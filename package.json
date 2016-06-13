@@ -1,0 +1,35 @@
+{
+  "engines": {
+    "node": ">=6.2.1"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "ava": "0.15.2",
+    "del": "2.2.0",
+    "awesome-typescript-loader": "1.0.0",
+    "connect-history-api-fallback": "1.2.0",
+    "express": "4.13.4",
+    "html-webpack-plugin": "2.19.0",
+    "source-map-loader": "0.1.5",
+    "svg-sprite-loader": "0.0.21",
+    "ts-helper": "0.0.1",
+    "ts-node": "0.8.0",
+    "tslint": "3.11.0",
+    "tslint-loader": "2.1.4",
+    "typescript": "1.8.10",
+    "typings": "1.0.4",
+    "webpack": "2.1.0-beta.13",
+    "webpack-dev-middleware": "1.6.1",
+    "webpack-hot-middleware": "2.10.0",
+    "webpack-merge": "0.14.0"
+  },
+  "scripts": {
+    "test": "ava",
+    "typings": "typings",
+    "lint": "tslint -c tslint.json src/*.ts src/**/*.ts",
+    "bundle": "node tools/bundle",
+    "start": "node tools/server",
+    "postinstall": "npm run typings install"
+  }
+}
