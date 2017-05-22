@@ -1,13 +1,12 @@
 {
   "compilerOptions": {
-    "removeComments": false,
-    "sourceMap": false,
-    "declaration": true,
-    "noImplicitAny": false,
+    "moduleResolution": "node",
     "module": "commonjs",
-    "target": "ES5"
-  },
-  "exclude":[
-    "node_modules"
-  ]
+    "target": "es5",
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "noUnusedParameters": false,
+    "strictNullChecks": true,
+    "lib": [ "dom", "es5", "es2015" ]
+  }
 }
