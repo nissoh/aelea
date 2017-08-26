@@ -3,7 +3,8 @@
   "rules": {
     "curly": false,
     "no-empty": false,
-    "no-multi-spaces": false
+    "no-multi-spaces": false,
+    "no-consecutive-blank-lines": false
   },
   "style": {
     "semicolon": [true, "never"]

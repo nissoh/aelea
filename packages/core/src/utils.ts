@@ -1,7 +1,5 @@
 
-import { Stream, Sink } from '@most/types'
-
-export type inputComposition<A, B> = (input: Stream<A>) => Stream<B>
+import { Sink } from '@most/types'
 
 export const nullSink = {
   // tslint:disable-next-line:no-empty

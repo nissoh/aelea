@@ -1,0 +1,67 @@
+0 silly input [ 'build' ]
+1 silly flags { _: [ 'run' ], script: 'build', args: [] }
+2 verbose rootPath /Users/hanni05/GIT/fufu
+3 info version 2.0.0
+4 silly existsSync /Users/hanni05/GIT/fufu/VERSION
+5 silly initialize attempt
+6 silly initialize success
+7 silly execute attempt
+8 silly runScriptInDir build [] core
+9 silly getExecOpts { cwd: '/Users/hanni05/GIT/fufu/packages/core' }
+10 error build Errored while running script in '@fufu/core'
+11 error execute Error: Command failed: npm run build
+11 error execute error Command failed with exit code 2.
+11 error execute error Command failed with exit code 2.
+11 error execute npm ERR! code ELIFECYCLE
+11 error execute npm ERR! errno 1
+11 error execute npm ERR! @fufu/core@0.0.0 build: `yarn build:commonjs & yarn build:es2015`
+11 error execute npm ERR! Exit status 1
+11 error execute npm ERR!
+11 error execute npm ERR! Failed at the @fufu/core@0.0.0 build script.
+11 error execute npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+11 error execute
+11 error execute npm ERR! A complete log of this run can be found in:
+11 error execute npm ERR!     /Users/hanni05/.npm/_logs/2017-08-26T10_45_13_170Z-debug.log
+11 error execute
+11 error execute > @fufu/core@0.0.0 build /Users/hanni05/GIT/fufu/packages/core
+11 error execute > yarn build:commonjs & yarn build:es2015
+11 error execute
+11 error execute src/combinator/style.ts(5,10): error TS6133: 'splitStream' is declared but never used.
+11 error execute src/combinator/style.ts(5,10): error TS6133: 'splitStream' is declared but never used.
+11 error execute
+11 error execute     at Promise.all.then.arr (/Users/hanni05/GIT/fufu/node_modules/execa/index.js:210:11)
+11 error execute     at <anonymous>
+11 error execute     at process._tickCallback (internal/process/next_tick.js:188:7)
+11 error execute  callback with error
+11 error execute  { Error: Command failed: npm run build
+11 error execute error Command failed with exit code 2.
+11 error execute error Command failed with exit code 2.
+11 error execute npm ERR! code ELIFECYCLE
+11 error execute npm ERR! errno 1
+11 error execute npm ERR! @fufu/core@0.0.0 build: `yarn build:commonjs & yarn build:es2015`
+11 error execute npm ERR! Exit status 1
+11 error execute npm ERR!
+11 error execute npm ERR! Failed at the @fufu/core@0.0.0 build script.
+11 error execute npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+11 error execute
+11 error execute npm ERR! A complete log of this run can be found in:
+11 error execute npm ERR!     /Users/hanni05/.npm/_logs/2017-08-26T10_45_13_170Z-debug.log
+11 error execute
+11 error execute > @fufu/core@0.0.0 build /Users/hanni05/GIT/fufu/packages/core
+11 error execute > yarn build:commonjs & yarn build:es2015
+11 error execute
+11 error execute src/combinator/style.ts(5,10): error TS6133: 'splitStream' is declared but never used.
+11 error execute src/combinator/style.ts(5,10): error TS6133: 'splitStream' is declared but never used.
+11 error execute
+11 error execute     at Promise.all.then.arr (/Users/hanni05/GIT/fufu/node_modules/execa/index.js:210:11)
+11 error execute     at <anonymous>
+11 error execute     at process._tickCallback (internal/process/next_tick.js:188:7)
+11 error execute   stack: 'Error: Command failed: npm run build\nerror Command failed with exit code 2.\nerror Command failed with exit code 2.\nnpm ERR! code ELIFECYCLE\nnpm ERR! errno 1\nnpm ERR! @fufu/core@0.0.0 build: `yarn build:commonjs & yarn build:es2015`\nnpm ERR! Exit status 1\nnpm ERR! \nnpm ERR! Failed at the @fufu/core@0.0.0 build script.\nnpm ERR! This is probably not a problem with npm. There is likely additional logging output above.\n\nnpm ERR! A complete log of this run can be found in:\nnpm ERR!     /Users/hanni05/.npm/_logs/2017-08-26T10_45_13_170Z-debug.log\n\n> @fufu/core@0.0.0 build /Users/hanni05/GIT/fufu/packages/core\n> yarn build:commonjs & yarn build:es2015\n\nsrc/combinator/style.ts(5,10): error TS6133: \'splitStream\' is declared but never used.\nsrc/combinator/style.ts(5,10): error TS6133: \'splitStream\' is declared but never used.\n\n    at Promise.all.then.arr (/Users/hanni05/GIT/fufu/node_modules/execa/index.js:210:11)\n    at <anonymous>\n    at process._tickCallback (internal/process/next_tick.js:188:7)',
+11 error execute   code: 1,
+11 error execute   killed: false,
+11 error execute   stdout: '\n> @fufu/core@0.0.0 build /Users/hanni05/GIT/fufu/packages/core\n> yarn build:commonjs & yarn build:es2015\n\nsrc/combinator/style.ts(5,10): error TS6133: \'splitStream\' is declared but never used.\nsrc/combinator/style.ts(5,10): error TS6133: \'splitStream\' is declared but never used.\n',
+11 error execute   stderr: 'error Command failed with exit code 2.\nerror Command failed with exit code 2.\nnpm ERR! code ELIFECYCLE\nnpm ERR! errno 1\nnpm ERR! @fufu/core@0.0.0 build: `yarn build:commonjs & yarn build:es2015`\nnpm ERR! Exit status 1\nnpm ERR! \nnpm ERR! Failed at the @fufu/core@0.0.0 build script.\nnpm ERR! This is probably not a problem with npm. There is likely additional logging output above.\n\nnpm ERR! A complete log of this run can be found in:\nnpm ERR!     /Users/hanni05/.npm/_logs/2017-08-26T10_45_13_170Z-debug.log\n',
+11 error execute   failed: true,
+11 error execute   signal: null,
+11 error execute   cmd: 'npm run build',
+11 error execute   timedOut: false }

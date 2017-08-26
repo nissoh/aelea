@@ -2,13 +2,13 @@
 Functional Reactive Programming UI library based on [@most/core](https://github.com/mostjs/core) paradigm and [architecture](https://github.com/cujojs/most/wiki/Architecture)
 
 ## What
-This project is pretty much is a proof of concept with a few unresolved issues and unissued interface decisions.
+This project is pretty much a proof of concept with a few unresolved issues and unissued interface decisions.
 Current mission is to discover the most conviniet/generic way to create UI abstractions
 
 ## Why
 - UI is naturally reactive from both end points(user and server)
-- CSS selectors, static styling replaced by much more powerfull behaviours
-- Imperative abstractions and a lot of boilerplate replaced by streams and behaviours
+- CSS selectors, static styling replaced by much more powerfull Behaviors
+- Imperative abstractions and a lot of boilerplate replaced by streams and Behaviors
 - Avoid Large, Complex Layouts and Layout Thrashing by batching dom operations
 - Model your application through reactive streams without chaotic state management tools, i.e. flux, redux etc
 - Possibly has the best possible performance since diffing is obselete and mutating states relay on stream computation
@@ -17,6 +17,8 @@ Current mission is to discover the most conviniet/generic way to create UI abstr
 ### Simple Counter
 ```typescript
 import { map, switchLatest, constant, periodic, scan } from '@most/core'
+import { newDefaultScheduler } from '@most/scheduler'
+
 import { text, renderTo } from '@fufu/core'
 import { pipe } from '../common' // (f1, f2) => x => f2(f1(x))
 
@@ -27,33 +29,44 @@ const accumulate = scan(add, 0, oneEverySecond)
 
 const counter = switchLatest(map(pipe(String, text), accumulate))
 
-renderTo(document.body, counter)
+branch(xForver(document.body), counter)
+  .run(nullSink, newDefaultScheduler())
 ```
 
-### Simple Input binding - view | style | behaviour
+### Simple Input binding - view | style | Behavior
 ```typescript
-import { chain, map, merge, switchLatest, constant } from '@most/core'
-import { domEvent, branch, text, node, component, element, renderTo, style } from '@fufu/core'
-import { pipe } from '../common'
+import { constant, map, merge, scan, switchLatest, mergeArray } from '@most/core'
+import { pipe } from '../utils'
+import { style, branch, text, node, component, domEvent } from '@fufu/core'
+import * as stylesheet from '../stylesheet'
 
-const inputValue = pipe(
-  chain(domEvent('input')),
-  map(pipe(ev => ev.target.value, String))
-)
 
-const inputComponenet = component(({ input }) => {
-  const inputElement = input.sample(inputValue, element('input'))
+const styledBtn = stylesheet.btn(node)
+const centeredContainer = pipe(stylesheet.centerStyle, stylesheet.row)(node)
 
-  const containerStyle = style(constant({background: '#e6e6e6', padding: '10px', display: 'flex', flexDirection: 'column'}))
-  const container = containerStyle(node)
+const countBtn = (str: string) => style({ margin: '6px' }, branch(styledBtn, text(str)))
+const add = (x: number, y: number) => (x + y)
 
-  return branch(container, merge(
-    inputElement, // <node><input/></node>
-    switchLatest(map(text, input)) // stream of text
-  ))
+const click = domEvent('click')
+
+const actions = {
+  countUp:   pipe(click, constant(1)),
+  countDown: pipe(click, constant(-1))
+}
+
+export const counter = component(actions, ({ countUp, countDown }) => {
+  const count = scan(add, 0, merge(countUp, countDown))
+
+  return branch(centeredContainer, mergeArray([
+    countUp.sample(countBtn('+1')),
+    countDown.sample(countBtn('-1')),
+    switchLatest(map(pipe(String, text), count))
+  ]))
 })
 
-renderTo(document.body, inputComponenet)
+
+branch(xForver(document.body), counter)
+  .run(nullSink, newDefaultScheduler())
 ```
 
 

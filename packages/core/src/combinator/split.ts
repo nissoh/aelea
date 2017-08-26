@@ -1,6 +1,6 @@
 // https://github.com/briancavalier/most-behave/blob/master/src/event/split.js
 import { Stream, Disposable, Scheduler, Sink, Time } from '@most/types'
-import { nullSink, nullDisposable } from './utils'
+import { nullSink, nullDisposable } from '../utils'
 
 class SplitDisposable<T> implements Disposable {
   constructor (private source: any, private sink: Sink<T>) {}

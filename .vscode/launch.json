@@ -7,13 +7,13 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Mocha Tests",
-      "program": "${workspaceRoot}/node_modules/.bin/45",
-      "sourceMaps": true,
-      "args": [
-        // "${workspaceRoot}/src/*.ts"
+      "name": "addui",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run-script",
+        "add-ui"
       ],
-      "internalConsoleOptions": "openOnSessionStart"
+      "port": 5858
     }
   ]
 }

@@ -1,0 +1,28 @@
+{
+  "name": "@fufu/core",
+  "version": "0.0.1-0",
+  "main": ".dist/commonjs/index.js",
+  "module": ".dist/es6/index.js",
+  "typings": ".dist/type-definitions/index.d.ts",
+  "scripts": {
+    "build": "yarn build:commonjs & yarn build:es2015",
+    "build:commonjs": "tsc -P tsconfig.json --module commonjs --outDir .dist/commonjs",
+    "build:es2015": "tsc -P tsconfig.json --module es6 --outDir .dist/es6 --declaration true  --declarationDir .dist/type-definitions",
+    "test": "../../node_modules/.bin/typed-test 'src/*.test.ts' 'src/**/*.test.ts'",
+    "lint": "tslint -e **/dist/** -t codeFrame **/*.ts "
+  },
+  "dependencies": {
+    "@most/core": "^0.11.4",
+    "@most/disposable": "^0.11.0",
+    "@most/prelude": "^1.6.2",
+    "@most/scheduler": "^0.11.0",
+    "@most/types": "^0.10.0"
+  },
+  "devDependencies": {
+    "jsdom": "^11.2.0",
+    "jsdom-global": "^3.0.2",
+    "typescript": "^2.4.2"
+  },
+  "license": "MIT",
+  "author": "Nissan Hanina <nissan@yo.ma>"
+}

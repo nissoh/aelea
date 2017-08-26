@@ -1,18 +1,5 @@
 
-export const button = {
-  outline: 0,
-  border: 0,
-  cursor: 'pointer'
-}
 
-export const countBtn = {
-  ...button,
-  backgroundColor: 'rgb(218, 218, 218)',
-  borderRadius: '50%',
-  padding: '15px',
-  margin: '0 10px',
-  fontSize: '18px'
-}
 
 export const count = {
   boxShadow: '0 0 0 1px #e2e2e2',

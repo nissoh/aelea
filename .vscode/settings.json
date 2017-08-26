@@ -1,11 +1,8 @@
 {
-  "editor.fontLigatures": true,
   "editor.tabSize": 2,
   "editor.rulers": [80, 160],
   "editor.wordWrapColumn": 120,
   "editor.wrappingIndent": "indent",
   "editor.insertSpaces": true,
-  "editor.formatOnType": true,
-  "search.exclude": { "lib": true },
   "tslint.autoFixOnSave": true
 }
