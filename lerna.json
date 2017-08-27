@@ -1,7 +1,6 @@
 {
-  "lerna": "2.0.0",
-  "packages": [
-    "packages/*"
-  ],
-  "npmClient": "yarn"
+  "lerna": "2.1.0",
+  "packages": [ "packages/*" ],
+  "npmClient": "yarn",
+  "version": "independent"
 }

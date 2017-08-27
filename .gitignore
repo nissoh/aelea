@@ -7,3 +7,4 @@
 node_modules
 .DS_STORE
 yarn-error.log
+lerna-debug.log
