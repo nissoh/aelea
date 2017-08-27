@@ -1,7 +1,7 @@
 
 
 import { constant } from '@most/core'
-import { style, domEvent, styleBehaviour } from '@fufu/core'
+import { style, domEvent, styleBehaviour } from 'fufu'
 import { pipe } from './utils'
 
 

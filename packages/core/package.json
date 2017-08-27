@@ -1,6 +1,6 @@
 {
-  "name": "@fufu/core",
-  "version": "0.0.0",
+  "name": "fufu",
+  "version": "0.0.0-alpha.0",
   "main": ".dist/commonjs/index.js",
   "module": ".dist/es6/index.js",
   "typings": ".dist/type-definitions/index.d.ts",

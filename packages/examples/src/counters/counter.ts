@@ -1,6 +1,6 @@
 import { constant, map, merge, scan, switchLatest, mergeArray } from '@most/core'
 import { pipe } from '../utils'
-import { style, branch, text, node, component, domEvent } from '@fufu/core'
+import { style, branch, text, node, component, domEvent } from 'fufu'
 import * as stylesheet from '../stylesheet'
 
 

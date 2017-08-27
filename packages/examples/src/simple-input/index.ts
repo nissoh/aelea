@@ -1,7 +1,7 @@
 
 import { map, switchLatest, merge } from '@most/core'
 import { pipe, xForver } from '../utils'
-import { nullSink, component, domEvent, style, branch, node, element, text } from '@fufu/core'
+import { nullSink, component, domEvent, style, branch, node, element, text } from 'fufu'
 import { newDefaultScheduler } from '@most/scheduler'
 import { inputStyleBehaviour, mainCentered } from '../stylesheet'
 

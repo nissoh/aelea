@@ -19,7 +19,7 @@ Current mission is to discover the most conviniet/generic way to create UI abstr
 import { map, switchLatest, constant, periodic, scan } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
 
-import { text, renderTo } from '@fufu/core'
+import { text, renderTo } from 'fufu'
 import { pipe } from '../common' // (f1, f2) => x => f2(f1(x))
 
 const add = (n1: number, n2: number) => n1 + n2
@@ -37,7 +37,7 @@ branch(xForver(document.body), counter)
 ```typescript
 import { constant, map, merge, scan, switchLatest, mergeArray } from '@most/core'
 import { pipe } from '../utils'
-import { style, branch, text, node, component, domEvent } from '@fufu/core'
+import { style, branch, text, node, component, domEvent } from 'fufu'
 import * as stylesheet from '../stylesheet'
 
 

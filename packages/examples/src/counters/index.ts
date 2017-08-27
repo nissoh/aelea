@@ -1,5 +1,5 @@
 
-import {  branch, node, component, text, domEvent, style, nullSink } from '@fufu/core'
+import {  branch, node, component, text, domEvent, style, nullSink } from 'fufu'
 import { constant, merge, join } from '@most/core'
 import { pipe, xForver } from '../utils'
 import * as commonSSheet from '../stylesheet'
