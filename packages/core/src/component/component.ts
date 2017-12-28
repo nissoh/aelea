@@ -1,8 +1,9 @@
 
 import { Stream, Disposable, Scheduler, Sink } from '@most/types'
-import { inputComposition, NodeStreamLike, Actions, Behaviors } from '../types'
+import { inputComposition, NodeStream, Actions, Behaviors } from '../types'
 import { splitStream, SplitStream } from '../combinator/split'
-import { chain } from '@most/core'
+import { chain, multicast } from '@most/core'
+import { compose } from '@most/prelude'
 
 
 // const dragStart: (x: Node) => Stream<Event>
@@ -15,9 +16,7 @@ export class Behavior<T, R> implements Stream<T> {
 
   run (sink: Sink<T>, scheduler: Scheduler): Disposable {
     if (!this.sampler) throw Error('No sampler defined')
-
     this.disposable = this.sampler.run(sink, scheduler)
-
 
     return { dispose: () => this.dispose() }
   }
@@ -28,7 +27,7 @@ export class Behavior<T, R> implements Stream<T> {
     }
   }
 
-  sample (snode: NodeStreamLike): SplitStream<Node> {
+  sample (snode: NodeStream): SplitStream<Node> {
     const [e1, e2] = splitStream(snode)
 
     this.sampler = this.input(e2 as any)
@@ -43,8 +42,9 @@ export class Component<K extends string, T> implements Stream<any> {
 
   run (sink: Sink<any>, scheduler: Scheduler): Disposable {
     const mmdeo = Object.keys(this.model).reduce((seed, k) => {
-      const item = chain(this.model[k])
-      const b = behavior(item)
+      const item = chain(this.model[k as any])
+      // const b = behavior(item)
+      const b = behavior(compose(multicast, item))
       return { [k]: b, ...seed }
     }, {})
 

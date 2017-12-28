@@ -4,5 +4,6 @@
   "editor.wordWrapColumn": 120,
   "editor.wrappingIndent": "indent",
   "editor.insertSpaces": true,
-  "tslint.autoFixOnSave": true
+  "tslint.autoFixOnSave": true,
+  "gitlens.codeLens.enabled": false
 }

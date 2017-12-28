@@ -1,53 +1,47 @@
 
 
 import { style, styleBehaviour } from './combinator/style'
-import { curry2 } from '@most/prelude'
-import { NodeStreamLike, Actions, Behaviors } from './types'
+import { curry2, CurriedFunction2 } from '@most/prelude'
+import { NodeStream, Actions, Behaviors, TextStream, DomStream, DomType, NodeType } from './types'
 import { Branch } from './combinator/branch'
-import { NodeSource, TextNodeSource } from './source/node'
+import { text, node, element } from './source/node'
 import { DomEvent } from './combinator/event'
 import { nullSink } from './utils'
 import { Component } from './component/component'
+import { Stream } from '@most/types'
 
 
 export interface DomEventCurry {
-  <T extends Event>(name: string, node: Node, capture: boolean): DomEvent<T>
+  <T extends Event>(name: string, node: Node, capture?: boolean): DomEvent<T>
   <T extends Event>(name: string): (node: Node, capture?: boolean) => DomEvent<T>
 }
 
-export interface BranchCurry {
-  (cs: NodeStreamLike, ps: NodeStreamLike): Branch
-  (cs: NodeStreamLike): (ps: NodeStreamLike) => Branch
-}
-
-const branch: BranchCurry = curry2((ps: NodeStreamLike, cs: NodeStreamLike) =>
+const branch = curry2<NodeStream, DomStream, Branch>((ps: NodeStream, cs: DomStream) =>
   new Branch(ps, cs)
 )
 
-function element (tagname: string) {
-  return new NodeSource(tagname)
-}
 
-function text (str: string) {
-  return new TextNodeSource(str)
-}
-
-const node = element('node')
-
-const domEvent: DomEventCurry = curry2(<T extends Event> (name: string, node: Node, capture = false) =>
+const domEvent: DomEventCurry = curry2(<T extends Event>(name: string, node: Node, capture = false) =>
   new DomEvent<T>(name, node, capture)
 )
 
 const component = <K extends string, T>(model: Actions<K, T>, view: (x: Behaviors<K, T>) => any) => new Component(model, view)
 
 export {
+  CurriedFunction2,
+  Stream,
   domEvent,
-  text,
   styleBehaviour,
   component,
   nullSink,
   node,
-  style,
+  text,
   element,
-  branch
+  style,
+  branch,
+  NodeStream,
+  TextStream,
+  DomStream,
+  DomType,
+  NodeType
 }

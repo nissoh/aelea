@@ -8,7 +8,7 @@ import { newDefaultScheduler } from '@most/scheduler'
 
 
 const addBtnStyle = pipe(commonSSheet.btn, style({
-  width: '70px', textAlign: 'center', marginBottom: '25px', color: '#ffffff',
+  width: '70px', textAlign: 'center', color: '#ffffff',
   background: '#e65656', borderRadius: '4px', display: 'block', padding: '5px 0'
 }))
 const btn = addBtnStyle(branch(node, text('add')))
@@ -19,7 +19,7 @@ const actions = {
 }
 
 const countersComponent = component(actions, ({ count }) => {
-  const styledCounter = style(constant({margin: '10px 0'}) , counter)
+  const styledCounter = style({margin: '10px 0'} , counter)
 
   return branch(node, merge(
     count.sample(btn),

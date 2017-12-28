@@ -6,7 +6,6 @@ const expand = require('glob-expand')
 
 
 
-
 const PATTERNS =
   [
     'src/*/*.ts',

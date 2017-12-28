@@ -1,19 +1,19 @@
 import { Stream, Sink, Scheduler, Disposable } from '@most/types'
 import { curry2, CurriedFunction2 } from '@most/prelude'
-import { NodeStreamType, NodeStreamLike } from '../types'
+import { NodeStream } from '../types'
 import { map } from '@most/core'
 import { nullSink } from '../utils'
 
 
 export type IStyleProperties = {[N in keyof CSSStyleDeclaration]?: any }
 export type StyleLike = Stream<IStyleProperties>
-export type StyleBehaviorFn = (s: NodeStreamType) => StyleLike
+export type StyleBehaviorFn = (s: Node) => StyleLike
 
 
 
 export interface StyleEffectCurry {
-  (input: IStyleProperties, els: NodeStreamType): NodeStreamType
-  (input: IStyleProperties): (els: NodeStreamType) => NodeStreamType
+  (input: IStyleProperties, els: Node): Node
+  (input: IStyleProperties): (els: Node) => Node
 }
 
 export const applyStyle = (style: IStyleProperties, el: HTMLElement) => {
@@ -27,11 +27,11 @@ export const applyStyle = (style: IStyleProperties, el: HTMLElement) => {
 export const ApplyStyleCurry: StyleEffectCurry = curry2(applyStyle)
 
 export const style: CurriedFunction2<IStyleProperties, Stream<Node>, Stream<Node>> =
-  curry2((style: IStyleProperties, node: NodeStreamLike) => map(ApplyStyleCurry(style), node))
+  curry2((style: IStyleProperties, node: NodeStream) => map(ApplyStyleCurry(style), node))
 
 
-export class StyleBehavior implements NodeStreamLike {
-  constructor (private bfn: StyleBehaviorFn, private ns: NodeStreamLike) { }
+export class StyleBehavior implements NodeStream {
+  constructor (private bfn: StyleBehaviorFn, private ns: NodeStream) { }
 
   run (sink: Sink<Node>, scheduler: Scheduler): Disposable {
     return this.ns.run(new StyleBehaviorSink(sink, scheduler, this.bfn), scheduler)
@@ -39,7 +39,7 @@ export class StyleBehavior implements NodeStreamLike {
 
 }
 
-class StyleBehaviorSink implements Sink<NodeStreamType> {
+class StyleBehaviorSink implements Sink<Node> {
   styleDisposable: Disposable
   constructor (private sink: any, private scheduler: Scheduler, private bfn: StyleBehaviorFn) {
 
@@ -66,7 +66,7 @@ class StyleBehaviorSink implements Sink<NodeStreamType> {
 
 }
 
-export const styleB = (ss: StyleBehaviorFn, ns: NodeStreamLike) => new StyleBehavior(ss, ns)
+export const styleB = (ss: StyleBehaviorFn, ns: NodeStream) => new StyleBehavior(ss, ns)
 
 export const styleBehaviour = curry2(styleB)
 

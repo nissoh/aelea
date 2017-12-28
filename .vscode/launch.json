@@ -5,15 +5,28 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Current TS File",
       "type": "node",
       "request": "launch",
-      "name": "addui",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run-script",
-        "add-ui"
+      "program": "/Users/hanni05/GIT/fufu/packages/examples/node_modules/ts-node/dist/_bin.js",
+      "args": [
+        "${relativeFile}"
       ],
-      "port": 5858
+      "sourceMaps": true,
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector"
+    },
+    {
+      "name": "Test RF",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/node_modules/.bin/typed-test",
+      "args": [
+        "${relativeFile}"
+      ],
+      "sourceMaps": true,
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector"
     }
   ]
 }

@@ -1,40 +1,74 @@
-import { Scheduler, Sink, Stream } from '@most/types'
-import { NodeStreamLike, NodeStreamType } from '../types'
+import { Disposable } from '@most/types'
+import { applyStream, DisposableValue, ApplyStream } from './apply'
+import { pipe } from '../utils'
+export { Disposable, ApplyStream }
 
 
-export class DisposeNode<A extends Node> {
-  constructor (private child: A) {}
+
+
+export class DisposeNode<A extends Node> implements DisposableValue<A> {
+  value = this.fn()
+
+  constructor (public fn: () => A) {}
   dispose () {
-    if (this.child.parentElement && this.child.parentElement.contains(this.child)) {
-      this.child.parentElement.removeChild(this.child)
+    if (this.value.parentElement && this.value.parentElement.contains(this.value)) {
+      this.value.parentElement.removeChild(this.value)
     }
   }
 }
 
-export class NodeSource implements NodeStreamLike {
-  constructor (private tagName: string) { }
 
-  run (sink: Sink<NodeStreamType>, scheduler: Scheduler) {
-    const node = document.createElement(this.tagName || 'node')
-    // const disposable = requestFrameTask(sink, scheduler, node).run()
-    sink.event(scheduler.now(), node)
+const resolveNode = <T extends Node>(rfn: () => T) => () => new DisposeNode(rfn)
 
-    return new DisposeNode(node)
-  }
-}
+const createNodeFn = (tagname: string) => () => document.createElement(tagname)
+const createTextFn = (text: string) => () => document.createTextNode(text)
 
-export class TextNodeSource implements Stream<Text> {
-  constructor (private text: string) { }
+export const element = pipe(pipe(createNodeFn, resolveNode), applyStream)
+export const text =    pipe(pipe(createTextFn, resolveNode), applyStream)
 
-  run (sink: Sink<Text>, scheduler: Scheduler) {
-    const node = document.createTextNode(this.text)
-    // const disposable = requestFrameTask(sink, scheduler, node).run()
+export const node = element('node')
 
-    sink.event(scheduler.now(), node)
+export function nodeWithAttrs (tagName: string, attrs?: {[key: string]: string}) {
+  const node = document.createElement(this.tagName || 'node')
 
-    return new DisposeNode(node)
-    // return disposeBoth(disposable, new DisposeNode(node))
+  if (attrs) {
+    Object.keys(attrs).forEach(attrKey => {
+      node.setAttribute(attrKey, attrs[attrKey])
+    })
   }
 }
 
 
+
+// export class NodeSource implements NodeStream {
+//   constructor (private tagName: string, private attrs?: {[key: string]: string}) { }
+
+//   run (sink: Sink<Node>, scheduler: Scheduler) {
+
+//     const attrs = this.attrs
+//     const node = document.createElement(this.tagName || 'node')
+
+//     if (attrs) {
+//       Object.keys(attrs).forEach(attrKey => {
+//         node.setAttribute(attrKey, attrs[attrKey])
+//       })
+//     }
+
+//     sink.event(scheduler.currentTime(), node)
+
+//     return new DisposeNode(node)
+//   }
+// }
+
+// export class TextNodeSource implements Stream<Text> {
+//   constructor (private text: string) { }
+
+//   run (sink: Sink<Text>, scheduler: Scheduler) {
+//     const node = document.createTextNode(this.text)
+
+//     sink.event(scheduler.currentTime(), node)
+
+//     // return { dispose () {}}
+//     return new DisposeNode(node)
+//   }
+// }
