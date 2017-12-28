@@ -1,14 +1,13 @@
 {
   "name": "examples",
-  "version": "0.0.0-alpha.1",
-
+  "version": "0.0.0-alpha.2",
   "license": "MIT",
   "scripts": {
-    "add-ui":       "webpack-dev-server  --entry ./src/add-ui/index.ts",
+    "add-ui": "webpack-dev-server  --entry ./src/add-ui/index.ts",
     "simple-input": "webpack-dev-server  --entry ./src/simple-input/index.ts",
-    "routing":      "webpack-dev-server  --entry ./src/routing/index.ts",
-    "ca-money":     "webpack-dev-server  --entry ./src/ca-money/index.ts",
-    "counters":     "webpack-dev-server  --entry ./src/counters/index.ts"
+    "routing": "webpack-dev-server  --entry ./src/routing/index.ts",
+    "ca-money": "webpack-dev-server  --entry ./src/ca-money/index.ts",
+    "counters": "webpack-dev-server  --entry ./src/counters/index.ts"
   },
   "dependencies": {
     "@most/core": "^1.2.0",
@@ -16,9 +15,9 @@
     "@most/prelude": "^1.7.0",
     "@most/scheduler": "^1.1.0",
     "@most/types": "^1.0.0",
-    "fufu": "^0.0.0-alpha.1",
-    "match-trie": "^0.0.0-alpha.1",
+    "fufu": "^0.0.0-alpha.2",
     "jsdom": "^11.3.0",
+    "match-trie": "^0.0.0-alpha.2",
     "unirest": "^0.5.1"
   },
   "devDependencies": {

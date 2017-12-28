@@ -1,6 +1,6 @@
 {
   "name": "fufu",
-  "version": "0.0.0-alpha.1",
+  "version": "0.0.0-alpha.2",
   "main": ".dist/commonjs/index.js",
   "module": ".dist/es6/index.js",
   "typings": ".dist/type-definitions/index.d.ts",
@@ -29,8 +29,8 @@
     "@typed/test": "^2.5.0",
     "jsdom": "^11.2.0",
     "jsdom-global": "^3.0.2",
-    "typescript": "^2.5.2",
-    "tslint": "^5.7.0"
+    "tslint": "^5.7.0",
+    "typescript": "^2.5.2"
   },
   "license": "MIT",
   "author": "Nissan Hanina <nissan@yo.ma>"
