@@ -2,7 +2,7 @@
 import { startWith, never, tap, map, chain, constant, take, until, filter, merge, delay, switchLatest, scan } from '@most/core'
 import { Stream } from '@most/types'
 import { compose } from '@most/prelude'
-import { style, node, domEvent, element, branch } from '../core'
+import { style, node, domEvent, element, branch } from 'fufu'
 import { inputStyleBehaviour } from './stylesheet'
 
 

@@ -9,7 +9,7 @@ export class RequestFrameTask<T> implements Task {
     if (this.frameId !== -1) return this
 
     this.frameId = requestAnimationFrame(_ =>
-      this.sink.event(this.scheduler.now(), this.value)
+      this.sink.event(this.scheduler.currentTime(), this.value)
     )
 
     return this
@@ -43,7 +43,7 @@ export class RequestFrameSink<T> implements Sink<T> {
     if (this.frameId !== -1) return
 
     this.frameId = requestAnimationFrame(_ => {
-      this.sink.event(this.scheduler.now(), value)
+      this.sink.event(this.scheduler.currentTime(), value)
       this.frameId = -1
     })
   }

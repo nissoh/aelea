@@ -17,14 +17,20 @@ const actions = {
 }
 
 const inputComponenet = component(actions, ({ fufu }) => {
-  const container = branch(containerStyle(node), branch(node, merge(
-    fufu.sample(input),
-    switchLatest(map(text, fufu))
-  )))
+  const container = branch(containerStyle(node))(
+    branch(node)(
+      merge(
+        fufu.sample(input),
+        switchLatest(map(text, fufu))
+      )
+    )
+  )
 
   return container
 })
 
 
-branch(xForver(document.body), inputComponenet)
-  .run(nullSink, newDefaultScheduler())
+const ww = branch(xForver(document.body), inputComponenet)
+
+ww.run(nullSink, newDefaultScheduler())
+

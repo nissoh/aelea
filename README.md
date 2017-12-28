@@ -29,11 +29,12 @@ const accumulate = scan(add, 0, oneEverySecond)
 
 const counter = switchLatest(map(pipe(String, text), accumulate))
 
-branch(xForver(document.body), counter)
-  .run(nullSink, newDefaultScheduler())
+branch(xForver(document.body))(
+  counter
+).run(nullSink, newDefaultScheduler())
 ```
 
-### Simple Input binding - view | style | Behavior
+### Simple counter - view | style | Behavior
 ```typescript
 import { constant, map, merge, scan, switchLatest, mergeArray } from '@most/core'
 import { pipe } from '../utils'
@@ -57,16 +58,19 @@ const actions = {
 export const counter = component(actions, ({ countUp, countDown }) => {
   const count = scan(add, 0, merge(countUp, countDown))
 
-  return branch(centeredContainer, mergeArray([
-    countUp.sample(countBtn('+1')),
-    countDown.sample(countBtn('-1')),
-    switchLatest(map(pipe(String, text), count))
-  ]))
+  return branch(centeredContainer)(
+    mergeArray([
+      countUp.sample(countBtn('+1')),
+      countDown.sample(countBtn('-1')),
+      switchLatest(map(pipe(String, text), count))
+    ])
+  )
 })
 
 
-branch(xForver(document.body), counter)
-  .run(nullSink, newDefaultScheduler())
+branch(xForver(document.body))(
+  counter
+).run(nullSink, newDefaultScheduler())
 ```
 
 

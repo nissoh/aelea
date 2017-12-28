@@ -35,7 +35,7 @@ export class SplitStream<T> implements Stream<T> {
     } else if (this.sink1 === nullSink) {
       this.sink1 = sink
       if (this.latest) {
-        this.sink1.event(scheduler.now(), this.latest)
+        this.sink1.event(scheduler.currentTime(), this.latest)
         this.latest = null
       }
     } else {
