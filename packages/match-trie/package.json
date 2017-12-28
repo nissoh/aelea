@@ -1,11 +1,11 @@
 {
   "name": "match-trie",
-  "version": "0.0.0-alpha.1",
+  "version": "0.0.0-alpha.2",
   "main": ".dist/commonjs/index.js",
   "module": ".dist/es6/index.js",
   "typings": ".dist/type-definitions/index.d.ts",
   "scripts": {
-    "clean": "rm -rf .dist",        
+    "clean": "rm -rf .dist",
     "build": "npm run clean && npm run build:commonjs & npm run build:es2015",
     "build:commonjs": "tsc -P tsconfig.json --module commonjs --outDir .dist/commonjs",
     "build:es2015": "tsc -P tsconfig.json --module es6 --outDir .dist/es6 --declaration true  --declarationDir .dist/type-definitions",
@@ -24,9 +24,9 @@
     "@most/types": "^1.0.0"
   },
   "devDependencies": {
-    "typescript": "^2.4.2",
     "@typed/test": "^2.5.0",
-    "tslint": "^5.7.0"
+    "tslint": "^5.7.0",
+    "typescript": "^2.4.2"
   },
   "license": "MIT",
   "author": "Nissan Hanina <nissan@yo.ma>"
