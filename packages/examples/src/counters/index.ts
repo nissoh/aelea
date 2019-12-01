@@ -1,10 +1,11 @@
 
-import {  branch, node, component, text, domEvent, style, nullSink } from 'fufu'
-import { constant, merge, join } from '@most/core'
-import { pipe, xForver } from '../utils'
-import * as commonSSheet from '../stylesheet'
-import { counter } from './counter'
-import { newDefaultScheduler } from '@most/scheduler'
+import {branch, node, component, text, domEvent, style, nullSink} from 'fufu'
+import {constant, join} from '@most/core'
+import {pipe, xForver} from '../utils'
+import * as commonSSheet from '../style/stylesheet'
+import counter from './counter'
+import {newDefaultScheduler} from '@most/scheduler'
+import {column} from '../common/flex'
 
 
 const addBtnStyle = pipe(commonSSheet.btn, style({
@@ -18,16 +19,16 @@ const actions = {
   count: pipe(domEvent('click'), constant(1))
 }
 
-const countersComponent = component(actions, ({ count }) => {
-  const styledCounter = style({margin: '10px 0'} , counter)
 
-  return branch(node, merge(
-    count.sample(btn),
+const countersComponent = component(actions, ({count}) => {
+  const styledCounter = style({margin: '10px 0'}, counter)
+
+  return column(
+    count.attach(btn),
     join(constant(styledCounter, count))
-  ))
+  )
 })
 
 
 branch(xForver(document.body), commonSSheet.mainCentered(countersComponent))
   .run(nullSink, newDefaultScheduler())
-

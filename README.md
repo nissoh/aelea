@@ -60,8 +60,8 @@ export const counter = component(actions, ({ countUp, countDown }) => {
 
   return branch(centeredContainer)(
     mergeArray([
-      countUp.sample(countBtn('+1')),
-      countDown.sample(countBtn('-1')),
+      countUp.attach(countBtn('+1')),
+      countDown.attach(countBtn('-1')),
       switchLatest(map(pipe(String, text), count))
     ])
   )

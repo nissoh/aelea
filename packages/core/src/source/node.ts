@@ -1,74 +1,45 @@
-import { Disposable } from '@most/types'
-import { applyStream, DisposableValue, ApplyStream } from './apply'
-import { pipe } from '../utils'
-export { Disposable, ApplyStream }
+import {Stream, Sink, Scheduler, Disposable} from '@most/types'
+import {disposeWith} from '@most/disposable'
+import {CurriedFunction2} from '@most/prelude'
+import {NodeType} from '../types'
 
 
 
 
-export class DisposeNode<A extends Node> implements DisposableValue<A> {
-  value = this.fn()
-
-  constructor (public fn: () => A) {}
-  dispose () {
-    if (this.value.parentElement && this.value.parentElement.contains(this.value)) {
-      this.value.parentElement.removeChild(this.value)
-    }
-  }
-}
-
-
-const resolveNode = <T extends Node>(rfn: () => T) => () => new DisposeNode(rfn)
-
-const createNodeFn = (tagname: string) => () => document.createElement(tagname)
-const createTextFn = (text: string) => () => document.createTextNode(text)
-
-export const element = pipe(pipe(createNodeFn, resolveNode), applyStream)
-export const text =    pipe(pipe(createTextFn, resolveNode), applyStream)
-
-export const node = element('node')
-
-export function nodeWithAttrs (tagName: string, attrs?: {[key: string]: string}) {
-  const node = document.createElement(this.tagName || 'node')
-
-  if (attrs) {
-    Object.keys(attrs).forEach(attrKey => {
-      node.setAttribute(attrKey, attrs[attrKey])
-    })
+function disposeNode(el: Node) {
+  if (el.parentElement && el.parentElement.contains(el)) {
+    el.parentElement.removeChild(el)
   }
 }
 
 
 
-// export class NodeSource implements NodeStream {
-//   constructor (private tagName: string, private attrs?: {[key: string]: string}) { }
+export class NodeStream<R extends NodeType> implements Stream<R> {
+  constructor(private nodeCreationFn: (cv: string) => R, private cv: string) {}
 
-//   run (sink: Sink<Node>, scheduler: Scheduler) {
+  run(sink: Sink<R>, scheduler: Scheduler) {
+    const node = this.nodeCreationFn(this.cv)
 
-//     const attrs = this.attrs
-//     const node = document.createElement(this.tagName || 'node')
+    sink.event(scheduler.currentTime(), node)
 
-//     if (attrs) {
-//       Object.keys(attrs).forEach(attrKey => {
-//         node.setAttribute(attrKey, attrs[attrKey])
-//       })
-//     }
+    return disposeWith(disposeNode, node)
+  }
+}
 
-//     sink.event(scheduler.currentTime(), node)
+const createElement =  (s: string) => document.createElement(s)
+const createTextNode = (s: string) => document.createTextNode(s)
 
-//     return new DisposeNode(node)
-//   }
-// }
+export const node:Stream<HTMLElement> =new NodeStream(createElement, 'node')
 
-// export class TextNodeSource implements Stream<Text> {
-//   constructor (private text: string) { }
+export const element = (name: string): Stream<HTMLElement> => {
+  return new NodeStream(createElement, name)
+}
 
-//   run (sink: Sink<Text>, scheduler: Scheduler) {
-//     const node = document.createTextNode(this.text)
 
-//     sink.event(scheduler.currentTime(), node)
+export const text = (s: string): Stream<Text> => {
+  return new NodeStream(createTextNode, s)
+}
 
-//     // return { dispose () {}}
-//     return new DisposeNode(node)
-//   }
-// }
+
+
+export {Disposable, CurriedFunction2}

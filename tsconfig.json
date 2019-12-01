@@ -1,17 +1,22 @@
 {
   "compilerOptions": {
+    "incremental": true,
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "strict": true,
+    // "strictFunctionTypes": false,
+    "pretty": true,
+    // "keyofStringsOnly": true,
+    "noUnusedLocals": true,
+    "resolveJsonModule": true,
+    "declaration": true,
     "lib": [
       "dom",
       "es5",
       "es2015"
     ],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "es2017",
-    "noImplicitAny": true,
-    "sourceMap": true,
-    "strictNullChecks": true,
-    "noUnusedLocals": true
-  },
-  "include": []
+    "target": "es6",
+    "module": "es6",
+    "moduleResolution": "node"
+  }
 }

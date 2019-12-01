@@ -2,9 +2,8 @@
 # Read about how to use .gitignore: https://help.github.com/articles/ignoring-files
 
 .idea/
-.fusebox/
-.dist
+dist
 node_modules
 .DS_STORE
-yarn-error.log
+.rpt2_cache
 lerna-debug.log

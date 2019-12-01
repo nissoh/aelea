@@ -1,8 +1,15 @@
 {
-  "extends": "./../../tsconfig",
+  "extends": "../../tsconfig",
   "compilerOptions": {
+    // "sourceMap": false,
+    // "module": "esnext",
+    "noUnusedLocals": false,
+    "declaration": false,
+    "skipLibCheck": true
+    // "skipLibCheck": true
   },
   "include": [
-    "src/**/*.ts"
+    "src",
+    "test"
   ]
 }

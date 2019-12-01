@@ -2,14 +2,10 @@ require('jsdom-global')()
 
 import { it, describe } from '@typed/test'
 import { node, branch } from './index'
-import { runEffects, tap, take } from '@most/core'
-import { Stream, Scheduler } from '@most/types'
-import { newDefaultScheduler } from '@most/scheduler'
+import { take } from '@most/core'
 import { curry2 } from '@most/prelude'
 import { pipe } from '../../examples/src/utils'
 import { collectEvents, Event } from '../utils'
-
-const defScheduler = newDefaultScheduler()
 
 
 const eqInstance = curry2((b: Function, a: Object) => a instanceof b)
@@ -19,7 +15,7 @@ const isNode = pipe(fstEventValue, eqInstance(Node))
 
 const take1 = take(1)
 
-export default describe(`basic tests`, [
+export const test =  describe(`basic tests`, [
   it('Emits node', ({ ok }) =>
     collectEvents(take1(node)).then(pipe(isNode, ok))
   ),
@@ -27,6 +23,4 @@ export default describe(`basic tests`, [
     collectEvents(take1(branch(node, node))).then(pipe(isNode, ok))
   )
 ])
-
-
 

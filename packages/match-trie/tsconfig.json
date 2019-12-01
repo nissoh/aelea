@@ -1,9 +1,10 @@
 {
   "extends": "../../tsconfig",
+  "compilerOptions": {
+    "declarationDir": "dist/type-definitions"
+  },
   "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "src/**/*.test.ts"
+    "src",
+    "test"
   ]
 }

@@ -1,16 +1,16 @@
-import { Scheduler, Sink, Time, Disposable } from '@most/types'
-import { NodeStream, DomStream, DomType, NodeType } from '../types'
-import { nullSink } from '../utils'
+import {Scheduler, Sink, Time, Disposable} from '@most/types'
+import {NodeStream, DomStream, NodeType} from '../types'
+import {nullSink} from '../utils'
 
-export { Disposable }
+export {Disposable}
 
 export type nodeInput = (input: nodeInput) => NodeStream
 
 
 export class Branch implements NodeStream {
-  constructor (private ps: NodeStream, private cs: DomStream) { }
+  constructor(private ps: NodeStream, private cs: DomStream) {}
 
-  run (sink: Sink<NodeType>, scheduler: Scheduler) {
+  run(sink: Sink<NodeType>, scheduler: Scheduler) {
     const branchSink = new BranchSink(this.cs, sink, scheduler)
     return this.ps.run(branchSink, scheduler)
   }
@@ -19,49 +19,49 @@ export class Branch implements NodeStream {
 class BranchSink {
   innerChild: Sink<any> = nullSink
 
-  constructor (
+  constructor(
     private cs: DomStream,
     private sink: Sink<NodeType>,
     private scheduler: Scheduler
-  ) { }
+  ) {}
 
-  event (t: Time, parent: NodeType) {
+  event(t: Time, parent: NodeType) {
     this.innerChild = new InnerChildSink(this.cs, this.scheduler, parent)
     this.sink.event(t, parent)
   }
 
-  end (t: Time) {
+  end(t: Time) {
     this.innerChild.end(t)
     this.sink.end(t)
   }
 
-  error (t: Time, e: Error) {
+  error(t: Time, e: Error) {
     this.sink.error(t, e)
   }
 }
 
-class InnerChildSink implements Sink<DomType> {
-  childrenList: DomType[] = []
+class InnerChildSink implements Sink<NodeType> {
+  childrenList: NodeType[] = []
   childDisposable = this.cs.run(this, this.scheduler)
 
-  constructor (
+  constructor(
     private cs: DomStream,
     private scheduler: Scheduler,
     private parent: Node
   ) {}
 
-  event (t: Time, child: DomType): void {
+  event(t: Time, child: NodeType): void {
     this.parent.appendChild(child)
   }
-  end (t: Time): void {
+  end(t: Time): void {
     this.dispose()
   }
-  error (t: Time, err: Error): void {
+  error(t: Time, err: Error): void {
     this.end(t)
     throw (err)
   }
 
-  dispose () {
+  dispose() {
     this.childDisposable.dispose()
   }
 }

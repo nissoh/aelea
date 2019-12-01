@@ -1,8 +1,7 @@
 import { it, describe } from '@typed/test'
-import { runEffects, tap, take, delay, now } from '@most/core'
-import { newDefaultScheduler } from '@most/scheduler'
+import { now } from '@most/core'
 import { resolveUrl, resolve } from './index'
-import { collectEvents, collectOne, run } from '../utils'
+import { collectOne } from '../utils'
 import { createPathState } from './resolver'
 import { curry2 } from '@most/prelude'
 
@@ -18,12 +17,12 @@ const urlFragments = now(rawFragments.join('/'))
 const url1Comp = pipe(resolveUrl('main'), pipe(resolve('books'), resolve(/\d+/)))
 
 interface Prop {
-  <T, K extends keyof T>(key: K, obj: T): T[K]
   <T, K extends keyof T>(key: K): (obj: T) => T[K]
+  <T, K extends keyof T>(key: K, obj: T): T[K]
 }
-const prop: Prop = curry2(<T, K extends keyof T>(key: K, obj: T) => obj[key])
 
 
+const prop: Prop = curry2((key, obj: any) => obj[key])
 
 
 

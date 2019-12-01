@@ -1,15 +1,18 @@
-import { Stream, Sink, Scheduler } from '@most/types'
+import {Stream, Sink, Scheduler} from '@most/types'
 
-export class DomEvent<T extends Event> implements Stream<T> {
-  constructor (private name: string, private node: EventTarget, private capture: boolean) { }
+export class DomEvent<K extends keyof HTMLElementEventMap> implements Stream<HTMLElementEventMap[K]> {
+  constructor(private eventType: K, private node: HTMLElement, private options?: boolean | AddEventListenerOptions) {}
 
-  run (sink: Sink<T>, scheduler: Scheduler) {
-    const cb = (ev: T) => sink.event(scheduler.currentTime(), ev)
-    const dispose = () => this.node.removeEventListener(this.name, cb, this.capture)
+  run(sink: Sink<Event>, scheduler: Scheduler) {
+    const cb = (e: HTMLElementEventMap[K]) => sink.event(scheduler.currentTime(), e)
 
-    this.node.addEventListener(this.name, cb, this.capture)
+    const dispose = () => this.node.removeEventListener(this.eventType, cb, this.options)
 
-    return { dispose }
+    this.node.addEventListener(this.eventType, cb, this.options)
+
+    return {dispose}
   }
 }
 
+export const domEvent = <K extends keyof HTMLElementEventMap>(eventType: K, node: HTMLElement, options = false) =>
+  new DomEvent<K>(eventType, node, options)

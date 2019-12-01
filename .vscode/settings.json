@@ -1,9 +1,3 @@
 {
-  "editor.tabSize": 2,
-  "editor.rulers": [80, 160],
-  "editor.wordWrapColumn": 120,
-  "editor.wrappingIndent": "indent",
-  "editor.insertSpaces": true,
-  "tslint.autoFixOnSave": true,
-  "gitlens.codeLens.enabled": false
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

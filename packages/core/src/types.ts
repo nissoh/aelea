@@ -4,20 +4,22 @@ import { Stream } from '@most/types'
 
 export type NodeStream = Stream<NodeType | never>
 export type TextStream = Stream<Text | never>
-export type DomStream = Stream<DomType>
-export type DomType = Text | NodeType
-export type NodeType = HTMLElement
+export type DomStream = Stream<NodeType>
+export type NodeType =  Node
+export type Func<A, B> = (input: A) => B
+export type FuncComp<A, B> = Func<Stream<A>, Stream<B>>
 
-export interface Behavior<T> extends Stream<T> {
-  sample <R> (event: Stream<any>): Stream<R>
+export interface Behavior<T, R> extends Stream<T> {
+  attach (event: Stream<R>): Stream<R>
 }
 
-export type Behaviors<K extends string, T> = {
-    [P in K]: Behavior<T>
+export type ComponentBehaviors<T, K extends keyof T> = {
+  [P in K]: Behavior<T[P], HTMLElement>
 }
 
-export type Actions<K extends string, T> = {
-    [P in K]: (x: NodeType) => Stream<T>
+export type ComponentActions<T, K extends keyof T> = {
+    [P in K]: Func<HTMLElement, Stream<T[P]>>
 }
 
-export type inputComposition<A, B> = (input: Stream<A>) => Stream<B>
+
+export { Stream }

@@ -1,20 +1,18 @@
 
-import { Sink } from '@most/types'
-
-
+import {Sink, Disposable} from '@most/types'
 
 export const pipe = <A, B, C>(a: (a: A) => B, b: (b: B) => C) => (x: A) => b(a(x))
 
-export const nullSink = {
+export const nullSink = <Sink<any>>{
   // tslint:disable-next-line:no-empty
-  event (t, x) {},
+  event(t, x) {},
   // tslint:disable-next-line:no-empty
-  end (t) {},
+  end(t) {},
   // tslint:disable-next-line:no-empty
-  error (t, x) {}
-} as Sink<any>
+  error(t, x) {}
+}
 
-export const nullDisposable = {
+export const nullDisposable = <Disposable>{
   // tslint:disable-next-line:no-empty
-  dispose () {}
+  dispose() {}
 }

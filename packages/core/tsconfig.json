@@ -1,5 +1,9 @@
 {
-  "extends": "../../tsconfig",
+  "extends": "./../../tsconfig",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "declarationDir": "dist/type-definitions"
+  },
   "include": [
     "src/**/*.ts"
   ],

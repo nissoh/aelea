@@ -1,11 +1,10 @@
-// https://github.com/briancavalier/most-behave/blob/master/src/event/split.js
-import { Stream, Disposable, Scheduler, Sink, Time } from '@most/types'
-import { nullSink, nullDisposable } from '../utils'
+import {Stream, Disposable, Scheduler, Sink, Time} from '@most/types'
+import {nullSink, nullDisposable} from '../utils'
 
 class SplitDisposable<T> implements Disposable {
-  constructor (private source: any, private sink: Sink<T>) {}
+  constructor(private source: any, private sink: Sink<T>) {}
 
-  dispose () {
+  dispose() {
     if (this.sink === this.source.sink0) {
       this.source.sink0 = this.source.sink1
       this.source.sink1 = nullSink
@@ -23,12 +22,12 @@ export class SplitStream<T> implements Stream<T> {
   sink0 = nullSink
   sink1 = nullSink
   disposable = nullDisposable
-  _disposable: Disposable
-  latest: T | null
+  _disposable = nullDisposable
+  latest: T | null = null
 
-  constructor (private source: Stream<T>) { }
+  constructor(private source: Stream<T>) {}
 
-  run (sink: Sink<T>, scheduler: Scheduler): Disposable {
+  run(sink: Sink<T>, scheduler: Scheduler): Disposable {
     if (this.sink0 === nullSink) {
       this.sink0 = sink
       this.disposable = this.source.run(this, scheduler)
@@ -45,13 +44,13 @@ export class SplitStream<T> implements Stream<T> {
     return new SplitDisposable(this, sink)
   }
 
-  _dispose () {
+  _dispose() {
     const disposable = this._disposable
     this._disposable = nullDisposable
     return disposable.dispose()
   }
 
-  event (time: Time, value: T) {
+  event(time: Time, value: T) {
     this.sink0.event(time, value)
     this.sink1.event(time, value)
 
@@ -60,12 +59,12 @@ export class SplitStream<T> implements Stream<T> {
     }
   }
 
-  end (time: Time) {
+  end(time: Time) {
     this.sink0.end(time)
     this.sink1.end(time)
   }
 
-  error (time: Time, err: Error) {
+  error(time: Time, err: Error) {
     this.sink0.error(time, err)
     this.sink1.error(time, err)
   }

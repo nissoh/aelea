@@ -1,8 +1,8 @@
 
 
 
-import { Stream, Scheduler } from '@most/types'
-import { tap, runEffects, take, now } from '@most/core'
+import { Stream } from '@most/types'
+import { tap, runEffects, take } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
 import { curry2 } from '@most/prelude'
 
@@ -21,7 +21,7 @@ export function collectEvents<T> (stream: Stream<T>) {
 }
 
 
-interface CollectNCurry {
+export interface CollectNCurry {
   <T>(n: number, stream: Stream<T>): Promise<Event<T>[]>
   <T>(n: number): (stream: Stream<T>) => Promise<Event<T>[]>
 }

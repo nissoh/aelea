@@ -6,7 +6,7 @@ export const count = {
   padding: '10px'
 }
 
-export const computedFontSize = (n: number) => ({fontSize: `${(n + 1) * 15}px`})
+export const computedFontSize = (n: number) => ({ fontSize: `${(n + 1) * 15}px` })
 
 export const counter = {
   padding: '15px',

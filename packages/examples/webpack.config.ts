@@ -1,22 +1,29 @@
+const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 
-export default {
+exports.default = {
+  entry: './src/hydra/index.ts',
+  mode: 'development',
   devtool: 'inline-source-map',
-  output: {
-    filename: 'bundle.js'
-  },
-  resolve: {
-    // Add `.ts` and `.tsx` as a resolvable extension.
-    extensions: ['.ts', '.tsx', '.js']
-  },
   devServer: {
-    publicPath: '/public/'
-    // contentBase: './dist'
+    contentBase: path.join(__dirname, 'dist'),
+    compress: true,
+    port: 9000
   },
   module: {
     rules: [
-      // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
-      { test: /\.tsx?$/, loader: 'ts-loader', options: { transpileOnly: true } }
+      {
+        test: /\.ts/,
+        use: 'ts-loader',
+        exclude: /node_modules/
+      }
     ]
-  }
+  },
+  resolve: {
+    extensions: [ '.tsx', '.ts', '.js' ]
+  },
+  plugins: [
+    new HtmlWebpackPlugin()
+  ]
 }

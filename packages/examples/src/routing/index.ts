@@ -1,12 +1,13 @@
 
-import { switchLatest, merge, now, constant } from '@most/core'
+import { switchLatest, now, constant } from '@most/core'
 import { xForver } from '../utils'
-import { nullSink, component, domEvent, style, branch, node, element, text } from 'fufu'
+import { nullSink, component, domEvent, style, branch, element, text } from 'fufu'
 import { newDefaultScheduler } from '@most/scheduler'
 import { resolveUrl, resolve, PathEvent } from 'match-trie'
 import { NodeStream } from '../../../core/src/types'
 import { Stream } from '@most/types'
-import * as stylesheet from '../stylesheet'
+import * as stylesheet from '../style/stylesheet'
+import { row, column } from '../common/flex'
 
 
 const styledBtn = stylesheet.btn(element('anchor'))
@@ -22,12 +23,6 @@ const p2 = resolve('p2', mainRoute)
 const switchRoute = (ps: Stream<PathEvent>, node: NodeStream) => switchLatest(constant(node, ps))
 
 
-const root = branch(xForver(document.body))
-
-const branchC = branch(node)
-
-// const columnB = branch(stylesheet.column(node))
-const rowB = branch(stylesheet.row(node))
 
 const click = domEvent('click')
 const actions = {
@@ -35,16 +30,16 @@ const actions = {
   p2Click: click
 }
 
-component(actions, ({ p1Click, p2Click }) => root(
-  switchRoute(mainRoute, branch(stylesheet.mainCentered(node))(merge(
-    rowB(merge(
-      p1Click.sample(btn('p1')),
-      p2Click.sample(btn('p2'))
-    )),
-    merge(
-      switchRoute(p1, branchC(text('p1'))),
-      switchRoute(p2, branchC(text('p2')))
-    )
+const main = component(actions, ({ p1Click, p2Click }) =>
+  switchRoute(mainRoute, stylesheet.mainCentered(column(
+    row(
+      p1Click.attach(btn('p1')),
+      p2Click.attach(btn('p2'))
+    ),
+    switchRoute(p1, row(text('p1'))),
+    switchRoute(p2, row(text('p2')))
   )))
-)).run(nullSink, newDefaultScheduler())
+)
+
+branch(xForver(document.body), main).run(nullSink, newDefaultScheduler())
 

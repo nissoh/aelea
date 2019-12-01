@@ -6,7 +6,7 @@ export class RequestFrameTask<T> implements Task {
   constructor (private sink: Sink<T>, private scheduler: Scheduler, private value: T) { }
 
   run (): this {
-    if (this.frameId !== -1) return this
+    if (this.frameId !== -1) { return this }
 
     this.frameId = requestAnimationFrame(_ =>
       this.sink.event(this.scheduler.currentTime(), this.value)
@@ -40,7 +40,7 @@ export class RequestFrameSink<T> implements Sink<T> {
   constructor (private sink: Sink<T>, private source: Stream<T>, private scheduler: Scheduler) { }
 
   event (time: number, value: T): void {
-    if (this.frameId !== -1) return
+    if (this.frameId !== -1) { return }
 
     this.frameId = requestAnimationFrame(_ => {
       this.sink.event(this.scheduler.currentTime(), value)
