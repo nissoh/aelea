@@ -1,6 +1,6 @@
 {
   "name": "match-trie",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist/commonjs/index.js",
   "module": "dist/module/index.js",
   "browser": "dist/browser/index.js",
