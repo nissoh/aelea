@@ -7,7 +7,7 @@
   "typings": "dist/type-definitions/index.d.ts",
   "scripts": {
     "clean": "rm -rf dist",
-    "rollup": "./../../node_modules/.bin/rollup -c -w rollup.config.js",
+    "rollup": "./../../node_modules/.bin/rollup -c rollup.config.js",
     "build": "npm run clean && npm run rollup",
     "build:dev": "npm run build -- -w",
     "test": "npm run lint && npm run test:unit",
@@ -28,5 +28,6 @@
     "csstype": "2.6.7"
   },
   "license": "MIT",
-  "author": "Nissan Hanina <nissan@yo.ma>"
+  "author": "Nissan Hanina <nissan@yo.ma>",
+  "gitHead": "34f90530df65dc490678d3b0e0fb018c294befb6"
 }

@@ -28,5 +28,6 @@
     "@typed/test": "^6.5.0"
   },
   "license": "MIT",
-  "author": "Nissan Hanina <nissan@yo.ma>"
+  "author": "Nissan Hanina <nissan@yo.ma>",
+  "gitHead": "34f90530df65dc490678d3b0e0fb018c294befb6"
 }
