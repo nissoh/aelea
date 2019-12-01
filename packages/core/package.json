@@ -1,6 +1,6 @@
 {
   "name": "fufu",
-  "version": "0.0.0-alpha.2",
+  "version": "0.0.0",
   "main": "dist/commonjs/index.js",
   "module": "dist/module/index.js",
   "browser": "dist/browser/index.js",
@@ -27,7 +27,6 @@
     "@most/types": "1.0.2",
     "csstype": "2.6.7"
   },
-  "devDependencies": {},
   "license": "MIT",
   "author": "Nissan Hanina <nissan@yo.ma>"
 }
