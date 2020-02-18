@@ -1,34 +1,35 @@
 
-import {branch, node, component, text, domEvent, style, nullSink} from 'fufu'
+import { node, component, text, domEvent, style, pipe, renderAt} from 'fufu'
 import {constant, join} from '@most/core'
-import {pipe, xForver} from '../utils'
-import * as commonSSheet from '../style/stylesheet'
+import * as stylesheet from '../style/stylesheet'
 import counter from './counter'
 import {newDefaultScheduler} from '@most/scheduler'
-import {column} from '../common/flex'
+import {column, row} from '../common/flex'
 
 
-const addBtnStyle = pipe(commonSSheet.btn, style({
+const addBtnStyle = pipe(stylesheet.btn, style({
   width: '70px', textAlign: 'center', color: '#ffffff',
   background: '#e65656', borderRadius: '4px', display: 'block', padding: '5px 0'
 }))
-const btn = addBtnStyle(branch(node, text('add')))
+
+const btn = pipe(node, addBtnStyle)
 
 
-const actions = {
-  count: pipe(domEvent('click'), constant(1))
-}
+const countersComponent = component(({add}) => column([
+  row([
+    add.sample(btn(text('Add One')), domEvent('click'))
+  ]),
+  join(constant(counter, add))
+]))
 
 
-const countersComponent = component(actions, ({count}) => {
-  const styledCounter = style({margin: '10px 0'}, counter)
 
-  return column(
-    count.attach(btn),
-    join(constant(styledCounter, count))
-  )
-})
-
-
-branch(xForver(document.body), commonSSheet.mainCentered(countersComponent))
-  .run(nullSink, newDefaultScheduler())
+renderAt(document.body, stylesheet.mainCentered(countersComponent)).run({
+  event() {
+  },
+  error(e) {
+    throw e
+  },
+  end() {
+  }
+}, newDefaultScheduler())

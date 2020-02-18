@@ -1,57 +1,54 @@
-
-
-import {style as styleFn, styleBehavior as _styleBehavior, StyleBehavior} from './combinator/style'
-import {curry2, CurriedFunction2} from '@most/prelude'
-import {TextStream, DomStream, NodeType, NodeStream, ComponentBehaviors, ComponentActions, Func} from './types'
-import {Branch} from './combinator/branch'
-import {node, text, element} from './source/node'
-import {domEvent as _domEvent} from './combinator/event'
-import {component as _component} from './combinator/component'
+import {NodeStream, DomNode, NodeType} from './types'
+import {tap, startWith, never, empty, map} from '@most/core'
+import {applyStyle} from './combinator/style'
 import {nullSink} from './utils'
-import {Stream} from '@most/types'
-import {attr as _attr} from './combinator/attribute'
+import {Scheduler, Stream} from '@most/types'
 
 
-interface DomEvent {
-  <K extends keyof HTMLElementEventMap>(eventType: K): (node: HTMLElement, options?: boolean) => Stream<HTMLElementEventMap[K]>
-  <K extends keyof HTMLElementEventMap>(eventType: K, node: HTMLElement, options?: boolean): Stream<HTMLElementEventMap[K]>
+export * from './combinator/style'
+export * from './combinator/event'
+export * from './utils'
+export * from './combinator/attribute'
+export * from './behavior'
+export * from './combinator/component'
+export * from './source/node'
+export * from './types'
+
+
+
+
+function runEffect(ns: NodeStream<HTMLElement, unknown, any>, scheduler: Scheduler) {
+  return map(ps => {
+
+    tap(style => applyStyle(style, ps.node), ps.style).run(nullSink, scheduler)
+
+    runEffect(
+      tap(cs => {
+        if (cs.slot < 1) {
+          ps.node.appendChild(cs.node)
+        } else {
+          ps.node.insertBefore(cs.node, ps.node.children[cs.slot])
+        }
+      }, ps.children), scheduler
+    ).run(nullSink, scheduler)
+
+    return ps
+  }, ns)
 }
 
-interface Component {
-  <T, K extends keyof T>(model: ComponentActions<T, K>): (view: Func<ComponentBehaviors<T, K>, Stream<NodeType>>) => Stream<HTMLElement>
-  <T, K extends keyof T>(model: ComponentActions<T, K>, view: Func<ComponentBehaviors<T, K>, Stream<NodeType>>): Stream<HTMLElement>
-}
+const forver = <T>(x: T) => startWith(x, never())
 
-
-
-const component: Component = curry2(_component)
-const domEvent: DomEvent = curry2(_domEvent)
-const style = curry2(styleFn)
-const styleBehavior = curry2(_styleBehavior)
-const attr = curry2(_attr)
-const branch = curry2((ps: NodeStream, cs: DomStream) => new Branch(ps, cs))
-
-
-
-export {
-  CurriedFunction2,
-  attr,
-  Stream,
-  domEvent,
-  DomEvent,
-  StyleBehavior,
-  styleBehavior,
-  component,
-  Component,
-  ComponentBehaviors,
-  ComponentActions,
-  nullSink,
-  node,
-  text,
-  element,
-  style,
-  branch,
-  TextStream,
-  DomStream,
-  NodeType
+export function renderAt(node: NodeType, children: NodeStream<HTMLElement, unknown, any>): Stream<any> {
+  const nnode: DomNode<NodeType, any, any> = {
+    node,
+    children,
+    slot: 0,
+    behavior: empty(),
+    style: empty()
+  }
+  return {
+    run(sink, scheduler) {
+      return runEffect(forver(nnode), scheduler).run(sink, scheduler)
+    }
+  }
 }

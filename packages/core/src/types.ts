@@ -1,25 +1,42 @@
 
 
-import { Stream } from '@most/types'
+import {Stream} from '@most/types'
+import {SplitBehavior} from './behavior'
+import * as CSS from 'csstype'
 
-export type NodeStream = Stream<NodeType | never>
-export type TextStream = Stream<Text | never>
-export type DomStream = Stream<NodeType>
-export type NodeType =  Node
-export type Func<A, B> = (input: A) => B
-export type FuncComp<A, B> = Func<Stream<A>, Stream<B>>
 
-export interface Behavior<T, R> extends Stream<T> {
-  attach (event: Stream<R>): Stream<R>
+export type StyleObj<T> = {
+  [K in keyof T]: T[K]
+} & CSS.Properties<HTMLElement>
+
+export type TextStream = Stream<Text>
+export type NodeType = Node
+export type ElementType = HTMLElement
+export type DomNode<A extends NodeType, B, C> = {
+  node: A
+  behavior: Stream<B>
+  style: Stream<StyleObj<C>>
+  children: NodeStream<any, any, any>
+  slot: number
 }
 
-export type ComponentBehaviors<T, K extends keyof T> = {
-  [P in K]: Behavior<T[P], HTMLElement>
+
+// export type NodeStream<T extends NodeType> = Stream<T>
+export type NodeStream<A extends NodeType, B, C> = Stream<DomNode<A, B, C>>
+export type ElementStream<A extends ElementType, B, C> = NodeStream<A, B, C>
+
+
+export type Op<T, R> = (o: Stream<T>) => Stream<R>
+export type FuncA2<A, B, C> = (a: A, b: B) => C
+
+
+export type ComponentNode<A extends NodeType, B, Style = {}> = DomNode<A, B, Style>
+
+export type ComponentActions<A, N extends NodeType> = {
+  [P in keyof A]: Op<A[P], A[P]>
 }
 
-export type ComponentActions<T, K extends keyof T> = {
-    [P in K]: Func<HTMLElement, Stream<T[P]>>
-}
 
 
-export { Stream }
+
+export {Stream}

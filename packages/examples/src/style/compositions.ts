@@ -1,5 +1,4 @@
-import { pipe } from '../utils'
-import { domEvent } from 'fufu'
+import { domEvent, pipe } from 'fufu'
 import { constant } from '@most/core'
 
 

@@ -1,69 +1,110 @@
-import {Scheduler, Sink, Time, Disposable} from '@most/types'
-import {NodeStream, DomStream, NodeType} from '../types'
-import {nullSink} from '../utils'
-
-export {Disposable}
-
-export type nodeInput = (input: nodeInput) => NodeStream
+// import {Disposable, Sink, Scheduler, Time, Stream} from '@most/types'
+// import {NodeStream, ElementStream, ElementType, NodeType, ElementNode, Func} from '../types'
+// import {curry2, compose} from '@most/prelude'
+// import {map, snapshot, join, merge, never, chain, startWith, now, tap} from '@most/core'
+// import {nullSink} from '../'
 
 
-export class Branch implements NodeStream {
-  constructor(private ps: NodeStream, private cs: DomStream) {}
+// interface Branch {
+//   <A extends HTMLElement, B extends Node>(ps: ElementStream<A>): (cs: NodeStream<B>) => ElementStream<A>
+//   <A extends HTMLElement, B extends Node>(ps: ElementStream<A>, cs: NodeStream<B>): ElementStream<A>
+// }
 
-  run(sink: Sink<NodeType>, scheduler: Scheduler) {
-    const branchSink = new BranchSink(this.cs, sink, scheduler)
-    return this.ps.run(branchSink, scheduler)
-  }
-}
 
-class BranchSink {
-  innerChild: Sink<any> = nullSink
 
-  constructor(
-    private cs: DomStream,
-    private sink: Sink<NodeType>,
-    private scheduler: Scheduler
-  ) {}
+// export const branch: Branch = curry2((ps, cs) => ({
+//   run(sink, scheduler) {
+//     return ps.run(new BranchSink(cs, sink, scheduler), scheduler)
+//   }
+// }))
+// // export const branch: Branch = curry2((ps, cs) => {
+// //   return map(([parentEl, pfs]) => {
 
-  event(t: Time, parent: NodeType) {
-    this.innerChild = new InnerChildSink(this.cs, this.scheduler, parent)
-    this.sink.event(t, parent)
-  }
+// //     // return [parentEl, merge(pfs, map(([childEl, cfs]) =>  appendChild(childEl), cs))]
+// //     return [parentEl, pfs]
 
-  end(t: Time) {
-    this.innerChild.end(t)
-    this.sink.end(t)
-  }
+// //   }, ps)
 
-  error(t: Time, e: Error) {
-    this.sink.error(t, e)
-  }
-}
+// // })
 
-class InnerChildSink implements Sink<NodeType> {
-  childrenList: NodeType[] = []
-  childDisposable = this.cs.run(this, this.scheduler)
+// class BranchSink<A extends ElementType, B extends NodeType, C> implements Sink<ElementNode<A, C>> {
+//   innerChild: Sink<ElementNode<B>> = nullSink
 
-  constructor(
-    private cs: DomStream,
-    private scheduler: Scheduler,
-    private parent: Node
-  ) {}
+//   constructor(
+//     private cs: NodeStream<B>,
+//     private sink: Sink<ElementNode<A, C>>,
+//     private scheduler: Scheduler
+//   ) {}
 
-  event(t: Time, child: NodeType): void {
-    this.parent.appendChild(child)
-  }
-  end(t: Time): void {
-    this.dispose()
-  }
-  error(t: Time, err: Error): void {
-    this.end(t)
-    throw (err)
-  }
+//   event(t: Time, [parent, pf]: ElementNode<A, C>) {
 
-  dispose() {
-    this.childDisposable.dispose()
-  }
-}
+
+//     // const nsf = compose(
+//     //   snapshot(([child, cfn], pfn) => {
+//     //     appendChild(child, parent)
+
+//     //     cfn(now(child)).run({
+//     //       event(t, cfn) {
+//     //         debugger
+//     //         // cfn(child)
+//     //       },
+//     //       end(t) {
+//     //       },
+//     //       error(t, err) {
+//     //       }
+//     //     }, this.scheduler)
+
+
+//     //     return pfn
+//     //   }, this.cs),
+//     //   pf
+//     // )
+
+//     // this.sink.event(t, [parent, nsf])
+//   }
+
+//   end(t: Time) {
+//     // this.innerChild.end(t)
+//     this.sink.end(t)
+//   }
+
+//   error(t: Time, e: Error) {
+//     this.sink.error(t, e)
+//   }
+// }
+
+// // class InnerChildSink<A extends ElementType, B extends NodeType> {
+// //   childrenList: NodeType[] = []
+// //   childDisposable = this.cs.run(this, this.scheduler)
+
+// //   constructor(
+// //     private cs: NodeStream<B>,
+// //     private scheduler: Scheduler,
+// //     private parent: A,
+// //     private parentSink: any
+// //   ) {}
+
+// //   event(t: Time, [child, csf]: ElementNode<B>): void {
+// //     this.parent.appendChild(child)
+
+// //     // this.parentSink.event(t, [child, csf])
+// //   }
+// //   end(t: Time): void {
+// //     this.dispose()
+// //   }
+// //   error(t: Time, err: Error): void {
+// //     this.end(t)
+// //     throw (err)
+// //   }
+
+// //   dispose() {
+// //     this.childDisposable.dispose()
+// //   }
+// // }
+
+
+
+
+// export {Disposable}
 
 

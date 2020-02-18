@@ -7,7 +7,7 @@
     // "strictFunctionTypes": false,
     "pretty": true,
     // "keyofStringsOnly": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "resolveJsonModule": true,
     "declaration": true,
     "lib": [

@@ -1,8 +1,6 @@
 
 
-import { constant } from '@most/core'
-import { style, domEvent } from 'fufu'
-import { pipe } from '../utils'
+import { style, pipe } from 'fufu'
 
 
 export const centerStyle =  style({ alignItems: 'center', justifyContent: 'center' })
@@ -15,8 +13,9 @@ export const rowFlex =      pipe(row, flex)
 export const columnFlex =   pipe(column, flex)
 
 
+
 const fontFamily = 'Fira Code'
-export const main =         style({
+const main =         style({
   position: 'absolute',
   top: '0',
   left: '0',
@@ -41,17 +40,12 @@ export const input = pipe(row, style({
 
 export const centerFlex =    pipe(row, centerStyle)
 
-export const mainCentered =  pipe(main, pipe(column, centerStyle))
-export const inputStyle =    pipe(rowFlex, input)
+export const mainCentered =  pipe(main, column, centerStyle)
 
-
-
-// export const inputStyleBehaviour = pipe(inputStyle, pipe(applyFocusStyle, applyBlurStyle))
 
 
 // Common UI elements
 const button =  style({
-  border: 'ded',
   cursor: 'pointer'
 })
 

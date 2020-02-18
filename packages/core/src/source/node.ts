@@ -1,12 +1,9 @@
-import {Stream, Sink, Scheduler, Disposable} from '@most/types'
-import {disposeWith} from '@most/disposable'
-import {CurriedFunction2} from '@most/prelude'
-import {NodeType} from '../types'
+import {Scheduler, Sink} from '@most/types'
+import {NodeType, NodeStream, Op, DomNode} from '../types'
+import {now, never, startWith, map, empty, mergeArray} from '@most/core'
 
 
-
-
-function disposeNode(el: Node) {
+function disposeNode(el: NodeType) {
   if (el.parentElement && el.parentElement.contains(el)) {
     el.parentElement.removeChild(el)
   }
@@ -14,32 +11,80 @@ function disposeNode(el: Node) {
 
 
 
-export class NodeStream<R extends NodeType> implements Stream<R> {
-  constructor(private nodeCreationFn: (cv: string) => R, private cv: string) {}
+export type NodeChildInput<A extends NodeType> = NodeStream<A, any, any> | NodeStream<A, any, any>[] | void
 
-  run(sink: Sink<R>, scheduler: Scheduler) {
-    const node = this.nodeCreationFn(this.cv)
+export class NodeSource<A extends NodeType, B, C, D> implements NodeStream<A, B, C> {
+  constructor(
+    private value: D,
+    private op: Op<D, A>,
+    private cs: NodeChildInput<NodeType>
+  ) {}
 
-    sink.event(scheduler.currentTime(), node)
 
-    return disposeWith(disposeNode, node)
+  run(sink: Sink<DomNode<A, B, C>>, scheduler: Scheduler) {
+
+
+    const css = this.cs instanceof Array ? this.cs : [this.cs ? this.cs : empty()]
+    const node = this.op(startWith(this.value, never()))
+
+
+    let parent: A | null = null
+
+
+    node.run({
+      event: (time, node) => {
+        parent = node
+        sink.event(time, {
+          node,
+          children: mergeArray(css.map((cs, i) =>
+            map(n => ({...n, slot: i}), cs)
+          )),
+          slot: 0,
+          style: now({}),
+          behavior: empty()
+        })
+      },
+      error() {
+
+      },
+      end() {
+        debugger
+      }
+    }, scheduler)
+
+    return {
+      dispose() {
+        if (parent) {
+          disposeNode(parent)
+        }
+      }
+    }
   }
 }
 
-const createElement =  (s: string) => document.createElement(s)
-const createTextNode = (s: string) => document.createTextNode(s)
 
-export const node:Stream<HTMLElement> =new NodeStream(createElement, 'node')
 
-export const element = (name: string): Stream<HTMLElement> => {
-  return new NodeStream(createElement, name)
+
+export const create = <A, N extends NodeType, NB extends NodeType>(something: A, op: Op<A, N>) =>
+  (cs: NodeChildInput<NB>) =>
+    new NodeSource(something, op, cs)
+
+export const element = <K extends keyof HTMLElementTagNameMap>(tagName: K) =>
+  create(tagName, map(a => document.createElement(a)))
+
+export const svg = <K extends keyof SVGElementTagNameMap>(tagName: K) =>
+  create(tagName, map(a => document.createElementNS('http://www.w3.org/2000/svg', a)))
+
+export const customElement = (tagName: string) =>
+  create(tagName, map(a => document.createElement(a)))
+
+export const text = (text: string, ) => {
+  const textns: NodeStream<any, any, any> = startWith({node: document.createTextNode(text), children: empty(), style: empty()}, empty())
+  return customElement('text')(
+    textns
+  )
 }
 
-
-export const text = (s: string): Stream<Text> => {
-  return new NodeStream(createTextNode, s)
-}
+export const node = customElement('node')
 
 
-
-export {Disposable, CurriedFunction2}

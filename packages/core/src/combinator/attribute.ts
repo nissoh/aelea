@@ -1,30 +1,66 @@
-import {curry2, CurriedFunction2} from '@most/prelude'
-import {NodeStream} from '../types'
-import {tap} from '@most/core'
-import {Stream} from '@most/types'
+// import {curry2, CurriedFunction2, compose} from '@most/prelude'
+// import {NodeStream, ElementType, ElementStream, ElementNode} from '../types'
+// import {map} from '@most/core'
+// import {Stream, Sink, Scheduler, Disposable, Time} from '@most/types'
+// import {Pipe} from '../utils'
 
 
-export type IAttrProperties = {[key: string]: string}
+// interface Attr {
+//   <A extends ElementType>(attrs: IAttrProperties): (ns: NodeStream<A>) => NodeStream<A>
+//   <A extends ElementType>(attrs: IAttrProperties, ns: NodeStream<A>): NodeStream<A>
+// }
+
+// interface ApplyAttr {
+//   <A extends ElementType>(attrs: IAttrProperties): (ns: A) => A
+//   <A extends ElementType>(attrs: IAttrProperties, ns: A): A
+// }
 
 
-const applyAttr = (attrs: IAttrProperties, node: HTMLElement) => {
-  if (attrs) {
-    Object.keys(attrs).forEach(attrKey => {
-      node.setAttribute(attrKey, attrs[attrKey])
-    })
-  }
-
-  return node
-}
-
-export const applyAttrCurry = curry2(applyAttr)
+// export type IAttrProperties = {[key: string]: string}
 
 
-export function attr(attrs: IAttrProperties, ns: NodeStream): NodeStream {
-  return tap(applyAttrCurry(attrs), ns)
-}
+// export const applyAttrCurry: ApplyAttr = curry2((attrs, node) => {
+//   if (attrs) {
+//     Object.keys(attrs).forEach(attrKey => {
+//       node.setAttribute(attrKey, attrs[attrKey])
+//     })
+//   }
+
+//   return node
+// })
+
+
+// class AttributeSource<T extends ElementType> implements ElementStream<T> {
+
+//   constructor(public attrs: IAttrProperties, public source: NodeStream<T>) {}
+
+//   run(sink: Sink<ElementNode<T>>, scheduler: Scheduler): Disposable {
+//     return this.source.run(new AttributeSink(sink, this.attrs), scheduler)
+//   }
+
+// }
+
+
+// class AttributeSink<T extends ElementType> extends Pipe<ElementNode<T>, ElementNode<T>> implements Sink<ElementNode<T>> {
+
+//   constructor(protected sink: Sink<ElementNode<T>>, private attrs: IAttrProperties) {
+//     super(sink)
+//   }
+
+//   event(t: Time, [el, ups]: ElementNode<T>): void {
+//     this.sink.event(t, [el, compose(map(applyAttrCurry(this.attrs)), ups)])
+//   }
+// }
 
 
 
+// const attr: Attr = curry2((attrs, source) => {
+//   if (source instanceof AttributeSource) {
+//     return new AttributeSource({...source.attrs, ...attrs}, source.source)
+//   }
 
-export {CurriedFunction2, Stream}
+//   return new AttributeSource(attrs, source)
+// })
+
+
+export {}

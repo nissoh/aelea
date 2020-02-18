@@ -1,86 +1,45 @@
 
-import {Stream, Disposable, Scheduler, Sink} from '@most/types'
-import {FuncComp, ComponentActions, ComponentBehaviors, NodeType, Func} from '../types'
-import {splitStream} from '../combinator/split'
-import {chain, multicast} from '@most/core'
-import {disposeAll} from '@most/disposable'
+import {NodeStream, ElementType, DomNode} from '../types'
+import {multicast, empty, map, chain} from '@most/core'
+import {splitBehavior, SplitBehavior} from '../behavior'
 import {compose} from '@most/prelude'
-import {nullSink} from './../'
 
 
-export class Behavior<T, R> {
-  attachments: Disposable[] = []
-  queuedAttachments: Stream<T>[] = []
 
-  sampler: Stream<T> | undefined
-  running: boolean = false
+export type compFn<A extends ElementType, B, C> = (componentFunction: {[k: string]: SplitBehavior<DomNode<A, B, C>, B>}) => NodeStream<A, B, C>
 
-  sink: Sink<T> = nullSink
-  scheduler: Scheduler | undefined
+const component = <A extends ElementType, B, C>(inputComp: compFn<A, B, C>): NodeStream<A, B, C> => {
+  return {
+    run(sink, scheduler) {
 
-  constructor(private input: FuncComp<R, T>) {}
 
-  run(sink: Sink<T>, scheduler: Scheduler): Disposable {
-    this.running = true
+      const prox: Parameters<typeof inputComp>[0] = new Proxy({} as any, {
+        get(target, p: keyof A) {
+          target[p] = target[p] ?? splitBehavior(multicast)
+          // target[p] = target[p] ?? splitBehavior(compose(multicast as any, chain((x: any) => x.behavior)))
+          return target[p]
+        }
+      })
 
-    if (this.queuedAttachments.length) {
-      const dss = this.queuedAttachments.map(x => x.run(sink, scheduler))
-      this.attachments.push(...dss)
-    } else {
-      this.sink = sink
-      this.scheduler = scheduler
+
+
+
+      const ns = inputComp(prox)
+
+
+      return ns.run(sink, scheduler)
+
+
+
+      // return snapshot((aa, bb) => aa, ns, be).run(sink, scheduler)
+      // return map(([el, fn]) => [el, fn], splitb.sample(ns)).run(sink, scheduler)
+      // return merge(ns, eee).run(sink, scheduler)
     }
-
-    return this
-  }
-
-  dispose() {
-    disposeAll(this.attachments)
-
-    this.attachments = []
-  }
-
-
-  attach(s: Stream<R>): Stream<R> {
-
-    const [e1, e2] = splitStream(s)
-
-    const inputStream = this.input(e2)
-
-    if (this.running && this.scheduler) {
-      this.attachments.push(inputStream.run(this.sink, this.scheduler))
-    } else {
-      this.queuedAttachments.push(inputStream)
-    }
-
-    return e1
-  }
-}
-
-export const behavior = <T, R>(x: FuncComp<R, T>) =>
-  new Behavior<T, R>(x)
-
-export class Component<T, K extends keyof T> implements Stream<NodeType> {
-  constructor(private model: ComponentActions<T, K>, private view: (x: ComponentBehaviors<T, K>) => Stream<NodeType>) {}
-
-  run(sink: Sink<NodeType>, scheduler: Scheduler): Disposable {
-
-    const props: Array<K> = Object.keys(this.model) as any
-    const mmdeo = props.reduce((seed, k) => {
-
-      const item = chain(this.model[k])
-      const b = behavior(compose(multicast, item))
-
-      return {...seed, [k]: b}
-    }, <ComponentBehaviors<T, K>>{})
-
-    const op = this.view(mmdeo)
-    return op.run(sink, scheduler)
   }
 }
 
 
-export const component = <T, K extends keyof T>(
-  model: ComponentActions<T, K>,
-  view: Func<ComponentBehaviors<T, K>, Stream<NodeType>>
-) => new Component<T, K>(model, view)
+
+
+export {component}
+

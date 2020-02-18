@@ -2,7 +2,7 @@ import {Stream, Disposable, Scheduler, Sink, Time} from '@most/types'
 import {nullSink, nullDisposable} from '../utils'
 
 class SplitDisposable<T> implements Disposable {
-  constructor(private source: any, private sink: Sink<T>) {}
+  constructor(private source: SplitStream<T>, private sink: Sink<T>) {}
 
   dispose() {
     if (this.sink === this.source.sink0) {

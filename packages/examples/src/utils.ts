@@ -1,9 +1,13 @@
 
 
+// tslint:disable: max-line-length
+
 import { Stream, Sink } from '@most/types'
 import { startWith, never } from '@most/core'
 
-export const pipe = <A, B, C>(a: (a: A) => B, b: (b: B) => C) => (x: A) => b(a(x))
+
+export declare type UnaryFunction<T, R> = (source: T) => R
+
 
 export const xForver = <T> (x: T): Stream<T>  => startWith(x, never())
 

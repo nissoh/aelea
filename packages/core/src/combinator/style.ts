@@ -1,19 +1,12 @@
 import {Stream, Sink, Scheduler, Disposable} from '@most/types'
-import {curry2, CurriedFunction2} from '@most/prelude'
-import {NodeStream} from '../types'
-import {tap} from '@most/core'
-import {nullSink} from '../utils'
+import {ElementStream, ElementType, DomNode, StyleObj} from '../types'
 
 import * as CSS from 'csstype'
+import {map, merge} from '@most/core'
 
 
-export type IStyleProperties = CSS.Properties<HTMLElement>
-export type StyleLike = Stream<IStyleProperties>
-export type IPipe = (s: Node) => StyleLike
-export type IStyleBehavior = IPipe
 
-
-export const applyStyle = (style: Partial<IStyleProperties>, el: HTMLElement) => {
+export const applyStyle = (style: Partial<CSS.Properties<any>>, el: HTMLElement) => {
   let prop: any
 
   const elementStyle = el.style
@@ -23,54 +16,45 @@ export const applyStyle = (style: Partial<IStyleProperties>, el: HTMLElement) =>
   return el
 }
 
-export const applyStyleCurry = curry2(applyStyle)
 
-export const style = (style: IStyleProperties, node: NodeStream) => tap(applyStyleCurry(style), node)
-
-
-
-
-export class StyleBehavior implements NodeStream {
-  constructor(private bfn: Stream<IStyleProperties>, private ns: NodeStream) {}
-
-  run(sink: Sink<HTMLElement>, scheduler: Scheduler): Disposable {
-    return this.ns.run(new StyleBehavriorSink(sink, scheduler, this.bfn), scheduler)
-  }
+interface Style {
+  <A extends ElementType, B, C, D>(style: StyleObj<D>): (node: ElementStream<A, B, C>, behavior?: Stream<any>) => ElementStream<A, B, C & D>
+  <A extends ElementType, B, C, D>(style: StyleObj<D>, node: ElementStream<A, B, C>, behavior?: Stream<any>): ElementStream<A, B, C & D>
 }
 
-export class StyleBehavriorSink implements Sink<HTMLElement> {
-  styleDisposable: Disposable | undefined
-  constructor(private sink: any, private scheduler: Scheduler, private bfn: Stream<IStyleProperties>) {
 
+export const style: Style = (function styleFn <A extends ElementType, B, C, D>(style: StyleObj<D>, source: ElementStream<A, B, C>, behavior: Stream<any> | null = null) {
+  if (arguments.length === 1) {
+    return (source: any, behavior: any) => styleFn(style, source, behavior)
+  }
+  if (behavior) {
+    return map(dn => {
+      return {...dn, style: merge(dn.style, map(() => style, behavior))}
+    }, source)
   }
 
-  event(time: number, el: HTMLElement): void {
-    this.sink.event(time, el)
-
-    const event = (time: number, style: IStyleProperties) => {
-      applyStyle(style, el as any)
-    }
-
-    this.styleDisposable = this.bfn.run({...nullSink, event}, this.scheduler)
+  if (source instanceof StyleSource) {
+    return new StyleSource({...source.style, ...style}, source.source)
   }
-  end(time: number): void {
-    if (this.styleDisposable) {
-      this.styleDisposable.dispose()
-    }
 
-    this.sink.end(time)
-  }
-  error(time: number, err: Error): void {
-    this.end(time)
-    this.sink.error(time)
-    throw err
+  return new StyleSource(style, source as any)
+}) as any
+
+class StyleSource<A extends ElementType, B extends ElementType, C, D> implements ElementStream<A, B, C & D> {
+
+  constructor(public style: StyleObj<D>, public source: ElementStream<A, B, C>) {}
+
+  run(sink: Sink<DomNode<A, B, C & D>>, scheduler: Scheduler): Disposable {
+
+    return map(ns => {
+      const style = map(style => ({...style, ...this.style}), ns.style)
+      return {...ns, style}
+    }, this.source).run(sink, scheduler)
+
   }
 
 }
 
 
 
-export const styleBehavior = (ss: Stream<IStyleProperties>, ns: Stream<HTMLElement>) => new StyleBehavior(ss, ns)
 
-
-export {CurriedFunction2, Stream}

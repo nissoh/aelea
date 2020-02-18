@@ -8,7 +8,7 @@
     "no-implicit-dependencies": [true, "dev"],
 
     "indent": [true, "spaces"],
-    "max-line-length": [true, 150],
+    "max-line-length": false,
     "no-var-keyword": true,
     "no-require-imports": true,
     "semicolon": [true, "never"],

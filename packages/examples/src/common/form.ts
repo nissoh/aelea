@@ -1,68 +1,54 @@
-import { branch, node, element, style, component, text, styleBehavior, attr  } from 'fufu'
-import { column } from './flex'
-import { inputStyle } from '../style/stylesheet'
-import { applyBlurStyle, applyFocusStyle } from '../style/compositions'
-import { pipe } from '../utils'
+import {style, component, text, pipe, element, domEvent, SplitBehavior, branch, behavior, ElementNode} from 'fufu'
+import styleList from '../style/stylesheet'
+import {empty, map, switchLatest, sample, tap} from '@most/core'
+import {column} from './flex'
+import {Stream} from '@most/types'
 
 
+const labelStyle = pipe(text, style({
+  textTransform: 'uppercase',
+  fontSize: '11px',
+  color: '#9a9a9a'
+}))
 
 
-interface IInputOptions {
-  placeholder: string
-  type: 'text' | 'number' | 'input'
+interface Input {
+  type: 'text' | 'number' | 'input' | undefined
+  value: string
+  placeholder?: string | undefined
+}
+
+interface Field extends Input {
+  label?: string | undefined
 }
 
 
-
-const labelStyle = style({ textTransform: 'uppercase', fontSize: '11px', color: '#9a9a9a' })
-
+const input = component(input => {
 
 
-const inputLabel = pipe(text, branch(labelStyle(node)))
+  const focusStyle = behavior(style({borderBottom: '1px solid red'}), domEvent('focus'))
+  const borderStyle = behavior(style({borderBottom: '1px solid rgb(210, 210, 210)'}), domEvent('blur'))
+
+  const mouseInteractions = pipe(focusStyle, borderStyle)
+
+  const inputValue = pipe(
+    domEvent('input'),
+    map(ev =>
+      ev.target instanceof HTMLInputElement ? ev.target.value : ''
+    )
+  )
 
 
-const inputBehaviors = {
-  blur: applyBlurStyle,
-  focus: applyFocusStyle
-}
-
-
-const bb = style({ borderBottom: '1px solid rgb(185, 185, 185)' })
-const bt = style({ borderBottom: '1px solid rgb(185, 185, 185)' })
-
-
-
-const inp = inputStyle(element('input'))
-const input = component(inputBehaviors, ({ blur, focus }) => {
-
-  const attFocus = styleBehavior(focus, focus.attach(inp))
-
-  const attBlur = styleBehavior(blur, blur.attach(attFocus))
-
-
-  return attBlur
+  return [element('input', mouseInteractions), inputValue]
 })
 
 
-
-
-export const field = (label: string, options: Partial<IInputOptions>) => {
-
-  const attrs = {
-    placeholder: options.placeholder || '',
-    type: options.type || 'text',
-    value: '0'
-  }
-
-  return column(
-    inputLabel(label),
-    attr(attrs, input)
+export const field = component(value =>
+  column(
+    input(tap(x => {}))
   )
-}
+)
 
-
-export const numberField = (label: string, options?: Partial<IInputOptions>) => field(label, { type: 'number', ...options })
-export const emailField =  (label: string, options?: Partial<IInputOptions>) => field(label, { type: 'text', ...options })
 
 
 

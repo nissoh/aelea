@@ -1,7 +1,7 @@
 
 import { map, switchLatest, combine, startWith } from '@most/core'
-import { domEvent, component, branch, nullSink, node, text, style } from 'fufu'
-import { pipe, xForver } from '../utils'
+import { domEvent, component, branch, nullSink, node, text, style, pipe } from 'fufu'
+import { xForver } from '../utils'
 import { newDefaultScheduler } from '@most/scheduler'
 import * as commonSSheet from '../style/stylesheet'
 import { row, column } from '../common/flex'
@@ -15,7 +15,7 @@ const add = (x: number, y: number) => x + y
 
 
 const targetInputValue = (el: HTMLInputElement | null) => el && el.value
-const targetEventValue = pipe(pipe((x: Event) => x.target as HTMLInputElement, targetInputValue), Number)
+const targetEventValue = pipe((x: Event) => x.target as HTMLInputElement, targetInputValue, Number)
 
 const inputValue = (x: HTMLElement) => {
   const input = x.querySelector('input')
