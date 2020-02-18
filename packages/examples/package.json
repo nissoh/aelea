@@ -1,6 +1,6 @@
 {
   "name": "examples",
-  "version": "0.0.2",
+  "version": "0.0.3-alpha.0",
   "license": "MIT",
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config ./webpack.config.js",
@@ -16,8 +16,8 @@
     "@most/prelude": "1.7.3",
     "@most/scheduler": "1.2.3",
     "@most/types": "1.0.2",
-    "fufu": "^0.0.2",
-    "match-trie": "^0.0.2"
+    "fufu": "^0.0.3-alpha.0",
+    "match-trie": "^0.0.3-alpha.0"
   },
   "devDependencies": {
     "@types/node": "10.12.12",
