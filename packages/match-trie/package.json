@@ -9,8 +9,7 @@
     "clean": "rm -rf dist",
     "rollup": "./../../node_modules/.bin/rollup  -c rollup.config.js",
     "build": "npm run clean && npm run rollup",
-    "test": "npm run lint && typed-test src/**/*.test.ts",
-    "lint": "tslint --fix 'src/**/*.ts'",
+    "lint": "./../../node_modules/.bin/tslint --fix 'src/**/*.ts'",
     "prepublish": "npm run build"
   },
   "repository": {
