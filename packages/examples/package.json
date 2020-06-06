@@ -4,10 +4,12 @@
   "license": "MIT",
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config ./webpack.config.js",
-    "rollup": "./../../node_modules/.bin/rollup -w -c rollup.config.js",
+    "rollup": "./../../node_modules/.bin/rollup --watch -c rollup.config.js",
     "add-ui": "npm run rollup -i ./src/add-ui/index.ts",
     "simple-input": "npm run rollup --entry ./src/simple-input/index.ts",
     "routing": "npm run rollup --entry ./src/routing/index.ts",
+    "panning-ui": "npm run rollup --entry ./src/panning-ui/index.ts",
+    "todo-list": "npm run rollup --entry ./src/todo-list/index.ts",
     "counters": "npm run rollup --entry ./src/counters/index.ts"
   },
   "dependencies": {
@@ -21,7 +23,7 @@
   },
   "devDependencies": {
     "@types/node": "10.12.12",
-    "rollup-plugin-browsersync": "^0.2.6"
+    "rollup-plugin-browsersync": "1.1.0"
   },
   "private": true
 }

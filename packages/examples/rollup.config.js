@@ -55,8 +55,10 @@ export default {
 
 
     browsersync({
-      server: './',
-      open: false
+      open: true,
+      single: true,
+      serveStatic: ['./'],
+      // proxy: "localhost:4700"
     })
   ]
 }

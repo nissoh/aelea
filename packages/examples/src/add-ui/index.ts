@@ -1,68 +1,48 @@
 
-import { map, switchLatest, combine, startWith } from '@most/core'
-import { domEvent, component, branch, nullSink, node, text, style, pipe } from 'fufu'
-import { xForver } from '../utils'
+import { map, combine, startWith } from '@most/core'
+import { component, nullSink, $node, $text, style, O, ProxyStream, renderAt } from 'fufu'
 import { newDefaultScheduler } from '@most/scheduler'
+import { $row, $column } from '../common/flex'
+import { $field, InputType } from '../common/form'
 import * as commonSSheet from '../style/stylesheet'
-import { row, column } from '../common/flex'
-import { numberField } from '../common/form'
-import { Stream } from '@most/types'
-
 
 
 const add = (x: number, y: number) => x + y
 
 
+const extractValue = O(
+  map((evt: Event) => evt.target instanceof HTMLInputElement
+  ? Number(evt.target.value)
+  : null),
+  startWith(0)
+)
 
-const targetInputValue = (el: HTMLInputElement | null) => el && el.value
-const targetEventValue = pipe((x: Event) => x.target as HTMLInputElement, targetInputValue, Number)
-
-const inputValue = (x: HTMLElement) => {
-  const input = x.querySelector('input')
-  const inputEv = map(targetEventValue, domEvent('input', x))
-
-  if (input) {
-    return startWith(Number(input.value), inputEv)
-  }
-
-  return inputEv
-}
-
-const actions = {
-  x: inputValue,
-  y: inputValue
-}
-
-
-const sumText = (x: Stream<number>, y: Stream<number>) => switchLatest(map(pipe(String, text), combine(add, x, y)))
-
-const fieldx = numberField('X')
-const fieldy = numberField('Y')
-
-const seperator = style({ width: '26px' }, node)
-
-const addComponent = component(actions, ({ x, y }) => row(
-  x.attach(fieldx),
-  seperator,
-  y.attach(fieldy),
-  row(
-    sumText(x, y)
-  )
+const $seperator = $node(O(
+  style({ width: '26px', padding: '0 10px' }),
+  commonSSheet.panningContainer
 ))
 
-
-const body = branch(xForver(document.body))
-
-
-
-
-body(
-  commonSSheet.mainCentered(column(
-    addComponent,
-    style({ height: '50px' }, node),
-    addComponent
-  ))
+const $add = component((a: ProxyStream<Event>, b: ProxyStream<Event>) =>
+  $row(
+    $field({ label: 'A', type: InputType.NUMBER, value: 0 }, a),
+    $seperator(
+      $text('+')
+    ),
+    $field({ label: 'B', type: InputType.NUMBER, value: 0 }, b),
+    $row(
+      $text(map(String, combine(add, extractValue(a), extractValue(b))))
+    )
+  )
 )
+
+
+
+renderAt(document.body, commonSSheet.panningUI($column(
+  $add,
+  $node(style({ height: '50px' }))(),
+  $add,
+)))
+
   .run(nullSink, newDefaultScheduler())
 
 

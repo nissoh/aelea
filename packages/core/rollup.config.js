@@ -4,12 +4,7 @@ import typescript from 'rollup-plugin-typescript2'
 import * as pkg from './package.json'
 
 
-const packages = {
-  '@most/core': 'mostCore',
-  '@most/scheduler': 'mostScheduler',
-  '@most/disposable': 'mostDisposable',
-  '@most/prelude': 'mostPrelude'
-}
+const deps = Object.keys(pkg.dependencies)
 
 
 export default {
@@ -20,7 +15,7 @@ export default {
       format: 'umd',
       name: pkg.name,
       sourcemap: true,
-      globals: packages
+      globals: deps
     },
     {
       file: pkg.module,
@@ -28,7 +23,7 @@ export default {
       sourcemap: true
     }
   ],
-  external: Object.keys(packages),
+  external: deps,
   plugins: [
     resolve(),
     typescript({

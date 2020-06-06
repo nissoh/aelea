@@ -1,35 +1,52 @@
 
-import { node, component, text, domEvent, style, pipe, renderAt} from 'fufu'
-import {constant, join} from '@most/core'
+import { component, $text, style, renderAt, event, $element, splitBehavior, ProxyStream, O } from 'fufu'
+import { chain, until, filter, map } from '@most/core'
+import { newDefaultScheduler } from '@most/scheduler'
+import { $column, $row } from '../common/flex'
+
 import * as stylesheet from '../style/stylesheet'
 import counter from './counter'
-import {newDefaultScheduler} from '@most/scheduler'
-import {column, row} from '../common/flex'
 
 
-const addBtnStyle = pipe(stylesheet.btn, style({
-  width: '70px', textAlign: 'center', color: '#ffffff',
-  background: '#e65656', borderRadius: '4px', display: 'block', padding: '5px 0'
-}))
-
-const btn = pipe(node, addBtnStyle)
-
-
-const countersComponent = component(({add}) => column([
-  row([
-    add.sample(btn(text('Add One')), domEvent('click'))
-  ]),
-  join(constant(counter, add))
-]))
+const $btn = $element('button')(O(
+  stylesheet.btn,
+  style({
+    textAlign: 'center', color: '#ffffff',
+    background: '#e65656', borderRadius: '4px', display: 'block'
+  })
+))
 
 
+let counterId = 0
 
-renderAt(document.body, stylesheet.mainCentered(countersComponent)).run({
-  event() {
-  },
-  error(e) {
+const addCounter = O(
+  event('click'),
+  map(() => counterId++)
+)
+
+const $counterCreator = component((add: ProxyStream<typeof counterId>, remove: ProxyStream<typeof counterId>) =>
+
+  $column(
+    $row(
+      $btn(splitBehavior(addCounter, add))(
+        $text('Add One')
+      )
+    ),
+    chain(cid => {
+      const disposeCounter = filter(id => cid === id, remove)
+
+      return until(disposeCounter, counter(remove, cid))
+    }, add)
+  )
+
+)
+
+
+
+renderAt(document.body, stylesheet.panningUI($counterCreator)).run({
+  event() { },
+  error(t, e) {
     throw e
   },
-  end() {
-  }
+  end() { }
 }, newDefaultScheduler())

@@ -5,33 +5,29 @@
 import resolve from 'rollup-plugin-node-resolve'
 import typescript from 'rollup-plugin-typescript2'
 import * as pkg from './package.json'
-import { rollup } from 'rollup'
-
-// import copy from 'rollup-plugin-copy-assets'
 
 
+const deps = Object.keys(pkg.dependencies)
+// .filter(k => k !== 'fufu')
 
-const globals = {
-  '@most/core': 'mostCore',
-  '@most/scheduler': 'mostScheduler',
-  '@most/disposable': 'mostDisposable',
-  '@most/prelude': 'mostPrelude'
-}
-
-const pkgOutput = {
-  name: pkg.name,
-  sourcemap: true,
-  globals
-}
 
 const compilerOptions = {
   input: `src/index.ts`,
-  output: [  // (amd, cjs, esm, iife, umd)
-    { ...pkgOutput, file: pkg.module,  format: 'esm' },
-    { ...pkgOutput, file: pkg.main,    format: 'cjs' },
-    { ...pkgOutput, file: pkg.browser, format: 'umd' }
+  output: [
+    {
+      file: pkg.main,
+      format: 'umd',
+      name: pkg.name,
+      sourcemap: true,
+      globals: deps
+    },
+    {
+      file: pkg.module,
+      format: 'esm',
+      sourcemap: true
+    }
   ],
-  external: Object.keys(global),
+  external: deps,
   plugins: [
     resolve(),
     typescript({ typescript: require('typescript'), check: false, useTsconfigDeclarationDir: true })

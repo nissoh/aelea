@@ -1,39 +1,21 @@
 
-import {NodeStream, ElementType, DomNode} from '../types'
-import {multicast, empty, map, chain} from '@most/core'
-import {splitBehavior, SplitBehavior} from '../behavior'
-import {compose} from '@most/prelude'
+import { NodeStream, NodeType } from '../types'
+import { split, Behavior } from '../behavior'
 
 
 
-export type compFn<A extends ElementType, B, C> = (componentFunction: {[k: string]: SplitBehavior<DomNode<A, B, C>, B>}) => NodeStream<A, B, C>
+export type compFn<A extends NodeType, B, C> = (
+  ...args: Behavior<any, any>[]
+) => NodeStream<A, B, C>
 
-const component = <A extends ElementType, B, C>(inputComp: compFn<A, B, C>): NodeStream<A, B, C> => {
+const component = <A extends NodeType, B, C>(inputComp: compFn<A, B, C>): NodeStream<A, B, C> => {
   return {
     run(sink, scheduler) {
-
-
-      const prox: Parameters<typeof inputComp>[0] = new Proxy({} as any, {
-        get(target, p: keyof A) {
-          target[p] = target[p] ?? splitBehavior(multicast)
-          // target[p] = target[p] ?? splitBehavior(compose(multicast as any, chain((x: any) => x.behavior)))
-          return target[p]
-        }
-      })
-
-
-
-
-      const ns = inputComp(prox)
-
+      // fill mocked aguments as a behavior
+      const args = Array(inputComp.length).fill(null).map(split)
+      const ns = inputComp(...args)
 
       return ns.run(sink, scheduler)
-
-
-
-      // return snapshot((aa, bb) => aa, ns, be).run(sink, scheduler)
-      // return map(([el, fn]) => [el, fn], splitb.sample(ns)).run(sink, scheduler)
-      // return merge(ns, eee).run(sink, scheduler)
     }
   }
 }
@@ -41,5 +23,5 @@ const component = <A extends ElementType, B, C>(inputComp: compFn<A, B, C>): Nod
 
 
 
-export {component}
+export { component }
 

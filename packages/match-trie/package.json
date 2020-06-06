@@ -8,6 +8,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "rollup": "./../../node_modules/.bin/rollup  -c rollup.config.js",
+    "rollup:watch": "./../../node_modules/.bin/rollup  -c -w rollup.config.js",
     "build": "npm run clean && npm run rollup",
     "lint": "./../../node_modules/.bin/tslint --fix 'src/**/*.ts'",
     "prepublish": "npm run build"
@@ -17,11 +18,12 @@
     "url": "https://github.com/nissoh/fufu"
   },
   "dependencies": {
-    "@most/core": "1.3.2",
-    "@most/disposable": "1.2.1",
-    "@most/prelude": "^1.7.2",
-    "@most/scheduler": "^1.2.1",
-    "@most/types": "^1.0.1"
+    "@most/core": "1.5.0",
+    "@most/disposable": "1.2.2",
+    "@most/prelude": "1.7.3",
+    "@most/scheduler": "1.2.3",
+    "@most/types": "1.0.2",
+    "fufu": "0.0.3-alpha.0"
   },
   "devDependencies": {
     "@typed/test": "^6.5.0"

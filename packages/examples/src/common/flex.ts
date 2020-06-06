@@ -1,6 +1,8 @@
 import * as stylesheet from '../style/stylesheet'
-import {pipe, customElement} from 'fufu'
+import { $custom } from 'fufu'
 
 
-export const row = pipe(customElement('row'), stylesheet.row)
-export const column = pipe(customElement('column'), stylesheet.column)
+export const $row = $custom('row')(stylesheet.row)
+export const $column = $custom('column')(stylesheet.column)
+
+

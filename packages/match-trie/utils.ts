@@ -10,14 +10,13 @@ import { curry2 } from '@most/prelude'
 export type Event<T> = { time: number, value: T }
 
 
-export const pipe = <A, B, C>(a: (a: A) => B, b: (b: B) => C) => (x: A) => b(a(x))
 const scheduler = newDefaultScheduler()
-export const run = <T>(s: Stream<T>) => runEffects(s, scheduler)
 
-export function collectEvents<T> (stream: Stream<T>) {
+export async function collectEvents<T> (stream: Stream<T>) {
   const into: Event<T>[] = []
-  const s = tap(x => into.push({ time: scheduler.now(), value: x }), stream)
-  return run(s).then(() => into)
+  const s = tap(x => into.push({ time: scheduler.currentTime(), value: x }), stream)
+  await runEffects(s, scheduler)
+  return into
 }
 
 

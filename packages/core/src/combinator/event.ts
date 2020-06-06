@@ -1,11 +1,31 @@
-import {Stream, Sink, Scheduler} from '@most/types'
-import {NodeStream, DomNode} from '../types'
-import {chain, map, merge} from '@most/core'
-import {curry2} from '@most/prelude'
-import {NodeType} from '../types'
+import { Stream, Sink, Scheduler } from '@most/types'
+import { NodeStream } from '../types'
+import { chain } from '@most/core'
+import { curry2 } from '@most/prelude'
+import { NodeType } from '../types'
+
+type EventNames = keyof HTMLElementEventMap & keyof WindowEventMap & keyof SVGElementEventMap
+
+type GuessByName<A extends EventNames> =
+  HTMLElementEventMap[A] extends Event ? HTMLElementEventMap[A]
+  : WindowEventMap[A] extends Event ? WindowEventMap[A]
+  : SVGElementEventMap[A] extends Event ? SVGElementEventMap[A]
+  : Event
+
+type ElementEventTypeMap<A extends EventNames, B> =
+  B extends Window ? WindowEventMap[A]
+  : B extends HTMLElement ? DocumentEventMap[A]
+  : B extends SVGAElement ? SVGElementEventMap[A]
+  : GuessByName<A>
 
 
-export function eventTarget<E extends Event, N extends EventTarget>(eventType: string, target: N, options?: boolean | AddEventListenerOptions): Stream<E> {
+export interface NodeEventTarget {
+  <A extends EventNames, B extends EventTarget>(eventType: A): (node: B, options?: boolean | AddEventListenerOptions) => Stream<ElementEventTypeMap<A, B>>
+  <A extends EventNames, B extends EventTarget>(eventType: A, node: B, options?: boolean | AddEventListenerOptions): Stream<ElementEventTypeMap<A, B>>
+}
+
+
+export const eventTarget: NodeEventTarget = curry2((eventType, target, options = undefined) => {
   return {
     run(sink: Sink<Event>, scheduler: Scheduler) {
       const cb = (e: Event) => sink.event(scheduler.currentTime(), e)
@@ -13,22 +33,20 @@ export function eventTarget<E extends Event, N extends EventTarget>(eventType: s
 
       target.addEventListener(eventType, cb, options)
 
-      return {dispose}
+      return { dispose }
     }
   }
+})
+
+export interface NodeEvent {
+  <A extends EventNames, B extends NodeType, C, D>(eventType: A): (node: NodeStream<B, C, D>) => Stream<ElementEventTypeMap<A, B>>
+  <A extends EventNames, B extends NodeType, C, D>(eventType: A, node: NodeStream<B, C, D>): Stream<ElementEventTypeMap<A, B>>
 }
 
-// options?: boolean | AddEventListenerOptions
-
-interface DomEvent {
-  <A extends NodeType, B, C, D extends Event>(eventType: string): (node: NodeStream<A, B, C>) => Stream<D>
-  <A extends NodeType, B, C, D extends Event>(eventType: string, node: NodeStream<A, B, C>): Stream<D>
-}
 
 
+export const event: NodeEvent = curry2((eventType, node) => {
+  return chain(ns => eventTarget(eventType, ns.node), node)
+})
 
 
-const domEvent: DomEvent = curry2((eventType, node) => chain(ns => eventTarget(eventType, ns.node), node))
-
-
-export {domEvent}

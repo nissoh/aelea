@@ -3,7 +3,7 @@ import {compose} from '@most/prelude'
 import {DomStream, NodeStream} from '../../../core/src/types'
 import {mergeArray, merge, map, switchLatest, chain} from '@most/core'
 import {Stream} from '@most/types'
-import {column, row} from './flex'
+import {$column, $row} from './flex'
 import {pipe} from '../utils'
 
 
@@ -30,7 +30,7 @@ function cellValue(x: any): string {
   return ''
 }
 
-export const tableCell = compose(branch(tableItemStyle(style({color: 'rgba(255, 255, 255, 0.26)', paddingBottom: '20px'}, node))), row)
+export const tableCell = compose(branch(tableItemStyle(style({color: 'rgba(255, 255, 255, 0.26)', paddingBottom: '20px'}, node))), $row)
 export const applyTxt = compose(tableCell, text)
 
 function tableItem<T>(obj: T, opts: TableOption<T>[]) {
@@ -85,7 +85,7 @@ function table<T>(dataStream: Stream<T[]>, inputOptions: TableInputs<T>) {
   return component(actions, ({fufu}) => {
 
     const columns = map(data => mergeArray(options.map(x =>
-      style({margin: '0 16px'}, column(
+      style({margin: '0 16px'}, $column(
         fufu.attach(applyTxt(x.headerLabel)),
         ...data.map(i => tableCell(x.template(i)))
       ))
@@ -93,7 +93,7 @@ function table<T>(dataStream: Stream<T[]>, inputOptions: TableInputs<T>) {
 
     return merge(
       chain(x => branch(style({color: 'white'}, node), text(x + '')), fufu),
-      style({padding: '20px'}, row(
+      style({padding: '20px'}, $row(
         switchLatest(columns)
       ))
     )

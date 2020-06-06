@@ -1,45 +1,119 @@
 
-import { switchLatest, now, constant } from '@most/core'
-import { xForver } from '../utils'
-import { nullSink, component, domEvent, style, branch, element, text } from 'fufu'
+import { map, mergeArray, tap, now, runEffects } from '@most/core'
+import { component, event, style, $element, $text, ProxyStream, eventTarget, renderAt, attr, splitBehavior, O, DomNode, Behavior, Sample } from 'fufu'
 import { newDefaultScheduler } from '@most/scheduler'
-import { resolveUrl, resolve, PathEvent } from 'match-trie'
-import { NodeStream } from '../../../core/src/types'
-import { Stream } from '@most/types'
+import { router, path } from 'match-trie'
+import { $row, $column } from '../common/flex'
 import * as stylesheet from '../style/stylesheet'
-import { row, column } from '../common/flex'
 
 
-const styledBtn = stylesheet.btn(element('anchor'))
-const btn = (str: string) => style({ margin: '6px' }, branch(styledBtn, text(str)))
-
-const initialPath = now(document.location.pathname.substr(1))
-
-const mainRoute = resolveUrl('main', initialPath)
-const p1 = resolve('p1', mainRoute)
-const p2 = resolve('p2', mainRoute)
-
-
-const switchRoute = (ps: Stream<PathEvent>, node: NodeStream) => switchLatest(constant(node, ps))
+const initialPath = map(location => location.pathname, now(document.location))
+const popStateEvent = map(() => document.location.pathname, eventTarget('popstate', window))
 
 
 
-const click = domEvent('click')
-const actions = {
-  p1Click: click,
-  p2Click: click
-}
-
-const main = component(actions, ({ p1Click, p2Click }) =>
-  switchRoute(mainRoute, stylesheet.mainCentered(column(
-    row(
-      p1Click.attach(btn('p1')),
-      p2Click.attach(btn('p2'))
-    ),
-    switchRoute(p1, row(text('p1'))),
-    switchRoute(p2, row(text('p2')))
-  )))
+const $anchor = $element('a')(
+  stylesheet.btn,
+  style({ margin: '6px' }),
 )
 
-branch(xForver(document.body), main).run(nullSink, newDefaultScheduler())
+const createLink = (linkB: Sample<DomNode, string>) => (href: string) =>
+  $anchor(
+    attr({ href }),
+    linkB(
+      event('click'),
+      map(clickEv => {
+        clickEv.preventDefault()
+
+        const pathName = clickEv.currentTarget instanceof HTMLAnchorElement ? clickEv.currentTarget.pathname : null
+
+        if (pathName) {
+          history.pushState(null, '', href)
+        }
+        return pathName
+      })
+    )
+  )
+
+
+const $main = component(([linkClick, routeChanges]: Behavior<DomNode, string>) => {
+
+
+  const linkChange = map((href) => href, routeChanges)
+
+  const routeChange = mergeArray([
+    initialPath,
+    popStateEvent,
+    linkChange
+  ])
+
+  const rootRoute = router(routeChange)
+
+  const p1 = rootRoute.create(/p1/)
+  const p2 = rootRoute.create('p2')
+
+
+  const p1Inner = p1.create('inner')
+
+  const $link = createLink(linkClick)
+
+  return (
+
+    path(rootRoute)(
+      $column(
+
+        $row(
+          $link('/')(
+            $text('Home')
+          ),
+          $link('/p1')(
+            $text('p1')
+          ),
+          $link('/p2')(
+            $text('p2')
+          ),
+          $link('/p1/inner')(
+            $text('inside p1')
+          )
+        ),
+
+
+        $row(style({ alignSelf: 'stretch' }))(
+          $element('hr')(stylesheet.flex)()
+        ),
+
+        path(p1)(
+          $column(
+            $text('p1'),
+            $link('/')(
+              $text('Back Home')
+            ),
+          )
+        ),
+        path(p2)(
+          $row(
+            $text('p2')
+          )
+        ),
+
+        path(p1Inner)(
+          $column(
+            $text('p1nner'),
+          )
+        )
+
+
+      )
+    )
+
+
+  )
+})
+
+runEffects(
+  renderAt(document.body, $main),
+  newDefaultScheduler()
+)
+
+
 

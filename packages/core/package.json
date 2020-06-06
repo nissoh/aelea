@@ -8,8 +8,9 @@
   "scripts": {
     "clean": "rm -rf dist",
     "rollup": "./../../node_modules/.bin/rollup -c rollup.config.js --",
+    "rollup:watch": "./../../node_modules/.bin/rollup -w -c rollup.config.js",
     "build": "npm run clean && npm run rollup",
-    "build:dev": "npm run build -- -w",
+    "build:dev": "npm run rollup:watch",
     "test": "npm run lint && npm run test:unit",
     "test:unit": "./../../node_modules/.bin/typed-test -r jsdom-global/register src/*.test.ts --browser chrome",
     "lint": "./../../node_modules/.bin/tslint --fix 'src/**/*.ts'",
@@ -25,7 +26,7 @@
     "@most/prelude": "1.7.3",
     "@most/scheduler": "1.2.3",
     "@most/types": "1.0.2",
-    "csstype": "2.6.9"
+    "csstype": "2.6.10"
   },
   "license": "MIT",
   "author": "Nissan Hanina <nissan@yo.ma>",
