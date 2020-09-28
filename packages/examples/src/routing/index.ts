@@ -1,19 +1,19 @@
 
-import { map, mergeArray, tap, now, runEffects } from '@most/core'
-import { component, event, style, $element, $text, ProxyStream, eventTarget, renderAt, attr, splitBehavior, O, DomNode, Behavior, Sample } from 'fufu'
+import { map, mergeArray, now } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
-import { router, path } from 'match-trie'
-import { $row, $column } from '../common/flex'
-import * as stylesheet from '../style/stylesheet'
+import { $element, $text, attr, Behavior, component, DomNode, event, eventTarget, runAt, Sample, style } from 'fufu'
+import { path, router } from 'match-trie'
+import { $column, $examplesRoot, $row } from '../common/common'
+import * as designSheet from '../common/style/stylesheet'
 
 
 const initialPath = map(location => location.pathname, now(document.location))
-const popStateEvent = map(() => document.location.pathname, eventTarget('popstate', window))
-
+const popStateEvent = eventTarget('popstate', window)
+const locationChange = map(() => document.location.pathname, popStateEvent)
 
 
 const $anchor = $element('a')(
-  stylesheet.btn,
+  designSheet.btn,
   style({ margin: '6px' }),
 )
 
@@ -36,14 +36,15 @@ const createLink = (linkB: Sample<DomNode, string>) => (href: string) =>
   )
 
 
-const $main = component(([linkClick, routeChanges]: Behavior<DomNode, string>) => {
-
+const $Main = component((
+  [sampleLinkClick, routeChanges]: Behavior<DomNode, string>
+) => {
 
   const linkChange = map((href) => href, routeChanges)
 
   const routeChange = mergeArray([
     initialPath,
-    popStateEvent,
+    locationChange,
     linkChange
   ])
 
@@ -55,9 +56,9 @@ const $main = component(([linkClick, routeChanges]: Behavior<DomNode, string>) =
 
   const p1Inner = p1.create('inner')
 
-  const $link = createLink(linkClick)
+  const $link = createLink(sampleLinkClick)
 
-  return (
+  return [
 
     path(rootRoute)(
       $column(
@@ -79,7 +80,7 @@ const $main = component(([linkClick, routeChanges]: Behavior<DomNode, string>) =
 
 
         $row(style({ alignSelf: 'stretch' }))(
-          $element('hr')(stylesheet.flex)()
+          $element('hr')(designSheet.flex)()
         ),
 
         path(p1)(
@@ -106,14 +107,17 @@ const $main = component(([linkClick, routeChanges]: Behavior<DomNode, string>) =
       )
     )
 
-
-  )
+  ]
 })
 
-runEffects(
-  renderAt(document.body, $main),
+
+runAt(
+  $examplesRoot(
+    $Main()
+  ),
   newDefaultScheduler()
 )
+
 
 
 

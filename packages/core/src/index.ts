@@ -1,9 +1,10 @@
-import { NodeStream } from './types'
-import { tap, map, chain, mergeArray } from '@most/core'
-import { applyStyle } from './combinator/style'
-import { Stream, Sink } from '@most/types'
-import { applyAttrCurry } from './combinator/attribute'
-import { create } from './source/node'
+import { DomNode, NodeContainerType, NodeStream, NodeType } from './types'
+import { map, chain, mergeArray } from '@most/core'
+import { Scheduler, Sink, Time } from '@most/types'
+import { nullSink, Pipe } from 'src/utils'
+import { disposeNone } from '@most/disposable'
+import { StyleRule } from 'src/combinator/style'
+import { applyAttrFn } from 'src/combinator/attribute'
 
 
 export * from './combinator/style'
@@ -16,40 +17,117 @@ export * from './combinator/animate'
 export * from './source/node'
 export * from './types'
 
-// tslint:disable-next-line: no-empty
-const noop = () => { }
 
-const justLogSink = <Sink<never>>{
-  event: noop,
-  error(_, e) {
-    throw (e)
-  },
-  end: noop
+
+
+function appendToSlot(parent: DomNode<NodeContainerType>, child: DomNode<NodeType>) {
+  if (parent.element.children.length < 1) {
+    parent.element.appendChild(child.element)
+  } else {
+    parent.element.insertBefore(child.element, parent.element.children[child.slot])
+  }
 }
 
-export function nodeEffect(ns: NodeStream<HTMLElement, {}, any>): Stream<any> {
-  return chain(ps => {
-    return mergeArray([
-      tap(style => applyStyle(style, ps.node), ps.style),
-      tap(attrs => applyAttrCurry(attrs, ps.node), ps.attributes),
-      nodeEffect(
-        tap(cs => {
-          if (ps.node.children.length < 1) {
-            ps.node.appendChild(cs.node)
-          } else {
-            ps.node.insertBefore(cs.node, ps.node.children[cs.slot])
-          }
-        }, ps.children)
-      )
+// recusivley build children tree of sinks
+export function nodeEffects(parent: DomNode<NodeContainerType>, stylesheet: CSSStyleSheet) {
+
+  return {
+    run(sink: Sink<DomNode<HTMLElement>>, scheduler: Scheduler) {
+
+      const nodeSink = new NodeRenderSink(parent, stylesheet, scheduler, sink)
+      nodeSink.disposable = mergeArray(parent.children).run(nodeSink, scheduler)
+
+      return nodeSink
+    }
+  }
+}
+
+
+
+class NodeRenderSink<T extends NodeContainerType> extends Pipe<any, any> {
+
+  disposable = disposeNone()
+  childrenSinks: NodeRenderSink<T>[] = []
+
+  effectsDisposable = disposeNone()
+
+  constructor(
+    private parent: DomNode<NodeContainerType>,
+    private stylesheet: CSSStyleSheet,
+    private scheduler: Scheduler,
+    sink: Sink<any>
+  ) {
+    super(sink)
+  }
+
+  event(time: Time, node: DomNode<T>) {
+
+    appendToSlot(this.parent, node)
+
+    this.childrenSinks = node.children.map($child => {
+      const csink = new NodeRenderSink(node, this.stylesheet, this.scheduler, this.sink)
+      const disp = $child.run(csink, this.scheduler)
+
+      csink.disposable = disp
+
+      return csink
+    })
+
+    this.effectsDisposable = mergeArray([
+      ...node.style,
+      ...node.attributes.map(s =>
+        map(attrs => applyAttrFn(attrs, node.element), s)
+      ),
     ])
-  }, ns)
+      .run(nullSink, this.scheduler)
+
+    this.sink.event(time, node)
+  }
+
+  end(t: Time) {
+    this.childrenSinks.forEach(s => {
+      s.end(t)
+    })
+    this.sink.end(t)
+
+    this.dispose()
+  }
+
+  error(t: Time, err: any) {
+    this.sink.error(t, err)
+  }
+
+  dispose() {
+    this.effectsDisposable.dispose()
+    this.disposable.dispose()
+  }
+
 }
 
 
+// missing adoptedStyleSheets type
+declare global {
+  interface Document {
+    adoptedStyleSheets: CSSStyleSheet[];
+  }
+}
 
-export function renderAt(node: Node, children: NodeStream<HTMLElement, {}, any>): Stream<any> {
-  const rootNode = create(map(() => node))('')(
-    children
-  )
-  return nodeEffect(rootNode as any)
+
+export function runAt(rootNode: NodeStream<NodeContainerType>, scheduler: Scheduler) {
+  document.adoptedStyleSheets = [...document.adoptedStyleSheets, StyleRule.stylesheet]
+
+  const effectsSink: Sink<any> = {
+    event(t, x) {
+
+    },
+    error(t, err) {
+      // tslint:disable-next-line: no-console
+      console.error(err)
+    },
+    end(t) {
+
+    }
+  }
+
+  return chain(root => nodeEffects(root, StyleRule.stylesheet), rootNode).run(effectsSink, scheduler)
 }

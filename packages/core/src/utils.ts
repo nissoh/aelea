@@ -1,21 +1,32 @@
 
-import {Sink, Disposable, Time} from '@most/types'
+import { Sink, Disposable, Time, Stream } from '@most/types'
 import { compose } from '@most/prelude'
 import { Op } from './types'
+import { continueWith, empty } from '@most/core'
+import { disposeWith } from '@most/disposable'
 
 
 type Fn<T, R> = (a: T) => R
 
+const EMPTY = empty()
 
 export function MaybeOp<A, B, C>(a: Op<A, B>, b?: Op<B, C>) {
   return b ? compose(b, a) : a
 }
 
+export function isStream<T>(s: T) {
+  return 'run' in s
+}
+
+export function isEmpty(s: Stream<any>): boolean {
+  return s === EMPTY
+}
+
 export abstract class Pipe<A, B> implements Sink<A> {
 
-  constructor(protected readonly sink: Sink<B>) {}
+  constructor(protected readonly sink: Sink<B>) { }
 
-  abstract event (t: Time, x: A): void
+  abstract event(t: Time, x: A): void
 
   end(t: Time): void {
     return this.sink.end(t)
@@ -26,19 +37,55 @@ export abstract class Pipe<A, B> implements Sink<A> {
   }
 }
 
+export class SettableDisposable implements Disposable {
+  private disposable?: Disposable;
+  private disposed: boolean;
+
+  constructor() {
+    this.disposable = undefined
+    this.disposed = false
+  }
+
+  setDisposable(disposable: Disposable): void {
+    if (this.disposable !== undefined) {
+      throw new Error('setDisposable called more than once')
+    }
+
+    this.disposable = disposable
+
+    if (this.disposed) {
+      disposable.dispose()
+    }
+  }
+
+  dispose(): void {
+    if (this.disposed) {
+      return
+    }
+
+    this.disposed = true
+
+    if (this.disposable !== undefined) {
+      this.disposable.dispose()
+    }
+  }
+}
+
 
 export const nullSink = <Sink<any>>{
   // tslint:disable-next-line:no-empty
-  event(t, x) {},
+  event(t, x) { },
   // tslint:disable-next-line:no-empty
-  end(t) {},
+  end(t) { },
   // tslint:disable-next-line:no-empty
-  error(t, x) {}
+  error(t, x) {
+    console.error(x)
+  }
 }
 
 export const nullDisposable = <Disposable>{
   // tslint:disable-next-line:no-empty
-  dispose() {}
+  dispose() { }
 }
 const pipeFn = <A, B, C>(f: Fn<A, B>, g: Fn<B, C>) => (x: A): C => g(f(x))
 
@@ -53,9 +100,10 @@ export function O<T, A, B, C, D, E, F, G>(fn1: Fn<T, A>, fn2: Fn<A, B>, fn3: Fn<
 export function O<T, A, B, C, D, E, F, G, H>(fn1: Fn<T, A>, fn2: Fn<A, B>, fn3: Fn<B, C>, fn4: Fn<C, D>, fn5: Fn<D, E>, fn6: Fn<E, F>, fn7: Fn<F, G>, fn8: Fn<G, H>): Fn<T, H>
 export function O<T, A, B, C, D, E, F, G, H, I>(fn1: Fn<T, A>, fn2: Fn<A, B>, fn3: Fn<B, C>, fn4: Fn<C, D>, fn5: Fn<D, E>, fn6: Fn<E, F>, fn7: Fn<F, G>, fn8: Fn<G, H>, ...fn9: Fn<any, I>[]): Fn<T, I>
 /* tslint:enable:max-line-length */
-export function O<A, B, C>(...fns: Fn<A, B>[]): (b: B) => C  {
-  return fns.reduce(pipeFn as any) as any
+export function O<A, B, C>(...fns: Fn<A, B>[]): (b: B) => C {
+  return fns?.length ? fns.reduce(pipeFn as any) as any : (x) => x
 }
+
 
 
 export function isArrayOfOps(arr: any[]) {
@@ -67,6 +115,4 @@ export function isArrayOfOps(arr: any[]) {
 
   return false
 }
-
-
 

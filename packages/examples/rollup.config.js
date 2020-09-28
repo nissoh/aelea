@@ -1,5 +1,5 @@
-const resolve = require('rollup-plugin-node-resolve')
-const commonjs = require('rollup-plugin-commonjs')
+import resolve from '@rollup/plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
 const browsersync = require('rollup-plugin-browsersync')
 
 import typescript from 'rollup-plugin-typescript2'

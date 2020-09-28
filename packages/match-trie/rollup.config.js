@@ -1,8 +1,5 @@
-// const resolve = require('rollup-plugin-node-resolve')
-// const commonjs = require('rollup-plugin-commonjs')
-// const sourceMaps = require('rollup-plugin-sourcemaps')
 
-import resolve from 'rollup-plugin-node-resolve'
+import resolve from '@rollup/plugin-node-resolve'
 import typescript from 'rollup-plugin-typescript2'
 import * as pkg from './package.json'
 
@@ -30,7 +27,11 @@ const compilerOptions = {
   external: deps,
   plugins: [
     resolve(),
-    typescript({ typescript: require('typescript'), check: false, useTsconfigDeclarationDir: true })
+    typescript({
+      typescript: require('typescript'),
+      check: true,
+      useTsconfigDeclarationDir: true
+    })
   ]
 }
 

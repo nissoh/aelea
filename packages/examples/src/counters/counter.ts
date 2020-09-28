@@ -1,7 +1,8 @@
 import { constant, map, merge, scan } from '@most/core'
-import { style, $text, component, event, O, $custom, splitBehavior, ProxyStream } from 'fufu'
-import * as stylesheet from '../style/stylesheet'
-import { $row } from '../common/flex'
+import { style, $text, component, O, Behavior } from 'fufu'
+import * as designSheet from '../common/style/stylesheet'
+import { $column, $row, $TrashBtn } from '../common/common'
+import { $Button } from '../common/form/button'
 
 
 
@@ -10,54 +11,42 @@ const sum = O(
   map(String)
 )
 
-const plus1Click = O(
-  event('click'),
-  constant(-1)
-)
-const minus1Click = O(
-  event('click'),
-  constant(1)
-)
 
-
-const $counter = $row(
+const $counterContainer = $column(
+  designSheet.spacing,
   style({
-    backgroundColor: '#ffc0cb4f',
-    padding: '10px',
-    margin: '10px',
-    borderRadius: '5px'
+    borderRadius: '5px',
+    alignItems: 'center'
   })
 )
 
-const $btn = $custom('button')(
-  stylesheet.btn,
-  style({ padding: '2px 6px', lineHeight: 0 }),
-)
 
-const $xBtn = $custom('button')(
-  stylesheet.btn,
-  style({ padding: '6px' }),
-)
+export default component((
+  [sampleIncrement, increment]: Behavior<PointerEvent, 1>,
+  [sampleDecrement, decrement]: Behavior<PointerEvent, -1>,
+  [sampleRemove, remove]: Behavior<PointerEvent, PointerEvent>,
+) => [
 
-export default (remove: ProxyStream<number>, counterId: number) => component((increment: ProxyStream<1>, decrement: ProxyStream<-1>) =>
+    $row(style({ alignItems: 'center', justifyContent: 'center' }), designSheet.spacing)(
+      $TrashBtn({
+        click: sampleRemove()
+      }),
+      $counterContainer(
+        $Button({ $content: $text('+') })({
+          click: sampleIncrement(constant(1))
+        }),
+        $Button({ $content: $text('-') })({
+          click: sampleDecrement(constant(-1))
+        }),
+      ),
+      $text(style({ fontSize: '64px' }))(
+        sum(merge(increment, decrement))
+      ),
 
-  $row(stylesheet.panningContainer)(
-    $counter(
-      $row(
-        $btn(splitBehavior(plus1Click, decrement))(
-          $text('-')
-        ),
-        $text(
-          sum(merge(increment, decrement))
-        ),
-        $btn(splitBehavior(minus1Click, decrement))(
-          $text('+')
-        ),
-      )
     ),
-    $xBtn(splitBehavior(O(event('click'), constant(counterId)), remove))(
-      $text('x')
-    )
-  )
 
-)
+    {
+      remove
+    }
+
+  ])

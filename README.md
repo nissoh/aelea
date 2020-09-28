@@ -13,6 +13,8 @@ Current mission is to discover the most conviniet/generic way to create UI abstr
 - Model your application through reactive streams without chaotic state management tools, i.e. flux, redux etc
 - Possibly has the best possible performance since diffing is obselete and mutating states relay on stream computation
 
+## why `Most`
+
 
 ### Simple Counter
 ```typescript
@@ -39,11 +41,11 @@ branch(xForver(document.body))(
 import { constant, map, merge, scan, switchLatest, mergeArray } from '@most/core'
 import { pipe } from '../utils'
 import { style, branch, text, node, component, domEvent } from 'fufu'
-import * as stylesheet from '../stylesheet'
+import * as designSheet from '../stylesheet'
 
 
-const styledBtn = stylesheet.btn(node)
-const centeredContainer = pipe(stylesheet.centerStyle, stylesheet.row)(node)
+const styledBtn = designSheet.btn(node)
+const centeredContainer = pipe(designSheet.centerStyle, designSheet.row)(node)
 
 const countBtn = (str: string) => style({ margin: '6px' }, branch(styledBtn, text(str)))
 const add = (x: number, y: number) => (x + y)

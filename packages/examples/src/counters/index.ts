@@ -1,52 +1,59 @@
 
-import { component, $text, style, renderAt, event, $element, splitBehavior, ProxyStream, O } from 'fufu'
-import { chain, until, filter, map } from '@most/core'
+import { chain, until, filter, map, constant } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
-import { $column, $row } from '../common/flex'
+import { component, $text, Behavior, style, runAt } from 'fufu'
 
-import * as stylesheet from '../style/stylesheet'
-import counter from './counter'
+import { $column, $examplesRoot, $seperator } from '../common/common'
+import { $Button } from '../common/form/button'
+import * as designSheet from '../common/style/stylesheet'
 
-
-const $btn = $element('button')(O(
-  stylesheet.btn,
-  style({
-    textAlign: 'center', color: '#ffffff',
-    background: '#e65656', borderRadius: '4px', display: 'block'
-  })
-))
+import $Counter from './counter'
 
 
 let counterId = 0
 
-const addCounter = O(
-  event('click'),
-  map(() => counterId++)
+
+const $AddBtn = $Button({
+  $content: $text('Add One')
+})
+
+const $CounterCreator = component((
+  [sampleAdd, add]: Behavior<any, typeof counterId>,
+  [sampleRemove, remove]: Behavior<any, typeof counterId>,
+) => [
+    $column(
+      designSheet.spacing,
+      style({ width: '250px', margin: '0 auto' })
+    )(
+      $AddBtn({
+        click: sampleAdd(
+          map(() => counterId++)
+        )
+      }),
+      chain(cid => {
+        const disposeCounter = until(
+          filter(id => cid === id, remove)
+        )
+
+        return disposeCounter(
+          $column(designSheet.spacing)(
+            $seperator,
+            $Counter({
+              remove: sampleRemove(constant(cid))
+            })
+          )
+        )
+      }, add)
+    )
+  ])
+
+
+
+
+runAt(
+  $examplesRoot(
+    $CounterCreator()
+  ),
+  newDefaultScheduler()
 )
 
-const $counterCreator = component((add: ProxyStream<typeof counterId>, remove: ProxyStream<typeof counterId>) =>
-
-  $column(
-    $row(
-      $btn(splitBehavior(addCounter, add))(
-        $text('Add One')
-      )
-    ),
-    chain(cid => {
-      const disposeCounter = filter(id => cid === id, remove)
-
-      return until(disposeCounter, counter(remove, cid))
-    }, add)
-  )
-
-)
-
-
-
-renderAt(document.body, stylesheet.panningUI($counterCreator)).run({
-  event() { },
-  error(t, e) {
-    throw e
-  },
-  end() { }
-}, newDefaultScheduler())

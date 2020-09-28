@@ -1,12 +1,9 @@
 
-import { component, $node, style, $text, event, O, StyleCSS, eventTarget, create, $svg, motion, attr, nodeEffect, throttleRaf, $element, Behavior, DomNode, Sample } from 'fufu'
-import * as stylesheet from '../style/stylesheet'
-import { $column, $row } from '../common/flex'
-import { map, until, merge, switchLatest, chain, empty, runEffects, snapshot, filter, constant, now, never, startWith } from '@most/core';
-import { Stream } from '@most/types';
-import { remove as removeFromArray, findIndex } from '@most/prelude';
+import { chain, empty, map, merge, switchLatest, until } from '@most/core';
 import { newDefaultScheduler } from '@most/scheduler';
-import { $field } from '../common/form';
+import { Stream } from '@most/types';
+import { $node, $svg, attr, Behavior, component, DomNode, event, eventTarget, motion, O, runAt, style, StyleCSS, throttleRaf } from 'fufu';
+import { $column, $examplesRoot } from '../common/common';
 
 
 
@@ -33,11 +30,6 @@ const $content = $column(
 )
 
 
-const $title = $node(
-  style({
-    fontSize: '30px'
-  })
-)
 
 
 function elementTransformArgs(el: HTMLElement) {
@@ -92,24 +84,12 @@ const moveStart = O(
 
     const stop = eventTarget('pointerup', window)
 
-    const decelerate = chain(ev => {
-      const vlc = mouseVelocity(startEv, ev)
-
-      const [currentElX = 0, currentElY = 0] = elementTransformArgs(target);
-      const tx = (ev.pageX - startEv.pageX) * vlc
-      const ty = (ev.pageY - startEv.pageY) * vlc
-
-      return map(freq => {
-        return { x: currentElX + (tx * freq), y: currentElY + (ty * freq) }
-      }, motion())
-    }, stop)
+    const decelerate = decalarateObjectPosition(startEv, target, stop)
 
     const move = merge(
       until(stop, pointingMove),
       decelerate
     )
-
-
 
     return map(state => {
       const { x, y } = state
@@ -121,7 +101,7 @@ const moveStart = O(
   switchLatest
 )
 
-const svgClick = O(
+const svgInteraction = O(
   event('pointerdown'),
   map(downEv => {
 
@@ -173,163 +153,52 @@ const svgClick = O(
 
 
 
-const $world = component(([clickBehavior, linePosition]: Behavior<DomNode, any>) =>
-
-  $svg('svg')(clickBehavior(svgClick))(
-    $svg('circle')(
-      attr({ cx: 50, cy: 60, r: 50 }),
-      attr(linePosition)
-    )()
-  )
-
+const $World = component(([clickBehavior, linePosition]: Behavior<DomNode, any>) =>
+  [
+    $svg('svg')(clickBehavior(svgInteraction))(
+      $svg('circle')(
+        attr({ cx: 50, cy: 60, r: 50 }),
+        attr(linePosition)
+      )()
+    )
+  ]
 )
 
-const $btn = $element('button')
 
-
-
-type Todo = {
-  text: string
-  id: number
-  completed: boolean
-}
-
-let iid = 0
-
-
-const $newTodoField = (
-  [sampleAdd, added]: Behavior<DomNode, Stream<Todo>>,
-  [sampleRemove, removed]: Behavior<DomNode, Todo>
-) =>
-  component(([inputBehavior, input]: Behavior<DomNode, Event>) => {
-
-    const submitBehavior = sampleAdd(
-      O(
-        event('click'),
-        snapshot((inputEvent, buttonClick) => {
-          const target = inputEvent.target;
-
-          if (target instanceof HTMLInputElement) {
-            const text = target.value
-            target.value = ''
-            return text || '';
-          }
-
-          return ''
-        }, input),
-        map(text => {
-
-          const id = ++iid
-          const always: Stream<Todo> = startWith({
-            text,
-            id
-          }, never())
-
-          return until(filter((todo => todo.id === id), removed), always)
-        }),
-      )
-    )
-
-
-    return (
-      $row(
-        $field({ label: 'Name' }, inputBehavior),
-        $btn(submitBehavior)(
-          $text('add')
-        )
-      )
-    )
-  })
-
-
-const click = O(
-  event('click')
-)
-
-const $todoItem = (todo: Stream<Todo>, sampleRemove: Sample<DomNode, Todo>) => {
-  // const removeBehavior = sampleRemove(O(click, constant(todo)))
-
-  return (
-    $row(style({ padding: '8px' }))(
-      $text(map(t => t.text, todo)),
-      // $btn(removeBehavior)(
-      //   $text('X')
-      // )
-    )
-  )
-}
-
-const $todoList = component((
-  addB: Behavior<DomNode, Stream<Todo>>,
-  removeB: Behavior<DomNode, Todo>
+const $PanningUI = component((
+  [styleBehavior, panningStyle]: Behavior<DomNode, any>
 ) => {
 
-  const todosFromMemoy = now(<Todo[]>[]);
-
-  // const newTodoS = snapshot((item, list) => removeFromArray(findIndex(item, list), list), sampleTodo, todosFromMemoy)
-  // const removeS = snapshot((item, list) => removeFromArray(findIndex(item, list), list), sampleRemove, todosFromMemoy)
-
-
-  // const list$ = merge(newTodoS, removeS)
-
-  return (
-
-    $column(
-      $newTodoField(addB, removeB),
-      chain(todo => $todoItem(todo, removeB[0]), addB[1])
+  return [
+    $container(
+      $content(styleBehavior(moveStart), style(panningStyle))(
+        $World()
+      )
     )
-
-  )
+  ]
 })
 
 
-const headline = `
-Reactive UI Toolkit
-For the eventive World
-`.trim()
 
-const $introComponent = component(() =>
-  $row(
-    $title(style({ width: '500px', height: '500px' }))(
-      $text(style({ whiteSpace: 'pre-line' }))(headline)
-    ),
-    $column(style({ width: '500px' }))(
-      $todoList
-      // $world
-    )
-  )
-)
-
-const $panningUI = component((
-  [styleBehavior, panningStyle]: Behavior<DomNode, StyleCSS<HTMLElement>>
-) =>
-  $container(
-    // $introComponent
-    $content(styleBehavior(moveStart), style(panningStyle))(
-      $introComponent
-    )
-  )
-)
-
-
-const $body = create(map(x => x))(document.body)(
-  style({
-    backgroundColor: '#5c6a76',
-    margin: '0',
-    height: '100vh',
-    display: 'flex',
-    color: '#d7dae0',
-  }),
-  stylesheet.main
-)
-
-const $main = $body(
-  $panningUI
-)
-
-runEffects(
-  nodeEffect($main),
+runAt(
+  $examplesRoot(
+    $PanningUI()
+  ),
   newDefaultScheduler()
 )
 
+
+function decalarateObjectPosition(startEv: PointerEvent, target: HTMLElement, stop: Stream<PointerEvent>) {
+  return chain(ev => {
+    const vlc = mouseVelocity(startEv, ev);
+
+    const [currentElX = 0, currentElY = 0] = elementTransformArgs(target);
+    const tx = (ev.pageX - startEv.pageX) * vlc;
+    const ty = (ev.pageY - startEv.pageY) * vlc;
+
+    return map(freq => {
+      return { x: currentElX + (tx * freq), y: currentElY + (ty * freq) };
+    }, motion());
+  }, stop);
+}
 
