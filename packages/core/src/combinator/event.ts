@@ -19,12 +19,12 @@ type ElementEventTypeMap<A extends ElementEventNameList, B> =
 
 
 export interface NodeEventTarget {
-  <A extends ElementEventNameList, B extends EventTarget>(eventType: A): (node: B, options?: boolean | AddEventListenerOptions) => Stream<ElementEventTypeMap<A, B>>
   <A extends ElementEventNameList, B extends EventTarget>(eventType: A, node: B, options?: boolean | AddEventListenerOptions): Stream<ElementEventTypeMap<A, B>>
+  <A extends ElementEventNameList, B extends EventTarget>(eventType: A): (node: B, options?: boolean | AddEventListenerOptions) => Stream<ElementEventTypeMap<A, B>>
 }
 
 
-export const eventTarget: NodeEventTarget = curry2((eventType, target, options = undefined) => {
+export const eventElementTarget: NodeEventTarget = curry2((eventType, target, options = undefined) => {
   return {
     run(sink: Sink<Event>, scheduler: Scheduler) {
       const cb = (e: Event) => sink.event(scheduler.currentTime(), e)
@@ -38,14 +38,14 @@ export const eventTarget: NodeEventTarget = curry2((eventType, target, options =
 })
 
 export interface NodeEvent {
-  <A extends ElementEventNameList, B extends NodeType, C, D>(eventType: A): (node: NodeStream<B, C, D>) => Stream<ElementEventTypeMap<A, B>>
   <A extends ElementEventNameList, B extends NodeType, C, D>(eventType: A, node: NodeStream<B, C, D>): Stream<ElementEventTypeMap<A, B>>
+  <A extends ElementEventNameList, B extends NodeType, C, D>(eventType: A): (node: NodeStream<B, C, D>) => Stream<ElementEventTypeMap<A, B>>
 }
 
 
 export const event: NodeEvent = curry2((eventType, node) => {
   return join(
-    map(ns => eventTarget(eventType, ns.element), node)
+    map(ns => eventElementTarget(eventType, ns.element), node)
   )
 })
 

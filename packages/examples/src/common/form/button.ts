@@ -30,6 +30,7 @@ export const $Button = (props: Button) => component((
     )(
       props.$content
     ),
+
     {
       click
     }

@@ -6,6 +6,7 @@ import { $Button } from "../common/form/button"
 import { $Checkbox } from "../common/form/checkbox"
 import { $form } from "../common/form/form.common"
 import { $Input } from "../common/form/input"
+import { Stream } from "@most/types"
 
 let iid = 0
 
@@ -28,7 +29,7 @@ const rowStyle = O(
   style({ alignItems: 'center' })
 )
 
-const $TodoItem = (todo: Todo, completed: ReplayLatest<boolean>) => component((
+const $TodoItem = (todo: Todo, completed: Stream<boolean>) => component((
   [sampleRemove, remove]: Behavior<MouseEvent, MouseEvent>,
   [sampleComplete, complete]: Behavior<boolean, boolean>,
   [sampleText, text]: Behavior<string, string>
@@ -85,7 +86,7 @@ export const $NewTodoField = component((
         $Button({
           $content: $text('add'),
           disabled: map(x => !Boolean(x), merge(input, resetOnAdd))
-        })()
+        })({})
       )
     ),
     {

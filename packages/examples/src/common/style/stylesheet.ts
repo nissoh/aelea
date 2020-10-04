@@ -63,7 +63,7 @@ export const text = style({
 export const main = O(
   text,
   style({
-    minHeight: '100%',
+    minHeight: '100vh',
     color: theme.text,
     backgroundColor: theme.baseDark,
     margin: '0',
@@ -99,6 +99,7 @@ export const input = O(
 export const btn = O(
   control,
   style({
+    cursor: 'pointer',
     backgroundColor: 'transparent',
     border: `2px solid ${theme.system}`,
     color: theme.text,

@@ -6,8 +6,8 @@ import { isStream } from 'src/utils'
 
 
 interface Attr {
-  <A, B, C extends NodeContainerType, D>(attrs: Stream<IAttrProperties<A> | null> | IAttrProperties<A>): (ns: ElementStream<C, B, D>) => ElementStream<C, A & B, C>
   <A, B, C extends NodeContainerType, D>(attrs: Stream<IAttrProperties<A> | null> | IAttrProperties<A>, ns: ElementStream<C, B, D>): ElementStream<C, A & B, C>
+  <A, B, C extends NodeContainerType, D>(attrs: Stream<IAttrProperties<A> | null> | IAttrProperties<A>): (ns: ElementStream<C, B, D>) => ElementStream<C, A & B, C>
 }
 
 
@@ -31,7 +31,7 @@ class AttributeSource<A, B, C extends NodeContainerType, D> implements ElementSt
 
   run(sink: Sink<DomNode<C, D, A & B>>, scheduler: Scheduler): Disposable {
 
-    const attrsStream = 'run' in this.attrs ? this.attrs : now(this.attrs)
+    const attrsStream = isStream(this.attrs) ? this.attrs : now(this.attrs)
 
     return map(ns =>
       ({ ...ns, attributes: [...ns.attributes, attrsStream] }),
@@ -43,9 +43,13 @@ class AttributeSource<A, B, C extends NodeContainerType, D> implements ElementSt
 
 export const attr: Attr = curry2((attrsInput, source) => {
 
-  if (source instanceof AttributeSource && !isStream(attrsInput)) {
+  if (isStream(attrsInput)) {
+    return new AttributeSource(attrsInput, source)
+  }
+
+  if (source instanceof AttributeSource) {
     return new AttributeSource({ ...source.attrs, ...attrsInput }, source.source)
   }
 
-  return new AttributeSource(attrsInput as IAttrProperties<unknown>, source)
+  return new AttributeSource(attrsInput, source)
 })

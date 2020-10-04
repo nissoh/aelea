@@ -1,110 +1,53 @@
 
-import { Scheduler, Sink, Time, Stream, Disposable } from '@most/types'
+import { Scheduler, Sink, Stream, Disposable } from '@most/types'
 import { currentTime, } from '@most/scheduler'
-import { skipAfter, scan, map, take, throttle } from '@most/core'
+import { skipAfter, scan, map, continueWith } from '@most/core'
 import { O } from 'src/utils'
+import { disposeWith } from '@most/disposable'
+import { Op } from 'src/types'
+
+// copied & modified from https://github.com/mostjs/x-animation-frame/tree/master
+export type RafHandlerId = number
+export type RafHandler = (dts: RafHandlerId) => void
 
 
-export type RafEvent = Readonly<[Time, Time]>
-class RquestFrameTask implements Disposable {
+export type AnimationFrameRequestTime = number
+export type AnimationFrameResponseTime = number
 
-  private requestTime = -1;
-  private requestId = -1;
+export interface AnimationFrame {
+  requestTime: AnimationFrameRequestTime,
+  responseTime: AnimationFrameResponseTime
+}
 
+export type AnimationFrames = {
+  requestAnimationFrame: (f: RafHandler) => AnimationFrameRequestTime,
+  cancelAnimationFrame: (f: AnimationFrameRequestTime) => void
+}
+
+class AnimationFrameSource {
   constructor(
-    private readonly sink: Sink<RafEvent>,
-    private readonly scheduler: Scheduler
+    private afp: AnimationFrames
   ) { }
 
-  run(): Disposable {
-    this.requestTime = currentTime(this.scheduler)
-    this.requestId = requestAnimationFrame(this.eventBound)
-
-    return this;
-  }
-
-  dispose(): void {
-    cancelAnimationFrame(this.requestId)
-  }
-
-  private eventBound = (): void => {
-    const requestTime = this.requestTime
-    this.run()
-    const now = this.requestTime
-
-    this.sink.event(now, [requestTime, now])
-  }
-
-}
-
-
-class ThrottleSink<T> implements Sink<T> {
-
-  private requestId = -1;
-  private latestValue!: T
-
-  constructor(private sink: Sink<T>, private scheduler: Scheduler) {
-
-  }
-
-  event(_time: number, value: T) {
-    this.latestValue = value
-
-    if (this.requestId > -1) {
-      this.dispose(this.requestId)
-    }
-
-    this.requestId = requestAnimationFrame(this.eventBound)
-  }
-
-  end(time: number) {
-    if (this.requestId > -1) {
-      this.dispose(this.requestId)
-    }
-
-    this.sink.end(time)
-  }
-
-  error(time: number, err: Error) {
-    this.error(time, err)
-  }
-
-  dispose(id: number) {
-    cancelAnimationFrame(id)
-  }
-
-
-  private eventBound = (): void => {
-    const now = currentTime(this.scheduler)
-    this.sink.event(now, this.latestValue)
-
-    this.requestId = -1
-  }
-
-}
-
-class ThrottleRaf<T> {
-  static maxFPS = (1000 / 60) / 1000
-
-  constructor(private readonly source: Stream<T>) { }
-
-  run(sink: Sink<any>, scheduler: Scheduler): Disposable {
-    return throttle(ThrottleRaf.maxFPS, this.source).run(new ThrottleSink(sink, scheduler), scheduler)
+  run(sink: Sink<AnimationFrame>, scheduler: Scheduler): Disposable {
+    const requestTime = currentTime(scheduler)
+    const propagate: RafHandler = () => eventThenEnd(requestTime, currentTime(scheduler), sink)
+    const request = this.afp.requestAnimationFrame(propagate)
+    return disposeWith(fid => this.afp.cancelAnimationFrame(fid), request)
   }
 }
 
-// - throttle source to 60 fps
-// - propogate using raf(request animation frame)
-// - discard frames that were not propogated by raf
-export const throttleRaf = <T>(source: Stream<T>) => new ThrottleRaf(source)
-
-// recursive reuqest for frame(AKA stepper(i think))
-export const raf: Stream<RafEvent> = {
-  run(sink: Sink<any>, scheduler: Scheduler): Disposable {
-    const disposable = new RquestFrameTask(sink, scheduler).run()
-    return disposable;
-  }
+const eventThenEnd = (requestTime: AnimationFrameRequestTime, responseTime: AnimationFrameResponseTime, sink: Sink<AnimationFrame>) => {
+  sink.event(requestTime, { requestTime, responseTime })
+  sink.end(requestTime)
 }
+
+export const nextAnimationFrame = (afp: AnimationFrames): Stream<AnimationFrame> =>
+  new AnimationFrameSource(afp)
+
+export const animationFrames = (afp: AnimationFrames): Stream<AnimationFrame> =>
+  continueWith(() => animationFrames(afp), nextAnimationFrame(afp))
+
 
 /*
 // Applying motion using "spring physics"
@@ -123,10 +66,10 @@ export const motion = (
 
   const motionState = Object.freeze({ position: 0, velocity: 0 })
 
-  const motionOp = O(
-    scan((state, [requestTime, frameTime]: RafEvent) => {
+  const motionOp: Op<AnimationFrame, number> = O(
+    scan((state, { requestTime, responseTime }: AnimationFrame) => {
 
-      const frameRate = (frameTime - requestTime) / 1000;
+      const frameRate = (responseTime - requestTime) / 1000;
 
       // this the spring magic in the loop - for example the x property of an object
       // spring & damper from k (stiffness) and b (damping constant)
@@ -140,7 +83,6 @@ export const motion = (
       const velocity = state.velocity + (acceleration * frameRate);
       const position = state.position + (velocity * frameRate);
 
-
       // rest
       if (Math.abs(state.position - 1) < 0.001) {
         return { position: 1, velocity: 1 }
@@ -152,12 +94,10 @@ export const motion = (
     skipAfter(state =>
       state.position === 1
     ),
-    map(state => state.position),
-    take(1000)
+    map(state => state.position)
   )
 
-  return motionOp(raf)
+  return motionOp(animationFrames(window))
 }
-
 
 

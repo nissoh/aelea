@@ -10,9 +10,8 @@ import $TodoItem, { $NewTodoField, createTodo, Todo } from './todo';
 
 
 
-
-// start application with 15 todo's
-const todos = Array(15).fill(undefined).map((x, i) => createTodo('t-' + (i + 1)))
+// start application with X amount of todo's
+const todos = Array(5).fill(undefined).map((x, i) => createTodo('t-' + (i + 1)))
 
 const [sampleShowComplete, showCompleted] = state(false)
 
@@ -70,7 +69,7 @@ const $TodoApp = component((
         )
       )
 
-    ])
+    ].reverse())
 
   ]
 
@@ -80,7 +79,7 @@ const $TodoApp = component((
 
 runAt(
   $examplesRoot(
-    $TodoApp()
+    $TodoApp({})
   ),
   newDefaultScheduler()
 )

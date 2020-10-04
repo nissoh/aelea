@@ -52,7 +52,7 @@ const $CounterCreator = component((
 
 runAt(
   $examplesRoot(
-    $CounterCreator()
+    $CounterCreator({})
   ),
   newDefaultScheduler()
 )

@@ -1,5 +1,5 @@
 {
-  "name": "fufu",
+  "name": "@fufu/core",
   "version": "0.0.3-alpha.0",
   "main": "dist/commonjs/index.js",
   "module": "dist/module/index.js",
@@ -21,11 +21,11 @@
     "url": "https://github.com/nissoh/fufu"
   },
   "dependencies": {
-    "@most/core": "1.5.0",
-    "@most/disposable": "1.2.2",
-    "@most/prelude": "1.7.3",
-    "@most/scheduler": "1.2.3",
-    "@most/types": "1.0.2",
+    "@most/core": "1.6.1",
+    "@most/disposable": "1.3.0",
+    "@most/prelude": "1.8.0",
+    "@most/scheduler": "1.3.0",
+    "@most/types": "1.1.0",
     "csstype": "3.0.2"
   },
   "license": "MIT",

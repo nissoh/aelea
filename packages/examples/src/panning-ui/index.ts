@@ -2,8 +2,10 @@
 import { chain, empty, map, merge, switchLatest, until } from '@most/core';
 import { newDefaultScheduler } from '@most/scheduler';
 import { Stream } from '@most/types';
-import { $node, $svg, attr, Behavior, component, DomNode, event, eventTarget, motion, O, runAt, style, StyleCSS, throttleRaf } from 'fufu';
-import { $column, $examplesRoot } from '../common/common';
+import { $node, $svg, $text, attr, Behavior, component, DomNode, event, eventElementTarget, motion, O, runAt, style, StyleCSS } from 'fufu';
+import { $bodyRoot, $card, $column, $examplesRoot } from '../common/common';
+import { flex } from '../common/style/stylesheet';
+import { $Link } from './common';
 
 
 
@@ -50,7 +52,19 @@ const clamp = (val: number, min: number, max: number) =>
     : val < min ? min
       : val
 
+function decelerateObjectPosition(startEv: PointerEvent, target: HTMLElement, stop: Stream<PointerEvent>) {
+  return chain(ev => {
+    const vlc = mouseVelocity(startEv, ev);
 
+    const [currentElX = 0, currentElY = 0] = elementTransformArgs(target);
+    const tx = (ev.pageX - startEv.pageX) * vlc;
+    const ty = (ev.pageY - startEv.pageY) * vlc;
+
+    return map(freq => {
+      return { x: currentElX + (tx * freq), y: currentElY + (ty * freq) };
+    }, motion());
+  }, stop);
+}
 
 
 const moveStart = O(
@@ -74,17 +88,16 @@ const moveStart = O(
     const initY = startEv.pageY - initElY
 
     const pointingMove = O(
-      eventTarget('pointermove'),
-      throttleRaf,
+      eventElementTarget('pointermove'),
       map(ev => ({
         x: ev.pageX - initX,
         y: ev.pageY - initY
       }))
     )(window)
 
-    const stop = eventTarget('pointerup', window)
+    const stop = eventElementTarget('pointerup', window)
 
-    const decelerate = decalarateObjectPosition(startEv, target, stop)
+    const decelerate = decelerateObjectPosition(startEv, target, stop)
 
     const move = merge(
       until(stop, pointingMove),
@@ -105,8 +118,8 @@ const svgInteraction = O(
   event('pointerdown'),
   map(downEv => {
 
-    const up = eventTarget('pointerup', downEv.currentTarget!)
-    const move = eventTarget('pointermove', downEv.currentTarget!)
+    const up = eventElementTarget('pointerup', downEv.currentTarget!)
+    const move = eventElementTarget('pointermove', downEv.currentTarget!)
     const stop = until(up)
 
     const target = downEv.target
@@ -153,7 +166,9 @@ const svgInteraction = O(
 
 
 
-const $World = component(([clickBehavior, linePosition]: Behavior<DomNode, any>) =>
+const $World = component((
+  [clickBehavior, linePosition]: Behavior<DomNode, any>
+) =>
   [
     $svg('svg')(clickBehavior(svgInteraction))(
       $svg('circle')(
@@ -170,35 +185,28 @@ const $PanningUI = component((
 ) => {
 
   return [
-    $container(
-      $content(styleBehavior(moveStart), style(panningStyle))(
-        $World()
+    $container(style({ placeContent: 'center' }))(
+      $content(flex, styleBehavior(moveStart), style(panningStyle))(
+
+        $card(flex)(
+          $text('Fufu Functional'),
+
+          $text('Examples'),
+
+          $Link({ $content: $text('Counter'), href: '/counter' })({})
+        )
+        // $World({})
       )
     )
   ]
 })
 
 
-
 runAt(
-  $examplesRoot(
-    $PanningUI()
+  $bodyRoot(
+    $PanningUI({})
   ),
   newDefaultScheduler()
 )
 
-
-function decalarateObjectPosition(startEv: PointerEvent, target: HTMLElement, stop: Stream<PointerEvent>) {
-  return chain(ev => {
-    const vlc = mouseVelocity(startEv, ev);
-
-    const [currentElX = 0, currentElY = 0] = elementTransformArgs(target);
-    const tx = (ev.pageX - startEv.pageX) * vlc;
-    const ty = (ev.pageY - startEv.pageY) * vlc;
-
-    return map(freq => {
-      return { x: currentElX + (tx * freq), y: currentElY + (ty * freq) };
-    }, motion());
-  }, stop);
-}
 

@@ -1,14 +1,13 @@
-
-import { map, mergeArray, now } from '@most/core'
+import { map, mergeArray, multicast, now } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
-import { $element, $text, attr, Behavior, component, DomNode, event, eventTarget, runAt, Sample, style } from 'fufu'
-import { path, router } from 'match-trie'
+import { $element, $text, attr, Behavior, component, DomNode, event, eventElementTarget, NodeStream, Op, runAt, style } from 'fufu'
+import { path, router } from '../../../router/dist/type-definitions'
 import { $column, $examplesRoot, $row } from '../common/common'
 import * as designSheet from '../common/style/stylesheet'
 
 
 const initialPath = map(location => location.pathname, now(document.location))
-const popStateEvent = eventTarget('popstate', window)
+const popStateEvent = eventElementTarget('popstate', window)
 const locationChange = map(() => document.location.pathname, popStateEvent)
 
 
@@ -17,46 +16,57 @@ const $anchor = $element('a')(
   style({ margin: '6px' }),
 )
 
-const createLink = (linkB: Sample<DomNode, string>) => (href: string) =>
-  $anchor(
-    attr({ href }),
-    linkB(
-      event('click'),
-      map(clickEv => {
-        clickEv.preventDefault()
+interface Link {
+  href: string,
+  $content: NodeStream
+}
 
-        const pathName = clickEv.currentTarget instanceof HTMLAnchorElement ? clickEv.currentTarget.pathname : null
+const $Link = (props: Link) => component((
+  [sampleClick, click]
+) => {
 
-        if (pathName) {
-          history.pushState(null, '', href)
-        }
+  const changeLocationBehavior: Op<DomNode, DomNode> = sampleClick(
+    event('click'),
+    map((clickEv): string => {
+      clickEv.preventDefault()
+
+      const pathName = clickEv.currentTarget instanceof HTMLAnchorElement ? clickEv.currentTarget.pathname : null
+
+      if (pathName) {
+        history.pushState(null, '', props.href)
         return pathName
-      })
-    )
+      }
+
+      throw new Error('target anchor contains no href')
+    })
   )
+
+  return [
+    $anchor(
+      attr({ href: props.href }),
+      changeLocationBehavior
+    )(props.$content),
+
+    { click }
+  ]
+})
 
 
 const $Main = component((
   [sampleLinkClick, routeChanges]: Behavior<DomNode, string>
 ) => {
 
-  const linkChange = map((href) => href, routeChanges)
-
   const routeChange = mergeArray([
     initialPath,
     locationChange,
-    linkChange
+    multicast(routeChanges)
   ])
-
   const rootRoute = router(routeChange)
 
   const p1 = rootRoute.create(/p1/)
   const p2 = rootRoute.create('p2')
 
-
   const p1Inner = p1.create('inner')
-
-  const $link = createLink(sampleLinkClick)
 
   return [
 
@@ -64,18 +74,18 @@ const $Main = component((
       $column(
 
         $row(
-          $link('/')(
-            $text('Home')
-          ),
-          $link('/p1')(
-            $text('p1')
-          ),
-          $link('/p2')(
-            $text('p2')
-          ),
-          $link('/p1/inner')(
-            $text('inside p1')
-          )
+          $Link({ $content: $text('Home'), href: '/' })({
+            click: sampleLinkClick()
+          }),
+          $Link({ $content: $text('p1'), href: '/p1' })({
+            click: sampleLinkClick()
+          }),
+          $Link({ $content: $text('p2'), href: '/p2' })({
+            click: sampleLinkClick()
+          }),
+          $Link({ $content: $text('inside p1'), href: '/p1/inner' })({
+            click: sampleLinkClick()
+          }),
         ),
 
 
@@ -86,9 +96,9 @@ const $Main = component((
         path(p1)(
           $column(
             $text('p1'),
-            $link('/')(
-              $text('Back Home')
-            ),
+            $Link({ $content: $text('Back Home'), href: '/' })({
+              click: sampleLinkClick()
+            }),
           )
         ),
         path(p2)(
@@ -96,7 +106,6 @@ const $Main = component((
             $text('p2')
           )
         ),
-
         path(p1Inner)(
           $column(
             $text('p1nner'),
@@ -113,7 +122,7 @@ const $Main = component((
 
 runAt(
   $examplesRoot(
-    $Main()
+    $Main({})
   ),
   newDefaultScheduler()
 )

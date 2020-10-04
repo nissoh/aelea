@@ -1,6 +1,8 @@
 {
-  "name": "fufu-repo",
-  "version": "0.0.0",
+  "name": "fufu",
+  "license": "MIT",
+  "author": "Nissan Hanina <nissanhanina@gmail.com>",
+  "private": true,
   "scripts": {
     "prepare": "npm run bootstrap && lerna run prepare",
     "bootstrap": "lerna bootstrap --hoist",
@@ -16,14 +18,12 @@
     "@rollup/plugin-json": "4.1.0",
     "@rollup/plugin-node-resolve": "9.0.0",
     "@rollup/plugin-typescript": "6.0.0",
-    "@typed/test": "9.4.0",
+    "@typed/test": "9.5.0",
     "jsdom": "16.4.0",
     "jsdom-global": "^3.0.2",
     "lerna": "3.22.1",
     "rollup-plugin-typescript2": "0.27.3",
     "tslint": "^6.1.3",
     "typescript": "4.0.3"
-  },
-  "license": "MIT",
-  "author": "Nissan Hanina <nissan@yo.ma>"
+  }
 }

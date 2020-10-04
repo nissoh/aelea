@@ -1,6 +1,6 @@
 
-import { NodeStream, NodeType, Op } from '../types'
-import { behavior, Behavior } from '../behavior'
+import { Behavior, NodeStream, NodeType, Op } from '../types'
+import { behavior, BehaviorSource } from '../behavior'
 import { disposeAll } from '@most/disposable'
 import { Disposable, Stream } from '@most/types'
 import { curry2 } from '@most/prelude'
@@ -14,12 +14,10 @@ export type compFn<A extends NodeType, B, C, D> = (
   ...args: Behavior<any, any>[]
 ) => [NodeStream<A, B, C>, IComponentOutputBehaviors<D>] | [NodeStream<A, B, C>]
 
-interface Component {
-  <A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>): (projectBehaviors?: { [P in keyof D]: Op<D[P], D[P]>; } | undefined) => NodeStream<A, B, C>
-  <A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>, projectBehaviors?: { [P in keyof D]: Op<D[P], D[P]>; } | undefined): NodeStream<A, B, C>
-}
+export type OutputBehaviors<A> = { [P in keyof A]?: Op<A[P], A[P]> }
 
-function componentFn<A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>, projectBehaviors?: { [P in keyof D]: Op<D[P], D[P]> }): NodeStream<A, B, C> {
+
+function componentFn<A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>, projectBehaviors: OutputBehaviors<D>): NodeStream<A, B, C> {
   return {
     run(sink, scheduler) {
       // fill stubbed aguments as a behavior
@@ -30,11 +28,13 @@ function componentFn<A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>,
       if (projectBehaviors) {
         for (const k in projectBehaviors) {
           if (projectBehaviors[k] && outputBehaviors) {
-            const projectSampler = projectBehaviors[k]
-            const componentOutputBehavior = outputBehaviors[k]
-            const outputDisposable = projectSampler(componentOutputBehavior).run(nullSink, scheduler)
+            const consumerSampler = projectBehaviors[k]
 
-            outputDisposables.push(outputDisposable)
+            if (consumerSampler) {
+              const componentOutputBehavior = outputBehaviors[k]
+              const outputDisposable = consumerSampler(componentOutputBehavior).run(nullSink, scheduler)
+              outputDisposables.push(outputDisposable)
+            }
           }
         }
       }
@@ -50,6 +50,12 @@ function componentFn<A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>,
 }
 
 
+interface ComponentCurry {
+  <A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>, projectBehaviors: OutputBehaviors<D>): NodeStream<A, B, C>
+  <A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>): (projectBehaviors: OutputBehaviors<D>) => NodeStream<A, B, C>
+}
 
-export const component: Component = curry2(componentFn)
+
+
+export const component: ComponentCurry = curry2(componentFn)
 

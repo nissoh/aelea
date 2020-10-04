@@ -1,44 +1,38 @@
 import { Stream, Disposable, Sink, Scheduler } from '@most/types'
-import { Op } from './types'
-import { disposeAll } from '@most/disposable'
+import { Behavior, Op, StateBehavior } from './types'
+import { disposeWith } from '@most/disposable'
 import { O, Pipe } from './utils'
 import { startWith } from '@most/core'
 import { tether } from './combinator/tether'
 
 
-
 export class BehaviorSource<A, B> implements Stream<A> {
   queuedSamplers: Stream<A>[] = []
 
-  sinks: Map<Sink<A>, Disposable | null> = new Map()
+  sinks: Map<Sink<A>, Map<Stream<A>, Disposable | null>> = new Map()
   scheduler: Scheduler | undefined
 
   run(sink: Sink<A>, scheduler: Scheduler): Disposable {
 
     this.scheduler = scheduler
-    this.sinks.set(sink, null)
 
-    if (this.queuedSamplers.length) {
-      this.runBehaviors(sink)
-    }
+    const sourcesMap = new Map<Stream<A>, Disposable | null>()
+    this.sinks.set(sink, sourcesMap)
 
-    return {
-      dispose: () => {
-        const d = this.sinks.get(sink)
+    this.queuedSamplers.forEach(s => {
+      sourcesMap.set(s, this.runBehavior(sink, s))
+    })
 
-        if (d) {
-          d.dispose()
-          this.sinks.delete(sink)
-        }
-      }
-    }
+    return disposeWith((s) => this.disposeSampler(s), sink)
   }
 
-  protected runBehaviors(sink: Sink<A>) {
-    const dss = this.queuedSamplers.map(x => {
-      return x.run(sink, this.scheduler!)
-    })
-    this.sinks.set(sink, disposeAll(dss))
+  disposeSampler(sink: Sink<A>) {
+    this.sinks.get(sink)?.forEach(x => x?.dispose())
+    this.sinks.delete(sink)
+  }
+
+  protected runBehavior(sink: Sink<A>, x: Stream<A>) {
+    return x.run(sink, this.scheduler!)
   }
 
 
@@ -52,8 +46,8 @@ export class BehaviorSource<A, B> implements Stream<A> {
 
       this.queuedSamplers.push(bops)
 
-      this.sinks.forEach((d, s) => {
-        this.runBehaviors(s)
+      this.sinks.forEach((sourcesMap, sink) => {
+        sourcesMap.set(bops, this.runBehavior(sink, bops))
       })
 
       return source
@@ -62,18 +56,6 @@ export class BehaviorSource<A, B> implements Stream<A> {
 }
 
 
-export type Sampler<A> = Op<A, A>
-
-export interface Sample<A, B> {
-  (): Sampler<A>
-  (o1: Op<A, B>): Sampler<A>
-  <B1>(o1: Op<A, B1>, o2: Op<B1, B>): Sampler<A>
-  <B1, B2>(o1: Op<A, B1>, o2: Op<B1, B2>, o3: Op<B2, B>): Sampler<A>
-  <B1, B2, B3>(o1: Op<A, B1>, o2: Op<B1, B2>, o3: Op<B2, B3>, o4: Op<B3, any>, ...oos: Op<any, B>[]): Sampler<A>
-}
-
-export type Behavior<A, B> = [Sample<A, B>, BehaviorSource<B, A>]
-export type StateBehavior<A, B> = [Sample<A, B>, ReplayLatest<B>]
 
 export function behavior<A, B>(): Behavior<A, B> {
   const ss = new BehaviorSource<B, A>()

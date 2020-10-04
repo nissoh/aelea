@@ -18,15 +18,15 @@ export * from './source/node'
 export * from './types'
 
 
-
-
-function appendToSlot(parent: DomNode<NodeContainerType>, child: DomNode<NodeType>) {
-  if (parent.element.children.length < 1) {
-    parent.element.appendChild(child.element)
-  } else {
-    parent.element.insertBefore(child.element, parent.element.children[child.slot])
+function appendToSlot(parent: DomNode<NodeContainerType>, child: DomNode<NodeType>, childSegmentIndex: number, insertAt: number) {
+  if (childSegmentIndex === 0 && insertAt === 0) {
+    parent.element.prepend(child.element)
+    return
   }
+
+  parent.element.insertBefore(child.element, parent.element.children[insertAt])
 }
+
 
 // recusivley build children tree of sinks
 export function nodeEffects(parent: DomNode<NodeContainerType>, stylesheet: CSSStyleSheet) {
@@ -34,8 +34,8 @@ export function nodeEffects(parent: DomNode<NodeContainerType>, stylesheet: CSSS
   return {
     run(sink: Sink<DomNode<HTMLElement>>, scheduler: Scheduler) {
 
-      const nodeSink = new NodeRenderSink(parent, stylesheet, scheduler, sink)
-      nodeSink.disposable = mergeArray(parent.children).run(nodeSink, scheduler)
+      const nodeSink = new NodeRenderSink(parent, stylesheet, scheduler, 0, sink)
+      nodeSink.disposable = mergeArray(parent.childrenSegment).run(nodeSink, scheduler)
 
       return nodeSink
     }
@@ -47,25 +47,35 @@ export function nodeEffects(parent: DomNode<NodeContainerType>, stylesheet: CSSS
 class NodeRenderSink<T extends NodeContainerType> extends Pipe<any, any> {
 
   disposable = disposeNone()
-  childrenSinks: NodeRenderSink<T>[] = []
-
+  childrenSegmentSink: NodeRenderSink<T>[] = []
   effectsDisposable = disposeNone()
 
   constructor(
     private parent: DomNode<NodeContainerType>,
     private stylesheet: CSSStyleSheet,
     private scheduler: Scheduler,
+    private csIndex: number,
     sink: Sink<any>
   ) {
     super(sink)
   }
 
+
   event(time: Time, node: DomNode<T>) {
 
-    appendToSlot(this.parent, node)
 
-    this.childrenSinks = node.children.map($child => {
-      const csink = new NodeRenderSink(node, this.stylesheet, this.scheduler, this.sink)
+    let insertAt = node.slot // node.slot // asc order
+    for (let i = 0; i < this.csIndex; i++) {
+      insertAt = insertAt + this.parent.segmentsSlot[i]
+    }
+    appendToSlot(this.parent, node, this.csIndex, insertAt)
+
+    this.parent.segmentsSlot[this.csIndex]++
+
+    node.segmentsSlot = Array(node.childrenSegment.length).fill(0)
+
+    this.childrenSegmentSink = node.childrenSegment.map(($child, csIndex) => {
+      const csink = new NodeRenderSink(node, this.stylesheet, this.scheduler, csIndex, this.sink)
       const disp = $child.run(csink, this.scheduler)
 
       csink.disposable = disp
@@ -85,7 +95,7 @@ class NodeRenderSink<T extends NodeContainerType> extends Pipe<any, any> {
   }
 
   end(t: Time) {
-    this.childrenSinks.forEach(s => {
+    this.childrenSegmentSink.forEach(s => {
       s.end(t)
     })
     this.sink.end(t)
@@ -98,6 +108,7 @@ class NodeRenderSink<T extends NodeContainerType> extends Pipe<any, any> {
   }
 
   dispose() {
+    this.parent.segmentsSlot[this.csIndex]--
     this.effectsDisposable.dispose()
     this.disposable.dispose()
   }
@@ -117,14 +128,14 @@ export function runAt(rootNode: NodeStream<NodeContainerType>, scheduler: Schedu
   document.adoptedStyleSheets = [...document.adoptedStyleSheets, StyleRule.stylesheet]
 
   const effectsSink: Sink<any> = {
-    event(t, x) {
+    event() {
 
     },
-    error(t, err) {
+    error(_, err) {
       // tslint:disable-next-line: no-console
       console.error(err)
     },
-    end(t) {
+    end() {
 
     }
   }

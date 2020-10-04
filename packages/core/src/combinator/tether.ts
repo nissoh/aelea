@@ -15,33 +15,28 @@ class SourceSink<A> implements Sink<A> {
     this.hasValue = true
 
     this.sink.event(t, x)
-    this.parent.bSink.forEach(s => s.event(t, x))
+    this.parent.tetherSink.forEach(s => s.event(t, x))
   }
 
   end(t: Time) {
     this.sink.end(t)
-    // this.parent.bSink.forEach(s => s.end(t))
   }
 
   error(t: Time, e: Error): void {
     this.sink.error(t, e)
-    // this.parent.bSink.forEach(s => s.error(t, e))
   }
 
 }
 
 class TetherSink<A> extends Pipe<A, A> {
 
-  constructor(private tetherParent: Tether<A>, sink: Sink<A>) {
+  constructor(sink: Sink<A>) {
     super(sink)
   }
 
   event(t: number, x: A): void {
     this.sink.event(t, x)
   }
-  // dispose() {
-  //   this.tetherParent.bSink = null
-  // }
 
 }
 
@@ -49,8 +44,8 @@ class TetherSink<A> extends Pipe<A, A> {
 
 export class Tether<A> implements Stream<A> {
 
-  sSink: SourceSink<A> | null = null;
-  bSink: TetherSink<A>[] = [];
+  sourceSink: SourceSink<A> | null = null;
+  tetherSink: TetherSink<A>[] = [];
 
   constructor(private source: Stream<A>) { }
 
@@ -58,11 +53,11 @@ export class Tether<A> implements Stream<A> {
 
     if (sink instanceof SourceSink) {
 
-      if (this.sSink) {
+      if (this.sourceSink) {
         throw new Error('Cannot split multiple sources')
       }
 
-      this.sSink = sink
+      this.sourceSink = sink
 
       const sourceDisposable = this.source.run(sink, scheduler);
 
@@ -70,26 +65,26 @@ export class Tether<A> implements Stream<A> {
         dispose: () => {
           sourceDisposable.dispose()
 
-          this.bSink = []
-          this.sSink = null
+          this.tetherSink = []
+          this.sourceSink = null
         }
       }
     }
 
     if (sink instanceof TetherSink) {
-      this.bSink.push(sink)
+      this.tetherSink.push(sink)
 
-      if (this.sSink?.hasValue) {
-        sink.event(scheduler.currentTime(), this.sSink.value)
+      if (this.sourceSink?.hasValue) {
+        sink.event(scheduler.currentTime(), this.sourceSink.value)
       }
 
       return disposeWith(
         s => {
-          const sinkIdx = this.bSink.indexOf(s)
+          const sinkIdx = this.tetherSink.indexOf(s)
 
           if (sinkIdx > -1) {
-            this.bSink[sinkIdx].end(scheduler.currentTime())
-            remove(sinkIdx, this.bSink)
+            this.tetherSink[sinkIdx].end(scheduler.currentTime())
+            remove(sinkIdx, this.tetherSink)
           }
         },
         sink
@@ -104,17 +99,17 @@ export class Tether<A> implements Stream<A> {
 
 
 export const tether = <A>(source: Stream<A>): [Stream<A>, Stream<A>] => {
-  const sp = new Tether(source)
+  const split = new Tether(source)
 
   return [
     {
       run(sink, scheduler) {
-        return sp.run(new SourceSink(sp, sink), scheduler)
+        return split.run(new SourceSink(split, sink), scheduler)
       }
     },
     {
       run(sink, scheduler) {
-        return sp.run(new TetherSink(sp, sink), scheduler)
+        return split.run(new TetherSink(sink), scheduler)
       }
     }
   ]

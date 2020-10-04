@@ -1,11 +1,11 @@
 
-import { component, $node, $text, Behavior, $element, event, runAt, wrapNativeElement } from 'fufu'
 import { map } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
+import { $element, $node, $text, $wrapNativeElement, Behavior, component, DomNode, event, runAt } from 'fufu'
 
 
 const $SimpleInput = component((
-  [sampleInput, input]: Behavior<any, string>
+  [sampleInput, input]: Behavior<DomNode<HTMLInputElement>, string>
 ) => {
 
   const inputBehavior = sampleInput(
@@ -31,7 +31,7 @@ const $SimpleInput = component((
 
 
 runAt(
-  wrapNativeElement(document.body)(
+  $wrapNativeElement(document.body)(
     $SimpleInput()
   ),
   newDefaultScheduler()

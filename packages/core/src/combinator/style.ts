@@ -1,5 +1,5 @@
 import { Sink, Scheduler, Disposable, Stream } from '@most/types'
-import { ElementStream, NodeContainerType, DomNode, StyleCSS, NodeType } from '../types'
+import { ElementStream, NodeContainerType, DomNode, StyleCSS } from '../types'
 import * as CSS from 'csstype'
 
 import { loop, map } from '@most/core'
@@ -9,8 +9,8 @@ import { SettableDisposable } from 'src'
 
 
 interface StyleCurry {
-  <A, B, C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>): (node: ElementStream<C, D, B>) => ElementStream<C, D, A & B>
   <A, B, C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>, node: ElementStream<C, D, B>): ElementStream<C, D, A & B>
+  <A, B, C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>): (node: ElementStream<C, D, B>) => ElementStream<C, D, A & B>
 }
 
 interface StylePseudoCurry {
@@ -42,31 +42,10 @@ export class StyleRule {
   static cache = new Map<string, StyleRule>()
   static namespace = 'S-'
 
-
   index = StyleRule.stylesheet.cssRules.length
   id = StyleRule.namespace + this.index
   selector = `.${this.id}`
   activeUsages = 1
-
-  constructor() { }
-
-
-
-  // would transient rules make increase performance?
-  // dispose() {
-  //   if (--this.activeUsages > 0) {
-  //     return
-  //   }
-
-  //   for (const cssStyleRule in StyleRule.stylesheet.cssRules) {
-  //     // todo(check why) chrome returns `CSSStyleRule` where typescript defines CSSSRule
-  //     if ((<CSSStyleRule>StyleRule.stylesheet.cssRules[cssStyleRule]).selectorText === this.selector) {
-  //       StyleRule.stylesheet.removeRule(Number(cssStyleRule))
-  //       StyleRule.cache.delete(this.properties)
-  //     }
-  //   }
-  // }
-
 }
 
 class StyleInlineSource<A, B, C extends NodeContainerType, D, E extends string> implements ElementStream<C, D, A & B> {
@@ -113,7 +92,6 @@ class StyleSource<A, B, C extends NodeContainerType, D, E extends string> implem
             if (previousCssRule) {
               if (styleObject === null) {
                 node.element.classList.remove(previousCssRule)
-                // seed.disposable.dispose()
 
                 return { seed: null, value: '' }
               } else {
@@ -137,9 +115,7 @@ class StyleSource<A, B, C extends NodeContainerType, D, E extends string> implem
               return { seed: cashedCssClas, value: cashedCssClas }
             }
 
-
             return { seed: previousCssRule, value: '' }
-
           },
           null,
           this.styleInput
@@ -187,7 +163,6 @@ function stylePseudoFn<A, B, C extends NodeContainerType, D, E extends string>(p
 }
 
 
-// export const style = styleFn
 export const style: StyleCurry = curry2(styleFn)
 export const stylePseudo: StylePseudoCurry = curry3(stylePseudoFn)
 

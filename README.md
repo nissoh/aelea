@@ -1,19 +1,19 @@
 # Fufu
 Functional Reactive Programming UI library based on [@most/core](https://github.com/mostjs/core) paradigm and [architecture](https://github.com/cujojs/most/wiki/Architecture)
 
-## What
-This project is pretty much a proof of concept with a few unresolved issues and unissued interface decisions.
-Current mission is to discover the most conviniet/generic way to create UI abstractions
+Invent Complex Apps
 
-## Why
+
+# Why - 
 - UI is naturally reactive from both end points(user and server)
-- CSS selectors, static styling replaced by much more powerfull Behaviors
 - Imperative abstractions and a lot of boilerplate replaced by streams and Behaviors
 - Avoid Large, Complex Layouts and Layout Thrashing by batching dom operations
-- Model your application through reactive streams without chaotic state management tools, i.e. flux, redux etc
-- Possibly has the best possible performance since diffing is obselete and mutating states relay on stream computation
+- Model your application through reactive computations without instead of unpredictable immutble state
+- Highly performant, diffing is obselete and mutating states relay on stream computation
 
-## why `Most`
+### CSS
+- CSS Dom instead of global stylesheets
+
 
 
 ### Simple Counter
@@ -22,7 +22,7 @@ import { map, switchLatest, constant, periodic, scan } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
 
 import { text, renderTo } from 'fufu'
-import { pipe } from '../common' // (f1, f2) => x => f2(f1(x))
+import { pipe } from '../common'
 
 const add = (n1: number, n2: number) => n1 + n2
 

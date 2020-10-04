@@ -5,12 +5,10 @@ import { $column, $row, $TrashBtn } from '../common/common'
 import { $Button } from '../common/form/button'
 
 
-
 const sum = O(
   scan((current: number, x: number) => current + x, 0),
   map(String)
 )
-
 
 const $counterContainer = $column(
   designSheet.spacing,
@@ -48,5 +46,4 @@ export default component((
     {
       remove
     }
-
   ])

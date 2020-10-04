@@ -1,12 +1,12 @@
-import { $custom, $node, $svg, attr, wrapNativeElement, style, NodeStream } from 'fufu'
+import { $custom, $node, $svg, attr, $wrapNativeElement, style, NodeStream } from 'fufu'
 
 import * as designSheet from './style/stylesheet'
 import { $ButtonIcon } from './form/button'
 
 
-const $exmaplesRootContainer = wrapNativeElement(document.body)(designSheet.main, style({ padding: '10vh 0', }))
+export const $bodyRoot = $wrapNativeElement(document.body)(designSheet.main)
 
-export const $examplesRoot = ($content: NodeStream<HTMLElement>) => $exmaplesRootContainer(
+export const $examplesRoot = ($content: NodeStream<HTMLElement>) => $bodyRoot(style({ padding: '10vh 0', }))(
     $card(designSheet.spacingBig, style({ width: '400px', margin: '0 auto' }))(
         $content
     )
@@ -35,6 +35,4 @@ export const $TrashBtn = $ButtonIcon(
         })
     )()
 )
-
-
 

@@ -54,7 +54,7 @@ function resolveRoute(pathChange: Stream<PathEvent>, parentFragments: Fragment[]
       diff,
       filter(next => {
         return isMatched(fragment, next.target[fragIdx])
-      })
+      }),
     )
 
     const currentMiss = O(
