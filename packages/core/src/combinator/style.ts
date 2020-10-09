@@ -1,22 +1,20 @@
 import { Sink, Scheduler, Disposable, Stream } from '@most/types'
-import { ElementStream, NodeContainerType, DomNode, StyleCSS } from '../types'
+import { ElementStream, NodeContainerType, StyleCSS, ContainerDomNode } from '../types'
 import * as CSS from 'csstype'
 
 import { loop, map } from '@most/core'
 import { curry2, curry3 } from '@most/prelude'
-import { disposeBoth } from '@most/disposable';
-import { SettableDisposable } from 'src'
 
 
 interface StyleCurry {
-  <A, B, C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>, node: ElementStream<C, D, B>): ElementStream<C, D, A & B>
-  <A, B, C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>): (node: ElementStream<C, D, B>) => ElementStream<C, D, A & B>
+  <C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>, node: ElementStream<C, D>): ElementStream<C, D>
+  <C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>): (node: ElementStream<C, D>) => ElementStream<C, D>
 }
 
 interface StylePseudoCurry {
-  <A, B, C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E, styleInput: StyleCSS | Stream<StyleCSS | null>, node: ElementStream<C, D, B>): ElementStream<C, D, A & B>
-  <A, B, C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E, styleInput: StyleCSS | Stream<StyleCSS | null>): (node: ElementStream<C, D, B>) => ElementStream<C, D, A & B>
-  <A, B, C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E): (styleInput: StyleCSS | Stream<StyleCSS | null>) => (node: ElementStream<C, D, B>) => ElementStream<C, D, A & B>
+  <A, B, C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E, styleInput: StyleCSS | Stream<StyleCSS | null>, node: ElementStream<C, D>): ElementStream<C, D>
+  <A, B, C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E, styleInput: StyleCSS | Stream<StyleCSS | null>): (node: ElementStream<C, D>) => ElementStream<C, D>
+  <A, B, C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E): (styleInput: StyleCSS | Stream<StyleCSS | null>) => (node: ElementStream<C, D>) => ElementStream<C, D>
 }
 
 function useStyleRule(pseudoClass: CSS.Pseudos | string, styles: StyleCSS) {
@@ -48,11 +46,11 @@ export class StyleRule {
   activeUsages = 1
 }
 
-class StyleInlineSource<A, B, C extends NodeContainerType, D, E extends string> implements ElementStream<C, D, A & B> {
+class StyleInlineSource<A, B, C extends NodeContainerType, D, E extends string> implements ElementStream<C, D> {
 
-  constructor(public pseudo: CSS.Pseudos | E, public styleInput: StyleCSS, public source: ElementStream<C, D, A & B>) { }
+  constructor(public pseudo: CSS.Pseudos | E, public styleInput: StyleCSS, public source: ElementStream<C, D>) { }
 
-  run(sink: Sink<DomNode<C, D, A & B>>, scheduler: Scheduler): Disposable {
+  run(sink: Sink<ContainerDomNode<C, D>>, scheduler: Scheduler): Disposable {
     const cssClass = useStyleRule(this.pseudo, this.styleInput)
 
     const disp = map(
@@ -73,13 +71,11 @@ class StyleInlineSource<A, B, C extends NodeContainerType, D, E extends string> 
 }
 
 
-class StyleSource<A, B, C extends NodeContainerType, D, E extends string> implements ElementStream<C, D, A & B> {
+class StyleSource<A, B, C extends NodeContainerType, D, E extends string> implements ElementStream<C, D> {
 
-  constructor(public pseudo: CSS.Pseudos | E, public styleInput: Stream<StyleCSS | null>, public source: ElementStream<C, D, A & B>) { }
+  constructor(public pseudo: CSS.Pseudos | E, public styleInput: Stream<StyleCSS | null>, public source: ElementStream<C, D>) { }
 
-  run(sink: Sink<DomNode<C, D, A & B>>, scheduler: Scheduler): Disposable {
-
-    const styleRuleDiposable = new SettableDisposable()
+  run(sink: Sink<ContainerDomNode<C, D>>, scheduler: Scheduler): Disposable {
 
 
     const applyStyleEffects = map(
@@ -130,7 +126,7 @@ class StyleSource<A, B, C extends NodeContainerType, D, E extends string> implem
     )
       .run(sink, scheduler)
 
-    return disposeBoth(applyStyleEffects, styleRuleDiposable)
+    return applyStyleEffects
   }
 }
 
@@ -145,7 +141,7 @@ function styleObjectAsString(styleObj: StyleCSS) {
 }
 
 
-function styleFn<A, B, C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>, source: ElementStream<C, D, B>, pseudoClass = ''): ElementStream<C, D, A & B> {
+function styleFn<C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>, source: ElementStream<C, D>, pseudoClass = ''): ElementStream<C, D> {
 
   if (!('run' in styleInput)) {
     if (source instanceof StyleInlineSource && source.pseudo === pseudoClass) {
@@ -158,7 +154,7 @@ function styleFn<A, B, C extends NodeContainerType, D>(styleInput: StyleCSS | St
   return new StyleSource(pseudoClass, styleInput, source)
 }
 
-function stylePseudoFn<A, B, C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E, styleInput: StyleCSS | Stream<StyleCSS | null>, source: ElementStream<C, D, B>): ElementStream<C, D, A & B> {
+function stylePseudoFn<C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E, styleInput: StyleCSS | Stream<StyleCSS | null>, source: ElementStream<C, D>): ElementStream<C, D> {
   return styleFn(styleInput, source, pseudoClass)
 }
 

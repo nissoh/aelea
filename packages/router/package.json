@@ -1,5 +1,5 @@
 {
-  "name": "@fufu/router",
+  "name": "fufu-router",
   "version": "0.0.3-alpha.0",
   "main": "dist/commonjs/index.js",
   "module": "dist/module/index.js",

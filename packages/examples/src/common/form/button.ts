@@ -1,5 +1,5 @@
 import { map, empty, mergeArray } from "@most/core"
-import { NodeStream, component, Behavior, DomNode, $element, style, attr, stylePseudo, $svg, event } from "fufu"
+import { NodeStream, component, Behavior, $element, style, attr, stylePseudo, $svg, event, NodeChild } from "fufu"
 import { Control } from "../form"
 import { interactionOp, dismissOp } from "./form.common"
 
@@ -10,7 +10,7 @@ export interface Button extends Control {
 }
 
 export const $Button = (props: Button) => component((
-  [sampleClick, click]: Behavior<DomNode, PointerEvent>
+  [sampleClick, click]: Behavior<NodeChild, PointerEvent>
 ) => [
     $element('button')(
       designSheet.btn,
@@ -43,13 +43,13 @@ const $svgiconStage = $svg('svg')(
 )
 
 export const $ButtonIcon = ($content: NodeStream) => component((
-  [interactionBehavior, focusStyle]: Behavior<DomNode, true>,
-  [dismissBehavior, dismissstyle]: Behavior<DomNode, false>,
-  [sampleClick, click]: Behavior<DomNode, PointerEvent>
+  [interactionBehavior, focusStyle]: Behavior<NodeChild, true>,
+  [dismissBehavior, dismissstyle]: Behavior<NodeChild, false>,
+  [sampleClick, click]: Behavior<NodeChild, PointerEvent>
 ) => [
     $svgiconStage(
       designSheet.control,
-      style({ fill: designSheet.theme.system, borderRadius: '50%', }),
+      style({ cursor: 'pointer', fill: designSheet.theme.system, borderRadius: '50%', }),
 
       interactionBehavior(interactionOp),
       dismissBehavior(dismissOp),

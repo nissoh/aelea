@@ -12,12 +12,12 @@ export type IComponentOutputBehaviors<T> = {
 
 export type compFn<A extends NodeType, B, C, D> = (
   ...args: Behavior<any, any>[]
-) => [NodeStream<A, B, C>, IComponentOutputBehaviors<D>] | [NodeStream<A, B, C>]
+) => [NodeStream<A>, IComponentOutputBehaviors<D>] | [NodeStream<A>]
 
 export type OutputBehaviors<A> = { [P in keyof A]?: Op<A[P], A[P]> }
 
 
-function componentFn<A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>, projectBehaviors: OutputBehaviors<D>): NodeStream<A, B, C> {
+function componentFn<A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>, projectBehaviors: OutputBehaviors<D>): NodeStream<A> {
   return {
     run(sink, scheduler) {
       // fill stubbed aguments as a behavior
@@ -51,8 +51,8 @@ function componentFn<A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>,
 
 
 interface ComponentCurry {
-  <A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>, projectBehaviors: OutputBehaviors<D>): NodeStream<A, B, C>
-  <A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>): (projectBehaviors: OutputBehaviors<D>) => NodeStream<A, B, C>
+  <A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>, projectBehaviors: OutputBehaviors<D>): NodeStream<A>
+  <A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>): (projectBehaviors: OutputBehaviors<D>) => NodeStream<A>
 }
 
 

@@ -1,6 +1,6 @@
 
 import * as CSS from 'csstype'
-import { Stream } from '@most/types'
+import { Disposable, Stream } from '@most/types'
 
 export type StyleCSS = CSS.Properties
 
@@ -11,13 +11,19 @@ export type IAttrProperties<T> = {
 export type TextStream = Stream<Text>
 export type NodeType = Node & ChildNode
 export type NodeContainerType = HTMLElement | SVGElement
-export type DomNode<A extends NodeType = NodeType, B = {}, C = {}> = {
+
+export interface NodeChild<A extends NodeType = NodeType> {
   element: A
-  attributes: Stream<IAttrProperties<B>>[]
-  style: Stream<string>[]
+  slot: number
+  disposable: Disposable
+}
+
+export interface ContainerDomNode<A extends NodeContainerType = NodeContainerType, B = {}> extends NodeChild<A> {
   childrenSegment: NodeStream[]
-  segmentsSlot: number[],
-  slot: number,
+  segmentsChildrenCount: number[],
+
+  style: Stream<string>[]
+  attributes: Stream<IAttrProperties<B>>[]
 }
 
 
@@ -29,8 +35,8 @@ export interface Sample<A, B> {
   <B1, B2, B3>(o1: Op<A, B1>, o2: Op<B1, B2>, o3: Op<B2, B3>, o4: Op<B3, any>, ...oos: Op<any, B>[]): Sampler<A>
 }
 
-export type NodeStream<A extends NodeType = NodeType, B = {}, C = {}> = Stream<DomNode<A, B, C>>
-export type ElementStream<A extends NodeType = NodeContainerType, B = {}, C = {}> = NodeStream<A, B, C>
+export type NodeStream<A extends NodeType = NodeType> = Stream<NodeChild<A>>
+export type ElementStream<A extends NodeContainerType = NodeContainerType, B = {}> = Stream<ContainerDomNode<A, B>>
 
 export type Op<T, R> = (o: Stream<T>) => Stream<R>
 export type OpType<T extends Op<any, any>> = ReturnType<T> extends Stream<infer Z> ? Z : unknown

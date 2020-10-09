@@ -2,12 +2,12 @@
 import { Sink, Disposable, Time, Stream } from '@most/types'
 import { compose, id } from '@most/prelude'
 import { Op } from './types'
-import { empty } from '@most/core'
+import { empty, never, startWith } from '@most/core'
 
 
 type Fn<T, R> = (a: T) => R
 
-const EMPTY = empty()
+export const xForver = <T>(x: T) => startWith(x, never())
 
 export function MaybeOp<A, B, C>(a: Op<A, B>, b?: Op<B, C>) {
   return b ? compose(b, a) : a
@@ -17,6 +17,11 @@ export function isStream<T>(s: any): s is Stream<T> {
   return 'run' in s
 }
 
+export function isFunction<A, B>(s: any): s is Op<A, B> {
+  return s instanceof Function
+}
+
+const EMPTY = empty()
 export function isEmpty(s: Stream<any>): boolean {
   return s === EMPTY
 }
@@ -36,39 +41,6 @@ export abstract class Pipe<A, B> implements Sink<A> {
   }
 }
 
-export class SettableDisposable implements Disposable {
-  private disposable?: Disposable;
-  private disposed: boolean;
-
-  constructor() {
-    this.disposable = undefined
-    this.disposed = false
-  }
-
-  setDisposable(disposable: Disposable): void {
-    if (this.disposable !== undefined) {
-      throw new Error('setDisposable called more than once')
-    }
-
-    this.disposable = disposable
-
-    if (this.disposed) {
-      disposable.dispose()
-    }
-  }
-
-  dispose(): void {
-    if (this.disposed) {
-      return
-    }
-
-    this.disposed = true
-
-    if (this.disposable !== undefined) {
-      this.disposable.dispose()
-    }
-  }
-}
 
 
 export const nullSink = <Sink<any>>{

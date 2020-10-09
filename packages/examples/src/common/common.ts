@@ -6,11 +6,6 @@ import { $ButtonIcon } from './form/button'
 
 export const $bodyRoot = $wrapNativeElement(document.body)(designSheet.main)
 
-export const $examplesRoot = ($content: NodeStream<HTMLElement>) => $bodyRoot(style({ padding: '10vh 0', }))(
-    $card(designSheet.spacingBig, style({ width: '400px', margin: '0 auto' }))(
-        $content
-    )
-)
 export const $row = $custom('row')(designSheet.row)
 export const $column = $custom('column')(designSheet.column)
 
@@ -19,6 +14,8 @@ export const $card = $column(style({
     backgroundColor: designSheet.theme.baseLight,
     boxShadow: '10px 10px 0px -6px rgba(0, 0, 0, .25)',
 }))
+
+export const $mainCard = $card(designSheet.spacingBig, style({ width: '400px', margin: '0 auto' }))
 
 export const $seperator = $node(
     style({

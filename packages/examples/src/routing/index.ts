@@ -1,8 +1,8 @@
 import { map, mergeArray, multicast, now } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
 import { $element, $text, attr, Behavior, component, DomNode, event, eventElementTarget, NodeStream, Op, runAt, style } from 'fufu'
-import { path, router } from '../../../router/dist/type-definitions'
-import { $column, $examplesRoot, $row } from '../common/common'
+import { path, router } from 'fufu-router'
+import { $bodyRoot, $column, $mainCard, $row } from '../common/common'
 import * as designSheet from '../common/style/stylesheet'
 
 
@@ -121,8 +121,10 @@ const $Main = component((
 
 
 runAt(
-  $examplesRoot(
-    $Main({})
+  $bodyRoot(
+    $mainCard(
+      $Main({})
+    )
   ),
   newDefaultScheduler()
 )

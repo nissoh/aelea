@@ -14,7 +14,7 @@ export interface Checkbox extends Control {
 export const $Checkbox = (props: Checkbox) => component((
   [interactionBehavior, focusStyle]: Behavior<DomNode, true>,
   [dismissBehavior, dismissstyle]: Behavior<DomNode, false>,
-  [sampleCheck, check]: Behavior<DomNode<HTMLInputElement>, boolean>
+  [sampleCheck, check]: Behavior<ContainerDomNode<HTMLInputElement>, boolean>
 ) => {
 
   const $overlay = $node(

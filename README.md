@@ -1,7 +1,15 @@
 # Fufu
 Functional Reactive Programming UI library based on [@most/core](https://github.com/mostjs/core) paradigm and [architecture](https://github.com/cujojs/most/wiki/Architecture)
 
-Invent Complex Apps
+Current Building Blocks of building Applications require high amount of unecessary compounding effect when the application grows
+
+Compounding effects makes apps more fragile and reduce the incentive to change and evolve into a better program.
+
+Better programs often change and improve, Fufu incentivices the tools for a reactive thinking
+
+
+
+
 
 
 # Why - 

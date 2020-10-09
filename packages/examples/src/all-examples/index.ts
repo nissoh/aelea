@@ -1,11 +1,15 @@
 
-import { chain, empty, map, merge, switchLatest, until } from '@most/core';
-import { newDefaultScheduler } from '@most/scheduler';
-import { Stream } from '@most/types';
-import { $node, $svg, $text, attr, Behavior, component, DomNode, event, eventElementTarget, motion, O, runAt, style, StyleCSS } from 'fufu';
-import { $bodyRoot, $card, $column, $examplesRoot } from '../common/common';
-import { flex } from '../common/style/stylesheet';
-import { $Link } from './common';
+import { chain, empty, map, merge, mergeArray, multicast, now, switchLatest, until } from '@most/core'
+import { newDefaultScheduler } from '@most/scheduler'
+import { Stream } from '@most/types'
+import { $node, $svg, $text, attr, Behavior, component, event, eventElementTarget, motion, NodeChild, O, runAt, style, StyleCSS } from 'fufu'
+import { path, router } from 'fufu-router'
+import { $bodyRoot, $card, $column } from '../common/common'
+import { spacingBig } from '../common/style/stylesheet'
+import $CountCounters from '../count-counters/$CountCounters'
+import $TodoApp from '../todo-app/$TodoApp'
+import $VirtualList from '../quantom-list/$QuantomList'
+import { $Link } from './common'
 
 
 
@@ -31,6 +35,9 @@ const $content = $column(
   })
 )
 
+const initialPath = map(location => location.pathname, now(document.location))
+const popStateEvent = eventElementTarget('popstate', window)
+const locationChange = map(() => document.location.pathname, popStateEvent)
 
 
 
@@ -107,8 +114,8 @@ const moveStart = O(
     return map(state => {
       const { x, y } = state
       return {
-        transform: `translate(${clamp(x, minX, 0)}px, ${clamp(y, minY, 0)}px)`
-      } as StyleCSS
+        style: `transform: translate(${clamp(x, minX, 0)}px, ${clamp(y, minY, 0)}px);`
+      }
     }, move)
   }),
   switchLatest
@@ -167,7 +174,7 @@ const svgInteraction = O(
 
 
 const $World = component((
-  [clickBehavior, linePosition]: Behavior<DomNode, any>
+  [clickBehavior, linePosition]: Behavior<NodeChild, any>
 ) =>
   [
     $svg('svg')(clickBehavior(svgInteraction))(
@@ -181,23 +188,72 @@ const $World = component((
 
 
 const $PanningUI = component((
-  [styleBehavior, panningStyle]: Behavior<DomNode, any>
+  [styleBehavior, panningStyle]: Behavior<NodeChild, any>,
+  [sampleLinkClick, routeChanges]: Behavior<NodeChild, string>
 ) => {
 
+  const routeChange = mergeArray([
+    initialPath,
+    locationChange,
+    multicast(routeChanges)
+  ])
+
+  const rootRoute = router(routeChange)
+
+
+  const todoAppRoute = rootRoute.create('todo-app')
+  const countCountersRoute = rootRoute.create('count-counters')
+  const quantomListRoute = rootRoute.create('quantom-list')
+
+
+
   return [
-    $container(style({ placeContent: 'center' }))(
-      $content(flex, styleBehavior(moveStart), style(panningStyle))(
 
-        $card(flex)(
-          $text('Fufu Functional'),
+    path(rootRoute)(
+      $container(style({ placeContent: 'center' }))(
+        $content(style({ width: '500px' }), spacingBig, styleBehavior(moveStart), attr(panningStyle))(
 
-          $text('Examples'),
+          $card(
+            $text('Fufu Functional'),
 
-          $Link({ $content: $text('Counter'), href: '/counter' })({})
+            $text('Examples'),
+          ),
+
+          $card(
+            $Link({ $content: $text('Quantom List'), href: '/quantom-list' })({
+              click: sampleLinkClick()
+            }),
+            path(quantomListRoute)(
+              $VirtualList({})
+            )
+          ),
+
+
+          $card(
+            $Link({ $content: $text('Count Counters'), href: '/count-counters' })({
+              click: sampleLinkClick()
+            }),
+            path(countCountersRoute)(
+              $CountCounters({})
+            )
+          ),
+
+          $card(
+            $Link({ $content: $text('Todo App'), href: '/todo-app' })({
+              click: sampleLinkClick()
+            }),
+            path(todoAppRoute)(
+              $TodoApp({})
+            ),
+          ),
+
+
+
+
         )
-        // $World({})
       )
     )
+
   ]
 })
 

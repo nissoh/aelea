@@ -38,8 +38,8 @@ export const eventElementTarget: NodeEventTarget = curry2((eventType, target, op
 })
 
 export interface NodeEvent {
-  <A extends ElementEventNameList, B extends NodeType, C, D>(eventType: A, node: NodeStream<B, C, D>): Stream<ElementEventTypeMap<A, B>>
-  <A extends ElementEventNameList, B extends NodeType, C, D>(eventType: A): (node: NodeStream<B, C, D>) => Stream<ElementEventTypeMap<A, B>>
+  <A extends ElementEventNameList, B extends NodeType, C, D>(eventType: A, node: NodeStream<B>): Stream<ElementEventTypeMap<A, B>>
+  <A extends ElementEventNameList, B extends NodeType, C, D>(eventType: A): (node: NodeStream<B>) => Stream<ElementEventTypeMap<A, B>>
 }
 
 

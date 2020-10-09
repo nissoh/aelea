@@ -5,12 +5,9 @@ import { $column, $row, $TrashBtn } from '../common/common'
 import { $Button } from '../common/form/button'
 
 
-const sum = O(
-  scan((current: number, x: number) => current + x, 0),
-  map(String)
-)
+export const sumFromZeroOp = scan((current: number, x: number) => current + x, 0)
 
-const $counterContainer = $column(
+const $counterContainerStyle = O(
   designSheet.spacing,
   style({
     borderRadius: '5px',
@@ -22,14 +19,14 @@ const $counterContainer = $column(
 export default component((
   [sampleIncrement, increment]: Behavior<PointerEvent, 1>,
   [sampleDecrement, decrement]: Behavior<PointerEvent, -1>,
-  [sampleRemove, remove]: Behavior<PointerEvent, PointerEvent>,
-) => [
+  [sampleDispose, dispose]: Behavior<PointerEvent, PointerEvent>,
+) => {
+  const count = sumFromZeroOp(merge(increment, decrement))
 
-    $row(style({ alignItems: 'center', justifyContent: 'center' }), designSheet.spacing)(
-      $TrashBtn({
-        click: sampleRemove()
-      }),
-      $counterContainer(
+  return [
+
+    $row(style({ alignItems: 'center', placeContent: 'space-between' }), designSheet.spacing)(
+      $column($counterContainerStyle)(
         $Button({ $content: $text('+') })({
           click: sampleIncrement(constant(1))
         }),
@@ -37,13 +34,21 @@ export default component((
           click: sampleDecrement(constant(-1))
         }),
       ),
-      $text(style({ fontSize: '64px' }))(
-        sum(merge(increment, decrement))
+
+      $text(style({ fontSize: '64px', }))(
+        map(String, count)
       ),
 
+      $TrashBtn({
+        click: sampleDispose()
+      }),
     ),
 
     {
-      remove
+      dispose,
+      increment,
+      decrement,
+      count
     }
-  ])
+  ]
+})
