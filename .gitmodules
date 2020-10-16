@@ -1,6 +1,3 @@
-[submodule "packages/examples"]
-	path = packages/examples
-	url = https://github.com/nissoh/fufu-examples
-[submodule "fufu-examples"]
-	path = fufu-examples
+[submodule "packages/fufu-examples"]
+	path = packages/fufu-examples
 	url = https://github.com/nissoh/fufu-examples
