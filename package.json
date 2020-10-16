@@ -4,10 +4,11 @@
   "author": "Nissan Hanina <nissanhanina@gmail.com>",
   "private": true,
   "scripts": {
-    "prepare": "npm run bootstrap",
+    "prepare": "lerna bootstrap",
     "release": "lerna publish",
     "dev": "lerna run --parallel dev",
     "test": "lerna run test",
+    "clean": "lerna clean",
     "test:unit": "lerna run test:unit",
     "test:lint": "lerna run test:lint",
     "build": "lerna run build --stream"
