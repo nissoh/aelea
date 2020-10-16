@@ -5,6 +5,7 @@
     ],
     "jsRules": {},
     "rules": {
+        "only-arrow-functions": false,
         "deprecation": true,
         "no-angle-bracket-type-assertion": false,
         "no-empty": false,

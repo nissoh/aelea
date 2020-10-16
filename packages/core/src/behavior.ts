@@ -1,163 +1,126 @@
-import { Stream, Disposable, Sink, Scheduler, Time } from '@most/types'
-import { Op } from './types'
-import { disposeNone } from '@most/disposable'
-import { never, startWith } from '@most/core'
-import { remove, findIndex, append } from '@most/prelude'
-import { O } from './utils'
+import { Stream, Disposable, Sink, Scheduler } from '@most/types'
+import { Behavior, Op, StateBehavior } from './types'
+import { disposeWith } from '@most/disposable'
+import { O, Pipe } from './utils'
+import { startWith } from '@most/core'
+import { tether } from './combinator/tether'
 
-export class ProxyStream<A> implements Stream<A> {
-  attachments: Disposable[] = []
-  queuedAttachments: Stream<A>[] = []
 
-  running: boolean = false
+export class BehaviorSource<A, B> implements Stream<A> {
+  queuedSamplers: Stream<A>[] = []
 
-  sinks: Sink<A>[] = []
+  sinks: Map<Sink<A>, Map<Stream<A>, Disposable | null>> = new Map()
   scheduler: Scheduler | undefined
 
   run(sink: Sink<A>, scheduler: Scheduler): Disposable {
-    this.running = true
+
     this.scheduler = scheduler
 
-    this.add(sink)
+    const sourcesMap = new Map<Stream<A>, Disposable | null>()
+    this.sinks.set(sink, sourcesMap)
 
-    if (this.queuedAttachments.length) {
-      const dss = this.queuedAttachments.map(x =>
-        this.runProxy(x, scheduler)
-      )
-      this.attachments.push(...dss)
-    }
+    this.queuedSamplers.forEach(s => {
+      sourcesMap.set(s, this.runBehavior(sink, s))
+    })
 
-    return {
-      dispose: () => {
-        this.remove(sink)
-      }
-    }
+    return disposeWith((s) => this.disposeSampler(s), sink)
+  }
+
+  disposeSampler(sink: Sink<A>) {
+    this.sinks.get(sink)?.forEach(x => x?.dispose())
+    this.sinks.delete(sink)
+  }
+
+  protected runBehavior(sink: Sink<A>, x: Stream<A>) {
+    return x.run(sink, this.scheduler!)
   }
 
 
-  add(sink: Sink<A>): number {
-    this.sinks = append(sink, this.sinks)
-    return this.sinks.length
-  }
+  sample = (...ops: Op<B, A>[]) => {
+    return (sb: Stream<B>): Stream<B> => {
 
-  remove(sink: Sink<A>): number {
-    const i = findIndex(sink, this.sinks)
-
-    if (i >= 0) {
-      this.sinks = remove(i, this.sinks)
-    }
-
-    return this.sinks.length
-  }
-
-  runProxy(x: Stream<A>, scheduler: Scheduler) {
-    return x.run({
-      event: (t, a) => {
-        this.event(t, a)
-      },
-      end() { },
-      error() { }
-    }, scheduler)
-  }
-
-  attach(s: Stream<A>): Disposable {
-    if (this.running && this.scheduler) {
-      const disposeProxy = this.runProxy(s, this.scheduler)
-      this.attachments.push(disposeProxy)
-
-      return disposeProxy
-    } else {
-      this.queuedAttachments.push(s)
-
-      return {
-        dispose() {
-
-        }
-      }
-    }
-  }
-
-  event(t: Time, v: A): void {
-    const s = this.sinks
-
-    for (let i = 0; i < s.length; ++i) {
-      try {
-        s[i].event(t, v)
-      } catch (e) {
-        s[i].error(t, e)
-      }
-    }
-  }
-
-  end(t: Time): void {
-    const s = this.sinks
-    for (let i = 0; i < s.length; ++i) {
-      s[i].end(t)
-    }
-  }
-
-  error(time: Time, err: Error): void {
-    const s = this.sinks
-    for (let i = 0; i < s.length; ++i) {
-      s[i].error(time, err)
-    }
-  }
-
-}
-
-
-export const splitBehavior = <A, B>(pb: ProxyStream<B>): Sample<A, B> =>
-  (...ob: any): Op<A, A> =>
-    (sa) => {
+      const [source, tetherSource] = tether(sb)
 
       // @ts-ignore
-      const oops: Op<A, B> = O(...ob)
+      const bops: Stream<A> = ops.length ? O(...ops)(tetherSource) : tetherSource
 
-      return {
-        run(sink, scheduler) {
-          return new SplitSink(oops, sa, pb, sink, scheduler)
-        }
-      }
+      this.queuedSamplers.push(bops)
+
+      this.sinks.forEach((sourcesMap, sink) => {
+        sourcesMap.set(bops, this.runBehavior(sink, bops))
+      })
+
+      return source
     }
-
-
-export interface Sample<A, B> {
-  (o1: Op<A, B>): Op<A, A>
-  <B1>(o1: Op<A, B1>, o2: Op<B1, B>): Op<A, A>
-  <B1, B2>(o1: Op<A, B1>, o2: Op<B1, B2>, o3: Op<B2, B>): Op<A, A>
-  <B1, B2, B3>(o1: Op<A, B1>, o2: Op<B1, B2>, o3: Op<B2, B3>, o4: Op<B3, any>, ...oos: Op<any, B>[]): Op<A, A>
-}
-export type Behavior<A, B> = [Sample<A, B>, Stream<B>]
-
-export const split = <A, B>(): Behavior<A, B> => {
-  const prox = new ProxyStream<B>()
-  const behavior = splitBehavior(prox)
-
-  return [behavior, prox]
+  }
 }
 
-class SplitSink<A, B> implements Disposable {
 
-  saDispoable: Disposable = disposeNone()
 
-  constructor(bb: Op<A, B>, sa: Stream<A>, proxy: ProxyStream<B>, sink: Sink<A>, scheduler: Scheduler) {
+export function behavior<A, B>(): Behavior<A, B> {
+  const ss = new BehaviorSource<B, A>()
 
-    this.saDispoable = sa.run({
-      event(t: Time, ev: A) {
-        sink.event(t, ev)
-        proxy.attach(bb(startWith(ev, never())))
-      },
-      error() { },
-      end() { }
-    }, scheduler)
+  return [ss.sample, ss]
+}
 
+
+export function state<A, B>(initialState: B): StateBehavior<A, B> {
+  const ss = new BehaviorSource<B, A>()
+
+  return [ss.sample, replayLatest(ss, initialState)]
+}
+
+
+
+class StateSink<A> extends Pipe<A, A> {
+
+  constructor(private parent: ReplayLatest<A>, public sink: Sink<A>) {
+    super(sink)
   }
 
-  dispose(): void {
-    this.saDispoable.dispose()
+  event(t: number, x: A): void {
+    this.parent.latestvalue = x;
+    this.parent.hasValue = true;
+
+    this.sink.event(t, x)
   }
 
 }
 
 
 
+export function replayLatest<A>(s: Stream<A>, initialState?: A): ReplayLatest<A> {
+  if (arguments.length === 1) {
+    return new ReplayLatest(s)
+  } else {
+    return new ReplayLatest(s, initialState)
+  }
+}
+
+
+export class ReplayLatest<A> implements Stream<A> {
+  latestvalue!: A
+  hasValue = false
+  hasInitial
+
+  constructor(
+    private source: Stream<A>,
+    private initialState?: A,
+  ) {
+    this.hasInitial = arguments.length === 2
+  }
+
+  run(sink: Sink<A>, scheduler: Scheduler): Disposable {
+    const startWithReplay = this.hasValue
+      ? startWith(this.latestvalue)
+      : this.hasInitial
+        ? startWith(this.initialState)
+        : null
+
+    const withReplayedValue = startWithReplay ? startWithReplay(this.source) : this.source
+
+    // return this.source.run(new StateSink(this, sink), scheduler)
+    return withReplayedValue.run(new StateSink(this, sink), scheduler)
+  }
+
+}

@@ -1,6 +1,6 @@
 {
-  "name": "match-trie",
-  "version": "0.0.3-alpha.0",
+  "name": "fufu-router",
+  "version": "0.0.1-0",
   "main": "dist/commonjs/index.js",
   "module": "dist/module/index.js",
   "browser": "dist/browser/index.js",
@@ -8,7 +8,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "rollup": "./../../node_modules/.bin/rollup  -c rollup.config.js",
-    "rollup:watch": "./../../node_modules/.bin/rollup  -c -w rollup.config.js",
+    "dev": "./../../node_modules/.bin/rollup  -c -w rollup.config.js",
     "build": "npm run clean && npm run rollup",
     "lint": "./../../node_modules/.bin/tslint --fix 'src/**/*.ts'",
     "prepublish": "npm run build"
@@ -23,7 +23,7 @@
     "@most/prelude": "1.7.3",
     "@most/scheduler": "1.2.3",
     "@most/types": "1.0.2",
-    "fufu": "0.0.3-alpha.0"
+    "fufu": "^0.0.2-alpha.0"
   },
   "devDependencies": {
     "@typed/test": "^6.5.0"

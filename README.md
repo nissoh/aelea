@@ -1,17 +1,27 @@
 # Fufu
 Functional Reactive Programming UI library based on [@most/core](https://github.com/mostjs/core) paradigm and [architecture](https://github.com/cujojs/most/wiki/Architecture)
 
-## What
-This project is pretty much a proof of concept with a few unresolved issues and unissued interface decisions.
-Current mission is to discover the most conviniet/generic way to create UI abstractions
+Current Building Blocks of building Applications require high amount of unecessary compounding effect when the application grows
 
-## Why
+Compounding effects makes apps more fragile and reduce the incentive to change and evolve into a better program.
+
+Better programs often change and improve, Fufu incentivices the tools for a reactive thinking
+
+
+
+
+
+
+# Why - 
 - UI is naturally reactive from both end points(user and server)
-- CSS selectors, static styling replaced by much more powerfull Behaviors
 - Imperative abstractions and a lot of boilerplate replaced by streams and Behaviors
 - Avoid Large, Complex Layouts and Layout Thrashing by batching dom operations
-- Model your application through reactive streams without chaotic state management tools, i.e. flux, redux etc
-- Possibly has the best possible performance since diffing is obselete and mutating states relay on stream computation
+- Model your application through reactive computations without instead of unpredictable immutble state
+- Highly performant, diffing is obselete and mutating states relay on stream computation
+
+### CSS
+- CSS Dom instead of global stylesheets
+
 
 
 ### Simple Counter
@@ -20,7 +30,7 @@ import { map, switchLatest, constant, periodic, scan } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
 
 import { text, renderTo } from 'fufu'
-import { pipe } from '../common' // (f1, f2) => x => f2(f1(x))
+import { pipe } from '../common'
 
 const add = (n1: number, n2: number) => n1 + n2
 
@@ -39,11 +49,11 @@ branch(xForver(document.body))(
 import { constant, map, merge, scan, switchLatest, mergeArray } from '@most/core'
 import { pipe } from '../utils'
 import { style, branch, text, node, component, domEvent } from 'fufu'
-import * as stylesheet from '../stylesheet'
+import * as designSheet from '../stylesheet'
 
 
-const styledBtn = stylesheet.btn(node)
-const centeredContainer = pipe(stylesheet.centerStyle, stylesheet.row)(node)
+const styledBtn = designSheet.btn(node)
+const centeredContainer = pipe(designSheet.centerStyle, designSheet.row)(node)
 
 const countBtn = (str: string) => style({ margin: '6px' }, branch(styledBtn, text(str)))
 const add = (x: number, y: number) => (x + y)

@@ -1,4 +1,4 @@
-import { Stream } from 'fufu'
+import { Stream } from "@most/types"
 
 
 export type Path = string

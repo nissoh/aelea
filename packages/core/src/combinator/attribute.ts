@@ -1,66 +1,55 @@
 import { curry2 } from '@most/prelude'
-import { ElementType, IAttrProperties, ElementStream, Stream, DomNode } from '../types'
-import { map, merge } from '@most/core'
-import { Scheduler, Disposable, Sink } from '@most/types'
+import { NodeContainerType, IAttrProperties, $Node, ContainerDomNode } from '../types'
+import { map, now } from '@most/core'
+import { Scheduler, Disposable, Sink, Stream } from '@most/types'
+import { isStream } from 'src/utils'
 
 
 interface Attr {
-  <A, B, C extends ElementType, D>(attrs: Stream<IAttrProperties<A>> | IAttrProperties<A>): (ns: ElementStream<C, B, D>) => ElementStream<C, A & B, C>
-  <A, B, C extends ElementType, D>(attrs: Stream<IAttrProperties<A>> | IAttrProperties<A>, ns: ElementStream<C, B, D>): ElementStream<C, A & B, C>
-}
-
-interface ApplyAttr {
-  <A extends ElementType, B>(attrs: IAttrProperties<B>): (ns: A) => A
-  <A extends ElementType, B>(attrs: IAttrProperties<B>, ns: A): A
+  <A, B, C extends NodeContainerType, D>(attrs: Stream<IAttrProperties<A> | null> | IAttrProperties<A>, ns: $Node<C, B>): $Node<C, A & B>
+  <A, B, C extends NodeContainerType, D>(attrs: Stream<IAttrProperties<A> | null> | IAttrProperties<A>): (ns: $Node<C, B>) => $Node<C, A & B>
 }
 
 
-
-export const applyAttrCurry: ApplyAttr = curry2((attrs: any, node) => {
+export function applyAttrFn(attrs: IAttrProperties<unknown>, node: NodeContainerType) {
   if (attrs) {
-    Object.keys(attrs).forEach(attrKey => {
-      node.setAttribute(attrKey, attrs[attrKey])
-    })
+      Object.entries(attrs).forEach(([attrKey, value]) => {
+          if (value) {
+              node.setAttribute(attrKey, String(value))
+          } else {
+              node.removeAttribute(attrKey)
+          }
+      })
   }
 
   return node
-})
+}
 
+class AttributeSource<A, B, C extends NodeContainerType, D> implements $Node<C, A & B> {
 
-class AttributeSource<A, B, C extends ElementType, D> implements ElementStream<C, D, A & B> {
+  constructor(public attrs: Stream<IAttrProperties<A> | null> | IAttrProperties<A>, public source: $Node<C, A & B>) { }
 
-  constructor(public attrs: IAttrProperties<D>, public source: ElementStream<C, D, A & B>) { }
+  run(sink: Sink<ContainerDomNode<C, A & B>>, scheduler: Scheduler): Disposable {
 
-  run(sink: Sink<DomNode<C, D, A & B>>, scheduler: Scheduler): Disposable {
+    const attrsStream = isStream(this.attrs) ? this.attrs : now(this.attrs)
 
-    return map(ns => {
-      return {
-        ...ns,
-        attributes: map(newStyle => ({ ...newStyle, ...this.attrs }), ns.style)
-      }
-    }, this.source).run(sink, scheduler)
+    return map(ns =>
+      ({ ...ns, attributes: [...ns.attributes, attrsStream] }),
+      this.source
+    ).run(sink, scheduler)
   }
 
 }
 
 export const attr: Attr = curry2((attrsInput, source) => {
-  // pretty hacky.. kinda
-  if ((<any>attrsInput).run) {
-    return map(dn => {
-      const styleStream = map(styleObj => styleObj, attrsInput as Stream<IAttrProperties<unknown>>)
-      return {
-        ...dn,
-        attributes: merge(dn.attributes, styleStream
-        )
-      }
-    }, source)
+
+  if (isStream(attrsInput)) {
+    return new AttributeSource(attrsInput, source)
   }
 
   if (source instanceof AttributeSource) {
     return new AttributeSource({ ...source.attrs, ...attrsInput }, source.source)
   }
 
-  return new AttributeSource(attrsInput as IAttrProperties<unknown>, source)
+  return new AttributeSource(attrsInput, source)
 })
-
-

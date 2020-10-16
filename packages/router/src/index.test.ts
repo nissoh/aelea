@@ -1,8 +1,7 @@
 import { it, describe } from '@typed/test'
 import { now } from '@most/core'
-import { resolveUrl, resolve } from './index'
+import { match } from './index'
 import { collectOne } from '../utils'
-import { createPathState } from './resolve'
 import { curry2 } from '@most/prelude'
 import { O } from 'fufu'
 
@@ -11,9 +10,9 @@ const paths = now(rawFragments)
 const urlFragments = now(rawFragments.join('/'))
 
 const url1Comp = O(
-  resolveUrl('main'),
-  resolve('books'),
-  resolve(/\d+/)
+  match('main'),
+  match('books'),
+  match(/\d+/)
 )
 
 interface Prop {
@@ -27,13 +26,14 @@ const prop: Prop = curry2((key, obj: any) => obj[key])
 
 
 export default describe(`basic tests`, [
+
   it('matches fragments', async ({ equal }) => {
     const frsgs = (await collectOne(url1Comp(urlFragments))).fragments
     equal(frsgs, ['main', 'books', /\d+/])
   }),
   it('matches resolved fragments', ({ equal }) =>
     collectOne(url1Comp(urlFragments)).then(
-      O(prop('resolvedFragments'), equal(['main', 'books', '3']))
+      O(prop('match'), equal(['main', 'books', '3']))
     )
   ),
   it('matches remaining target fragments', ({ equal }) =>
@@ -46,6 +46,7 @@ export default describe(`basic tests`, [
       O(prop('targetRemaining'), equal(['chapters', '1']))
     )
   )
+
 ])
 
 

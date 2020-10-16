@@ -1,5 +1,5 @@
 
-import resolve from 'rollup-plugin-node-resolve'
+import resolve from '@rollup/plugin-node-resolve'
 import typescript from 'rollup-plugin-typescript2'
 import * as pkg from './package.json'
 
@@ -27,10 +27,8 @@ export default {
   plugins: [
     resolve(),
     typescript({
-      typescript: require('typescript'),
-      check: true,
-      useTsconfigDeclarationDir: true
+      useTsconfigDeclarationDir: true,
+      clean: true
     }),
-    // sourceMaps()
   ]
 }

@@ -2,6 +2,7 @@
   "extends": "./../../tsconfig",
   "compilerOptions": {
     "baseUrl": ".",
+    "target": "ES2020",
     "declarationDir": "dist/type-definitions"
   },
   "include": [

@@ -1,124 +1,200 @@
-import { Scheduler, Sink, Stream } from '@most/types'
-import { NodeType, NodeStream, Op, DomNode, StyleCSS } from '../types'
-import { now, map, empty, mergeArray, never, startWith, switchLatest } from '@most/core'
-import { O, isArrayOfOps } from 'src/utils'
+import { Scheduler, Sink, Stream, Time } from '@most/types'
+import { $ChildNode, Op, NodeChild, NodeContainerType, ContainerDomNode, NodeType, $Node } from '../types'
+import { now, map, never, switchLatest, mergeArray } from '@most/core'
+import { O, isFunction, Pipe, xForver, nullSink } from 'src/utils'
+import { disposeBoth, disposeNone, disposeWith } from '@most/disposable'
+import { compose, curry2, id } from '@most/prelude'
+import { applyAttrFn } from 'src'
 
 
-function disposeNode(el: NodeType) {
-  if (el.parentElement && el.parentElement.contains(el)) {
-    el.parentElement.removeChild(el)
+
+function appendToSlot(parent: ContainerDomNode<NodeContainerType>, child: NodeChild<NodeType>, insertAt: number) {
+  if (insertAt === 0) {
+    parent.element.prepend(child.element)
+    return
   }
+
+  parent.element.insertBefore(child.element, parent.element.children[insertAt])
 }
 
 
+export interface NodeComposeFn<TChildren, A extends NodeContainerType = NodeContainerType, B = {}, C = {}> {
+  <BB1, CC1>(o1: Op<ContainerDomNode<A, B>, ContainerDomNode<A, BB1>>): NodeComposeFn<TChildren, A, B & BB1, C & CC1>
+  <BB1, CC1, BB2, CC2>(o1: Op<ContainerDomNode<A, B>, ContainerDomNode<A, BB1>>, o2: Op<ContainerDomNode<A, BB1>, ContainerDomNode<A, BB1>>): NodeComposeFn<TChildren, A, B & BB1 & BB2, C & CC1 & CC2>
+  <BB1, CC1, BB2, CC2, BB3, CC3>(o1: Op<ContainerDomNode<A, B>, ContainerDomNode<A, BB1>>, o2: Op<ContainerDomNode<A, BB1>, ContainerDomNode<A, BB1>>, o3: Op<ContainerDomNode<A, BB1>, ContainerDomNode<A, BB1>>): NodeComposeFn<TChildren, A, B & BB1 & BB2 & BB3, C & CC1 & CC2 & CC3>
+  <BB1, CC1, BB2, CC2, BB3, BB4, CC3, CC4>(o1: Op<ContainerDomNode<A, B>, ContainerDomNode<A, BB1>>, o2: Op<ContainerDomNode<A, BB1>, ContainerDomNode<A, BB1>>, o3: Op<ContainerDomNode<A, BB1>, ContainerDomNode<A, BB1>>, o4: Op<ContainerDomNode<A, BB1>, ContainerDomNode<A, BB1>>): NodeComposeFn<TChildren, A, B & BB1 & BB2 & BB3 & BB4, C & CC1 & CC2 & CC3 & CC4>
+  <BB1, CC1, BB2, CC2, BB3, BB4, CC3, CC4, BB5, CC5>(o1: Op<ContainerDomNode<A, B>, ContainerDomNode<A, BB1>>, o2: Op<ContainerDomNode<A, BB1>, ContainerDomNode<A, BB1>>, o3: Op<ContainerDomNode<A, BB1>, ContainerDomNode<A, BB1>>, o4: Op<ContainerDomNode<A, BB1>, ContainerDomNode<A, BB1>>, ...o5: Op<ContainerDomNode<A, any>, ContainerDomNode<A, BB1>>[]): NodeComposeFn<TChildren, A, B & BB1 & BB2 & BB3 & BB4 & BB5, C & CC1 & CC2 & CC3 & CC4 & CC5>
 
-export type NodeCreationInput<B, C> = Op<B, C>[] | NodeStream<NodeType, any, any>[]
-export type TextCreationInput<B, C> = string[] | Stream<string>[] | Op<B, C>[]
+  (...childrenSegment: TChildren[]): $Node<A>
+}
 
-export class NodeSource<A extends NodeType, B, C, D> implements NodeStream<A, B, C> {
+
+class NodeSource<A extends NodeType, B extends NodeChild<A>> implements $ChildNode<A> {
+  constructor(private source: Stream<B>) { }
+
+  run(sink: Sink<B>, scheduler: Scheduler) {
+    const nodeSink = new NodeSourceSink(sink)
+    const disposable = this.source.run(nodeSink, scheduler)
+    return disposeBoth(disposable, nodeSink)
+  }
+}
+
+class NodeSourceSink<A extends NodeType, B extends NodeChild<A>> extends Pipe<B, B> {
+  disposable = disposeNone()
+
+  event(t: Time, node: B): void {
+    this.disposable = disposeWith(n => n.remove(), node.element)
+    this.sink.event(t, node)
+  }
+
+  dispose() {
+    this.disposable.dispose()
+  }
+}
+
+export class NodeRenderSink<T extends NodeContainerType> extends Pipe<ContainerDomNode<T>, ContainerDomNode<T>> {
+
+  disposable = disposeNone()
+  childrenSegmentSink: NodeRenderSink<T>[] = []
+  effectsDisposable = disposeNone()
+
   constructor(
-    private value: D,
-    private op: Op<D, A>,
-    private css: NodeStream<NodeType, any, any>[]
-  ) { }
+    private parent: ContainerDomNode,
+    private stylesheet: CSSStyleSheet,
+    private scheduler: Scheduler,
+    private csIndex: number,
+    sink: Sink<ContainerDomNode<T>>
+  ) {
+    super(sink)
+  }
 
 
-  run(sink: Sink<DomNode<A, B, C>>, scheduler: Scheduler) {
+  event(time: Time, node: ContainerDomNode<T>) {
+    this.disposable = disposeWith(n => n.remove(), node.element)
 
-    const ns = this.op(startWith(this.value, never()))
+    let insertAt = 0 // node.slot // asc order
+    for (let i = 0; i < this.csIndex; i++) {
+      insertAt = insertAt + this.parent.segmentsChildrenCount[i]
+    }
 
-    let parent: A | null = null
+    appendToSlot(this.parent, node, insertAt)
 
-    const disp = ns.run({
-      event: (time, node) => {
-        parent = node
-        const childrenStream = this.css.map((cs, i) =>
-          map(n => ({ ...n, slot: i }), cs)
-        )
+    this.parent.segmentsChildrenCount[this.csIndex]++
 
-        sink.event(time, {
-          node,
-          children: mergeArray(childrenStream),
-          slot: 0,
-          style: now({}),
-          attributes: now({})
-        })
-      },
-      error(t, err) {
-        sink.error(t, err)
-      },
-      end(t) {
-        sink.end(t)
-      }
-    }, scheduler)
+    if (node.childrenSegment) {
+      this.childrenSegmentSink = node.childrenSegment.map(($child, csIndex) => {
+        const csink = new NodeRenderSink(node, this.stylesheet, this.scheduler, csIndex, this.sink)
+        const disp = $child.run(csink, this.scheduler)
 
-    return {
-      dispose() {
-        disp.dispose()
-        if (parent) {
-          disposeNode(parent)
-        }
-      }
+        csink.disposable = disp
+
+        return csink
+      })
+
+      this.effectsDisposable = mergeArray([
+        ...node.style,
+        ...node.attributes.map(s =>
+          map(attrs => applyAttrFn(attrs, node.element), s)
+        ),
+      ])
+        .run(nullSink, this.scheduler)
+    }
+
+
+    this.sink.event(time, node)
+  }
+
+  end(t: Time) {
+    this.childrenSegmentSink.forEach(s => {
+      s.end(t)
+    })
+    this.sink.end(t)
+
+    this.dispose()
+  }
+
+  error(t: Time, err: any) {
+    this.sink.error(t, err)
+  }
+
+  dispose() {
+    this.parent.segmentsChildrenCount[this.csIndex]--
+    this.effectsDisposable.dispose()
+    this.disposable.dispose()
+  }
+
+}
+
+export const createNodeSource = <A extends NodeType, B extends NodeChild<A>>(source: Stream<B>): $ChildNode<A> =>
+  new NodeSource(source)
+
+export function createNodeContainer(parent: ContainerDomNode<NodeContainerType>, stylesheet: CSSStyleSheet) {
+  return {
+    run(sink: Sink<ContainerDomNode<HTMLElement>>, scheduler: Scheduler) {
+
+      const nodeSink = new NodeRenderSink(parent, stylesheet, scheduler, 0, sink)
+      nodeSink.disposable = mergeArray(parent.childrenSegment).run(nodeSink, scheduler)
+
+      return nodeSink
     }
   }
 }
 
-
-const textOp = O(
-  map((text: string | Stream<string>) => {
-    const txtNode = document.createElement('text')
-
-    if (typeof text === 'string') {
-      txtNode.appendChild(document.createTextNode(text))
-      return now(txtNode);
-    }
-
-    return map(x => {
-      txtNode.textContent = x
-      return txtNode
-    }, text)
-
-  }),
-
-  switchLatest
+const createTextNodeSource = curry2((slot: number, text: string): $ChildNode<Text> =>
+  createNodeSource(xForver({ element: document.createTextNode(text) }))
 )
 
 
-interface Nnode<A extends NodeType, B, C> {
-  (...children: NodeStream<NodeType, any, any>[]): NodeStream<A, B, C>
-  <BB1, CC1>(o1: Op<DomNode<A, B, C>, DomNode<A, BB1, CC1>>): Nnode<A, B & BB1, C & CC1>
-  <BB1, CC1, BB2, CC2>(o1: Op<DomNode<A, B, C>, DomNode<A, BB1, CC1>>, o2: Op<DomNode<A, BB1, CC1>, DomNode<A, BB2, CC2>>): Nnode<A, B & BB1 & BB2, C & CC1 & CC2>
-  <BB1, CC1, BB2, CC2, BB3, CC3>(o1: Op<DomNode<A, B, C>, DomNode<A, BB1, CC1>>, o2: Op<DomNode<A, BB1, CC1>, DomNode<A, BB2, CC2>>, o3: Op<DomNode<A, BB2, CC2>, DomNode<A, BB3, CC3>>): Nnode<A, B & BB1 & BB2 & BB3, C & CC1 & CC2 & CC3>
-  <BB1, CC1, BB2, CC2, BB3, BB4, CC3, CC4>(o1: Op<DomNode<A, B, C>, DomNode<A, BB1, CC1>>, o2: Op<DomNode<A, BB1, CC1>, DomNode<A, BB2, CC2>>, o3: Op<DomNode<A, BB2, CC2>, DomNode<A, BB3, CC3>>, o4: Op<DomNode<A, BB3, CC3>, DomNode<A, BB4, CC4>>): Nnode<A, B & BB1 & BB2 & BB3 & BB4, C & CC1 & CC2 & CC3 & CC4>
-  <BB1, CC1, BB2, CC2, BB3, BB4, CC3, CC4, BB5, CC5>(o1: Op<DomNode<A, B, C>, DomNode<A, BB1, CC1>>, o2: Op<DomNode<A, BB1, CC1>, DomNode<A, BB2, CC2>>, o3: Op<DomNode<A, BB2, CC2>, DomNode<A, BB3, CC3>>, o4: Op<DomNode<A, BB3, CC3>, DomNode<A, BB4, CC4>>, ...o5: Op<DomNode<A, any, any>, DomNode<A, BB5, CC5>>[]): Nnode<A, B & BB1 & BB2 & BB3 & BB4 & BB5, C & CC1 & CC2 & CC3 & CC4 & CC5>
+export const create = <A, B extends NodeContainerType>(sourceOp: Op<A, B>, postOp: Op<ContainerDomNode<B>, ContainerDomNode<B>> = id) => (sourceOpValue: A): NodeComposeFn<$ChildNode, B> => {
+  return function nodeComposeFn(...input: any[]): any {
+    if (input.some(isFunction)) {
+      // @ts-ignore
+      const inputFinalOp: Op<ContainerDomNode<B>, ContainerDomNode<B>> = O(...input)
+
+      return create(sourceOp, compose(inputFinalOp, postOp))(sourceOpValue)
+    }
+
+    const childrenSegment = input.length ? input as $ChildNode<B>[] : [never()]
+    const segmentsChildrenCount: number[] = Array(childrenSegment.length).fill(0)
+
+    const createNodeOp = O(
+      sourceOp,
+      map(element => {
+        return <ContainerDomNode<B>>{
+          element,
+          childrenSegment,
+          segmentsChildrenCount,
+          slot: 0,
+          style: [],
+          disposable: disposeNone(),
+          attributes: []
+        }
+      })
+    )
+
+    return postOp(createNodeSource(createNodeOp(xForver(sourceOpValue))))
+  }
 }
 
 
-export const create = <A, B extends NodeType>(sourceOp: Op<A, B>) => (something: A): Nnode<B, {}, StyleCSS<{}>> => {
-  function nnode(...input: NodeCreationInput<A, B>) {
-    const isOpsInput = isArrayOfOps(input)
+export const $textFn = <A extends HTMLElement>(postOp: Op<ContainerDomNode<A>, ContainerDomNode<A>> = O(x => x)): NodeComposeFn<string | Stream<string>, A> => {
+  return function textComp(...input: any[]) {
 
-    if (isOpsInput) {
-      return <C extends DomNode<B, any, any>>(...args: NodeCreationInput<B, C>) => {
+    if (input.some(isFunction)) {
+      // @ts-ignore
+      const inputFinalOp: Op<ContainerDomNode<A>, ContainerDomNode<A>> = O(...input)
 
-        const opsInput = <Op<any, any>[]>input
-
-        if (isArrayOfOps(args)) {
-          return nnode(...opsInput, ...args as Op<any, any>[])
-        }
-
-        // @ts-ignore
-        const oop = O(...opsInput as any)
-        return oop(nnode(...<any>args))
-      }
+      return $textFn(compose(inputFinalOp, postOp)) as any
     }
 
-    const children = (input.length ? input : [empty()]) as NodeStream<NodeType, any, any>[]
+    const children: Stream<NodeChild<Text>>[] = input.map((x, slot) => {
+      const strStream = typeof x === 'string' ? now(x) : x as Stream<string>
 
-    return new NodeSource(something, sourceOp, children)
+      return switchLatest(map(createTextNodeSource(slot), strStream))
+    })
+
+    return create(map(_ => document.createElement('text')), postOp)(null)(...children)
   }
-
-  return nnode as any
 }
 
 
@@ -126,34 +202,5 @@ export const $svg = create(map(<K extends keyof SVGElementTagNameMap>(a: K) => d
 export const $element = create(map(<K extends keyof HTMLElementTagNameMap>(a: K) => document.createElement(a)))
 export const $custom = create(map((a: string) => document.createElement(a)))
 export const $node = $custom('node')
-
-
-interface Ntext {
-  <A, B>(...children: string[] | Stream<string>[]): NodeStream<HTMLElement, A, B>
-  <A1, B1>(...ops: Op<DomNode<HTMLElement, any, any>, DomNode<HTMLElement, A1, B1>>[]): Ntext
-}
-
-export const $text: Ntext = <B, C>(...input: TextCreationInput<B, C>): any => {
-  const isOpsInput = isArrayOfOps(input)
-
-  if (isOpsInput) {
-    return <BB, CC>(...args: TextCreationInput<B & BB,C & CC>): any => {
-
-      const opsInput = <Op<any, any>[]>input
-
-      if (isArrayOfOps(args)) {
-        return $text(...opsInput as any, ...args as Op<any, any>[])
-      }
-
-      // @ts-ignore
-      const oop = O(...opsInput)
-      return oop($text(...<any>args))
-    }
-  }
-
-  return new NodeSource(<any>input[0], textOp, [empty()])
-}
-
-
-
-
+export const $text = $textFn(id)
+export const $wrapNativeElement = create(map((rootNode: HTMLElement) => rootNode))

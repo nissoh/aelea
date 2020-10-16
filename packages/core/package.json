@@ -1,6 +1,6 @@
 {
   "name": "fufu",
-  "version": "0.0.3-alpha.0",
+  "version": "0.0.2-alpha.0",
   "main": "dist/commonjs/index.js",
   "module": "dist/module/index.js",
   "browser": "dist/browser/index.js",
@@ -10,7 +10,7 @@
     "rollup": "./../../node_modules/.bin/rollup -c rollup.config.js --",
     "rollup:watch": "./../../node_modules/.bin/rollup -w -c rollup.config.js",
     "build": "npm run clean && npm run rollup",
-    "build:dev": "npm run rollup:watch",
+    "dev": "npm run rollup:watch",
     "test": "npm run lint && npm run test:unit",
     "test:unit": "./../../node_modules/.bin/typed-test -r jsdom-global/register src/*.test.ts --browser chrome",
     "lint": "./../../node_modules/.bin/tslint --fix 'src/**/*.ts'",
@@ -21,12 +21,12 @@
     "url": "https://github.com/nissoh/fufu"
   },
   "dependencies": {
-    "@most/core": "1.5.0",
-    "@most/disposable": "1.2.2",
-    "@most/prelude": "1.7.3",
-    "@most/scheduler": "1.2.3",
-    "@most/types": "1.0.2",
-    "csstype": "2.6.10"
+    "@most/core": "1.6.1",
+    "@most/disposable": "1.3.0",
+    "@most/prelude": "1.8.0",
+    "@most/scheduler": "1.3.0",
+    "@most/types": "1.1.0",
+    "csstype": "3.0.2"
   },
   "license": "MIT",
   "author": "Nissan Hanina <nissan@yo.ma>",

@@ -4,18 +4,18 @@
     "noImplicitAny": true,
     "sourceMap": true,
     "strict": true,
-    // "strictFunctionTypes": false,
     "pretty": true,
-    // "keyofStringsOnly": true,
     "noUnusedLocals": false,
     "resolveJsonModule": true,
     "declaration": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "declarationMap": true,
     "lib": [
-      "dom",
-      "es5",
-      "es2015"
+      "DOM",
+      "es2020"
     ],
-    "target": "es6",
+    "target": "ES2020",
     "module": "es6",
     "moduleResolution": "node"
   }

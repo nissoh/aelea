@@ -1,10 +1,10 @@
 
 
-import { map, until, filter, skipRepeatsWith, skipRepeats, chain } from '@most/core'
+import { map, until, filter, skipRepeatsWith, skipRepeats, chain, tap } from '@most/core'
 import { isMatched } from './resolve'
 import { PathEvent, Fragment, Route } from './types'
 import { Stream } from '@most/types'
-import { Op, O } from 'fufu'
+import { Op, O, $Node, NodeContainerType } from 'fufu'
 
 
 const routerDefaults = {
@@ -54,7 +54,7 @@ function resolveRoute(pathChange: Stream<PathEvent>, parentFragments: Fragment[]
       diff,
       filter(next => {
         return isMatched(fragment, next.target[fragIdx])
-      })
+      }),
     )
 
     const currentMiss = O(
@@ -73,8 +73,13 @@ function resolveRoute(pathChange: Stream<PathEvent>, parentFragments: Fragment[]
 }
 
 
-export const path = (route: Route) => <T>(ns: Stream<T>) => {
-  return chain(() => until(route.miss, ns), route.match)
+export const path = <A extends NodeContainerType, B extends $Node<A>>(route: Route) => (ns: B) => {
+  return chain(() => until(route.miss, tap(x => {
+    setTimeout(() => {
+      x.element.scrollIntoView({behavior: 'smooth'});
+    }, 30)
+
+  }, ns)), route.match)
 }
 
 
