@@ -89,8 +89,10 @@ const element = (
                         map(x => {
                             const dummy = document.createElement('dummy')
                             node.element.appendChild(dummy)
-                            const vm = fromPromise(sdk.embedProject(dummy, project, embedOptions))
-
+                            const vm = fromPromise(
+                                sdk.embedProjectId(dummy, 'typescript-hbfabr', embedOptions)
+                            )
+                            // https://github.com/nissoh/fufu/tree/v1
                             const frame = node.element.querySelector('iframe')!
 
                             frame.style.border = 'none'
