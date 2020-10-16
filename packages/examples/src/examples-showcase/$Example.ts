@@ -21,8 +21,6 @@ import { flex, spacingBig } from '../common/stylesheet';
 //     })
 // )
 
-console.log(__dirname)
-
 
 export default (...$content: $Node<HTMLElement, {}>[]) => component((
     []: Behavior<PointerEvent, PointerEvent>,
