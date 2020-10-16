@@ -1,5 +1,5 @@
 import { Scheduler, Sink, Stream, Time } from '@most/types'
-import { NodeStream, Op, NodeChild, NodeContainerType, ContainerDomNode, NodeType, ElementStream } from '../types'
+import { $ChildNode, Op, NodeChild, NodeContainerType, ContainerDomNode, NodeType, $Node } from '../types'
 import { now, map, never, switchLatest, mergeArray } from '@most/core'
 import { O, isFunction, Pipe, xForver, nullSink } from 'src/utils'
 import { disposeBoth, disposeNone, disposeWith } from '@most/disposable'
@@ -25,11 +25,11 @@ export interface NodeComposeFn<TChildren, A extends NodeContainerType = NodeCont
   <BB1, CC1, BB2, CC2, BB3, BB4, CC3, CC4>(o1: Op<ContainerDomNode<A, B>, ContainerDomNode<A, BB1>>, o2: Op<ContainerDomNode<A, BB1>, ContainerDomNode<A, BB1>>, o3: Op<ContainerDomNode<A, BB1>, ContainerDomNode<A, BB1>>, o4: Op<ContainerDomNode<A, BB1>, ContainerDomNode<A, BB1>>): NodeComposeFn<TChildren, A, B & BB1 & BB2 & BB3 & BB4, C & CC1 & CC2 & CC3 & CC4>
   <BB1, CC1, BB2, CC2, BB3, BB4, CC3, CC4, BB5, CC5>(o1: Op<ContainerDomNode<A, B>, ContainerDomNode<A, BB1>>, o2: Op<ContainerDomNode<A, BB1>, ContainerDomNode<A, BB1>>, o3: Op<ContainerDomNode<A, BB1>, ContainerDomNode<A, BB1>>, o4: Op<ContainerDomNode<A, BB1>, ContainerDomNode<A, BB1>>, ...o5: Op<ContainerDomNode<A, any>, ContainerDomNode<A, BB1>>[]): NodeComposeFn<TChildren, A, B & BB1 & BB2 & BB3 & BB4 & BB5, C & CC1 & CC2 & CC3 & CC4 & CC5>
 
-  (...childrenSegment: TChildren[]): ElementStream<A>
+  (...childrenSegment: TChildren[]): $Node<A>
 }
 
 
-export class NodeSource<A extends NodeType, B extends NodeChild<A>, C> implements NodeStream<A> {
+class NodeSource<A extends NodeType, B extends NodeChild<A>> implements $ChildNode<A> {
   constructor(private source: Stream<B>) { }
 
   run(sink: Sink<B>, scheduler: Scheduler) {
@@ -70,6 +70,7 @@ export class NodeRenderSink<T extends NodeContainerType> extends Pipe<ContainerD
 
 
   event(time: Time, node: ContainerDomNode<T>) {
+    this.disposable = disposeWith(n => n.remove(), node.element)
 
     let insertAt = 0 // node.slot // asc order
     for (let i = 0; i < this.csIndex; i++) {
@@ -124,7 +125,7 @@ export class NodeRenderSink<T extends NodeContainerType> extends Pipe<ContainerD
 
 }
 
-const createNodeSource = <A extends NodeType, B extends NodeChild<A>>(source: Stream<B>): NodeStream<A> =>
+export const createNodeSource = <A extends NodeType, B extends NodeChild<A>>(source: Stream<B>): $ChildNode<A> =>
   new NodeSource(source)
 
 export function createNodeContainer(parent: ContainerDomNode<NodeContainerType>, stylesheet: CSSStyleSheet) {
@@ -139,12 +140,12 @@ export function createNodeContainer(parent: ContainerDomNode<NodeContainerType>,
   }
 }
 
-const createTextNodeSource = curry2((slot: number, text: string): NodeStream<Text> =>
+const createTextNodeSource = curry2((slot: number, text: string): $ChildNode<Text> =>
   createNodeSource(xForver({ element: document.createTextNode(text) }))
 )
 
 
-export const create = <A, B extends NodeContainerType>(sourceOp: Op<A, B>, postOp: Op<ContainerDomNode<B>, ContainerDomNode<B>> = id) => (sourceOpValue: A): NodeComposeFn<NodeStream, B> => {
+export const create = <A, B extends NodeContainerType>(sourceOp: Op<A, B>, postOp: Op<ContainerDomNode<B>, ContainerDomNode<B>> = id) => (sourceOpValue: A): NodeComposeFn<$ChildNode, B> => {
   return function nodeComposeFn(...input: any[]): any {
     if (input.some(isFunction)) {
       // @ts-ignore
@@ -153,7 +154,7 @@ export const create = <A, B extends NodeContainerType>(sourceOp: Op<A, B>, postO
       return create(sourceOp, compose(inputFinalOp, postOp))(sourceOpValue)
     }
 
-    const childrenSegment = input.length ? input as NodeStream<B>[] : [never()]
+    const childrenSegment = input.length ? input as $ChildNode<B>[] : [never()]
     const segmentsChildrenCount: number[] = Array(childrenSegment.length).fill(0)
 
     const createNodeOp = O(

@@ -1,9 +1,9 @@
 import { map, empty, mergeArray, merge } from "@most/core"
-import { component, Behavior, DomNode, $element, style, attr, event, $node, O } from "fufu"
-import { Control } from "../form"
+import { component, Behavior, ContainerDomNode, $element, style, attr, event, $node, O } from "fufu"
+import { Control } from "../../common/form"
 import { interactionOp, dismissOp } from "./form.common"
 
-import * as designSheet from '../style/stylesheet'
+import * as designSheet from '../../common/stylesheet'
 import { Stream } from "@most/types"
 
 
@@ -11,9 +11,9 @@ export interface Checkbox extends Control {
   setCheck?: Stream<boolean>
 }
 
-export const $Checkbox = (props: Checkbox) => component((
-  [interactionBehavior, focusStyle]: Behavior<DomNode, true>,
-  [dismissBehavior, dismissstyle]: Behavior<DomNode, false>,
+export default (props: Checkbox) => component((
+  [interactionBehavior, focusStyle]: Behavior<ContainerDomNode, true>,
+  [dismissBehavior, dismissstyle]: Behavior<ContainerDomNode, false>,
   [sampleCheck, check]: Behavior<ContainerDomNode<HTMLInputElement>, boolean>
 ) => {
 

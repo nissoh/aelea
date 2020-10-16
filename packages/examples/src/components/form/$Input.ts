@@ -1,11 +1,11 @@
-import { map, combine } from "@most/core";
-import { $element, attr, Behavior, component, DomNode, stylePseudo, event } from "fufu";
+import { combine, map, tap } from "@most/core";
+import { $element, attr, Behavior, component, ContainerDomNode, event, stylePseudo } from "fufu";
+import { Input, InputType } from "../../common/form";
+import * as designSheet from '../../common/stylesheet';
 
-import { Input, InputType } from "../form";
-import * as designSheet from '../style/stylesheet'
 
-export const $Input = (props: Input) => component((
-    [sampleValue, value]: Behavior<DomNode, string>
+export default (props: Input) => component((
+    [sampleValue, value]: Behavior<ContainerDomNode, string>
 ) => {
 
     return [

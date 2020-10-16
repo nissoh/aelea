@@ -1,10 +1,10 @@
-import { style, component, Behavior, O } from "fufu"
 import { now } from "@most/core"
-import { $row, $TrashBtn } from "../../common/common"
-import { spacing } from "../../common/style/stylesheet"
-import { $Checkbox } from "../../common/form/checkbox"
-import { $Input } from "../../common/form/input"
 import { Stream } from "@most/types"
+import { Behavior, component, O, style } from "fufu"
+import { $row, $TrashBtn } from "../../common/common"
+import { spacing } from "../../common/stylesheet"
+import $Checkbox from "../form/$Checkbox"
+import $Input from "../form/$Input"
 import { Todo } from "./$CreateTodo"
 
 

@@ -1,14 +1,14 @@
-import { component, Behavior, $text } from "fufu";
-import { $column } from "../common";
-import { Input, $label } from "../form";
-import { $Input } from "./input";
-import * as designSheet from '../style/stylesheet'
+import { $text, Behavior, component } from "fufu";
+import { $column } from "../../common/common";
+import { $label, Input } from "../../common/form";
+import * as designSheet from '../../common/stylesheet';
+import $Input from "./$Input";
 
 export interface Field extends Input {
   label: string
 }
 
-export const $Field = (props: Field) => component((
+export default (props: Field) => component((
   [sampleValue, value]: Behavior<string, string>
 ) => [
 

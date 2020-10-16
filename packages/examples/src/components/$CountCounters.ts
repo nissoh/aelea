@@ -1,14 +1,10 @@
 
-import { chain, until, map, constant, merge, snapshot, mergeArray } from '@most/core'
-import { id } from '@most/prelude'
-import { component, $text, Behavior, behavior, style, $node } from 'fufu'
-
+import { chain, constant, map, merge, mergeArray, snapshot, until } from '@most/core'
+import { $text, Behavior, behavior, component, style } from 'fufu'
 import { $column, $row, $seperator } from '../common/common'
-import { $Button } from '../common/form/button'
-import * as designSheet from '../common/style/stylesheet'
-
-import $Counter, { sumFromZeroOp } from '../counter/$Counter'
-
+import * as designSheet from '../common/stylesheet'
+import $Counter, { sumFromZeroOp } from './$Counter'
+import $Button from './form/$Button'
 
 const $AddBtn = $Button({
   $content: $text('Add One')

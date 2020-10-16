@@ -63,13 +63,14 @@ export const text = style({
 export const main = O(
   text,
   style({
-    minHeight: '100vh',
+    height: '100vh',
+    overflow: 'auto',
     color: theme.text,
     backgroundColor: theme.baseDark,
     margin: '0',
     display: 'flex',
     flexDirection: 'column',
-  })
+  }),
 )
 
 

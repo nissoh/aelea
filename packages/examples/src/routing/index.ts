@@ -1,9 +1,9 @@
 import { map, mergeArray, multicast, now } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
-import { $element, $text, attr, Behavior, component, DomNode, event, eventElementTarget, NodeStream, Op, runAt, style } from 'fufu'
+import { $element, $text, attr, Behavior, component, ContainerDomNode, event, eventElementTarget, $ChildNode, Op, runAt, style } from 'fufu'
 import { path, router } from 'fufu-router'
 import { $bodyRoot, $column, $mainCard, $row } from '../common/common'
-import * as designSheet from '../common/style/stylesheet'
+import * as designSheet from '../common/stylesheet'
 
 
 const initialPath = map(location => location.pathname, now(document.location))
@@ -18,14 +18,14 @@ const $anchor = $element('a')(
 
 interface Link {
   href: string,
-  $content: NodeStream
+  $content: $ChildNode
 }
 
 const $Link = (props: Link) => component((
   [sampleClick, click]
 ) => {
 
-  const changeLocationBehavior: Op<DomNode, DomNode> = sampleClick(
+  const changeLocationBehavior: Op<ContainerDomNode, ContainerDomNode> = sampleClick(
     event('click'),
     map((clickEv): string => {
       clickEv.preventDefault()
@@ -53,7 +53,7 @@ const $Link = (props: Link) => component((
 
 
 const $Main = component((
-  [sampleLinkClick, routeChanges]: Behavior<DomNode, string>
+  [sampleLinkClick, routeChanges]: Behavior<ContainerDomNode, string>
 ) => {
 
   const routeChange = mergeArray([

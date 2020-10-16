@@ -1,7 +1,7 @@
 import { Stream } from '@most/types'
 import { style, $element } from 'fufu'
 
-import * as designSheet from './style/stylesheet'
+import * as designSheet from './stylesheet'
 
 export enum InputType {
   TEXT = 'text',

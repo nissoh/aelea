@@ -1,8 +1,8 @@
 import { constant, map, merge, scan } from '@most/core'
 import { style, $text, component, O, Behavior } from 'fufu'
-import * as designSheet from '../common/style/stylesheet'
+import * as designSheet from '../common/stylesheet'
 import { $column, $row, $TrashBtn } from '../common/common'
-import { $Button } from '../common/form/button'
+import $Button from './form/$Button'
 
 
 export const sumFromZeroOp = scan((current: number, x: number) => current + x, 0)
@@ -26,6 +26,7 @@ export default component((
   return [
 
     $row(style({ alignItems: 'center', placeContent: 'space-between' }), designSheet.spacing)(
+
       $column($counterContainerStyle)(
         $Button({ $content: $text('+') })({
           click: sampleIncrement(constant(1))
@@ -42,6 +43,7 @@ export default component((
       $TrashBtn({
         click: sampleDispose()
       }),
+
     ),
 
     {

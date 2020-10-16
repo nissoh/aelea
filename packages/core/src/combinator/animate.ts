@@ -1,10 +1,11 @@
 
 import { Scheduler, Sink, Stream, Disposable } from '@most/types'
 import { currentTime, } from '@most/scheduler'
-import { skipAfter, scan, map, continueWith } from '@most/core'
+import { skipAfter, scan, map, continueWith, constant, switchLatest } from '@most/core'
 import { O } from 'src/utils'
 import { disposeWith } from '@most/disposable'
 import { Op } from 'src/types'
+import { compose } from '@most/prelude'
 
 // copied & modified from https://github.com/mostjs/x-animation-frame/tree/master
 export type RafHandlerId = number
@@ -49,6 +50,18 @@ export const animationFrames = (afp: AnimationFrames): Stream<AnimationFrame> =>
   continueWith(() => animationFrames(afp), nextAnimationFrame(afp))
 
 
+
+export const drawLatest = compose(
+  switchLatest as any,
+  map(x => constant(x, nextAnimationFrame(window))),
+) as <A>(x: Stream<A>) => Stream<A>
+
+
+interface Motion {
+  stiffness: number
+  damping: number
+}
+
 /*
 // Applying motion using "spring physics"
 // noWobble  stiffness 170 damping 26
@@ -59,10 +72,7 @@ export const animationFrames = (afp: AnimationFrames): Stream<AnimationFrame> =>
 // modified from
 // https://github.com/chenglou/react-motion/blob/master/src/stepper.js
 */
-export const motion = (
-  stiffness = 210,
-  damping = 20,
-) => {
+export const motion = ({ stiffness = 210, damping = 20 }: Partial<Motion> = {}) => {
 
   const motionState = Object.freeze({ position: 0, velocity: 0 })
 

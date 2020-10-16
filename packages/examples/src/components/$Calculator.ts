@@ -1,12 +1,12 @@
 
 import { map, combine, startWith, now } from '@most/core'
-import { component, $node, $text, style, O, Behavior, create, runAt } from 'fufu'
-import { newDefaultScheduler } from '@most/scheduler'
-import { $row, $column, $examplesRoot } from '../common/common'
+import { component, $node, $text, style, O, Behavior } from 'fufu'
+import { $row, $column } from '../common/common'
 
-import * as designSheet from '../common/style/stylesheet'
-import { $Input } from '../common/form/input'
+import * as designSheet from '../common/stylesheet'
+import $Input from './form/$Input'
 import { InputType } from '../common/form'
+
 
 
 const add = (x: number, y: number) => x + y
@@ -25,7 +25,7 @@ const $plus = $node(
   designSheet.displayFlex
 )
 
-const $Add = component((
+export default component((
   [sampleX, x]: Behavior<string, number>,
   [sampleY, y]: Behavior<string, number>
 ) =>
@@ -58,23 +58,5 @@ const $Add = component((
     )
   ]
 )
-
-
-
-const $body = create(map(x => x))(document.body)(
-  designSheet.main,
-)
-
-
-
-
-runAt(
-  $examplesRoot(
-    $Add()
-  ),
-  newDefaultScheduler()
-)
-
-
 
 

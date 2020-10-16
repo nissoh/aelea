@@ -8,6 +8,9 @@
     "noUnusedLocals": false,
     "resolveJsonModule": true,
     "declaration": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "declarationMap": true,
     "lib": [
       "DOM",
       "es2020"

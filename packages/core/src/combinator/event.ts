@@ -1,7 +1,7 @@
 import { join, map } from '@most/core'
 import { curry2 } from '@most/prelude'
-import { Scheduler, Sink, Stream } from '@most/types'
-import { NodeType, NodeStream } from '../types'
+import { Stream } from '@most/types'
+import { NodeType, $ChildNode } from '../types'
 
 type PickEvent<A, B> = A extends keyof B ? B[A] : Event
 
@@ -18,34 +18,33 @@ type ElementEventTypeMap<A extends ElementEventNameList, B> =
   : GuessByName<A>
 
 
-export interface NodeEventTarget {
-  <A extends ElementEventNameList, B extends EventTarget>(eventType: A, node: B, options?: boolean | AddEventListenerOptions): Stream<ElementEventTypeMap<A, B>>
-  <A extends ElementEventNameList, B extends EventTarget>(eventType: A): (node: B, options?: boolean | AddEventListenerOptions) => Stream<ElementEventTypeMap<A, B>>
-}
 
-
-export const eventElementTarget: NodeEventTarget = curry2((eventType, target, options = undefined) => {
+export function eventElementTarget<A extends ElementEventNameList, B extends EventTarget>(eventType: A, node: B, options: boolean | AddEventListenerOptions = false): Stream<ElementEventTypeMap<A, B>> {
   return {
-    run(sink: Sink<Event>, scheduler: Scheduler) {
-      const cb = (e: Event) => sink.event(scheduler.currentTime(), e)
-      const dispose = () => target.removeEventListener(eventType, cb, options)
+    run(sink, scheduler) {
+      const cb = (e: any) => sink.event(scheduler.currentTime(), e)
+      const dispose = () => node.removeEventListener(eventType, cb, options)
 
-      target.addEventListener(eventType, cb, options)
+      node.addEventListener(eventType, cb, options)
 
       return { dispose }
     }
   }
-})
+}
+
 
 export interface NodeEvent {
-  <A extends ElementEventNameList, B extends NodeType, C, D>(eventType: A, node: NodeStream<B>): Stream<ElementEventTypeMap<A, B>>
-  <A extends ElementEventNameList, B extends NodeType, C, D>(eventType: A): (node: NodeStream<B>) => Stream<ElementEventTypeMap<A, B>>
+  <A extends ElementEventNameList, B extends NodeType>(eventType: A, node: $ChildNode<B>): Stream<ElementEventTypeMap<A, B>>
+  <A extends ElementEventNameList, B extends NodeType>(eventType: A): (node: $ChildNode<B>) => Stream<ElementEventTypeMap<A, B>>
 }
 
 
 export const event: NodeEvent = curry2((eventType, node) => {
   return join(
-    map(ns => eventElementTarget(eventType, ns.element), node)
+    map(ns => {
+
+      return eventElementTarget(eventType, ns.element, false)
+    }, node)
   )
 })
 

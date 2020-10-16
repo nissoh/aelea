@@ -27,7 +27,8 @@ export default {
   plugins: [
     resolve(),
     typescript({
-      useTsconfigDeclarationDir: true
+      useTsconfigDeclarationDir: true,
+      clean: true
     }),
   ]
 }

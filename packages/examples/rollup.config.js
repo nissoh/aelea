@@ -58,6 +58,14 @@ export default {
       open: true,
       single: true,
       serveStatic: ['./'],
+      xors: true,
+      cors: true,
+      middleware: function (req, res, next) {
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        console.log(res)
+        next();
+      }
       // proxy: "localhost:4700"
     })
   ]

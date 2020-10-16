@@ -3,13 +3,9 @@
   "license": "MIT",
   "scripts": {
     "rollup": "./../../node_modules/.bin/rollup --watch -c rollup.config.js",
-    "add-ui": "npm run rollup -i ./src/add-ui/index.ts",
-    "simple-example": "npm run rollup --entry ./src/simple-example/index.ts",
-    "routing": "npm run rollup --entry ./src/routing/index.ts",
-    "all-examples": "npm run rollup --entry ./src/all-examples/index.ts",
-    "todo-app": "npm run rollup --entry ./src/todo-app/index.ts",
-    "fufu-web": "npm run rollup --entry ./src/fufu-web/index.ts",
-    "counter-counter": "npm run rollup --entry ./src/counter-counter/index.ts"
+    "routing": "npm run rollup --entry ./src/run-example/routing/index.ts",
+    "all-examples": "npm run rollup --entry ./src/examples-showcase/showcase.ts",
+    "fufu-web": "npm run rollup --entry ./src/run-example/fufu-web/index.ts"
   },
   "dependencies": {
     "@most/core": "1.6.1",
@@ -18,10 +14,12 @@
     "@most/scheduler": "1.3.0",
     "@most/types": "1.1.0",
     "fufu": "^0.0.3-alpha.0",
-    "fufu-router": "^0.0.3-alpha.0"
+    "fufu-router": "^0.0.3-alpha.0",
+    "@stackblitz/sdk": "1.5.1",
+    "codesandbox": "2.2.1"
   },
   "devDependencies": {
-    "rollup-plugin-browsersync": "1.1.0"
+    "rollup-plugin-browsersync": "1.3.1"
   },
   "private": true
 }

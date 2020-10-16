@@ -1,5 +1,5 @@
 import { Sink, Scheduler, Disposable, Stream } from '@most/types'
-import { ElementStream, NodeContainerType, StyleCSS, ContainerDomNode } from '../types'
+import { $Node, NodeContainerType, StyleCSS, ContainerDomNode } from '../types'
 import * as CSS from 'csstype'
 
 import { loop, map } from '@most/core'
@@ -7,14 +7,14 @@ import { curry2, curry3 } from '@most/prelude'
 
 
 interface StyleCurry {
-  <C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>, node: ElementStream<C, D>): ElementStream<C, D>
-  <C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>): (node: ElementStream<C, D>) => ElementStream<C, D>
+  <C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>, node: $Node<C, D>): $Node<C, D>
+  <C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>): (node: $Node<C, D>) => $Node<C, D>
 }
 
 interface StylePseudoCurry {
-  <A, B, C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E, styleInput: StyleCSS | Stream<StyleCSS | null>, node: ElementStream<C, D>): ElementStream<C, D>
-  <A, B, C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E, styleInput: StyleCSS | Stream<StyleCSS | null>): (node: ElementStream<C, D>) => ElementStream<C, D>
-  <A, B, C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E): (styleInput: StyleCSS | Stream<StyleCSS | null>) => (node: ElementStream<C, D>) => ElementStream<C, D>
+  <A, B, C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E, styleInput: StyleCSS | Stream<StyleCSS | null>, node: $Node<C, D>): $Node<C, D>
+  <A, B, C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E, styleInput: StyleCSS | Stream<StyleCSS | null>): (node: $Node<C, D>) => $Node<C, D>
+  <A, B, C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E): (styleInput: StyleCSS | Stream<StyleCSS | null>) => (node: $Node<C, D>) => $Node<C, D>
 }
 
 function useStyleRule(pseudoClass: CSS.Pseudos | string, styles: StyleCSS) {
@@ -46,9 +46,9 @@ export class StyleRule {
   activeUsages = 1
 }
 
-class StyleInlineSource<A, B, C extends NodeContainerType, D, E extends string> implements ElementStream<C, D> {
+class StyleInlineSource<A, B, C extends NodeContainerType, D, E extends string> implements $Node<C, D> {
 
-  constructor(public pseudo: CSS.Pseudos | E, public styleInput: StyleCSS, public source: ElementStream<C, D>) { }
+  constructor(public pseudo: CSS.Pseudos | E, public styleInput: StyleCSS, public source: $Node<C, D>) { }
 
   run(sink: Sink<ContainerDomNode<C, D>>, scheduler: Scheduler): Disposable {
     const cssClass = useStyleRule(this.pseudo, this.styleInput)
@@ -71,9 +71,9 @@ class StyleInlineSource<A, B, C extends NodeContainerType, D, E extends string> 
 }
 
 
-class StyleSource<A, B, C extends NodeContainerType, D, E extends string> implements ElementStream<C, D> {
+class StyleSource<A, B, C extends NodeContainerType, D, E extends string> implements $Node<C, D> {
 
-  constructor(public pseudo: CSS.Pseudos | E, public styleInput: Stream<StyleCSS | null>, public source: ElementStream<C, D>) { }
+  constructor(public pseudo: CSS.Pseudos | E, public styleInput: Stream<StyleCSS | null>, public source: $Node<C, D>) { }
 
   run(sink: Sink<ContainerDomNode<C, D>>, scheduler: Scheduler): Disposable {
 
@@ -140,8 +140,8 @@ function styleObjectAsString(styleObj: StyleCSS) {
     .join("");
 }
 
-
-function styleFn<C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>, source: ElementStream<C, D>, pseudoClass = ''): ElementStream<C, D> {
+// Todo sed
+function styleFn<C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>, source: $Node<C, D>, pseudoClass = ''): $Node<C, D> {
 
   if (!('run' in styleInput)) {
     if (source instanceof StyleInlineSource && source.pseudo === pseudoClass) {
@@ -154,7 +154,7 @@ function styleFn<C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<S
   return new StyleSource(pseudoClass, styleInput, source)
 }
 
-function stylePseudoFn<C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E, styleInput: StyleCSS | Stream<StyleCSS | null>, source: ElementStream<C, D>): ElementStream<C, D> {
+function stylePseudoFn<C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E, styleInput: StyleCSS | Stream<StyleCSS | null>, source: $Node<C, D>): $Node<C, D> {
   return styleFn(styleInput, source, pseudoClass)
 }
 

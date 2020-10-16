@@ -1,7 +1,7 @@
-import { $custom, $node, $svg, attr, $wrapNativeElement, style, NodeStream } from 'fufu'
+import { $custom, $node, $svg, attr, $wrapNativeElement, style } from 'fufu'
+import $ButtonIcon from '../components/form/$ButtonIcon'
 
-import * as designSheet from './style/stylesheet'
-import { $ButtonIcon } from './form/button'
+import * as designSheet from './stylesheet'
 
 
 export const $bodyRoot = $wrapNativeElement(document.body)(designSheet.main)

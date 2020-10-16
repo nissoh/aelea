@@ -1,17 +1,13 @@
 
-import { chain, combine, empty, mergeArray, now, periodic, skip, switchLatest, until } from '@most/core';
-import { map } from '@most/prelude';
+import { chain, combine, empty, mergeArray, now, switchLatest, until } from '@most/core';
 import { $text, behavior, Behavior, component, state, style } from 'fufu';
-import { $column, $mainCard, $seperator } from '../common/common';
-import { $label } from '../common/form';
-import { $Checkbox } from '../common/form/checkbox';
-import * as designSheet from '../common/style/stylesheet';
-import $CreateTodo, { createTodo, Todo } from './components/$CreateTodo';
-import $TodoItem from './components/$TodoItem';
+import { $column, $seperator } from '../../common/common';
+import { $label } from '../../common/form';
+import * as designSheet from '../../common/stylesheet';
+import $Checkbox from '../form/$Checkbox';
+import $CreateTodo, { Todo } from './$CreateTodo';
+import $TodoItem from './$TodoItem';
 
-
-// start application with X amount of todo's
-const todos = Array(5).fill(undefined).map((x, i) => createTodo('t-' + (i + 1)))
 
 const [sampleShowComplete, showCompleted] = state(false)
 
@@ -42,7 +38,7 @@ const $todosList = chain((model: Todo) => {
 })
 
 
-export default component(([sampleCreateTodo, newTodo]: Behavior<Todo, Todo>) => [
+export default (todos: Todo[]) => component(([sampleCreateTodo, newTodo]: Behavior<Todo, Todo>) => [
   $column(designSheet.spacingBig)(
 
     $column(designSheet.spacingSmall)(

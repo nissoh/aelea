@@ -1,13 +1,13 @@
 import { curry2 } from '@most/prelude'
-import { NodeContainerType, IAttrProperties, ElementStream, ContainerDomNode } from '../types'
+import { NodeContainerType, IAttrProperties, $Node, ContainerDomNode } from '../types'
 import { map, now } from '@most/core'
 import { Scheduler, Disposable, Sink, Stream } from '@most/types'
 import { isStream } from 'src/utils'
 
 
 interface Attr {
-  <A, B, C extends NodeContainerType, D>(attrs: Stream<IAttrProperties<A> | null> | IAttrProperties<A>, ns: ElementStream<C, B>): ElementStream<C, A & B>
-  <A, B, C extends NodeContainerType, D>(attrs: Stream<IAttrProperties<A> | null> | IAttrProperties<A>): (ns: ElementStream<C, B>) => ElementStream<C, A & B>
+  <A, B, C extends NodeContainerType, D>(attrs: Stream<IAttrProperties<A> | null> | IAttrProperties<A>, ns: $Node<C, B>): $Node<C, A & B>
+  <A, B, C extends NodeContainerType, D>(attrs: Stream<IAttrProperties<A> | null> | IAttrProperties<A>): (ns: $Node<C, B>) => $Node<C, A & B>
 }
 
 
@@ -25,9 +25,9 @@ export function applyAttrFn(attrs: IAttrProperties<unknown>, node: NodeContainer
   return node
 }
 
-class AttributeSource<A, B, C extends NodeContainerType, D> implements ElementStream<C, A & B> {
+class AttributeSource<A, B, C extends NodeContainerType, D> implements $Node<C, A & B> {
 
-  constructor(public attrs: Stream<IAttrProperties<A> | null> | IAttrProperties<A>, public source: ElementStream<C, A & B>) { }
+  constructor(public attrs: Stream<IAttrProperties<A> | null> | IAttrProperties<A>, public source: $Node<C, A & B>) { }
 
   run(sink: Sink<ContainerDomNode<C, A & B>>, scheduler: Scheduler): Disposable {
 

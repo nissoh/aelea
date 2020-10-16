@@ -1,9 +1,9 @@
-import { DomNode, style, $text, state, component, Behavior, event } from "fufu"
-import { constant, snapshot, now, merge, tap, map } from "@most/core"
+import { constant, map, merge, now, snapshot, tap } from "@most/core"
+import { $text, Behavior, component, ContainerDomNode, event, state, style } from "fufu"
 import { $row } from "../../common/common"
-import { $Button } from "../../common/form/button"
-import { $form } from "../../common/form/form.common"
-import { $Input } from "../../common/form/input"
+import $Button from "../form/$Button"
+import $Input from "../form/$Input"
+import { $form } from "../form/form.common"
 
 let iid = 0
 

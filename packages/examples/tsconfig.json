@@ -3,11 +3,10 @@
   "compilerOptions": {
     "noUnusedLocals": false,
     "declaration": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "declarationMap": false,
   },
   "include": [
-    "src",
-    "test",
-    "../core/src/b.ts"
-  ]
+    "src/**/*.ts"
+  ],
 }

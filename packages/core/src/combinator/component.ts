@@ -1,23 +1,27 @@
 
-import { Behavior, NodeStream, NodeType, Op } from '../types'
-import { behavior, BehaviorSource } from '../behavior'
+import { Behavior, $ChildNode, NodeType, Op } from '../types'
+import { behavior } from '../behavior'
 import { disposeAll } from '@most/disposable'
 import { Disposable, Stream } from '@most/types'
-import { curry2 } from '@most/prelude'
 import { nullSink } from 'src'
+import { curry2 } from '@most/prelude'
 
 export type IComponentOutputBehaviors<T> = {
   [P in keyof T]: Stream<T[P]>
 }
-
-export type compFn<A extends NodeType, B, C, D> = (
-  ...args: Behavior<any, any>[]
-) => [NodeStream<A>, IComponentOutputBehaviors<D>] | [NodeStream<A>]
-
 export type OutputBehaviors<A> = { [P in keyof A]?: Op<A[P], A[P]> }
 
 
-function componentFn<A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>, projectBehaviors: OutputBehaviors<D>): NodeStream<A> {
+export type ComponentFunction<A extends NodeType, B extends $ChildNode<A>, D> = (
+  ...args: Behavior<any, any>[]
+) => [B, IComponentOutputBehaviors<D>] | [B]
+
+
+
+export function componentFn<A extends NodeType, B extends $ChildNode<A>, D>(
+  inputComp: ComponentFunction<A, B, D>,
+  projectBehaviors: OutputBehaviors<D>
+): $ChildNode<A> {
   return {
     run(sink, scheduler) {
       // fill stubbed aguments as a behavior
@@ -51,11 +55,8 @@ function componentFn<A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>,
 
 
 interface ComponentCurry {
-  <A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>, projectBehaviors: OutputBehaviors<D>): NodeStream<A>
-  <A extends NodeType, B, C, D>(inputComp: compFn<A, B, C, D>): (projectBehaviors: OutputBehaviors<D>) => NodeStream<A>
+  <A extends NodeType, B extends $ChildNode<A>, D>(inputComp: ComponentFunction<A, B, D>, projectBehaviors: OutputBehaviors<D>): B
+  <A extends NodeType, B extends $ChildNode<A>, D>(inputComp: ComponentFunction<A, B, D>): (projectBehaviors: OutputBehaviors<D>) => B
 }
 
-
-
 export const component: ComponentCurry = curry2(componentFn)
-

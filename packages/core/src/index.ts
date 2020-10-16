@@ -1,9 +1,8 @@
-import { ElementStream } from './types'
+import { $Node } from './types'
 import { chain } from '@most/core'
 import { Scheduler, Sink } from '@most/types'
 import { StyleRule } from 'src/combinator/style'
 import { createNodeContainer } from 'src/source/node'
-
 
 export * from './combinator/style'
 export * from './combinator/event'
@@ -24,7 +23,7 @@ declare global {
 }
 
 
-export function runAt(rootNode: ElementStream, scheduler: Scheduler) {
+export function runAt<T extends $Node>(rootNode: T, scheduler: Scheduler) {
   document.adoptedStyleSheets = [...document.adoptedStyleSheets, StyleRule.stylesheet]
 
   const effectsSink: Sink<any> = {
@@ -39,3 +38,4 @@ export function runAt(rootNode: ElementStream, scheduler: Scheduler) {
   return chain(root => createNodeContainer(root, StyleRule.stylesheet), rootNode)
     .run(effectsSink, scheduler)
 }
+

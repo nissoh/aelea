@@ -1,10 +1,10 @@
 import { map } from "@most/core"
-import { NodeStream, component, Op, DomNode, attr, event, $element, style } from "fufu"
-import * as designSheet from '../common/style/stylesheet'
+import { $ChildNode, component, Op, attr, event, $element, style, ContainerDomNode } from "fufu"
+import * as designSheet from '../common/stylesheet'
 
 interface Link {
     href: string,
-    $content: NodeStream
+    $content: $ChildNode
 }
 
 const $anchor = $element('a')(
@@ -16,7 +16,7 @@ export const $Link = (props: Link) => component((
     [sampleClick, click]
 ) => {
 
-    const changeLocationBehavior: Op<DomNode, DomNode> = sampleClick(
+    const changeLocationBehavior: Op<ContainerDomNode, ContainerDomNode> = sampleClick(
         event('click'),
         map((clickEv): string => {
             clickEv.preventDefault()
@@ -27,6 +27,7 @@ export const $Link = (props: Link) => component((
                 history.pushState(null, '', props.href)
                 return pathName
             }
+
 
             throw new Error('target anchor contains no href')
         })

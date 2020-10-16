@@ -1,10 +1,10 @@
 
 import { chain, constant, map, multicast, switchLatest } from '@most/core';
 import { newDefaultScheduler } from '@most/scheduler';
-import { $text, Behavior, component, DomNode, event, NodeStream, O, runAt, style } from 'fufu';
+import { $ChildNode, $text, Behavior, component, ContainerDomNode, event, O, runAt, style } from 'fufu';
 import { $bodyRoot, $card, $column, $row, $seperator } from '../common/common';
-import { $Button } from '../common/form/button';
-import { flex, spacingBig } from '../common/style/stylesheet';
+import { flex, spacingBig } from '../common/stylesheet';
+import $Button from '../components/form/$Button';
 
 
 
@@ -20,8 +20,8 @@ const defaultProps: Omit<NodeModel, 'name'> = {
   composition: [],
   children: []
 }
-const $NodeView = (model: Omit<NodeModel, 'composition' | 'children'>) => component((
-  [sampleClick, click]: Behavior<DomNode, PointerEvent>
+const $ChildNodeView = (model: Omit<NodeModel, 'composition' | 'children'>) => component((
+  [sampleClick, click]: Behavior<ContainerDomNode, PointerEvent>
 ) => {
 
   const props: NodeModel = { ...defaultProps, ...model }
@@ -41,14 +41,14 @@ const $NodeView = (model: Omit<NodeModel, 'composition' | 'children'>) => compon
 
 
 const $Awake = component((
-  [sampleComposition, composition]: Behavior<PointerEvent, NodeStream>,
+  [sampleComposition, composition]: Behavior<PointerEvent, $ChildNode>,
   [sampleNodeSelection, nodeSelection]: Behavior<NodeModel, NodeModel>
 ) => {
 
 
   const mulicatedcomposition = multicast(
     map(() => {
-      return $NodeView({ name: 'aa ' + ++id })
+      return $ChildNodeView({ name: 'aa ' + ++id })
     }, composition)
   )
 
