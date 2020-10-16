@@ -4,9 +4,9 @@
   "author": "Nissan Hanina <nissanhanina@gmail.com>",
   "private": true,
   "scripts": {
-    "prepare": "npm run bootstrap && lerna run prepare",
-    "bootstrap": "lerna bootstrap --hoist",
+    "prepare": "npm run bootstrap",
     "release": "lerna publish",
+    "dev": "lerna run --parallel dev",
     "test": "lerna run test",
     "test:unit": "lerna run test:unit",
     "test:lint": "lerna run test:lint",
