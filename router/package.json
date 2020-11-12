@@ -1,0 +1,30 @@
+{
+  "name": "@aelea/router",
+  "version": "0.0.0",
+  "main": ".dist-cjs/index.js",
+  "module": ".dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build:clean": "yarn g:tsc:clean",
+    "build:project": "yarn g:tsc:project",
+    "build:cjs": "yarn g:tsc:cjs",
+    "build": "yarn build:cjs && yarn build:project"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nissoh/fufu"
+  },
+  "dependencies": {
+    "@aelea/core": "workspace:*",
+    "@most/core": "1.6.1",
+    "@most/disposable": "1.3.0",
+    "@most/prelude": "1.8.0",
+    "@most/scheduler": "1.3.0",
+    "@most/types": "1.1.0"
+  },
+  "devDependencies": {
+    "@typed/test": "^9.5.0"
+  },
+  "license": "MIT",
+  "author": "Nissan Hanina <nissan@yo.ma>"
+}

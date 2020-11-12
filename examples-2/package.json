@@ -1,0 +1,35 @@
+{
+  "name": "examples",
+  "private": true,
+  "license": "MIT",
+  "version": "0.0.0",
+  "scripts": {
+    "clean": "rm -rf .dist",
+    "serve": "webpack serve",
+    "routing": "yarn serve --entry ./src/run-example/routing/index.ts",
+    "fufu-web": "yarn serve --entry ./src/run-example/fufu-web/index.ts",
+    "showcase": "yarn serve --entry ./src/examples-showcase/index.ts",
+    "tst": "node ./index.ts",
+    "generate-docs": "ts-node -O '{\"module\":\"commonjs\"}'  --project tsconfig.json ./generate-docs.ts"
+  },
+  "dependencies": {
+    "@aelea/core": "workspace:*",
+    "@aelea/router": "workspace:*",
+    "@most/core": "1.6.1",
+    "@most/disposable": "1.3.0",
+    "@most/prelude": "1.8.0",
+    "@most/scheduler": "1.3.0",
+    "@most/types": "1.1.0",
+    "monaco-editor": "0.21.2"
+  },
+  "devDependencies": {
+    "fork-ts-checker-webpack-plugin": "^6.0.1",
+    "html-webpack-plugin": "^4.5.0",
+    "pnp-webpack-plugin": "^1.6.4",
+    "ts-loader": "^8.0.11",
+    "tsconfig-paths-webpack-plugin": "^3.3.0",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^4.2.0",
+    "webpack-dev-server": "^3.11.0"
+  }
+}

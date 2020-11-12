@@ -2,8 +2,15 @@
 # Read about how to use .gitignore: https://help.github.com/articles/ignoring-files
 
 .idea/
-dist
+.dist
 node_modules
 .DS_STORE
-.rpt2_cache
 lerna-debug.log
+
+# yarn Zero-Installs
+.yarn/*
+!.yarn/cache
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions

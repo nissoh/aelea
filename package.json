@@ -1,30 +1,35 @@
 {
+  "private": true,
   "name": "fufu",
   "license": "MIT",
   "author": "Nissan Hanina <nissanhanina@gmail.com>",
-  "private": true,
+  "workspaces": [
+    "*"
+  ],
   "scripts": {
-    "prepare": "lerna bootstrap",
-    "release": "lerna publish",
-    "dev": "lerna run --parallel dev",
-    "test": "lerna run test",
-    "clean": "lerna clean",
-    "test:unit": "lerna run test:unit",
-    "test:lint": "lerna run test:lint",
-    "build": "lerna run build --stream"
+    "build": "yarn workspaces foreach --verbose --parallel run build",
+    "test": "jest",
+    "test:changed": "jest --onlyChanged",
+    "test:fast": "jest --testPathIgnorePatterns e2e",
+    "lint": "eslint . --ext .ts",
+    "changeset": "changeset",
+    "version:all": "yarn version apply --all",
+    "publish": "yarn workspaces foreach --exclude examples-2 --verbose npm publish --tolerate-republish --access public",
+    "upgrade-interactive": "yarn upgrade-interactive",
+    "check-version": "yarn version check",
+    "g:tsc:clean": "cd $INIT_CWD && tsc -b --clean",
+    "g:tsc:project": "cd $INIT_CWD && tsc -b --verbose",
+    "g:tsc:cjs": "cd $INIT_CWD && tsc --outDir .dist-cjs --module CommonJS"
   },
   "devDependencies": {
-    "rollup": "2.28.2",
-    "@rollup/plugin-commonjs": "15.1.0",
-    "@rollup/plugin-json": "4.1.0",
-    "@rollup/plugin-node-resolve": "9.0.0",
-    "@rollup/plugin-typescript": "6.0.0",
     "@typed/test": "9.5.0",
+    "@types/jsdom": "16.2.5",
+    "@typescript-eslint/eslint-plugin": "^4.7.0",
+    "@typescript-eslint/parser": "^4.7.0",
+    "cssstyle": "2.3.0",
+    "eslint": "7.13.0",
     "jsdom": "16.4.0",
     "jsdom-global": "^3.0.2",
-    "lerna": "3.22.1",
-    "rollup-plugin-typescript2": "0.27.3",
-    "tslint": "^6.1.3",
-    "typescript": "4.0.3"
+    "typescript": "4.0.5"
   }
 }

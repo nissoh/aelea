@@ -1,0 +1,28 @@
+{
+  "name": "@aelea/core",
+  "version": "0.0.3",
+  "main": ".dist-cjs/index.js",
+  "module": ".dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build:clean": "yarn g:tsc:clean",
+    "build:project": "yarn g:tsc:project",
+    "build:cjs": "yarn g:tsc:cjs",
+    "build": "yarn build:cjs && yarn build:project"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nissoh/fufu"
+  },
+  "dependencies": {
+    "@most/core": "1.6.1",
+    "@most/disposable": "1.3.0",
+    "@most/prelude": "1.8.0",
+    "@most/scheduler": "1.3.0",
+    "@most/types": "1.1.0",
+    "csstype": "3.0.4"
+  },
+  "license": "MIT",
+  "author": "Nissan Hanina <nissan@yo.ma>",
+  "gitHead": "34f90530df65dc490678d3b0e0fb018c294befb6"
+}

@@ -29,7 +29,7 @@ Better programs often change and improve, Fufu incentivices the tools for a reac
 import { map, switchLatest, constant, periodic, scan } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
 
-import { text, renderTo } from 'fufu'
+import { text, renderTo } from '@aelea/core'
 import { pipe } from '../common'
 
 const add = (n1: number, n2: number) => n1 + n2
@@ -48,7 +48,7 @@ branch(xForver(document.body))(
 ```typescript
 import { constant, map, merge, scan, switchLatest, mergeArray } from '@most/core'
 import { pipe } from '../utils'
-import { style, branch, text, node, component, domEvent } from 'fufu'
+import { style, branch, text, node, component, domEvent } from '@aelea/core'
 import * as designSheet from '../stylesheet'
 
 
