@@ -10,13 +10,10 @@ Better programs often change and improve, Fufu incentivices the tools for a reac
 
 
 
-
-
 # Why - 
 - UI is naturally reactive from both end points(user and server)
 - Imperative abstractions and a lot of boilerplate replaced by streams and Behaviors
 - Avoid Large, Complex Layouts and Layout Thrashing by batching dom operations
-- Model your application through reactive computations without instead of unpredictable immutble state
 - Highly performant, diffing is obselete and mutating states relay on stream computation
 
 ### CSS

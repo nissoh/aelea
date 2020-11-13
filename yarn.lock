@@ -3083,9 +3083,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"examples@workspace:examples-2":
+"examples@workspace:examples":
   version: 0.0.0-use.local
-  resolution: "examples@workspace:examples-2"
+  resolution: "examples@workspace:examples"
   dependencies:
     "@aelea/core": "workspace:*"
     "@aelea/router": "workspace:*"

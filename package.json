@@ -14,7 +14,7 @@
     "lint": "eslint . --ext .ts",
     "changeset": "changeset",
     "version:all": "yarn version apply --all",
-    "publish": "yarn workspaces foreach --exclude examples-2 --verbose npm publish --tolerate-republish --access public",
+    "publish": "yarn workspaces foreach --exclude examples --verbose npm publish --tolerate-republish --access public",
     "upgrade-interactive": "yarn upgrade-interactive",
     "check-version": "yarn version check",
     "g:tsc:clean": "cd $INIT_CWD && tsc -b --clean",

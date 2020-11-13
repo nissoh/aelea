@@ -506,11 +506,6 @@
         "signature": "86466073f93fe72d8a9b7dbcf99ead1a8fa14a7e41a3311ca63aecdea3f6e90f",
         "affectsGlobalScope": false
       },
-      "./src/examples-showcase/docsTooltip.ts": {
-        "version": "87298de5c4653204aec60c0ed3a43c89817bb728cbe06e4e6586e56d65b1d67a",
-        "signature": "6797c5683eff59b014e2987c953ee0ff14a8ad9de333c7b3e11d9fd204f763d2",
-        "affectsGlobalScope": false
-      },
       "./src/examples-showcase/drag.ts": {
         "version": "1f16c7061fd9230c73ee1d80f14f6421d9140f9bb6d121833949db9d01fbabee",
         "signature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -1332,7 +1327,6 @@
       ],
       "./src/examples-showcase/common.ts",
       "./src/examples-showcase/docs.ts",
-      "./src/examples-showcase/docsTooltip.ts",
       "./src/examples-showcase/drag.ts",
       "./src/examples-showcase/index.ts",
       "./src/fufu-web/index.ts",
