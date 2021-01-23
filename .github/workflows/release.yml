@@ -23,7 +23,7 @@ jobs:
         run: yarn version check
 
       - name: Install Dependencies
-        run: yarn install --immutable
+        run: yarn install --immutable --verbose
 
       - name: Lint
         run: yarn eslint
