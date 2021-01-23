@@ -2,10 +2,19 @@
     "root": true,
     "parser": "@typescript-eslint/parser",
     "rules": {
-        "@typescript-eslint/explicit-module-boundary-types": "off",
-        "@typescript-eslint/ban-ts-comment": "off",
-        "@typescript-eslint/ban-types": "off",
-        "@typescript-eslint/no-empty-function": "off"
+        "@typescript-eslint/explicit-module-boundary-types": 0,
+        "@typescript-eslint/ban-ts-comment": 0,
+        "@typescript-eslint/ban-types": 0,
+        "@typescript-eslint/no-empty-function": 0,
+        "@typescript-eslint/indent": [
+            1,
+            2,
+            {
+                "FunctionExpression": {
+                    "parameters": "first"
+                }
+            }
+        ]
     },
     "plugins": [
         "@typescript-eslint"
@@ -14,5 +23,8 @@
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended"
     ],
-    "ignorePatterns": ["node_modules", ".dist"]
+    "ignorePatterns": [
+        "node_modules",
+        ".dist"
+    ]
 }

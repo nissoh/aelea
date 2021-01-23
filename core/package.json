@@ -3,7 +3,6 @@
   "version": "0.0.3",
   "main": ".dist-cjs/index.js",
   "module": ".dist/index.js",
-  "type": "module",
   "scripts": {
     "build:clean": "yarn g:tsc:clean",
     "build:project": "yarn g:tsc:project",
@@ -20,7 +19,7 @@
     "@most/prelude": "1.8.0",
     "@most/scheduler": "1.3.0",
     "@most/types": "1.1.0",
-    "csstype": "3.0.4"
+    "csstype": "3.0.5"
   },
   "license": "MIT",
   "author": "Nissan Hanina <nissan@yo.ma>",

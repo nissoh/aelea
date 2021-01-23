@@ -81,6 +81,7 @@ export class Tether<A> implements Stream<A> {
       return disposeWith(
         s => {
           const sinkIdx = this.tetherSink.indexOf(s)
+          console.log(this.tetherSink)
 
           if (sinkIdx > -1) {
             this.tetherSink[sinkIdx].end(scheduler.currentTime())

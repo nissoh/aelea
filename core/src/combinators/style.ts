@@ -1,165 +1,70 @@
-import { Sink, Scheduler, Disposable, Stream } from '@most/types'
-import { $Node, NodeContainerType, StyleCSS, NodeContainer } from '../types'
-import * as CSS from 'csstype'
-
-import { loop, map } from '@most/core'
-import { curry2, curry3 } from '@most/prelude'
+import { map } from '@most/core'
+import { curry2 } from '@most/prelude'
+import { Stream } from '@most/types'
+import { $Branch, IBranchElement, StyleCSS } from '../types'
 
 
 interface StyleCurry {
-  <C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>, node: $Node<C, D>): $Node<C, D>
-  <C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>): (node: $Node<C, D>) => $Node<C, D>
+  <C extends IBranchElement, D>(styleInput: StyleCSS, node: $Branch<C, D>): $Branch<C, D>
+  <C extends IBranchElement, D>(styleInput: StyleCSS): (node: $Branch<C, D>) => $Branch<C, D>
 }
 
-interface StylePseudoCurry {
-  <C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E, styleInput: StyleCSS | Stream<StyleCSS | null>, node: $Node<C, D>): $Node<C, D>
-  <C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E, styleInput: StyleCSS | Stream<StyleCSS | null>): (node: $Node<C, D>) => $Node<C, D>
-  <C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E): (styleInput: StyleCSS | Stream<StyleCSS | null>) => (node: $Node<C, D>) => $Node<C, D>
-}
-
-function useStyleRule(pseudoClass: CSS.Pseudos | string, styles: StyleCSS) {
-  const properties = styleObjectAsString(styles)
-  const cachedRule = StyleRule.cache.get(pseudoClass + properties)
-
-  if (cachedRule) {
-    cachedRule.activeUsages++
-    return cachedRule.id
-  }
-
-  const newRule = new StyleRule()
-
-  StyleRule.cache.set(pseudoClass + properties, newRule)
-  StyleRule.stylesheet.insertRule(`${newRule.selector + pseudoClass} {${properties}}`, newRule.index)
-
-  return newRule.id
-}
-
-export class StyleRule {
-
-  static stylesheet = new CSSStyleSheet()
-  static cache = new Map<string, StyleRule>()
-  static namespace = '•'
-
-  index = StyleRule.stylesheet.cssRules.length
-  id = StyleRule.namespace + this.index
-  selector = `.${this.id}`
-  activeUsages = 1
-}
-
-class StyleInlineSource<C extends NodeContainerType, D, E extends string> implements $Node<C, D> {
-
-  constructor(public pseudo: CSS.Pseudos | E, public styleInput: StyleCSS, public source: $Node<C, D>) { }
-
-  run(sink: Sink<NodeContainer<C, D>>, scheduler: Scheduler): Disposable {
-    const cssClass = useStyleRule(this.pseudo, this.styleInput)
-
-    const disp = map(
-      node => {
-        node.element.classList.add(cssClass)
-        return {
-          ...node,
-          style: [...node.style]
-        }
-      },
-      this.source
-    )
-      .run(sink, scheduler)
-
-
-    return disp
-  }
+interface StyleBehaviorCurry {
+  <C extends IBranchElement, D>(styleInput: Stream<StyleCSS | null>, node: $Branch<C, D>): $Branch<C, D>
+  <C extends IBranchElement, D>(styleInput: Stream<StyleCSS | null>): (node: $Branch<C, D>) => $Branch<C, D>
 }
 
 
-class StyleSource<C extends NodeContainerType, D, E extends string> implements $Node<C, D> {
 
-  constructor(public pseudo: CSS.Pseudos | E, public styleInput: Stream<StyleCSS | null>, public source: $Node<C, D>) { }
-
-  run(sink: Sink<NodeContainer<C, D>>, scheduler: Scheduler): Disposable {
-
-
-    const applyStyleEffects = map(
-      node => {
-        let latestClass: string
-
-        const ss = loop(
-          (previousCssRule: null | ReturnType<typeof useStyleRule>, styleObject) => {
-
-            if (previousCssRule) {
-              if (styleObject === null) {
-                node.element.classList.remove(previousCssRule)
-
-                return { seed: null, value: '' }
-              } else {
-                const cashedCssClas = useStyleRule(this.pseudo, styleObject)
-
-                if (previousCssRule !== cashedCssClas) {
-                  node.element.classList.replace(latestClass, cashedCssClas)
-                  latestClass = cashedCssClas
-
-                  return { seed: cashedCssClas, value: cashedCssClas }
-                }
-              }
-            }
-
-            if (styleObject) {
-              const cashedCssClas = useStyleRule(this.pseudo, styleObject)
-
-              node.element.classList.add(cashedCssClas)
-              latestClass = cashedCssClas
-
-              return { seed: cashedCssClas, value: cashedCssClas }
-            }
-
-            return { seed: previousCssRule, value: '' }
-          },
-          null,
-          this.styleInput
-        )
-
-        return {
-          ...node,
-          style: [...node.style, ss]
-        }
-      },
-      this.source
-    )
-      .run(sink, scheduler)
-
-    return applyStyleEffects
-  }
+function styleFn<C extends IBranchElement, D>(styleInput: StyleCSS, source: $Branch<C, D>): $Branch<C, D> {
+  return map(node => ({ ...node, style: { ...node.style, ...styleInput } }), source)
 }
 
 
-function styleObjectAsString(styleObj: StyleCSS) {
-  return Object.entries(styleObj)
-    .map(([key, val]) => {
-      const kebabCaseKey = key.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
-      return `${kebabCaseKey}:${val};`;
-    })
-    .join("");
-}
+// class StyleBehavior<T extends IBranchElement> implements $Branch<T> {
 
-// Todo sed
-function styleFn<C extends NodeContainerType, D>(styleInput: StyleCSS | Stream<StyleCSS | null>, source: $Node<C, D>, pseudoClass = ''): $Node<C, D> {
+//   constructor(private $node: $Node, private style: Stream<StyleCSS | null>) { }
 
-  if (!('run' in styleInput)) {
-    if (source instanceof StyleInlineSource && source.pseudo === pseudoClass) {
-      return new StyleInlineSource(pseudoClass, { ...source.styleInput, ...styleInput }, source.source)
-    } else {
-      return new StyleInlineSource(pseudoClass, styleInput, source)
-    }
-  }
+//   run(sink: Sink<IBranch<T>>, scheduler: Scheduler) {
+//     // const styleBehaviorSink = new StyleBehaviorEffectSink(sink, this.style)
+//     // const nodeDisposable = this.$node.run(styleBehaviorSink, scheduler)
 
-  return new StyleSource(pseudoClass, styleInput, source)
-}
+//     // const [src, behavior] = tether(this.$node)
 
-function stylePseudoFn<C extends NodeContainerType, D, E extends string>(pseudoClass: CSS.Pseudos | E, styleInput: StyleCSS | Stream<StyleCSS | null>, source: $Node<C, D>): $Node<C, D> {
-  return styleFn(styleInput, source, pseudoClass)
+//     return this.$node.run(new StyleBehaviorEffectSink(sink, this.style), scheduler)
+
+//     // return disposeBoth(nodeDisposable, styleBehaviorSink)
+//   }
+// }
+
+
+// class StyleBehaviorEffectSink<T extends IBranchElement> extends Pipe<IBranch<T>> implements Disposable {
+
+
+//   constructor(public sink: Sink<IBranch<T>>, private style: Stream<StyleCSS | null>) { super(sink) }
+
+//   dispose(): void {
+//     throw new Error('Method not implemented.')
+//   }
+
+//   event(t: number, x: IBranch<T, {}>): void {
+//     this.sink.event(t, x)
+
+//     applyStyleBehavior(this.style, x, this.config.styleCache)
+
+//     // this.disposables.push(disposeStyle)
+
+
+//   }
+// }
+
+function styleBehaviorFn<C extends IBranchElement, D>(style: Stream<StyleCSS | null>, $node: $Branch<C, D>): $Branch<C, D> {
+  return map(node => ({ ...node, styleBehaviors: [...node.styleBehaviors, style] }), $node)
 }
 
 
 // applyStyle
 export const style: StyleCurry = curry2(styleFn)
-export const stylePseudo: StylePseudoCurry = curry3(stylePseudoFn)
+// export const stylePseudo: StylePseudoCurry = curry3(stylePseudoFn)
+export const styleBehavior: StyleBehaviorCurry = curry2(styleBehaviorFn)
 

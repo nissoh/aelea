@@ -1,6 +1,6 @@
 import { empty, map, merge, mergeArray } from "@most/core"
 import { Stream } from "@most/types"
-import { $element, $node, attr, Behavior, component, NodeContainer, event, O, style } from '@aelea/core'
+import { $element, $node, attr, Behavior, component, IBranch, event, O, style, styleBehavior } from '@aelea/core'
 import * as designSheet from '../../common/stylesheet'
 import { Control, dismissOp, interactionOp } from "./form"
 
@@ -11,15 +11,15 @@ export interface Checkbox extends Control {
 }
 
 export default (config: Checkbox) => component((
-  [interactionBehavior, focusStyle]: Behavior<NodeContainer, true>,
-  [dismissBehavior, dismissstyle]: Behavior<NodeContainer, false>,
-  [sampleCheck, check]: Behavior<NodeContainer<HTMLInputElement>, boolean>
+  [interactionBehavior, focusStyle]: Behavior<IBranch, true>,
+  [dismissBehavior, dismissstyle]: Behavior<IBranch, false>,
+  [sampleCheck, check]: Behavior<IBranch<HTMLInputElement>, boolean>
 ) => {
 
   const $overlay = $node(
     designSheet.stretch,
     style({ flex: 1, margin: '3px', }),
-    style(
+    styleBehavior(
       map(
         ch => ch ? { backgroundColor: designSheet.theme.text } : null,
         merge(check, config.setCheck || empty())
@@ -50,7 +50,7 @@ export default (config: Checkbox) => component((
 
 
   const containerStyle = O(
-    style(
+    styleBehavior(
       map(
         active => active ? { borderColor: designSheet.theme.primary } : null,
         mergeArray([focusStyle, dismissstyle])

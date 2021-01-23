@@ -1,15 +1,15 @@
-import { attr, Behavior, component, NodeContainer, event, NodeComposeFn, style } from '@aelea/core';
-import { $Node } from '@aelea/core';
+import { attr, Behavior, component, IBranch, event, NodeComposeFn, style } from '@aelea/core';
+import { $Branch } from '@aelea/core';
 import { $column } from '../common/common';
 import { flex } from '../common/stylesheet';
 
 
 interface ScrollFlow {
-    $$rootCompositon: NodeComposeFn<$Node>
+    $$rootCompositon: NodeComposeFn<$Branch>
 }
 
-export default ({ $$rootCompositon: rootCompositon = $column}: ScrollFlow) => (...$content: $Node[]) => component((
-    [sampleScroll, scroll]: Behavior<NodeContainer, Event>
+export default ({ $$rootCompositon: rootCompositon = $column}: ScrollFlow) => (...$content: $Branch[]) => component((
+    [sampleScroll, scroll]: Behavior<IBranch, Event>
 ) => {
 
     const scrollBehavior = sampleScroll(

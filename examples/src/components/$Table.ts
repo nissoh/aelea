@@ -1,6 +1,6 @@
 import { map, now } from "@most/core"
 import { Stream } from "@most/types"
-import { $Node, $text, Behavior, component, NodeChild, Op, style } from '@aelea/core'
+import { $Branch, $text, Behavior, component, INode, Op, style } from '@aelea/core'
 import { $column, $row } from "../common/common"
 import { spacing, theme } from "../common/stylesheet"
 import $QuantumScroll, { QuantumScroll, ScrollSegment } from "./$QuantumScroll"
@@ -18,8 +18,8 @@ export interface TableOption<T> extends Omit<QuantumScroll, 'dataSource'> {
 
 export interface TableColumn<T> {
   id: keyof T
-  header?: $Node
-  value: Op<T, NodeChild>
+  header?: $Branch
+  value: Op<T, INode>
 }
 
 

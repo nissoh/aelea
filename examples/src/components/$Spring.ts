@@ -1,6 +1,6 @@
 import { chain, combine, filter, map, merge, multicast, now, skipAfter, skipRepeats, snapshot, startWith, switchLatest } from "@most/core"
 import { remove } from "@most/prelude"
-import { $Node, Behavior, behavior, component, event, eventElementTarget, motion, NodeChild, O, style, styleInMotion } from '@aelea/core'
+import { $Branch, Behavior, behavior, component, event, eventElementTarget, motion, INode, O, style, styleInMotion, styleBehavior } from '@aelea/core'
 import { $column, $row } from "../common/common"
 import { flex } from "../common/stylesheet"
 
@@ -18,13 +18,13 @@ const swap = <T>(a: T, idx: number, arr: T[]) => {
 
 const $dragItem = $row(style({ cursor: 'grab', width: '100%', position: 'absolute' }))
 
-interface DraggableList<T extends $Node> {
+interface DraggableList<T extends $Branch> {
   $list: T[],
   itemHeight: number,
   gap?: number
 }
 
-interface DraggingState<T extends $Node> {
+interface DraggingState<T extends $Branch> {
   $draggedItem: T,
   list: T[],
   isDragging: boolean,
@@ -32,7 +32,7 @@ interface DraggingState<T extends $Node> {
   delta: number,
 }
 
-export default <T extends $Node>(config: DraggableList<T>) => component((
+export default <T extends $Branch>(config: DraggableList<T>) => component((
   [sampleOrderChange, orderChange]: Behavior<DraggingState<T>, DraggingState<T>>
 ) => {
   const gap = (config.gap ?? 0)
@@ -48,7 +48,7 @@ export default <T extends $Node>(config: DraggableList<T>) => component((
     $column(flex, style({ flex: 1, userSelect: 'none', position: 'relative', height: containerHeight + 'px' }))(
       ...config.$list.map(($item, i) => {
 
-        const [sampleDragY, dragY]: Behavior<NodeChild, DraggingState<T>> = behavior()
+        const [sampleDragY, dragY]: Behavior<INode, DraggingState<T>> = behavior()
 
         const multicastedDrag = multicast(dragY)
         const isDraggingStream = skipRepeats(map(x => x.isDragging, multicastedDrag))
@@ -84,7 +84,7 @@ export default <T extends $Node>(config: DraggableList<T>) => component((
 
         return $dragItem(
 
-          style(map(x => ({ zIndex: x ? 1000 : 0 }), isDraggingStream)),
+          styleBehavior(map(x => ({ zIndex: x ? 1000 : 0 }), isDraggingStream)),
 
           sampleDragY(
             event('pointerdown'),

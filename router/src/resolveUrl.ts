@@ -1,7 +1,7 @@
 
 import { constant, filter, join, map, skipRepeats, skipRepeatsWith, until } from '@most/core'
 import { Stream } from '@most/types'
-import { $Node, NodeContainerType, O, Op } from '@aelea/core'
+import { $Branch, IBranchElement, O, Op } from '@aelea/core'
 import { isMatched } from './resolve'
 import { Fragment, PathEvent, Route } from './types'
 
@@ -72,7 +72,7 @@ function resolveRoute(pathChange: Stream<PathEvent>, parentFragments: Fragment[]
 }
 
 
-export const path = <A extends NodeContainerType, B extends $Node<A>>(route: Route) => (ns: B) => {
+export const path = <A extends IBranchElement, B extends $Branch<A>>(route: Route) => (ns: B) => {
   return join(constant(until(route.miss, ns), route.match))
 }
 

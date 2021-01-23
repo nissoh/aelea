@@ -1,8 +1,9 @@
 
-import { Sink, Disposable, Time, Stream } from '@most/types'
+import { Sink, Disposable, Time, Stream, Scheduler } from '@most/types'
 import { compose, id } from '@most/prelude'
 import { Op } from './types'
-import { empty, never, startWith } from '@most/core'
+import { empty, never, run, startWith } from '@most/core'
+import { disposeNone } from '@most/disposable'
 
 
 type Fn<T, R> = (a: T) => R
@@ -26,7 +27,7 @@ export function isEmpty(s: Stream<unknown>): boolean {
   return s === EMPTY
 }
 
-export abstract class Pipe<A, B> implements Sink<A> {
+export abstract class Pipe<A, B = A> implements Sink<A> {
 
   constructor(protected readonly sink: Sink<B>) { }
 
@@ -38,6 +39,16 @@ export abstract class Pipe<A, B> implements Sink<A> {
 
   error(t: Time, e: Error): void {
     return this.sink.error(t, e)
+  }
+}
+
+
+export function tryRunning<T>(stream: Stream<T>, sink: Sink<T>, scheduler: Scheduler, time = scheduler.currentTime()) {
+  try {
+    return run(sink, scheduler, stream)
+  } catch (e) {
+    sink.error(time, e)
+    return disposeNone()
   }
 }
 

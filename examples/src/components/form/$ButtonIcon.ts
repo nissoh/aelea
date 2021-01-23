@@ -1,6 +1,6 @@
 
 import { map, mergeArray } from "@most/core"
-import { $ChildNode, $svg, attr, Behavior, component, event, NodeChild, style } from '@aelea/core'
+import { $Node, $svg, attr, Behavior, component, event, INode, style, styleBehavior } from '@aelea/core'
 import * as designSheet from '../../common/stylesheet'
 import { dismissOp, interactionOp } from "./form"
 
@@ -10,31 +10,31 @@ const $svgiconStage = $svg('svg')(
   style({ width: '24px', height: '24px', })
 )
 
-export default ($content: $ChildNode) => component((
-  [interactionBehavior, focusStyle]: Behavior<NodeChild, true>,
-  [dismissBehavior, dismissstyle]: Behavior<NodeChild, false>,
-  [sampleClick, click]: Behavior<NodeChild, PointerEvent>
+export default ($content: $Node) => component((
+  [interactionBehavior, focusStyle]: Behavior<INode, true>,
+  [dismissBehavior, dismissstyle]: Behavior<INode, false>,
+  [sampleClick, click]: Behavior<INode, PointerEvent>
 ) => [
-    $svgiconStage(
-      designSheet.control,
-      style({ cursor: 'pointer', fill: designSheet.theme.system, borderRadius: '50%', }),
 
-      interactionBehavior(interactionOp),
-      dismissBehavior(dismissOp),
+  $svgiconStage(
+    designSheet.control,
+    style({ cursor: 'pointer', fill: designSheet.theme.system, borderRadius: '50%', }),
 
-      sampleClick(event('pointerup')),
+    interactionBehavior(interactionOp),
+    dismissBehavior(dismissOp),
 
-      style(
-        map(
-          active => active ? { borderColor: designSheet.theme.primary } : null,
-          mergeArray([focusStyle, dismissstyle])
-        )
-      ),
+    sampleClick(event('pointerup')),
 
-    )($content),
-    {
-      click
-    }
-  ]
-)
+    styleBehavior(
+      map(
+        active => active ? { borderColor: designSheet.theme.primary } : null,
+        mergeArray([focusStyle, dismissstyle])
+      )
+    ),
+
+  )($content),
+
+  { click }
+
+])
 

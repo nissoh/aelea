@@ -1,7 +1,7 @@
 
 import { map, mergeArray, multicast, skipRepeatsWith, startWith, switchLatest } from "@most/core"
 import { Stream } from '@most/types'
-import { $node, $Node, Behavior, component, event, NodeContainer, O, replayLatest, style, styleInMotion } from '@aelea/core'
+import { $node, $Branch, Behavior, component, event, IBranch, O, replayLatest, style, styleInMotion } from '@aelea/core'
 import { $column } from '../common/common'
 
 
@@ -35,7 +35,7 @@ export interface ScrollSegment {
 }
 
 export interface ScrollResponse {
-    $items: $Node[]
+    $items: $Branch[]
     totalItems: number,
 }
 
@@ -45,7 +45,7 @@ export interface QuantumScroll {
     dataSource: Stream<ScrollResponse>
 
     threshold?: number
-    $intermissionItem?: $Node
+    $intermissionItem?: $Branch
 }
 
 const containerStyle = style({
@@ -59,7 +59,7 @@ const scrollerStyle = style({
 
 
 export default ({ maxContainerHeight, rowHeight, dataSource, threshold = 10 }: QuantumScroll) => component((
-    [sampleScroll, scroll]: Behavior<NodeContainer, ScrollSegment>,
+    [sampleScroll, scroll]: Behavior<IBranch, ScrollSegment>,
 ) => {
 
     const scrollBehavior = sampleScroll(

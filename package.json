@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "build": "yarn workspaces foreach --verbose --parallel run build",
+    "clean": "yarn workspaces foreach --verbose --parallel run clean",
     "test": "jest",
     "test:changed": "jest --onlyChanged",
     "test:fast": "jest --testPathIgnorePatterns e2e",
@@ -17,19 +18,24 @@
     "publish": "yarn workspaces foreach --exclude examples --verbose npm publish --tolerate-republish --access public",
     "upgrade-interactive": "yarn upgrade-interactive",
     "check-version": "yarn version check",
+
+
+    ".": "_______GLOBAL_TASKS_____",
+
     "g:tsc:clean": "cd $INIT_CWD && tsc -b --clean",
+    "g:dev": "cd $INIT_CWD && tsc -b --clean",
     "g:tsc:project": "cd $INIT_CWD && tsc -b --verbose",
+    "g:tsc:project:watch": "cd $INIT_CWD && tsc -b -w --verbose",
     "g:tsc:cjs": "cd $INIT_CWD && tsc --outDir .dist-cjs --module CommonJS"
   },
   "devDependencies": {
     "@typed/test": "9.5.0",
     "@types/jsdom": "16.2.5",
-    "@typescript-eslint/eslint-plugin": "^4.7.0",
-    "@typescript-eslint/parser": "^4.7.0",
-    "cssstyle": "2.3.0",
-    "eslint": "7.13.0",
+    "@typescript-eslint/eslint-plugin": "4.10.0",
+    "@typescript-eslint/parser": "4.10.0",
+    "eslint": "7.18.0",
     "jsdom": "16.4.0",
     "jsdom-global": "^3.0.2",
-    "typescript": "4.0.5"
+    "typescript": "4.1.3"
   }
 }

@@ -24,7 +24,8 @@ export class BehaviorSource<A, B> implements Stream<A> {
     })
 
     return disposeWith((s) => {
-      console.log(s)
+      console.log('running behavior disposed')
+      sink.end(scheduler.currentTime())
       this.disposeSampler(s)
     }, sink)
   }

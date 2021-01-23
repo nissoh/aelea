@@ -1,5 +1,5 @@
 import { constant, map, merge, now, snapshot, tap } from "@most/core"
-import { $text, Behavior, component, NodeContainer, event, state, style } from '@aelea/core'
+import { $text, Behavior, component, IBranch, event, state, style } from '@aelea/core'
 import { $row } from "../../common/common"
 import $Button from "../form/$Button"
 import $Input from "../form/$Input"
@@ -23,7 +23,7 @@ export function createTodo(text: string): Todo {
 
 
 export default component((
-    [sampleSubmit, submit]: Behavior<NodeContainer<HTMLFormElement>, Event>
+    [sampleSubmit, submit]: Behavior<IBranch<HTMLFormElement>, Event>
 ) => {
 
     const [sampleInput, input] = state<string, string>('')

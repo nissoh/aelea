@@ -1,31 +1,44 @@
-import { empty, map } from "@most/core"
-import { $ChildNode, $element, attr, Behavior, component, event, NodeChild, style, stylePseudo } from '@aelea/core'
-import { Control } from './form'
+import { empty, map, mergeArray } from "@most/core"
+import { $Node, $element, attr, Behavior, component, event, INode, styleBehavior, IBranch } from '@aelea/core'
+import { Control, dismissOp, interactionOp } from './form'
 import * as designSheet from '../../common/stylesheet'
 
 
 export interface Button extends Control {
-  $content: $ChildNode,
+  $content: $Node,
 }
 
 export default (config: Button) => component((
-  [sampleClick, click]: Behavior<NodeChild, PointerEvent>
-) => [
+  [interactionBehavior, focusStyle]: Behavior<IBranch, true>,
+  [dismissBehavior, dismissstyle]: Behavior<IBranch, false>,
+  [sampleClick, click]: Behavior<INode, PointerEvent>
+) => {
+  return [
     $element('button')(
       designSheet.btn,
       sampleClick(
         event('pointerup')
       ),
-      style(
-        config.disabled ? map(disabled =>
-          disabled ? { opacity: .4, pointerEvents: 'none' } : null
-          , config.disabled) : empty()
+      styleBehavior(
+        config.disabled ? map(disabled => {
+          return disabled ? { opacity: .4, pointerEvents: 'none' } : null
+        }, config.disabled) : empty()
       ),
       attr(
         config.disabled ? map(disabled => ({ disabled }), config.disabled) : empty()
       ),
-      stylePseudo(':hover', { border: `2px solid ${designSheet.theme.primary}` }),
-      stylePseudo(':focus', { border: `2px solid ${designSheet.theme.primary}` }),
+      // stylePseudo(':hover', { border: `2px solid ${designSheet.theme.primary}` }),
+      // stylePseudo(':focus', { border: `2px solid ${designSheet.theme.primary}` }),
+
+      styleBehavior(
+        map(
+          active => active ? { borderColor: designSheet.theme.primary } : null,
+          mergeArray([focusStyle, dismissstyle])
+        )
+      ),
+
+      interactionBehavior(interactionOp),
+      dismissBehavior(dismissOp),
     )(
       config.$content
     ),
@@ -34,4 +47,4 @@ export default (config: Button) => component((
       click
     }
   ]
-)
+})

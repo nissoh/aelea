@@ -1,9 +1,9 @@
 
 import { map } from '@most/core'
-import { $element, $node, $text, Behavior, component, NodeContainer, event } from '@aelea/core'
+import { $element, $node, $text, Behavior, component, IBranch, event } from '@aelea/core'
 
 export default component((
-  [sampleInput, input]: Behavior<NodeContainer<HTMLInputElement>, string>
+  [sampleInput, input]: Behavior<IBranch<HTMLInputElement>, string>
 ) => {
 
   const inputBehavior = sampleInput(

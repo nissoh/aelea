@@ -1,7 +1,7 @@
 import { join, map } from '@most/core'
 import { curry2 } from '@most/prelude'
 import { Stream } from '@most/types'
-import { NodeType, $ChildNode } from '../types'
+import { INodeElement, $Node } from '../types'
 
 type PickEvent<A, B> = A extends keyof B ? B[A] : Event
 
@@ -13,9 +13,9 @@ type GuessByName<A extends ElementEventNameList> = ElementEventList[A]
 
 type ElementEventTypeMap<A extends ElementEventNameList, B> =
   B extends Window ? PickEvent<A, WindowEventMap>
-  : B extends HTMLElement ? PickEvent<A, DocumentEventMap>
-  : B extends SVGAElement ? PickEvent<A, SVGElementEventMap>
-  : GuessByName<A>
+    : B extends HTMLElement ? PickEvent<A, DocumentEventMap>
+      : B extends SVGAElement ? PickEvent<A, SVGElementEventMap>
+        : GuessByName<A>
 
 
 
@@ -27,13 +27,13 @@ export function eventElementTarget<A extends ElementEventNameList, B extends Eve
   return {
     run(sink, scheduler) {
       const cb = (e: any) => sink.event(scheduler.currentTime(), e)
-      const dispose = () => node.removeEventListener(eventType, cb, options)
+      const removeListener = () => node.removeEventListener(eventType, cb, options)
 
       node.addEventListener(eventType, cb, options)
 
       return {
         dispose() {
-          dispose()
+          removeListener()
         }
       }
     }
@@ -42,8 +42,8 @@ export function eventElementTarget<A extends ElementEventNameList, B extends Eve
 
 
 export interface NodeEvent {
-  <A extends ElementEventNameList, B extends NodeType>(eventType: A, node: $ChildNode<B>): Stream<ElementEventTypeMap<A, B>>
-  <A extends ElementEventNameList, B extends NodeType>(eventType: A): (node: $ChildNode<B>) => Stream<ElementEventTypeMap<A, B>>
+  <A extends ElementEventNameList, B extends INodeElement>(eventType: A, node: $Node<B>): Stream<ElementEventTypeMap<A, B>>
+  <A extends ElementEventNameList, B extends INodeElement>(eventType: A): (node: $Node<B>) => Stream<ElementEventTypeMap<A, B>>
 }
 
 

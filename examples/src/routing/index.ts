@@ -1,8 +1,8 @@
 import { map, mergeArray, multicast, now } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
-import { $element, $text, attr, Behavior, component, event, eventElementTarget, $ChildNode, Op, runAt, style, NodeContainer } from '@aelea/core'
+import { $element, $text, attr, Behavior, component, event, eventElementTarget, $Node, Op, style, IBranch, nullSink } from '@aelea/core'
 import { path, router } from '@aelea/router'
-import { $bodyRoot, $column, $mainCard, $row } from '../common/common'
+import { $main, $column, $mainCard, $row } from '../common/common'
 import * as designSheet from '../common/stylesheet'
 
 
@@ -17,14 +17,14 @@ const $anchor = $element('a')(
 
 interface Link {
   href: string,
-  $content: $ChildNode
+  $content: $Node
 }
 
 const $Link = (config: Link) => component((
   [sampleClick, click]
 ) => {
 
-  const changeLocationBehavior: Op<NodeContainer, NodeContainer> = sampleClick(
+  const changeLocationBehavior: Op<IBranch, IBranch> = sampleClick(
     event('click'),
     map((clickEv): string => {
       clickEv.preventDefault()
@@ -52,7 +52,7 @@ const $Link = (config: Link) => component((
 
 
 const $Main = component((
-  [sampleLinkClick, routeChanges]: Behavior<NodeContainer, string>
+  [sampleLinkClick, routeChanges]: Behavior<IBranch, string>
 ) => {
 
   const routeChange = mergeArray([
@@ -119,14 +119,11 @@ const $Main = component((
 })
 
 
-runAt(
-  $bodyRoot(
-    $mainCard(
-      $Main({})
-    )
-  ),
-  newDefaultScheduler()
-)
+$main(
+  $mainCard(
+    $Main({})
+  )
+).run(nullSink, newDefaultScheduler())
 
 
 

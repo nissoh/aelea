@@ -1,8 +1,8 @@
 
 import { chain, constant, map, multicast, switchLatest } from '@most/core'
 import { newDefaultScheduler } from '@most/scheduler'
-import { $ChildNode, $text, Behavior, component, event, O, runAt, style, NodeContainer } from '@aelea/core'
-import { $bodyRoot, $card, $column, $row, $seperator } from '../common/common'
+import { $Node, $text, Behavior, component, event, O, style, IBranch, nullSink } from '@aelea/core'
+import { $main, $card, $column, $row, $seperator } from '../common/common'
 import { flex, spacingBig } from '../common/stylesheet'
 import $Button from '../components/form/$Button'
 
@@ -21,7 +21,7 @@ const defaultConfig: Omit<NodeModel, 'name'> = {
 }
 
 const $ChildNodeView = (model: Omit<NodeModel, 'composition' | 'children'>) => component((
-  [sampleClick, click]: Behavior<NodeContainer, PointerEvent>
+  [sampleClick, click]: Behavior<IBranch, PointerEvent>
 ) => {
 
   const config: NodeModel = { ...defaultConfig, ...model }
@@ -41,7 +41,7 @@ const $ChildNodeView = (model: Omit<NodeModel, 'composition' | 'children'>) => c
 
 
 const $Awake = component((
-  [sampleComposition, composition]: Behavior<PointerEvent, $ChildNode>,
+  [sampleComposition, composition]: Behavior<PointerEvent, $Node>,
   [sampleNodeSelection, nodeSelection]: Behavior<NodeModel, NodeModel>
 ) => {
 
@@ -118,11 +118,8 @@ const $Awake = component((
 
 
 
-runAt(
-  $bodyRoot(
-    $Awake({})
-  ),
-  newDefaultScheduler()
-)
+$main(
+  $Awake({})
+).run(nullSink, newDefaultScheduler())
 
 

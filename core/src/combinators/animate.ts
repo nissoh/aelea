@@ -1,11 +1,11 @@
 
 import { Scheduler, Sink, Stream, Disposable } from '@most/types'
 import { currentTime, } from '@most/scheduler'
-import { skipAfter, map, continueWith, constant, switchLatest, loop, startWith, tap } from '@most/core'
+import { skipAfter, map, continueWith, constant, switchLatest, loop, filter, startWith, tap } from '@most/core'
 import { O } from '../utils'
 import { disposeWith } from '@most/disposable'
 import { compose, curry3 } from '@most/prelude'
-import { $Node, NodeContainerType, StyleCSS } from '../types'
+import { $Branch, IBranchElement, StyleCSS } from '../types'
 
 type RafHandlerId = number
 type RafHandler = (dts: RafHandlerId) => void
@@ -97,9 +97,7 @@ export const motion = curry3((motionEnvironment: Partial<Motion>, startAt: numbe
   return O(
     loop((seed: MotionState, target: number) => {
       const frames = O(
-        map(() => {
-          return stepFrame(target, seed, motionEnv).position
-        }),
+        map(() => stepFrame(target, seed, motionEnv).position),
         skipAfter(n => n === target)
       )
       return { seed, value: frames(animationFrames()) }
@@ -109,9 +107,9 @@ export const motion = curry3((motionEnvironment: Partial<Motion>, startAt: numbe
   )(change)
 })
 
-export const styleInMotion = <A extends NodeContainerType, B>(
+export const styleInMotion = <A extends IBranchElement, B>(
   style: Stream<StyleCSS>,
-) => ($node: $Node<A, B>): $Node<A, B> => {
+) => ($node: $Branch<A, B>): $Branch<A, B> => {
 
   return map(node => {
     const applyInlineStyleStream = tap((styleObj) => {
@@ -126,7 +124,9 @@ export const styleInMotion = <A extends NodeContainerType, B>(
       }
     }, style)
 
-    return { ...node, style: [...node.style, applyInlineStyleStream] }
+    
+
+    return { ...node, styleBehaviors: [filter(() => false, applyInlineStyleStream)] }
   }, $node)
 
 }
