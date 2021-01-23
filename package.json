@@ -18,10 +18,7 @@
     "publish": "yarn workspaces foreach --exclude examples --verbose npm publish --tolerate-republish --access public",
     "upgrade-interactive": "yarn upgrade-interactive",
     "check-version": "yarn version check",
-
-
     ".": "_______GLOBAL_TASKS_____",
-
     "g:tsc:clean": "cd $INIT_CWD && tsc -b --clean",
     "g:dev": "cd $INIT_CWD && tsc -b --clean",
     "g:tsc:project": "cd $INIT_CWD && tsc -b --verbose",
