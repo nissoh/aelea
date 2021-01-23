@@ -7,7 +7,7 @@
     "*"
   ],
   "scripts": {
-    "build": "yarn workspaces foreach --verbose --parallel run build",
+    "build": "yarn workspaces foreach --verbose --topological --parallel run build",
     "clean": "yarn workspaces foreach --verbose --parallel run clean",
     "test": "jest",
     "test:changed": "jest --onlyChanged",

@@ -1,7 +1,7 @@
 
 import { constant, filter, join, map, skipRepeats, skipRepeatsWith, until } from '@most/core'
 import { Stream } from '@most/types'
-import { $Branch, IBranchElement, O, Op } from '@aelea/core'
+import { O, Op, IBranchElement, $Branch } from '@aelea/core'
 import { isMatched } from './resolve'
 import { Fragment, PathEvent, Route } from './types'
 

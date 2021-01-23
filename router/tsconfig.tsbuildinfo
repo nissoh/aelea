@@ -372,8 +372,8 @@
         "affectsGlobalScope": false
       },
       "./src/resolveUrl.ts": {
-        "version": "58f923ecb2bc106a5b8f44620351c12d8805631cc29260114c47a2ca98b7d712",
-        "signature": "40b26ecc330aa1f2bb775b21c337063053e1df4dde0cca7d78ae3377b1482eb3",
+        "version": "4e3c98e32f372de8fd5e41ba0c7723a44421b8c73bb5fe2490ae53b13bbfeecc",
+        "signature": "9b59406d21c68ade33c1791951783b668a5fd18cb8cdc5810608af367b3711d3",
         "affectsGlobalScope": false
       },
       "./src/index.ts": {
@@ -388,7 +388,7 @@
       "forceConsistentCasingInFileNames": true,
       "declarationMap": true,
       "target": 5,
-      "module": 1,
+      "module": 5,
       "moduleResolution": 2,
       "composite": true,
       "incremental": true,
@@ -407,7 +407,7 @@
         ]
       },
       "pathsBasePath": "/Users/nh658711/GIT/fufu",
-      "outDir": "./.dist-cjs",
+      "outDir": "./.dist",
       "rootDir": "./src",
       "configFilePath": "./tsconfig.json"
     },
@@ -700,7 +700,7 @@
       ],
       "./src/resolveUrl.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/types.ts"
       ],
       "./src/types.ts": [

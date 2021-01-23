@@ -448,7 +448,7 @@
       "forceConsistentCasingInFileNames": true,
       "declarationMap": true,
       "target": 5,
-      "module": 1,
+      "module": 5,
       "moduleResolution": 2,
       "composite": true,
       "incremental": true,
@@ -467,7 +467,7 @@
         ]
       },
       "pathsBasePath": "/Users/nh658711/GIT/fufu",
-      "outDir": "./.dist-cjs",
+      "outDir": "./.dist",
       "rootDir": "./src",
       "configFilePath": "./tsconfig.json"
     },
