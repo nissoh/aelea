@@ -1,7 +1,4 @@
-releases:
-  "@aelea/core": patch
-  "@aelea/router": patch
-  fufu: prerelease
-
 undecided:
-  - examples
+  - fufu
+  - "@aelea/core"
+  - "@aelea/router"
