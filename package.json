@@ -1,6 +1,7 @@
 {
   "private": true,
   "name": "fufu",
+  "version": "0.1.0",
   "license": "MIT",
   "author": "Nissan Hanina <nissanhanina@gmail.com>",
   "workspaces": [
