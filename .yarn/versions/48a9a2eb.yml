@@ -1,4 +1,4 @@
-undecided:
-  - fufu
-  - "@aelea/core"
-  - "@aelea/router"
+releases:
+  "@aelea/core": minor
+  "@aelea/router": minor
+  fufu: minor
