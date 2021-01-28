@@ -2,6 +2,14 @@ import { filter, map, skipRepeatsWith } from '@most/core'
 import { Fragment, PathEvent, Path } from './types'
 
 
+export const resolve = (paths: Path[]): PathEvent => {
+  return {
+    target: [...paths],
+    fragments: [],
+    remaining: [...paths]
+  }
+}
+
 export const isMatched = (frag: Fragment, path: Path) => {
   if (frag instanceof RegExp) {
     return Boolean(path?.match(frag))

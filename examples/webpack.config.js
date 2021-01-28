@@ -2,7 +2,6 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-// const PnpWebpackPlugin = require(`pnp-webpack-plugin`);
 
 module.exports = {
   mode: "development",
@@ -35,7 +34,6 @@ module.exports = {
     ],
     extensions: [".ts", '.js'],
     plugins: [
-      // PnpWebpackPlugin,
       new TsconfigPathsPlugin({})
     ]
   },
@@ -45,11 +43,6 @@ module.exports = {
       template: 'index.html'
     })
   ],
-  // resolveLoader: {
-  //     plugins: [
-  //         PnpWebpackPlugin.moduleLoader(module),
-  //     ],
-  // },
   devServer: {
     port: 3000,
     historyApiFallback: {

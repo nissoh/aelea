@@ -33,8 +33,19 @@ export class NodeSource<A, B extends IBranchElement> implements Stream<IBranch<B
   }
 }
 
-const createText = (text: string): $Node<Text> =>
-  map(element => ({ element }), xForver(document.createTextNode(text)))
+const createText = (text: string): $Node<Text> => ({
+  run(sink, scheduler) {
+    const textNode = document.createTextNode(text)
+
+    sink.event(scheduler.currentTime(), { element: textNode })
+
+    return {
+      dispose() {
+        textNode.remove()
+      }
+    }
+  }
+})
 
 
 export function branch<A, B extends IBranchElement>(sourceOp: (a: A) => B, postOp: Op<IBranch<B>, IBranch<B>> = id) {

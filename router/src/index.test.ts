@@ -1,19 +1,36 @@
-import { now } from '@most/core'
+import { mergeArray, now, runEffects, take, tap } from '@most/core'
 import { curry2 } from '@most/prelude'
-import { describe, it } from '@typed/test'
+import { newDefaultScheduler } from '@most/scheduler'
 import { O } from '@aelea/core'
-import { collectEvents } from 'utils'
-import { match } from './index'
+import { match, resolve, router } from './index'
+import { Stream, Time } from '@most/types'
+import { Suite, assert, expect } from "cynic"
 
-const rawFragments = ['main', 'books', '3', 'chapters', '1']
-const paths = now(rawFragments)
-const urlFragments = now(rawFragments.join('/'))
 
-const url1Comp = O(
-  match('main'),
-  match('books'),
-  match(/\d+/)
-)
+
+export default <Suite>{
+  'match fragments': async () => {
+    const route = O(match('main'), match('books'), match(/\d+/))
+    const matchEvent = now(resolve(['main', 'books', '3']))
+
+    const frsgs = await collectOne(route(matchEvent))
+
+    expect(frsgs.fragments).equals(['main', 'books', /\d+/])
+  },
+  
+  'matches remainig target url': async () => {
+    const changes = mergeArray([
+      now('main'),
+      now('main/books'),
+      now('main/books/144/chapter/3'),
+    ])
+
+    const mainRoute = router(changes).create('main')
+
+
+    expect((await collectOne(mainRoute.match)).fragments).equals(['main', 'books', /\d+/])
+  }
+}
 
 interface Prop {
   <T, K extends keyof T>(key: K): (obj: T) => T[K]
@@ -25,65 +42,38 @@ const prop: Prop = curry2((key, obj: any) => obj[key])
 
 
 
-export default describe(`basic tests`, [
-
-  it('matches fragments', async ({ equal }) => {
-    const frsgs = (await collectOne(url1Comp(urlFragments))).fragments
-    equal(frsgs, ['main', 'books', /\d+/])
-  }),
-  it('matches resolved fragments', ({ equal }) =>
-    collectOne(url1Comp(urlFragments)).then(
-      O(prop('match'), equal(['main', 'books', '3']))
-    )
-  ),
-  it('matches remaining target fragments', ({ equal }) =>
-    collectOne(resolve('main', createPathState(paths))).then(
-      O(prop('targetRemaining'), equal(['books', '3', 'chapters', '1']))
-    )
-  ),
-  it('matches remainig target url', ({ equal }) =>
-    collectOne(url1Comp(urlFragments)).then(
-      O(prop('targetRemaining'), equal(['chapters', '1']))
-    )
-  )
-
-])
 
 
 
-// import { Stream } from '@most/types'
-// import { tap, runEffects, take } from '@most/core'
-// import { newDefaultScheduler } from '@most/scheduler'
-// import { curry2 } from '@most/prelude'
+type Event<T> = { value: T, time: Time }
+
+const scheduler = newDefaultScheduler()
+
+export async function collectEvents<T>(stream: Stream<T>) {
+  const into: Event<T>[] = []
+  const s = tap(x => into.push({ time: scheduler.currentTime(), value: x }), stream)
+  await runEffects(s, scheduler)
+  return into
+}
+
+export async function collect<T>(stream: Stream<T>) {
+  const events = await collectEvents(stream)
+  return events.map(e => e.value)
+}
+
+export interface CollectNCurry {
+  <T>(n: number, stream: Stream<T>): Promise<Event<T>[]>
+  <T>(n: number): (stream: Stream<T>) => Promise<Event<T>[]>
+}
+
+function collectNFn<T>(n: number, stream: Stream<T>) {
+  return collectEvents<T>(take(n, stream))
+}
+
+export const collectN: CollectNCurry = curry2(collectNFn)
 
 
-// export type Event<T> = { time: number, value: T }
-
-
-// export const pipe = <A, B, C>(a: (a: A) => B, b: (b: B) => C) => (x: A) => b(a(x))
-// const scheduler = newDefaultScheduler()
-// export const run = <T>(s: Stream<T>) => runEffects(s, scheduler)
-
-// export function collectEvents<T>(stream: Stream<T>) {
-//   const into: Event<T>[] = []
-//   const s = tap(x => into.push({ time: scheduler.currentTime(), value: x }), stream)
-//   return run(s).then(() => into)
-// }
-
-
-// export interface CollectNCurry {
-//   <T>(n: number, stream: Stream<T>): Promise<Event<T>[]>
-//   <T>(n: number): (stream: Stream<T>) => Promise<Event<T>[]>
-// }
-
-// function collectNFn<T>(n: number, stream: Stream<T>) {
-//   return collectEvents<T>(take(n, stream))
-// }
-
-// export const collectN: CollectNCurry = curry2(collectNFn)
-
-
-// export const collectOne = <T>(s: Stream<T>) =>
-//   collectEvents(take(1, s)).then(x => x[0].value)
+export const collectOne = <T>(s: Stream<T>) =>
+  collectEvents(take(1, s)).then(x => x[0].value)
 
 

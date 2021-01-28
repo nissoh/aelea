@@ -19,14 +19,11 @@
     "@most/disposable": "1.3.0",
     "@most/prelude": "1.8.0",
     "@most/scheduler": "1.3.0",
-    "@most/types": "1.1.0",
-    "monaco-editor": "0.21.2",
-    "react": "17.0.1"
+    "@most/types": "1.1.0"
   },
   "devDependencies": {
     "fork-ts-checker-webpack-plugin": "6.0.7",
     "html-webpack-plugin": "4.5.0",
-    "pnp-webpack-plugin": "1.6.4",
     "ts-loader": "8.0.12",
     "tsconfig-paths-webpack-plugin": "3.3.0",
     "webpack": "5.11.0",

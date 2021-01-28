@@ -417,8 +417,8 @@
         "affectsGlobalScope": false
       },
       "./src/source/node.ts": {
-        "version": "c36c7076f0923c985a1d5b2b549c3b5786e79662f7db156180acb7dd8e57d33c",
-        "signature": "0ee93ef82e3ecc295ac7d590a1dc0076dadacf80a11a3dd81ea55914850de36e",
+        "version": "406a5c2cee9609a9b03ed20a78e9a515bb7aecf41efe916265d17dbfd3ab12a0",
+        "signature": "e41e76ee662acdcb53b017e545352520cb12869ef396c08963180bf9532db36f",
         "affectsGlobalScope": false
       },
       "./src/utils/styleUtils.ts": {
@@ -469,7 +469,9 @@
       "pathsBasePath": "/Users/nh658711/GIT/fufu",
       "outDir": "./.dist",
       "rootDir": "./src",
-      "configFilePath": "./tsconfig.json"
+      "configFilePath": "./tsconfig.json",
+      "skipLibCheck": true,
+      "suppressOutputPathCheck": true
     },
     "referencedMap": {
       "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/combinator/chain.d.ts": [

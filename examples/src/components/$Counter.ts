@@ -18,8 +18,7 @@ const $counterContainerStyle = O(
 
 export default component((
   [sampleIncrement, increment]: Behavior<PointerEvent, 1>,
-  [sampleDecrement, decrement]: Behavior<PointerEvent, -1>,
-  [sampleDispose, dispose]: Behavior<PointerEvent, PointerEvent>,
+  [sampleDecrement, decrement]: Behavior<PointerEvent, -1>
 ) => {
   const count = sumFromZeroOp(merge(increment, decrement))
 
@@ -38,16 +37,11 @@ export default component((
 
       $text(style({ fontSize: '64px', }))(
         map(String, count)
-      ),
-
-      $TrashBtn({
-        click: sampleDispose()
-      }),
+      )
 
     ),
 
     {
-      dispose,
       increment,
       decrement,
       count

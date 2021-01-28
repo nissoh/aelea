@@ -1,7 +1,7 @@
 
 import { chain, constant, map, merge, mergeArray, snapshot, until } from '@most/core'
 import { $text, Behavior, behavior, component, style } from '@aelea/core'
-import { $column, $row, $seperator } from '../common/common'
+import { $column, $row, $seperator, $TrashBtn } from '../common/common'
 import * as designSheet from '../common/stylesheet'
 import $Counter, { sumFromZeroOp } from './$Counter'
 import $Button from './form/$Button'
@@ -41,16 +41,18 @@ export default component((
         return until(remove)(
           $column(designSheet.spacing)(
             $seperator,
-            $Counter({
-              dispose: sampleDisposeCounter(
-                sampleRemove()
-              ),
-              increment: sampleCountersIncrement(),
-              decrement: sampleCountersDecrement(),
-              count: sampleDisposedCounterCount(
-                source => snapshot(n => -n, source, remove)
-              )
-            })
+            $row(style({ alignItems: 'center' }), designSheet.spacingBig)(
+              $TrashBtn({
+                click: sampleRemove()
+              }),
+              $Counter({
+                increment: sampleCountersIncrement(),
+                decrement: sampleCountersDecrement(),
+                count: sampleDisposedCounterCount(
+                  source => snapshot(n => -n, source, remove)
+                )
+              })
+            )
           )
         )
       }, addedCounter)
