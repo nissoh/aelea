@@ -4,6 +4,7 @@ import { Stream } from "@most/types"
 export type Path = string
 export type Fragment = string | RegExp
 
+
 export type PathEvent = {
   fragments: Fragment[],
 

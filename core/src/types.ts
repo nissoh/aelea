@@ -15,7 +15,6 @@ export type IBranchElement = HTMLElement | SVGElement
 export interface INode<A extends INodeElement = INodeElement> {
   element: A
 }
-
 export interface IBranch<A extends IBranchElement = IBranchElement, B = {}> extends INode<A> {
   $segments: Array<$Node>
 
