@@ -1,6 +1,6 @@
 import { constant, map, merge, scan } from '@most/core'
 import { $text, Behavior, component, O, style } from '@aelea/core'
-import { $column, $row, $TrashBtn } from '../common/common'
+import { $column, $row } from '../common/common'
 import * as designSheet from '../common/stylesheet'
 import $Button from './form/$Button'
 
@@ -25,7 +25,6 @@ export default component((
   return [
 
     $row(style({ alignItems: 'center', placeContent: 'space-between' }), designSheet.spacing)(
-
       $column($counterContainerStyle)(
         $Button({ $content: $text('+') })({
           click: sampleIncrement(constant(1))
@@ -38,7 +37,6 @@ export default component((
       $text(style({ fontSize: '64px', }))(
         map(String, count)
       )
-
     ),
 
     {
@@ -46,5 +44,6 @@ export default component((
       decrement,
       count
     }
+
   ]
 })

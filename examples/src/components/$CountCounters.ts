@@ -19,7 +19,7 @@ export default component((
 ) => {
 
   const counting = mergeArray([disposedCounterCount, counterIncrement, counterDecrement])
-  const count = sumFromZeroOp(counting)
+  const totalCount = sumFromZeroOp(counting)
 
   return [
 
@@ -29,7 +29,7 @@ export default component((
           map(n => `Counters: ${n}`, sumFromZeroOp(merge(constant(1, addedCounter), constant(-1, disposeCounter))))
         ),
         $text(
-          map(n => `Sum: ${n}`, count)
+          map(n => `Sum: ${n}`, totalCount)
         ),
         $AddBtn({
           click: sampleAddedCounter()
@@ -43,7 +43,9 @@ export default component((
             $seperator,
             $row(style({ alignItems: 'center' }), designSheet.spacingBig)(
               $TrashBtn({
-                click: sampleRemove()
+                click: sampleDisposeCounter(
+                  sampleRemove()
+                )
               }),
               $Counter({
                 increment: sampleCountersIncrement(),
