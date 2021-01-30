@@ -12,7 +12,6 @@
     "sourceMap": true,
     "declaration": true,
     "strict": true,
-    "baseUrl": ".",
     "pretty": true,
     "lib": [
       "DOM",

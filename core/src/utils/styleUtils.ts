@@ -1,6 +1,6 @@
 import { loop } from "@most/core"
 import { Stream } from "@most/types"
-import { StyleCSS, IBranch, StyleEnvironment } from "core/src"
+import { IBranch, StyleCSS, StyleEnvironment } from "../types"
 
 
 

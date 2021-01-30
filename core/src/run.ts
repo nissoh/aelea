@@ -3,8 +3,8 @@ import { Disposable, Sink, Stream, Time } from '@most/types'
 import { newDefaultScheduler } from '@most/scheduler'
 import { loop, map, mergeArray } from '@most/core'
 import { disposeAll, disposeWith } from '@most/disposable'
-import { nullSink } from 'core/src/utils'
-import { useStyleRule } from 'core/src/utils/styleUtils'
+import { useStyleRule } from './utils/styleUtils'
+import { nullSink } from './utils'
 
 
 function appendToSlot(parent: IBranchElement, child: INodeElement, insertAt: number) {
