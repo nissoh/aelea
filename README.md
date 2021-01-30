@@ -1,23 +1,13 @@
-# Fufu
+# aelea - Tiny Composable UI Framework
 Functional Reactive Programming UI library based on [@most/core](https://github.com/mostjs/core) paradigm and [architecture](https://github.com/cujojs/most/wiki/Architecture)
 
-Current Building Blocks of building Applications require high amount of unecessary compounding effect when the application grows
-
-Compounding effects makes apps more fragile and reduce the incentive to change and evolve into a better program.
-
-Better programs often change and improve, Fufu incentivices the tools for a reactive thinking
-
-
-
-
-# Why - 
-- UI is naturally reactive from both end points(user and server)
-- Imperative abstractions and a lot of boilerplate replaced by streams and Behaviors
-- Avoid Large, Complex Layouts and Layout Thrashing by batching dom operations
-- Highly performant, diffing is obselete and mutating states relay on stream computation
-
-### CSS
-- CSS Dom instead of global stylesheets
+# Why?
+- Everything is composable, elements, style, behaviors are reusable and compose well together. All Built to scale
+- State UI naturally using Streams and set changes using Behaviors
+- Highly performant since diffing became obsolete, state changes based on natural Behaviors
+- CSS Declarations only exists when they are displayed, reducing paint time
+- Components is similar to a function, AS I/O, Outputs(Automatically Typed) outout(unlike any other libraries)
+- Typed. Less friction, more feedback Style, Elements and even Dom Events
 
 
 
@@ -41,50 +31,70 @@ branch(xForver(document.body))(
 ).run(nullSink, newDefaultScheduler())
 ```
 
-### Simple counter - view | style | Behavior
+### Simple counter component `$Counter.ts` - view | style | Behavior
+This is a dumbed down version where everything is packed into a single file
+
+For a better composed example check [./examples/src/components/$Counter]()
+
 ```typescript
-import { constant, map, merge, scan, switchLatest, mergeArray } from '@most/core'
-import { pipe } from '../utils'
-import { style, branch, text, node, component, domEvent } from '@aelea/core'
-import * as designSheet from '../stylesheet'
+import { constant, map, merge, scan } from '@most/core'
+import { $custom, $element, $text, Behavior, component, style, event, INode, runBrowser } from '@aelea/core'
 
 
-const styledBtn = designSheet.btn(node)
-const centeredContainer = pipe(designSheet.centerStyle, designSheet.row)(node)
+// reusable style
+const displayFlex = style({ display: 'flex' })
+const spacingStyle = style({ gap: '16px' })
 
-const countBtn = (str: string) => style({ margin: '6px' }, branch(styledBtn, text(str)))
-const add = (x: number, y: number) => (x + y)
 
-const click = domEvent('click')
+// reusable elements
+const $row = $custom('row')(displayFlex)
+const $column = $custom('column')(displayFlex, style({ flex: 1, flexDirection: 'row' }))
 
-const actions = {
-  countUp:   pipe(click, constant(1)),
-  countDown: pipe(click, constant(-1))
-}
+const sumFromZeroOp = scan((current: number, x: number) => current + x, 0)
 
-export const counter = component(actions, ({ countUp, countDown }) => {
-  const count = scan(add, 0, merge(countUp, countDown))
 
-  return branch(centeredContainer)(
-    mergeArray([
-      countUp.attach(countBtn('+1')),
-      countDown.attach(countBtn('-1')),
-      switchLatest(map(pipe(String, text), count))
-    ])
+const $Counter = component((
+  [sampleIncrement, increment]: Behavior<INode, 1>,
+  [sampleDecrement, decrement]: Behavior<INode, -1>
+) => {
+
+  const incrementBehavior = sampleIncrement(
+    event('click'),
+    constant(1)
   )
+
+  const decrementBehavior = sampleDecrement(
+    event('click'),
+    constant(-1)
+  )
+
+  const count = sumFromZeroOp(merge(increment, decrement))
+
+  return [
+
+    $row(spacingStyle)(
+      $column(
+        $element('button')(incrementBehavior)(
+          $text('+')
+        ),
+        $element('button')(decrementBehavior)(
+          $text('-')
+        ),
+      ),
+
+      $text(style({ fontSize: '64px', }))(
+        map(String, count)
+      )
+    ),
+
+    { increment, decrement, count }
+
+  ]
 })
 
 
-branch(xForver(document.body))(
-  counter
-).run(nullSink, newDefaultScheduler())
+runBrowser({ rootNode: document.body })(
+  $Counter({})
+)
+
 ```
-
-
-## Running examples
-
-`yarn run add-ui`
-
-`yarn run counters`
-
-`yarn run simple-input`

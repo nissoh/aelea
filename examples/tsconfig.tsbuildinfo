@@ -301,141 +301,6 @@
         "signature": "40d590054420e086fe2fdb9dd531c8c29f3954474e76d9b568b9b4f05b33c55b",
         "affectsGlobalScope": false
       },
-      "./src/common/stylesheet.ts": {
-        "version": "ece36b68b768ea0813c7e7741b3cc42083b4e519425a38f241402a7134496978",
-        "signature": "c0183ec6b429083e016f1ba4984db9be558fe9128b4eb25a8f69da22e7a36702",
-        "affectsGlobalScope": false
-      },
-      "./src/components/form/form.ts": {
-        "version": "a9f65d15be5aae7a930e8d7706b36482b99d79d1251ebcad2ebca1ca64de95a5",
-        "signature": "64708e33f3f5c4d8946982514f999e98e0d6a0488d9b88d016ed48cb7c02b2b1",
-        "affectsGlobalScope": false
-      },
-      "./src/components/form/$ButtonIcon.ts": {
-        "version": "ac66438c9ed319e362bc194f1027574b607ba0b12538fd1e87d66fb061936b57",
-        "signature": "a10ece11b9c0caf39b659fef2b27040e9528f1c8ec91c4c49db07938e46561e4",
-        "affectsGlobalScope": false
-      },
-      "./src/common/common.ts": {
-        "version": "25372666a6904fd498fd4895defc1664a006aa96814dfad894bb71a2b5a12d13",
-        "signature": "46568b6cd06cf13e8036298dda9dd23d2c8be85d39acee33664e933ee1a3d2ae",
-        "affectsGlobalScope": false
-      },
-      "./src/common/utils.ts": {
-        "version": "45cef68fc7f2cf52a6969eadff2eea0f51685c677ebbd7c7387389b56a49cf04",
-        "signature": "da0c9d90e32e77a28dce5091c46ed9eb3b15d6b6fa2591810ec45b6dd3972bb9",
-        "affectsGlobalScope": false
-      },
-      "./src/components/form/$Input.ts": {
-        "version": "bdcbc4fb411eaa0f2687a1cb95c44b9e30c40f91cd2d49e701f5b3dbc398e754",
-        "signature": "7bd367806078fc9cb914b1b17aa87e5f5883280d4fd695d2438fdb053d16a5e0",
-        "affectsGlobalScope": false
-      },
-      "./src/components/$Calculator.ts": {
-        "version": "0db5e2f04515da39f46386664441046bf559b682c9fa0fad067c2f78fdec9cf4",
-        "signature": "46a0b34e1264c4d25ca6646ff0e6cfaa7275ea1ae5a6bc23d4dfd84edf2f2b2e",
-        "affectsGlobalScope": false
-      },
-      "./src/components/form/$Button.ts": {
-        "version": "00804d516569f44004396aeaf7b55cdb5d3c045f5709898741f78ae264b4bf6f",
-        "signature": "b3c34ebc11f83dbf8b763f046d45426a2720f65d4a35abda6ecc8f961e8f3add",
-        "affectsGlobalScope": false
-      },
-      "./src/components/$Counter.ts": {
-        "version": "f173ddb95d650faf5a4151a02f949558a809eb01ecc5230cb9ec04a89758bb2c",
-        "signature": "b5bbf60509d47abd3c221fadf63fc8bf2a026effd2f37bcdd9da79dbab11a0d7",
-        "affectsGlobalScope": false
-      },
-      "./src/components/$CountCounters.ts": {
-        "version": "77517c60ccf9bc04591731e0754e6be2750eb0feb833f521619a787e8ba613f0",
-        "signature": "46a0b34e1264c4d25ca6646ff0e6cfaa7275ea1ae5a6bc23d4dfd84edf2f2b2e",
-        "affectsGlobalScope": false
-      },
-      "./src/components/$QuantumScroll.ts": {
-        "version": "77a22c72f44d99f4ea9c7ac863c55984b25d5dd8899565dea22f1fbe6099d7da",
-        "signature": "2c3c52070b18fe382f76df50300565ea899729335ee33d4a9cad42e344312641",
-        "affectsGlobalScope": false
-      },
-      "./src/components/form/$Field.ts": {
-        "version": "94b13976c9be4965339ae7bf99794b16abc60f0f979a0c891cae8e4291699def",
-        "signature": "cd45f9f07bf54f0908a689faee794aec98fa29c9a5b2567e95c7c3db8dc57283",
-        "affectsGlobalScope": false
-      },
-      "./src/components/$QuantumList.ts": {
-        "version": "b14591ceabc79f3ca77554af103894e370f93c6a932245ccb4a1d14259b134c3",
-        "signature": "46a0b34e1264c4d25ca6646ff0e6cfaa7275ea1ae5a6bc23d4dfd84edf2f2b2e",
-        "affectsGlobalScope": false
-      },
-      "./src/components/$SimpleExample.ts": {
-        "version": "ba881f722c87fe83b963049512de210576b8581befe57eb073d76b1f3c5e16eb",
-        "signature": "46a0b34e1264c4d25ca6646ff0e6cfaa7275ea1ae5a6bc23d4dfd84edf2f2b2e",
-        "affectsGlobalScope": false
-      },
-      "./src/components/$Spring.ts": {
-        "version": "92d4d6f62e29c7e11c927a41fbf8a1743a717ea8e9fa108510f68b40da8d3fb6",
-        "signature": "534bb1bba470cd1b4ce656def580ad24a38d662d5a37d801fab891b0c6984021",
-        "affectsGlobalScope": false
-      },
-      "./src/components/$Table.ts": {
-        "version": "e4b7df8594d7ed0e8676ab4c0fc040f973e7d83a4fcc756975804a34ab6d3d11",
-        "signature": "d2203e37617704798bc3cf707eb7093f86d0d5bc2675ef4eb86b9f0bf38f2000",
-        "affectsGlobalScope": false
-      },
-      "./src/components/$ViewFlow.ts": {
-        "version": "0fcab80fc2606dfe8b67457df51296a2885dee6e4012500af1de10721bb0ed10",
-        "signature": "8398edd0d5d29278fdd3568b00bab497d97b24b0e35c8ba551b6da11660d3897",
-        "affectsGlobalScope": false
-      },
-      "./src/components/form/$Checkbox.ts": {
-        "version": "85e876994799679c5c4ff6aafc19b7aaa2ec49617be65f7d23eed5af4d5854da",
-        "signature": "ce762bbdf6baaaaec951b01425a0e20f323abce1ad30451f1dd6f417622627eb",
-        "affectsGlobalScope": false
-      },
-      "./src/components/todo-app/$CreateTodo.ts": {
-        "version": "71fdf59aa6541b9e721b8e6df69ed2a40426d4e063188a293826e94f74973afa",
-        "signature": "abf63b21d8bc960a7d56cbb73e9c299e94c13c60d92163407b73cab35da9bd33",
-        "affectsGlobalScope": false
-      },
-      "./src/components/todo-app/$TodoItem.ts": {
-        "version": "b76bade0ed7732bfc4797dfec56e2ece12135eeaca1b79bb17a291117acb747b",
-        "signature": "1bda7f8c920601226f18a4346ed641570826e457a269a61db4e1c0b7c9dcf5a9",
-        "affectsGlobalScope": false
-      },
-      "./src/components/todo-app/$TodoApp.ts": {
-        "version": "1349d42aa130fec5cfde005d27aa5ea30547a80f850fbbdd4a425af4e62b883c",
-        "signature": "97685f825885d71c7c6def878d1a2e22721986c2f41d557c22758190c6eca944",
-        "affectsGlobalScope": false
-      },
-      "./src/examples-showcase/$Example.ts": {
-        "version": "025a74b5436e83b3f5f1571b8574d5a3455e419463b67c8865b778d7f0677e0e",
-        "signature": "fdc7bccc108595a055b9e53fc81e3f216ac9319fd785cbaaee8b550aea4c64f8",
-        "affectsGlobalScope": false
-      },
-      "./src/examples-showcase/$MonacoEditor.ts": {
-        "version": "0acc01826ee47ff87644b7890a2f3121bb2ba3c52ca82e500f39e4446892bdaa",
-        "signature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "affectsGlobalScope": false
-      },
-      "./src/examples-showcase/common.ts": {
-        "version": "bfa25f8e3c5e3557a9b4caf014e4c2a4b67e1c6f587d3258ff6c1eda7be146d3",
-        "signature": "160286c504bc632c7eab4ac1a1998e6c4034c3b0441a01fb7f7d69b4ed0559ff",
-        "affectsGlobalScope": false
-      },
-      "./src/examples-showcase/docs.ts": {
-        "version": "24ed555dbf79cbd50ba3a238a33d0c1e8bd85065c148a149f8b376e1e51fc6ae",
-        "signature": "86466073f93fe72d8a9b7dbcf99ead1a8fa14a7e41a3311ca63aecdea3f6e90f",
-        "affectsGlobalScope": false
-      },
-      "./src/examples-showcase/drag.ts": {
-        "version": "1f16c7061fd9230c73ee1d80f14f6421d9140f9bb6d121833949db9d01fbabee",
-        "signature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "affectsGlobalScope": false
-      },
-      "./src/examples-showcase/index.ts": {
-        "version": "b30356952d4e5d54e7c231ce20b88834f78484c5bef2590e79e7ae271fb1f5c6",
-        "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
-        "affectsGlobalScope": false
-      },
       "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/ScheduledTask.d.ts": {
         "version": "9e0de8deb44054b3e2c00281f454e09fd7da6322a00960a93e94affcbc7b33ed",
         "signature": "9e0de8deb44054b3e2c00281f454e09fd7da6322a00960a93e94affcbc7b33ed",
@@ -466,8 +331,218 @@
         "signature": "4aebdfbbda7f1480690a93bf5a6310cf8bc299a3013ce15e810ab1b5781efcd9",
         "affectsGlobalScope": false
       },
-      "./src/fufu-web/index.ts": {
+      "../.yarn/cache/csstype-npm-3.0.5-ca116ff797-d15967edea.zip/node_modules/csstype/index.d.ts": {
+        "version": "ea58e4cbcf3d760a15f9300978a360c46360f544b355c737b60c733a385b8858",
+        "signature": "ea58e4cbcf3d760a15f9300978a360c46360f544b355c737b60c733a385b8858",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist-cjs/types.d.ts": {
+        "version": "a40946128be4c6ab86af8c35b5aef19dc3efb9c06c716a06bf4c253ce3f4aa8a",
+        "signature": "a40946128be4c6ab86af8c35b5aef19dc3efb9c06c716a06bf4c253ce3f4aa8a",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist-cjs/combinators/style.d.ts": {
+        "version": "9f0de7e81594a622eaacf996a085bbbcbd1e35e29443b09ce979b1e6e79b9388",
+        "signature": "9f0de7e81594a622eaacf996a085bbbcbd1e35e29443b09ce979b1e6e79b9388",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist-cjs/combinators/event.d.ts": {
+        "version": "9041a86225578e48dd5314b9275da9b7c81e265b36d647dc657efb52c799dd6f",
+        "signature": "9041a86225578e48dd5314b9275da9b7c81e265b36d647dc657efb52c799dd6f",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist-cjs/utils.d.ts": {
+        "version": "da045bde2f066cea2fb01e6fb020b7bd4d5accc97fd236a4ab1315c376a48672",
+        "signature": "da045bde2f066cea2fb01e6fb020b7bd4d5accc97fd236a4ab1315c376a48672",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist-cjs/combinators/attribute.d.ts": {
+        "version": "9a97a4be1dea3fdc42c36e0aeb04b6f8f7341edbfa72c9de1d49052d6dd7c929",
+        "signature": "9a97a4be1dea3fdc42c36e0aeb04b6f8f7341edbfa72c9de1d49052d6dd7c929",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist-cjs/source/behavior.d.ts": {
+        "version": "6ad886db8be81109e4035a1db3c32b5486e21979ab4a92beb3bf45fa69f4b346",
+        "signature": "6ad886db8be81109e4035a1db3c32b5486e21979ab4a92beb3bf45fa69f4b346",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist-cjs/combinators/component.d.ts": {
+        "version": "9366635fdc9db2b3c164da9c84b89b68058586fb5a5e6766939e3632abcda00a",
+        "signature": "9366635fdc9db2b3c164da9c84b89b68058586fb5a5e6766939e3632abcda00a",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist-cjs/combinators/animate.d.ts": {
+        "version": "980aab1c5b99c65f0e92809d271533b164d8a40256e4674e485b3008b987e0fb",
+        "signature": "980aab1c5b99c65f0e92809d271533b164d8a40256e4674e485b3008b987e0fb",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist-cjs/source/node.d.ts": {
+        "version": "8918c795ffb504073cc13e55a548f9946f0817f1f315f8eb77a446583515c232",
+        "signature": "8918c795ffb504073cc13e55a548f9946f0817f1f315f8eb77a446583515c232",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist-cjs/run.d.ts": {
+        "version": "4bf445084c9f1ea51a9fb4b5e0666a830b9f14daee5ce1f1297e48a158b98bf4",
+        "signature": "4bf445084c9f1ea51a9fb4b5e0666a830b9f14daee5ce1f1297e48a158b98bf4",
+        "affectsGlobalScope": true
+      },
+      "../core/.dist-cjs/index.d.ts": {
+        "version": "59f5bd871ca523c34410942bae2ca9f256c98f8c88ea1228a6e30c98b37debb2",
+        "signature": "59f5bd871ca523c34410942bae2ca9f256c98f8c88ea1228a6e30c98b37debb2",
+        "affectsGlobalScope": false
+      },
+      "./src/common/stylesheet.ts": {
+        "version": "ece36b68b768ea0813c7e7741b3cc42083b4e519425a38f241402a7134496978",
+        "signature": "526cfe8246e18561162fa15dcf9a0b645a774ffcb6b7355eecbe9885eff7cd2b",
+        "affectsGlobalScope": false
+      },
+      "./src/components/form/form.ts": {
+        "version": "a9f65d15be5aae7a930e8d7706b36482b99d79d1251ebcad2ebca1ca64de95a5",
+        "signature": "68d4dba662b4e8c2f50053bbe7fd4c38f0c4d7801169c1c497d34924d9d22361",
+        "affectsGlobalScope": false
+      },
+      "./src/components/form/$ButtonIcon.ts": {
+        "version": "ac66438c9ed319e362bc194f1027574b607ba0b12538fd1e87d66fb061936b57",
+        "signature": "3760550e4a26f58a8372cbc40afc3afb0763d991147dda1f11addc060e26d8b9",
+        "affectsGlobalScope": false
+      },
+      "./src/common/common.ts": {
+        "version": "25372666a6904fd498fd4895defc1664a006aa96814dfad894bb71a2b5a12d13",
+        "signature": "9ba39123858134c1a5b421c0f4d246ca38f505c4661bfef23967c16457a0b4f7",
+        "affectsGlobalScope": false
+      },
+      "./src/components/form/$Button.ts": {
+        "version": "00804d516569f44004396aeaf7b55cdb5d3c045f5709898741f78ae264b4bf6f",
+        "signature": "a59d6e9b46d1aa0e4a02b60d5c89d89e26c1d17cebc7f5f4f2a6a7217e97fe9f",
+        "affectsGlobalScope": false
+      },
+      "./src/aelea-web/index.ts": {
         "version": "47a312185f97d376931eeae690ff2e9fdd61c9305a9330a95d792bc6c1255d8f",
+        "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "affectsGlobalScope": false
+      },
+      "./src/common/utils.ts": {
+        "version": "45cef68fc7f2cf52a6969eadff2eea0f51685c677ebbd7c7387389b56a49cf04",
+        "signature": "da0c9d90e32e77a28dce5091c46ed9eb3b15d6b6fa2591810ec45b6dd3972bb9",
+        "affectsGlobalScope": false
+      },
+      "./src/components/form/$Input.ts": {
+        "version": "bdcbc4fb411eaa0f2687a1cb95c44b9e30c40f91cd2d49e701f5b3dbc398e754",
+        "signature": "065a363513fd6375e3bb226b96f84454bb5b1a1ec50f91d19f5de0019fb16ee3",
+        "affectsGlobalScope": false
+      },
+      "./src/components/$Calculator.ts": {
+        "version": "0db5e2f04515da39f46386664441046bf559b682c9fa0fad067c2f78fdec9cf4",
+        "signature": "ee2128d7035f438a6e5a4a0ccb690408ffc75a35c12a3f9f0660f9b691d43444",
+        "affectsGlobalScope": false
+      },
+      "./src/components/$Counter.ts": {
+        "version": "b8a11f6f1f1477150f2aeb34718670ce2e22a7ab2aedfcbe6a72fa3b20fa1ba5",
+        "signature": "6dbf05cd45cd8b9e6ae935de03d1b2ad8ca77e518062e8047c19b1fd7ca3e3ea",
+        "affectsGlobalScope": false
+      },
+      "./src/components/$CountCounters.ts": {
+        "version": "8e27d39969da8dd9f8a2c6301b8b895dbbb7106f5e1d137d0c95ea54c30b9fdd",
+        "signature": "ee2128d7035f438a6e5a4a0ccb690408ffc75a35c12a3f9f0660f9b691d43444",
+        "affectsGlobalScope": false
+      },
+      "./src/components/$QuantumScroll.ts": {
+        "version": "77a22c72f44d99f4ea9c7ac863c55984b25d5dd8899565dea22f1fbe6099d7da",
+        "signature": "b555fa992695c2b22918b88f32e0928c9bd9c4cd75c788daba74617351d7f1a9",
+        "affectsGlobalScope": false
+      },
+      "./src/components/form/$Field.ts": {
+        "version": "94b13976c9be4965339ae7bf99794b16abc60f0f979a0c891cae8e4291699def",
+        "signature": "23ff7874de2dfcc8a2f68b393ea337c8c841c5838eb2643d1a84005a538f64f6",
+        "affectsGlobalScope": false
+      },
+      "./src/components/$QuantumList.ts": {
+        "version": "b14591ceabc79f3ca77554af103894e370f93c6a932245ccb4a1d14259b134c3",
+        "signature": "ee2128d7035f438a6e5a4a0ccb690408ffc75a35c12a3f9f0660f9b691d43444",
+        "affectsGlobalScope": false
+      },
+      "./src/components/$SimpleExample.ts": {
+        "version": "ba881f722c87fe83b963049512de210576b8581befe57eb073d76b1f3c5e16eb",
+        "signature": "ee2128d7035f438a6e5a4a0ccb690408ffc75a35c12a3f9f0660f9b691d43444",
+        "affectsGlobalScope": false
+      },
+      "./src/components/$Spring.ts": {
+        "version": "92d4d6f62e29c7e11c927a41fbf8a1743a717ea8e9fa108510f68b40da8d3fb6",
+        "signature": "25872f14b51f3600a5a3e8daf8e32604bc1e339977d3301be6bac0fb2fbcd625",
+        "affectsGlobalScope": false
+      },
+      "./src/components/$Table.ts": {
+        "version": "e4b7df8594d7ed0e8676ab4c0fc040f973e7d83a4fcc756975804a34ab6d3d11",
+        "signature": "2a75a3fbb82a68e04f090f4cd0dcbbec40194685d5b95776bd7d48cae42a490e",
+        "affectsGlobalScope": false
+      },
+      "./src/components/$ViewFlow.ts": {
+        "version": "0fcab80fc2606dfe8b67457df51296a2885dee6e4012500af1de10721bb0ed10",
+        "signature": "b60b6f8080240d6c36cd886bb837aa0c74dd313fe838a7bc4c6cf25525986ae4",
+        "affectsGlobalScope": false
+      },
+      "./src/components/form/$Checkbox.ts": {
+        "version": "85e876994799679c5c4ff6aafc19b7aaa2ec49617be65f7d23eed5af4d5854da",
+        "signature": "3393299cc8f900f12066d20a36723d3899929054d8da27496ffef1f706c31b04",
+        "affectsGlobalScope": false
+      },
+      "./src/components/todo-app/$CreateTodo.ts": {
+        "version": "71fdf59aa6541b9e721b8e6df69ed2a40426d4e063188a293826e94f74973afa",
+        "signature": "365d77e3eee28d7f3ba57996497165ac0d176f6635fdde348aa4968e89445660",
+        "affectsGlobalScope": false
+      },
+      "./src/components/todo-app/$TodoItem.ts": {
+        "version": "b76bade0ed7732bfc4797dfec56e2ece12135eeaca1b79bb17a291117acb747b",
+        "signature": "6c5234e397c7b5f96ab3e2952a4682e0fd9c08fb5fc261af270dd171dd705bb2",
+        "affectsGlobalScope": false
+      },
+      "./src/components/todo-app/$TodoApp.ts": {
+        "version": "1349d42aa130fec5cfde005d27aa5ea30547a80f850fbbdd4a425af4e62b883c",
+        "signature": "7e3d322f4a07330d66b1720bf1f09843e8d700de295b95b892cf189d278ff0ff",
+        "affectsGlobalScope": false
+      },
+      "./src/examples-showcase/$Example.ts": {
+        "version": "025a74b5436e83b3f5f1571b8574d5a3455e419463b67c8865b778d7f0677e0e",
+        "signature": "7a4c6f2dc2e46c11050439cf7dd3cd57a19867e204ff3e5813cb0c64f58e30a9",
+        "affectsGlobalScope": false
+      },
+      "./src/examples-showcase/$MonacoEditor.ts": {
+        "version": "0acc01826ee47ff87644b7890a2f3121bb2ba3c52ca82e500f39e4446892bdaa",
+        "signature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "affectsGlobalScope": false
+      },
+      "../router/.dist-cjs/types.d.ts": {
+        "version": "b77701eb036a4a85e425f7bead9168947cd2d92cdf693bee47f82fac15da75fe",
+        "signature": "b77701eb036a4a85e425f7bead9168947cd2d92cdf693bee47f82fac15da75fe",
+        "affectsGlobalScope": false
+      },
+      "../router/.dist-cjs/resolve.d.ts": {
+        "version": "865708329f86e0fca74974145123ba61089f342fd55935286585efb5c1a17456",
+        "signature": "865708329f86e0fca74974145123ba61089f342fd55935286585efb5c1a17456",
+        "affectsGlobalScope": false
+      },
+      "../router/.dist-cjs/resolveUrl.d.ts": {
+        "version": "7f5041a72235329226d4c43523cc798c33cce6f51036a157b1a0e30fde36eb7d",
+        "signature": "7f5041a72235329226d4c43523cc798c33cce6f51036a157b1a0e30fde36eb7d",
+        "affectsGlobalScope": false
+      },
+      "../router/.dist-cjs/index.d.ts": {
+        "version": "f6805b863fc45267a538e051870888d24d994e65d6d667c8423dcfcdbb590ed2",
+        "signature": "f6805b863fc45267a538e051870888d24d994e65d6d667c8423dcfcdbb590ed2",
+        "affectsGlobalScope": false
+      },
+      "./src/examples-showcase/common.ts": {
+        "version": "bfa25f8e3c5e3557a9b4caf014e4c2a4b67e1c6f587d3258ff6c1eda7be146d3",
+        "signature": "bed538927ea2b56a4d934472ede01533a30f8214597178f1b0744d4a186aac77",
+        "affectsGlobalScope": false
+      },
+      "./src/examples-showcase/drag.ts": {
+        "version": "1f16c7061fd9230c73ee1d80f14f6421d9140f9bb6d121833949db9d01fbabee",
+        "signature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "affectsGlobalScope": false
+      },
+      "./src/examples-showcase/index.ts": {
+        "version": "b30356952d4e5d54e7c231ce20b88834f78484c5bef2590e79e7ae271fb1f5c6",
         "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
         "affectsGlobalScope": false
       },
@@ -611,18 +686,84 @@
         "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
       ],
+      "../core/.dist-cjs/combinators/animate.d.ts": [
+        "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "../core/.dist-cjs/combinators/attribute.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "../core/.dist-cjs/combinators/component.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "../core/.dist-cjs/combinators/event.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "../core/.dist-cjs/combinators/style.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "../core/.dist-cjs/index.d.ts": [
+        "../core/.dist-cjs/combinators/animate.d.ts",
+        "../core/.dist-cjs/combinators/attribute.d.ts",
+        "../core/.dist-cjs/combinators/component.d.ts",
+        "../core/.dist-cjs/combinators/event.d.ts",
+        "../core/.dist-cjs/combinators/style.d.ts",
+        "../core/.dist-cjs/run.d.ts",
+        "../core/.dist-cjs/source/behavior.d.ts",
+        "../core/.dist-cjs/source/node.d.ts",
+        "../core/.dist-cjs/types.d.ts",
+        "../core/.dist-cjs/utils.d.ts"
+      ],
+      "../core/.dist-cjs/run.d.ts": [
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "../core/.dist-cjs/source/behavior.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "../core/.dist-cjs/source/node.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "../core/.dist-cjs/types.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../.yarn/cache/csstype-npm-3.0.5-ca116ff797-d15967edea.zip/node_modules/csstype/index.d.ts"
+      ],
+      "../core/.dist-cjs/utils.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "./src/aelea-web/index.ts": [
+        "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
+        "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
+        "./src/common/common.ts",
+        "./src/common/stylesheet.ts",
+        "./src/components/form/$Button.ts"
+      ],
       "./src/common/common.ts": [
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/$ButtonIcon.ts"
       ],
+      "./src/common/stylesheet.ts": [
+        "../core/.dist-cjs/index.d.ts"
+      ],
       "./src/components/$Calculator.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/$Input.ts"
       ],
       "./src/components/$CountCounters.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/$Counter.ts",
@@ -630,12 +771,14 @@
       ],
       "./src/components/$Counter.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/$Button.ts"
       ],
       "./src/components/$QuantumList.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/$QuantumScroll.ts",
@@ -644,45 +787,54 @@
       "./src/components/$QuantumScroll.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/common.ts"
       ],
       "./src/components/$SimpleExample.ts": [
-        "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts"
+        "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
+        "../core/.dist-cjs/index.d.ts"
       ],
       "./src/components/$Spring.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts"
       ],
       "./src/components/$Table.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/$QuantumScroll.ts"
       ],
       "./src/components/$ViewFlow.ts": [
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts"
       ],
       "./src/components/form/$Button.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/form.ts"
       ],
       "./src/components/form/$ButtonIcon.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/form.ts"
       ],
       "./src/components/form/$Checkbox.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/form.ts"
       ],
       "./src/components/form/$Field.ts": [
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/$Input.ts",
@@ -691,16 +843,19 @@
       "./src/components/form/$Input.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/form.ts"
       ],
       "./src/components/form/form.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/stylesheet.ts"
       ],
       "./src/components/todo-app/$CreateTodo.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/common.ts",
         "./src/components/form/$Button.ts",
         "./src/components/form/$Input.ts",
@@ -708,6 +863,7 @@
       ],
       "./src/components/todo-app/$TodoApp.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/$Checkbox.ts",
@@ -718,6 +874,7 @@
       "./src/components/todo-app/$TodoItem.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/$Checkbox.ts",
@@ -726,15 +883,20 @@
       ],
       "./src/examples-showcase/$Example.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts"
       ],
       "./src/examples-showcase/common.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
+        "../router/.dist-cjs/index.d.ts",
         "./src/common/stylesheet.ts"
       ],
       "./src/examples-showcase/index.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
+        "../router/.dist-cjs/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/$Calculator.ts",
@@ -748,18 +910,30 @@
         "./src/examples-showcase/$Example.ts",
         "./src/examples-showcase/common.ts"
       ],
-      "./src/fufu-web/index.ts": [
-        "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/index.d.ts",
-        "./src/common/common.ts",
-        "./src/common/stylesheet.ts",
-        "./src/components/form/$Button.ts"
-      ],
       "./src/routing/index.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
+        "../router/.dist-cjs/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts"
+      ],
+      "../router/.dist-cjs/index.d.ts": [
+        "../router/.dist-cjs/resolve.d.ts",
+        "../router/.dist-cjs/resolveUrl.d.ts",
+        "../router/.dist-cjs/types.d.ts"
+      ],
+      "../router/.dist-cjs/resolve.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../router/.dist-cjs/types.d.ts"
+      ],
+      "../router/.dist-cjs/resolveUrl.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
+        "../router/.dist-cjs/types.d.ts"
+      ],
+      "../router/.dist-cjs/types.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
       ]
     },
     "exportedModulesMap": {
@@ -865,39 +1039,155 @@
         "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
       ],
+      "../core/.dist-cjs/combinators/animate.d.ts": [
+        "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "../core/.dist-cjs/combinators/attribute.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "../core/.dist-cjs/combinators/component.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "../core/.dist-cjs/combinators/event.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "../core/.dist-cjs/combinators/style.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "../core/.dist-cjs/index.d.ts": [
+        "../core/.dist-cjs/combinators/animate.d.ts",
+        "../core/.dist-cjs/combinators/attribute.d.ts",
+        "../core/.dist-cjs/combinators/component.d.ts",
+        "../core/.dist-cjs/combinators/event.d.ts",
+        "../core/.dist-cjs/combinators/style.d.ts",
+        "../core/.dist-cjs/run.d.ts",
+        "../core/.dist-cjs/source/behavior.d.ts",
+        "../core/.dist-cjs/source/node.d.ts",
+        "../core/.dist-cjs/types.d.ts",
+        "../core/.dist-cjs/utils.d.ts"
+      ],
+      "../core/.dist-cjs/run.d.ts": [
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "../core/.dist-cjs/source/behavior.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "../core/.dist-cjs/source/node.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "../core/.dist-cjs/types.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../.yarn/cache/csstype-npm-3.0.5-ca116ff797-d15967edea.zip/node_modules/csstype/index.d.ts"
+      ],
+      "../core/.dist-cjs/utils.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/types.d.ts"
+      ],
+      "./src/common/common.ts": [
+        "../core/.dist-cjs/index.d.ts"
+      ],
+      "./src/common/stylesheet.ts": [
+        "../core/.dist-cjs/index.d.ts"
+      ],
+      "./src/components/$Calculator.ts": [
+        "../core/.dist-cjs/index.d.ts"
+      ],
+      "./src/components/$CountCounters.ts": [
+        "../core/.dist-cjs/index.d.ts"
+      ],
       "./src/components/$Counter.ts": [
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/index.d.ts"
+      ],
+      "./src/components/$QuantumList.ts": [
+        "../core/.dist-cjs/index.d.ts"
       ],
       "./src/components/$QuantumScroll.ts": [
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/index.d.ts"
+      ],
+      "./src/components/$SimpleExample.ts": [
+        "../core/.dist-cjs/index.d.ts"
+      ],
+      "./src/components/$Spring.ts": [
+        "../core/.dist-cjs/index.d.ts"
       ],
       "./src/components/$Table.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/components/$QuantumScroll.ts"
       ],
+      "./src/components/$ViewFlow.ts": [
+        "../core/.dist-cjs/index.d.ts"
+      ],
       "./src/components/form/$Button.ts": [
+        "../core/.dist-cjs/index.d.ts",
         "./src/components/form/form.ts"
+      ],
+      "./src/components/form/$ButtonIcon.ts": [
+        "../core/.dist-cjs/index.d.ts"
       ],
       "./src/components/form/$Checkbox.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/components/form/form.ts"
       ],
       "./src/components/form/$Field.ts": [
+        "../core/.dist-cjs/index.d.ts",
         "./src/components/form/$Input.ts"
       ],
       "./src/components/form/$Input.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/components/form/form.ts"
       ],
       "./src/components/form/form.ts": [
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/index.d.ts"
+      ],
+      "./src/components/todo-app/$CreateTodo.ts": [
+        "../core/.dist-cjs/index.d.ts"
       ],
       "./src/components/todo-app/$TodoApp.ts": [
+        "../core/.dist-cjs/index.d.ts",
         "./src/components/todo-app/$CreateTodo.ts"
       ],
       "./src/components/todo-app/$TodoItem.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
         "./src/components/todo-app/$CreateTodo.ts"
+      ],
+      "./src/examples-showcase/$Example.ts": [
+        "../core/.dist-cjs/index.d.ts"
+      ],
+      "./src/examples-showcase/common.ts": [
+        "../core/.dist-cjs/index.d.ts",
+        "../router/.dist-cjs/index.d.ts"
+      ],
+      "../router/.dist-cjs/index.d.ts": [
+        "../router/.dist-cjs/resolve.d.ts",
+        "../router/.dist-cjs/resolveUrl.d.ts",
+        "../router/.dist-cjs/types.d.ts"
+      ],
+      "../router/.dist-cjs/resolve.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../router/.dist-cjs/types.d.ts"
+      ],
+      "../router/.dist-cjs/resolveUrl.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist-cjs/index.d.ts",
+        "../router/.dist-cjs/types.d.ts"
+      ],
+      "../router/.dist-cjs/types.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
       ]
     },
     "semanticDiagnosticsPerFile": [
@@ -929,6 +1219,7 @@
       "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/relative.d.ts",
       "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/schedule.d.ts",
       "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+      "../.yarn/cache/csstype-npm-3.0.5-ca116ff797-d15967edea.zip/node_modules/csstype/index.d.ts",
       "../.yarn/cache/typescript-patch-7a9e6321b3-017af99214.zip/node_modules/typescript/lib/lib.dom.d.ts",
       "../.yarn/cache/typescript-patch-7a9e6321b3-017af99214.zip/node_modules/typescript/lib/lib.es2015.collection.d.ts",
       "../.yarn/cache/typescript-patch-7a9e6321b3-017af99214.zip/node_modules/typescript/lib/lib.es2015.core.d.ts",
@@ -967,769 +1258,49 @@
       "../.yarn/cache/typescript-patch-7a9e6321b3-017af99214.zip/node_modules/typescript/lib/lib.es2020.string.d.ts",
       "../.yarn/cache/typescript-patch-7a9e6321b3-017af99214.zip/node_modules/typescript/lib/lib.es2020.symbol.wellknown.d.ts",
       "../.yarn/cache/typescript-patch-7a9e6321b3-017af99214.zip/node_modules/typescript/lib/lib.es5.d.ts",
-      [
-        "./src/common/common.ts",
-        [
-          {
-            "file": "./src/common/common.ts",
-            "start": 50,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          }
-        ]
-      ],
-      [
-        "./src/common/stylesheet.ts",
-        [
-          {
-            "file": "./src/common/stylesheet.ts",
-            "start": 27,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          }
-        ]
-      ],
+      "../core/.dist-cjs/combinators/animate.d.ts",
+      "../core/.dist-cjs/combinators/attribute.d.ts",
+      "../core/.dist-cjs/combinators/component.d.ts",
+      "../core/.dist-cjs/combinators/event.d.ts",
+      "../core/.dist-cjs/combinators/style.d.ts",
+      "../core/.dist-cjs/index.d.ts",
+      "../core/.dist-cjs/run.d.ts",
+      "../core/.dist-cjs/source/behavior.d.ts",
+      "../core/.dist-cjs/source/node.d.ts",
+      "../core/.dist-cjs/types.d.ts",
+      "../core/.dist-cjs/utils.d.ts",
+      "./src/aelea-web/index.ts",
+      "./src/common/common.ts",
+      "./src/common/stylesheet.ts",
       "./src/common/utils.ts",
-      [
-        "./src/components/$Calculator.ts",
-        [
-          {
-            "file": "./src/components/$Calculator.ts",
-            "start": 119,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          }
-        ]
-      ],
-      [
-        "./src/components/$CountCounters.ts",
-        [
-          {
-            "file": "./src/components/$CountCounters.ts",
-            "start": 147,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/components/$CountCounters.ts",
-            "start": 1943,
-            "length": 6,
-            "messageText": "Parameter 'source' implicitly has an 'any' type.",
-            "category": 1,
-            "code": 7006
-          },
-          {
-            "file": "./src/components/$CountCounters.ts",
-            "start": 1968,
-            "length": 1,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          }
-        ]
-      ],
-      [
-        "./src/components/$Counter.ts",
-        [
-          {
-            "file": "./src/components/$Counter.ts",
-            "start": 109,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          }
-        ]
-      ],
-      [
-        "./src/components/$QuantumList.ts",
-        [
-          {
-            "file": "./src/components/$QuantumList.ts",
-            "start": 112,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/components/$QuantumList.ts",
-            "start": 707,
-            "length": 14,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$QuantumList.ts",
-            "start": 727,
-            "length": 14,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$QuantumList.ts",
-            "start": 878,
-            "length": 14,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$QuantumList.ts",
-            "start": 1336,
-            "length": 1,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$QuantumList.ts",
-            "start": 1364,
-            "length": 1,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$QuantumList.ts",
-            "start": 1384,
-            "length": 1,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          }
-        ]
-      ],
-      [
-        "./src/components/$QuantumScroll.ts",
-        [
-          {
-            "file": "./src/components/$QuantumScroll.ts",
-            "start": 243,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/components/$QuantumScroll.ts",
-            "start": 1807,
-            "length": 2,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$QuantumScroll.ts",
-            "start": 2301,
-            "length": 4,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$QuantumScroll.ts",
-            "start": 2315,
-            "length": 4,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$QuantumScroll.ts",
-            "start": 2980,
-            "length": 1,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          }
-        ]
-      ],
-      [
-        "./src/components/$SimpleExample.ts",
-        [
-          {
-            "file": "./src/components/$SimpleExample.ts",
-            "start": 110,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/components/$SimpleExample.ts",
-            "start": 316,
-            "length": 7,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$SimpleExample.ts",
-            "start": 377,
-            "length": 7,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          }
-        ]
-      ],
-      [
-        "./src/components/$Spring.ts",
-        [
-          {
-            "file": "./src/components/$Spring.ts",
-            "start": 315,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/components/$Spring.ts",
-            "start": 1588,
-            "length": 1,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$Spring.ts",
-            "start": 2032,
-            "length": 1,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$Spring.ts",
-            "start": 2398,
-            "length": 1,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$Spring.ts",
-            "start": 2439,
-            "length": 1,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$Spring.ts",
-            "start": 2505,
-            "length": 1,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$Spring.ts",
-            "start": 2574,
-            "length": 1,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$Spring.ts",
-            "start": 3028,
-            "length": 6,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$Spring.ts",
-            "start": 3621,
-            "length": 2,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/$Spring.ts",
-            "start": 3815,
-            "length": 7,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          }
-        ]
-      ],
-      [
-        "./src/components/$Table.ts",
-        [
-          {
-            "file": "./src/components/$Table.ts",
-            "start": 145,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          }
-        ]
-      ],
-      [
-        "./src/components/$ViewFlow.ts",
-        [
-          {
-            "file": "./src/components/$ViewFlow.ts",
-            "start": 80,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/components/$ViewFlow.ts",
-            "start": 119,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          }
-        ]
-      ],
-      [
-        "./src/components/form/$Button.ts",
-        [
-          {
-            "file": "./src/components/form/$Button.ts",
-            "start": 149,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          }
-        ]
-      ],
-      [
-        "./src/components/form/$ButtonIcon.ts",
-        [
-          {
-            "file": "./src/components/form/$ButtonIcon.ts",
-            "start": 137,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          }
-        ]
-      ],
-      [
-        "./src/components/form/$Checkbox.ts",
-        [
-          {
-            "file": "./src/components/form/$Checkbox.ts",
-            "start": 196,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/components/form/$Checkbox.ts",
-            "start": 1155,
-            "length": 3,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          }
-        ]
-      ],
-      [
-        "./src/components/form/$Field.ts",
-        [
-          {
-            "file": "./src/components/form/$Field.ts",
-            "start": 43,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          }
-        ]
-      ],
-      [
-        "./src/components/form/$Input.ts",
-        [
-          {
-            "file": "./src/components/form/$Input.ts",
-            "start": 149,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/components/form/$Input.ts",
-            "start": 880,
-            "length": 7,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/form/$Input.ts",
-            "start": 951,
-            "length": 7,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/components/form/$Input.ts",
-            "start": 1152,
-            "length": 6,
-            "messageText": "Parameter 'source' implicitly has an 'any' type.",
-            "category": 1,
-            "code": 7006
-          },
-          {
-            "file": "./src/components/form/$Input.ts",
-            "start": 1227,
-            "length": 7,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          }
-        ]
-      ],
-      [
-        "./src/components/form/form.ts",
-        [
-          {
-            "file": "./src/components/form/form.ts",
-            "start": 139,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/components/form/form.ts",
-            "start": 600,
-            "length": 1,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          }
-        ]
-      ],
-      [
-        "./src/components/todo-app/$CreateTodo.ts",
-        [
-          {
-            "file": "./src/components/todo-app/$CreateTodo.ts",
-            "start": 143,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/components/todo-app/$CreateTodo.ts",
-            "start": 872,
-            "length": 2,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          }
-        ]
-      ],
-      [
-        "./src/components/todo-app/$TodoApp.ts",
-        [
-          {
-            "file": "./src/components/todo-app/$TodoApp.ts",
-            "start": 158,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          }
-        ]
-      ],
-      [
-        "./src/components/todo-app/$TodoItem.ts",
-        [
-          {
-            "file": "./src/components/todo-app/$TodoItem.ts",
-            "start": 116,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          }
-        ]
-      ],
-      [
-        "./src/examples-showcase/$Example.ts",
-        [
-          {
-            "file": "./src/examples-showcase/$Example.ts",
-            "start": 103,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          }
-        ]
-      ],
+      "./src/components/$Calculator.ts",
+      "./src/components/$CountCounters.ts",
+      "./src/components/$Counter.ts",
+      "./src/components/$QuantumList.ts",
+      "./src/components/$QuantumScroll.ts",
+      "./src/components/$SimpleExample.ts",
+      "./src/components/$Spring.ts",
+      "./src/components/$Table.ts",
+      "./src/components/$ViewFlow.ts",
+      "./src/components/form/$Button.ts",
+      "./src/components/form/$ButtonIcon.ts",
+      "./src/components/form/$Checkbox.ts",
+      "./src/components/form/$Field.ts",
+      "./src/components/form/$Input.ts",
+      "./src/components/form/form.ts",
+      "./src/components/todo-app/$CreateTodo.ts",
+      "./src/components/todo-app/$TodoApp.ts",
+      "./src/components/todo-app/$TodoItem.ts",
+      "./src/examples-showcase/$Example.ts",
       "./src/examples-showcase/$MonacoEditor.ts",
-      [
-        "./src/examples-showcase/common.ts",
-        [
-          {
-            "file": "./src/examples-showcase/common.ts",
-            "start": 177,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/examples-showcase/common.ts",
-            "start": 213,
-            "length": 15,
-            "messageText": "Cannot find module '@aelea/router' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/examples-showcase/common.ts",
-            "start": 925,
-            "length": 42,
-            "code": 2345,
-            "category": 1,
-            "messageText": {
-              "messageText": "Argument of type '({ match, focused }: { match: any; focused: any; }) => any' is not assignable to parameter of type '(a: unknown) => any'.",
-              "category": 1,
-              "code": 2345,
-              "next": [
-                {
-                  "messageText": "Types of parameters '__0' and 'a' are incompatible.",
-                  "category": 1,
-                  "code": 2328,
-                  "next": [
-                    {
-                      "messageText": "Type 'unknown' is not assignable to type '{ match: any; focused: any; }'.",
-                      "category": 1,
-                      "code": 2322
-                    }
-                  ]
-                }
-              ]
-            }
-          },
-          {
-            "file": "./src/examples-showcase/common.ts",
-            "start": 1279,
-            "length": 7,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/examples-showcase/common.ts",
-            "start": 1332,
-            "length": 7,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/examples-showcase/common.ts",
-            "start": 1385,
-            "length": 7,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/examples-showcase/common.ts",
-            "start": 1645,
-            "length": 3,
-            "messageText": "Parameter 'src' implicitly has an 'any' type.",
-            "category": 1,
-            "code": 7006
-          }
-        ]
-      ],
-      "./src/examples-showcase/docs.ts",
+      "./src/examples-showcase/common.ts",
       "./src/examples-showcase/drag.ts",
-      [
-        "./src/examples-showcase/index.ts",
-        [
-          {
-            "file": "./src/examples-showcase/index.ts",
-            "start": 150,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/examples-showcase/index.ts",
-            "start": 193,
-            "length": 15,
-            "messageText": "Cannot find module '@aelea/router' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/examples-showcase/index.ts",
-            "start": 2050,
-            "length": 8,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/examples-showcase/index.ts",
-            "start": 2064,
-            "length": 8,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/examples-showcase/index.ts",
-            "start": 2190,
-            "length": 8,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/examples-showcase/index.ts",
-            "start": 2504,
-            "length": 1,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/examples-showcase/index.ts",
-            "start": 2579,
-            "length": 1,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/examples-showcase/index.ts",
-            "start": 2654,
-            "length": 1,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/examples-showcase/index.ts",
-            "start": 5078,
-            "length": 6,
-            "messageText": "Type 'unknown' must have a '[Symbol.iterator]()' method that returns an iterator.",
-            "category": 1,
-            "code": 2488
-          }
-        ]
-      ],
-      [
-        "./src/fufu-web/index.ts",
-        [
-          {
-            "file": "./src/fufu-web/index.ts",
-            "start": 216,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/fufu-web/index.ts",
-            "start": 2517,
-            "length": 12,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          }
-        ]
-      ],
-      [
-        "./src/routing/index.ts",
-        [
-          {
-            "file": "./src/routing/index.ts",
-            "start": 238,
-            "length": 13,
-            "messageText": "Cannot find module '@aelea/core' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/routing/index.ts",
-            "start": 281,
-            "length": 15,
-            "messageText": "Cannot find module '@aelea/router' or its corresponding type declarations.",
-            "category": 1,
-            "code": 2307
-          },
-          {
-            "file": "./src/routing/index.ts",
-            "start": 789,
-            "length": 11,
-            "messageText": "Binding element 'sampleClick' implicitly has an 'any' type.",
-            "category": 1,
-            "code": 7031
-          },
-          {
-            "file": "./src/routing/index.ts",
-            "start": 802,
-            "length": 5,
-            "messageText": "Binding element 'click' implicitly has an 'any' type.",
-            "category": 1,
-            "code": 7031
-          },
-          {
-            "file": "./src/routing/index.ts",
-            "start": 942,
-            "length": 7,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/routing/index.ts",
-            "start": 991,
-            "length": 7,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          },
-          {
-            "file": "./src/routing/index.ts",
-            "start": 1044,
-            "length": 7,
-            "messageText": "Object is of type 'unknown'.",
-            "category": 1,
-            "code": 2571
-          }
-        ]
-      ]
+      "./src/examples-showcase/index.ts",
+      "./src/routing/index.ts",
+      "../router/.dist-cjs/index.d.ts",
+      "../router/.dist-cjs/resolve.d.ts",
+      "../router/.dist-cjs/resolveUrl.d.ts",
+      "../router/.dist-cjs/types.d.ts"
     ],
     "affectedFilesPendingEmit": [
       [

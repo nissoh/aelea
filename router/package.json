@@ -1,13 +1,13 @@
 {
   "name": "@aelea/router",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": ".dist-cjs/index.js",
   "module": ".dist/index.js",
   "scripts": {
-    "build:clean": "yarn g:tsc:clean",
+    "clean": "yarn g:tsc:clean",
     "build:project": "yarn g:tsc:project",
     "build:cjs": "yarn g:tsc:cjs",
-    "build": "yarn build:cjs && yarn build:project"
+    "build": "yarn build:cjs |& yarn build:project"
   },
   "homepage": "https://github.com/nissoh/aelea",
   "dependencies": {

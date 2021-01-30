@@ -1,5 +1,5 @@
 {
-  "name": "fufu",
+  "name": "aelea",
   "license": "MIT",
   "author": "Nissan Hanina <nissanhanina@gmail.com>",
   "workspaces": [
@@ -8,13 +8,9 @@
   "scripts": {
     "build": "yarn workspaces foreach --verbose --topological --parallel run build",
     "clean": "yarn workspaces foreach --verbose --parallel run clean",
-    "test": "jest",
-    "test:changed": "jest --onlyChanged",
-    "test:fast": "jest --testPathIgnorePatterns e2e",
     "lint": "eslint . --ext .ts",
-    "changeset": "changeset",
     "version:all": "yarn version apply --all",
-    "publish": "yarn workspaces foreach --exclude examples --verbose npm publish --tolerate-republish --access public",
+    "publish": "yarn workspaces foreach --exclude examples --exclude aelea --verbose npm publish --tolerate-republish --access public",
     "upgrade-interactive": "yarn upgrade-interactive",
     "check-version": "yarn version check",
     ".": "_______GLOBAL_TASKS_____",
@@ -25,8 +21,8 @@
     "g:tsc:cjs": "cd $INIT_CWD && tsc --outDir .dist-cjs --module CommonJS"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "4.10.0",
-    "@typescript-eslint/parser": "4.10.0",
+    "@typescript-eslint/eslint-plugin": "4.14.1",
+    "@typescript-eslint/parser": "4.14.1",
     "eslint": "7.18.0",
     "typescript": "4.1.3"
   }
