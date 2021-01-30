@@ -5,7 +5,7 @@
     "forceConsistentCasingInFileNames": true,
     "declarationMap": true,
     "target": "ES2018",
-    "module": "es6",
+    "module": "ESNext",
     "moduleResolution": "node",
     "composite": true,
     "incremental": true,
@@ -17,12 +17,7 @@
     "lib": [
       "DOM",
       "es2020"
-    ],
-    "paths": {
-      "utils/*": [
-        "utils/*"
-      ]
-    }
+    ]
   },
   "exclude": [
     "**/*.test.ts",

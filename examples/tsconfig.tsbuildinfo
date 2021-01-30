@@ -331,62 +331,62 @@
         "signature": "4aebdfbbda7f1480690a93bf5a6310cf8bc299a3013ce15e810ab1b5781efcd9",
         "affectsGlobalScope": false
       },
-      "../.yarn/cache/csstype-npm-3.0.5-ca116ff797-d15967edea.zip/node_modules/csstype/index.d.ts": {
-        "version": "ea58e4cbcf3d760a15f9300978a360c46360f544b355c737b60c733a385b8858",
-        "signature": "ea58e4cbcf3d760a15f9300978a360c46360f544b355c737b60c733a385b8858",
+      "../.yarn/cache/csstype-npm-3.0.6-57c059c166-ebdca96d26.zip/node_modules/csstype/index.d.ts": {
+        "version": "2421504d4ad8486abdb522b7bcdd4caafbcf4a320cdf7b19e780df258c639d7f",
+        "signature": "2421504d4ad8486abdb522b7bcdd4caafbcf4a320cdf7b19e780df258c639d7f",
         "affectsGlobalScope": false
       },
-      "../core/.dist-cjs/types.d.ts": {
+      "../core/.dist/types/types.d.ts": {
         "version": "a40946128be4c6ab86af8c35b5aef19dc3efb9c06c716a06bf4c253ce3f4aa8a",
         "signature": "a40946128be4c6ab86af8c35b5aef19dc3efb9c06c716a06bf4c253ce3f4aa8a",
         "affectsGlobalScope": false
       },
-      "../core/.dist-cjs/combinators/style.d.ts": {
+      "../core/.dist/types/combinators/style.d.ts": {
         "version": "9f0de7e81594a622eaacf996a085bbbcbd1e35e29443b09ce979b1e6e79b9388",
         "signature": "9f0de7e81594a622eaacf996a085bbbcbd1e35e29443b09ce979b1e6e79b9388",
         "affectsGlobalScope": false
       },
-      "../core/.dist-cjs/combinators/event.d.ts": {
+      "../core/.dist/types/combinators/event.d.ts": {
         "version": "9041a86225578e48dd5314b9275da9b7c81e265b36d647dc657efb52c799dd6f",
         "signature": "9041a86225578e48dd5314b9275da9b7c81e265b36d647dc657efb52c799dd6f",
         "affectsGlobalScope": false
       },
-      "../core/.dist-cjs/utils.d.ts": {
+      "../core/.dist/types/utils.d.ts": {
         "version": "da045bde2f066cea2fb01e6fb020b7bd4d5accc97fd236a4ab1315c376a48672",
         "signature": "da045bde2f066cea2fb01e6fb020b7bd4d5accc97fd236a4ab1315c376a48672",
         "affectsGlobalScope": false
       },
-      "../core/.dist-cjs/combinators/attribute.d.ts": {
+      "../core/.dist/types/combinators/attribute.d.ts": {
         "version": "9a97a4be1dea3fdc42c36e0aeb04b6f8f7341edbfa72c9de1d49052d6dd7c929",
         "signature": "9a97a4be1dea3fdc42c36e0aeb04b6f8f7341edbfa72c9de1d49052d6dd7c929",
         "affectsGlobalScope": false
       },
-      "../core/.dist-cjs/source/behavior.d.ts": {
+      "../core/.dist/types/source/behavior.d.ts": {
         "version": "6ad886db8be81109e4035a1db3c32b5486e21979ab4a92beb3bf45fa69f4b346",
         "signature": "6ad886db8be81109e4035a1db3c32b5486e21979ab4a92beb3bf45fa69f4b346",
         "affectsGlobalScope": false
       },
-      "../core/.dist-cjs/combinators/component.d.ts": {
+      "../core/.dist/types/combinators/component.d.ts": {
         "version": "9366635fdc9db2b3c164da9c84b89b68058586fb5a5e6766939e3632abcda00a",
         "signature": "9366635fdc9db2b3c164da9c84b89b68058586fb5a5e6766939e3632abcda00a",
         "affectsGlobalScope": false
       },
-      "../core/.dist-cjs/combinators/animate.d.ts": {
+      "../core/.dist/types/combinators/animate.d.ts": {
         "version": "980aab1c5b99c65f0e92809d271533b164d8a40256e4674e485b3008b987e0fb",
         "signature": "980aab1c5b99c65f0e92809d271533b164d8a40256e4674e485b3008b987e0fb",
         "affectsGlobalScope": false
       },
-      "../core/.dist-cjs/source/node.d.ts": {
+      "../core/.dist/types/source/node.d.ts": {
         "version": "8918c795ffb504073cc13e55a548f9946f0817f1f315f8eb77a446583515c232",
         "signature": "8918c795ffb504073cc13e55a548f9946f0817f1f315f8eb77a446583515c232",
         "affectsGlobalScope": false
       },
-      "../core/.dist-cjs/run.d.ts": {
+      "../core/.dist/types/run.d.ts": {
         "version": "4bf445084c9f1ea51a9fb4b5e0666a830b9f14daee5ce1f1297e48a158b98bf4",
         "signature": "4bf445084c9f1ea51a9fb4b5e0666a830b9f14daee5ce1f1297e48a158b98bf4",
         "affectsGlobalScope": true
       },
-      "../core/.dist-cjs/index.d.ts": {
+      "../core/.dist/types/index.d.ts": {
         "version": "59f5bd871ca523c34410942bae2ca9f256c98f8c88ea1228a6e30c98b37debb2",
         "signature": "59f5bd871ca523c34410942bae2ca9f256c98f8c88ea1228a6e30c98b37debb2",
         "affectsGlobalScope": false
@@ -511,22 +511,22 @@
         "signature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "affectsGlobalScope": false
       },
-      "../router/.dist-cjs/types.d.ts": {
+      "../router/.dist/types/types.d.ts": {
         "version": "b77701eb036a4a85e425f7bead9168947cd2d92cdf693bee47f82fac15da75fe",
         "signature": "b77701eb036a4a85e425f7bead9168947cd2d92cdf693bee47f82fac15da75fe",
         "affectsGlobalScope": false
       },
-      "../router/.dist-cjs/resolve.d.ts": {
+      "../router/.dist/types/resolve.d.ts": {
         "version": "865708329f86e0fca74974145123ba61089f342fd55935286585efb5c1a17456",
         "signature": "865708329f86e0fca74974145123ba61089f342fd55935286585efb5c1a17456",
         "affectsGlobalScope": false
       },
-      "../router/.dist-cjs/resolveUrl.d.ts": {
+      "../router/.dist/types/resolveUrl.d.ts": {
         "version": "7f5041a72235329226d4c43523cc798c33cce6f51036a157b1a0e30fde36eb7d",
         "signature": "7f5041a72235329226d4c43523cc798c33cce6f51036a157b1a0e30fde36eb7d",
         "affectsGlobalScope": false
       },
-      "../router/.dist-cjs/index.d.ts": {
+      "../router/.dist/types/index.d.ts": {
         "version": "f6805b863fc45267a538e051870888d24d994e65d6d667c8423dcfcdbb590ed2",
         "signature": "f6805b863fc45267a538e051870888d24d994e65d6d667c8423dcfcdbb590ed2",
         "affectsGlobalScope": false
@@ -558,7 +558,7 @@
       "forceConsistentCasingInFileNames": true,
       "declarationMap": false,
       "target": 5,
-      "module": 5,
+      "module": 99,
       "moduleResolution": 2,
       "composite": true,
       "incremental": true,
@@ -571,12 +571,6 @@
         "lib.dom.d.ts",
         "lib.es2020.d.ts"
       ],
-      "paths": {
-        "utils/*": [
-          "utils/*"
-        ]
-      },
-      "pathsBasePath": "/Users/nh658711/GIT/fufu",
       "outDir": "./.dist",
       "rootDir": "./src",
       "skipLibCheck": true,
@@ -686,84 +680,84 @@
         "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
       ],
-      "../core/.dist-cjs/combinators/animate.d.ts": [
+      "../core/.dist/types/combinators/animate.d.ts": [
         "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/types.d.ts"
+        "../core/.dist/types/types.d.ts"
       ],
-      "../core/.dist-cjs/combinators/attribute.d.ts": [
+      "../core/.dist/types/combinators/attribute.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/types.d.ts"
+        "../core/.dist/types/types.d.ts"
       ],
-      "../core/.dist-cjs/combinators/component.d.ts": [
+      "../core/.dist/types/combinators/component.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/types.d.ts"
+        "../core/.dist/types/types.d.ts"
       ],
-      "../core/.dist-cjs/combinators/event.d.ts": [
+      "../core/.dist/types/combinators/event.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/types.d.ts"
+        "../core/.dist/types/types.d.ts"
       ],
-      "../core/.dist-cjs/combinators/style.d.ts": [
+      "../core/.dist/types/combinators/style.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/types.d.ts"
+        "../core/.dist/types/types.d.ts"
       ],
-      "../core/.dist-cjs/index.d.ts": [
-        "../core/.dist-cjs/combinators/animate.d.ts",
-        "../core/.dist-cjs/combinators/attribute.d.ts",
-        "../core/.dist-cjs/combinators/component.d.ts",
-        "../core/.dist-cjs/combinators/event.d.ts",
-        "../core/.dist-cjs/combinators/style.d.ts",
-        "../core/.dist-cjs/run.d.ts",
-        "../core/.dist-cjs/source/behavior.d.ts",
-        "../core/.dist-cjs/source/node.d.ts",
-        "../core/.dist-cjs/types.d.ts",
-        "../core/.dist-cjs/utils.d.ts"
+      "../core/.dist/types/index.d.ts": [
+        "../core/.dist/types/combinators/animate.d.ts",
+        "../core/.dist/types/combinators/attribute.d.ts",
+        "../core/.dist/types/combinators/component.d.ts",
+        "../core/.dist/types/combinators/event.d.ts",
+        "../core/.dist/types/combinators/style.d.ts",
+        "../core/.dist/types/run.d.ts",
+        "../core/.dist/types/source/behavior.d.ts",
+        "../core/.dist/types/source/node.d.ts",
+        "../core/.dist/types/types.d.ts",
+        "../core/.dist/types/utils.d.ts"
       ],
-      "../core/.dist-cjs/run.d.ts": [
-        "../core/.dist-cjs/types.d.ts"
+      "../core/.dist/types/run.d.ts": [
+        "../core/.dist/types/types.d.ts"
       ],
-      "../core/.dist-cjs/source/behavior.d.ts": [
+      "../core/.dist/types/source/behavior.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/types.d.ts"
+        "../core/.dist/types/types.d.ts"
       ],
-      "../core/.dist-cjs/source/node.d.ts": [
+      "../core/.dist/types/source/node.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/types.d.ts"
+        "../core/.dist/types/types.d.ts"
       ],
-      "../core/.dist-cjs/types.d.ts": [
+      "../core/.dist/types/types.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../.yarn/cache/csstype-npm-3.0.5-ca116ff797-d15967edea.zip/node_modules/csstype/index.d.ts"
+        "../.yarn/cache/csstype-npm-3.0.6-57c059c166-ebdca96d26.zip/node_modules/csstype/index.d.ts"
       ],
-      "../core/.dist-cjs/utils.d.ts": [
+      "../core/.dist/types/utils.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/types.d.ts"
+        "../core/.dist/types/types.d.ts"
       ],
       "./src/aelea-web/index.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/$Button.ts"
       ],
       "./src/common/common.ts": [
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/$ButtonIcon.ts"
       ],
       "./src/common/stylesheet.ts": [
-        "../core/.dist-cjs/index.d.ts"
+        "../core/.dist/types/index.d.ts"
       ],
       "./src/components/$Calculator.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/$Input.ts"
       ],
       "./src/components/$CountCounters.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/$Counter.ts",
@@ -771,14 +765,14 @@
       ],
       "./src/components/$Counter.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/$Button.ts"
       ],
       "./src/components/$QuantumList.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/$QuantumScroll.ts",
@@ -787,54 +781,54 @@
       "./src/components/$QuantumScroll.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/common.ts"
       ],
       "./src/components/$SimpleExample.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../core/.dist-cjs/index.d.ts"
+        "../core/.dist/types/index.d.ts"
       ],
       "./src/components/$Spring.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts"
       ],
       "./src/components/$Table.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/$QuantumScroll.ts"
       ],
       "./src/components/$ViewFlow.ts": [
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts"
       ],
       "./src/components/form/$Button.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/form.ts"
       ],
       "./src/components/form/$ButtonIcon.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/form.ts"
       ],
       "./src/components/form/$Checkbox.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/form.ts"
       ],
       "./src/components/form/$Field.ts": [
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/$Input.ts",
@@ -843,19 +837,19 @@
       "./src/components/form/$Input.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/form.ts"
       ],
       "./src/components/form/form.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/stylesheet.ts"
       ],
       "./src/components/todo-app/$CreateTodo.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/components/form/$Button.ts",
         "./src/components/form/$Input.ts",
@@ -863,7 +857,7 @@
       ],
       "./src/components/todo-app/$TodoApp.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/$Checkbox.ts",
@@ -874,7 +868,7 @@
       "./src/components/todo-app/$TodoItem.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/$Checkbox.ts",
@@ -883,20 +877,20 @@
       ],
       "./src/examples-showcase/$Example.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts"
       ],
       "./src/examples-showcase/common.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
-        "../router/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
+        "../router/.dist/types/index.d.ts",
         "./src/common/stylesheet.ts"
       ],
       "./src/examples-showcase/index.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
-        "../router/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
+        "../router/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
         "./src/components/$Calculator.ts",
@@ -913,26 +907,26 @@
       "./src/routing/index.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
-        "../router/.dist-cjs/index.d.ts",
+        "../core/.dist/types/index.d.ts",
+        "../router/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts"
       ],
-      "../router/.dist-cjs/index.d.ts": [
-        "../router/.dist-cjs/resolve.d.ts",
-        "../router/.dist-cjs/resolveUrl.d.ts",
-        "../router/.dist-cjs/types.d.ts"
+      "../router/.dist/types/index.d.ts": [
+        "../router/.dist/types/resolve.d.ts",
+        "../router/.dist/types/resolveUrl.d.ts",
+        "../router/.dist/types/types.d.ts"
       ],
-      "../router/.dist-cjs/resolve.d.ts": [
+      "../router/.dist/types/resolve.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../router/.dist-cjs/types.d.ts"
+        "../router/.dist/types/types.d.ts"
       ],
-      "../router/.dist-cjs/resolveUrl.d.ts": [
+      "../router/.dist/types/resolveUrl.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
-        "../router/.dist-cjs/types.d.ts"
+        "../core/.dist/types/index.d.ts",
+        "../router/.dist/types/types.d.ts"
       ],
-      "../router/.dist-cjs/types.d.ts": [
+      "../router/.dist/types/types.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
       ]
     },
@@ -1039,57 +1033,57 @@
         "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
       ],
-      "../core/.dist-cjs/combinators/animate.d.ts": [
+      "../core/.dist/types/combinators/animate.d.ts": [
         "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/types.d.ts"
+        "../core/.dist/types/types.d.ts"
       ],
-      "../core/.dist-cjs/combinators/attribute.d.ts": [
+      "../core/.dist/types/combinators/attribute.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/types.d.ts"
+        "../core/.dist/types/types.d.ts"
       ],
-      "../core/.dist-cjs/combinators/component.d.ts": [
+      "../core/.dist/types/combinators/component.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/types.d.ts"
+        "../core/.dist/types/types.d.ts"
       ],
-      "../core/.dist-cjs/combinators/event.d.ts": [
+      "../core/.dist/types/combinators/event.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/types.d.ts"
+        "../core/.dist/types/types.d.ts"
       ],
-      "../core/.dist-cjs/combinators/style.d.ts": [
+      "../core/.dist/types/combinators/style.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/types.d.ts"
+        "../core/.dist/types/types.d.ts"
       ],
-      "../core/.dist-cjs/index.d.ts": [
-        "../core/.dist-cjs/combinators/animate.d.ts",
-        "../core/.dist-cjs/combinators/attribute.d.ts",
-        "../core/.dist-cjs/combinators/component.d.ts",
-        "../core/.dist-cjs/combinators/event.d.ts",
-        "../core/.dist-cjs/combinators/style.d.ts",
-        "../core/.dist-cjs/run.d.ts",
-        "../core/.dist-cjs/source/behavior.d.ts",
-        "../core/.dist-cjs/source/node.d.ts",
-        "../core/.dist-cjs/types.d.ts",
-        "../core/.dist-cjs/utils.d.ts"
+      "../core/.dist/types/index.d.ts": [
+        "../core/.dist/types/combinators/animate.d.ts",
+        "../core/.dist/types/combinators/attribute.d.ts",
+        "../core/.dist/types/combinators/component.d.ts",
+        "../core/.dist/types/combinators/event.d.ts",
+        "../core/.dist/types/combinators/style.d.ts",
+        "../core/.dist/types/run.d.ts",
+        "../core/.dist/types/source/behavior.d.ts",
+        "../core/.dist/types/source/node.d.ts",
+        "../core/.dist/types/types.d.ts",
+        "../core/.dist/types/utils.d.ts"
       ],
-      "../core/.dist-cjs/run.d.ts": [
-        "../core/.dist-cjs/types.d.ts"
+      "../core/.dist/types/run.d.ts": [
+        "../core/.dist/types/types.d.ts"
       ],
-      "../core/.dist-cjs/source/behavior.d.ts": [
+      "../core/.dist/types/source/behavior.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/types.d.ts"
+        "../core/.dist/types/types.d.ts"
       ],
-      "../core/.dist-cjs/source/node.d.ts": [
+      "../core/.dist/types/source/node.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/types.d.ts"
+        "../core/.dist/types/types.d.ts"
       ],
-      "../core/.dist-cjs/types.d.ts": [
+      "../core/.dist/types/types.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../.yarn/cache/csstype-npm-3.0.5-ca116ff797-d15967edea.zip/node_modules/csstype/index.d.ts"
+        "../.yarn/cache/csstype-npm-3.0.6-57c059c166-ebdca96d26.zip/node_modules/csstype/index.d.ts"
       ],
-      "../core/.dist-cjs/utils.d.ts": [
+      "../core/.dist/types/utils.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/types.d.ts"
+        "../core/.dist/types/types.d.ts"
       ],
       "./src/common/common.ts": [
         "../core/.dist-cjs/index.d.ts"
@@ -1172,21 +1166,21 @@
         "../core/.dist-cjs/index.d.ts",
         "../router/.dist-cjs/index.d.ts"
       ],
-      "../router/.dist-cjs/index.d.ts": [
-        "../router/.dist-cjs/resolve.d.ts",
-        "../router/.dist-cjs/resolveUrl.d.ts",
-        "../router/.dist-cjs/types.d.ts"
+      "../router/.dist/types/index.d.ts": [
+        "../router/.dist/types/resolve.d.ts",
+        "../router/.dist/types/resolveUrl.d.ts",
+        "../router/.dist/types/types.d.ts"
       ],
-      "../router/.dist-cjs/resolve.d.ts": [
+      "../router/.dist/types/resolve.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../router/.dist-cjs/types.d.ts"
+        "../router/.dist/types/types.d.ts"
       ],
-      "../router/.dist-cjs/resolveUrl.d.ts": [
+      "../router/.dist/types/resolveUrl.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/index.d.ts",
-        "../router/.dist-cjs/types.d.ts"
+        "../core/.dist/types/index.d.ts",
+        "../router/.dist/types/types.d.ts"
       ],
-      "../router/.dist-cjs/types.d.ts": [
+      "../router/.dist/types/types.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
       ]
     },
@@ -1219,7 +1213,7 @@
       "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/relative.d.ts",
       "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/schedule.d.ts",
       "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-      "../.yarn/cache/csstype-npm-3.0.5-ca116ff797-d15967edea.zip/node_modules/csstype/index.d.ts",
+      "../.yarn/cache/csstype-npm-3.0.6-57c059c166-ebdca96d26.zip/node_modules/csstype/index.d.ts",
       "../.yarn/cache/typescript-patch-7a9e6321b3-017af99214.zip/node_modules/typescript/lib/lib.dom.d.ts",
       "../.yarn/cache/typescript-patch-7a9e6321b3-017af99214.zip/node_modules/typescript/lib/lib.es2015.collection.d.ts",
       "../.yarn/cache/typescript-patch-7a9e6321b3-017af99214.zip/node_modules/typescript/lib/lib.es2015.core.d.ts",
@@ -1258,17 +1252,17 @@
       "../.yarn/cache/typescript-patch-7a9e6321b3-017af99214.zip/node_modules/typescript/lib/lib.es2020.string.d.ts",
       "../.yarn/cache/typescript-patch-7a9e6321b3-017af99214.zip/node_modules/typescript/lib/lib.es2020.symbol.wellknown.d.ts",
       "../.yarn/cache/typescript-patch-7a9e6321b3-017af99214.zip/node_modules/typescript/lib/lib.es5.d.ts",
-      "../core/.dist-cjs/combinators/animate.d.ts",
-      "../core/.dist-cjs/combinators/attribute.d.ts",
-      "../core/.dist-cjs/combinators/component.d.ts",
-      "../core/.dist-cjs/combinators/event.d.ts",
-      "../core/.dist-cjs/combinators/style.d.ts",
-      "../core/.dist-cjs/index.d.ts",
-      "../core/.dist-cjs/run.d.ts",
-      "../core/.dist-cjs/source/behavior.d.ts",
-      "../core/.dist-cjs/source/node.d.ts",
-      "../core/.dist-cjs/types.d.ts",
-      "../core/.dist-cjs/utils.d.ts",
+      "../core/.dist/types/combinators/animate.d.ts",
+      "../core/.dist/types/combinators/attribute.d.ts",
+      "../core/.dist/types/combinators/component.d.ts",
+      "../core/.dist/types/combinators/event.d.ts",
+      "../core/.dist/types/combinators/style.d.ts",
+      "../core/.dist/types/index.d.ts",
+      "../core/.dist/types/run.d.ts",
+      "../core/.dist/types/source/behavior.d.ts",
+      "../core/.dist/types/source/node.d.ts",
+      "../core/.dist/types/types.d.ts",
+      "../core/.dist/types/utils.d.ts",
       "./src/aelea-web/index.ts",
       "./src/common/common.ts",
       "./src/common/stylesheet.ts",
@@ -1297,10 +1291,10 @@
       "./src/examples-showcase/drag.ts",
       "./src/examples-showcase/index.ts",
       "./src/routing/index.ts",
-      "../router/.dist-cjs/index.d.ts",
-      "../router/.dist-cjs/resolve.d.ts",
-      "../router/.dist-cjs/resolveUrl.d.ts",
-      "../router/.dist-cjs/types.d.ts"
+      "../router/.dist/types/index.d.ts",
+      "../router/.dist/types/resolve.d.ts",
+      "../router/.dist/types/resolveUrl.d.ts",
+      "../router/.dist/types/types.d.ts"
     ],
     "affectedFilesPendingEmit": [
       [
