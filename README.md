@@ -75,7 +75,7 @@ const $Counter = component((
 
   const count = sumFromZeroOp(merge(increment, decrement))
 
-  return [
+  return [ // Component has to return [$Node, Behavior(optionally)] in the next example we will use these outputted behaviors
 
     $row(spacingStyle)(
       $column(
