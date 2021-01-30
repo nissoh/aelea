@@ -13,8 +13,6 @@ function appendToSlot(parent: IBranchElement, child: INodeElement, insertAt: num
   parent.insertBefore(child, parent.children[insertAt])
 }
 
-
-// missing adoptedStyleSheets type
 declare global {
   interface Document {
     adoptedStyleSheets: CSSStyleSheet[];

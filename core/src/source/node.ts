@@ -2,7 +2,7 @@ import { map, never, now, switchLatest } from '@most/core'
 import { id } from '@most/prelude'
 import { Disposable, Scheduler, Sink, Stream } from '@most/types'
 import { $Node, $Branch, INode, IBranch, IBranchElement, Op } from '../types'
-import { isFunction, O, xForver } from '../utils'
+import { isFunction, O } from '../utils'
 
 
 export const $svg = branch(<K extends keyof SVGElementTagNameMap>(a: K) => document.createElementNS('http://www.w3.org/2000/svg', a))
