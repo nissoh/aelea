@@ -29,91 +29,91 @@ import { $column } from '../common/common'
 
 
 export interface ScrollSegment {
-    from: number
-    to: number
-    pageSize: number
+  from: number
+  to: number
+  pageSize: number
 }
 
 export interface ScrollResponse {
-    $items: $Branch[]
-    totalItems: number,
+  $items: $Branch[]
+  totalItems: number,
 }
 
 export interface QuantumScroll {
-    rowHeight: number
-    maxContainerHeight: number
-    dataSource: Stream<ScrollResponse>
+  rowHeight: number
+  maxContainerHeight: number
+  dataSource: Stream<ScrollResponse>
 
-    threshold?: number
-    $intermissionItem?: $Branch
+  threshold?: number
+  $intermissionItem?: $Branch
 }
 
 const containerStyle = style({
-    display: 'block', overflow: 'auto'
+  display: 'block', overflow: 'auto'
 })
 
 const scrollerStyle = style({
-    display: 'block', position: 'relative', overflow: 'hidden', width: '100%', minHeight: '100%',
+  display: 'block', position: 'relative', overflow: 'hidden', width: '100%', minHeight: '100%',
 })
 
 
 
 export default ({ maxContainerHeight, rowHeight, dataSource, threshold = 10 }: QuantumScroll) => component((
-    [sampleScroll, scroll]: Behavior<IBranch, ScrollSegment>,
+  [sampleScroll, scroll]: Behavior<IBranch, ScrollSegment>,
 ) => {
 
-    const scrollBehavior = sampleScroll(
-        event('scroll'),
-        map(ev => {
-            const target = ev.target
-            if (!(target instanceof HTMLElement)) {
-                throw new Error('element target is not scrollable')
-            }
+  const scrollBehavior = sampleScroll(
+    event('scroll'),
+    map(ev => {
+      const target = ev.target
+      if (!(target instanceof HTMLElement)) {
+        throw new Error('element target is not scrollable')
+      }
 
-            const top = Math.floor(target.scrollTop / rowHeight)
-            const pageSize = Math.floor((target.clientHeight / rowHeight) + threshold)
+      const top = Math.floor(target.scrollTop / rowHeight)
+      const pageSize = Math.floor((target.clientHeight / rowHeight) + threshold)
 
-            const from = Math.max(0, top - (top % threshold))
-            const to = from + pageSize
+      const from = Math.max(0, top - (top % threshold))
+      const to = from + pageSize
 
-            return { from, to, pageSize }
-        }),
-        skipRepeatsWith((prev, next) => prev.from === next.from),
-    )
+      return { from, to, pageSize }
+    }),
+    skipRepeatsWith((prev, next) => prev.from === next.from),
+  )
 
-    const intialPageSize = Math.floor(maxContainerHeight / rowHeight) + threshold
-    const multicatedScroll: Stream<ScrollSegment> = startWith({ from: 0, to: intialPageSize, pageSize: intialPageSize }, multicast(scroll))
+  const intialPageSize = Math.floor(maxContainerHeight / rowHeight) + threshold
+  const multicatedScroll: Stream<ScrollSegment> = startWith({ from: 0, to: intialPageSize, pageSize: intialPageSize }, multicast(scroll))
 
-    const multicastedData = replayLatest(multicast(dataSource))
+  const multicastedData = replayLatest(multicast(dataSource))
 
-    const $intermissionedItems = O(
-        map(({ $items }: ScrollResponse) => mergeArray($items)),
-        switchLatest
-    )(multicastedData)
+  const $intermissionedItems = O(
+    map(({ $items }: ScrollResponse) => mergeArray($items)),
+    switchLatest
+  )(multicastedData)
 
 
-    const $container = $column(style({ maxHeight: maxContainerHeight + 'px' }), containerStyle, scrollBehavior)
+  const $container = $column(style({ maxHeight: maxContainerHeight + 'px' }), containerStyle, scrollBehavior)
 
-    const $content = $node(
-        styleInMotion(
-            map(x => ({ height: `${rowHeight * x.totalItems}px` }), multicastedData)
-        ),
-        scrollerStyle
-    )
+  const $content = $node(
+    styleInMotion(
+      map(x => ({ height: `${rowHeight * x.totalItems}px` }), multicastedData)
+    ),
+    scrollerStyle
+  )
 
-    const $innerContent = $column(styleInMotion(map(loc => ({ transform: `translate(0, ${loc.from * rowHeight}px)` }), multicatedScroll)), style({ willChange: 'transform' }))
+  const $innerContent = $column(styleInMotion(map(loc => ({ transform: `translate(0, ${loc.from * rowHeight}px)` }), multicatedScroll)), style({ willChange: 'transform' }))
 
-    return [
-        $container(
-            $content(
-                $innerContent(
-                    style({ height: rowHeight + 'px' }, $intermissionedItems)
-                )
-            )
-        ),
+  return [
+    $container(
+      $content(
+        $innerContent(
+          style({ height: rowHeight + 'px' }, $intermissionedItems)
+        )
+      )
+    ),
 
-        {
-            scroll: multicatedScroll
-        }
-    ]
+    {
+      scroll: multicatedScroll
+    }
+  ]
 })

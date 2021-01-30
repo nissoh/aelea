@@ -1,8 +1,8 @@
-import { combine, map } from "@most/core";
+import { $element, attr, Behavior, component, event, IBranch, styleBehavior } from '@aelea/core';
+import { combine, map, mergeArray } from "@most/core";
 import { Stream } from "@most/types";
-import { $element, attr, Behavior, component, IBranch, event } from '@aelea/core';
 import * as designSheet from '../../common/stylesheet';
-import { Control, InputType } from "./form";
+import { Control, dismissOp, InputType, interactionOp } from "./form";
 
 
 export interface Input extends Control {
@@ -13,6 +13,8 @@ export interface Input extends Control {
 }
 
 export default (config: Input) => component((
+  [interactionBehavior, focusStyle]: Behavior<IBranch, true>,
+  [dismissBehavior, dismissstyle]: Behavior<IBranch, false>,
   [sampleValue, value]: Behavior<IBranch, string>
 ) => {
 
@@ -20,9 +22,6 @@ export default (config: Input) => component((
     $element('input')(
       attr({ type: config.type ?? InputType.TEXT, name: config.name }),
       designSheet.input,
-
-      // stylePseudo(':hover', { borderColor: designSheet.theme.primary }),
-      // stylePseudo(':focus', { borderColor: designSheet.theme.primary }),
 
       sampleValue(
         event('input'),
@@ -34,6 +33,16 @@ export default (config: Input) => component((
           return ''
         })
       ),
+
+      styleBehavior(
+        map(
+          active => active ? { borderBottom: `2px solid ${designSheet.theme.primary}` } : null,
+          mergeArray([focusStyle, dismissstyle])
+        )
+      ),
+
+      interactionBehavior(interactionOp),
+      dismissBehavior(dismissOp),
 
       // applying by setting `HTMLInputElement.value` imperatively(only way known to me)
       (source) => config.setValue

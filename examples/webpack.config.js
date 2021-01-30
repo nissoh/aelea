@@ -33,9 +33,9 @@ module.exports = {
       path.resolve(__dirname)
     ],
     extensions: [".ts", '.js'],
-    plugins: [
-      new TsconfigPathsPlugin({})
-    ]
+    // plugins: [
+    //   new TsconfigPathsPlugin({})
+    // ]
   },
   plugins: [
     new ForkTsCheckerWebpackPlugin(),

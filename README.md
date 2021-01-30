@@ -6,7 +6,7 @@ Functional Reactive Programming UI library based on [@most/core](https://github.
 - State UI naturally using Streams and changes declared using Behaviors
 - Highly performant since diffing became obsolete, state changes based on natural Behaviors
 - CSS Declarations only exists when they are displayed, reducing paint time
-- Components is similar to a function, AS I/O, Outputs(Automatically Typed) outout(unlike any other libraries)
+- Components are similar to a function, AS I/O, Outputs(Automatically Typed) outout(unlike any other libraries)
 - Typed. Less friction, more feedback Style, Elements and even Dom Events
 
 
@@ -39,68 +39,54 @@ runBrowser({ rootNode: document.body })($pinkishCountUp )
 ### Simple UI Counter - View, Style and Behavior
 This is a dumbed down version where everything is packed into a single file
 
-For a better composed example check [/examples/src/components/$Counter.ts](/examples/src/components/$Counter.ts)
+Sanboxed version [https://codesandbox.io/s/ancient-hooks-909qq?file=/src/index.ts](https://codesandbox.io/s/ancient-hooks-909qq?file=/src/index.ts)
 
 ```typescript
 import { constant, map, merge, scan } from '@most/core'
 import { $custom, $element, $text, Behavior, component, style, event, INode, runBrowser } from '@aelea/core'
 
-
 // composable style
 const displayFlex = style({ display: 'flex' })
 const spacingStyle = style({ gap: '16px' })
 
-
 // composable elements
 const $row = $custom('row')(displayFlex)
-const $column = $custom('column')(displayFlex, style({ flex: 1, flexDirection: 'row' }))
+const $column = $custom('column')(displayFlex, style({ flexDirection: 'column' }))
 
 const sumFromZeroOp = scan((current: number, x: number) => current + x, 0)
 
 // Component that outputs state(optionally), this is currently not used anywhere, see next example to see it being consumed
 const $Counter = component((
-  [sampleIncrement, increment]: Behavior<INode, 1>,
-  [sampleDecrement, decrement]: Behavior<INode, -1>
-) => {
+    [sampleIncrement, increment]: Behavior<INode, 1>,
+    [sampleDecrement, decrement]: Behavior<INode, -1>
+  ) => {
+    const incrementBehavior = sampleIncrement(event('click'), constant(1))
+    const decrementBehavior = sampleDecrement(event('click'), constant(-1))
 
-  const incrementBehavior = sampleIncrement(
-    event('click'),
-    constant(1)
-  )
+    const count = sumFromZeroOp(merge(increment, decrement))
 
-  const decrementBehavior = sampleDecrement(
-    event('click'),
-    constant(-1)
-  )
+    return [ // Component has to return [$Node, Behavior(optionally)] in the next example we will use these outputted behaviors
 
-  const count = sumFromZeroOp(merge(increment, decrement))
-
-  return [ // Component has to return [$Node, Behavior(optionally)] in the next example we will use these outputted behaviors
-
-    $row(spacingStyle)(
-      $column(
-        $element('button')(incrementBehavior)(
-          $text('+')
+      $row(spacingStyle)(
+        $column(
+          $element('button')(incrementBehavior)(
+            $text('+')
+          ),
+          $element('button')(decrementBehavior)(
+            $text('-')
+          )
         ),
-        $element('button')(decrementBehavior)(
-          $text('-')
-        ),
+
+        $text(style({ fontSize: '64px' }))(map(String, count))
       ),
 
-      $text(style({ fontSize: '64px', }))(
-        map(String, count)
-      )
-    ),
-
-    { increment, decrement }
-
-  ]
-})
-
-
-runBrowser({ rootNode: document.body })(
-  $Counter({})
+      { increment, decrement }
+    ]
+  }
 )
+
+runBrowser({ rootNode: document.body })($Counter({}))
+
 
 ```
 
@@ -149,3 +135,16 @@ runBrowser({ rootNode: document.body })(
 )
 
 ```
+
+This is all nice and dandy, graping everything will require some practice
+There are various examples and whole lot of different tools avaible at the examples folder
+
+### to see it running
+
+- install NodeJS, https://nodejs.org/en/
+- `npm install -g yarn` cmd to install yarn package and project manager
+- `cd ./examples`
+- `yarn run showcase`
+
+
+`cd ./examples` and `yarn run`

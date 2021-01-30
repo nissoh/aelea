@@ -27,8 +27,6 @@ export default (config: Button) => component((
       attr(
         config.disabled ? map(disabled => ({ disabled }), config.disabled) : empty()
       ),
-      // stylePseudo(':hover', { border: `2px solid ${designSheet.theme.primary}` }),
-      // stylePseudo(':focus', { border: `2px solid ${designSheet.theme.primary}` }),
 
       styleBehavior(
         map(
