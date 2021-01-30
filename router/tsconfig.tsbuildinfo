@@ -357,8 +357,8 @@
         "affectsGlobalScope": false
       },
       "../core/.dist-cjs/source/node.d.ts": {
-        "version": "c02528ba44ec4e877b5a5a494a9600a8caffa115e8b510c80e4843ee0765e0b3",
-        "signature": "c02528ba44ec4e877b5a5a494a9600a8caffa115e8b510c80e4843ee0765e0b3",
+        "version": "8918c795ffb504073cc13e55a548f9946f0817f1f315f8eb77a446583515c232",
+        "signature": "8918c795ffb504073cc13e55a548f9946f0817f1f315f8eb77a446583515c232",
         "affectsGlobalScope": false
       },
       "../core/.dist-cjs/run.d.ts": {
@@ -388,7 +388,7 @@
       "forceConsistentCasingInFileNames": true,
       "declarationMap": true,
       "target": 5,
-      "module": 1,
+      "module": 5,
       "moduleResolution": 2,
       "composite": true,
       "incremental": true,
@@ -407,7 +407,7 @@
         ]
       },
       "pathsBasePath": "/Users/nh658711/GIT/fufu",
-      "outDir": "./.dist-cjs",
+      "outDir": "./.dist",
       "rootDir": "./src",
       "configFilePath": "./tsconfig.json"
     },
