@@ -2,16 +2,17 @@
 Functional Reactive Programming UI library based on [@most/core](https://github.com/mostjs/core) paradigm and [architecture](https://github.com/cujojs/most/wiki/Architecture)
 
 # Why?
-- Everything is composable, elements, style, behaviors are reusable and compose well together. All Built to scale
-- State UI naturally using Streams and changes declared using Behaviors
+- Everything is programatic and reduced by applying First Principle
+- A lot is meant to compose well together. elements, style, behaviors are reusable and stateless. All Built to scale
+- State UI naturally by declaring Behaviors, state managers are obsolete
 - Highly performant since diffing became obsolete, state changes based on natural Behaviors
 - CSS Declarations only exists when they are displayed, reducing paint time
 - Components are similar to a function, AS I/O, Outputs(Automatically Typed) outout(unlike any other libraries)
-- Typed. Less friction, more feedback Style, Elements and even Dom Events
+- Typed. Less friction and more feedback. Style(csstype), Elements(either custom or specific(form, button etc)) and even Dom Events(based on element type)
+- Animations. done using Spring physics https://www.youtube.com/watch?v=1tavDv5hXpo
 
 
-
-### Functionally Increment number periodically
+### Increment number periodically
 ```typescript
 import { $node, $text, O, runBrowser } from '@aelea/core'
 import { constant, map, periodic, scan } from '@most/core'
@@ -77,7 +78,9 @@ const $Counter = component((
           )
         ),
 
-        $text(style({ fontSize: '64px' }))(map(String, count))
+        $text(style({ fontSize: '64px' }))(
+          map(String, count)
+        )
       ),
 
       { increment, decrement }
@@ -104,7 +107,7 @@ const $SumOfTwoCounters = component((
   [sampleDecrements, decrements]: Behavior<INode, -1>
 ) => {
 
-  const sumOfTwoCounters = merge(increments, decrements)
+  const sumOfTwoCounters = scan((sum, count) =>  sum + count, 0 , merge(increments, decrements))
 
   return [
 
@@ -136,7 +139,7 @@ runBrowser({ rootNode: document.body })(
 
 ```
 
-This is all nice and dandy, graping everything will require some practice
+This is all nice and dandy, grasping everything will require some practice
 There are various examples and whole lot of different tools avaible at the examples folder
 
 ### to see it running
