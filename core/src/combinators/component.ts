@@ -45,12 +45,9 @@ export function componentFn<A extends INodeElement, B extends $Node<A>, D>(
       return disposeAll([
         disposeWith(() => {
           sink.end(scheduler.currentTime())
-          console.log(view)
         }, null),
         view.run(sink, scheduler),
         ...outputDisposables,
-
-        // ...behaviors.map(([s, b]) => b as BehaviorSource<any, any>),
       ])
 
     }

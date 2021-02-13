@@ -191,6 +191,56 @@
         "signature": "31e8df2398e328077079c17ea4f1664bad0a34adf8b0608837e504e310e329a1",
         "affectsGlobalScope": true
       },
+      "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts": {
+        "version": "af99b3836fe46d2a893da1b9cb87f01bb4d13aac86ca925a582b68ae8ff43bba",
+        "signature": "af99b3836fe46d2a893da1b9cb87f01bb4d13aac86ca925a582b68ae8ff43bba",
+        "affectsGlobalScope": false
+      },
+      "../.yarn/cache/csstype-npm-3.0.6-57c059c166-ebdca96d26.zip/node_modules/csstype/index.d.ts": {
+        "version": "2421504d4ad8486abdb522b7bcdd4caafbcf4a320cdf7b19e780df258c639d7f",
+        "signature": "2421504d4ad8486abdb522b7bcdd4caafbcf4a320cdf7b19e780df258c639d7f",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist/types/utils/SettableDisposable.d.ts": {
+        "version": "fbd77e714813a83c60cc7650bc53ec791f21c212761034d16e7059ad7bd0c834",
+        "signature": "fbd77e714813a83c60cc7650bc53ec791f21c212761034d16e7059ad7bd0c834",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist/types/types.d.ts": {
+        "version": "f500b85724dc99120cdc0728c7acfa3ed78882937e5fe1a51fcaa646bfba4205",
+        "signature": "f500b85724dc99120cdc0728c7acfa3ed78882937e5fe1a51fcaa646bfba4205",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist/types/combinators/style.d.ts": {
+        "version": "9f0de7e81594a622eaacf996a085bbbcbd1e35e29443b09ce979b1e6e79b9388",
+        "signature": "9f0de7e81594a622eaacf996a085bbbcbd1e35e29443b09ce979b1e6e79b9388",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist/types/combinators/event.d.ts": {
+        "version": "9041a86225578e48dd5314b9275da9b7c81e265b36d647dc657efb52c799dd6f",
+        "signature": "9041a86225578e48dd5314b9275da9b7c81e265b36d647dc657efb52c799dd6f",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist/types/utils.d.ts": {
+        "version": "da045bde2f066cea2fb01e6fb020b7bd4d5accc97fd236a4ab1315c376a48672",
+        "signature": "da045bde2f066cea2fb01e6fb020b7bd4d5accc97fd236a4ab1315c376a48672",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist/types/combinators/attribute.d.ts": {
+        "version": "9a97a4be1dea3fdc42c36e0aeb04b6f8f7341edbfa72c9de1d49052d6dd7c929",
+        "signature": "9a97a4be1dea3fdc42c36e0aeb04b6f8f7341edbfa72c9de1d49052d6dd7c929",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist/types/source/behavior.d.ts": {
+        "version": "6ad886db8be81109e4035a1db3c32b5486e21979ab4a92beb3bf45fa69f4b346",
+        "signature": "6ad886db8be81109e4035a1db3c32b5486e21979ab4a92beb3bf45fa69f4b346",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist/types/combinators/component.d.ts": {
+        "version": "9366635fdc9db2b3c164da9c84b89b68058586fb5a5e6766939e3632abcda00a",
+        "signature": "9366635fdc9db2b3c164da9c84b89b68058586fb5a5e6766939e3632abcda00a",
+        "affectsGlobalScope": false
+      },
       "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/array.d.ts": {
         "version": "f2cbee30ac379c1260b0d2ce0bf49fc0b833b6f050d5c0427a05da772b740de8",
         "signature": "f2cbee30ac379c1260b0d2ce0bf49fc0b833b6f050d5c0427a05da772b740de8",
@@ -206,9 +256,44 @@
         "signature": "7b2fe1cea8f3ecc499859a351c2679f51796de056d864759683680b73cdea33c",
         "affectsGlobalScope": false
       },
-      "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts": {
-        "version": "af99b3836fe46d2a893da1b9cb87f01bb4d13aac86ca925a582b68ae8ff43bba",
-        "signature": "af99b3836fe46d2a893da1b9cb87f01bb4d13aac86ca925a582b68ae8ff43bba",
+      "../core/.dist/types/combinators/animate.d.ts": {
+        "version": "20ba5ef29462eacd68d9f5c6c1b32826e6142ca7ce9463fa868957277884e022",
+        "signature": "20ba5ef29462eacd68d9f5c6c1b32826e6142ca7ce9463fa868957277884e022",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist/types/source/node.d.ts": {
+        "version": "e41e76ee662acdcb53b017e545352520cb12869ef396c08963180bf9532db36f",
+        "signature": "e41e76ee662acdcb53b017e545352520cb12869ef396c08963180bf9532db36f",
+        "affectsGlobalScope": false
+      },
+      "../core/.dist/types/run.d.ts": {
+        "version": "4bf445084c9f1ea51a9fb4b5e0666a830b9f14daee5ce1f1297e48a158b98bf4",
+        "signature": "4bf445084c9f1ea51a9fb4b5e0666a830b9f14daee5ce1f1297e48a158b98bf4",
+        "affectsGlobalScope": true
+      },
+      "../core/.dist/types/index.d.ts": {
+        "version": "59f5bd871ca523c34410942bae2ca9f256c98f8c88ea1228a6e30c98b37debb2",
+        "signature": "59f5bd871ca523c34410942bae2ca9f256c98f8c88ea1228a6e30c98b37debb2",
+        "affectsGlobalScope": false
+      },
+      "../router/.dist/types/types.d.ts": {
+        "version": "b77701eb036a4a85e425f7bead9168947cd2d92cdf693bee47f82fac15da75fe",
+        "signature": "b77701eb036a4a85e425f7bead9168947cd2d92cdf693bee47f82fac15da75fe",
+        "affectsGlobalScope": false
+      },
+      "../router/.dist/types/resolve.d.ts": {
+        "version": "865708329f86e0fca74974145123ba61089f342fd55935286585efb5c1a17456",
+        "signature": "865708329f86e0fca74974145123ba61089f342fd55935286585efb5c1a17456",
+        "affectsGlobalScope": false
+      },
+      "../router/.dist/types/resolveUrl.d.ts": {
+        "version": "7f5041a72235329226d4c43523cc798c33cce6f51036a157b1a0e30fde36eb7d",
+        "signature": "7f5041a72235329226d4c43523cc798c33cce6f51036a157b1a0e30fde36eb7d",
+        "affectsGlobalScope": false
+      },
+      "../router/.dist/types/index.d.ts": {
+        "version": "f6805b863fc45267a538e051870888d24d994e65d6d667c8423dcfcdbb590ed2",
+        "signature": "f6805b863fc45267a538e051870888d24d994e65d6d667c8423dcfcdbb590ed2",
         "affectsGlobalScope": false
       },
       "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/source/empty.d.ts": {
@@ -301,96 +386,6 @@
         "signature": "40d590054420e086fe2fdb9dd531c8c29f3954474e76d9b568b9b4f05b33c55b",
         "affectsGlobalScope": false
       },
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/ScheduledTask.d.ts": {
-        "version": "9e0de8deb44054b3e2c00281f454e09fd7da6322a00960a93e94affcbc7b33ed",
-        "signature": "9e0de8deb44054b3e2c00281f454e09fd7da6322a00960a93e94affcbc7b33ed",
-        "affectsGlobalScope": false
-      },
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/Scheduler.d.ts": {
-        "version": "51e3dfe9cef5307015e232e9b889c024030188d290e7f0bd087d506f02935929",
-        "signature": "51e3dfe9cef5307015e232e9b889c024030188d290e7f0bd087d506f02935929",
-        "affectsGlobalScope": false
-      },
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/clock.d.ts": {
-        "version": "32966ddcbaae05d4e0b0fa0fb32a46bc7a86e4711d6cf9172d8045d39a3925d5",
-        "signature": "32966ddcbaae05d4e0b0fa0fb32a46bc7a86e4711d6cf9172d8045d39a3925d5",
-        "affectsGlobalScope": false
-      },
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/schedule.d.ts": {
-        "version": "831f6760a3152499327754982399d9da077df1427ec881bcba43ad357ac5d1a4",
-        "signature": "831f6760a3152499327754982399d9da077df1427ec881bcba43ad357ac5d1a4",
-        "affectsGlobalScope": false
-      },
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/relative.d.ts": {
-        "version": "14c5c7abfb9a1bab5437181879fa4f4d29e8ad3b0f595b9bc634c8b887daed48",
-        "signature": "14c5c7abfb9a1bab5437181879fa4f4d29e8ad3b0f595b9bc634c8b887daed48",
-        "affectsGlobalScope": false
-      },
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/index.d.ts": {
-        "version": "4aebdfbbda7f1480690a93bf5a6310cf8bc299a3013ce15e810ab1b5781efcd9",
-        "signature": "4aebdfbbda7f1480690a93bf5a6310cf8bc299a3013ce15e810ab1b5781efcd9",
-        "affectsGlobalScope": false
-      },
-      "../.yarn/cache/csstype-npm-3.0.6-57c059c166-ebdca96d26.zip/node_modules/csstype/index.d.ts": {
-        "version": "2421504d4ad8486abdb522b7bcdd4caafbcf4a320cdf7b19e780df258c639d7f",
-        "signature": "2421504d4ad8486abdb522b7bcdd4caafbcf4a320cdf7b19e780df258c639d7f",
-        "affectsGlobalScope": false
-      },
-      "../core/.dist/types/types.d.ts": {
-        "version": "a40946128be4c6ab86af8c35b5aef19dc3efb9c06c716a06bf4c253ce3f4aa8a",
-        "signature": "a40946128be4c6ab86af8c35b5aef19dc3efb9c06c716a06bf4c253ce3f4aa8a",
-        "affectsGlobalScope": false
-      },
-      "../core/.dist/types/combinators/style.d.ts": {
-        "version": "9f0de7e81594a622eaacf996a085bbbcbd1e35e29443b09ce979b1e6e79b9388",
-        "signature": "9f0de7e81594a622eaacf996a085bbbcbd1e35e29443b09ce979b1e6e79b9388",
-        "affectsGlobalScope": false
-      },
-      "../core/.dist/types/combinators/event.d.ts": {
-        "version": "9041a86225578e48dd5314b9275da9b7c81e265b36d647dc657efb52c799dd6f",
-        "signature": "9041a86225578e48dd5314b9275da9b7c81e265b36d647dc657efb52c799dd6f",
-        "affectsGlobalScope": false
-      },
-      "../core/.dist/types/utils.d.ts": {
-        "version": "da045bde2f066cea2fb01e6fb020b7bd4d5accc97fd236a4ab1315c376a48672",
-        "signature": "da045bde2f066cea2fb01e6fb020b7bd4d5accc97fd236a4ab1315c376a48672",
-        "affectsGlobalScope": false
-      },
-      "../core/.dist/types/combinators/attribute.d.ts": {
-        "version": "9a97a4be1dea3fdc42c36e0aeb04b6f8f7341edbfa72c9de1d49052d6dd7c929",
-        "signature": "9a97a4be1dea3fdc42c36e0aeb04b6f8f7341edbfa72c9de1d49052d6dd7c929",
-        "affectsGlobalScope": false
-      },
-      "../core/.dist/types/source/behavior.d.ts": {
-        "version": "6ad886db8be81109e4035a1db3c32b5486e21979ab4a92beb3bf45fa69f4b346",
-        "signature": "6ad886db8be81109e4035a1db3c32b5486e21979ab4a92beb3bf45fa69f4b346",
-        "affectsGlobalScope": false
-      },
-      "../core/.dist/types/combinators/component.d.ts": {
-        "version": "9366635fdc9db2b3c164da9c84b89b68058586fb5a5e6766939e3632abcda00a",
-        "signature": "9366635fdc9db2b3c164da9c84b89b68058586fb5a5e6766939e3632abcda00a",
-        "affectsGlobalScope": false
-      },
-      "../core/.dist/types/combinators/animate.d.ts": {
-        "version": "980aab1c5b99c65f0e92809d271533b164d8a40256e4674e485b3008b987e0fb",
-        "signature": "980aab1c5b99c65f0e92809d271533b164d8a40256e4674e485b3008b987e0fb",
-        "affectsGlobalScope": false
-      },
-      "../core/.dist/types/source/node.d.ts": {
-        "version": "8918c795ffb504073cc13e55a548f9946f0817f1f315f8eb77a446583515c232",
-        "signature": "8918c795ffb504073cc13e55a548f9946f0817f1f315f8eb77a446583515c232",
-        "affectsGlobalScope": false
-      },
-      "../core/.dist/types/run.d.ts": {
-        "version": "4bf445084c9f1ea51a9fb4b5e0666a830b9f14daee5ce1f1297e48a158b98bf4",
-        "signature": "4bf445084c9f1ea51a9fb4b5e0666a830b9f14daee5ce1f1297e48a158b98bf4",
-        "affectsGlobalScope": true
-      },
-      "../core/.dist/types/index.d.ts": {
-        "version": "59f5bd871ca523c34410942bae2ca9f256c98f8c88ea1228a6e30c98b37debb2",
-        "signature": "59f5bd871ca523c34410942bae2ca9f256c98f8c88ea1228a6e30c98b37debb2",
-        "affectsGlobalScope": false
-      },
       "./src/common/stylesheet.ts": {
         "version": "ece36b68b768ea0813c7e7741b3cc42083b4e519425a38f241402a7134496978",
         "signature": "526cfe8246e18561162fa15dcf9a0b645a774ffcb6b7355eecbe9885eff7cd2b",
@@ -407,18 +402,8 @@
         "affectsGlobalScope": false
       },
       "./src/common/common.ts": {
-        "version": "25372666a6904fd498fd4895defc1664a006aa96814dfad894bb71a2b5a12d13",
-        "signature": "9ba39123858134c1a5b421c0f4d246ca38f505c4661bfef23967c16457a0b4f7",
-        "affectsGlobalScope": false
-      },
-      "./src/components/form/$Button.ts": {
-        "version": "c6dadb27a00fb0feb33c7fbde9670866e5f310503924f6719a19ad86cf7825d6",
-        "signature": "a59d6e9b46d1aa0e4a02b60d5c89d89e26c1d17cebc7f5f4f2a6a7217e97fe9f",
-        "affectsGlobalScope": false
-      },
-      "./src/aelea-web/index.ts": {
-        "version": "47a312185f97d376931eeae690ff2e9fdd61c9305a9330a95d792bc6c1255d8f",
-        "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "version": "53829741b687db29e3bec93d9bb0f757734104b32c70b6f1e53a8754d5d4b199",
+        "signature": "9183a748eced27b3759d0169ef4eec6b94ff520acf8d8c43e25055c774a2175a",
         "affectsGlobalScope": false
       },
       "./src/common/utils.ts": {
@@ -436,13 +421,23 @@
         "signature": "ee2128d7035f438a6e5a4a0ccb690408ffc75a35c12a3f9f0660f9b691d43444",
         "affectsGlobalScope": false
       },
+      "./src/components/form/$Button.ts": {
+        "version": "c6dadb27a00fb0feb33c7fbde9670866e5f310503924f6719a19ad86cf7825d6",
+        "signature": "a59d6e9b46d1aa0e4a02b60d5c89d89e26c1d17cebc7f5f4f2a6a7217e97fe9f",
+        "affectsGlobalScope": false
+      },
+      "./src/components/$NumberTicker.ts": {
+        "version": "7c8554c3b43b96fc97b50f51196dc951b1c799e843ec830e66cc27281b862d92",
+        "signature": "1e1b60fda8c4e820a8f063fcb971aaab641a00add1af24ca21a18a89a56ee369",
+        "affectsGlobalScope": false
+      },
       "./src/components/$Counter.ts": {
-        "version": "b8a11f6f1f1477150f2aeb34718670ce2e22a7ab2aedfcbe6a72fa3b20fa1ba5",
-        "signature": "6dbf05cd45cd8b9e6ae935de03d1b2ad8ca77e518062e8047c19b1fd7ca3e3ea",
+        "version": "3662dd86126f3b380a47c7d306ca6cb05e03ea8078f288acc67f10c5bac36e39",
+        "signature": "2dd088f95ecfeb1d780ec792edd98135dcc0f1e7795bdc4e01c03851105a4bcf",
         "affectsGlobalScope": false
       },
       "./src/components/$CountCounters.ts": {
-        "version": "8e27d39969da8dd9f8a2c6301b8b895dbbb7106f5e1d137d0c95ea54c30b9fdd",
+        "version": "a1d67b35589be7f0bda0ca66df3efeec0e011705a152679afa4c1b7029b0d3c2",
         "signature": "ee2128d7035f438a6e5a4a0ccb690408ffc75a35c12a3f9f0660f9b691d43444",
         "affectsGlobalScope": false
       },
@@ -457,7 +452,7 @@
         "affectsGlobalScope": false
       },
       "./src/components/$QuantumList.ts": {
-        "version": "b14591ceabc79f3ca77554af103894e370f93c6a932245ccb4a1d14259b134c3",
+        "version": "89ce174090afaa7091b4316b86fb0f2c8045950da8bc17aa2151923603a7ff81",
         "signature": "ee2128d7035f438a6e5a4a0ccb690408ffc75a35c12a3f9f0660f9b691d43444",
         "affectsGlobalScope": false
       },
@@ -467,7 +462,7 @@
         "affectsGlobalScope": false
       },
       "./src/components/$Spring.ts": {
-        "version": "92d4d6f62e29c7e11c927a41fbf8a1743a717ea8e9fa108510f68b40da8d3fb6",
+        "version": "4bd9a3e8bceef8f4e71b6b456f463cb249b0ddf1fbd3e36b56a52171a8ed3842",
         "signature": "25872f14b51f3600a5a3e8daf8e32604bc1e339977d3301be6bac0fb2fbcd625",
         "affectsGlobalScope": false
       },
@@ -511,44 +506,9 @@
         "signature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "affectsGlobalScope": false
       },
-      "../router/.dist/types/types.d.ts": {
-        "version": "b77701eb036a4a85e425f7bead9168947cd2d92cdf693bee47f82fac15da75fe",
-        "signature": "b77701eb036a4a85e425f7bead9168947cd2d92cdf693bee47f82fac15da75fe",
-        "affectsGlobalScope": false
-      },
-      "../router/.dist/types/resolve.d.ts": {
-        "version": "865708329f86e0fca74974145123ba61089f342fd55935286585efb5c1a17456",
-        "signature": "865708329f86e0fca74974145123ba61089f342fd55935286585efb5c1a17456",
-        "affectsGlobalScope": false
-      },
-      "../router/.dist/types/resolveUrl.d.ts": {
-        "version": "7f5041a72235329226d4c43523cc798c33cce6f51036a157b1a0e30fde36eb7d",
-        "signature": "7f5041a72235329226d4c43523cc798c33cce6f51036a157b1a0e30fde36eb7d",
-        "affectsGlobalScope": false
-      },
-      "../router/.dist/types/index.d.ts": {
-        "version": "f6805b863fc45267a538e051870888d24d994e65d6d667c8423dcfcdbb590ed2",
-        "signature": "f6805b863fc45267a538e051870888d24d994e65d6d667c8423dcfcdbb590ed2",
-        "affectsGlobalScope": false
-      },
-      "./src/examples-showcase/common.ts": {
-        "version": "bfa25f8e3c5e3557a9b4caf014e4c2a4b67e1c6f587d3258ff6c1eda7be146d3",
-        "signature": "bed538927ea2b56a4d934472ede01533a30f8214597178f1b0744d4a186aac77",
-        "affectsGlobalScope": false
-      },
       "./src/examples-showcase/drag.ts": {
         "version": "1f16c7061fd9230c73ee1d80f14f6421d9140f9bb6d121833949db9d01fbabee",
         "signature": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "affectsGlobalScope": false
-      },
-      "./src/examples-showcase/index.ts": {
-        "version": "b30356952d4e5d54e7c231ce20b88834f78484c5bef2590e79e7ae271fb1f5c6",
-        "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
-        "affectsGlobalScope": false
-      },
-      "./src/routing/index.ts": {
-        "version": "73356be89a7f20497bc7c3502c8939bb1572b0cd2244b5979016f8606284f769",
-        "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
         "affectsGlobalScope": false
       }
     },
@@ -653,32 +613,6 @@
         "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/array.d.ts",
         "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/function.d.ts"
       ],
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/ScheduledTask.d.ts": [
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
-      ],
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/Scheduler.d.ts": [
-        "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/ScheduledTask.d.ts",
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
-      ],
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/clock.d.ts": [
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
-      ],
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/index.d.ts": [
-        "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
-        "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/Scheduler.d.ts",
-        "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/clock.d.ts",
-        "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/relative.d.ts",
-        "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/schedule.d.ts",
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
-      ],
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/relative.d.ts": [
-        "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
-      ],
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/schedule.d.ts": [
-        "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
-      ],
       "../core/.dist/types/combinators/animate.d.ts": [
         "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
@@ -725,22 +659,37 @@
       ],
       "../core/.dist/types/types.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../.yarn/cache/csstype-npm-3.0.6-57c059c166-ebdca96d26.zip/node_modules/csstype/index.d.ts"
+        "../.yarn/cache/csstype-npm-3.0.6-57c059c166-ebdca96d26.zip/node_modules/csstype/index.d.ts",
+        "../core/.dist/types/utils/SettableDisposable.d.ts"
       ],
       "../core/.dist/types/utils.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
         "../core/.dist/types/types.d.ts"
       ],
-      "./src/aelea-web/index.ts": [
-        "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/index.d.ts",
+      "../core/.dist/types/utils/SettableDisposable.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
+      ],
+      "../router/.dist/types/index.d.ts": [
+        "../router/.dist/types/resolve.d.ts",
+        "../router/.dist/types/resolveUrl.d.ts",
+        "../router/.dist/types/types.d.ts"
+      ],
+      "../router/.dist/types/resolve.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../router/.dist/types/types.d.ts"
+      ],
+      "../router/.dist/types/resolveUrl.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
         "../core/.dist/types/index.d.ts",
-        "./src/common/common.ts",
-        "./src/common/stylesheet.ts",
-        "./src/components/form/$Button.ts"
+        "../router/.dist/types/types.d.ts"
+      ],
+      "../router/.dist/types/types.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
       ],
       "./src/common/common.ts": [
+        "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
         "../core/.dist/types/index.d.ts",
+        "../router/.dist/types/index.d.ts",
         "./src/common/stylesheet.ts",
         "./src/components/form/$ButtonIcon.ts"
       ],
@@ -767,7 +716,13 @@
         "../core/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts",
+        "./src/components/$NumberTicker.ts",
         "./src/components/form/$Button.ts"
+      ],
+      "./src/components/$NumberTicker.ts": [
+        "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist/types/index.d.ts"
       ],
       "./src/components/$QuantumList.ts": [
         "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
@@ -879,54 +834,6 @@
         "../core/.dist/types/index.d.ts",
         "./src/common/common.ts",
         "./src/common/stylesheet.ts"
-      ],
-      "./src/examples-showcase/common.ts": [
-        "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../core/.dist/types/index.d.ts",
-        "../router/.dist/types/index.d.ts",
-        "./src/common/stylesheet.ts"
-      ],
-      "./src/examples-showcase/index.ts": [
-        "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../core/.dist/types/index.d.ts",
-        "../router/.dist/types/index.d.ts",
-        "./src/common/common.ts",
-        "./src/common/stylesheet.ts",
-        "./src/components/$Calculator.ts",
-        "./src/components/$CountCounters.ts",
-        "./src/components/$QuantumList.ts",
-        "./src/components/$QuantumScroll.ts",
-        "./src/components/$Spring.ts",
-        "./src/components/$Table.ts",
-        "./src/components/todo-app/$CreateTodo.ts",
-        "./src/components/todo-app/$TodoApp.ts",
-        "./src/examples-showcase/$Example.ts",
-        "./src/examples-showcase/common.ts"
-      ],
-      "./src/routing/index.ts": [
-        "../.yarn/cache/@most-core-npm-1.6.1-3baa05d523-bc452f048d.zip/node_modules/@most/core/dist/index.d.ts",
-        "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/index.d.ts",
-        "../core/.dist/types/index.d.ts",
-        "../router/.dist/types/index.d.ts",
-        "./src/common/common.ts",
-        "./src/common/stylesheet.ts"
-      ],
-      "../router/.dist/types/index.d.ts": [
-        "../router/.dist/types/resolve.d.ts",
-        "../router/.dist/types/resolveUrl.d.ts",
-        "../router/.dist/types/types.d.ts"
-      ],
-      "../router/.dist/types/resolve.d.ts": [
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../router/.dist/types/types.d.ts"
-      ],
-      "../router/.dist/types/resolveUrl.d.ts": [
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist/types/index.d.ts",
-        "../router/.dist/types/types.d.ts"
-      ],
-      "../router/.dist/types/types.d.ts": [
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
       ]
     },
     "exportedModulesMap": {
@@ -1006,32 +913,6 @@
         "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/array.d.ts",
         "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/function.d.ts"
       ],
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/ScheduledTask.d.ts": [
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
-      ],
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/Scheduler.d.ts": [
-        "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/ScheduledTask.d.ts",
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
-      ],
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/clock.d.ts": [
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
-      ],
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/index.d.ts": [
-        "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
-        "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/Scheduler.d.ts",
-        "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/clock.d.ts",
-        "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/relative.d.ts",
-        "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/schedule.d.ts",
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
-      ],
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/relative.d.ts": [
-        "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
-      ],
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/schedule.d.ts": [
-        "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
-      ],
       "../core/.dist/types/combinators/animate.d.ts": [
         "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
@@ -1078,14 +959,36 @@
       ],
       "../core/.dist/types/types.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../.yarn/cache/csstype-npm-3.0.6-57c059c166-ebdca96d26.zip/node_modules/csstype/index.d.ts"
+        "../.yarn/cache/csstype-npm-3.0.6-57c059c166-ebdca96d26.zip/node_modules/csstype/index.d.ts",
+        "../core/.dist/types/utils/SettableDisposable.d.ts"
       ],
       "../core/.dist/types/utils.d.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
         "../core/.dist/types/types.d.ts"
       ],
+      "../core/.dist/types/utils/SettableDisposable.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
+      ],
+      "../router/.dist/types/index.d.ts": [
+        "../router/.dist/types/resolve.d.ts",
+        "../router/.dist/types/resolveUrl.d.ts",
+        "../router/.dist/types/types.d.ts"
+      ],
+      "../router/.dist/types/resolve.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../router/.dist/types/types.d.ts"
+      ],
+      "../router/.dist/types/resolveUrl.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist/types/index.d.ts",
+        "../router/.dist/types/types.d.ts"
+      ],
+      "../router/.dist/types/types.d.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
+      ],
       "./src/common/common.ts": [
-        "../core/.dist-cjs/index.d.ts"
+        "../core/.dist/types/index.d.ts",
+        "../router/.dist/types/index.d.ts"
       ],
       "./src/common/stylesheet.ts": [
         "../core/.dist-cjs/index.d.ts"
@@ -1097,11 +1000,16 @@
         "../core/.dist-cjs/index.d.ts"
       ],
       "./src/components/$Counter.ts": [
+        "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist-cjs/index.d.ts"
+        "../core/.dist/types/index.d.ts"
+      ],
+      "./src/components/$NumberTicker.ts": [
+        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
+        "../core/.dist/types/index.d.ts"
       ],
       "./src/components/$QuantumList.ts": [
-        "../core/.dist-cjs/index.d.ts"
+        "../core/.dist/types/index.d.ts"
       ],
       "./src/components/$QuantumScroll.ts": [
         "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
@@ -1160,26 +1068,6 @@
       ],
       "./src/examples-showcase/$Example.ts": [
         "../core/.dist-cjs/index.d.ts"
-      ],
-      "./src/examples-showcase/common.ts": [
-        "../core/.dist-cjs/index.d.ts"
-      ],
-      "../router/.dist/types/index.d.ts": [
-        "../router/.dist/types/resolve.d.ts",
-        "../router/.dist/types/resolveUrl.d.ts",
-        "../router/.dist/types/types.d.ts"
-      ],
-      "../router/.dist/types/resolve.d.ts": [
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../router/.dist/types/types.d.ts"
-      ],
-      "../router/.dist/types/resolveUrl.d.ts": [
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
-        "../core/.dist/types/index.d.ts",
-        "../router/.dist/types/types.d.ts"
-      ],
-      "../router/.dist/types/types.d.ts": [
-        "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts"
       ]
     },
     "semanticDiagnosticsPerFile": [
@@ -1204,12 +1092,6 @@
       "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/array.d.ts",
       "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/function.d.ts",
       "../.yarn/cache/@most-prelude-npm-1.8.0-f9da233011-64ef6318fd.zip/node_modules/@most/prelude/dist/index.d.ts",
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/ScheduledTask.d.ts",
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/Scheduler.d.ts",
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/clock.d.ts",
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/index.d.ts",
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/relative.d.ts",
-      "../.yarn/cache/@most-scheduler-npm-1.3.0-e34ae83921-942a3d0ac9.zip/node_modules/@most/scheduler/dist/schedule.d.ts",
       "../.yarn/cache/@most-types-npm-1.1.0-af65032278-c2f0999052.zip/node_modules/@most/types/index.d.ts",
       "../.yarn/cache/csstype-npm-3.0.6-57c059c166-ebdca96d26.zip/node_modules/csstype/index.d.ts",
       "../.yarn/cache/typescript-patch-7a9e6321b3-017af99214.zip/node_modules/typescript/lib/lib.dom.d.ts",
@@ -1261,13 +1143,18 @@
       "../core/.dist/types/source/node.d.ts",
       "../core/.dist/types/types.d.ts",
       "../core/.dist/types/utils.d.ts",
-      "./src/aelea-web/index.ts",
+      "../core/.dist/types/utils/SettableDisposable.d.ts",
+      "../router/.dist/types/index.d.ts",
+      "../router/.dist/types/resolve.d.ts",
+      "../router/.dist/types/resolveUrl.d.ts",
+      "../router/.dist/types/types.d.ts",
       "./src/common/common.ts",
       "./src/common/stylesheet.ts",
       "./src/common/utils.ts",
       "./src/components/$Calculator.ts",
       "./src/components/$CountCounters.ts",
       "./src/components/$Counter.ts",
+      "./src/components/$NumberTicker.ts",
       "./src/components/$QuantumList.ts",
       "./src/components/$QuantumScroll.ts",
       "./src/components/$SimpleExample.ts",
@@ -1285,14 +1172,7 @@
       "./src/components/todo-app/$TodoItem.ts",
       "./src/examples-showcase/$Example.ts",
       "./src/examples-showcase/$MonacoEditor.ts",
-      "./src/examples-showcase/common.ts",
-      "./src/examples-showcase/drag.ts",
-      "./src/examples-showcase/index.ts",
-      "./src/routing/index.ts",
-      "../router/.dist/types/index.d.ts",
-      "../router/.dist/types/resolve.d.ts",
-      "../router/.dist/types/resolveUrl.d.ts",
-      "../router/.dist/types/types.d.ts"
+      "./src/examples-showcase/drag.ts"
     ],
     "affectedFilesPendingEmit": [
       [
@@ -1608,6 +1488,22 @@
         1
       ],
       [
+        "../router/.dist/types/index.d.ts",
+        1
+      ],
+      [
+        "../router/.dist/types/resolve.d.ts",
+        1
+      ],
+      [
+        "../router/.dist/types/resolveUrl.d.ts",
+        1
+      ],
+      [
+        "../router/.dist/types/types.d.ts",
+        1
+      ],
+      [
         "./src/aelea-web/index.ts",
         1
       ],
@@ -1632,8 +1528,16 @@
         1
       ],
       [
+        "./src/components/$CountFlow.ts",
+        0
+      ],
+      [
         "./src/components/$Counter.ts",
         1
+      ],
+      [
+        "./src/components/$NumberFlow.ts",
+        0
       ],
       [
         "./src/components/$QuantumList.ts",
@@ -1717,22 +1621,6 @@
       ],
       [
         "./src/routing/index.ts",
-        1
-      ],
-      [
-        "../router/.dist/types/index.d.ts",
-        1
-      ],
-      [
-        "../router/.dist/types/resolve.d.ts",
-        1
-      ],
-      [
-        "../router/.dist/types/resolveUrl.d.ts",
-        1
-      ],
-      [
-        "../router/.dist/types/types.d.ts",
         1
       ]
     ]

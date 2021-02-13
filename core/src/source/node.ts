@@ -3,6 +3,7 @@ import { id } from '@most/prelude'
 import { Disposable, Scheduler, Sink, Stream } from '@most/types'
 import { $Node, $Branch, INode, IBranch, IBranchElement, Op } from '../types'
 import { isFunction, O } from '../utils'
+import SettableDisposable from '../utils/SettableDisposable'
 
 
 export const $svg = branch(<K extends keyof SVGElementTagNameMap>(a: K) => document.createElementNS('http://www.w3.org/2000/svg', a))
@@ -22,30 +23,30 @@ export class NodeSource<A, B extends IBranchElement> implements Stream<IBranch<B
 
     const element = this.sourceOp(this.sourceValue)
     const $segments = this.$segments
+    const disposable = new SettableDisposable()
 
-    sink.event(scheduler.currentTime(), { $segments, element, styleBehaviors: [], attributesBehavior: [] })
+    sink.event(scheduler.currentTime(), {
+      $segments, element, disposable,
+      styleBehaviors: [],
+      attributesBehavior: []
+    })
 
-    return {
-      dispose() {
-        element.remove()
-      }
-    }
+    return disposable
   }
 }
 
-const createText = (text: string): $Node<Text> => ({
-  run(sink, scheduler) {
-    const textNode = document.createTextNode(text)
+function node(text: string): $Node<Text> {
+  return {
+    run(sink, scheduler) {
+      const element = document.createTextNode(text)
+      const disposable = new SettableDisposable()
 
-    sink.event(scheduler.currentTime(), { element: textNode })
+      sink.event(scheduler.currentTime(), { element, disposable })
 
-    return {
-      dispose() {
-        textNode.remove()
-      }
+      return disposable
     }
   }
-})
+}
 
 
 export function branch<A, B extends IBranchElement>(sourceOp: (a: A) => B, postOp: Op<IBranch<B>, IBranch<B>> = id) {
@@ -73,7 +74,7 @@ export function $textFn<A extends HTMLElement>(postOp: Op<IBranch<A>, IBranch<A>
     const children: Stream<INode<Text>>[] = input.map((x) => {
       const strStream = typeof x === 'string' ? now(x) : x as Stream<string>
 
-      return switchLatest(map(createText, strStream))
+      return switchLatest(map(node, strStream))
     })
 
     return branch(() => document.createElement('text'), postOp)(null)(...children)

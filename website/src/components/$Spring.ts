@@ -64,27 +64,25 @@ export default <T extends $Branch>(config: DraggableList<T>) => component((
             if (s.isDragging) {
               return now(s.delta)
             } else {
-              const toPsotion = now(s.list.indexOf($item) * iHeight)
-              return draggingMotion(s.delta, toPsotion)
+              const toPsotion = startWith(s.delta, now(s.list.indexOf($item) * iHeight))
+              return draggingMotion(toPsotion)
             }
           }, multicastedDrag),
-          draggingMotion(i * iHeight, yMotion)
+          startWith(i * iHeight, draggingMotion(yMotion))
         )
 
         const applyTransformStyle = combine(
           (ypos, scale) => ({ transform: `translateY(${ypos}px) scale(${scale})` }),
           yDragPosition,
-          draggingMotion(1, map(id => id ? 1.1 : 1, isDraggingStream))
+          startWith(1, draggingMotion(map(id => id ? 1.1 : 1, isDraggingStream)))
         )
 
         const applyBoxShadowStyle = map(
           shadow => ({ boxShadow: `0px ${shadow}px ${shadow * 3}px 0px rgba(0, 0, 0, 0.25` }),
-          draggingMotion(0, map(id => id ? 5 : 0, isDraggingStream))
+          draggingMotion(startWith(0, map(id => id ? 5 : 0, isDraggingStream)))
         )
 
         return $dragItem(
-
-          styleBehavior(map(x => ({ zIndex: x ? 1000 : 0 }), isDraggingStream)),
 
           sampleDragY(
             event('pointerdown'),
@@ -101,8 +99,9 @@ export default <T extends $Branch>(config: DraggableList<T>) => component((
                 const isDragging = pointerEvent.type === 'pointermove'
 
                 return {
-                  $draggedItem: isDragging ? $item : null,
                   delta, isDragging, to,
+
+                  $draggedItem: isDragging ? $item : null,
                   list: isPositionChange ? swap($item, to, list) : list
                 }
               }, move)
@@ -111,7 +110,13 @@ export default <T extends $Branch>(config: DraggableList<T>) => component((
             sampleOrderChange()
           ),
 
-          styleInMotion(merge(applyTransformStyle, applyBoxShadowStyle))
+          styleInMotion(
+            merge(applyTransformStyle, applyBoxShadowStyle)
+          ),
+
+          styleBehavior(
+            map(x => ({ zIndex: x ? 1000 : 0 }), isDraggingStream)
+          ),
 
         )($item)
       })

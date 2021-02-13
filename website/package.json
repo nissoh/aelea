@@ -1,15 +1,15 @@
 {
-  "name": "examples",
-  "private": true,
+  "name": "@aelea/website",
+  "version": "0.0.1-0",
   "license": "MIT",
+  "module": ".dist/es/examples-showcase/$Website.js",
   "scripts": {
-    "clean": "rm -rf .dist",
+    "clean": "yarn g:tsc:clean",
+    "build:project": "yarn g:tsc:project",
+    "build:cjs": "yarn g:tsc:cjs",
+    "build": "yarn build:cjs && yarn build:project",
     "serve": "webpack serve",
-    "routing": "yarn serve --entry ./src/run-example/routing/index.ts",
-    "aelea-web": "yarn serve --entry ./src/run-example/aelea-web/index.ts",
-    "showcase": "yarn serve --entry ./src/examples-showcase/index.ts",
-    "tst": "node ./index.ts",
-    "generate-docs": "ts-node -O '{\"module\":\"commonjs\"}'  --project tsconfig.json ./generate-docs.ts"
+    "website-dev": "yarn serve --entry ./src/webpack-dev-showcase/website.ts"
   },
   "dependencies": {
     "@aelea/core": "workspace:*",

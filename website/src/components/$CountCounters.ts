@@ -1,9 +1,9 @@
 
-import { chain, constant, map, merge, mergeArray, snapshot, until } from '@most/core'
-import { $text, Behavior, behavior, component, style } from '@aelea/core'
+import { chain, combineArray, constant, map, merge, mergeArray, now, snapshot, until } from '@most/core'
+import { $text, Behavior, behavior, component, state, style } from '@aelea/core'
 import { $column, $row, $seperator, $TrashBtn } from '../common/common'
 import * as designSheet from '../common/stylesheet'
-import $Counter, { sumFromZeroOp } from './$Counter'
+import $Counter, { sumAdd } from './$Counter'
 import $Button from './form/$Button'
 
 const $AddBtn = $Button({
@@ -18,15 +18,20 @@ export default component((
   [sampleDisposedCounterCount, disposedCounterCount]: Behavior<number, number>,
 ) => {
 
+  const INITAL_COUNT = 0
+  const sumWithInitial = sumAdd(INITAL_COUNT)
+
   const counting = mergeArray([disposedCounterCount, counterIncrement, counterDecrement])
-  const totalCount = sumFromZeroOp(counting)
+  const totalCount = sumWithInitial(counting)
+
+  const counters = merge(addedCounter, now(null))
 
   return [
 
     $column(designSheet.spacing)(
       $row(style({ placeContent: 'space-between', alignItems: 'center' }), designSheet.spacing)(
         $text(
-          map(n => `Counters: ${n}`, sumFromZeroOp(merge(constant(1, addedCounter), constant(-1, disposeCounter))))
+          map(n => `Counters: ${n}`, sumWithInitial(merge(constant(1, addedCounter), constant(-1, disposeCounter))))
         ),
         $text(
           map(n => `Sum: ${n}`, totalCount)
@@ -47,7 +52,7 @@ export default component((
                   sampleRemove()
                 )
               }),
-              $Counter({
+              $Counter(INITAL_COUNT)({
                 increment: sampleCountersIncrement(),
                 decrement: sampleCountersDecrement(),
                 count: sampleDisposedCounterCount(
@@ -57,7 +62,7 @@ export default component((
             )
           )
         )
-      }, addedCounter)
+      }, counters)
     )
 
   ]

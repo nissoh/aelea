@@ -1,10 +1,10 @@
 
 import { Scheduler, Sink, Stream, Disposable } from '@most/types'
 import { currentTime, } from '@most/scheduler'
-import { skipAfter, map, continueWith, constant, switchLatest, loop, filter, startWith, tap } from '@most/core'
+import { skipAfter, map, continueWith, constant, switchLatest, loop, filter, tap, now } from '@most/core'
 import { O } from '../utils'
 import { disposeWith } from '@most/disposable'
-import { compose, curry3 } from '@most/prelude'
+import { compose, curry2 } from '@most/prelude'
 import { $Branch, IBranchElement, StyleCSS } from '../types'
 
 type RafHandlerId = number
@@ -26,9 +26,7 @@ export type AnimationFrames = {
 
 // copied & modified from https://github.com/mostjs/x-animation-frame/tree/master
 class AnimationFrameSource {
-  constructor(
-    private afp: AnimationFrames
-  ) { }
+  constructor(private afp: AnimationFrames) { }
 
   run(sink: Sink<AnimationFrame>, scheduler: Scheduler): Disposable {
     const requestTime = currentTime(scheduler)
@@ -43,10 +41,10 @@ const eventThenEnd = (requestTime: AnimationFrameRequestTime, responseTime: Anim
   sink.end(requestTime)
 }
 
-export const nextAnimationFrame = (afp: AnimationFrames = window): Stream<AnimationFrame> =>
+export const nextAnimationFrame = (afp: AnimationFrames): Stream<AnimationFrame> =>
   new AnimationFrameSource(afp)
 
-export const animationFrames = (afp: AnimationFrames = window): Stream<AnimationFrame> =>
+export const animationFrames = (afp: AnimationFrames): Stream<AnimationFrame> =>
   continueWith(() => animationFrames(afp), nextAnimationFrame(afp))
 
 
@@ -91,19 +89,25 @@ export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: .01 }
  *
  *  @see  modified-from https://github.com/chenglou/react-motion/blob/master/src/stepper.js
  */
-export const motion = curry3((motionEnvironment: Partial<Motion>, startAt: number, change: Stream<number>) => {
+export const motion = curry2((motionEnvironment: Partial<Motion>, change: Stream<number>) => {
   const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
 
   return O(
-    loop((seed: MotionState, target: number) => {
-      const frames = O(
+    loop((seed: MotionState | null, target: number) => {
+
+      if (seed === null) {
+        return { seed: { position: target, velocity: 0 }, value: now(target) }
+      }
+
+      const value = O(
+        animationFrames,
         map(() => stepFrame(target, seed, motionEnv).position),
         skipAfter(n => n === target)
-      )
-      return { seed, value: frames(animationFrames()) }
-    }, { velocity: 0, position: startAt }),
-    switchLatest,
-    startWith(startAt)
+      )(window)
+
+      return { seed, value }
+    }, null),
+    switchLatest
   )(change)
 })
 
@@ -123,8 +127,6 @@ export const styleInMotion = <A extends IBranchElement, B>(
         }
       }
     }, style)
-
-    
 
     return { ...node, styleBehaviors: [filter(() => false, applyInlineStyleStream)] }
   }, $node)

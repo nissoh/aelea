@@ -1,6 +1,7 @@
 
 import * as CSS from 'csstype'
-import { Scheduler, Stream } from '@most/types'
+import { Disposable, Scheduler, Stream } from '@most/types'
+import SettableDisposable from './utils/SettableDisposable'
 
 export type StyleCSS = CSS.Properties
 
@@ -14,6 +15,7 @@ export type IBranchElement = HTMLElement | SVGElement
 
 export interface INode<A extends INodeElement = INodeElement> {
   element: A
+  disposable: SettableDisposable
 }
 export interface IBranch<A extends IBranchElement = IBranchElement, B = {}> extends INode<A> {
   $segments: Array<$Node>

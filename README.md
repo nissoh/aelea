@@ -2,7 +2,7 @@
 Functional Reactive Programming UI library based on [@most/core](https://github.com/mostjs/core) paradigm and [architecture](https://github.com/cujojs/most/wiki/Architecture)
 
 # Why?
-- Everything is programatic and reduced by applying First Principle
+- Everything is programatic. bulit by applying First Principle
 - A lot is meant to compose well together. elements, style, behaviors are reusable and stateless. All Built to scale
 - State UI naturally by declaring Behaviors, state managers are obsolete
 - Highly performant since diffing became obsolete, state changes based on natural Behaviors

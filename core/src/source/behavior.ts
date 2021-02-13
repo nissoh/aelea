@@ -12,6 +12,7 @@ export class BehaviorSource<A, B> implements Stream<A> {
   sinks: Map<Sink<A>, Map<Stream<A>, Disposable | null>> = new Map()
   scheduler: Scheduler | undefined
 
+  // TODO: check case where early samplers will not receive events of future behaviors
   run(sink: Sink<A>, scheduler: Scheduler): Disposable {
 
     this.scheduler = scheduler
@@ -24,7 +25,6 @@ export class BehaviorSource<A, B> implements Stream<A> {
     })
 
     return disposeWith((s) => {
-      console.log('running behavior disposed')
       sink.end(scheduler.currentTime())
       this.disposeSampler(s)
     }, sink)

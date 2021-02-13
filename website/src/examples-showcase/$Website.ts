@@ -1,7 +1,7 @@
-import { $Branch, $element, $node, $text, behavior, Behavior, component, event, eventElementTarget, IBranch, IBranchElement, runBrowser, style } from '@aelea/core'
+import { $Branch, $node, $text, behavior, Behavior, component, eventElementTarget, IBranchElement, style } from '@aelea/core'
 import { path, router } from '@aelea/router'
-import { chain, map, merge, mergeArray, multicast, now, switchLatest, until } from '@most/core'
-import { $column, $main, $row } from '../common/common'
+import { chain, map, mergeArray, multicast, now, switchLatest } from '@most/core'
+import { $column, $Link, $row } from '../common/common'
 import { flex, spacing, spacingBig, spacingSmall, theme } from '../common/stylesheet'
 import $Calculator from '../components/$Calculator'
 import $CountCounters from '../components/$CountCounters'
@@ -11,15 +11,14 @@ import $Spring from '../components/$Spring'
 import $Table from '../components/$Table'
 import { createTodo } from '../components/todo-app/$CreateTodo'
 import $TodoApp from '../components/todo-app/$TodoApp'
-import $Example from './$Example'
-import { $Link } from './common'
+import $Example from '../examples-showcase/$Example'
 
 
 const initialPath = map(location => location.pathname, now(document.location))
 const popStateEvent = eventElementTarget('popstate', window)
 const locationChange = map(() => document.location.pathname, popStateEvent)
 
-const $PanningUI = component((
+export default component((
   // []: Behavior<NodeChild, any>,
   [sampleLinkClick, routeChanges]: Behavior<string, string>
 ) => {
@@ -208,62 +207,3 @@ const $PanningUI = component((
 
   ]
 })
-
-// sampleClick(event('click'))
-
-runBrowser({ rootNode: document.body })(
-  $main(style({ alignItems: 'center', justifyContent: 'center', }))(
-
-    // $Example({ file: 'src/components/$DragSort.ts' })(
-    //   component((
-    //     [sampleButtonClick, buttonClick]: Behavior<IBranch, PointerEvent>
-    //   ) => {
-
-    //     const buttonClickBehavior = sampleButtonClick(
-    //       event('pointerdown')
-    //     )
-
-    //     const $list = Array(4).fill(null).map((_, i) =>
-    //       $column(flex, style({ backgroundColor: theme.baseLight, placeContent: 'center', height: '90px', alignItems: 'center' }))(
-    //         $text('node: ' + i)
-    //       )
-    //     )
-
-    //     const $dndSpring = $Spring({
-    //       $list,
-    //       itemHeight: 90,
-    //       gap: 10
-    //     })({})
-
-    //     return [
-    //       $row(
-
-    //         $element('button')(buttonClickBehavior)(
-    //           $text('click meh')
-    //         ),
-
-    //         merge(
-    //           until(buttonClick)(
-    //             $dndSpring
-    //           ),
-    //           $text('ello2')
-    //         ),
-
-    //         // join(constant(until(buttonClick, $dndSpring), buttonClick))
-
-
-    //         // $node(
-    //         //   switchLatest(
-    //         //     map(($nodes) => $node(...$nodes), order)
-    //         //   )
-    //         // )
-    //       )
-    //     ]
-    //   })({})
-
-    // )({})
-
-    $PanningUI({})
-  )
-)
-

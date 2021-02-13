@@ -1,6 +1,6 @@
 {
   "name": "@aelea/core",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "main": ".dist/commonjs/index.js",
   "module": ".dist/es/index.js",
   "files": [
