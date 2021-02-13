@@ -1,7 +1,7 @@
 import { $Branch, $node, $text, behavior, Behavior, component, eventElementTarget, IBranchElement, style } from '@aelea/core'
 import { path, router } from '@aelea/router'
 import { chain, map, mergeArray, multicast, now, switchLatest } from '@most/core'
-import { $column, $Link, $row } from '../common/common'
+import { $column, $Link, $main, $row } from '../common/common'
 import { flex, spacing, spacingBig, spacingSmall, theme } from '../common/stylesheet'
 import $Calculator from '../components/$Calculator'
 import $CountCounters from '../components/$CountCounters'
@@ -17,6 +17,8 @@ import $Example from '../examples-showcase/$Example'
 const initialPath = map(location => location.pathname, now(document.location))
 const popStateEvent = eventElementTarget('popstate', window)
 const locationChange = map(() => document.location.pathname, popStateEvent)
+
+export { $main }
 
 export default component((
   // []: Behavior<NodeChild, any>,
