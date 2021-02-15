@@ -1,32 +1,9 @@
 
 import { map, mergeArray, multicast, skipRepeatsWith, startWith, switchLatest } from "@most/core"
 import { Stream } from '@most/types'
-import { $node, $Branch, Behavior, component, event, IBranch, O, replayLatest, style, styleInline } from '@aelea/core'
+import { $node, $Branch, Behavior, component, event, IBranch, O, style, styleInline } from '@aelea/core'
 import { $column } from '../common/common'
 import { customScroll } from "../common/stylesheet"
-
-
-// function smoothScroll(target = document.documentElement, smooth = 7) {
-//     if (!target) throw new Error('no scroll matched')
-
-//     const wheel = eventElementTarget('wheel', target, { passive: false })
-
-//     const scrollPos = switchLatest(
-//         map(e => {
-//             e.preventDefault(); // disable default scrolling
-
-//             const posY = target.scrollTop + e.deltaY
-
-//             return map(mf => {
-//                 const delta = (posY - target.scrollTop) // / smooth
-//                 target.scrollTop = target.scrollTop + (delta * mf)
-//             })
-
-//         }, wheel)
-//     )
-
-//     return scrollPos
-// }
 
 
 export interface ScrollSegment {
@@ -85,7 +62,7 @@ export default ({ maxContainerHeight, rowHeight, dataSource, threshold = 10 }: Q
   const intialPageSize = Math.floor(maxContainerHeight / rowHeight) + threshold
   const multicatedScroll: Stream<ScrollSegment> = startWith({ from: 0, to: intialPageSize, pageSize: intialPageSize }, multicast(scroll))
 
-  const multicastedData = replayLatest(multicast(dataSource))
+  const multicastedData = multicast(dataSource)
 
   const $intermissionedItems = O(
     map(({ $items }: ScrollResponse) => mergeArray($items)),
