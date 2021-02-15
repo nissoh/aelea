@@ -1,8 +1,9 @@
 
 import { map, mergeArray, multicast, skipRepeatsWith, startWith, switchLatest } from "@most/core"
 import { Stream } from '@most/types'
-import { $node, $Branch, Behavior, component, event, IBranch, O, replayLatest, style, styleInMotion } from '@aelea/core'
+import { $node, $Branch, Behavior, component, event, IBranch, O, replayLatest, style, styleInline } from '@aelea/core'
 import { $column } from '../common/common'
+import { customScroll } from "../common/stylesheet"
 
 
 // function smoothScroll(target = document.documentElement, smooth = 7) {
@@ -92,16 +93,16 @@ export default ({ maxContainerHeight, rowHeight, dataSource, threshold = 10 }: Q
   )(multicastedData)
 
 
-  const $container = $column(style({ maxHeight: maxContainerHeight + 'px' }), containerStyle, scrollBehavior)
+  const $container = $column(style({ maxHeight: maxContainerHeight + 'px' }), customScroll, containerStyle, scrollBehavior)
 
   const $content = $node(
-    styleInMotion(
+    styleInline(
       map(x => ({ height: `${rowHeight * x.totalItems}px` }), multicastedData)
     ),
     scrollerStyle
   )
 
-  const $innerContent = $column(styleInMotion(map(loc => ({ transform: `translate(0, ${loc.from * rowHeight}px)` }), multicatedScroll)), style({ willChange: 'transform' }))
+  const $innerContent = $column(styleInline(map(loc => ({ transform: `translate(0, ${loc.from * rowHeight}px)` }), multicatedScroll)), style({ willChange: 'transform' }))
 
   return [
     $container(

@@ -1,6 +1,6 @@
 
-import { chain, combineArray, constant, map, merge, mergeArray, now, snapshot, until } from '@most/core'
-import { $text, Behavior, behavior, component, state, style } from '@aelea/core'
+import { chain, constant, map, merge, mergeArray, now, snapshot, until } from '@most/core'
+import { $text, Behavior, behavior, component, style } from '@aelea/core'
 import { $column, $row, $seperator, $TrashBtn } from '../common/common'
 import * as designSheet from '../common/stylesheet'
 import $Counter, { sumAdd } from './$Counter'
@@ -31,7 +31,7 @@ export default component((
     $column(designSheet.spacing)(
       $row(style({ placeContent: 'space-between', alignItems: 'center' }), designSheet.spacing)(
         $text(
-          map(n => `Counters: ${n}`, sumWithInitial(merge(constant(1, addedCounter), constant(-1, disposeCounter))))
+          map(n => `Counters: ${n}`, sumWithInitial(merge(constant(1, counters), constant(-1, disposeCounter))))
         ),
         $text(
           map(n => `Sum: ${n}`, totalCount)
@@ -52,7 +52,7 @@ export default component((
                   sampleRemove()
                 )
               }),
-              $Counter(INITAL_COUNT)({
+              $Counter({ initial: INITAL_COUNT })({
                 increment: sampleCountersIncrement(),
                 decrement: sampleCountersDecrement(),
                 count: sampleDisposedCounterCount(

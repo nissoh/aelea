@@ -1,10 +1,8 @@
 import { Stream, Disposable, Sink, Scheduler } from '@most/types'
-import { Behavior, Op, StateBehavior } from '../types'
+import { Behavior, Op } from '../types'
 import { disposeWith } from '@most/disposable'
-import { O, Pipe } from '../utils'
-import { startWith } from '@most/core'
+import { O } from '../utils'
 import { tether } from '../combinators/tether'
-
 
 export class BehaviorSource<A, B> implements Stream<A> {
   queuedSamplers: Stream<A>[] = []
@@ -68,63 +66,3 @@ export function behavior<A, B>(): Behavior<A, B> {
 }
 
 
-export function state<A, B>(initialState: B): StateBehavior<A, B> {
-  const ss = new BehaviorSource<B, A>()
-
-  return [ss.sample, replayLatest(ss, initialState)]
-}
-
-
-
-class StateSink<A> extends Pipe<A, A> {
-
-  constructor(private parent: ReplayLatest<A>, public sink: Sink<A>) {
-    super(sink)
-  }
-
-  event(t: number, x: A): void {
-    this.parent.latestvalue = x;
-    this.parent.hasValue = true;
-
-    this.sink.event(t, x)
-  }
-
-}
-
-
-
-export function replayLatest<A>(s: Stream<A>, initialState?: A): ReplayLatest<A> {
-  if (arguments.length === 1) {
-    return new ReplayLatest(s)
-  } else {
-    return new ReplayLatest(s, initialState)
-  }
-}
-
-
-export class ReplayLatest<A> implements Stream<A> {
-  latestvalue!: A
-  hasValue = false
-  hasInitial
-
-  constructor(
-    private source: Stream<A>,
-    private initialState?: A,
-  ) {
-    this.hasInitial = arguments.length === 2
-  }
-
-  run(sink: Sink<A>, scheduler: Scheduler): Disposable {
-    const startWithReplay = this.hasValue
-      ? startWith(this.latestvalue)
-      : this.hasInitial
-        ? startWith(this.initialState)
-        : null
-
-    const withReplayedValue = startWithReplay ? startWithReplay(this.source) : this.source
-
-    // return this.source.run(new StateSink(this, sink), scheduler)
-    return withReplayedValue.run(new StateSink(this, sink), scheduler)
-  }
-
-}

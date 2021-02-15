@@ -4,10 +4,20 @@ import { Stream } from '@most/types'
 import { $Branch, IAttrProperties, IBranchElement } from '../types'
 
 interface Attr {
-  <A, B, C extends IBranchElement>(attrs: Stream<IAttrProperties<A> | null> | IAttrProperties<A>, ns: $Branch<C, B>): $Branch<C, A & B>
-  <A, B, C extends IBranchElement>(attrs: Stream<IAttrProperties<A> | null> | IAttrProperties<A>): (ns: $Branch<C, B>) => $Branch<C, A & B>
+  <A, B, C extends IBranchElement>(attrs: IAttrProperties<A>, ns: $Branch<C, B>): $Branch<C, A & B>
+  <A, B, C extends IBranchElement>(attrs: IAttrProperties<A>): (ns: $Branch<C, B>) => $Branch<C, A & B>
 }
 
-export const attr: Attr = curry2((attrs, source) => {
-  return map(ns => ({ ...ns, attributes: { ...ns.attributes, ...attrs } }), source)
-})
+interface AttrBehaviorCurry {
+  <A, C extends IBranchElement, D>(styleInput: Stream<IAttrProperties<A> | null>, node: $Branch<C, D>): $Branch<C, D>
+  <A, C extends IBranchElement, D>(styleInput: Stream<IAttrProperties<A> | null>): (node: $Branch<C, D>) => $Branch<C, D>
+}
+
+
+export const attr: Attr = curry2((attrs, source) =>
+  map(ns => ({ ...ns, attributes: { ...ns.attributes, ...attrs } }), source)
+)
+
+export const attrBehavior: AttrBehaviorCurry = curry2((attrs, source) =>
+  map(ns => ({ ...ns, attributesBehavior: [...ns.attributesBehavior, attrs] }), source)
+)

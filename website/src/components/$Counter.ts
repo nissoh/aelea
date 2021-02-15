@@ -1,13 +1,19 @@
-import { constant, merge, scan } from '@most/core'
 import { $text, Behavior, component, style } from '@aelea/core'
+import { constant, merge, scan } from '@most/core'
 import { $column, $row } from '../common/common'
 import * as designSheet from '../common/stylesheet'
-import $Button from './form/$Button'
+import { themeAttention } from '../common/stylesheet'
 import $NumberTicker from './$NumberTicker'
+import $Button from './form/$Button'
 
 export const sumAdd = scan((current: number, x: number) => current + x)
 
-export default (initial: number) => component((
+
+interface Counter {
+  initial: number
+}
+
+export default ({ initial }: Counter) => component((
   [sampleIncrement, increment]: Behavior<PointerEvent, 1>,
   [sampleDecrement, decrement]: Behavior<PointerEvent, -1>
 ) => {
@@ -21,7 +27,7 @@ export default (initial: number) => component((
         $Button({ $content: $text('+') })({
           click: sampleIncrement(constant(1))
         }),
-        $Button({ $content: $text('-') })({   
+        $Button({ $content: $text('-') })({
           click: sampleDecrement(constant(-1))
         }),
       ),
@@ -32,8 +38,8 @@ export default (initial: number) => component((
         textStyle: {
           fontSize: '30px'
         },
-        decrementColor: '#ff9393',
-        incrementColor: '#a6f5a6'
+        decrementColor: themeAttention.negative,
+        incrementColor: themeAttention.positive
       })
     ),
 

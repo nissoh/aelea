@@ -1,6 +1,6 @@
 
 import * as CSS from 'csstype'
-import { Disposable, Scheduler, Stream } from '@most/types'
+import { Scheduler, Stream } from '@most/types'
 import SettableDisposable from './utils/SettableDisposable'
 
 export type StyleCSS = CSS.Properties
@@ -21,9 +21,10 @@ export interface IBranch<A extends IBranchElement = IBranchElement, B = {}> exte
   $segments: Array<$Node>
 
   style?: StyleCSS
+  stylePseudo: Array<{ style: StyleCSS, class: string }>
   attributes?: IAttrProperties<B>
 
-  styleBehaviors: Stream<StyleCSS | null>[]
+  styleBehavior: Stream<StyleCSS | null>[]
   attributesBehavior: Stream<IAttrProperties<B>>[]
 }
 

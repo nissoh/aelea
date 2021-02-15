@@ -5,10 +5,6 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 module.exports = {
   mode: "development",
-  output: {
-    path: __dirname + '/dist',
-    filename: "[name].js"
-  },
   watch: false,
   context: __dirname, // to automatically find tsconfig.json
   devtool: 'source-map',

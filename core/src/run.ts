@@ -1,9 +1,9 @@
 import { $Branch, IAttrProperties, IBranch, IBranchElement, INode, INodeElement, RunEnvironment, StyleCSS, StyleEnvironment } from './types'
 import { Disposable, Sink, Stream, Time } from '@most/types'
 import { newDefaultScheduler } from '@most/scheduler'
-import { loop, map, mergeArray } from '@most/core'
+import { loop, map, mergeArray, tap } from '@most/core'
 import { disposeWith } from '@most/disposable'
-import { useStyleRule } from './utils/styleUtils'
+import { useStylePseudoRule, useStyleRule } from './utils/styleUtils'
 import { nullSink } from './utils'
 
 
@@ -71,22 +71,41 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
       node.element.classList.add(selector)
     }
 
+    if ('stylePseudo' in node) {
+      node.stylePseudo.forEach(styleDeclaration => {
+        const selector = useStylePseudoRule(this.env.style, styleDeclaration.style, styleDeclaration.class)
+        node.element.classList.add(selector)
+      })
+    }
+
     if ('attributes' in node && node.attributes) {
       if (Object.keys(node.attributes).length !== 0) {
         applyAttrFn(node.attributes, node.element)
       }
     }
 
-    node.disposable.setDisposable( 
+    node.disposable.setDisposable(
       disposeWith(node => {
         node.element.remove()
         this.segmentsCount[this.segmentPosition]--
       }, node)
     )
 
-    if ('styleBehaviors' in node && node.styleBehaviors) {
+    if ('styleBehavior' in node && node.styleBehavior) {
       const disposeStyle = mergeArray(
-        node.styleBehaviors.map(sb => styleBehavior(sb, node, this.env.style))
+        node.styleBehavior.map(sb => styleBehavior(sb, node, this.env.style))
+      ).run(nullSink, this.env.scheduler)
+
+      this.disposables.push(disposeStyle)
+    }
+
+    if ('attributesBehavior' in node && node.attributesBehavior) {
+      const disposeStyle = mergeArray(
+        node.attributesBehavior.map(attrs => {
+          return tap((attr) => {
+            applyAttrFn(attr, node.element)
+          }, attrs)
+        })
       ).run(nullSink, this.env.scheduler)
 
       this.disposables.push(disposeStyle)
@@ -107,7 +126,7 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
         this.sinks[i] = sink
         this.disposables[i] = $child.run(sink, this.env.scheduler)
       }
- 
+
     }
 
   }

@@ -58,10 +58,11 @@ function styleObjectAsString(styleObj: StyleCSS) {
 export function useStyleRule(cacheService: StyleEnvironment, styleDefinition: StyleCSS) {
   const properties = styleObjectAsString(styleDefinition)
   const cachedRuleIdx = cacheService.cache.indexOf(properties)
-  const index = cacheService.stylesheet.cssRules.length
 
   if (cachedRuleIdx === -1) {
+    const index = cacheService.stylesheet.cssRules.length
     const namespace = cacheService.namespace + index
+
     cacheService.cache.push(properties)
     cacheService.stylesheet.insertRule(`.${namespace} {${properties}}`, index)
     return `${cacheService.namespace + index}`
@@ -69,4 +70,20 @@ export function useStyleRule(cacheService: StyleEnvironment, styleDefinition: St
 
   return `${cacheService.namespace + cachedRuleIdx}`
 }
+
+export function useStylePseudoRule(cacheService: StyleEnvironment, styleDefinition: StyleCSS, pseudo = '') {
+  const properties = styleObjectAsString(styleDefinition)
+  const index = cacheService.stylesheet.cssRules.length
+  const rule = `.${cacheService.namespace + index + pseudo} {${properties}}`
+  const cachedRuleIdx = cacheService.cache.indexOf(rule)
+
+  if (cachedRuleIdx === -1) {
+    cacheService.cache.push(rule)
+    cacheService.stylesheet.insertRule(rule, index)
+    return `${cacheService.namespace + index}`
+  }
+
+  return `${cacheService.namespace + cachedRuleIdx}`
+}
+
 

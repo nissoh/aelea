@@ -24,7 +24,7 @@ export const resolveUrl = (config: typeof configDefaults): Op<string, PathEvent>
   })
 )
 
-export const router = (pathChange: Stream<string>, config = configDefaults) => {
+export const router = (pathChange: Stream<string>, config: Partial<typeof configDefaults> = configDefaults) => {
 
   const opts = config === configDefaults
     ? configDefaults

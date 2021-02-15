@@ -1,6 +1,6 @@
 
 
-import { style, O } from '@aelea/core'
+import { style, O, stylePseudo } from '@aelea/core'
 
 
 export enum theme {
@@ -10,6 +10,12 @@ export enum theme {
   base = 'rgb(201 222 230)',
   baseLight = 'rgb(74 92 99)',
   baseDark = 'rgb(43 52 55)',
+}
+
+
+export enum themeAttention {
+  positive = '#a6f5a6',
+  negative = '#ff9393',
 }
 
 
@@ -25,21 +31,32 @@ export const columnFlex = O(column, flex)
 export const text = style({
   fontFamily: 'Fira Code',
   fontWeight: 100,
-  fontSize: '1rem',
-  // fontSize: '16px',
+  fontSize: '1rem'
 })
+
+export const customScroll = O(
+  stylePseudo('::-webkit-scrollbar-thumb', {
+    backgroundColor: theme.baseLight
+  }),
+  stylePseudo('::-webkit-scrollbar', {
+    backgroundColor: 'transparent'
+  })
+)
 
 export const main = O(
   text,
   style({
     height: '100vh',
-    overflow: 'auto',
     color: theme.text,
+    overflowY: 'scroll',
     backgroundColor: theme.baseDark,
     margin: '0',
+    scrollbarColor: 'auto',
+    scrollbarWidth: 'thin',
     display: 'flex',
     flexDirection: 'column',
   }),
+  customScroll
 )
 
 

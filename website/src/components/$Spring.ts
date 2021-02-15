@@ -1,6 +1,6 @@
 import { chain, combine, filter, map, merge, multicast, now, skipAfter, skipRepeats, snapshot, startWith, switchLatest } from "@most/core"
 import { remove } from "@most/prelude"
-import { $Branch, Behavior, behavior, component, event, eventElementTarget, motion, INode, O, style, styleInMotion, styleBehavior } from '@aelea/core'
+import { $Branch, Behavior, behavior, component, event, eventElementTarget, motion, INode, O, style, styleInline, styleBehavior } from '@aelea/core'
 import { $column, $row } from "../common/common"
 import { flex } from "../common/stylesheet"
 
@@ -64,22 +64,21 @@ export default <T extends $Branch>(config: DraggableList<T>) => component((
             if (s.isDragging) {
               return now(s.delta)
             } else {
-              const toPsotion = startWith(s.delta, now(s.list.indexOf($item) * iHeight))
-              return draggingMotion(toPsotion)
+              return draggingMotion(s.delta, now(s.list.indexOf($item) * iHeight))
             }
           }, multicastedDrag),
-          startWith(i * iHeight, draggingMotion(yMotion))
+          draggingMotion(i * iHeight, yMotion)
         )
 
         const applyTransformStyle = combine(
           (ypos, scale) => ({ transform: `translateY(${ypos}px) scale(${scale})` }),
           yDragPosition,
-          startWith(1, draggingMotion(map(id => id ? 1.1 : 1, isDraggingStream)))
+          draggingMotion(1, map(id => id ? 1.1 : 1, isDraggingStream))
         )
 
         const applyBoxShadowStyle = map(
           shadow => ({ boxShadow: `0px ${shadow}px ${shadow * 3}px 0px rgba(0, 0, 0, 0.25` }),
-          draggingMotion(startWith(0, map(id => id ? 5 : 0, isDraggingStream)))
+          draggingMotion(0, map(id => id ? 5 : 0, isDraggingStream))
         )
 
         return $dragItem(
@@ -110,7 +109,7 @@ export default <T extends $Branch>(config: DraggableList<T>) => component((
             sampleOrderChange()
           ),
 
-          styleInMotion(
+          styleInline(
             merge(applyTransformStyle, applyBoxShadowStyle)
           ),
 

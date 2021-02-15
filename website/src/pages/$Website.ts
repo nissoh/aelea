@@ -1,6 +1,6 @@
 import { $Branch, $node, $text, behavior, Behavior, component, eventElementTarget, IBranchElement, style } from '@aelea/core'
 import { path, router } from '@aelea/router'
-import { chain, map, mergeArray, multicast, now, switchLatest } from '@most/core'
+import { chain, map, mergeArray, multicast, now } from '@most/core'
 import { $column, $Link, $main, $row } from '../common/common'
 import { flex, spacing, spacingBig, spacingSmall, theme } from '../common/stylesheet'
 import $Calculator from '../components/$Calculator'
@@ -11,7 +11,8 @@ import $Spring from '../components/$Spring'
 import $Table from '../components/$Table'
 import { createTodo } from '../components/todo-app/$CreateTodo'
 import $TodoApp from '../components/todo-app/$TodoApp'
-import $Example from '../examples-showcase/$Example'
+import { fadeIn } from '../components/transitions/enter'
+import $Example from './$Example'
 
 
 const initialPath = map(location => location.pathname, now(document.location))
@@ -31,7 +32,9 @@ export default component((
     multicast(routeChanges)
   ])
 
-  const rootRoute = router(routeChange)
+  const rootRoute = router(routeChange, {
+    rootFragment: document.location.pathname
+  })
 
 
   const dragAngDropRoute = rootRoute.create('drag-and-sort')
@@ -64,63 +67,47 @@ export default component((
     return { totalItems, data: $items }
   }, observed)
 
-  const $table = $Table<{ id: string }>({
-    maxContainerHeight: 400,
-    dataSource,
-    rowHeight: 30,
-    columns: [
-      {
-        id: 'id',
-        value: chain(x => $text(x.id)),
-      },
-      {
-        id: 'id',
-        value: chain(x => $text(x.id)),
-      },
-      {
-        id: 'id',
-        value: chain(x => $text(x.id)),
-      }
-    ],
-  })({ observed: sampleObserved() })
-
 
   return [
 
     path(rootRoute)(
+
+
       $row(spacingBig, flex, style({ placeContent: 'center' }))(
 
-        $column(spacing, style({ position: 'sticky', alignSelf: 'flex-start', top: '10vh', placeContent: 'center flex-start' }))(
+        fadeIn(
+          $column(spacing, style({ position: 'sticky', alignSelf: 'flex-start', top: '10vh', placeContent: 'center flex-start' }))(
 
-          $text(style({ color: theme.base }))('Fufu Examples'),
+            $text(style({ color: theme.base }))('Fufu Examples'),
 
-          $column(spacingSmall, style({ alignItems: 'flex-start' }))(
+            $column(spacingSmall, style({ alignItems: 'flex-start' }))(
 
-            $Link({ $content: $text('Drag And Sort'), href: '/drag-and-sort', route: dragAngDropRoute })({
-              click: sampleLinkClick()
-            }),
+              $Link({ $content: $text('Drag And Sort'), href: '/drag-and-sort', route: dragAngDropRoute })({
+                click: sampleLinkClick()
+              }),
 
-            $Link({ $content: $text('Table'), href: '/table', route: tableRoute })({
-              click: sampleLinkClick()
-            }),
+              $Link({ $content: $text('Table'), href: '/table', route: tableRoute })({
+                click: sampleLinkClick()
+              }),
 
-            $Link({ $content: $text('Calculator'), href: '/calculator', route: calculatorRoute })({
-              click: sampleLinkClick()
-            }),
+              $Link({ $content: $text('Calculator'), href: '/calculator', route: calculatorRoute })({
+                click: sampleLinkClick()
+              }),
 
-            $Link({ $content: $text('Quantum List'), href: '/quantum-list', route: quantumListRoute })({
-              click: sampleLinkClick()
-            }),
+              $Link({ $content: $text('Quantum List'), href: '/quantum-list', route: quantumListRoute })({
+                click: sampleLinkClick()
+              }),
 
-            $Link({ $content: $text('Count Counters'), href: '/count-counters', route: countCountersRoute })({
-              click: sampleLinkClick()
-            }),
+              $Link({ $content: $text('Count Counters'), href: '/count-counters', route: countCountersRoute })({
+                click: sampleLinkClick()
+              }),
 
-            $Link({ $content: $text('Todo App'), href: '/todo-app', route: todoAppRoute })({
-              click: sampleLinkClick()
-            }),
+              $Link({ $content: $text('Todo App'), href: '/todo-app', route: todoAppRoute })({
+                click: sampleLinkClick()
+              }),
+            )
+
           )
-
         ),
 
         $node(style({ borderLeft: `1px solid ${theme.baseLight}` }))(),
@@ -145,12 +132,7 @@ export default component((
                         $list,
                         itemHeight: 90,
                         gap: 10
-                      })({ orderChange: sampleOrder() }),
-                      $node(
-                        switchLatest(
-                          map(($nodes) => $node(...$nodes), order)
-                        )
-                      )
+                      })({ orderChange: sampleOrder() })
                     )
                   ]
                 })({})
@@ -162,7 +144,29 @@ export default component((
           $container(
             path(tableRoute)(
               $Example({ file: 'src/components/$Table.ts' })(
-                $table
+                
+                $column(style({ border: `1px solid ${theme.baseLight}` }))(
+                  $Table<{ id: string }>({
+                    maxContainerHeight: 400,
+                    dataSource,
+                    rowHeight: 30,
+                    columns: [
+                      {
+                        id: 'id',
+                        value: chain(x => $text(x.id)),
+                      },
+                      {
+                        id: 'id',
+                        value: chain(x => $text(x.id)),
+                      },
+                      {
+                        id: 'id',
+                        value: chain(x => $text(x.id)),
+                      }
+                    ],
+                  })({ observed: sampleObserved() })
+                )
+
               )({})
             )
           ),

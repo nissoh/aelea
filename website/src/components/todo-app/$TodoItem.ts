@@ -1,5 +1,4 @@
 import { now } from "@most/core"
-import { Stream } from "@most/types"
 import { Behavior, component, O, style } from '@aelea/core'
 import { $row, $TrashBtn } from "../../common/common"
 import { spacing } from "../../common/stylesheet"
@@ -13,7 +12,12 @@ const rowStyle = O(
   style({ alignItems: 'center' })
 )
 
-export default (todo: Todo, completed: Stream<boolean>) => component((
+interface TodoItem {
+  todo: Todo,
+  completed: boolean
+}
+
+export default ({ todo, completed }: TodoItem) => component((
   [sampleRemove, remove]: Behavior<MouseEvent, MouseEvent>,
   [sampleComplete, complete]: Behavior<boolean, boolean>,
   [sampleText, text]: Behavior<string, string>
@@ -21,7 +25,7 @@ export default (todo: Todo, completed: Stream<boolean>) => component((
 
   return [
     $row(rowStyle)(
-      $Checkbox({ setCheck: completed })({
+      $Checkbox({ inital: completed })({
         check: sampleComplete()
       }),
       $Input({ setValue: now(todo.text) })({

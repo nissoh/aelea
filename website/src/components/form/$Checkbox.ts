@@ -1,20 +1,23 @@
-import { empty, map, merge, mergeArray } from "@most/core"
+import { empty, map, merge, mergeArray, now } from "@most/core"
 import { Stream } from "@most/types"
-import { $element, $node, attr, Behavior, component, IBranch, event, O, style, styleBehavior } from '@aelea/core'
+import { $element, $node, attr, Behavior, component, IBranch, event, O, style, styleBehavior, attrBehavior } from '@aelea/core'
 import * as designSheet from '../../common/stylesheet'
 import { Control, dismissOp, interactionOp } from "./form"
 
 
 
 export interface Checkbox extends Control {
-  setCheck?: Stream<boolean>
+  inital?: boolean
 }
 
-export default (config: Checkbox) => component((
+export default ({ inital }: Checkbox) => component((
   [interactionBehavior, focusStyle]: Behavior<IBranch, true>,
   [dismissBehavior, dismissstyle]: Behavior<IBranch, false>,
   [sampleCheck, check]: Behavior<IBranch<HTMLInputElement>, boolean>
 ) => {
+
+  const initial = now(inital ?? false)
+  const checkState = merge(check, initial)
 
   const $overlay = $node(
     designSheet.stretch,
@@ -22,7 +25,7 @@ export default (config: Checkbox) => component((
     styleBehavior(
       map(
         ch => ch ? { backgroundColor: designSheet.theme.text } : null,
-        merge(check, config.setCheck || empty())
+        checkState
       )
     ),
   )()
@@ -30,22 +33,20 @@ export default (config: Checkbox) => component((
   const $checkInput = $element('input')(
     style({ opacity: 0, width: 'inherit', height: 'inherit', margin: '0', cursor: 'pointer', }),
     designSheet.stretch,
-
     sampleCheck(
       event('change'),
       map(evt => (<HTMLInputElement>evt.target).checked),
     ),
+    attr({ type: 'checkbox', [inital ? 'checked' : 'off']: '' }),
 
-    attr({ type: 'checkbox' }),
-    attr(
+    attrBehavior(
       map(
         checked => ({ checked }),
-        merge(config.setCheck || empty(), check)
+        checkState
       )
     ),
     interactionBehavior(interactionOp),
     dismissBehavior(dismissOp),
-
   )()
 
 

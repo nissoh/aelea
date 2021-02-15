@@ -4,6 +4,7 @@
     "**/.yarn": true,
     "**/.pnp.*": true
   },
+  "editor.tabSize": 2,
   "eslint.nodePath": ".yarn/sdks",
   "typescript.enablePromptUseWorkspaceTsdk": true
 }

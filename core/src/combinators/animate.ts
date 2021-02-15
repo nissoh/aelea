@@ -1,11 +1,10 @@
 
 import { Scheduler, Sink, Stream, Disposable } from '@most/types'
 import { currentTime, } from '@most/scheduler'
-import { skipAfter, map, continueWith, constant, switchLatest, loop, filter, tap, now } from '@most/core'
+import { skipAfter, map, continueWith, constant, switchLatest, loop, startWith } from '@most/core'
 import { O } from '../utils'
 import { disposeWith } from '@most/disposable'
-import { compose, curry2 } from '@most/prelude'
-import { $Branch, IBranchElement, StyleCSS } from '../types'
+import { compose, curry3 } from '@most/prelude'
 
 type RafHandlerId = number
 type RafHandler = (dts: RafHandlerId) => void
@@ -41,10 +40,10 @@ const eventThenEnd = (requestTime: AnimationFrameRequestTime, responseTime: Anim
   sink.end(requestTime)
 }
 
-export const nextAnimationFrame = (afp: AnimationFrames): Stream<AnimationFrame> =>
+export const nextAnimationFrame = (afp: AnimationFrames = window): Stream<AnimationFrame> =>
   new AnimationFrameSource(afp)
 
-export const animationFrames = (afp: AnimationFrames): Stream<AnimationFrame> =>
+export const animationFrames = (afp: AnimationFrames = window): Stream<AnimationFrame> =>
   continueWith(() => animationFrames(afp), nextAnimationFrame(afp))
 
 
@@ -89,55 +88,31 @@ export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: .01 }
  *
  *  @see  modified-from https://github.com/chenglou/react-motion/blob/master/src/stepper.js
  */
-export const motion = curry2((motionEnvironment: Partial<Motion>, change: Stream<number>) => {
+export const motion = curry3((motionEnvironment: Partial<Motion>, initialState: number, change: Stream<number>): Stream<number> => {
+  const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
+  const ma = motionState(motionEnv, { position: initialState, velocity: 0 }, change)
+  return map(s => s.position, ma)
+})
+
+// used in cases where velocity feedback is needed(for renimation)
+export const motionState = curry3((motionEnvironment: Partial<Motion>, initialState: MotionState, change: Stream<number>): Stream<MotionState> => {
   const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
 
   return O(
-    loop((seed: MotionState | null, target: number) => {
-
-      if (seed === null) {
-        return { seed: { position: target, velocity: 0 }, value: now(target) }
-      }
-
-      const value = O(
-        animationFrames,
-        map(() => stepFrame(target, seed, motionEnv).position),
-        skipAfter(n => n === target)
-      )(window)
-
-      return { seed, value }
-    }, null),
-    switchLatest
+    loop((seed: MotionState, target: number) => {
+      const frames = O(
+        map(() => stepFrame(target, seed, motionEnv)),
+        skipAfter(n => n.position === target)
+      )
+      return { seed, value: frames(animationFrames()) }
+    }, initialState),
+    switchLatest,
+    startWith(initialState)
   )(change)
 })
 
-export const styleInMotion = <A extends IBranchElement, B>(
-  style: Stream<StyleCSS>,
-) => ($node: $Branch<A, B>): $Branch<A, B> => {
-
-  return map(node => {
-    const applyInlineStyleStream = tap((styleObj) => {
-      for (const prop in styleObj) {
-        if (Object.prototype.hasOwnProperty.call(styleObj, prop)) {
-          // @ts-ignore
-          const val = styleObj[prop]
-
-          // @ts-ignore
-          node.element.style[prop] = val
-        }
-      }
-    }, style)
-
-    return { ...node, styleBehaviors: [filter(() => false, applyInlineStyleStream)] }
-  }, $node)
-
-}
-
-
 
 function stepFrame(target: number, state: MotionState, motionEnv: Motion) {
-  // const dddd = (frame.responseTime - frame.requestTime) / 1000 || (1 / 60)
-
   const fps = 1 / 60
   const delta = target - state.position
 

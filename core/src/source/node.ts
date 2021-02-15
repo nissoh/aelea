@@ -27,8 +27,9 @@ export class NodeSource<A, B extends IBranchElement> implements Stream<IBranch<B
 
     sink.event(scheduler.currentTime(), {
       $segments, element, disposable,
-      styleBehaviors: [],
-      attributesBehavior: []
+      styleBehavior: [],
+      attributesBehavior: [],
+      stylePseudo: []
     })
 
     return disposable

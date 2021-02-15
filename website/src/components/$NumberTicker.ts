@@ -1,4 +1,4 @@
-import { at, empty, filter, map, merge, multicast, now, scan, skipRepeats, skipRepeatsWith, switchLatest } from '@most/core'
+import { at, map, merge, multicast, now, scan, skipRepeats, skipRepeatsWith, switchLatest } from '@most/core'
 import { $node, $text, O, style, styleBehavior, StyleCSS } from '@aelea/core'
 import { Stream } from '@most/types'
 
@@ -21,7 +21,6 @@ type CountState = {
   dir: Direction | null
   change: number
   pos: number
-  currentStr: string
   changeStr: string
 }
 
@@ -34,35 +33,27 @@ function getDetlaSlotIdex(current: string, change: string, i: number): number {
   return getDetlaSlotIdex(current, change, i + 1)
 }
 
-export default (config: NumberConfig) => {
+export default ({ change, initial, incrementColor, decrementColor, textStyle = {} }: NumberConfig) => {
 
-  const slotLength = config.initial + 411
-  const { change, initial, incrementColor, decrementColor, textStyle } = {
-    textStyle: {},
-    ...config
-  }
-
+  const slotLength = initial + 6
   const initalCountState: CountState = {
     change: initial,
     dir: null,
     changeStr: String(initial),
-    currentStr: String(initial),
     pos: 0
   }
 
   const incrementMulticast = O(
     scan((seed, change: number): CountState => {
-      const delta = change - seed.change
-      const dir = delta > 0 ? Direction.INCREMENT : delta === 0 ? null : Direction.DECREMENT
+      const dir = change > seed.change ? Direction.INCREMENT : Direction.DECREMENT
 
-      const changeStr = String(change)
-      const currentStr = String(seed.change)
+      const changeStr = change.toLocaleString()
+      const currentStr = seed.change.toLocaleString()
 
       const pos = getDetlaSlotIdex(currentStr, changeStr, 0)
 
-      return { change, dir, pos, changeStr, currentStr }
+      return { change, dir, pos, changeStr }
     }, initalCountState),
-
     multicast,
   )(change)
 
