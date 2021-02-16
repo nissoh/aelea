@@ -1,8 +1,8 @@
 {
   "name": "@aelea/website",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
-  "module": ".dist/es/examples-showcase/$Website.js",
+  "module": ".dist/es/showcase-browser/$website.js",
   "scripts": {
     "clean": "yarn g:tsc:clean",
     "build:project": "yarn g:tsc:project",
