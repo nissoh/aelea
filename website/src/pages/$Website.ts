@@ -1,4 +1,4 @@
-import { $Branch, $node, $text, behavior, Behavior, component, eventElementTarget, IBranchElement, style } from '@aelea/core'
+import { $Branch, $node, $text, behavior, Behavior, component, eventElementTarget, IBranchElement, runBrowser, style } from '@aelea/core'
 import { path, router } from '@aelea/router'
 import { chain, map, mergeArray, multicast, now } from '@most/core'
 import { $column, $Link, $main, $row } from '../common/common'
@@ -12,7 +12,7 @@ import $Table from '../components/$Table'
 import { createTodo } from '../components/todo-app/$CreateTodo'
 import $TodoApp from '../components/todo-app/$TodoApp'
 import { fadeIn } from '../components/transitions/enter'
-import $Example from './$Example'
+import $Example from '../components/$Example'
 
 
 const initialPath = map(location => location.pathname, now(document.location))
@@ -24,9 +24,8 @@ const documentRootPathName = document.querySelector('base')?.href.split(location
 if (!documentRootPathName)
   throw `could not find <base href="..."> element to receive root path`
 
-export { $main }
 
-export default component((
+const $Website = component((
   // []: Behavior<NodeChild, any>,
   [sampleLinkClick, routeChanges]: Behavior<string, string>
 ) => {
@@ -216,3 +215,6 @@ export default component((
 
   ]
 })
+
+
+export default $main($Website({}))

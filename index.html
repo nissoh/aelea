@@ -8,10 +8,12 @@
 </head>
 <body>
     <script type="module">
-        import { runBrowser } from 'https://cdn.jsdelivr.net/npm/@aelea/core@0.3.0/+esm'
-        import $website from 'https://cdn.jsdelivr.net/npm/@aelea/website@1.0.1/+esm'
+        import { runBrowser } from 'https://cdn.jsdelivr.net/npm/@aelea/core@latest/+esm'
+        import $website from 'https://cdn.jsdelivr.net/npm/@aelea/website@latest/+esm'
 
-        runBrowser({ rootNode: document.body })()
+        runBrowser({ rootNode: document.body })(
+            $website
+        )
     </script>
 </body>
 
