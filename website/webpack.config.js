@@ -28,10 +28,7 @@ module.exports = {
       "node_modules",
       path.resolve(__dirname)
     ],
-    extensions: [".ts", '.js'],
-    // plugins: [
-    //   new TsconfigPathsPlugin({})
-    // ]
+    extensions: [".ts", '.js']
   },
   plugins: [
     new ForkTsCheckerWebpackPlugin(),
@@ -43,6 +40,7 @@ module.exports = {
     port: 3000,
     historyApiFallback: {
       disableDotRule: true
-    }
+    },
+    openPage: 'app'
   }
 }

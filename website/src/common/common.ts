@@ -35,11 +35,6 @@ export const $TrashBtn = $ButtonIcon(
 )
 
 
-interface Link {
-  href: string,
-  $content: $Node,
-  route: Route
-}
 
 const $anchor = $element('a')(style({
   transition: 'background-color 0.75s cubic-bezier(0, 1.5, 0.2, 0.18) 0s',
@@ -47,10 +42,18 @@ const $anchor = $element('a')(style({
   color: designSheet.theme.text
 }))
 
+interface Link {
+  href: string,
+  $content: $Node,
+  route: Route
+}
+
 export const $Link = ({ href, route, $content }: Link) => component((
   [sampleClick, click]: Behavior<IBranch, string>,
   [sampleActive, active]: Behavior<IBranch, { focused: boolean, match: boolean }>
 ) => {
+
+  const rootFrag = route.fragments[0]
 
   const isRouteMatched = merge(constant(true, route.match), constant(false, route.miss))
 
@@ -63,7 +66,7 @@ export const $Link = ({ href, route, $content }: Link) => component((
               : null
         }, active)
       ),
-      attr({ href }),
+      attr({ href: rootFrag + href }),
       sampleClick(
         event('click'),
         map((clickEv): string => {
@@ -72,7 +75,7 @@ export const $Link = ({ href, route, $content }: Link) => component((
           const pathName = clickEv.currentTarget instanceof HTMLAnchorElement ? clickEv.currentTarget.pathname : null
 
           if (pathName) {
-            history.pushState(null, '', href)
+            history.pushState(null, '', pathName)
             return pathName
           }
 

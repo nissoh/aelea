@@ -6,15 +6,17 @@ export type Fragment = string | RegExp
 
 
 export type PathEvent = {
-  fragments: Fragment[],
-
-  target: Path[],
-  remaining: Path[]
+  target: Path[]
 }
 
 export type Route = {
-  create: (newPath: Fragment) => Route
-  match: Stream<PathEvent>;
-  miss: Stream<PathEvent>;
+  create: (newPath: RouteConfig) => Route
+  match: Stream<PathEvent>
+  miss: Stream<PathEvent>
   fragments: Fragment[]
+}
+
+export type RouteConfig = {
+  fragment: Fragment
+  title?: string
 }

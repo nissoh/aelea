@@ -1,46 +1,36 @@
 
-import { constant, filter, join, map, skipRepeats, skipRepeatsWith, until } from '@most/core'
+import { constant, filter, join, map, skipRepeats, skipRepeatsWith, tap, until } from '@most/core'
 import { Stream } from '@most/types'
-import { O, Op } from '@aelea/core'
-import { isMatched } from './resolve'
-import { Fragment, PathEvent, Route } from './types'
+import { O } from '@aelea/core'
+import { Fragment, Path, PathEvent, Route, RouteConfig } from './types'
 
 
-const configDefaults = {
-  splitUrlPattern: /(?:\/|$)/,
-  rootFragment: ''
+
+type RootRouteConfig = RouteConfig & {
+  splitUrlPattern?: RegExp | string
+  pathChange: Stream<string>
 }
 
-export const resolveUrl = (config: typeof configDefaults): Op<string, PathEvent> => O(
-  skipRepeats,
-  map((rawPath): PathEvent => {
-    const urlToFragments = rawPath.substr(1).split(config.splitUrlPattern)
-    const targetPaths = [config.rootFragment, ...urlToFragments]
-    return {
-      target: targetPaths,
-      fragments: [],
-      remaining: targetPaths
-    }
-  })
-)
 
-export const router = (pathChange: Stream<string>, config: Partial<typeof configDefaults> = configDefaults) => {
+export const router = ({ fragment = '', splitUrlPattern = /(?:\/|$)/, pathChange, title }: RootRouteConfig) => {
 
-  const opts = config === configDefaults
-    ? configDefaults
-    : { ...configDefaults, ...config }
+  const ignoreRepeatPathChanges = skipRepeats(pathChange)
 
-  const rootRoute = resolveRoute(resolveUrl(opts)(pathChange), [])(opts.rootFragment)
+  const changes = map((rawPath): PathEvent => {
+    const removeInitialSlash = fragment ? rawPath.substr(1) : rawPath // stip / from empty path
+    const target = removeInitialSlash.split(splitUrlPattern)
 
-  return rootRoute
+    return { target }
+  }, ignoreRepeatPathChanges)
+
+  return resolveRoute(changes, [fragment])({ fragment, title })
 }
 
 
 function resolveRoute(pathChange: Stream<PathEvent>, parentFragments: Fragment[]) {
-  return (fragment: Fragment): Route => {
+  return ({ fragment, title }: RouteConfig): Route => {
     const fragments = [...parentFragments, fragment]
-    const fragIdx = parentFragments.length
-
+    const fragIdx = parentFragments.length - 1
 
     const diff = O(
       skipRepeatsWith((prev: PathEvent, next: PathEvent) => {
@@ -53,6 +43,11 @@ function resolveRoute(pathChange: Stream<PathEvent>, parentFragments: Fragment[]
       filter(next => {
         return isMatched(fragment, next.target[fragIdx])
       }),
+      tap((evt) => {
+        if (title && evt.target.slice(-1)[0] === fragment && document.title !== title) {
+          document.title = title;
+        }
+      })
     )
 
     const currentMiss = O(
@@ -69,6 +64,15 @@ function resolveRoute(pathChange: Stream<PathEvent>, parentFragments: Fragment[]
     }
   }
 }
+
+
+export function isMatched(frag: Fragment, path: Path) {
+  if (frag instanceof RegExp) {
+    return Boolean(path?.match(frag))
+  }
+  return frag === path
+}
+
 
 
 export const path = <T>(route: Route) => (ns: Stream<T>) => {

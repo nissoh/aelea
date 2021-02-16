@@ -1,6 +1,6 @@
 {
   "name": "@aelea/website",
-  "version": "0.0.1-4",
+  "version": "1.0.0",
   "license": "MIT",
   "module": ".dist/es/examples-showcase/$Website.js",
   "scripts": {

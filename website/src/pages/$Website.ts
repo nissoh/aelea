@@ -19,6 +19,11 @@ const initialPath = map(location => location.pathname, now(document.location))
 const popStateEvent = eventElementTarget('popstate', window)
 const locationChange = map(() => document.location.pathname, popStateEvent)
 
+const documentRootPathName = document.querySelector('base')?.href.split(location.origin)[1].substr(1)
+
+if (!documentRootPathName)
+  throw `could not find <base href="..."> element to receive root path`
+
 export { $main }
 
 export default component((
@@ -26,23 +31,21 @@ export default component((
   [sampleLinkClick, routeChanges]: Behavior<string, string>
 ) => {
 
-  const routeChange = mergeArray([
+
+  const pathChange = mergeArray([
     initialPath,
     locationChange,
     multicast(routeChanges)
   ])
 
-  const rootRoute = router(routeChange, {
-    rootFragment: document.location.pathname
-  })
+  const rootRoute = router({ fragment: documentRootPathName, title: 'aelea', pathChange })
 
-
-  const dragAngDropRoute = rootRoute.create('drag-and-sort')
-  const todoAppRoute = rootRoute.create('todo-app')
-  const countCountersRoute = rootRoute.create('count-counters')
-  const quantumListRoute = rootRoute.create('quantum-list')
-  const calculatorRoute = rootRoute.create('calculator')
-  const tableRoute = rootRoute.create('table')
+  const dragAngDropRoute = rootRoute.create({ fragment: 'drag-and-sort', title: 'Drag N Drop' })
+  const todoAppRoute = rootRoute.create({ fragment: 'todo-app', title: 'Todo App' })
+  const countCountersRoute = rootRoute.create({ fragment: 'count-counters', title: 'Count Counters' })
+  const quantumListRoute = rootRoute.create({ fragment: 'quantum-list', title: 'Quantum List' })
+  const calculatorRoute = rootRoute.create({ fragment: 'calculator', title: 'Calculator' })
+  const tableRoute = rootRoute.create({ fragment: 'table', title: 'Table' })
 
   const $container = $row(
     style({ placeContent: 'center', scrollSnapAlign: 'start' })
@@ -144,7 +147,7 @@ export default component((
           $container(
             path(tableRoute)(
               $Example({ file: 'src/components/$Table.ts' })(
-                
+
                 $column(style({ border: `1px solid ${theme.baseLight}` }))(
                   $Table<{ id: string }>({
                     maxContainerHeight: 400,
