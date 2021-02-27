@@ -1,8 +1,8 @@
 {
   "name": "@aelea/website",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "license": "MIT",
-  "module": ".dist/esm/pages/$website.js",
+  "module": ".dist/esm/pages/$Website.js",
   "files": [
     ".dist"
   ],
