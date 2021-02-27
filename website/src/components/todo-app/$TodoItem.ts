@@ -5,6 +5,7 @@ import { spacing } from "../../common/stylesheet"
 import $Checkbox from "../form/$Checkbox"
 import $Input from "../form/$Input"
 import { Todo } from "./$CreateTodo"
+import { Stream } from "@most/types"
 
 
 const rowStyle = O(
@@ -14,7 +15,7 @@ const rowStyle = O(
 
 interface TodoItem {
   todo: Todo,
-  completed: boolean
+  completed: Stream<boolean>
 }
 
 export default ({ todo, completed }: TodoItem) => component((
@@ -25,21 +26,18 @@ export default ({ todo, completed }: TodoItem) => component((
 
   return [
     $row(rowStyle)(
-      $Checkbox({ inital: completed })({
+      $Checkbox({ value: completed })({
         check: sampleComplete()
       }),
-      $Input({ setValue: now(todo.text) })({
-        value: sampleText()
+      $Input({ value: now(todo.text) })({
+        change: sampleText()
       }),
       $TrashBtn({
         click: sampleRemove()
       })
     ),
-    {
-      text,
-      remove,
-      complete
-    }
+
+    { text, remove, complete }
   ]
 })
 

@@ -11,7 +11,8 @@ export type PathEvent = {
 
 export type Route = {
   create: (newPath: RouteConfig) => Route
-  match: Stream<PathEvent>
+  contains: Stream<PathEvent>
+  match: Stream<boolean>
   miss: Stream<PathEvent>
   fragments: Fragment[]
 }

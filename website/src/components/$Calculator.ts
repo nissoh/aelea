@@ -1,9 +1,10 @@
 
-import { combine, map, now, startWith } from '@most/core'
+import { combine, empty, map, now, startWith } from '@most/core'
 import { $node, $text, Behavior, component, O, style } from '@aelea/core'
 import { $column, $row } from '../common/common'
 import * as designSheet from '../common/stylesheet'
 import $Input from './form/$Input'
+import $NumberTicker from './$NumberTicker'
 
 
 const add = (x: number, y: number) => x + y
@@ -27,25 +28,30 @@ export default component((
   [sampleY, y]: Behavior<string, number>
 ) =>
   [
-    $column(
+    $column(designSheet.spacingSmall)(
 
       $row(
         $plus(
           $text('+')
         ),
         $column(
-          $Input({ setValue: now('0') })({
-            value: sampleX(extractValue)
+          $Input({ value: empty(), placeholder: '0' })({
+            change: sampleX(extractValue)
           }),
-          $Input({ setValue: now('0') })({
-            value: sampleY(extractValue)
+          $Input({ value: empty(), placeholder: '0' })({
+            change: sampleY(extractValue)
           })
         )
       ),
 
       $row(
         $node(style({ width: '36px' }))(),
-        $text(style({ lineHeight: '46px', fontSize: '28px' }))(map(String, combine(add, x, y)))
+        $NumberTicker({
+          value$: combine(add, x, y),
+          decrementColor: designSheet.themeAttention.negative,
+          incrementColor: designSheet.themeAttention.positive,
+          slots: 30
+        })
       )
 
     )

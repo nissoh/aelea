@@ -1,10 +1,10 @@
 
-import { map, startWith, take } from '@most/core'
+import { map, now, startWith, take } from '@most/core'
 import { $text, Behavior, component, StateBehavior, style } from '@aelea/core'
 import { $column, $row, $seperator } from '../common/common'
 import * as designSheet from '../common/stylesheet'
 import $QuantumScroll, { ScrollResponse, ScrollSegment } from './$QuantumScroll'
-import $Field from './form/$Field'
+import $Field from './form/$TextField'
 import $NumberTicker from './$NumberTicker'
 import { themeAttention } from '../common/stylesheet'
 
@@ -15,10 +15,8 @@ export default component((
   [sampleDelayTime, delayTime]: StateBehavior<string, number>
 ) => {
 
-  const delayState = startWith(1500, delayTime)
-
   const dataSource = map((positionChange): ScrollResponse => {
-    const totalItems = 1e5
+    const totalItems = 1e6
 
     const segment = positionChange.to - positionChange.from
     const arr = Array(segment)
@@ -40,21 +38,25 @@ export default component((
 
   return [
     $column(designSheet.spacingBig)(
+      $text('Dynamically loaded list based on scroll position and container height'),
       $row(designSheet.spacingBig)(
         $row(designSheet.spacingSmall, designSheet.flex)(
           $text('Page: '),
           $NumberTicker({
-            initial: 0,
-            change: map(l => Math.floor(l.to / l.pageSize), scroll),
+            value$: map(l => Math.floor(l.to / l.pageSize), scroll),
             decrementColor: themeAttention.negative,
             incrementColor: themeAttention.positive
           }),
         ),
-        $text(map(l => ` page size: ${l.pageSize}`, scroll))
+        $text(
+          map(l => `page size: ${l.pageSize}`, scroll)
+        )
       ),
 
-      $Field({ label: 'Delay Response(ms)', setValue: take(1, map(String, delayState)) })({
-        value: sampleDelayTime(map(Number))
+      $Field({ label: 'Delay Response(ms)', value: now(1500) })({
+        value: sampleDelayTime(
+          map(Number)
+        )
       }),
 
       $seperator,

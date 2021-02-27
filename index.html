@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <base href="/aelea">
     <meta name="Description" content="Reactive, Composable and tiny UI Toolkit">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style> * { box-sizing: border-box; } body { margin: 0; } </style>
+    <style> * { box-sizing: border-box; } body { margin: 0; overflow: hidden; } </style>
 </head>
 <body>
     <script type="module">
         import { runBrowser } from 'https://cdn.jsdelivr.net/npm/@aelea/core@latest/+esm'
-        import $website from 'https://cdn.jsdelivr.net/npm/@aelea/website@latest/+esm'
+        import $Website, { $main } from 'https://cdn.jsdelivr.net/npm/@aelea/website@latest/+esm'
 
         runBrowser({ rootNode: document.body })(
-            $website
+            $main(
+                $Website({ baseRoute: 'aelea' })({})
+            )
         )
     </script>
 </body>

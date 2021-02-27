@@ -1,6 +1,5 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 module.exports = {
@@ -36,11 +35,9 @@ module.exports = {
       template: 'index.html'
     })
   ],
+  // node: { crypto: true, stream: true },
   devServer: {
     port: 3000,
-    historyApiFallback: {
-      disableDotRule: true
-    },
-    openPage: 'app'
+    historyApiFallback: true
   }
 }

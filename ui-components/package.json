@@ -1,0 +1,26 @@
+{
+  "name": "@aelea/ui-components",
+  "version": "0.1.0",
+  "license": "MIT",
+  "main": ".dist/commonjs/index.js",
+  "module": ".dist/esm/index.js",
+  "files": [
+    ".dist"
+  ],
+  "types": ".dist/types/index.d.ts",
+  "scripts": {
+    "clean": "yarn g:tsc:clean",
+    "build:project": "yarn g:tsc:project",
+    "build:cjs": "yarn g:tsc:cjs",
+    "build": "yarn build:cjs && yarn build:project"
+  },
+  "dependencies": {
+    "@aelea/core": "workspace:*",
+    "@aelea/router": "workspace:*",
+    "@most/core": "1.6.1",
+    "@most/disposable": "1.3.0",
+    "@most/prelude": "1.8.0",
+    "@most/scheduler": "1.3.0",
+    "@most/types": "1.1.0"
+  }
+}

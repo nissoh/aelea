@@ -1,40 +1,41 @@
 import { $text, Behavior, component, style } from '@aelea/core'
-import { constant, merge, scan } from '@most/core'
+import { constant } from '@most/core'
+import { Stream } from '@most/types'
 import { $column, $row } from '../common/common'
 import * as designSheet from '../common/stylesheet'
 import { themeAttention } from '../common/stylesheet'
 import $NumberTicker from './$NumberTicker'
 import $Button from './form/$Button'
 
-export const sumAdd = scan((current: number, x: number) => current + x)
-
 
 interface Counter {
-  initial: number
+  value$: Stream<number>
 }
 
-export default ({ initial }: Counter) => component((
+export default ({ value$ }: Counter) => component((
   [sampleIncrement, increment]: Behavior<PointerEvent, 1>,
   [sampleDecrement, decrement]: Behavior<PointerEvent, -1>
 ) => {
 
-  const count = sumAdd(initial, merge(increment, decrement))
 
   return [
 
     $row(style({ alignItems: 'center', placeContent: 'space-between' }), designSheet.spacing)(
       $column(style({ borderRadius: '5px', alignItems: 'center' }), designSheet.spacing)(
         $Button({ $content: $text('+') })({
-          click: sampleIncrement(constant(1))
+          click: sampleIncrement(
+            constant(1)
+          )
         }),
         $Button({ $content: $text('-') })({
-          click: sampleDecrement(constant(-1))
+          click: sampleDecrement(
+            constant(-1)
+          )
         }),
       ),
 
       $NumberTicker({
-        initial,
-        change: count,
+        value$,
         textStyle: {
           fontSize: '30px'
         },
@@ -43,7 +44,7 @@ export default ({ initial }: Counter) => component((
       })
     ),
 
-    { increment, decrement, count }
+    { increment, decrement }
 
   ]
 })

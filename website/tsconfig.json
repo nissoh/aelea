@@ -1,9 +1,11 @@
 {
   "extends": "../tsconfig",
   "compilerOptions": {
-    "outDir": ".dist/es",
+    "outDir": ".dist/esm",
     "rootDir": "src",
-    "declarationDir": ".dist/types"
+    "declarationDir": ".dist/types",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   },
   "references": [
     {
@@ -11,6 +13,9 @@
     },
     {
       "path": "../router"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

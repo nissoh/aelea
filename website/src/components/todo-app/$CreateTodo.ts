@@ -1,9 +1,8 @@
-import { constant, map, merge, now, snapshot, startWith, tap } from "@most/core"
-import { $text, Behavior, component, IBranch, event, style } from '@aelea/core'
+import { constant, map, merge, now, snapshot, startWith } from "@most/core"
+import { $text, Behavior, component, style } from '@aelea/core'
 import { $row } from "../../common/common"
 import $Button from "../form/$Button"
 import $Input from "../form/$Input"
-import { $form } from "../form/form"
 
 let iid = 0
 
@@ -23,43 +22,31 @@ export function createTodo(text: string): Todo {
 
 
 export default component((
-  [sampleSubmit, submit]: Behavior<IBranch<HTMLFormElement>, Event>,
-  [sampleInput, input]: Behavior<string, string>
+  [sampleAdd, create]: Behavior<PointerEvent, PointerEvent>,
+  [sampleInputChange, inputChange]: Behavior<string, string>
 ) => {
 
-  const inputState = startWith('', input)
-
-  const submitBehavior = sampleSubmit(
-    event('submit'),
-    tap(ev => {
-      // prevents form from directing to non-existing location
-      ev.preventDefault()
-    })
-  )
+  const inputState = startWith('', inputChange)
+  const value = constant('', merge(create, now(null)))
+  const valueChahnges = merge(inputChange, value)
+  const disabled$ = map(x => !x, valueChahnges)
 
   const add = snapshot(
-    createTodo,
-    inputState,
-    submit
+    (text) => ({ id: iid++, text, completed: false }),
+    inputState, create
   )
 
-  const resetOnAdd = constant('', merge(add, now(null)))
-
   return [
-    $form(submitBehavior, style({ marginBottom: '10px' }))(
-      $row(
-        $Input({ setValue: resetOnAdd })({
-          value: sampleInput()
-        }),
-        $Button({
-          $content: $text('add'),
-          disabled: map(x => !x, merge(input, resetOnAdd))
-        })({})
-      )
+    $row(style({ marginBottom: '10px' }))(
+      $Input({ value })({
+        change: sampleInputChange()
+      }),
+      $Button({ $content: $text('add'), disabled$ })({
+        click: sampleAdd()
+      })
     ),
-    {
-      add
-    }
+
+    { add }
   ]
 
 })

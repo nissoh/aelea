@@ -1,6 +1,6 @@
 
-import { $text, behavior, Behavior, component, style } from '@aelea/core';
-import { chain, combine, empty, mergeArray, now, startWith, switchLatest, until } from '@most/core';
+import { $text, behavior, Behavior, component, state, style } from '@aelea/core';
+import { chain, combine, empty, mergeArray, now, switchLatest, until } from '@most/core';
 import { $column, $seperator } from '../../common/common';
 import * as designSheet from '../../common/stylesheet';
 import $Checkbox from '../form/$Checkbox';
@@ -12,11 +12,10 @@ import $TodoItem from './$TodoItem';
 
 
 export default (todos: Todo[]) => component((
-  [sampleCreateTodo, newTodo]: Behavior<Todo, Todo>,
-  [sampleShowComplete, showCompleted]: Behavior<boolean, boolean>
+  [sampleCreateTodo, newTodo]: Behavior<Todo, Todo>
 ) => {
 
-  const initialShowCompleted = false
+  const [sampleShowCompletedList, showCompletedList] = state(false)
 
   return [
     $column(designSheet.spacingBig)(
@@ -26,8 +25,8 @@ export default (todos: Todo[]) => component((
           add: sampleCreateTodo()
         }),
         $label(
-          $Checkbox({ inital: initialShowCompleted })({
-            check: sampleShowComplete()
+          $Checkbox({ value: showCompletedList })({
+            check: sampleShowCompletedList()
           }),
           $text(style({ padding: '0 10px' }))(
             'Show completped '
@@ -41,22 +40,20 @@ export default (todos: Todo[]) => component((
         chain((todo: Todo) => {
 
           const [sampleRemove, remove] = behavior<MouseEvent, MouseEvent>()
-          const [sampleCompleted, completed] = behavior<boolean, boolean>()
 
-          const newLocal = startWith(initialShowCompleted, showCompleted)
-          const newLocal_1 = startWith(todo.completed, completed)
+          const [sampleCompleted, completed] = state(todo.completed)
 
           return until(remove)(
             switchLatest(
               combine(
                 (onlyCompleted, isCompleted) => onlyCompleted === isCompleted
-                  ? $TodoItem({ todo, completed: isCompleted })({
+                  ? $TodoItem({ todo, completed })({
                     remove: sampleRemove(),
                     complete: sampleCompleted()
                   })
                   : empty(),
-                newLocal,
-                newLocal_1
+                showCompletedList,
+                completed
               )
             )
           )

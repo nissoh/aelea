@@ -56,6 +56,21 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
 
   event(_: Time, node: INode | IBranch): void {
 
+
+    try {
+      node?.disposable.setDisposable(
+        disposeWith(node => {
+          node.element.remove()
+          this.segmentsCount[this.segmentPosition]--
+        }, node)
+      )
+    } catch (e) {
+      console.error(node.element)
+
+      throw new Error(`Cannot append node that have already been rendered, check invalid node operations under `)
+    }
+    
+
     this.segmentsCount[this.segmentPosition]++
 
     let slot = 0
@@ -83,13 +98,6 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
         applyAttrFn(node.attributes, node.element)
       }
     }
-
-    node.disposable.setDisposable(
-      disposeWith(node => {
-        node.element.remove()
-        this.segmentsCount[this.segmentPosition]--
-      }, node)
-    )
 
     if ('styleBehavior' in node && node.styleBehavior) {
       const disposeStyle = mergeArray(

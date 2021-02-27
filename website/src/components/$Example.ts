@@ -13,7 +13,7 @@ export default (config: Example) => (...$content: $Branch[]) => component(() => 
 
   return [
     fadeIn(
-      $column(spacingBig, style({ placeContent: 'center flex-start', width: '500px', margin: '10vh 0' }))(
+      $column(spacingBig, style({ placeContent: 'center flex-start', width: '650px', margin: '10vh 0' }))(
         ...$content
       )
     )
