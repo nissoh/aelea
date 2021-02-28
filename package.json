@@ -10,7 +10,7 @@
     "clean": "yarn workspaces foreach --verbose --parallel run clean",
     "lint": "eslint . --ext .ts",
     "check-version": "yarn version check --interactive",
-    "version:all": "yarn version apply --all",
+    "version:apply:all": "yarn version apply --all",
     "publish": "yarn workspaces foreach --exclude examples --exclude aelea --verbose npm publish --tolerate-republish --access public",
     "upgrade-interactive": "yarn upgrade-interactive",
     ".": "_______GLOBAL_TASKS_____",

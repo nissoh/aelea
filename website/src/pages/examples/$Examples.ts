@@ -68,27 +68,27 @@ export default ({ router }: Website) => component((
 
           $column(spacingSmall, style({ alignItems: 'flex-start' }))(
 
-            $Link({ $content: $text('Drag And Sort'), href: '/examples/drag-and-sort', route: dragAngDropRoute })({
+            $Link({ $content: $text('Drag And Sort'), href: '/p/examples/drag-and-sort', route: dragAngDropRoute })({
               click: sampleLinkClick()
             }),
 
-            $Link({ $content: $text('Table'), href: '/examples/table', route: tableRoute })({
+            $Link({ $content: $text('Table'), href: '/p/examples/table', route: tableRoute })({
               click: sampleLinkClick()
             }),
 
-            $Link({ $content: $text('Calculator'), href: '/examples/calculator', route: calculatorRoute })({
+            $Link({ $content: $text('Calculator'), href: '/p/examples/calculator', route: calculatorRoute })({
               click: sampleLinkClick()
             }),
 
-            $Link({ $content: $text('Quantum List'), href: '/examples/quantum-list', route: quantumListRoute })({
+            $Link({ $content: $text('Quantum List'), href: '/p/examples/quantum-list', route: quantumListRoute })({
               click: sampleLinkClick()
             }),
 
-            $Link({ $content: $text('Count Counters'), href: '/examples/count-counters', route: countCountersRoute })({
+            $Link({ $content: $text('Count Counters'), href: '/p/examples/count-counters', route: countCountersRoute })({
               click: sampleLinkClick()
             }),
 
-            $Link({ $content: $text('Todo App'), href: '/examples/todo-app', route: todoAppRoute })({
+            $Link({ $content: $text('Todo App'), href: '/p/examples/todo-app', route: todoAppRoute })({
               click: sampleLinkClick()
             }),
           )

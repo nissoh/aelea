@@ -1,5 +1,5 @@
 
-import { combine, empty, map, now, startWith } from '@most/core'
+import { combine, empty, map, startWith } from '@most/core'
 import { $node, $text, Behavior, component, O, style } from '@aelea/core'
 import { $column, $row } from '../common/common'
 import * as designSheet from '../common/stylesheet'
