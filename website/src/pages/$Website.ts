@@ -32,7 +32,7 @@ export default ({ baseRoute }: Website) => component((
   const fragmentsChange = map(pathStr => pathStr.replace(/^\/|\/$/g, '').split('/'), changes)
 
   const rootRoute = router.create({ fragment: baseRoute, title: 'aelea', fragmentsChange })
-  const pagesRoute = router.create({ fragment: 'p', title: 'aelea', fragmentsChange })
+  const pagesRoute = rootRoute.create({ fragment: 'p', title: 'aelea' })
   const guideRoute = pagesRoute.create({ fragment: 'guide', title: 'Guide' })
   const examplesRoute = pagesRoute.create({ fragment: 'examples', title: 'Examples' })
 
@@ -52,13 +52,13 @@ export default ({ baseRoute }: Website) => component((
 
               $row(spacingSmall, style({ paddingTop: '20px', alignItems: 'flex-start', placeContent: 'center' }))(
 
-                $Link({ $content: $text('Why?!'), href: '/drag-and-sort', route: guideRoute })({
+                // $Link({ $content: $text('Why?!'), href: '/drag-and-sort', route: guideRoute })({
+                //   click: sampleLinkClick()
+                // }),
+                $Link({ $content: $text('Developer\'s Guide'), href: '/p/guide', route: guideRoute })({
                   click: sampleLinkClick()
                 }),
-                $Link({ $content: $text('Developer\'s Guide'), href: '/guide', route: guideRoute })({
-                  click: sampleLinkClick()
-                }),
-                $Link({ $content: $text('Examples'), href: '/examples/drag-and-sort', route: examplesRoute })({
+                $Link({ $content: $text('Examples'), href: '/p/examples/drag-and-sort', route: examplesRoute })({
                   click: sampleLinkClick()
                 }),
               ),
