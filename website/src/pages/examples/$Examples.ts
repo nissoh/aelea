@@ -96,9 +96,11 @@ export default ({ router }: Website) => component((
         )
       ),
 
-      $node(style({ borderLeft: `1px solid ${theme.baseLight}` }))(),
+      $node(),
 
-      $column(style({ flex: 2, backgroundColor: theme.baseDark }))(
+      // $node(style({ borderLeft: `1px solid ${theme.baseLight}` }))(),
+
+      $column(style({ flex: 2 }))(
 
         $container(
           contains(dragAngDropRoute)(
@@ -187,7 +189,6 @@ export default ({ router }: Website) => component((
               $TodoApp(
                 Array(1e2).fill(null).map((x, i) => createTodo('t-' + (i + 1)))
               )({})
-
             )({})
           )
         ),

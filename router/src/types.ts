@@ -5,9 +5,7 @@ export type Path = string
 export type Fragment = string | RegExp
 
 
-export type PathEvent = {
-  target: Path[]
-}
+export type PathEvent = Path[]
 
 export type Route = {
   create: (newPath: RouteConfig) => Route

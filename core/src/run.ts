@@ -1,8 +1,8 @@
-import { $Branch, IAttrProperties, IBranch, IBranchElement, INode, INodeElement, RunEnvironment, StyleCSS, StyleEnvironment } from './types'
+import { $Branch, $Node, IAttrProperties, IBranch, IBranchElement, INode, INodeElement, RunEnvironment, StyleCSS, StyleEnvironment } from './types'
 import { Disposable, Sink, Stream, Time } from '@most/types'
 import { newDefaultScheduler } from '@most/scheduler'
 import { loop, map, mergeArray, tap } from '@most/core'
-import { disposeWith } from '@most/disposable'
+import { disposeNone, disposeWith } from '@most/disposable'
 import { useStylePseudoRule, useStyleRule } from './utils/styleUtils'
 import { nullSink } from './utils'
 
@@ -35,7 +35,7 @@ export function runBrowser(config: Partial<RunEnvironment> = {}) {
 
   document.adoptedStyleSheets = [...document.adoptedStyleSheets, composedConfig.style.stylesheet]
 
-
+ 
   return ($root: $Branch) => {
     const s = new BranchEffectsSink(composedConfig, composedConfig.rootNode, 0, [0])
 
@@ -47,20 +47,21 @@ export function runBrowser(config: Partial<RunEnvironment> = {}) {
 
 class BranchEffectsSink implements Sink<IBranch | INode> {
   disposables: Disposable[] = []
-  sinks: BranchEffectsSink[] = []
+  sinks: Disposable[] = []
 
   constructor(private env: RunEnvironment,
               private parentElement: IBranchElement,
               private segmentPosition: number,
               private segmentsCount: number[]) { }
 
-  event(_: Time, node: INode | IBranch): void {
+  event(_: Time, node: INode | IBranch) {
 
 
     try {
       node?.disposable.setDisposable(
         disposeWith(node => {
           node.element.remove()
+          this.sinks[this.segmentPosition]?.dispose()
           this.segmentsCount[this.segmentPosition]--
         }, node)
       )
@@ -69,9 +70,9 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
 
       throw new Error(`Cannot append node that have already been rendered, check invalid node operations under `)
     }
-    
 
-    this.segmentsCount[this.segmentPosition]++
+    const sinkPos = this.segmentsCount[this.segmentPosition]++
+
 
     let slot = 0
 
@@ -119,31 +120,16 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
       this.disposables.push(disposeStyle)
     }
 
-    if ('$segments' in node) {
-      const $children = node.$segments
-      const l = $children.length
-      const segmentsCount = new Array(l).fill(0)
 
-      this.disposables = new Array(l)
-      this.sinks = new Array(l)
-
-      for (let i = 0; i < l; ++i) {
-        const $child = $children[i]
-        const sink = new BranchEffectsSink(this.env, node.element, i, segmentsCount)
-
-        this.sinks[i] = sink
-        this.disposables[i] = $child.run(sink, this.env.scheduler)
-      }
-
-    }
-
+    this.sinks[sinkPos] = '$segments' in node
+      ? new BranchChildrenSinkList(node.$segments, this.env, node)
+      : disposeNone()
+    
   }
 
   end(t: Time) {
     this.segmentsCount[this.segmentPosition]--
-
-    this.sinks.forEach(s => s.end(t))
-    this.disposables.forEach(d => d.dispose())
+    this.sinks.forEach(s => s.dispose())
   }
 
   error(t: Time, err: Error) {
@@ -152,7 +138,33 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
 
 }
 
+class BranchChildrenSinkList implements Disposable {
+  disposables: Disposable[]
+  sinks: BranchEffectsSink[]
 
+  constructor($segments: $Node<INodeElement>[], private env: RunEnvironment, private node: IBranch) {
+
+    const l = $segments.length
+    const segmentsCount = new Array(l).fill(0)
+
+    this.disposables = new Array(l)
+    this.sinks = new Array(l)
+
+    for (let i = 0; i < l; ++i) {
+      const $child = $segments[i]
+      const sink = new BranchEffectsSink(this.env, node.element, i, segmentsCount)
+
+      this.sinks[i] = sink
+      this.disposables[i] = $child.run(sink, this.env.scheduler)
+    }
+
+  }
+
+  dispose(): void {
+    // this.sinks.forEach(s => s.end())
+    this.disposables.forEach(d => d.dispose())
+  }
+}
 
 
 function styleBehavior(styleBehavior: Stream<StyleCSS | null>, node: IBranch, cacheService: StyleEnvironment) {

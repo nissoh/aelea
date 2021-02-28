@@ -1,7 +1,7 @@
 import { $text, Behavior, component, eventElementTarget, style } from '@aelea/core'
 import * as router from '@aelea/router'
 import { $Anchor } from '@aelea/router'
-import { map, mergeArray, multicast, now } from '@most/core'
+import { map, merge, mergeArray, multicast, now } from '@most/core'
 import { $column, $main, $row } from '../common/common'
 import { flex, spacing, spacingBig, spacingSmall } from '../common/stylesheet'
 import { $Link } from '../components/$Link'
@@ -14,9 +14,10 @@ import $Guide from './guide/$Guide'
 export { $main }
 
 
-const initialPath = map(location => location.pathname, now(document.location))
 const popStateEvent = eventElementTarget('popstate', window)
-const locationChange = map(() => document.location.pathname, popStateEvent)
+const initialLocation = now(document.location)
+const requestRouteChange = merge(initialLocation, popStateEvent)
+const locationChange = map(() => location.pathname, requestRouteChange)
 
 
 interface Website {
@@ -27,15 +28,13 @@ export default ({ baseRoute }: Website) => component((
   [sampleLinkClick, routeChanges]: Behavior<string, string>
 ) => {
 
-  const pathChange = mergeArray([
-    initialPath,
-    locationChange,
-    multicast(routeChanges)
-  ])
+  const changes = merge(locationChange, multicast(routeChanges))
+  const fragmentsChange = map(pathStr => pathStr.replace(/^\/|\/$/g, '').split('/'), changes)
 
-  const rootRoute = router.create({ fragment: baseRoute, title: 'aelea', pathChange })
-  const guideRoute = rootRoute.create({ fragment: 'guide', title: 'Guide' })
-  const examplesRoute = rootRoute.create({ fragment: 'examples', title: 'Examples' })
+  const rootRoute = router.create({ fragment: baseRoute, title: 'aelea', fragmentsChange })
+  const pagesRoute = router.create({ fragment: 'p', title: 'aelea', fragmentsChange })
+  const guideRoute = pagesRoute.create({ fragment: 'guide', title: 'Guide' })
+  const examplesRoute = pagesRoute.create({ fragment: 'examples', title: 'Examples' })
 
   return [
     mergeArray([
@@ -62,7 +61,6 @@ export default ({ baseRoute }: Website) => component((
                 $Link({ $content: $text('Examples'), href: '/examples/drag-and-sort', route: examplesRoute })({
                   click: sampleLinkClick()
                 }),
-
               ),
             )
           )
@@ -70,18 +68,23 @@ export default ({ baseRoute }: Website) => component((
 
       ),
 
-
-      $row(style({ maxWidth: '1200px', margin: '0 auto' }))(
-        router.contains(guideRoute)(
-          $Guide({ router: rootRoute })({})
-        ),
-        router.contains(examplesRoute)(
-          $Examples({ router: examplesRoute })({
-            routeChanges: sampleLinkClick()
-          })
+      router.contains(pagesRoute)(
+        $column(style({ maxWidth: '1200px', margin: '0 auto' }))(
+          $row(
+            $Anchor({ $content: $icon({ $content: $aeleaLogo, width: 137, height: 115, viewBox: `0 0 147 90` }), href: '/', route: rootRoute })({
+              click: sampleLinkClick()
+            }),
+          ),
+          router.contains(guideRoute)(
+            $Guide({ router: rootRoute })({})
+          ),
+          router.contains(examplesRoute)(
+            $Examples({ router: examplesRoute })({
+              routeChanges: sampleLinkClick()
+            })
+          )
         )
-      ),
-
+      )
     ])
 
   ]

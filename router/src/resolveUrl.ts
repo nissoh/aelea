@@ -1,5 +1,5 @@
 
-import { constant, filter, join, map, skipRepeats, skipRepeatsWith, tap, until } from '@most/core'
+import { constant, filter, join, map, skipRepeatsWith, tap, until } from '@most/core'
 import { Stream } from '@most/types'
 import { O } from '@aelea/core'
 import { Fragment, Path, PathEvent, Route, RouteConfig } from './types'
@@ -7,22 +7,16 @@ import { Fragment, Path, PathEvent, Route, RouteConfig } from './types'
 
 
 type RootRouteConfig = RouteConfig & {
-  splitUrlPattern?: RegExp | string
-  pathChange: Stream<string>
+  fragmentsChange: Stream<PathEvent>
 }
 
 
-export const create = ({ fragment = '', splitUrlPattern = /(?:\/|$)/, pathChange, title }: RootRouteConfig) => {
+export const create = ({ fragment = '', fragmentsChange, title }: RootRouteConfig) => {
+  const ignoreRepeatPathChanges = skipRepeatsWith((next, prev) => {
+    return next.length === prev.length && next.every((f, i) => f === prev[i])
+  }, fragmentsChange)
 
-  const ignoreRepeatPathChanges = skipRepeats(pathChange)
-
-  const changes = map((rawPath): PathEvent => {
-    const target = rawPath === '/' ? [''] : rawPath.split(splitUrlPattern)
-
-    return { target }
-  }, ignoreRepeatPathChanges)
-
-  return resolveRoute(changes, [])({ fragment, title })
+  return resolveRoute(ignoreRepeatPathChanges, [])({ fragment, title })
 }
 
 
@@ -33,7 +27,7 @@ function resolveRoute(pathChange: Stream<PathEvent>, parentFragments: Fragment[]
 
     const diff = O(
       skipRepeatsWith((prev: PathEvent, next: PathEvent) => {
-        return next.target[fragIdx] === prev.target[fragIdx]
+        return next[fragIdx] === prev[fragIdx]
       })
     )
 
@@ -41,25 +35,25 @@ function resolveRoute(pathChange: Stream<PathEvent>, parentFragments: Fragment[]
     const contains = O(
       diff,
       filter(next => {
-        return isMatched(fragment, next.target[fragIdx])
+        return isMatched(fragment, next[fragIdx])
       }),
     )
 
     const match = O(
       map((evt: PathEvent) => {
-        const lastTarget = evt.target.slice(-1)[0]
+        const lastTarget = evt.slice(-1)[0]
         return isMatched(fragment, lastTarget)
       }),
-      tap(() => {
-        if (title && document.title !== title) {
-          document.title = title;
+      tap(isMatched => {
+        if (isMatched) {
+          document.title = title || ''
         }
       })
     )
 
     const miss = O(
       diff,
-      filter(next => !isMatched(fragment, next.target[fragIdx]))
+      filter(next => !isMatched(fragment, next[fragIdx]))
     )
 
 
@@ -80,7 +74,6 @@ export function isMatched(frag: Fragment, path: Path) {
   }
   return frag === path
 }
-
 
 
 export const contains = <T>(route: Route) => (ns: Stream<T>) => {

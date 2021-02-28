@@ -1,11 +1,8 @@
 
 import type * as monaco from 'monaco-editor'
-
-// @ts-ignore
-const monacoGlobalQuery: Promise<typeof monaco> = import(/* webpackIgnore: true */'https://cdn.skypack.dev/pin/monaco-editor@v0.22.3-8bUdTC8uNxBs1vrhFueX/mode=imports,min/optimized/monaco-editor.js')
+import type { editor } from 'monaco-editor'
 
 
-export default monacoGlobalQuery
 
 // Before loading vs/editor/editor.main, define a global MonacoEnvironment that overwrites
 // the default worker url location (used when creating WebWorkers). The problem here is that
@@ -40,3 +37,71 @@ window.addEventListener('fetch', (event) => {
     )
   }
 })
+
+export async function loadMonaco(
+  container: HTMLElement,
+  config?: editor.IStandaloneEditorConstructionOptions,
+  override?: editor.IEditorOverrideServices) {
+  // @ts-ignore
+  const monacoGlobalQuery: Promise<typeof monaco> = import(/* webpackIgnore: true */'https://cdn.skypack.dev/pin/monaco-editor@v0.22.3-8bUdTC8uNxBs1vrhFueX/mode=imports,min/optimized/monaco-editor.js')
+  const pastelThemeQuery = import('./pastelTheme')
+
+  const monacoGlobal = await monacoGlobalQuery
+
+
+  // const shadowRoot = container.attachShadow({ mode: 'closed' })
+  const editorElement = document.createElement('div')
+
+
+  container.appendChild(editorElement)
+  // shadowRoot.appendChild(editorElement)
+
+  monacoGlobal.languages.typescript.typescriptDefaults.setCompilerOptions({
+    ...monacoGlobal.languages.typescript.typescriptDefaults.getCompilerOptions(),
+    module: monacoGlobal.languages.typescript.ModuleKind.ESNext,
+    moduleResolution: monacoGlobal.languages.typescript.ModuleResolutionKind.NodeJs
+  });
+
+  const theme: editor.IStandaloneThemeData = {
+    ...(await pastelThemeQuery).default,
+    base: "vs-dark"
+  }
+
+  monacoGlobal.editor.defineTheme('pastel', theme)
+
+  const ops: editor.IStandaloneEditorConstructionOptions = {
+    theme: 'pastel',
+    "semanticHighlighting.enabled": true,
+    minimap: {
+      enabled: false
+    },
+    highlightActiveIndentGuide: false,
+    glyphMargin: false,
+    lineDecorationsWidth: 0,
+    padding: {
+      top: 16,
+      bottom: 16
+    },
+    renderLineHighlight: 'none',
+    renderIndentGuides: false,
+    lineNumbers: 'off',
+    automaticLayout: true,
+    scrollBeyondLastLine: false,
+    ...config,
+  }
+
+
+  const instance = monacoGlobal.editor.create(editorElement, ops, override)
+
+  const updateHeight = () => {
+    const contentHeight = Math.min(400, instance.getContentHeight())
+    editorElement.style.height = `${contentHeight}px`
+    instance.layout({ width: editorElement.clientWidth, height: contentHeight })
+  }
+
+  instance.onDidContentSizeChange(updateHeight)
+
+
+  return { instance, monacoGlobal }
+}
+

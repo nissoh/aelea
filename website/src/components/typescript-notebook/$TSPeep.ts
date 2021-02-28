@@ -1,4 +1,4 @@
-import { awaitPromises, chain, constant, empty, fromPromise, join, loop, map, never, scan, skip, switchLatest, recoverWith, filter, take, merge } from '@most/core'
+import { awaitPromises, chain, constant, empty, fromPromise, join, loop, map, never, scan, skip, switchLatest, recoverWith, filter, take, merge, tap } from '@most/core'
 import { $element, $Node, Behavior, component, fromCallback, IBranch, IBranchElement, INodeElement, O, style } from '@aelea/core'
 import type { editor } from 'monaco-editor'
 import type * as monaco from 'monaco-editor'
@@ -7,8 +7,8 @@ import { column, flex, theme } from '../../common/stylesheet'
 import { Stream } from '@most/types'
 import { disposeWith } from '@most/disposable'
 import { fetchFromMeta } from './fetchPackageDts'
-import pastelTheme from './pastelTheme'
-import monacoEsm from './monacoEsm'
+
+import { loadMonaco } from './monacoEsm'
 
 const esMagic = (content: string) => {
   const esModuleBlobUrl = URL.createObjectURL(new Blob([content], { type: 'text/javascript' }))
@@ -45,10 +45,25 @@ function resizeObserver<T extends INodeElement>(el: T): Stream<ResizeObserverEnt
       ro.observe(el)
 
       return disposeWith(([instance, el]) => instance.unobserve(el), [ro, el] as const)
-
     }
   }
 }
+
+function elementDisposedPromise<T extends INodeElement>(el: T): Promise<MutationRecord> {
+  return new Promise((resolve) => {
+    const ro = new MutationObserver((entries) => {
+      const fst = entries[0]
+      debugger
+      if (fst.removedNodes.length) {
+        ro.disconnect()
+        resolve(fst)
+      }
+    })
+    ro.observe(el, { childList: true })
+  })
+}
+
+
 
 
 const elementBecameVisibleEvent = O(
@@ -57,68 +72,7 @@ const elementBecameVisibleEvent = O(
   take(1)
 )
 
-async function loadMonaco(
-  monacoGlobal: typeof monaco,
-  container: HTMLElement,
-  config?: editor.IStandaloneEditorConstructionOptions,
-  override?: editor.IEditorOverrideServices
-) {
-  // const shadowRoot = container.attachShadow({ mode: 'closed' })
-  const editorElement = document.createElement('div')
 
-
-  container.appendChild(editorElement)
-  // shadowRoot.appendChild(editorElement)
-
-  monacoGlobal.languages.typescript.typescriptDefaults.setCompilerOptions({
-    ...monacoGlobal.languages.typescript.typescriptDefaults.getCompilerOptions(),
-    module: monacoGlobal.languages.typescript.ModuleKind.ESNext,
-    moduleResolution: monacoGlobal.languages.typescript.ModuleResolutionKind.NodeJs
-  });
-
-  const theme: editor.IStandaloneThemeData = {
-    ...pastelTheme,
-    base: "vs-dark"
-  }
-
-  monacoGlobal.editor.defineTheme('pastel', theme)
-
-  const ops: editor.IStandaloneEditorConstructionOptions = {
-    theme: 'pastel',
-    "semanticHighlighting.enabled": true,
-    minimap: {
-      enabled: false
-    },
-    highlightActiveIndentGuide: false,
-    glyphMargin: false,
-    lineDecorationsWidth: 0,
-    padding: {
-      top: 16,
-      bottom: 16
-    },
-    renderLineHighlight: 'none',
-    renderIndentGuides: false,
-    lineNumbers: 'off',
-    automaticLayout: true,
-    scrollBeyondLastLine: false,
-    ...config,
-  }
-
-
-  const instance = monacoGlobal.editor.create(editorElement, ops, override)
-
-  const updateHeight = () => {
-    const contentHeight = Math.min(400, instance.getContentHeight())
-    editorElement.style.height = `${contentHeight}px`
-    instance.layout({ width: editorElement.clientWidth, height: contentHeight })
-  }
-
-  instance.onDidContentSizeChange(updateHeight)
-
-
-  return instance
-
-}
 
 interface Monaco {
   code: string
@@ -140,9 +94,7 @@ export default ({ code = '', readOnly = true }: Monaco) => component((
   const monacoOps = O(
     map(async (node: IBranch<HTMLElement>) => {
 
-      const monacoGlobal = await monacoEsm
-      const monacoInstance = await loadMonaco(
-        monacoGlobal,
+      const { instance, monacoGlobal } = await loadMonaco(
         node.element,
         {
           value: code,
@@ -162,13 +114,18 @@ export default ({ code = '', readOnly = true }: Monaco) => component((
 
       fetchFromMeta(monacoGlobal.languages.typescript.typescriptDefaults, '@aelea/core', '0.3.0')
 
-      return { node, monacoInstance, monacoGlobal }
+      return { node, monacoInstance: instance, monacoGlobal }
     }),
     awaitPromises,
     sampleChange(
       chain(mi => {
         const model = mi.monacoInstance.getModel()!
-        const initalRender = elementBecameVisibleEvent(mi.node.element)
+        const initalRender = tap(() => {
+          elementDisposedPromise(mi.node.element).then(() => {
+            debugger
+            mi.monacoInstance.dispose()
+          })
+        }, elementBecameVisibleEvent(mi.node.element))
         const editorChanges = fromCallback(model.onDidChangeContent, model)
 
         return constant(mi, merge(initalRender, editorChanges))

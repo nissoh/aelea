@@ -32,11 +32,17 @@ export const $Anchor = ({ href, route, $content }: IAnchor) => component((
           const pathName = clickEv.currentTarget instanceof HTMLAnchorElement ? clickEv.currentTarget.pathname : null
 
           if (pathName) {
-            history.pushState(null, '', pathName)
-            return pathName
-          }
 
-          throw new Error('target anchor contains no href')
+            // avoid repeated adjacent states
+            if (location.pathname !== pathName) {
+              history.pushState(null, '', pathName)
+            }
+
+            return pathName
+          } else {
+            throw new Error('target anchor contains no href')
+          }
+          
         })
       ),
       sampleFocus(
