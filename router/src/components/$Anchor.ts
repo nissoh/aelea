@@ -19,11 +19,10 @@ export const $Anchor = ({ href, route, $content }: IAnchor) => component((
 ) => {
 
   // the main entry to a page this http://example.com/app "app" should be considired as the root fragment
-  const rootFragment = route.fragments[0]
 
   return [
     $anchor(
-      attr({ href: rootFragment + href }),
+      attr({ href: document.baseURI + href }),
       sampleClick(
         event('click'),
         map((clickEv): string => {
