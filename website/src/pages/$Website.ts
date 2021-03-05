@@ -9,7 +9,7 @@ import $Examples from './examples/$Examples'
 import $Guide from './guide/$Guide'
 import { designSheet } from '@aelea/ui-components'
 import $MainMenu from './$MainMenu'
-import 'construct-style-sheets-polyfill'
+
 
 
 
