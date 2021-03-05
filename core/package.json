@@ -11,7 +11,7 @@
     "clean": "yarn g:tsc:clean",
     "build:project": "yarn g:tsc:project",
     "build:cjs": "yarn g:tsc:cjs",
-    "build": "yarn build:cjs && yarn build:project"
+    "build": "yarn g:parallel 'yarn build:cjs' 'yarn build:project'"
   },
   "homepage": "https://github.com/nissoh/aelea",
   "dependencies": {

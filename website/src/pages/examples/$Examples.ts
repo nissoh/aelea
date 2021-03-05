@@ -1,22 +1,19 @@
-import { $Branch, $node, $text, behavior, Behavior, component, IBranchElement, style } from '@aelea/core'
+import { $node, $text, Behavior, component, style } from '@aelea/core'
 import { contains, Route } from '@aelea/router'
-import { chain, map } from '@most/core'
-import { $column, $main, $row } from '../../common/common'
-import { flex, spacing, spacingBig, spacingSmall, theme } from '../../common/stylesheet'
-import $Calculator from '../../components/$Calculator'
-import $CountCounters from '../../components/$CountCounters'
+import { $column, $row, layoutSheet } from '@aelea/ui-components'
+import { theme } from '@aelea/ui-components-theme'
 import $Example from '../../components/$Example'
 import { $Link } from '../../components/$Link'
-import $VirtualList from '../../components/$QuantumList'
-import { ScrollSegment } from '../../components/$QuantumScroll'
-import $Spring from '../../components/$Spring'
-import $Table from '../../components/$Table'
-import { createTodo } from '../../components/todo-app/$CreateTodo'
-import $TodoApp from '../../components/todo-app/$TodoApp'
 import { fadeIn } from '../../components/transitions/enter'
+import $Calculator from './calculator/$Calculator'
+import $CountCounters from './count-counters/$CountCounters'
+import $DragList from './dragList/$DragList'
+import $VirtualList from './quantum-list/$QuantumList'
+import $Table from './table/$Table'
+import { createTodo } from './todo-app/$CreateTodo'
+import $TodoApp from './todo-app/$TodoApp'
 
 
-export { $main }
 
 
 interface Website {
@@ -24,7 +21,6 @@ interface Website {
 }
 
 export default ({ router }: Website) => component((
-  // []: Behavior<NodeChild, any>,
   [sampleLinkClick, routeChanges]: Behavior<string, string>
 ) => {
 
@@ -39,56 +35,32 @@ export default ({ router }: Website) => component((
     style({ placeContent: 'center', scrollSnapAlign: 'start' })
   )
 
-  const [sampleObserved, observed] = behavior<ScrollSegment, ScrollSegment>()
-
-  const dataSource = map(position => {
-
-    const totalItems = 1e6
-
-    const segment = position.to - position.from
-    const arr = Array(segment)
-    const $items = arr.fill(null).map((x, i) => {
-      const id = totalItems - (position.to - i) + 1
-
-      return {
-        id: 'item-#' + id
-      }
-    })
-
-    return { totalItems, data: $items }
-  }, observed)
 
 
   return [
 
-    $row(spacingBig, flex, style({ placeContent: 'center' }))(
+    $row(layoutSheet.spacingBig, layoutSheet.flex, style({ placeContent: 'center' }))(
 
       fadeIn(
-        $column(spacing, style({ flex: 2, top: '10vh', placeContent: 'center flex-start' }))(
+        $column(layoutSheet.spacing, style({ flex: 2, top: '10vh', placeContent: 'center flex-start' }))(
 
-          $column(spacingSmall, style({ alignItems: 'flex-start' }))(
-
-            $Link({ $content: $text('Drag And Sort'), href: '/p/examples/drag-and-sort', route: dragAngDropRoute })({
+          $column(layoutSheet.spacingSmall, style({ alignItems: 'flex-start' }))(
+            $Link({ $content: $text('Drag And Sort'), url: '/p/examples/drag-and-sort', route: dragAngDropRoute })({
               click: sampleLinkClick()
             }),
-
-            $Link({ $content: $text('Table'), href: '/p/examples/table', route: tableRoute })({
+            $Link({ $content: $text('Quantum List'), url: '/p/examples/quantum-list', route: quantumListRoute })({
               click: sampleLinkClick()
             }),
-
-            $Link({ $content: $text('Calculator'), href: '/p/examples/calculator', route: calculatorRoute })({
+            $Link({ $content: $text('Count Counters'), url: '/p/examples/count-counters', route: countCountersRoute })({
               click: sampleLinkClick()
             }),
-
-            $Link({ $content: $text('Quantum List'), href: '/p/examples/quantum-list', route: quantumListRoute })({
+            $Link({ $content: $text('Todo App'), url: '/p/examples/todo-app', route: todoAppRoute })({
               click: sampleLinkClick()
             }),
-
-            $Link({ $content: $text('Count Counters'), href: '/p/examples/count-counters', route: countCountersRoute })({
+            $Link({ $content: $text('Table'), url: '/p/examples/table', route: tableRoute })({
               click: sampleLinkClick()
             }),
-
-            $Link({ $content: $text('Todo App'), href: '/p/examples/todo-app', route: todoAppRoute })({
+            $Link({ $content: $text('Calculator'), url: '/p/examples/calculator', route: calculatorRoute })({
               click: sampleLinkClick()
             }),
           )
@@ -98,33 +70,12 @@ export default ({ router }: Website) => component((
 
       $node(),
 
-      // $node(style({ borderLeft: `1px solid ${theme.baseLight}` }))(),
-
       $column(style({ flex: 2 }))(
 
         $container(
           contains(dragAngDropRoute)(
             $Example({ file: 'src/components/$DragSort.ts' })(
-
-              component(([sampleOrder]: Behavior<$Branch<IBranchElement, {}>[], $Branch<IBranchElement, {}>[]>) => {
-
-                const $list = Array(4).fill(null).map((_, i) =>
-                  $column(flex, style({ backgroundColor: theme.baseLight, placeContent: 'center', height: '90px', alignItems: 'center' }))(
-                    $text('node: ' + i)
-                  )
-                )
-
-                return [
-                  $row(style({ placeContent: 'stretch' }))(
-                    $Spring({
-                      $list,
-                      itemHeight: 90,
-                      gap: 10
-                    })({ orderChange: sampleOrder() })
-                  )
-                ]
-              })({})
-
+              $DragList({})
             )({})
           )
         ),
@@ -132,29 +83,9 @@ export default ({ router }: Website) => component((
         $container(
           contains(tableRoute)(
             $Example({ file: 'src/components/$Table.ts' })(
-
               $column(style({ border: `1px solid ${theme.baseLight}` }))(
-                $Table<{ id: string }>({
-                  maxContainerHeight: 400,
-                  dataSource,
-                  rowHeight: 30,
-                  columns: [
-                    {
-                      id: 'id',
-                      value: chain(x => $text(x.id)),
-                    },
-                    {
-                      id: 'id',
-                      value: chain(x => $text(x.id)),
-                    },
-                    {
-                      id: 'id',
-                      value: chain(x => $text(x.id)),
-                    }
-                  ],
-                })({ observed: sampleObserved() })
+                $Table({})
               )
-
             )({})
           )
         ),

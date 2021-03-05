@@ -1,13 +1,14 @@
 
 import { map, mergeArray } from "@most/core"
 import { $Node, Behavior, component, event, INode, O, style, styleBehavior } from '@aelea/core'
-import * as designSheet from '../../common/stylesheet'
 import { dismissOp, interactionOp } from "./form"
-import { $icon } from "./$icon"
+import { $icon, $trash } from "./$icon"
+import designSheet from "../../style/designSheet"
+import { theme } from "@aelea/ui-components-theme"
 
 
 
-export default ($content: $Node) => component((
+export const $ButtonIcon = ($content: $Node) => component((
   [interactionBehavior, focusStyle]: Behavior<INode, true>,
   [dismissBehavior, dismissstyle]: Behavior<INode, false>,
   [sampleClick, click]: Behavior<INode, PointerEvent>
@@ -15,7 +16,7 @@ export default ($content: $Node) => component((
 
   const iconOp = O(
     designSheet.control,
-    style({ cursor: 'pointer', fill: designSheet.theme.system, borderRadius: '50%', }),
+    style({ cursor: 'pointer', fill: theme.system, borderRadius: '50%', }),
 
     interactionBehavior(interactionOp),
     dismissBehavior(dismissOp),
@@ -24,7 +25,7 @@ export default ($content: $Node) => component((
 
     styleBehavior(
       map(
-        active => active ? { borderColor: designSheet.theme.primary } : null,
+        active => active ? { borderColor: theme.primary } : null,
         mergeArray([focusStyle, dismissstyle])
       )
     ),
@@ -41,4 +42,7 @@ export default ($content: $Node) => component((
 
   ]
 })
+
+export const $TrashBtn = $ButtonIcon($trash)
+
 

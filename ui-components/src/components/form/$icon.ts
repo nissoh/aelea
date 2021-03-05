@@ -1,6 +1,5 @@
 import { $Node, $svg, attr } from "@aelea/core"
-import { theme } from '../../common/stylesheet'
-
+import { theme } from "@aelea/ui-components-theme"
 
 
 
@@ -13,7 +12,7 @@ interface Icon {
 }
 
 
-export const $icon = ({ $content, width = 24, height = width, viewBox = `0 0 ${width} ${height}`, fill = theme.base }: Icon) => (
+export const $icon = ({ $content, width = 24, height = width, viewBox = `0 0 ${width} ${height}`, fill = theme.system }: Icon) => (
   $svg('svg')(
     attr({ viewBox, width, height, fill }),
   )($content)

@@ -1,7 +1,6 @@
 
 import { $Branch, component, style } from '@aelea/core';
-import { $column} from '../common/common';
-import { spacingBig } from '../common/stylesheet';
+import { $column, layoutSheet } from '@aelea/ui-components';
 import { fadeIn } from './transitions/enter';
 
 
@@ -13,7 +12,7 @@ export default (config: Example) => (...$content: $Branch[]) => component(() => 
 
   return [
     fadeIn(
-      $column(spacingBig, style({ placeContent: 'center flex-start', width: '650px' }))(
+      $column(layoutSheet.spacingBig, style({ placeContent: 'center flex-start', width: '650px' }))(
         ...$content
       )
     )

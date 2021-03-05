@@ -1,24 +1,29 @@
-import { $text, Behavior, component } from '@aelea/core';
-import { $column } from "../../common/common";
-import * as designSheet from '../../common/stylesheet';
-import $Input, { Field } from "./$Input";
+import { $text, Behavior, component, style } from '@aelea/core';
+import { empty } from '@most/core';
+import { $row } from "../../$elements";
+import layoutSheet from '../../style/layoutSheet';
+import { $Input, Field } from "./$Input";
 import { $label } from "./form";
 
 export interface TextField extends Field {
   label: string
+  hint?: string
 }
 
-export default (config: TextField) => component((
+export const $TextField = (config: TextField) => component((
   [sampleValue, value]: Behavior<string, string>
 ) => {
+  const { hint } = config
+
   return [
-    $label(designSheet.flex)(
-      $column(designSheet.flex)(
-        $text(config.label),
+    $label(layoutSheet.flex, layoutSheet.spacingTiny, style({ alignSelf: 'self-start' }))(
+      $row(layoutSheet.flex, layoutSheet.spacingSmall)(
+        $text(style({ alignSelf: 'flex-end', paddingBottom: '1px' }))(config.label),
         $Input(config)({
           change: sampleValue()
         })
-      )
+      ),
+      hint ? $text(style({ fontSize: '10px', width: '100%' }))(hint) : empty()
     ),
 
     { value }

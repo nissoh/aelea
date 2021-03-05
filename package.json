@@ -18,13 +18,14 @@
     "g:dev": "cd $INIT_CWD && tsc -b --clean",
     "g:tsc:project": "cd $INIT_CWD && tsc -b --verbose",
     "g:tsc:project:watch": "cd $INIT_CWD && tsc -b -w --verbose",
-    "g:tsc:cjs": "cd $INIT_CWD && tsc --outDir .dist/commonjs --module CommonJS --declarationMap false --composite false --declaration false --declarationDir null"
+    "g:tsc:cjs": "cd $INIT_CWD && tsc --outDir .dist/commonjs --module CommonJS --declarationMap false --composite false --declaration false --declarationDir null",
+    "g:parallel": "cd $INIT_CWD && concurrently"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "4.14.1",
-    "@typescript-eslint/parser": "4.14.1",
-    "eslint": "7.18.0",
-    "ts-node": "^9.1.1",
+    "@typescript-eslint/eslint-plugin": "4.16.1",
+    "@typescript-eslint/parser": "4.16.1",
+    "concurrently": "^6.0.0",
+    "eslint": "7.21.0",
     "typescript": "4.1.5"
   }
 }

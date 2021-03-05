@@ -1,6 +1,7 @@
 import { $element, attr, Behavior, component, event, IBranch, styleBehavior } from '@aelea/core';
+import { theme } from '@aelea/ui-components-theme';
 import { empty, map, mergeArray, snapshot } from "@most/core";
-import * as designSheet from '../../common/stylesheet';
+import designSheet from '../../style/designSheet';
 import { dismissOp, Input, InputType, interactionOp } from "./form";
 
 
@@ -10,7 +11,7 @@ export interface Field extends Input<string | number> {
   name?: string
 }
 
-export default ({ type = InputType.TEXT, value = empty(), name, placeholder }: Field) => component((
+export const $Input = ({ type = InputType.TEXT, value = empty(), name, placeholder }: Field) => component((
   [interactionBehavior, focusStyle]: Behavior<IBranch, true>,
   [dismissBehavior, dismissstyle]: Behavior<IBranch, false>,
   [sampleChange, change]: Behavior<IBranch<HTMLInputElement>, string>
@@ -34,7 +35,7 @@ export default ({ type = InputType.TEXT, value = empty(), name, placeholder }: F
 
       styleBehavior(
         map(
-          active => active ? { borderBottom: `2px solid ${designSheet.theme.primary}` } : null,
+          active => active ? { borderBottom: `1px solid ${theme.primary}` } : null,
           mergeArray([focusStyle, dismissstyle])
         )
       ),

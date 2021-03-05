@@ -1,7 +1,8 @@
 import { constant, filter, merge } from '@most/core'
 import { Stream } from '@most/types'
 import { $Node, $element, event, O, style } from '@aelea/core'
-import * as designSheet from '../../common/stylesheet'
+import layoutSheet from '../../style/layoutSheet'
+import { theme } from '@aelea/ui-components-theme'
 
 
 export enum InputType {
@@ -19,7 +20,7 @@ export interface Input<T> extends Control {
 
 
 export const interactionOp = O(
-  (src: $Node) => merge(event('focus', src), event('pointerover', src)),
+  event('focus'),
   constant(true)
 )
 
@@ -30,13 +31,13 @@ export const dismissOp = O(
 )
 
 
-export const $form = $element('form')(designSheet.column)
+export const $form = $element('form')(layoutSheet.column)
 
 
 
 export const $label = $element('label')(
-  designSheet.row,
-  style({ alignItems: 'center', cursor: 'pointer', color: designSheet.theme.system })
+  layoutSheet.column,
+  style({ alignItems: 'center', cursor: 'pointer', color: theme.system })
 )
 
 

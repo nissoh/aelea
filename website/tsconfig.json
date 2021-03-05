@@ -16,6 +16,9 @@
     },
     {
       "path": "../ui-components"
-    }
+    },
+    {
+      "path": "../ui-components-theme"
+    },
   ]
 }

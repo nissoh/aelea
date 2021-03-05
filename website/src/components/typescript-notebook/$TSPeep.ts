@@ -1,14 +1,14 @@
-import { awaitPromises, chain, constant, empty, fromPromise, join, loop, map, never, scan, skip, switchLatest, recoverWith, filter, take, merge, tap } from '@most/core'
+import { awaitPromises, chain, constant, empty, join, loop, map, never, scan, skip, switchLatest, recoverWith, filter, take, merge, tap } from '@most/core'
 import { $element, $Node, Behavior, component, fromCallback, IBranch, IBranchElement, INodeElement, O, style } from '@aelea/core'
 import type { editor } from 'monaco-editor'
 import type * as monaco from 'monaco-editor'
-import { $column, $row } from '../../common/common'
-import { column, flex, theme } from '../../common/stylesheet'
 import { Stream } from '@most/types'
 import { disposeWith } from '@most/disposable'
 import { fetchFromMeta } from './fetchPackageDts'
 
 import { loadMonaco } from './monacoEsm'
+import { $column, $row, designSheet, layoutSheet } from '@aelea/ui-components'
+import { theme } from '@aelea/ui-components-theme'
 
 const esMagic = (content: string) => {
   const esModuleBlobUrl = URL.createObjectURL(new Blob([content], { type: 'text/javascript' }))
@@ -122,7 +122,6 @@ export default ({ code = '', readOnly = true }: Monaco) => component((
         const model = mi.monacoInstance.getModel()!
         const initalRender = tap(() => {
           elementDisposedPromise(mi.node.element).then(() => {
-            debugger
             mi.monacoInstance.dispose()
           })
         }, elementBecameVisibleEvent(mi.node.element))
@@ -136,7 +135,7 @@ export default ({ code = '', readOnly = true }: Monaco) => component((
 
   return [
     $column(
-      $element('div')(flex, column, monacoOps, style({ position: 'relative' }))(),
+      $element('div')(layoutSheet.flex, layoutSheet.column, monacoOps, style({ position: 'relative' }))(),
       $row(style({ backgroundColor: theme.baseDark, minHeight: '30px', padding: '10px' }))(
         switchLatest(
           O(
@@ -160,7 +159,7 @@ export default ({ code = '', readOnly = true }: Monaco) => component((
               const diagnostics = await service.getSemanticDiagnostics(filename)
 
               if (diagnostics.length) {
-                throw new Error('erros occured')
+                return { previousModelValue: modelValueTrimmed, value: never() }
               }
 
               const file = emittedFiles.outputFiles[0].text

@@ -1,14 +1,16 @@
 
-import { map, mergeArray, multicast, skipRepeatsWith, startWith, switchLatest } from "@most/core"
+import { debounce, delay, map, merge, mergeArray, multicast, skipRepeatsWith, startWith, switchLatest, tap } from "@most/core"
 import { Stream } from '@most/types'
-import { $node, $Branch, Behavior, component, event, IBranch, O, style, styleInline } from '@aelea/core'
-import { $column } from './../common/common'
-import { customScroll } from "./../common/stylesheet"
+import { $node, $Branch, Behavior, component, event, IBranch, style, styleInline, $text, StyleCSS, $Node } from '@aelea/core'
+import { $column } from '../$elements'
+import { theme } from "@aelea/ui-components-theme"
+import designSheet from "../style/designSheet"
 
 
 export interface ScrollSegment {
   from: number
   to: number
+  delta: number
   pageSize: number
 }
 
@@ -22,30 +24,55 @@ export interface QuantumScroll {
   maxContainerHeight: number
   dataSource: Stream<ScrollResponse>
 
+
+  debounceReuqest?: number
   threshold?: number
-  $intermissionItem?: $Branch
+  $loading?: $Node
+
+  containerStyle?: StyleCSS
 }
 
 
+function getPageRequest(offsetTop: number, containerHeight: number, rowHeight: number, threshold: number): ScrollSegment {
 
-export default ({ maxContainerHeight, rowHeight, dataSource, threshold = 10 }: QuantumScroll) => component((
+  const top = Math.floor(offsetTop / rowHeight)
+  const pageSize = Math.floor((containerHeight / rowHeight) + threshold)
+
+  const from = Math.max(0, top - (top % threshold))
+  const to = from + pageSize
+  const delta = to - from
+
+  return { from, to, pageSize, delta }
+}
+
+
+const $itemLoading = $text(style({ color: theme.system }))('loading...')
+
+
+export const $QuantumScroll = ({ maxContainerHeight, rowHeight, dataSource, threshold = 10, containerStyle = {}, $loading = $itemLoading, debounceReuqest = 100 }: QuantumScroll) => component((
   [sampleScroll, scroll]: Behavior<IBranch, ScrollSegment>,
 ) => {
 
-  const intialPageSize = Math.floor(maxContainerHeight / rowHeight) + threshold
-  const multicatedScroll: Stream<ScrollSegment> = startWith({ from: 0, to: intialPageSize, pageSize: intialPageSize }, multicast(scroll))
-
   const multicastedData = multicast(dataSource)
+  const initalPage = getPageRequest(0, maxContainerHeight, rowHeight, threshold)
+  const scrollWithInitial: Stream<ScrollSegment> = startWith(initalPage, scroll)
 
-  const $intermissionedItems = O(
-    map(({ $items }: ScrollResponse) => mergeArray($items)),
-    switchLatest
-  )(multicastedData)
 
+  const newLocal_2: Stream<$Branch[]> = merge(
+    delay(1, map(res => res.$items, multicastedData)),
+    map((scroll) => Array(scroll.delta).fill($loading), scrollWithInitial),
+  )
+  const skipRepaintingLoader = skipRepeatsWith((prev, next) => {
+    return next[0] === prev[0]
+  }, newLocal_2)
+
+  const $intermissionedItems = switchLatest(
+    map(l => mergeArray(l), skipRepaintingLoader)
+  )
 
   const $container = $column(
-    style({ maxHeight: maxContainerHeight + 'px', display: 'block', overflow: 'auto' }),
-    customScroll,
+    style({ maxHeight: maxContainerHeight + 'px', display: 'block', overflow: 'auto', ...containerStyle }),
+    designSheet.customScroll,
     sampleScroll(
       event('scroll'),
       map(ev => {
@@ -53,14 +80,7 @@ export default ({ maxContainerHeight, rowHeight, dataSource, threshold = 10 }: Q
         if (!(target instanceof HTMLElement)) {
           throw new Error('element target is not scrollable')
         }
-
-        const top = Math.floor(target.scrollTop / rowHeight)
-        const pageSize = Math.floor((target.clientHeight / rowHeight) + threshold)
-
-        const from = Math.max(0, top - (top % threshold))
-        const to = from + pageSize
-
-        return { from, to, pageSize }
+        return getPageRequest(target.scrollTop, target.clientHeight, rowHeight, threshold)
       }),
       skipRepeatsWith((prev, next) => prev.from === next.from),
     )
@@ -75,22 +95,24 @@ export default ({ maxContainerHeight, rowHeight, dataSource, threshold = 10 }: Q
     )
   )
 
-  const $innerContent = $column(
-    styleInline(map(loc => ({ transform: `translate(0, ${loc.from * rowHeight}px)` }), multicatedScroll)),
+  const $list = $column(
+    styleInline(
+      map(loc => ({ transform: `translate(0, ${loc.from * rowHeight}px)` }), scrollWithInitial)
+    ),
     style({ willChange: 'transform' })
   )
 
   return [
     $container(
       $content(
-        $innerContent(
+        $list(
           style({ height: rowHeight + 'px' }, $intermissionedItems)
         )
       )
     ),
 
     {
-      scroll: multicatedScroll
+      scroll: debounce(debounceReuqest, scrollWithInitial)
     }
   ]
 })

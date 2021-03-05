@@ -1,7 +1,8 @@
+import { $element, $Node, event, O, style } from '@aelea/core'
+import { layoutSheet } from '@aelea/ui-components'
+import { theme } from '@aelea/ui-components-theme'
 import { constant, filter, merge } from '@most/core'
 import { Stream } from '@most/types'
-import { $Node, $element, event, O, style } from '@aelea/core'
-import * as designSheet from '../../common/stylesheet'
 
 
 export enum InputType {
@@ -30,13 +31,13 @@ export const dismissOp = O(
 )
 
 
-export const $form = $element('form')(designSheet.column)
+export const $form = $element('form')(layoutSheet.column)
 
 
 
 export const $label = $element('label')(
-  designSheet.row,
-  style({ alignItems: 'center', cursor: 'pointer', color: designSheet.theme.system })
+  layoutSheet.row,
+  style({ alignItems: 'center', cursor: 'pointer', color: theme.system })
 )
 
 

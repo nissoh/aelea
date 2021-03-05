@@ -4,7 +4,7 @@ import { Route } from "../types"
 
 
 export interface IAnchor {
-  href: string,
+  url: string,
   $content: $Node,
   route: Route
 }
@@ -13,16 +13,17 @@ const $anchor = $element('a')(
   style({ textDecoration: 'none', })
 )
 
-export const $Anchor = ({ href, route, $content }: IAnchor) => component((
+export const $Anchor = ({ url, route, $content }: IAnchor) => component((
   [sampleClick, click]: Behavior<IBranch, string>,
   [sampleFocus, focus]: Behavior<IBranch, boolean>,
 ) => {
 
-  // the main entry to a page this http://example.com/app "app" should be considired as the root fragment
+  const trailingSlash = /\/$/
+  const href = document.baseURI.replace(trailingSlash, '') + url.replace(trailingSlash, '')
 
   return [
     $anchor(
-      attr({ href: document.baseURI + href }),
+      attr({ href }),
       sampleClick(
         event('click'),
         map((clickEv): string => {

@@ -1,7 +1,7 @@
 import { component, Behavior, O, styleBehavior, StyleCSS, style } from "@aelea/core"
 import { IAnchor, $Anchor } from "@aelea/router"
 import { combine } from "@most/core"
-import { theme } from "../common/stylesheet"
+import { theme } from "@aelea/ui-components-theme"
 
 
 
@@ -9,7 +9,7 @@ export interface ILink extends IAnchor {
   styles?: StyleCSS
 }
 
-export const $Link = ({ href, route, $content, styles = {} }: ILink) => component((
+export const $Link = ({ url, route, $content, styles = {} }: ILink) => component((
   [sampleClick, click]: Behavior<string, string>,
   [sampleActive, active]: Behavior<boolean, boolean>,
   [sampleFocus, focus]: Behavior<boolean, boolean>,
@@ -32,7 +32,7 @@ export const $Link = ({ href, route, $content, styles = {} }: ILink) => componen
 
   return [
     anchorOps(
-      $Anchor({ $content, href, route })({
+      $Anchor({ $content, url, route })({
         click: sampleClick(),
         focus: sampleFocus(),
         active: sampleActive()

@@ -1,0 +1,17 @@
+{
+  "name": "@aelea/ui-components-theme",
+  "version": "0.1.0",
+  "license": "MIT",
+  "main": ".dist/commonjs/index.js",
+  "module": ".dist/esm/index.js",
+  "files": [
+    ".dist"
+  ],
+  "types": ".dist/types/index.d.ts",
+  "scripts": {
+    "clean": "yarn g:tsc:clean",
+    "build:project": "yarn g:tsc:project",
+    "build:cjs": "yarn g:tsc:cjs",
+    "build": "yarn g:parallel 'yarn build:cjs' 'yarn build:project'"
+  }
+}

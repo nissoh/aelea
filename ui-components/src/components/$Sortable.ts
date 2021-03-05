@@ -1,8 +1,8 @@
 import { chain, combine, filter, map, merge, multicast, now, skipAfter, skipRepeats, snapshot, startWith, switchLatest } from "@most/core"
 import { remove } from "@most/prelude"
 import { $Branch, Behavior, behavior, component, event, eventElementTarget, motion, INode, O, style, styleInline, styleBehavior } from '@aelea/core'
-import { $column, $row } from "./../common/common"
-import { flex } from "./../common/stylesheet"
+import { $column, $row } from "../$elements"
+import layoutSheet from "../style/layoutSheet"
 
 const clamp = (val: number, min: number, max: number) => val > max ? max : val < min ? min : val
 
@@ -32,7 +32,7 @@ interface DraggingState<T extends $Branch> {
   delta: number,
 }
 
-export default <T extends $Branch>(config: DraggableList<T>) => component((
+export const $Sortable = <T extends $Branch>(config: DraggableList<T>) => component((
   [sampleOrderChange, orderChange]: Behavior<DraggingState<T>, DraggingState<T>>
 ) => {
   const gap = (config.gap ?? 0)
@@ -45,7 +45,7 @@ export default <T extends $Branch>(config: DraggableList<T>) => component((
   const draggingMotion = motion({ stiffness: 150, damping: 20 })
 
   return [
-    $column(flex, style({ flex: 1, userSelect: 'none', position: 'relative', height: containerHeight + 'px' }))(
+    $column(layoutSheet.flex, style({ flex: 1, userSelect: 'none', position: 'relative', height: containerHeight + 'px' }))(
       ...config.$list.map(($item, i) => {
 
         const [sampleDragY, dragY]: Behavior<INode, DraggingState<T>> = behavior()

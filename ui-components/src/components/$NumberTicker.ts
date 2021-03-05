@@ -33,7 +33,7 @@ function getDetlaSlotIdex(current: string, change: string, i: number): number {
   return getDetlaSlotIdex(current, change, i + 1)
 }
 
-export default ({ value$, incrementColor, decrementColor, textStyle = {}, slots = 10 }: NumberConfig) => {
+export const $NumberTicker = ({ value$, incrementColor, decrementColor, textStyle = {}, slots = 10 }: NumberConfig) => {
 
   const uniqueValues$ = skipRepeats(value$)
   const incrementMulticast = O(

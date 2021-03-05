@@ -1,5 +1,5 @@
 import { $Node, $svg, attr } from "@aelea/core"
-import { theme } from '../../common/stylesheet'
+import { theme } from "@aelea/ui-components-theme"
 
 
 

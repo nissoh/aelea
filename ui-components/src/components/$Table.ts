@@ -1,9 +1,10 @@
 import { map, now } from "@most/core"
 import { Stream } from "@most/types"
 import { $Branch, $text, Behavior, component, INode, Op, style } from '@aelea/core'
-import { $column, $row } from "./../common/common"
-import { spacing, theme } from "./../common/stylesheet"
-import $QuantumScroll, { QuantumScroll, ScrollSegment } from "./$QuantumScroll"
+import { $column, $row } from "../$elements"
+import { $QuantumScroll, QuantumScroll, ScrollSegment } from "./$QuantumScroll"
+import { theme } from "@aelea/ui-components-theme"
+import layoutSheet from "../style/layoutSheet"
 
 
 export interface Response<T> {
@@ -39,11 +40,11 @@ const $bodyCell = $row(
   tableCellStyle,
 )
 
-const $cellContainer = $row(spacing)
+const $cellContainer = $row(layoutSheet.spacing)
 
 
 
-export default <T>(config: TableOption<T>) => {
+export const $Table = <T>(config: TableOption<T>) => {
   return component((
     [sampleObserved, observed]: Behavior<ScrollSegment, ScrollSegment>
   ) => {

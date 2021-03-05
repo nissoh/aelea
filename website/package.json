@@ -1,6 +1,6 @@
 {
   "name": "@aelea/website",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "license": "MIT",
   "module": ".dist/esm/pages/$Website.js",
   "files": [
@@ -13,9 +13,10 @@
     "website-dev": "webpack serve --entry ./src/dev-pages.ts"
   },
   "dependencies": {
-    "@aelea/core": "*",
-    "@aelea/router": "*",
-    "@aelea/ui-components": "*",
+    "@aelea/core": "workspace:*",
+    "@aelea/router": "workspace:*",
+    "@aelea/ui-components": "workspace:*",
+    "@aelea/ui-components-theme": "workspace:*",
     "@most/core": "1.6.1",
     "@most/disposable": "1.3.0",
     "@most/prelude": "1.8.0",
@@ -28,6 +29,7 @@
     "monaco-editor": "^0.22.3",
     "ts-loader": "8.0.17",
     "tsconfig-paths-webpack-plugin": "3.3.0",
+    "typescript": "4.1.5",
     "webpack": "5.24.2",
     "webpack-cli": "4.5.0",
     "webpack-dev-server": "3.11.2"

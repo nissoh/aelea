@@ -1,14 +1,11 @@
 import { $text, Behavior, component, style } from '@aelea/core'
 import { Route } from '@aelea/router'
-import { chain, fromPromise, map } from '@most/core'
-import { $column, $main, $row } from '../../common/common'
-import { flex, spacingBig } from '../../common/stylesheet'
+import { $column, layoutSheet } from '@aelea/ui-components'
 import $Example from '../../components/$Example'
 
 import $TSPeep from '../../components/typescript-notebook/$TSPeep'
 
 
-export { $main }
 
 
 interface Guide {
@@ -22,7 +19,7 @@ export default ({ router }: Guide) => component((
 
   return [
 
-    $column(spacingBig, flex, style({ alignItems: 'center' }))(
+    $column(layoutSheet.spacingBig, layoutSheet.flex, style({ alignItems: 'center' }))(
       $text(`--WIP--`),
 
       $Example({ file: 'src/components/$QuantumList.ts' })(
@@ -52,7 +49,7 @@ export default $node(
         $TSPeep({
           readOnly: false,
           code:
-`import { constant, map, merge, scan } from '@most/core'
+            `import { constant, map, merge, scan } from '@most/core'
 import { $custom, $element, $text, Behavior, component, style, event, INode, runBrowser } from '@aelea/core'
 
 // composable style
