@@ -1,8 +1,6 @@
 import { component, Behavior, IBranch, attr, $Node, event, style, $element } from "@aelea/core"
 import { constant, map, merge, startWith } from "@most/core"
 import { Route } from "../types"
-import * as router from '@aelea/router'
-
 
 export interface IAnchor {
   url: string,
