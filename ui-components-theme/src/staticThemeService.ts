@@ -3,7 +3,6 @@ export interface Theme {
   text: string
   system: string
   primary: string
-  base: string
   baseLight: string
   baseDark: string
 
@@ -18,7 +17,6 @@ const dark: Theme = {
   text: 'rgb(255 255 255)',
   system: 'rgb(165 182 189)',
   primary: 'rgb(234 96 126)',
-  base: 'rgb(201 222 230)',
   baseLight: 'rgb(74 92 99)',
   baseDark: 'rgb(43 52 55)',
 
@@ -32,7 +30,6 @@ const light: Theme = {
   text: 'rgb(255 255 255)',
   system: 'rgb(165 182 189)',
   primary: 'rgb(234 96 126)',
-  base: 'rgb(201 222 230)',
   baseLight: 'rgb(74 92 99)',
   baseDark: 'rgb(43 52 55)',
 

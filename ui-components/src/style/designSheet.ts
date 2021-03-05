@@ -4,9 +4,9 @@ import { style, O, stylePseudo } from '@aelea/core'
 import { theme } from '@aelea/ui-components-theme'
 
 const text = style({
-  fontFamily: 'Fira Code',
+  fontFamily: `'Nunito', Fira Code`,
   fontWeight: 100,
-  fontSize: '1rem'
+  fontSize: '1.15rem'
 })
 
 const customScroll = O(
@@ -36,7 +36,9 @@ export default {
     style({
       height: '100vh',
       color: theme.text,
+      fill: theme.text,
       overflowY: 'scroll',
+      backgroundImage: `radial-gradient(at center center, ${theme.baseDark} 50vh, rgb(0 0 0 / 33%))`,
       backgroundColor: theme.baseDark,
       margin: '0',
       scrollbarColor: 'auto',

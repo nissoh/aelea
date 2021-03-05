@@ -3,12 +3,13 @@ import * as router from '@aelea/router'
 import { $Anchor } from '@aelea/router'
 import { $column, $row, layoutSheet } from '@aelea/ui-components'
 import { map, merge, multicast, now } from '@most/core'
-import { $Link } from '../components/$Link'
-import { $aeleaLogo, $icon } from '../components/form/$icon'
+import { $aeleaLogo, $icon } from '../common/$icons'
 import { fadeIn } from '../components/transitions/enter'
 import $Examples from './examples/$Examples'
 import $Guide from './guide/$Guide'
 import { designSheet } from '@aelea/ui-components'
+import $MainMenu from './$MainMenu'
+import 'construct-style-sheets-polyfill'
 
 
 
@@ -45,9 +46,7 @@ export default ({ baseRoute }: Website) => component((
   return [
     $node(designSheet.main)(
       router.match(rootRoute)(
-
         $row(layoutSheet.flex, layoutSheet.spacingBig, style({ alignContent: 'center', alignItems: 'center', placeContent: 'center', textAlign: 'center', padding: '0 30px', }))(
-
           fadeIn(
             $column(style({ alignItems: 'center', maxWidth: '550px' }), layoutSheet.spacing)(
               $Anchor({ $content: $icon({ $content: $aeleaLogo, width: 237, height: 115, viewBox: `0 0 147 90` }), url: '/', route: rootRoute })({
@@ -56,33 +55,26 @@ export default ({ baseRoute }: Website) => component((
               $text(`"aelea", is a UI Framework for reactive event programming`),
               $text(`It helps you write composable and performant building blocks by composing functional event streams`),
 
-              $row(layoutSheet.spacingSmall, style({ paddingTop: '20px', alignItems: 'flex-start', placeContent: 'center' }))(
-
-                // $Link({ $content: $text('Why?!'), href: '/drag-and-sort', route: guideRoute })({
-                //   click: sampleLinkClick()
-                // }),
-                $Link({ $content: $text('Developer\'s Guide'), url: '/p/guide', route: guideRoute })({
-                  click: sampleLinkClick()
-                }),
-                $Link({ $content: $text('Examples'), url: '/p/examples/drag-and-sort', route: examplesRoute })({
-                  click: sampleLinkClick()
-                }),
-              ),
+              $MainMenu({ parentRoute: pagesRoute })({
+                routeChange: sampleLinkClick()
+              })
             )
           )
         )
-
       ),
 
       router.contains(pagesRoute)(
-        $column(style({ maxWidth: '1200px', margin: '0 auto' }))(
-          $row(
+        $column(layoutSheet.spacingBig, style({ maxWidth: '870px', width: '100%', margin: '0 auto' }))(
+          $row(style({ placeContent: 'space-between', padding: '0 15px' }))(
             $Anchor({ $content: $icon({ $content: $aeleaLogo, width: 137, height: 115, viewBox: `0 0 147 90` }), url: '/', route: rootRoute })({
               click: sampleLinkClick()
             }),
+            $MainMenu({ parentRoute: pagesRoute })({
+              routeChange: sampleLinkClick()
+            })
           ),
           router.contains(guideRoute)(
-            $Guide({ router: rootRoute })({})
+            $Guide({ parentRoute: rootRoute })({})
           ),
           router.contains(examplesRoute)(
             $Examples({ router: examplesRoute })({

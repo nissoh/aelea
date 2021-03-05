@@ -141,6 +141,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@most/prelude", "npm:1.8.0"],
             ["@most/scheduler", "npm:1.3.0"],
             ["@most/types", "npm:1.1.0"],
+            ["construct-style-sheets-polyfill", "npm:2.4.16"],
             ["fork-ts-checker-webpack-plugin", "virtual:da54780a64c4828d914b45cdf0f6e23267cdabde642cfddfe75debb2a5c7ed9db1bb9dbfe5cae394a2d07d0bed757529ace05d8ff96c00c12affdf8b5fe23a04#npm:6.1.0"],
             ["html-webpack-plugin", "virtual:da54780a64c4828d914b45cdf0f6e23267cdabde642cfddfe75debb2a5c7ed9db1bb9dbfe5cae394a2d07d0bed757529ace05d8ff96c00c12affdf8b5fe23a04#npm:5.2.0"],
             ["monaco-editor", "npm:0.22.3"],
@@ -1911,6 +1912,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/console-control-strings-npm-1.1.0-e3160e5275-58a404d951.zip/node_modules/console-control-strings/",
           "packageDependencies": [
             ["console-control-strings", "npm:1.1.0"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["construct-style-sheets-polyfill", [
+        ["npm:2.4.16", {
+          "packageLocation": "./.yarn/cache/construct-style-sheets-polyfill-npm-2.4.16-1c8c5de5af-340007116f.zip/node_modules/construct-style-sheets-polyfill/",
+          "packageDependencies": [
+            ["construct-style-sheets-polyfill", "npm:2.4.16"]
           ],
           "linkType": "HARD",
         }]

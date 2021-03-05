@@ -1,6 +1,6 @@
 
-import { $text, behavior, Behavior, component, state, style } from '@aelea/core';
-import { $Checkbox, $column, $seperator, layoutSheet } from '@aelea/ui-components';
+import { $node, $text, behavior, Behavior, component, state, style } from '@aelea/core';
+import { $Checkbox, $column, $row, $seperator, layoutSheet } from '@aelea/ui-components';
 import { chain, combine, empty, mergeArray, now, switchLatest, until } from '@most/core';
 import { $label } from '../../../components/form/form';
 import $CreateTodo, { Todo } from './$CreateTodo';
@@ -18,10 +18,7 @@ export default (todos: Todo[]) => component((
   return [
     $column(layoutSheet.spacingBig)(
 
-      $column(layoutSheet.spacingSmall)(
-        $CreateTodo({
-          add: sampleCreateTodo()
-        }),
+      $row(layoutSheet.spacingBig)(
         $label(
           $Checkbox({ value: showCompletedList })({
             check: sampleShowCompletedList()
@@ -30,9 +27,10 @@ export default (todos: Todo[]) => component((
             'Show completped '
           )
         ),
+        $CreateTodo({
+          add: sampleCreateTodo()
+        }),
       ),
-
-      $seperator,
 
       $column(layoutSheet.spacingSmall)(
         chain((todo: Todo) => {

@@ -23,7 +23,7 @@ export const $TextField = (config: TextField) => component((
           change: sampleValue()
         })
       ),
-      hint ? $text(style({ fontSize: '10px', width: '100%' }))(hint) : empty()
+      hint ? $text(style({ fontSize: '75%', width: '100%' }))(hint) : empty()
     ),
 
     { value }

@@ -28,28 +28,28 @@ const elipsisTextOverflow = style({
   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
 })
 const tableCellStyle = style({
-  padding: '6px 0', width: '150px', height: '30px'
+  padding: '6px 0', width: '150px', height: '30px', flex: 1
 })
 
 const $headerCell = $row(
   tableCellStyle,
-  style({ fontSize: '15px', color: theme.system, flex: 1 }),
+  style({ fontSize: '15px', color: theme.system, }),
 )
 
 const $bodyCell = $row(
   tableCellStyle,
 )
 
-const $cellContainer = $row(layoutSheet.spacing)
+const $rowContainer = $row(layoutSheet.spacing)
 
 
 
 export const $Table = <T>(config: TableOption<T>) => {
   return component((
-    [sampleObserved, observed]: Behavior<ScrollSegment, ScrollSegment>
+    [sampleRequestList, requestList]: Behavior<ScrollSegment, ScrollSegment>
   ) => {
 
-    const $header = $cellContainer(
+    const $header = $rowContainer(
       ...config.columns.map(col => {
         return $headerCell(
           col.header ?? elipsisTextOverflow($text(String(col.id)))
@@ -60,7 +60,7 @@ export const $Table = <T>(config: TableOption<T>) => {
     const dataStream = map(({ data, totalItems }) => {
 
       const $items = data.map(rowData =>
-        $cellContainer(
+        $rowContainer(
           ...config.columns.map(col =>
             $bodyCell(
               col.value(now(rowData))
@@ -77,7 +77,7 @@ export const $Table = <T>(config: TableOption<T>) => {
       rowHeight: config.rowHeight,
       dataSource: dataStream
     })({
-      scroll: sampleObserved()
+      scroll: sampleRequestList()
     })
 
     return [
@@ -86,9 +86,7 @@ export const $Table = <T>(config: TableOption<T>) => {
         $body
       ),
 
-      {
-        observed
-      }
+      { requestList }
     ]
 
   })

@@ -1,5 +1,5 @@
 import { $text, Behavior, component, style } from '@aelea/core'
-import { $Button, $Input, $row } from "@aelea/ui-components"
+import { $Button, $Input, $row, layoutSheet } from "@aelea/ui-components"
 import { constant, map, merge, now, snapshot, startWith } from "@most/core"
 
 let iid = 0
@@ -35,7 +35,7 @@ export default component((
   )
 
   return [
-    $row(style({ marginBottom: '10px' }))(
+    $row(layoutSheet.flex)(
       $Input({ value })({
         change: sampleInputChange()
       }),

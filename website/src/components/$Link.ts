@@ -1,6 +1,6 @@
 import { component, Behavior, O, styleBehavior, StyleCSS, style } from "@aelea/core"
 import { IAnchor, $Anchor } from "@aelea/router"
-import { combine } from "@most/core"
+import { combine, tap } from "@most/core"
 import { theme } from "@aelea/ui-components-theme"
 
 
@@ -11,7 +11,7 @@ export interface ILink extends IAnchor {
 
 export const $Link = ({ url, route, $content, styles = {} }: ILink) => component((
   [sampleClick, click]: Behavior<string, string>,
-  [sampleActive, active]: Behavior<boolean, boolean>,
+  [sampleContains, active]: Behavior<boolean, boolean>,
   [sampleFocus, focus]: Behavior<boolean, boolean>,
 ) => {
 
@@ -35,7 +35,7 @@ export const $Link = ({ url, route, $content, styles = {} }: ILink) => component
       $Anchor({ $content, url, route })({
         click: sampleClick(),
         focus: sampleFocus(),
-        active: sampleActive()
+        contains: sampleContains()
       })
     ),
 

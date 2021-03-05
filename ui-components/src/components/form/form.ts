@@ -37,7 +37,7 @@ export const $form = $element('form')(layoutSheet.column)
 
 export const $label = $element('label')(
   layoutSheet.column,
-  style({ alignItems: 'center', cursor: 'pointer', color: theme.system })
+  style({ cursor: 'pointer', color: theme.system })
 )
 
 

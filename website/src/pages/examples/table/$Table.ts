@@ -4,7 +4,7 @@ import { chain, map } from "@most/core";
 
 
 export default component((
-  [sampleObserved, observed]: Behavior<ScrollSegment, ScrollSegment>
+  [sampleRequestList, requestList]: Behavior<ScrollSegment, ScrollSegment>
 ) => {
 
   const dataSource = map(position => {
@@ -20,7 +20,7 @@ export default component((
     })
 
     return { totalItems, data: $items }
-  }, observed)
+  }, requestList)
 
   return [
     $Table<{ id: string }>({
@@ -41,6 +41,6 @@ export default component((
           value: chain(x => $text(x.id)),
         }
       ],
-    })({ observed: sampleObserved() })
+    })({ requestList: sampleRequestList() })
   ]
 })

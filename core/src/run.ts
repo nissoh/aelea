@@ -212,10 +212,10 @@ function styleBehavior(styleBehavior: Stream<StyleCSS | null>, node: IBranch, ca
 export function applyAttrFn(attrs: IAttrProperties<unknown>, node: IBranchElement) {
   if (attrs) {
     Object.entries(attrs).forEach(([attrKey, value]) => {
-      if (value) {
-        node.setAttribute(attrKey, String(value))
-      } else {
+      if (value === undefined || value === null) {
         node.removeAttribute(attrKey)
+      } else {
+        node.setAttribute(attrKey, String(value))
       }
     })
   }

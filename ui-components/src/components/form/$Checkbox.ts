@@ -31,7 +31,7 @@ export const $Checkbox = ({ value }: Checkbox) => component((
     ),
     attr({ type: 'checkbox' }),
     attrBehavior(
-      map(checked => ({ checked }), value)
+      map(checked => ({ checked: checked ? true : null }), value)
     ),
     interactionBehavior(interactionOp),
     dismissBehavior(dismissOp),

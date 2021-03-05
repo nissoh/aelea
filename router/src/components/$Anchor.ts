@@ -1,6 +1,7 @@
 import { component, Behavior, IBranch, attr, $Node, event, style, $element } from "@aelea/core"
 import { constant, map, merge, startWith } from "@most/core"
 import { Route } from "../types"
+import * as router from '@aelea/router'
 
 
 export interface IAnchor {
@@ -19,7 +20,12 @@ export const $Anchor = ({ url, route, $content }: IAnchor) => component((
 ) => {
 
   const trailingSlash = /\/$/
-  const href = document.baseURI.replace(trailingSlash, '') + url.replace(trailingSlash, '')
+  const href = url.replace(trailingSlash, '')
+
+  const contains = merge(
+    constant(true, route.contains),
+    constant(false, route.miss)
+  )
 
   return [
     $anchor(
@@ -55,6 +61,6 @@ export const $Anchor = ({ url, route, $content }: IAnchor) => component((
       ),
     )($content),
 
-    { click, active: route.match, focus }
+    { click, match: route.match, contains, focus }
   ]
 })

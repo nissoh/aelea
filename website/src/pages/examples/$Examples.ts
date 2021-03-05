@@ -31,9 +31,7 @@ export default ({ router }: Website) => component((
   const calculatorRoute = router.create({ fragment: 'calculator', title: 'Calculator' })
   const tableRoute = router.create({ fragment: 'table', title: 'Table' })
 
-  const $container = $row(
-    style({ placeContent: 'center', scrollSnapAlign: 'start' })
-  )
+  const $container = $row
 
 
 
@@ -42,9 +40,9 @@ export default ({ router }: Website) => component((
     $row(layoutSheet.spacingBig, layoutSheet.flex, style({ placeContent: 'center' }))(
 
       fadeIn(
-        $column(layoutSheet.spacing, style({ flex: 2, top: '10vh', placeContent: 'center flex-start' }))(
+        $column(layoutSheet.spacing, style({ top: '10vh', placeContent: 'center flex-start' }))(
 
-          $column(layoutSheet.spacingSmall, style({ alignItems: 'flex-start' }))(
+          $column(layoutSheet.spacingSmall, style({ alignItems: 'flex-end' }))(
             $Link({ $content: $text('Drag And Sort'), url: '/p/examples/drag-and-sort', route: dragAngDropRoute })({
               click: sampleLinkClick()
             }),

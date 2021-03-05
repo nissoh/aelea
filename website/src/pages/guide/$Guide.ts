@@ -1,6 +1,7 @@
-import { $text, Behavior, component, style } from '@aelea/core'
+import { $element, $node, $text, attr, Behavior, component, style } from '@aelea/core'
 import { Route } from '@aelea/router'
 import { $column, layoutSheet } from '@aelea/ui-components'
+import { theme } from '@aelea/ui-components-theme'
 import $Example from '../../components/$Example'
 
 import $TSPeep from '../../components/typescript-notebook/$TSPeep'
@@ -9,10 +10,10 @@ import $TSPeep from '../../components/typescript-notebook/$TSPeep'
 
 
 interface Guide {
-  router: Route
+  parentRoute: Route
 }
 
-export default ({ router }: Guide) => component((
+export default ({ parentRoute }: Guide) => component((
   // []: Behavior<NodeChild, any>,
   [sampleLinkClick, routeChanges]: Behavior<string, string>
 ) => {
@@ -20,10 +21,16 @@ export default ({ router }: Guide) => component((
   return [
 
     $column(layoutSheet.spacingBig, layoutSheet.flex, style({ alignItems: 'center' }))(
-      $text(`--WIP--`),
 
       $Example({ file: 'src/components/$QuantumList.ts' })(
-        $text(`aelea uses a reactive toolkit called @most/core, in this guide we will be creating different types of Counters in different levels of complexity`),
+        $node(
+          $text(`aelea uses a reactive toolkit called `),
+          $element('a')(style({ color: theme.primary }), attr({ href: 'https://mostcore.readthedocs.io/en/latest/index.html' }))(
+            $text('@most/core')
+          ),
+
+          $text(` in this guide we will be creating different types of Counters in different levels of complexity`)
+        ),
         $text(`The ultimate way to learn is to get your hands a little dirty`),
 
         $TSPeep({
@@ -46,47 +53,47 @@ export default $node(
 
         $text(`WIP - still need to find a proper way to import typings`),
 
-        $TSPeep({
-          readOnly: false,
-          code:
-            `import { constant, map, merge, scan } from '@most/core'
-import { $custom, $element, $text, Behavior, component, style, event, INode, runBrowser } from '@aelea/core'
+        //         $TSPeep({
+        //           readOnly: false,
+        //           code:
+        //             `import { constant, map, merge, scan } from '@most/core'
+        // import { $custom, $element, $text, Behavior, component, style, event, INode, runBrowser } from '@aelea/core'
 
-// composable style
-const displayFlex = style({ display: 'flex' })
-const spacingStyle = style({ gap: '16px' })
+        // // composable style
+        // const displayFlex = style({ display: 'flex' })
+        // const spacingStyle = style({ gap: '16px' })
 
-// composable elements
-const $row = $custom('row')(displayFlex)
-const $column = $custom('column')(displayFlex, style({ flexDirection: 'column' }))
+        // // composable elements
+        // const $row = $custom('row')(displayFlex)
+        // const $column = $custom('column')(displayFlex, style({ flexDirection: 'column' }))
 
-// Component that outputs state(optionally), this is currently not used anywhere, see next example to see it being consumed
-export default component((
-    [sampleIncrement, increment]: Behavior<INode, 1>,
-    [sampleDecrement, decrement]: Behavior<INode, -1>
-  ) => {
+        // // Component that outputs state(optionally), this is currently not used anywhere, see next example to see it being consumed
+        // export default component((
+        //     [sampleIncrement, increment]: Behavior<INode, 1>,
+        //     [sampleDecrement, decrement]: Behavior<INode, -1>
+        //   ) => {
 
-    return [ // Component has to return [$Node, Behavior(optionally)] in the next example we will use these outputted behaviors
+        //     return [ // Component has to return [$Node, Behavior(optionally)] in the next example we will use these outputted behaviors
 
-      $row(spacingStyle)(
-        $column(
-          $element('button')(sampleIncrement(event('click'), constant(1)))(
-            $text('+')
-          ),
-          $element('button')(sampleDecrement(event('click'), constant(-1)))(
-            $text('-')
-          )
-        ),
-        $text(style({ fontSize: '64px' }))(
-          map(String, scan((current: number, x: number) => current + x, 0, merge(increment, decrement)))
-        )
-      ),
+        //       $row(spacingStyle)(
+        //         $column(
+        //           $element('button')(sampleIncrement(event('click'), constant(1)))(
+        //             $text('+')
+        //           ),
+        //           $element('button')(sampleDecrement(event('click'), constant(-1)))(
+        //             $text('-')
+        //           )
+        //         ),
+        //         $text(style({ fontSize: '64px' }))(
+        //           map(String, scan((current: number, x: number) => current + x, 0, merge(increment, decrement)))
+        //         )
+        //       ),
 
-      { increment, decrement }
-    ]
-  }
-)({})`
-        })({})
+        //       { increment, decrement }
+        //     ]
+        //   }
+        // )({})`
+        //         })({})
 
       )({}),
 

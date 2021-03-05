@@ -99,7 +99,7 @@ export default ({ code = '', readOnly = true }: Monaco) => component((
         {
           value: code,
           language: 'typescript',
-          readOnly,
+          readOnly
         }
       )
 
@@ -136,19 +136,19 @@ export default ({ code = '', readOnly = true }: Monaco) => component((
   return [
     $column(
       $element('div')(layoutSheet.flex, layoutSheet.column, monacoOps, style({ position: 'relative' }))(),
-      $row(style({ backgroundColor: theme.baseDark, minHeight: '30px', padding: '10px' }))(
+      $row(style({ backgroundColor: theme.baseDark, minHeight: '30px', padding: '10px 15px' }))(
         switchLatest(
           O(
             scan(async (seedPromise: Promise<any> | null, initMonaco: MonacoInputBehavior) => {
 
               const model = initMonaco.monacoInstance.getModel()!
               const modelValue = model.getValue()
-              const modelValueTrimmed = modelValue.replace(/[\n\r\s\t]+/g, '')
+              const modelValueWithoutWhitespace = modelValue.replace(/[\n\r\s\t]+/g, '')
 
               const seed = await seedPromise
 
-              if (seed?.previousModelValue === modelValueTrimmed) {
-                return { previousModelValue: modelValueTrimmed, value: never() }
+              if (seed?.previousModelValue === modelValueWithoutWhitespace) {
+                return { previousModelValue: modelValueWithoutWhitespace, value: never() }
               }
 
               const worker = await initMonaco.monacoGlobal.languages.typescript.getTypeScriptWorker()
@@ -159,7 +159,7 @@ export default ({ code = '', readOnly = true }: Monaco) => component((
               const diagnostics = await service.getSemanticDiagnostics(filename)
 
               if (diagnostics.length) {
-                return { previousModelValue: modelValueTrimmed, value: never() }
+                return { previousModelValue: modelValueWithoutWhitespace, value: never() }
               }
 
               const file = emittedFiles.outputFiles[0].text
@@ -168,7 +168,7 @@ export default ({ code = '', readOnly = true }: Monaco) => component((
               const value: $Node = (await esMagic(refImports)).default ?? empty()
 
 
-              return { previousModelValue: modelValueTrimmed, value }
+              return { previousModelValue: modelValueWithoutWhitespace, value }
             }, null),
             skip(1),
             recoverWith((err) => {

@@ -75,16 +75,28 @@ export async function loadMonaco(
     minimap: {
       enabled: false
     },
-    highlightActiveIndentGuide: false,
+    // highlightActiveIndentGuide: false,
+    // lineDecorationsWidth: 0,
+    // hideCursorInOverviewRuler: true,
+    // overviewRulerBorder: false,
+    overviewRulerLanes: 0,
+
+    lineNumbers: 'off',
     glyphMargin: false,
-    lineDecorationsWidth: 0,
+    folding: false,
+    // Undocumented see https://github.com/Microsoft/vscode/issues/30795#issuecomment-410998882
+    lineDecorationsWidth: 15,
+    lineNumbersMinChars: 0,
+    hover: {
+      delay: 0
+    },
+
     padding: {
       top: 16,
       bottom: 16
     },
     renderLineHighlight: 'none',
     renderIndentGuides: false,
-    lineNumbers: 'off',
     automaticLayout: true,
     scrollBeyondLastLine: false,
     ...config,
