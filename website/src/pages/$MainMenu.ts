@@ -13,7 +13,7 @@ interface MainMenu {
 }
 
 export default ({ parentRoute }: MainMenu) => component((
-  [sampleRouteChange, routeChange]: Behavior<any, any>
+  [sampleRouteChange, routeChange]: Behavior<string, string>
 ) => {
 
   const guideRoute = parentRoute.create({ fragment: 'guide', title: 'Guide' })
@@ -31,7 +31,7 @@ export default ({ parentRoute }: MainMenu) => component((
         click: sampleRouteChange()
       }),
       $seperator,
-      $Link({ $content: $text('Examples'), url: '/p/examples', route: examplesRoute })({
+      $Link({ $content: $text('Examples'), url: '/p/examples/drag-and-sort', route: examplesRoute })({
         click: sampleRouteChange()
       }),
       $seperator,

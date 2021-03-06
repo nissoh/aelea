@@ -1,6 +1,6 @@
 import { $element, $node, $text, attr, Behavior, component, style } from '@aelea/core'
 import { Route } from '@aelea/router'
-import { $column, layoutSheet } from '@aelea/ui-components'
+import { $column, $row, layoutSheet } from '@aelea/ui-components'
 import { theme } from '@aelea/ui-components-theme'
 import $Example from '../../components/$Example'
 
@@ -23,35 +23,67 @@ export default ({ parentRoute }: Guide) => component((
     $column(layoutSheet.spacingBig, layoutSheet.flex, style({ alignItems: 'center' }))(
 
       $Example({ file: 'src/components/$QuantumList.ts' })(
+        $row(style({ border: `1px solid ${theme.negative}`, padding: '10px' }))(
+          $text(style({ fontSize: '75%' }))('WIP: current typing(code blocks tooltip) is mostly missing. i need to figure out to fix this in Monaco Editor(should work great in your IDE). everything else seem functional')
+        ),
+
         $node(
           $text(`aelea uses a reactive toolkit called `),
           $element('a')(style({ color: theme.primary }), attr({ href: 'https://mostcore.readthedocs.io/en/latest/index.html' }))(
             $text('@most/core')
           ),
-
-          $text(` in this guide we will be creating different types of Counters in different levels of complexity`)
+          $text(` Some basic understanding of functional programming and typescript is required, if you use Visual Studio Code IDE these code blocks will look familiar`)
         ),
-        $text(`The ultimate way to learn is to get your hands a little dirty`),
+
+        $text(`The ultimate way to learn is to get your hands a little dirty, any changes in the code below will reflect it visually right below the code block`),
 
         $TSPeep({
           readOnly: false,
           code:
-            `import { $text, $node } from '@aelea/core'
-import { constant, map, periodic, scan } from '@most/core'
+            `import { $text } from '@aelea/core'
 
-const eventEverySecond = periodic(1000)
-const mapTo1 = constant(1, eventEverySecond)
+export default $text('Yellow World')`
+        })({}),
 
-const accumulate = scan((n1: number, n2: number) => n1 + n2, 0, mapTo1)
-const toString = map(String, accumulate)
+        $text(`Nothing fancy yet, the "default export" renders a message and there is this "$text" function, aelea semantically prefixes anything that will eventually emits elements with $ sign, this is jsut for readability, we see its usefulness later on`),
 
+        $TSPeep({
+          readOnly: false,
+          code:
+`import { $text, $node, style } from '@aelea/core'
 
-export default $node(
-  $text(toString)
+const colorStyle = style({ color: 'yellow' })
+const containerStyle = style({ padding: '10px', display: 'block', border: '1px dashed yellow', borderRadius: '50px' })
+
+const $container = $node(containerStyle, colorStyle)
+
+export default $container(
+    $container(
+        $text(containerStyle)('Yellow World')
+    )
 )`
         })({}),
 
-        $text(`WIP - still need to find a proper way to import typings`),
+        $text(`in this guide we will be creating different types of Counters in different levels of complexity`),
+
+
+        //         $TSPeep({
+        //           readOnly: false,
+        //           code:
+        // `import { $text, $node } from '@aelea/core'
+        // import { constant, map, periodic, scan } from '@most/core'
+
+        // const eventEverySecond = periodic(1000)       // stream of undefined every 1000 milliseconds
+        // const mapTo1 = constant(1, eventEverySecond)  // map that undefined into 1
+
+        // const accumulate = scan((acc, one) => acc + one, 0, mapTo1)
+        // const toString = map(String, accumulate)
+
+
+        // export default $node(
+        //   $text(toString)
+        // )`
+        //         })({}),
 
         //         $TSPeep({
         //           readOnly: false,

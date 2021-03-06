@@ -5,17 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <base href="/">
     <style> * { box-sizing: border-box; } body { margin: 0; overflow: hidden; } </style>
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link async href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700" rel="stylesheet">
 </head>
 <body>
     <script type="module">
-        import { runBrowser } from 'https://cdn.jsdelivr.net/npm/@aelea/core@latest/+esm'
-        import $Website from 'https://cdn.jsdelivr.net/npm/@aelea/website@7.0.0/+esm'
-
-        runBrowser({ rootNode: document.body })(
-            $Website({ baseRoute: '' })({})
-        )
+        import $Website from 'https://cdn.jsdelivr.net/npm/@aelea/website@8.0.0/+esm'
     </script>
 </body>
 

@@ -1,5 +1,5 @@
 import { awaitPromises, chain, constant, empty, join, loop, map, never, scan, skip, switchLatest, recoverWith, filter, take, merge, tap } from '@most/core'
-import { $element, $Node, Behavior, component, fromCallback, IBranch, IBranchElement, INodeElement, O, style } from '@aelea/core'
+import { $custom, $element, $Node, Behavior, component, fromCallback, IBranch, IBranchElement, INodeElement, O, style } from '@aelea/core'
 import type { editor } from 'monaco-editor'
 import type * as monaco from 'monaco-editor'
 import { Stream } from '@most/types'
@@ -136,7 +136,7 @@ export default ({ code = '', readOnly = true }: Monaco) => component((
   return [
     $column(
       $element('div')(layoutSheet.flex, layoutSheet.column, monacoOps, style({ position: 'relative' }))(),
-      $row(style({ backgroundColor: theme.baseDark, minHeight: '30px', padding: '10px 15px' }))(
+      $custom('render-here')(style({ backgroundColor: theme.baseDark, minHeight: '30px', padding: '10px 15px' }))(
         switchLatest(
           O(
             scan(async (seedPromise: Promise<any> | null, initMonaco: MonacoInputBehavior) => {
@@ -145,7 +145,13 @@ export default ({ code = '', readOnly = true }: Monaco) => component((
               const modelValue = model.getValue()
               const modelValueWithoutWhitespace = modelValue.replace(/[\n\r\s\t]+/g, '')
 
-              const seed = await seedPromise
+              let seed
+
+              try {
+                seed = await seedPromise
+              } catch (e) {
+                return { previousModelValue: modelValueWithoutWhitespace, value: never() }
+              }
 
               if (seed?.previousModelValue === modelValueWithoutWhitespace) {
                 return { previousModelValue: modelValueWithoutWhitespace, value: never() }

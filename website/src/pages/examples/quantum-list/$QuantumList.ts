@@ -32,7 +32,7 @@ export default component((
 
   return [
     $column(layoutSheet.spacingBig)(
-      $text('High performance dynamically loaded list based on scroll position and container height'),
+      $text('High performance dynamically loaded list based on scroll position and computed container height'),
       $row(layoutSheet.spacingBig)(
         $row(layoutSheet.spacingSmall, layoutSheet.flex)(
           $text(style({ color: theme.system }))('Page: '),
