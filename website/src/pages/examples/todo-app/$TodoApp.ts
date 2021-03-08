@@ -19,11 +19,11 @@ export default (todos: Todo[]) => component((
     $column(layoutSheet.spacingBig)(
 
       $row(layoutSheet.spacingBig)(
-        $label(
+        $label(layoutSheet.spacing)(
           $Checkbox({ value: showCompletedList })({
             check: sampleShowCompletedList()
           }),
-          $text(style({ padding: '0 10px' }))(
+          $text(
             'Show completped '
           )
         ),

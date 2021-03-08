@@ -1,9 +1,8 @@
 
 import { $text, Behavior, component, StateBehavior, style } from '@aelea/core'
-import { $column, $QuantumScroll, $row, $seperator, $TextField, layoutSheet, ScrollSegment } from '@aelea/ui-components'
+import { $column, $NumberTicker, $QuantumScroll, $row, $seperator, $TextField, layoutSheet, ScrollSegment } from '@aelea/ui-components'
 import { theme } from '@aelea/ui-components-theme'
-import { at, map, now, snapshot, switchLatest } from '@most/core'
-import $NumberTicker from '../../../components/$NumberTicker'
+import { at, debounce, map, now, snapshot, switchLatest } from '@most/core'
 
 const formatNumber = Intl.NumberFormat().format
 
@@ -15,18 +14,24 @@ export default component((
 ) => {
 
   const dataSource = switchLatest(
-    snapshot((delay, positionChange) => {
-      const totalItems = 1e6
+    map(dt => {
 
-      const arr = Array(positionChange.delta)
-      const $items = arr.fill(undefined).map((x, i) => {
-        const id = totalItems - (positionChange.to - i) + 1
+      const newLocal = debounce(dt, scroll)
+      return switchLatest(
+        snapshot((delay, positionChange) => {
+          const totalItems = 1e6
 
-        return $text('item: ' + formatNumber(id))
-      }, delayReuestChange)
+          const arr = Array(positionChange.delta)
+          const $items = arr.fill(undefined).map((x, i) => {
+            const id = totalItems - (positionChange.to - i) + 1
 
-      return at(delay, { $items, totalItems })
-    }, delayReuestChange, scroll)
+            return $text('item: ' + formatNumber(id))
+          }, delayReuestChange)
+
+          return at(delay, { $items, totalItems })
+        }, delayReuestChange, newLocal)
+      )
+    }, debounceRequestChange)
   )
 
 
@@ -73,17 +78,12 @@ export default component((
 
       $seperator,
 
-      switchLatest(
-        map(debounceReuqest => {
-          return $QuantumScroll({
-            rowHeight: 30,
-            maxContainerHeight: 300,
-            dataSource,
-            debounceReuqest,
-            containerStyle: { border: `1px solid ${theme.baseLight}`, padding: '15px' }
-          })({ scroll: sampleScroll() })
-        }, debounceRequestChange)
-      )
+      $QuantumScroll({
+        rowHeight: 30,
+        maxContainerHeight: 300,
+        dataSource,
+        containerStyle: { border: `1px solid ${theme.baseLight}`, padding: '15px' }
+      })({ scroll: sampleScroll() })
 
     )
   ]

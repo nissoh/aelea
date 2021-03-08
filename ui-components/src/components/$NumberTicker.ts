@@ -47,7 +47,10 @@ export const $NumberTicker = ({ value$, incrementColor, decrementColor, textStyl
 
       const dir = change > seed.change ? Direction.INCREMENT : Direction.DECREMENT
       const currentStr = seed.change.toLocaleString()
-      const pos = getDetlaSlotIdex(currentStr, changeStr, 0)
+      const isWholeNumber = changeStr.split('.').length === 1
+
+      // TODO handle fractions
+      const pos = isWholeNumber && changeStr.length > currentStr.length ? 0 : getDetlaSlotIdex(currentStr, changeStr, 0)
 
       return { change, dir, pos, changeStr }
     }, null),

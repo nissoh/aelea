@@ -1,9 +1,8 @@
 import { $text, Behavior, component, style } from '@aelea/core'
-import { $Button, $column, $row, layoutSheet } from '@aelea/ui-components'
+import { $Button, $column, $NumberTicker, $row, layoutSheet } from '@aelea/ui-components'
 import { theme } from '@aelea/ui-components-theme'
 import { constant } from '@most/core'
 import { Stream } from '@most/types'
-import $NumberTicker from '../../../components/$NumberTicker'
 
 
 interface Counter {

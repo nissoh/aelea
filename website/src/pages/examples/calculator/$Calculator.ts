@@ -1,9 +1,8 @@
 
 import { $node, $text, Behavior, component, O, style } from '@aelea/core'
-import { $column, $Input, $row, layoutSheet } from '@aelea/ui-components'
+import { $column, $Input, $NumberTicker, $row, layoutSheet } from '@aelea/ui-components'
 import { theme } from '@aelea/ui-components-theme'
 import { combine, empty, map, startWith } from '@most/core'
-import $NumberTicker from '../../../components/$NumberTicker'
 
 
 const add = (x: number, y: number) => x + y

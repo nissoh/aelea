@@ -1,5 +1,5 @@
 
-import { debounce, delay, map, merge, mergeArray, multicast, skipRepeatsWith, startWith, switchLatest, tap } from "@most/core"
+import { delay, map, merge, mergeArray, multicast, skipRepeatsWith, startWith, switchLatest } from "@most/core"
 import { Stream } from '@most/types'
 import { $node, $Branch, Behavior, component, event, IBranch, style, styleInline, $text, StyleCSS, $Node } from '@aelea/core'
 import { $column } from '../$elements'
@@ -25,7 +25,6 @@ export interface QuantumScroll {
   dataSource: Stream<ScrollResponse>
 
 
-  debounceReuqest?: number
   threshold?: number
   $loading?: $Node
 
@@ -49,25 +48,25 @@ function getPageRequest(offsetTop: number, containerHeight: number, rowHeight: n
 const $itemLoading = $text(style({ color: theme.system }))('loading...')
 
 
-export const $QuantumScroll = ({ maxContainerHeight, rowHeight, dataSource, threshold = 10, containerStyle = {}, $loading = $itemLoading, debounceReuqest = 100 }: QuantumScroll) => component((
+export const $QuantumScroll = ({ maxContainerHeight, rowHeight, dataSource, threshold = 10, containerStyle = {}, $loading = $itemLoading }: QuantumScroll) => component((
   [sampleScroll, scroll]: Behavior<IBranch, ScrollSegment>,
 ) => {
 
   const multicastedData = multicast(dataSource)
   const initalPage = getPageRequest(0, maxContainerHeight, rowHeight, threshold)
-  const scrollWithInitial: Stream<ScrollSegment> = startWith(initalPage, scroll)
+  const scrollWithInitial: Stream<ScrollSegment> = multicast(startWith(initalPage, scroll))
 
 
-  const newLocal_2: Stream<$Branch[]> = merge(
+  const $requestAndLoader: Stream<$Branch[]> = merge(
     delay(1, map(res => res.$items, multicastedData)),
     map((scroll) => Array(scroll.delta).fill($loading), scrollWithInitial),
   )
-  const skipRepaintingLoader = skipRepeatsWith((prev, next) => {
+  const $skipRepaintingLoader = skipRepeatsWith((prev, next) => {
     return next[0] === prev[0]
-  }, newLocal_2)
+  }, $requestAndLoader)
 
   const $intermissionedItems = switchLatest(
-    map(l => mergeArray(l), skipRepaintingLoader)
+    map(l => mergeArray(l), $skipRepaintingLoader)
   )
 
   const $container = $column(
@@ -112,7 +111,7 @@ export const $QuantumScroll = ({ maxContainerHeight, rowHeight, dataSource, thre
     ),
 
     {
-      scroll: debounce(debounceReuqest, scrollWithInitial)
+      scroll: scrollWithInitial
     }
   ]
 })
