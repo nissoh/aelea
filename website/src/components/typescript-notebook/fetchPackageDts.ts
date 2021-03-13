@@ -1,16 +1,10 @@
-// modified from https://github.com/codesandbox/codesandbox-client/blob/master/packages/app/src/embed/components/Content/Monaco/workers/fetch-dependency-typings.js
 
-
-import type * as monaco from 'monaco-editor'
 import { fetchJson } from '../../common/utils'
-
-
-const ROOT_URL = `https://cdn.jsdelivr.net/`
-
+import type * as monaco from 'monaco-editor'
 
 
 interface JSDelivrFlat {
-  files: JSDelivrMeta[],
+  files: JSDelivrMeta[]
   default: string
 }
 
@@ -21,165 +15,142 @@ interface JSDelivrMeta {
   time: string
 }
 
-const fetchCache = new Map()
+type PackageFile = {
+  content: string
+} & JSDelivrMeta
 
-// function resolveAppropiateFile(fileMetaData, relativePath: string) {
-//   const absolutePath = `/${relativePath}`
 
-//   return fileMetaData[`${absolutePath}.d.ts`]
-//     ? `${relativePath}.d.ts` : fileMetaData[`${absolutePath}.ts`]
-//       ? `${relativePath}.ts` : fileMetaData[absolutePath] ?? fileMetaData[`${absolutePath}/index.d.ts`]
-//         ? `${relativePath}/index.d.ts` : relativePath
-
-// }
-
-// const getFileTypes = (depUrl: string, dependency: string, depPath: string, fetchedPaths: Array<string>, fileMetaData) => {
-//   const virtualPath = path.join('node_modules', dependency, depPath)
-
-//   if (fetchedPaths[virtualPath]) return null
-
-//   return fetch(`${depUrl}/${depPath}`).then(typings => {
-//     if (fetchedPaths[virtualPath]) return null
-
-//     // addLib(virtualPath, typings, fetchedPaths)
-
-//     // Now find all require statements, so we can download those types too
-//     return Promise.all(
-//       getDependancyRefs(depPath, typings)
-//         .filter(
-//           // Don't add global deps
-//           dep => dep.startsWith('.')
-//         )
-//         .map(relativePath => path.join(path.dirname(depPath), relativePath))
-//         .map(relativePath => resolveAppropiateFile(fileMetaData, relativePath))
-//         .map(nextDepPath =>
-//           getFileTypes(depUrl, dependency, nextDepPath, fetchedPaths, fileMetaData)
-//         )
-//     )
-//   })
-// }
+type PackageJsonDependencies = { [version: string]: string }
 
 
 
-// const getDependancyRefs = (title: string, file: string) => {
-//   const requires = []
 
-//   const sourceFile = self.ts.createSourceFile(
-//     title,
-//     file,
-//     self.ts.ScriptTarget.Latest,
-//     true,
-//     self.ts.ScriptKind.TS
-//   )
+export type Package = {
+  name: string
+  version: string
+  typings?: string
+  files: PackageFile[]
+}
 
-//   self.ts.forEachChild(sourceFile, node => {
-//     switch (node.kind) {
-//     case self.ts.SyntaxKind.ImportDeclaration: {
-//       requires.push(node.moduleSpecifier.text)
-//       break
-//     }
-//     case self.ts.SyntaxKind.ExportDeclaration: {
-//       // For syntax 'export ... from '...'''
-//       if (node.moduleSpecifier) {
-//         requires.push(node.moduleSpecifier.text)
-//       }
-//       break
-//     }
-//     default: {
-//       /* */
-//     }
-//     }
-//   })
+export type PackageJson = {
+  name: string
+  version: string
+  typings?: string
+  files: PackageFile[]
+  dependencies: PackageJsonDependencies
+} & Package
 
-//   return requires
-// }
+export type PackageTree = {
+  dependencies: PackageTree[]
+} & Package
 
 
-export async function fetchFromMeta(tsService: monaco.languages.typescript.LanguageServiceDefaults, dependency: string, version: string): Promise<string> {
-  const meta = (await fetchMeta(dependency, version)).files
+const fetchMeta = (dependency: string, version: string): Promise<JSDelivrFlat> =>
+  fetchJson(`https://data.jsdelivr.com/v1/package/npm/${dependency}@${version}/flat`)
 
-  let dtsFiles: string[] = meta.filter(metaFile => /\.d\.ts$/.test(metaFile.name)).map(m => m.name)
+
+
+const packageQueryCache = new Map<string, Promise<PackageJson>>()
+const packageLocalCache = new Map<string, PackageJson>()
+
+async function cacheGet(key: string, queryStore: () => Promise<PackageJson>): Promise<PackageJson> {
+  const locallyStoredItem = packageLocalCache.get(key)
+
+  if (locallyStoredItem)
+    return locallyStoredItem
+
+  const storedItem = localStorage.getItem(key)
+
+  if (storedItem) {
+    const parsedItem: PackageJson = JSON.parse(storedItem)
+    packageLocalCache.set(key, parsedItem)
+    return parsedItem
+  }
+
+  const pendingQuery = packageQueryCache.get(key)
+
+  if (pendingQuery)
+    return pendingQuery
+
+  const query = queryStore()
+
+  packageQueryCache.set(key, query)
+
+  const resp = await query
+
+  packageLocalCache.set(key, resp)
+  localStorage.setItem(key, JSON.stringify(resp))
+
+  return resp
+}
+
+export async function fetchFileListContent(name: string, version = 'latest') {
+  const meta = (await fetchMeta(name, version)).files
+
+  let dtsFiles: JSDelivrMeta[] = meta.filter(metaFile => /\.d\.ts$/.test(metaFile.name))
 
   if (dtsFiles.length === 0) {
     // if no .d.ts files found, fallback to .ts files
-    dtsFiles = meta.filter(metaFile => /\.ts$/.test(metaFile.name)).map(m => m.name)
+    dtsFiles = meta.filter(metaFile => /\.ts$/.test(metaFile.name))
   }
 
   if (dtsFiles.length === 0) {
     throw new Error('No inline typings found.')
   }
 
-  const dtsQueries = dtsFiles.map(async (file: string): Promise<string> => {
-    const dtsContent: string = await fetch(`https://cdn.jsdelivr.net/npm/${dependency}@${version}${file}`).then(r => r.text())
+  const dtsQueries = dtsFiles.map(async (file): Promise<PackageFile> => {
+    const content: string = await fetch(`https://cdn.jsdelivr.net/npm/${name}@${version}${file.name}`).then(r => r.text())
 
-    return dtsContent // [dtsContent, `${dependency}${file}`]
+    return { ...file, content: content.replace(/(} from '@)/g, `} from '%40`) }
   })
 
-  const dtss = await Promise.all(dtsQueries)
-
-  tsService.addExtraLib(`declare module '${dependency}' { ${dtss.join('\n')} }'`)
-
-  return dtss.join('\n')
+  return Promise.all(dtsQueries)
 }
 
-// async function fetchFromTypings(dependency: string, version: string) {
-//   const depUrl = `${ROOT_URL}npm/${dependency}@${version}`
-//   const packageJSON: {
-//     typings: string
-//     types: string
-//   } = await fetchJson(`${depUrl}/package.json`)
+export async function fetchAndCacheDependancyTree(name: string, version = 'latest'): Promise<PackageTree> {
+  const pkgPath = `https://cdn.jsdelivr.net/npm/${name}@${version}/package.json`
 
-//   const declaredTypesPath = (packageJSON.typings || packageJSON.types).replace(/^(\/|\.\/)/, '') // trim possible trailing path
+  const pkg = await cacheGet(pkgPath, async () => {
+    const pkgJson: { dependencies: PackageJsonDependencies, typings?: string, types?: string } = await fetchJson(pkgPath)
+    const dependencies = pkgJson?.dependencies ?? {}
+    const files = await fetchFileListContent(name, version)
+    const typings = pkgJson.typings ?? pkgJson.types
 
-//   if (declaredTypesPath) {
-//     // get all files in the specified directory
-//     const fileData = getFileMetaData(dependency, version, declaredTypesPath)
+    return { files, dependencies, name, version, typings }
+  })
 
-//     return getFileTypes(depUrl, dependency, resolveAppropiateFile(fileData, declaredTypesPath), fetchedPaths, fileData)
-//   }
+  const depsQueries = Object.entries(pkg.dependencies).map(([pkgName, version]) =>
+    fetchAndCacheDependancyTree(pkgName, version.replace(/[\^*]/, ''))
+  )
 
-//   throw new Error('No typings field in package.json')
-// }
+  const dependencies = await Promise.all(depsQueries)
 
-const fetchMeta = (dependency: string, version: string): Promise<JSDelivrFlat> =>
-  fetchJson(`https://data.jsdelivr.com/v1/package/npm/${dependency}@${version}/flat`)
+  return { ...pkg, dependencies }
+}
 
-const getFileMetaData = async (dependency: string, version: string, depPath: string) =>
-  (await fetchMeta(dependency, version)).files.filter(f => f.name.startsWith(depPath))
+export function defineModel(pkg: PackageTree, monacoGlobal: typeof monaco) {
+  const pkgModelUri = monacoGlobal.Uri.parse(`file://root/node_modules/${pkg.name}/package.json`)
+  const model = monacoGlobal.editor.getModel(pkgModelUri)
 
+  if (!model) {
+    const dependencies = Object.entries(pkg.dependencies).reduce(((acc, [key, val]) => ({ ...acc, [key.replace(/^@/, `%40`)]: val })), {}) // https://github.com/microsoft/monaco-editor/issues/1306
+    const pakgDefJsonStr = JSON.stringify({
+      name: pkg.name,
+      version: pkg.version,
+      typings: pkg.typings,
+      dependencies
+    })
+    monacoGlobal.editor.createModel(pakgDefJsonStr, "typescript", pkgModelUri);
 
+    pkg.files.forEach(file => {
+      monacoGlobal.editor.createModel(file.content, "typescript", monacoGlobal.Uri.parse(`file://root/node_modules/${pkg.name}${file.name}`));
+    })
+  }
+}
 
-// async function fetchAndAddDependencies(dependencies: { name: string, version: string }[]) {
-//   const fetchedPaths = {}
-//   const depNames = dependencies.map(d => d.name)
-
-//   await Promise.all(
-//     depNames.map(async dep => {
-//       try {
-//         if (!loadedTypings.includes(dep)) {
-//           loadedTypings.push(dep)
-
-//           const depVersion = await doFetch(
-//             `https://data.jsdelivr.com/v1/package/resolve/npm/${dep}@${dependencies[dep]}`
-//           )
-//             .then(x => JSON.parse(x))
-//             .then(x => x.version)
-//           // eslint-disable-next-line no-await-in-loop
-//           await fetchFromTypings(dep, depVersion, fetchedPaths).catch(() =>
-//             // not available in package.json, try checking meta for inline .d.ts files
-//             fetchFromMeta(dep, depVersion, fetchedPaths).catch(() =>
-//               // Not available in package.json or inline from meta, try checking in @types/
-//               fetchFromDefinitelyTyped(dep, depVersion, fetchedPaths)
-//             )
-//           )
-//         }
-//       } catch (e) {
-//         // Don't show these cryptic messages to users, because this is not vital
-//         if (process.env.NODE_ENV === 'development') {
-//           console.error(`Couldn't find typings for ${dep}`, e)
-//         }
-//       }
-//     })
-//   )
-
-// }
+export function definePackageTree(pkg: PackageTree, monacoGlobal: typeof monaco) {
+  defineModel(pkg, monacoGlobal)
+  pkg.dependencies.forEach(pkg => {
+    definePackageTree(pkg, monacoGlobal)
+  })
+}

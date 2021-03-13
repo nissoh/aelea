@@ -58,7 +58,7 @@ export const styleInline = <A extends IBranchElement, B>(style: Stream<StyleCSS>
       }
     }, style)
 
-    return { ...node, styleBehavior: [filter(() => false, applyInlineStyleStream)] }
+    return { ...node, styleBehavior: [...node.styleBehavior, filter(() => false, applyInlineStyleStream)] }
   }, $node)
 
 }

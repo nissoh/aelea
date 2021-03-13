@@ -1,8 +1,11 @@
+import { disposeNone } from '@most/disposable';
 import { Disposable } from '@most/types'
 
 export default class SettableDisposable implements Disposable {
   private disposable: Disposable | undefined;
   private disposed = false
+
+  constructor(private initialDiposable = disposeNone()) {}
 
   setDisposable(disposable: Disposable): void {
     if (this.disposable !== undefined) {
@@ -24,6 +27,7 @@ export default class SettableDisposable implements Disposable {
     this.disposed = true
 
     if (this.disposable !== undefined) {
+      this.initialDiposable.dispose()
       this.disposable.dispose()
     }
   }

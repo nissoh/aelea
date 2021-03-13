@@ -17,7 +17,9 @@ export const $text = $textFn(id)
 
 
 export class NodeSource<A, B extends IBranchElement> implements Stream<IBranch<B>> {
-  constructor(private sourceValue: A, private sourceOp: (a: A) => B, private $segments: $Node[]) { }
+  constructor(private sourceValue: A,
+              private sourceOp: (a: A) => B,
+              private $segments: $Node[]) { }
 
   run(sink: Sink<IBranch<B>>, scheduler: Scheduler): Disposable {
 
@@ -66,7 +68,7 @@ export function branch<A, B extends IBranchElement>(sourceOp: (a: A) => B, postO
 }
 
 
-export function $textFn<A extends HTMLElement>(postOp: Op<IBranch<A>, IBranch<A>> = O(x => x)): NodeComposeFn<string | Stream<string>, A> {
+function $textFn<A extends HTMLElement>(postOp: Op<IBranch<A>, IBranch<A>> = O(x => x)): NodeComposeFn<string | Stream<string>, A> {
   return function textComp(...input: any[]) {
     if (input.some(isFunction))
       // @ts-ignore

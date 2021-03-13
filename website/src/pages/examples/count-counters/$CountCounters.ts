@@ -1,5 +1,5 @@
 
-import { $text, Behavior, behavior, component, state, style } from '@aelea/core'
+import { $text, Behavior, behavior, component, O, state, style } from '@aelea/core'
 import { $Button, $column, $row, $seperator, $TrashBtn, layoutSheet } from '@aelea/ui-components'
 import { chain, constant, map, merge, mergeArray, now, scan, snapshot, until } from '@most/core'
 import $Counter from './$Counter'
@@ -23,14 +23,14 @@ export default component((
   const counting = mergeArray([disposedCounterCount, counterIncrement, counterDecrement])
   const totalCount = sumWithInitial(counting)
 
-  const counters = merge(addedCounter, now(null))
+  const addCounter = merge(addedCounter, now(null))
 
   return [
 
     $column(layoutSheet.spacing)(
       $row(style({ placeContent: 'space-between', alignItems: 'center' }), layoutSheet.spacing)(
         $text(
-          map(n => `Counters: ${n}`, sumWithInitial(merge(constant(1, counters), constant(-1, disposeCounter))))
+          map(n => `Counters: ${n}`, sumWithInitial(merge(constant(1, addCounter), constant(-1, disposeCounter))))
         ),
         $text(
           map(n => `Sum: ${n}`, totalCount)
@@ -50,27 +50,34 @@ export default component((
             $seperator,
             $row(style({ alignItems: 'center' }), layoutSheet.spacingBig)(
               $TrashBtn({
-                click: sampleDisposeCounter(
+                click: O(
                   sampleRemove(),
+                  sampleDisposeCounter(),
                   sampleDisposedCounterCount(
                     snapshot((value) => -value, value$)
-                  )
+                  ),
                 )
               }),
               $Counter({ value$ })({
-                increment: sampleValue(
-                  sampleCountersIncrement(),
-                  snapshot((value, increment) => value + increment, value$),
+                increment: O(
+                  sampleCountersIncrement(),               
+
+                  sampleValue(
+                    snapshot((value, increment) => value + increment, value$)
+                  ),
                 ),
-                decrement: sampleValue(
+                decrement: O(
                   sampleCountersDecrement(),
-                  snapshot((value, increment) => value + increment, value$),
+
+                  sampleValue(
+                    snapshot((value, increment) => value + increment, value$)
+                  ),
                 )
               })
             )
           )
         )
-      }, counters)
+      }, addCounter)
     )
 
   ]

@@ -2,10 +2,9 @@ import { $element, $node, $text, attr, Behavior, component, style } from '@aelea
 import { Route } from '@aelea/router'
 import { $column, $row, layoutSheet } from '@aelea/ui-components'
 import { theme } from '@aelea/ui-components-theme'
+
 import $Example from '../../components/$Example'
-
 import $TSPeep from '../../components/typescript-notebook/$TSPeep'
-
 
 
 
@@ -24,7 +23,7 @@ export default ({ parentRoute }: Guide) => component((
 
       $Example({ file: 'src/components/$QuantumList.ts' })(
         $row(style({ border: `1px solid ${theme.negative}`, padding: '10px' }))(
-          $text(style({ fontSize: '75%' }))('WIP: current typing(code blocks tooltip) is mostly missing. i need to figure out to fix this in Monaco Editor(should work great in your IDE). everything else seem functional')
+          $text(style({ fontSize: '75%' }))(`WIP: still in progress, external imports name have been encoded because of Monaco editor issue: https://github.com/microsoft/monaco-editor/issues/1306. `)
         ),
 
         $node(
@@ -40,7 +39,8 @@ export default ({ parentRoute }: Guide) => component((
         $TSPeep({
           readOnly: false,
           code:
-            `import { $text } from '@aelea/core'
+            `
+import { $text } from '@aelea/core'
 
 export default $text('Yellow World')`
         })({}),
@@ -57,9 +57,9 @@ const containerStyle = style({ padding: '10px', display: 'block', border: '1px d
 
 const $container = $node(containerStyle, colorStyle)
 
-export default $container(
+export default $container(style({alignSelf: 'center'}))(
     $container(
-        $text(containerStyle)('Yellow World')
+        $text('Yellow World')
     )
 )`
         })({}),
@@ -67,65 +67,65 @@ export default $container(
         $text(`in this guide we will be creating different types of Counters in different levels of complexity`),
 
 
-        //         $TSPeep({
-        //           readOnly: false,
-        //           code:
-        // `import { $text, $node } from '@aelea/core'
-        // import { constant, map, periodic, scan } from '@most/core'
+        $TSPeep({
+          readOnly: false,
+          code:
+`import { $text, $node } from '@aelea/core'
+import { constant, map, periodic, scan } from '@most/core'
 
-        // const eventEverySecond = periodic(1000)       // stream of undefined every 1000 milliseconds
-        // const mapTo1 = constant(1, eventEverySecond)  // map that undefined into 1
+const eventEverySecond = periodic(1000)       // stream of undefined every 1000 milliseconds
+const mapTo1 = constant(1, eventEverySecond)  // map that undefined into 1
 
-        // const accumulate = scan((acc, one) => acc + one, 0, mapTo1)
-        // const toString = map(String, accumulate)
+const accumulate = scan((acc, one) => acc + one, 0, mapTo1)
+const toString = map(String, accumulate)
 
 
-        // export default $node(
-        //   $text(toString)
-        // )`
-        //         })({}),
+export default $node(
+  $text(toString)
+)`
+        })({}),
 
-        //         $TSPeep({
-        //           readOnly: false,
-        //           code:
-        //             `import { constant, map, merge, scan } from '@most/core'
-        // import { $custom, $element, $text, Behavior, component, style, event, INode, runBrowser } from '@aelea/core'
+        $TSPeep({
+          readOnly: false,
+          code:
+`import { constant, map, merge, scan } from '@most/core'
+import { $custom, $element, $text, Behavior, component, style, event, INode, runBrowser } from '@aelea/core'
 
-        // // composable style
-        // const displayFlex = style({ display: 'flex' })
-        // const spacingStyle = style({ gap: '16px' })
+// composable style
+const displayFlex = style({ display: 'flex' })
+const spacingStyle = style({ gap: '16px' })
 
-        // // composable elements
-        // const $row = $custom('row')(displayFlex)
-        // const $column = $custom('column')(displayFlex, style({ flexDirection: 'column' }))
+// composable elements
+const $row = $custom('row')(displayFlex)
+const $column = $custom('column')(displayFlex, style({ flexDirection: 'column' }))
 
-        // // Component that outputs state(optionally), this is currently not used anywhere, see next example to see it being consumed
-        // export default component((
-        //     [sampleIncrement, increment]: Behavior<INode, 1>,
-        //     [sampleDecrement, decrement]: Behavior<INode, -1>
-        //   ) => {
+// Component that outputs state(optionally), this is currently not used anywhere, see next example to see it being consumed
+export default component((
+    [sampleIncrement, increment]: Behavior<INode, 1>,
+    [sampleDecrement, decrement]: Behavior<INode, -1>
+  ) => {
 
-        //     return [ // Component has to return [$Node, Behavior(optionally)] in the next example we will use these outputted behaviors
+    return [ // Component has to return [$Node, Behavior(optionally)] in the next example we will use these outputted behaviors
 
-        //       $row(spacingStyle)(
-        //         $column(
-        //           $element('button')(sampleIncrement(event('click'), constant(1)))(
-        //             $text('+')
-        //           ),
-        //           $element('button')(sampleDecrement(event('click'), constant(-1)))(
-        //             $text('-')
-        //           )
-        //         ),
-        //         $text(style({ fontSize: '64px' }))(
-        //           map(String, scan((current: number, x: number) => current + x, 0, merge(increment, decrement)))
-        //         )
-        //       ),
+      $row(spacingStyle)(
+        $column(
+          $element('button')(sampleIncrement(event('click'), constant(1)))(
+            $text('+')
+          ),
+          $element('button')(sampleDecrement(event('click'), constant(-1)))(
+            $text('-')
+          )
+        ),
+        $text(style({ fontSize: '64px' }))(
+          map(String, scan((current: number, x: number) => current + x, 0, merge(increment, decrement)))
+        )
+      ),
 
-        //       { increment, decrement }
-        //     ]
-        //   }
-        // )({})`
-        //         })({})
+      { increment, decrement }
+    ]
+  }
+)({})`
+        })({})
 
       )({}),
 

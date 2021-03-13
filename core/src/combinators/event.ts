@@ -21,15 +21,15 @@ type ElementEventTypeMap<A extends ElementEventNameList, B> =
 
 export function eventElementTarget<A extends ElementEventNameList, B extends EventTarget>(
   eventType: A,
-  node: B,
+  element: B,
   options: boolean | AddEventListenerOptions = false
 ): Stream<ElementEventTypeMap<A, B>> {
   return {
     run(sink, scheduler) {
       const cb = (e: any) => sink.event(scheduler.currentTime(), e)
-      const removeListener = () => node.removeEventListener(eventType, cb, options)
+      const removeListener = () => element.removeEventListener(eventType, cb, options)
 
-      node.addEventListener(eventType, cb, options)
+      element.addEventListener(eventType, cb, options)
 
       return {
         dispose() {

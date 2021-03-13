@@ -1,5 +1,5 @@
 
-import { constant, filter, join, map, skipRepeatsWith, tap, until } from '@most/core'
+import { constant, filter, join, map, skipRepeatsWith, switchLatest, tap, until } from '@most/core'
 import { Stream } from '@most/types'
 import { O } from '@aelea/core'
 import { Fragment, Path, PathEvent, Route, RouteConfig } from './types'
@@ -77,7 +77,7 @@ export function isMatched(frag: Fragment, path: Path) {
 
 
 export const contains = <T>(route: Route) => (ns: Stream<T>) => {
-  return join(constant(until(route.miss, ns), route.contains))
+  return switchLatest(constant(until(route.miss, ns), route.contains))
 }
 
 export const match = <T>(route: Route) => (ns: Stream<T>) => {

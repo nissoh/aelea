@@ -2,7 +2,7 @@ import { $Branch, $Node, IAttrProperties, IBranch, IBranchElement, INode, INodeE
 import { Disposable, Sink, Stream, Time } from '@most/types'
 import { newDefaultScheduler } from '@most/scheduler'
 import { loop, map, mergeArray, tap } from '@most/core'
-import { disposeNone, disposeWith } from '@most/disposable'
+import { disposeAll, disposeNone, disposeWith } from '@most/disposable'
 import { useStylePseudoRule, useStyleRule } from './utils/styleUtils'
 import { nullSink } from './utils'
 
@@ -47,7 +47,8 @@ export function runBrowser(config: Partial<RunEnvironment> = {}) {
 
 class BranchEffectsSink implements Sink<IBranch | INode> {
   disposables: Disposable[] = []
-  sinks: Disposable[] = []
+
+  segmentsSlotsMap: Map<IBranch | INode, Disposable>[] = []
 
   constructor(private env: RunEnvironment,
               private parentElement: IBranchElement,
@@ -56,23 +57,24 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
 
   event(_: Time, node: INode | IBranch) {
 
-
     try {
       node?.disposable.setDisposable(
-        disposeWith(node => {
-          node.element.remove()
-          this.sinks[this.segmentPosition]?.dispose()
+        disposeWith(node => { 
           this.segmentsCount[this.segmentPosition]--
+          node.element.remove()
+          const slot = this.segmentsSlotsMap[this.segmentPosition]
+          const disposableBranch = slot.get(node)
+          slot.delete(node)
+          disposableBranch?.dispose()
+
         }, node)
       )
     } catch (e) {
       console.error(node.element)
-
-      throw new Error(`Cannot append node that have already been rendered, check invalid node operations under `)
+      throw new Error(`Cannot append node that have already been rendered, check invalid node operations under ^`)
     }
 
-    const sinkPos = this.segmentsCount[this.segmentPosition]++
-
+    this.segmentsCount[this.segmentPosition]++
 
     let slot = 0
 
@@ -121,15 +123,22 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
     }
 
 
-    this.sinks[sinkPos] = '$segments' in node
+    const newDisp = '$segments' in node
       ? new BranchChildrenSinkList(node.$segments, this.env, node)
       : disposeNone()
+
+    if (!this.segmentsSlotsMap[this.segmentPosition]) {
+      this.segmentsSlotsMap[this.segmentPosition] = new Map()
+    }
+
+    this.segmentsSlotsMap[this.segmentPosition].set(node, disposeAll([...this.disposables, newDisp]))
     
   }
 
-  end(t: Time) {
-    this.segmentsCount[this.segmentPosition]--
-    this.sinks.forEach(s => s.dispose())
+  end(_t: Time) {
+    this.segmentsSlotsMap.forEach(s => {
+      s.forEach(d => d.dispose())
+    })
   }
 
   error(t: Time, err: Error) {
@@ -139,29 +148,23 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
 }
 
 class BranchChildrenSinkList implements Disposable {
-  disposables: Disposable[]
-  sinks: BranchEffectsSink[]
+  disposables = new Map<$Node<INodeElement>, Disposable>()
 
   constructor($segments: $Node<INodeElement>[], private env: RunEnvironment, private node: IBranch) {
 
     const l = $segments.length
     const segmentsCount = new Array(l).fill(0)
 
-    this.disposables = new Array(l)
-    this.sinks = new Array(l)
-
     for (let i = 0; i < l; ++i) {
       const $child = $segments[i]
       const sink = new BranchEffectsSink(this.env, node.element, i, segmentsCount)
 
-      this.sinks[i] = sink
-      this.disposables[i] = $child.run(sink, this.env.scheduler)
+      this.disposables.set($child, $child.run(sink, this.env.scheduler))
     }
 
   }
 
   dispose(): void {
-    // this.sinks.forEach(s => s.end())
     this.disposables.forEach(d => d.dispose())
   }
 }

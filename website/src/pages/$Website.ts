@@ -64,7 +64,7 @@ export default ({ baseRoute }: Website) => component((
       ),
 
       router.contains(pagesRoute)(
-        $column(layoutSheet.spacingBig, style({ maxWidth: '870px', width: '100%', margin: '0 auto' }))(
+        $column(layoutSheet.spacingBig, style({ maxWidth: '870px', width: '100%', margin: '0 auto', paddingBottom: '45px' }))(
           $row(style({ placeContent: 'space-between', padding: '0 15px' }))(
             $Anchor({ $content: $icon({ $content: $aeleaLogo, width: 137, height: 115, viewBox: `0 0 147 90` }), url: '/', route: rootRoute })({
               click: sampleLinkClick()
