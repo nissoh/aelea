@@ -1,6 +1,6 @@
 
 
-import type { Theme } from '@aelea/ui-components-theme'
+import { Theme } from '@aelea/ui-components-theme'
 
 const theme: Partial<Theme> = {
   secondary: '#a6f5a6',
