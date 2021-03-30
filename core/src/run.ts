@@ -13,13 +13,6 @@ function appendToSlot(parent: IBranchElement, child: INodeElement, insertAt: num
   parent.insertBefore(child, parent.children[insertAt])
 }
 
-declare global {
-  interface Document {
-    adoptedStyleSheets: CSSStyleSheet[];
-  }
-}
-
-
 export function runBrowser(config: Partial<RunEnvironment> = {}) {
 
   const composedConfig: RunEnvironment = {
