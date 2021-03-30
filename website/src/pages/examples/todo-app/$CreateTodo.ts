@@ -1,5 +1,5 @@
 import { $text, Behavior, component, style } from '@aelea/core'
-import { $Button, $Input, $row, layoutSheet } from "@aelea/ui-components"
+import { $Button, $Field, $row, layoutSheet } from "@aelea/ui-components"
 import { constant, map, merge, now, snapshot, startWith } from "@most/core"
 
 let iid = 0
@@ -27,7 +27,7 @@ export default component((
   const inputState = startWith('', inputChange)
   const value = constant('', merge(create, now(null)))
   const valueChahnges = merge(inputChange, value)
-  const disabled$ = map(x => !x, valueChahnges)
+  const disabled = map(x => !x, valueChahnges)
 
   const add = snapshot(
     (text) => ({ id: iid++, text, completed: false }),
@@ -36,10 +36,10 @@ export default component((
 
   return [
     $row(layoutSheet.flex)(
-      $Input({ value })({
+      $Field({ value })({
         change: sampleInputChange()
       }),
-      $Button({ $content: $text('add'), disabled$ })({
+      $Button({ $content: $text('add'), disabled })({
         click: sampleAdd()
       })
     ),

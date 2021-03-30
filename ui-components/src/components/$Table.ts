@@ -1,7 +1,7 @@
-import { map, now } from "@most/core"
+import { map, merge, now } from "@most/core"
 import { Stream } from "@most/types"
-import { $Branch, $text, Behavior, component, INode, Op, style } from '@aelea/core'
-import { $column, $row } from "../$elements"
+import { $Branch, $text, Behavior, component, INode, O, Op, style, StyleCSS, stylePseudo } from '@aelea/core'
+import { $row } from "../$elements"
 import { $QuantumScroll, QuantumScroll, ScrollSegment } from "./$QuantumScroll"
 import { theme } from "@aelea/ui-components-theme"
 import layoutSheet from "../style/layoutSheet"
@@ -20,16 +20,20 @@ export interface TableOption<T> extends Omit<QuantumScroll, 'dataSource'> {
 export interface TableColumn<T> {
   id: keyof T
   header?: $Branch
-  value: Op<T, INode>
+  value: Op<T, INode>,
+  cellStyle?: StyleCSS
 }
 
 
 const elipsisTextOverflow = style({
   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
 })
-const tableCellStyle = style({
-  padding: '6px 0', width: '150px', height: '30px', flex: 1
-})
+const tableCellStyle = O(
+  style({
+    padding: '3px 6px'
+  }),
+  layoutSheet.flex
+)
 
 const $headerCell = $row(
   tableCellStyle,
@@ -49,9 +53,9 @@ export const $Table = <T>(config: TableOption<T>) => {
     [sampleRequestList, requestList]: Behavior<ScrollSegment, ScrollSegment>
   ) => {
 
-    const $header = $rowContainer(
+    const $header = $rowContainer(style({ overflowY: 'scroll' }), stylePseudo('::-webkit-scrollbar', { backgroundColor: 'transparent' }))(
       ...config.columns.map(col => {
-        return $headerCell(
+        return $headerCell(style(col.cellStyle ?? { height: config.rowHeight + 'px' }))(
           col.header ?? elipsisTextOverflow($text(String(col.id)))
         )
       })
@@ -62,7 +66,7 @@ export const $Table = <T>(config: TableOption<T>) => {
       const $items = data.map(rowData =>
         $rowContainer(
           ...config.columns.map(col =>
-            $bodyCell(
+            $bodyCell(style(col.cellStyle ?? {}))(
               col.value(now(rowData))
             )
           )
@@ -73,17 +77,16 @@ export const $Table = <T>(config: TableOption<T>) => {
     }, config.dataSource)
 
     const $body = $QuantumScroll({
-      maxContainerHeight: config.maxContainerHeight,
-      rowHeight: config.rowHeight,
+      ...config,
       dataSource: dataStream
     })({
-      scroll: sampleRequestList()
+      requestSource: sampleRequestList()
     })
 
     return [
-      $column(style({ margin: '0 16px' }))(
+      merge(
+        $body,
         $header,
-        $body
       ),
 
       { requestList }

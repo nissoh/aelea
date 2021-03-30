@@ -1,7 +1,7 @@
 import { $element, $text, attr, Behavior, component, style, stylePseudo } from '@aelea/core'
-import { $row, layoutSheet } from '@aelea/ui-components'
+import { $icon, $row, layoutSheet } from '@aelea/ui-components'
 import { $Link } from '../components/$Link'
-import { $github, $icon } from '../common/$icons'
+import { $github } from '../elements/$icons'
 import { Route } from '@aelea/router'
 import { theme } from '@aelea/ui-components-theme'
 

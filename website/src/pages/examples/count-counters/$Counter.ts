@@ -36,8 +36,8 @@ export default ({ value$ }: Counter) => component((
         textStyle: {
           fontSize: '30px'
         },
-        decrementColor: theme.negative,
-        incrementColor: theme.positive
+        decrementColor: theme.danger,
+        incrementColor: theme.secondary
       })
     ),
 

@@ -1,10 +1,10 @@
 
-import { $node, $text, behavior, Behavior, component, state, style } from '@aelea/core';
-import { $Checkbox, $column, $row, $seperator, layoutSheet } from '@aelea/ui-components';
-import { chain, combine, empty, mergeArray, now, switchLatest, until } from '@most/core';
-import { $label } from '../../../components/form/form';
-import $CreateTodo, { Todo } from './$CreateTodo';
-import $TodoItem from './$TodoItem';
+import { $node, $text, behavior, Behavior, component, state, style } from '@aelea/core'
+import { $Checkbox, $column, $row, $seperator, layoutSheet } from '@aelea/ui-components'
+import { chain, combine, empty, mergeArray, now, switchLatest, until } from '@most/core'
+import { $label } from '../../../components/form/form'
+import $CreateTodo, { Todo } from './$CreateTodo'
+import $TodoItem from './$TodoItem'
 
 
 

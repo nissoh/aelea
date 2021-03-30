@@ -5,6 +5,7 @@ import { theme } from '@aelea/ui-components-theme'
 import $Example from '../../components/$Example'
 import { $Link } from '../../components/$Link'
 import { fadeIn } from '../../components/transitions/enter'
+import $Autocomplete from './autocomplete/$Autocomplete'
 import $Calculator from './calculator/$Calculator'
 import $CountCounters from './count-counters/$CountCounters'
 import $DragList from './dragList/$DragList'
@@ -30,6 +31,7 @@ export default ({ router }: Website) => component((
   const quantumListRoute = router.create({ fragment: 'quantum-list', title: 'Quantum List' })
   const calculatorRoute = router.create({ fragment: 'calculator', title: 'Calculator' })
   const tableRoute = router.create({ fragment: 'table', title: 'Table' })
+  const autocompleteRoute = router.create({ fragment: 'autocomplete', title: 'Autocomplete' })
 
   const $container = $row
 
@@ -46,6 +48,9 @@ export default ({ router }: Website) => component((
             $Link({ $content: $text('Drag And Sort'), url: '/p/examples/drag-and-sort', route: dragAngDropRoute })({
               click: sampleLinkClick()
             }),
+            // $Link({ $content: $text('Autocomplete'), url: '/p/examples/autocomplete', route: autocompleteRoute })({
+            //   click: sampleLinkClick()
+            // }),
             $Link({ $content: $text('Quantum List'), url: '/p/examples/quantum-list', route: quantumListRoute })({
               click: sampleLinkClick()
             }),
@@ -78,10 +83,18 @@ export default ({ router }: Website) => component((
           )
         ),
 
+        // $container(
+        //   contains(autocompleteRoute)(
+        //     $Example({ file: 'src/components/$DragSort.ts' })(
+        //       $Autocomplete({})
+        //     )({})
+        //   )
+        // ),
+
         $container(
           contains(tableRoute)(
             $Example({ file: 'src/components/$Table.ts' })(
-              $column(style({ border: `1px solid ${theme.baseLight}` }))(
+              $column(style({ border: `1px solid ${theme.middleground}` }))(
                 $Table({})
               )
             )({})

@@ -8,10 +8,9 @@ const text = style({
   fontWeight: 100,
   fontSize: '1.15rem'
 })
-
 const customScroll = O(
   stylePseudo('::-webkit-scrollbar-thumb', {
-    backgroundColor: theme.baseLight
+    backgroundColor: theme.middleground
   }),
   stylePseudo('::-webkit-scrollbar', {
     backgroundColor: 'transparent'
@@ -22,7 +21,7 @@ const control = O(
   text,
   style({
     border: '2px solid transparent',
-    color: 'white',
+    color: theme.text,
     outline: 'none',
     flexShrink: 0,
   })
@@ -36,15 +35,13 @@ export default {
     style({
       height: '100vh',
       color: theme.text,
-      fill: theme.text,
+      fill: theme.foreground,
       overflowY: 'scroll',
-      backgroundImage: `radial-gradient(at center center, ${theme.baseDark} 50vh, rgb(0 0 0 / 33%))`,
-      backgroundColor: theme.baseDark,
+      backgroundColor: theme.background,
       margin: '0',
       scrollbarColor: 'auto',
       scrollbarWidth: 'thin',
-      display: 'flex',
-      flexDirection: 'column',
+      display: 'flex'
     }),
     customScroll
   ),
@@ -69,7 +66,7 @@ export default {
       cursor: 'pointer',
       backgroundColor: 'transparent',
       border: `2px solid ${theme.system}`,
-      color: theme.text,
+      color: theme.foreground,
       padding: '5px 15px',
       display: 'flex',
       alignItems: 'center',

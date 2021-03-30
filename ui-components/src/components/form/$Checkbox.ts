@@ -18,7 +18,7 @@ export const $Checkbox = ({ value }: Checkbox) => component((
     layoutSheet.stretch,
     style({ flex: 1, margin: '3px', }),
     styleBehavior(
-      map(ch => ch ? { backgroundColor: theme.text } : null, value)
+      map(ch => ch ? { backgroundColor: theme.foreground } : null, value)
     ),
   )
 

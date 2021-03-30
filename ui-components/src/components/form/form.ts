@@ -11,7 +11,7 @@ export enum InputType {
 }
 
 export interface Control {
-  disabled$?: Stream<boolean>,
+  disabled?: Stream<boolean>,
 }
 
 export interface Input<T> extends Control {
@@ -20,7 +20,7 @@ export interface Input<T> extends Control {
 
 
 export const interactionOp = O(
-  event('focus'),
+  (src: $Node) => merge(event('focus', src), event('pointerover', src)),
   constant(true)
 )
 

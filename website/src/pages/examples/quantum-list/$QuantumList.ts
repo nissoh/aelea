@@ -2,36 +2,40 @@
 import { $text, Behavior, component, StateBehavior, style } from '@aelea/core'
 import { $column, $NumberTicker, $QuantumScroll, $row, $seperator, $TextField, layoutSheet, ScrollSegment } from '@aelea/ui-components'
 import { theme } from '@aelea/ui-components-theme'
-import { at, debounce, map, now, snapshot, switchLatest } from '@most/core'
+import { at, debounce, map, merge, now, snapshot, switchLatest } from '@most/core'
 
 const formatNumber = Intl.NumberFormat().format
 
 
 export default component((
   [sampleScroll, scroll]: Behavior<ScrollSegment, ScrollSegment>,
-  [sampleDelayReuestChange, delayReuestChange]: StateBehavior<string, number>,
-  [sampleDebounceRequestChange, debounceRequestChange]: StateBehavior<string, number>,
+  [sampleDelayResponse, delayResponse]: StateBehavior<string, number>,
+  [sampleDebounceRequest, debounceRequest]: StateBehavior<string, number>,
 ) => {
 
-  const dataSource = switchLatest(
-    map(dt => {
+  const initialDebounceRequestChange = now(1000)
+  const initialDelayResponse = now(500)
 
-      const newLocal = debounce(dt, scroll)
+  const dataSource = switchLatest(
+    map((debounceDuration: number) => {
+      const dd = debounce(debounceDuration, scroll)
+
       return switchLatest(
-        snapshot((delay, positionChange) => {
+        snapshot((delay: number, positionChange) => {
           const totalItems = 1e6
 
-          const arr = Array(positionChange.delta)
-          const $items = arr.fill(undefined).map((x, i) => {
-            const id = totalItems - (positionChange.to - i) + 1
+          const arr = Array(positionChange.delta).fill(null)
+          const $items = arr.map((x, i) => {
+            const to = Math.min(positionChange.to, totalItems)
+            const id = totalItems - (to - i) + 1
 
-            return $text('item: ' + formatNumber(id))
-          }, delayReuestChange)
+            return $text(style({ padding: '3px 10px' }))('item: ' + formatNumber(id))
+          })
 
           return at(delay, { $items, totalItems })
-        }, delayReuestChange, newLocal)
+        }, merge(initialDelayResponse, delayResponse), dd)
       )
-    }, debounceRequestChange)
+    }, merge(initialDebounceRequestChange, debounceRequest))
   )
 
 
@@ -43,8 +47,8 @@ export default component((
           $text(style({ color: theme.system }))('Page: '),
           $NumberTicker({
             value$: map(l => Math.floor(l.to / l.pageSize), scroll),
-            decrementColor: theme.negative,
-            incrementColor: theme.positive
+            decrementColor: theme.danger,
+            incrementColor: theme.secondary
           }),
         ),
         $row(layoutSheet.spacingSmall)(
@@ -58,19 +62,19 @@ export default component((
       $row(layoutSheet.spacingBig)(
         $TextField({
           label: 'Debounce Request(ms)',
-          value: now(1000),
+          value: initialDebounceRequestChange,
           hint: 'prevent bursts of page requests to a datasource during scroll'
         })({
-          value: sampleDebounceRequestChange(
+          value: sampleDebounceRequest(
             map(Number)
           )
         }),
         $TextField({
           label: 'Delay Response(ms)',
-          value: now(500),
+          value: initialDelayResponse,
           hint: 'Emulate the duration of our datasource response, show a stubbed $node instead'
         })({
-          value: sampleDelayReuestChange(
+          value: sampleDelayResponse(
             map(Number)
           )
         }),
@@ -79,11 +83,12 @@ export default component((
       $seperator,
 
       $QuantumScroll({
-        rowHeight: 30,
-        maxContainerHeight: 300,
+        rowHeight: 31,
         dataSource,
-        containerStyle: { border: `1px solid ${theme.baseLight}`, padding: '15px' }
-      })({ scroll: sampleScroll() })
+        containerStyle: { border: `1px solid ${theme.middleground}`, height: '400px' }
+      })({
+        requestSource: sampleScroll()
+      })
 
     )
   ]

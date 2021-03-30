@@ -1,6 +1,6 @@
 
 import { $node, $text, Behavior, component, O, style } from '@aelea/core'
-import { $column, $Input, $NumberTicker, $row, layoutSheet } from '@aelea/ui-components'
+import { $column, $Field, $NumberTicker, $row, layoutSheet } from '@aelea/ui-components'
 import { theme } from '@aelea/ui-components-theme'
 import { combine, empty, map, startWith } from '@most/core'
 
@@ -33,10 +33,10 @@ export default component((
           $text('+')
         ),
         $column(
-          $Input({ value: empty(), placeholder: '0' })({
+          $Field({ value: empty(), placeholder: '0' })({
             change: sampleX(extractValue)
           }),
-          $Input({ value: empty(), placeholder: '0' })({
+          $Field({ value: empty(), placeholder: '0' })({
             change: sampleY(extractValue)
           })
         )
@@ -46,8 +46,8 @@ export default component((
         $node(style({ width: '36px' }))(),
         $NumberTicker({
           value$: combine(add, x, y),
-          decrementColor: theme.negative,
-          incrementColor: theme.positive,
+          decrementColor: theme.danger,
+          incrementColor: theme.secondary,
           slots: 30
         })
       )

@@ -8,7 +8,7 @@ class FromCallbackSource<T> {
 
   run(sink: Sink<T>, scheduler: Scheduler): Disposable {
 
-    // very common that callback functions returns a destructor, perhaps a Disposable in a "most" realm
+    // very common that callback functions returns a destructor, perhaps a Disposable in a "most" case
     const maybeDisposable = this.callbackFunction.bind(this.context)((ev) => {
       sink.event(scheduler.currentTime(), ev)
     })
@@ -17,7 +17,7 @@ class FromCallbackSource<T> {
       return disposeWith(maybeDisposable, null)
     }
 
-    if ('dispose' in maybeDisposable && maybeDisposable?.dispose instanceof Function) {
+    if (maybeDisposable && 'dispose' in maybeDisposable && maybeDisposable?.dispose instanceof Function) {
       return maybeDisposable
     }
 

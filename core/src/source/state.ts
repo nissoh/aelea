@@ -1,8 +1,8 @@
-import { multicast, startWith } from "@most/core";
-import { Sink, Stream, Scheduler, Disposable } from "@most/types";
-import { StateBehavior } from "../types";
-import { Pipe } from "../utils";
-import { BehaviorSource } from "./behavior";
+import { multicast, startWith } from "@most/core"
+import { Sink, Stream, Scheduler, Disposable } from "@most/types"
+import { StateBehavior } from "../types"
+import { Pipe } from "../utils"
+import { BehaviorSource } from "./behavior"
 
 export function state<A, B = A>(initialState: A): StateBehavior<B, A> {
   const bs = new BehaviorSource<A, B>()
@@ -20,8 +20,8 @@ class StateSink<A> extends Pipe<A, A> {
   }
 
   event(t: number, x: A): void {
-    this.parent.latestvalue = x;
-    this.parent.hasValue = true;
+    this.parent.latestvalue = x
+    this.parent.hasValue = true
 
     this.sink.event(t, x)
   }

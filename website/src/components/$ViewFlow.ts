@@ -1,13 +1,13 @@
-import { attr, Behavior, component, IBranch, event, NodeComposeFn, style } from '@aelea/core';
-import { $Branch } from '@aelea/core';
-import { $column, layoutSheet } from '@aelea/ui-components';
+import { attr, Behavior, component, IBranch, event, NodeComposeFn, style } from '@aelea/core'
+import { $Branch } from '@aelea/core'
+import { $column, layoutSheet } from '@aelea/ui-components'
 
 
 interface ScrollFlow {
   $$rootCompositon: NodeComposeFn<$Branch>
 }
 
-export default ({ $$rootCompositon: rootCompositon = $column}: ScrollFlow) => (...$content: $Branch[]) => component((
+export default ({ $$rootCompositon: rootCompositon = $column }: ScrollFlow) => (...$content: $Branch[]) => component((
   [sampleScroll, scroll]: Behavior<IBranch, Event>
 ) => {
 

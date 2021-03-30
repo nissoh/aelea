@@ -8,7 +8,7 @@ export const $column = $custom('column')(layoutSheet.column)
 
 export const $card = $column(style({
   padding: '16px',
-  backgroundColor: theme.baseLight,
+  backgroundColor: theme.middleground,
   boxShadow: '10px 10px 0px -6px rgba(0, 0, 0, .25)',
 }))
 

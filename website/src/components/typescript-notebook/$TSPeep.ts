@@ -1,9 +1,9 @@
 import { awaitPromises, empty, map, never, switchLatest, filter, now, debounce, startWith } from '@most/core'
 import { $custom, $Node, $text, Behavior, component, motion, O, style, styleInline } from '@aelea/core'
 
-import { $MonacoEditor, ModelChangeBehavior } from './$MonacoEditor'
-import { $column, $row, layoutSheet } from '@aelea/ui-components'
+import { $column, $MonacoEditor, $row, layoutSheet, ModelChangeBehavior } from '@aelea/ui-components'
 import { theme } from '@aelea/ui-components-theme'
+import type * as monaco from 'monaco-editor'
 
 
 
@@ -17,11 +17,11 @@ export default ({ code = '', readOnly = true }: IMonaco) => component((
   [sampleChange, change]: Behavior<ModelChangeBehavior, ModelChangeBehavior>
 ) => {
 
-  const $loader = $row(style({ width: '2px', backgroundColor: theme.baseDark }))(
+  const $loader = $row(style({ width: '2px', backgroundColor: 'rgb(43 52 55)' }))(
     $row(
       styleInline(
         map(({ semanticDiagnostics, syntacticDiagnostics }) => {
-          return {backgroundColor: semanticDiagnostics.length || syntacticDiagnostics.length ? theme.negative : theme.system}
+          return { backgroundColor: semanticDiagnostics.length || syntacticDiagnostics.length ? theme.danger : theme.system }
         }, change)
       ),
       styleInline(
@@ -29,7 +29,7 @@ export default ({ code = '', readOnly = true }: IMonaco) => component((
           s => ({ height: s + '%' }),
           switchLatest(
             map(xxx => {
-              return motion({stiffness: 160, damping: 36, precision: .1}, 0, now(100))
+              return motion({ stiffness: 160, damping: 36, precision: .1 }, 0, now(100))
             }, change)
           )
         )
@@ -39,17 +39,18 @@ export default ({ code = '', readOnly = true }: IMonaco) => component((
     )()
   )
 
- 
+  const initalCodeBlockHeight = 24 + 20 + (code.split('\n').length * 18)
+
 
   return [
     $column(layoutSheet.flex)(
-      $MonacoEditor({ code, config: { readOnly } })({
+      $MonacoEditor({ code, config: { readOnly, automaticLayout: true }, containerStyle: { height: initalCodeBlockHeight + 'px' } })({
         change: sampleChange()
       }),
       $row(style({ backgroundColor: `rgb(255 255 255 / 3%)`, minHeight: '30px' }))(
         $loader,
 
-        $custom('render-here')(style({padding: '10px 15px'}))(
+        $custom('render-here')(style({ padding: '10px 15px' }))(
           switchLatest(
             O(
               debounce(500),

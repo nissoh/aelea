@@ -1,10 +1,11 @@
 
-import { delay, map, merge, mergeArray, multicast, skipRepeatsWith, startWith, switchLatest } from "@most/core"
+import { combine, delay, map, merge, mergeArray, multicast, skipRepeats, skipRepeatsWith, switchLatest } from "@most/core"
 import { Stream } from '@most/types'
-import { $node, $Branch, Behavior, component, event, IBranch, style, styleInline, $text, StyleCSS, $Node } from '@aelea/core'
+import { $node, $Branch, Behavior, component, IBranch, style, styleInline, $text, StyleCSS, $Node, event, replayLatest } from '@aelea/core'
 import { $column } from '../$elements'
 import { theme } from "@aelea/ui-components-theme"
 import designSheet from "../style/designSheet"
+import { observer } from ".."
 
 
 export interface ScrollSegment {
@@ -21,7 +22,6 @@ export interface ScrollResponse {
 
 export interface QuantumScroll {
   rowHeight: number
-  maxContainerHeight: number
   dataSource: Stream<ScrollResponse>
 
 
@@ -29,6 +29,7 @@ export interface QuantumScroll {
   $loading?: $Node
 
   containerStyle?: StyleCSS
+  contentStyle?: StyleCSS
 }
 
 
@@ -45,21 +46,21 @@ function getPageRequest(offsetTop: number, containerHeight: number, rowHeight: n
 }
 
 
-const $itemLoading = $text(style({ color: theme.system }))('loading...')
+const $itemLoading = $text(style({ color: theme.system, padding: '3px 10px' }))('loading...')
 
 
-export const $QuantumScroll = ({ maxContainerHeight, rowHeight, dataSource, threshold = 10, containerStyle = {}, $loading = $itemLoading }: QuantumScroll) => component((
+export const $QuantumScroll = ({ rowHeight, dataSource, threshold = 10, containerStyle = {}, contentStyle = {}, $loading = $itemLoading }: QuantumScroll) => component((
   [sampleScroll, scroll]: Behavior<IBranch, ScrollSegment>,
+  [sampleContainerDimension, containerDimension]: Behavior<IBranch, DOMRectReadOnly>,
 ) => {
 
   const multicastedData = multicast(dataSource)
-  const initalPage = getPageRequest(0, maxContainerHeight, rowHeight, threshold)
-  const scrollWithInitial: Stream<ScrollSegment> = multicast(startWith(initalPage, scroll))
-
+  const initalScrollState = map(rect => getPageRequest(0, rect.height, rowHeight, threshold), containerDimension)
+  const requestSource = replayLatest(merge(scroll, initalScrollState))
 
   const $requestAndLoader: Stream<$Branch[]> = merge(
-    delay(1, map(res => res.$items, multicastedData)),
-    map((scroll) => Array(scroll.delta).fill($loading), scrollWithInitial),
+    delay(1, map(res => res.$items.map($item => style({ height: rowHeight + 'px' }, $item)), multicastedData)),
+    map((scroll) => Array(scroll.delta).fill(style({ height: rowHeight + 'px' }, $loading)), requestSource),
   )
   const $skipRepaintingLoader = skipRepeatsWith((prev, next) => {
     return next[0] === prev[0]
@@ -70,8 +71,7 @@ export const $QuantumScroll = ({ maxContainerHeight, rowHeight, dataSource, thre
   )
 
   const $container = $column(
-    style({ maxHeight: maxContainerHeight + 'px', display: 'block', overflow: 'auto', ...containerStyle }),
-    designSheet.customScroll,
+    style({ display: 'block', position: 'relative', ...containerStyle }),
     sampleScroll(
       event('scroll'),
       map(ev => {
@@ -82,36 +82,54 @@ export const $QuantumScroll = ({ maxContainerHeight, rowHeight, dataSource, thre
         return getPageRequest(target.scrollTop, target.clientHeight, rowHeight, threshold)
       }),
       skipRepeatsWith((prev, next) => prev.from === next.from),
+    ),
+    sampleContainerDimension(
+      observer.resize(),
+      map(dim =>
+        dim[0]?.contentRect
+      ),
+      skipRepeats
     )
   )
 
   const $content = $node(
+    designSheet.customScroll,
     style({
-      display: 'block', position: 'relative', overflow: 'hidden', width: '100%', minHeight: '100%',
+      ...contentStyle,
+      display: 'block', overflow: 'auto',
+      position: 'absolute', top: '0px', left: '0px', right: '0px', bottom: '0px'
     }),
-    styleInline(
-      map(x => ({ height: `${rowHeight * x.totalItems}px` }), multicastedData)
-    )
+    // styleInline(map(res => ({ height: res.height + 'px' }), containerDimension))
   )
+
+  const totalItemsCount = skipRepeats(map(x => x.totalItems, multicastedData))
 
   const $list = $column(
+    style({ willChange: 'transform' }),
     styleInline(
-      map(loc => ({ transform: `translate(0, ${loc.from * rowHeight}px)` }), scrollWithInitial)
+      combine((totalItems, loc) => {
+        const top = loc.from * rowHeight
+
+        return {
+          transform: `translate(0, ${top}px)`,
+          height: `${rowHeight * totalItems - top}px`
+        }
+      }, totalItemsCount, requestSource)
     ),
-    style({ willChange: 'transform' })
   )
 
+  
   return [
     $container(
       $content(
         $list(
-          style({ height: rowHeight + 'px' }, $intermissionedItems)
+          $intermissionedItems
         )
       )
     ),
 
     {
-      scroll: scrollWithInitial
+      requestSource
     }
   ]
 })

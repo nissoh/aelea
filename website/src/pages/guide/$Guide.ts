@@ -22,7 +22,7 @@ export default ({ parentRoute }: Guide) => component((
     $column(layoutSheet.spacingBig, layoutSheet.flex, style({ alignItems: 'center' }))(
 
       $Example({ file: 'src/components/$QuantumList.ts' })(
-        $row(style({ border: `1px solid ${theme.negative}`, padding: '10px' }))(
+        $row(style({ border: `1px solid ${theme.danger}`, padding: '10px' }))(
           $text(style({ fontSize: '75%' }))(`WIP: still in progress, external imports name have been encoded because of Monaco editor issue: https://github.com/microsoft/monaco-editor/issues/1306. `)
         ),
 
@@ -39,8 +39,7 @@ export default ({ parentRoute }: Guide) => component((
         $TSPeep({
           readOnly: false,
           code:
-            `
-import { $text } from '@aelea/core'
+`import { $text } from '@aelea/core'
 
 export default $text('Yellow World')`
         })({}),

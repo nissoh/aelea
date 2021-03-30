@@ -1,6 +1,6 @@
-import { $text, Behavior, component } from "@aelea/core";
-import { $Table, ScrollSegment } from "@aelea/ui-components";
-import { chain, map } from "@most/core";
+import { $text, Behavior, component } from "@aelea/core"
+import { $Table, ScrollSegment } from "@aelea/ui-components"
+import { chain, map } from "@most/core"
 
 
 export default component((
@@ -24,9 +24,11 @@ export default component((
 
   return [
     $Table<{ id: string }>({
-      maxContainerHeight: 400,
       dataSource,
-      rowHeight: 30,
+      rowHeight: 31,
+      containerStyle: {
+        height: '400px'
+      },
       columns: [
         {
           id: 'id',

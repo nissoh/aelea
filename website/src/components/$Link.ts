@@ -17,7 +17,7 @@ export const $Link = ({ url, route, $content, styles = {} }: ILink) => component
 
   const anchorOps = O(
     style({
-      color: theme.text,
+      color: theme.foreground,
       padding: '2px 4px',
       ...styles,
     }),

@@ -1,42 +1,45 @@
 
-export interface Theme {
+export type Attention = {
+  success: string
+  alert: string
+  warning: string
+  danger: string
+}
+
+export type Theme = Attention & {
   text: string
   system: string
-  primary: string
-  baseLight: string
-  baseDark: string
 
-  positive: string
-  negative: string
-
+  foreground: string
+  middleground: string
   background: string
+
+  primary: string
+  secondary: string
+
 }
 
 
 const dark: Theme = {
-  text: 'rgb(255 255 255)',
+  foreground: 'rgb(255 255 255)',
+  middleground: 'rgb(74, 92, 99)',
+  background: '#a6f5a6',
+
+  text: '#ffffff',
   system: 'rgb(165 182 189)',
+
   primary: 'rgb(234 96 126)',
-  baseLight: 'rgb(74 92 99)',
-  baseDark: 'rgb(43 52 55)',
+  secondary: '#a6f5a6',
 
-  positive: '#a6f5a6',
-  negative: '#ff9393',
-
-  background: '#000000',
+  success: 'green',
+  alert: 'yellow',
+  warning: 'orange',
+  danger: '#ff9393',
 }
 
+// TODO finish this
 const light: Theme = {
-  text: 'rgb(255 255 255)',
-  system: 'rgb(165 182 189)',
-  primary: 'rgb(234 96 126)',
-  baseLight: 'rgb(74 92 99)',
-  baseDark: 'rgb(43 52 55)',
-
-  positive: '#a6f5a6',
-  negative: '#ff9393',
-
-  background: '#ffffff',
+  ...dark
 }
 
 

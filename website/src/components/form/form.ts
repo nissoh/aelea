@@ -11,7 +11,7 @@ export enum InputType {
 }
 
 export interface Control {
-  disabled$?: Stream<boolean>,
+  disabled?: Stream<boolean>,
 }
 
 export interface Input<T> extends Control {

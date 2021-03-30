@@ -1,15 +1,15 @@
 import { map, mergeArray, never } from "@most/core"
-import { $Node, $element, attr, Behavior, component, event, INode, styleBehavior, IBranch } from '@aelea/core'
+import { $Node, $element, attr, Behavior, component, event, INode, styleBehavior, IBranch, attrBehavior } from '@aelea/core'
 import { Control, dismissOp, interactionOp } from './form'
 import { theme } from '@aelea/ui-components-theme'
 import designSheet from "../../style/designSheet"
 
 
-export interface Button extends Control {
+export interface IButton extends Control {
   $content: $Node,
 }
 
-export const $Button = ({ disabled$ = never(), $content }: Button) => component((
+export const $Button = ({ disabled = never(), $content }: IButton) => component((
   [interactionBehavior, focusStyle]: Behavior<IBranch, true>,
   [dismissBehavior, dismissstyle]: Behavior<IBranch, false>,
   [sampleClick, click]: Behavior<INode, PointerEvent>
@@ -21,11 +21,11 @@ export const $Button = ({ disabled$ = never(), $content }: Button) => component(
       event('pointerup')
     ),
     styleBehavior(
-      map(disabled => disabled ? { opacity: .4, pointerEvents: 'none' } : null, disabled$)
+      map(disabled => disabled ? { opacity: .4, pointerEvents: 'none' } : null, disabled)
     ),
 
-    attr(
-      map(disabled => ({ disabled }), disabled$)
+    attrBehavior(
+      map(disabled => ({ disabled }), disabled)
     ),
 
     styleBehavior(

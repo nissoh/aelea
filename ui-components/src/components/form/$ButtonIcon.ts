@@ -2,7 +2,7 @@
 import { map, mergeArray } from "@most/core"
 import { $Node, Behavior, component, event, INode, O, style, styleBehavior } from '@aelea/core'
 import { dismissOp, interactionOp } from "./form"
-import { $icon, $trash } from "./$icon"
+import { $icon } from "../../elemets/$icon"
 import designSheet from "../../style/designSheet"
 import { theme } from "@aelea/ui-components-theme"
 
@@ -43,6 +43,5 @@ export const $ButtonIcon = ($content: $Node) => component((
   ]
 })
 
-export const $TrashBtn = $ButtonIcon($trash)
 
 

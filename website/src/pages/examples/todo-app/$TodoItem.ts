@@ -1,7 +1,8 @@
 import { Behavior, component, O, style } from '@aelea/core'
-import { $Checkbox, $Input, $row, $TrashBtn, layoutSheet } from "@aelea/ui-components"
+import { $Checkbox, $Field, $row, layoutSheet } from "@aelea/ui-components"
 import { now } from "@most/core"
 import { Stream } from "@most/types"
+import { $TrashBtn } from '../../../elements/$common'
 import { Todo } from "./$CreateTodo"
 
 
@@ -26,7 +27,7 @@ export default ({ todo, completed }: TodoItem) => component((
       $Checkbox({ value: completed })({
         check: sampleComplete()
       }),
-      $Input({ value: now(todo.text) })({
+      $Field({ value: now(todo.text) })({
         change: sampleText()
       }),
       $TrashBtn({

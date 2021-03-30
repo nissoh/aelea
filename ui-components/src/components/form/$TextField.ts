@@ -2,7 +2,7 @@ import { $text, Behavior, component, style } from '@aelea/core';
 import { empty } from '@most/core';
 import { $row } from "../../$elements";
 import layoutSheet from '../../style/layoutSheet';
-import { $Input, Field } from "./$Input";
+import { $Field, Field } from "./$Field";
 import { $label } from "./form";
 
 export interface TextField extends Field {
@@ -19,7 +19,7 @@ export const $TextField = (config: TextField) => component((
     $label(layoutSheet.flex, layoutSheet.spacingTiny, style({ alignSelf: 'self-start' }))(
       $row(layoutSheet.flex, layoutSheet.spacingSmall)(
         $text(style({ alignSelf: 'flex-end', paddingBottom: '1px' }))(config.label),
-        $Input(config)({
+        $Field(config)({
           change: sampleValue()
         })
       ),

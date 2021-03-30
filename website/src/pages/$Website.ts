@@ -1,9 +1,9 @@
 import { $node, $text, Behavior, component, eventElementTarget, style } from '@aelea/core'
 import * as router from '@aelea/router'
 import { $Anchor } from '@aelea/router'
-import { $column, $row, layoutSheet } from '@aelea/ui-components'
+import { $column, $icon, $row, layoutSheet } from '@aelea/ui-components'
 import { map, merge, multicast, now } from '@most/core'
-import { $aeleaLogo, $icon } from '../common/$icons'
+import { $aeleaLogo } from '../elements/$icons'
 import { fadeIn } from '../components/transitions/enter'
 import $Examples from './examples/$Examples'
 import $Guide from './guide/$Guide'
@@ -44,7 +44,7 @@ export default ({ baseRoute }: Website) => component((
   const examplesRoute = pagesRoute.create({ fragment: 'examples', title: 'Examples' })
 
   return [
-    $node(designSheet.main)(
+    $node(designSheet.main, style({ backgroundImage: `radial-gradient(at center center, 'rgb(43 52 55)' 50vh, rgb(0 0 0 / 33%))` }))(
       router.match(rootRoute)(
         $row(layoutSheet.flex, layoutSheet.spacingBig, style({ alignContent: 'center', alignItems: 'center', placeContent: 'center', textAlign: 'center', padding: '0 30px', }))(
           fadeIn(

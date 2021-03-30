@@ -5,6 +5,8 @@
 .dist
 .DS_STORE
 
+tsconfig.tsbuildinfo
+
 # yarn Zero-Installs
 .yarn/*
 !.yarn/cache

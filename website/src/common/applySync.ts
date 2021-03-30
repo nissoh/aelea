@@ -3,10 +3,10 @@
 import type { Theme } from '@aelea/ui-components-theme'
 
 const theme: Partial<Theme> = {
-  positive: '#a6f5a6',
-  negative: '#ff9393',
+  secondary: '#a6f5a6',
+  danger: '#ff9393',
 
-  background: 'red',
+  background: 'rgb(43, 52, 55)',
 }
 
 localStorage.setItem(`!!AELEA_THEME_PALLETE`, JSON.stringify(theme))

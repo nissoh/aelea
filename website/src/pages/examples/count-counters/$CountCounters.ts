@@ -1,7 +1,8 @@
 
 import { $text, Behavior, behavior, component, O, state, style } from '@aelea/core'
-import { $Button, $column, $row, $seperator, $TrashBtn, layoutSheet } from '@aelea/ui-components'
+import { $Button, $column, $row, $seperator, layoutSheet } from '@aelea/ui-components'
 import { chain, constant, map, merge, mergeArray, now, scan, snapshot, until } from '@most/core'
+import { $TrashBtn } from '../../../elements/$common'
 import $Counter from './$Counter'
 
 const $AddBtn = $Button({
