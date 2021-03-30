@@ -1,8 +1,9 @@
-import { $element, attr, Behavior, component, event, IBranch, styleBehavior } from '@aelea/core';
-import { theme } from '@aelea/ui-components-theme';
-import { empty, map, mergeArray, snapshot } from "@most/core";
-import designSheet from '../../style/designSheet';
-import { dismissOp, Input, InputType, interactionOp } from "./form";
+import { $element, attr, Behavior, component, event, IBranch, styleBehavior } from '@aelea/core'
+import { theme } from '@aelea/ui-components-theme'
+import { empty, map, mergeArray, snapshot } from "@most/core"
+import designSheet from '../../style/designSheet'
+import { dismissOp, interactionOp } from "./form"
+import { Input, InputType } from './types'
 
 
 export interface Autocomplete extends Input<string | number> {
@@ -27,7 +28,7 @@ export const $Autocomplete = ({ type = InputType.TEXT, value = empty(), name, pl
         map(inputEv => {
           if (inputEv.target instanceof HTMLInputElement) {
             const text = inputEv.target.value
-            return text || '';
+            return text || ''
           }
           return ''
         })

@@ -1,12 +1,17 @@
 
-import { $node, $text, behavior, Behavior, component, state, style } from '@aelea/core'
-import { $Checkbox, $column, $row, $seperator, layoutSheet } from '@aelea/ui-components'
+import { $element, $text, behavior, Behavior, component, state, style } from '@aelea/core'
+import { $Checkbox, $column, $row, layoutSheet } from '@aelea/ui-components'
+import { theme } from '@aelea/ui-components-theme'
 import { chain, combine, empty, mergeArray, now, switchLatest, until } from '@most/core'
-import { $label } from '../../../components/form/form'
 import $CreateTodo, { Todo } from './$CreateTodo'
 import $TodoItem from './$TodoItem'
 
 
+
+export const $label = $element('label')(
+  layoutSheet.column,
+  style({ cursor: 'pointer', color: theme.system })
+)
 
 
 export default (todos: Todo[]) => component((

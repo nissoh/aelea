@@ -1,8 +1,9 @@
 import { map, mergeArray, never } from "@most/core"
-import { $Node, $element, attr, Behavior, component, event, INode, styleBehavior, IBranch, attrBehavior } from '@aelea/core'
-import { Control, dismissOp, interactionOp } from './form'
+import { $Node, $element, Behavior, component, event, INode, styleBehavior, IBranch, attrBehavior } from '@aelea/core'
+import { dismissOp, interactionOp } from './form'
 import { theme } from '@aelea/ui-components-theme'
 import designSheet from "../../style/designSheet"
+import { Control } from "./types"
 
 
 export interface IButton extends Control {

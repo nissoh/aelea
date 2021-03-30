@@ -5,7 +5,8 @@ import { filter } from '@most/core'
 import { merge } from '@most/core'
 import { empty, map, mergeArray, switchLatest } from "@most/core"
 import designSheet from '../../style/designSheet'
-import { dismissOp, Input, InputType, interactionOp } from "./form"
+import { dismissOp, interactionOp } from "./form"
+import { Input, InputType } from './types'
 
 export interface Field extends Input<string | number> {
   type?: InputType

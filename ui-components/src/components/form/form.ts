@@ -1,22 +1,8 @@
 import { constant, filter, merge } from '@most/core'
-import { Stream } from '@most/types'
 import { $Node, $element, event, O, style } from '@aelea/core'
 import layoutSheet from '../../style/layoutSheet'
 import { theme } from '@aelea/ui-components-theme'
 
-
-export enum InputType {
-  TEXT = 'text',
-  NUMBER = 'number'
-}
-
-export interface Control {
-  disabled?: Stream<boolean>,
-}
-
-export interface Input<T> extends Control {
-  value: Stream<T>
-}
 
 
 export const interactionOp = O(
@@ -32,8 +18,6 @@ export const dismissOp = O(
 
 
 export const $form = $element('form')(layoutSheet.column)
-
-
 
 export const $label = $element('label')(
   layoutSheet.column,

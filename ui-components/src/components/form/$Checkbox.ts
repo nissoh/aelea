@@ -1,8 +1,9 @@
 import { map, mergeArray } from "@most/core"
 import { $element, $node, attr, Behavior, component, IBranch, event, O, style, styleBehavior, attrBehavior } from '@aelea/core'
-import { dismissOp, Input, interactionOp } from "./form"
+import { dismissOp, interactionOp } from "./form"
 import { theme } from "@aelea/ui-components-theme"
 import layoutSheet from "../../style/layoutSheet"
+import { Input } from "./types"
 
 
 export interface Checkbox extends Input<boolean> {

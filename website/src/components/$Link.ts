@@ -1,6 +1,6 @@
 import { component, Behavior, O, styleBehavior, StyleCSS, style } from "@aelea/core"
 import { IAnchor, $Anchor } from "@aelea/router"
-import { combine, tap } from "@most/core"
+import { combine } from "@most/core"
 import { theme } from "@aelea/ui-components-theme"
 
 

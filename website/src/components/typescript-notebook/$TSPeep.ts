@@ -3,8 +3,6 @@ import { $custom, $Node, $text, Behavior, component, motion, O, style, styleInli
 
 import { $column, $MonacoEditor, $row, layoutSheet, ModelChangeBehavior } from '@aelea/ui-components'
 import { theme } from '@aelea/ui-components-theme'
-import type * as monaco from 'monaco-editor'
-
 
 
 interface IMonaco {
