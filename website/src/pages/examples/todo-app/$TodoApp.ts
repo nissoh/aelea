@@ -9,8 +9,8 @@ import $TodoItem from './$TodoItem'
 
 
 export const $label = $element('label')(
-  layoutSheet.column,
-  style({ cursor: 'pointer', color: theme.system })
+  layoutSheet.row,
+  style({ cursor: 'pointer', alignItems: 'center', color: theme.system })
 )
 
 
@@ -28,9 +28,7 @@ export default (todos: Todo[]) => component((
           $Checkbox({ value: showCompletedList })({
             check: sampleShowCompletedList()
           }),
-          $text(
-            'Show completped '
-          )
+          $text('Show completped ')
         ),
         $CreateTodo({
           add: sampleCreateTodo()
