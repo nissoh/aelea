@@ -1,16 +1,16 @@
 import { $node, $text, Behavior, component, style } from '@aelea/core'
-import { contains, Route } from '@aelea/router'
+import { match, Route } from '@aelea/router'
 import { $column, $row, layoutSheet } from '@aelea/ui-components'
-import { theme } from '@aelea/ui-components-theme'
+import { pallete } from '@aelea/ui-components-theme'
 import $Example from '../../components/$Example'
 import { $Link } from '../../components/$Link'
 import { fadeIn } from '../../components/transitions/enter'
-import $Autocomplete from './autocomplete/$Autocomplete'
 import $Calculator from './calculator/$Calculator'
 import $CountCounters from './count-counters/$CountCounters'
 import $DragList from './dragList/$DragList'
 import $VirtualList from './quantum-list/$QuantumList'
 import $Table from './table/$Table'
+import { $Theme } from './theme/$Theme'
 import { createTodo } from './todo-app/$CreateTodo'
 import $TodoApp from './todo-app/$TodoApp'
 
@@ -32,6 +32,7 @@ export default ({ router }: Website) => component((
   const calculatorRoute = router.create({ fragment: 'calculator', title: 'Calculator' })
   const tableRoute = router.create({ fragment: 'table', title: 'Table' })
   const autocompleteRoute = router.create({ fragment: 'autocomplete', title: 'Autocomplete' })
+  const themeRoute = router.create({ fragment: 'theme', title: 'Theme' })
 
   const $container = $row
 
@@ -45,6 +46,9 @@ export default ({ router }: Website) => component((
         $column(layoutSheet.spacing, style({ top: '10vh', placeContent: 'center flex-start' }))(
 
           $column(layoutSheet.spacingSmall, style({ alignItems: 'flex-end' }))(
+            $Link({ $content: $text('Theme'), url: '/p/examples/theme', route: themeRoute })({
+              click: sampleLinkClick()
+            }),
             $Link({ $content: $text('Drag And Sort'), url: '/p/examples/drag-and-sort', route: dragAngDropRoute })({
               click: sampleLinkClick()
             }),
@@ -76,7 +80,17 @@ export default ({ router }: Website) => component((
       $column(style({ flex: 2 }))(
 
         $container(
-          contains(dragAngDropRoute)(
+          match(themeRoute)(
+            $Example({ file: 'src/components/$Table.ts' })(
+              $column(
+                $Theme({})
+              )
+            )({})
+          )
+        ),
+
+        $container(
+          match(dragAngDropRoute)(
             $Example({ file: 'src/components/$DragSort.ts' })(
               $DragList({})
             )({})
@@ -92,9 +106,9 @@ export default ({ router }: Website) => component((
         // ),
 
         $container(
-          contains(tableRoute)(
+          match(tableRoute)(
             $Example({ file: 'src/components/$Table.ts' })(
-              $column(style({ border: `1px solid ${theme.middleground}` }))(
+              $column(style({ border: `1px solid ${pallete.horizon}` }))(
                 $Table({})
               )
             )({})
@@ -102,7 +116,7 @@ export default ({ router }: Website) => component((
         ),
 
         $container(
-          contains(calculatorRoute)(
+          match(calculatorRoute)(
             $Example({ file: 'src/components/$Calculator.ts' })(
               $Calculator({})
             )({})
@@ -110,7 +124,7 @@ export default ({ router }: Website) => component((
         ),
 
         $container(
-          contains(quantumListRoute)(
+          match(quantumListRoute)(
             $Example({ file: 'src/components/$QuantumList.ts' })(
               $VirtualList({})
             )({})
@@ -118,7 +132,7 @@ export default ({ router }: Website) => component((
         ),
 
         $container(
-          contains(countCountersRoute)(
+          match(countCountersRoute)(
             $Example({ file: 'src/components/$CountCounters.ts' })(
               $CountCounters({})
             )({})
@@ -126,7 +140,7 @@ export default ({ router }: Website) => component((
         ),
 
         $container(
-          contains(todoAppRoute)(
+          match(todoAppRoute)(
             $Example({ file: 'src/components/todo-app/$TodoApp.ts' })(
               $TodoApp(
                 Array(1e2).fill(null).map((x, i) => createTodo('t-' + (i + 1)))

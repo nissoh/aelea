@@ -1,4 +1,4 @@
-import { $text, Behavior, component, style } from '@aelea/core'
+import { $text, Behavior, component } from '@aelea/core'
 import { $Button, $Field, $row, layoutSheet } from "@aelea/ui-components"
 import { constant, map, merge, now, snapshot, startWith } from "@most/core"
 
@@ -36,7 +36,7 @@ export default component((
 
   return [
     $row(layoutSheet.flex)(
-      $Field({ value })({
+      $Field({ change: value })({
         change: sampleInputChange()
       }),
       $Button({ $content: $text('add'), disabled })({

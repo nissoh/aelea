@@ -1,5 +1,5 @@
 import { $element, attr, Behavior, component, event, IBranch, styleBehavior } from '@aelea/core'
-import { theme } from '@aelea/ui-components-theme'
+import { pallete } from '@aelea/ui-components-theme'
 import { empty, map, mergeArray, snapshot } from "@most/core"
 import designSheet from '../../style/designSheet'
 import { dismissOp, interactionOp } from "./form"
@@ -12,7 +12,7 @@ export interface Autocomplete extends Input<string | number> {
   name?: string
 }
 
-export const $Autocomplete = ({ type = InputType.TEXT, value = empty(), name, placeholder }: Autocomplete) => component((
+export const $Autocomplete = ({ type = InputType.TEXT, change: value = empty(), name, placeholder }: Autocomplete) => component((
   [sampleFocus, focus]: Behavior<IBranch, true>,
   [dismissBehavior, dismissstyle]: Behavior<IBranch, false>,
   [sampleChange, change]: Behavior<IBranch<HTMLInputElement>, string>
@@ -36,7 +36,7 @@ export const $Autocomplete = ({ type = InputType.TEXT, value = empty(), name, pl
 
       styleBehavior(
         map(
-          active => active ? { borderBottom: `1px solid ${theme.primary}` } : null,
+          active => active ? { borderBottom: `1px solid ${pallete.primary}` } : null,
           mergeArray([focus, dismissstyle])
         )
       ),

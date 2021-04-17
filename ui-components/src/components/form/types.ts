@@ -1,3 +1,4 @@
+import { Op } from "@aelea/core";
 import { Stream } from "@most/types"
 
 export enum InputType {
@@ -10,5 +11,6 @@ export interface Control {
 }
 
 export interface Input<T> extends Control {
-  value: Stream<T>
+  change: Stream<T>
+  validation?: Op<T, string | null>
 }

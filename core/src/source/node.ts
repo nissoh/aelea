@@ -75,9 +75,7 @@ function $textFn<A extends HTMLElement>(postOp: Op<IBranch<A>, IBranch<A>> = O(x
       return $textFn(O(postOp, ...input) as Op<IBranch<A>, IBranch<A>>) as any
 
     const children: Stream<INode<Text>>[] = input.map((x) => {
-      const strStream = typeof x === 'string' ? now(x) : x as Stream<string>
-
-      return switchLatest(map(node, strStream))
+      return typeof x === 'string' ? node(x) : switchLatest(map(node, x))
     })
 
     return branch(() => document.createElement('text'), postOp)(null)(...children)

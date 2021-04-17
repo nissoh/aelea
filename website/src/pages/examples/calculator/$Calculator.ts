@@ -1,7 +1,7 @@
 
 import { $node, $text, Behavior, component, O, style } from '@aelea/core'
 import { $column, $Field, $NumberTicker, $row, layoutSheet } from '@aelea/ui-components'
-import { theme } from '@aelea/ui-components-theme'
+import { pallete } from '@aelea/ui-components-theme'
 import { combine, empty, map, startWith } from '@most/core'
 
 
@@ -16,7 +16,7 @@ const extractValue = O(
 const $plus = $node(
   style({
     justifyContent: 'center', alignItems: 'center',
-    width: '36px', color: theme.system
+    width: '36px', color: pallete.description
   }),
   layoutSheet.displayFlex
 )
@@ -32,11 +32,11 @@ export default component((
         $plus(
           $text('+')
         ),
-        $column(
-          $Field({ value: empty(), placeholder: '0' })({
+        $column(layoutSheet.spacingTiny)(
+          $Field({ change: empty(), placeholder: '0' })({
             change: sampleX(extractValue)
           }),
-          $Field({ value: empty(), placeholder: '0' })({
+          $Field({ change: empty(), placeholder: '0' })({
             change: sampleY(extractValue)
           })
         )
@@ -46,8 +46,8 @@ export default component((
         $node(style({ width: '36px' }))(),
         $NumberTicker({
           value$: combine(add, x, y),
-          decrementColor: theme.danger,
-          incrementColor: theme.secondary,
+          decrementColor: pallete.negative,
+          incrementColor: pallete.positive,
           slots: 30
         })
       )

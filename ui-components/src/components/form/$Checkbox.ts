@@ -1,7 +1,7 @@
 import { map, mergeArray } from "@most/core"
 import { $element, $node, attr, Behavior, component, IBranch, event, O, style, styleBehavior, attrBehavior } from '@aelea/core'
 import { dismissOp, interactionOp } from "./form"
-import { theme } from "@aelea/ui-components-theme"
+import { pallete } from "@aelea/ui-components-theme"
 import layoutSheet from "../../style/layoutSheet"
 import { Input } from "./types"
 
@@ -9,7 +9,7 @@ import { Input } from "./types"
 export interface Checkbox extends Input<boolean> {
 }
 
-export const $Checkbox = ({ value }: Checkbox) => component((
+export const $Checkbox = ({ change: value }: Checkbox) => component((
   [interactionBehavior, focusStyle]: Behavior<IBranch, true>,
   [dismissBehavior, dismissstyle]: Behavior<IBranch, false>,
   [sampleCheck, check]: Behavior<IBranch<HTMLInputElement>, boolean>
@@ -19,7 +19,7 @@ export const $Checkbox = ({ value }: Checkbox) => component((
     layoutSheet.stretch,
     style({ flex: 1, margin: '3px', }),
     styleBehavior(
-      map(ch => ch ? { backgroundColor: theme.foreground } : null, value)
+      map(ch => ch ? { backgroundColor: pallete.message } : null, value)
     ),
   )
 
@@ -42,11 +42,11 @@ export const $Checkbox = ({ value }: Checkbox) => component((
   const containerStyle = O(
     styleBehavior(
       map(
-        active => active ? { borderColor: theme.primary } : null,
+        active => active ? { borderColor: pallete.primary } : null,
         mergeArray([focusStyle, dismissstyle])
       )
     ),
-    style({ position: 'relative', width: '18px', height: '18px', border: `2px solid ${theme.system}` }),
+    style({ position: 'relative', width: '18px', height: '18px', border: `2px solid ${pallete.description}` }),
   )
 
   return [

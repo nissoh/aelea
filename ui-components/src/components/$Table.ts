@@ -3,7 +3,7 @@ import { Stream } from "@most/types"
 import { $Branch, $text, Behavior, component, INode, O, Op, style, StyleCSS, stylePseudo } from '@aelea/core'
 import { $row } from "../$elements"
 import { $QuantumScroll, QuantumScroll, ScrollSegment } from "./$QuantumScroll"
-import { theme } from "@aelea/ui-components-theme"
+import { pallete } from "@aelea/ui-components-theme"
 import layoutSheet from "../style/layoutSheet"
 
 
@@ -37,7 +37,7 @@ const tableCellStyle = O(
 
 const $headerCell = $row(
   tableCellStyle,
-  style({ fontSize: '15px', color: theme.system, }),
+  style({ fontSize: '15px', color: pallete.description, }),
 )
 
 const $bodyCell = $row(

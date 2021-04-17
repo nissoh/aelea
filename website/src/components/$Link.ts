@@ -1,7 +1,7 @@
 import { component, Behavior, O, styleBehavior, StyleCSS, style } from "@aelea/core"
 import { IAnchor, $Anchor } from "@aelea/router"
 import { combine } from "@most/core"
-import { theme } from "@aelea/ui-components-theme"
+import { pallete } from "@aelea/ui-components-theme"
 
 
 
@@ -17,14 +17,14 @@ export const $Link = ({ url, route, $content, styles = {} }: ILink) => component
 
   const anchorOps = O(
     style({
-      color: theme.foreground,
+      color: pallete.message,
       padding: '2px 4px',
       ...styles,
     }),
     styleBehavior(
       combine((isActive, isFocus): StyleCSS | null => {
-        return isActive ? { color: theme.primary, cursor: 'default' }
-          : isFocus ? { backgroundColor: theme.primary }
+        return isActive ? { color: pallete.primary, cursor: 'default' }
+          : isFocus ? { backgroundColor: pallete.primary }
             : null
       }, active, focus)
     )

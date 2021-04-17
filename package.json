@@ -6,11 +6,11 @@
     "*"
   ],
   "scripts": {
-    "build": "yarn workspaces foreach --verbose --topological --parallel run build",
-    "clean": "yarn workspaces foreach --verbose --parallel run clean",
+    "build": "yarn workspaces foreach --no-private --verbose --topological --parallel run build",
+    "clean": "yarn workspaces foreach --verbose --no-private --parallel run clean",
     "lint": "eslint . --ext .ts",
     "check-version": "yarn version check --interactive",
-    "check-version:apply": "yarn run check-version && yarn version apply --all",
+    "check-version:apply": "yarn run check-version && yarn version apply --all --no-private",
     "publish": "yarn workspaces foreach --exclude examples --exclude aelea --verbose npm publish --tolerate-republish --access public",
     "upgrade-interactive": "yarn upgrade-interactive",
     ".": "_______GLOBAL_TASKS_____",
@@ -22,13 +22,13 @@
     "g:parallel": "cd $INIT_CWD && concurrently"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "4.19.0",
-    "@typescript-eslint/parser": "4.19.0",
-    "concurrently": "^6.0.0",
-    "eslint": "7.23.0",
-    "typescript": "4.2.3"
+    "@typescript-eslint/eslint-plugin": "4.22.0",
+    "@typescript-eslint/parser": "4.22.0",
+    "concurrently": "^6.0.2",
+    "eslint": "7.24.0",
+    "typescript": "4.2.4"
   },
   "dependencies": {
-    "@yarnpkg/pnpify": "^2.4.0"
+    "@yarnpkg/pnpify": "^3.0.0-rc.3"
   }
 }

@@ -1,10 +1,11 @@
-import { $element, attr, Behavior, component, event, IBranch, O, styleBehavior } from '@aelea/core'
-import { theme } from '@aelea/ui-components-theme'
-import { now, tap } from '@most/core'
+import { $element, attr, Behavior, component, event, IBranch, O, style, styleBehavior, StyleCSS } from '@aelea/core'
+import { pallete } from '@aelea/ui-components-theme'
+import { multicast, never, now, tap } from '@most/core'
 import { filter } from '@most/core'
 import { merge } from '@most/core'
-import { empty, map, mergeArray, switchLatest } from "@most/core"
+import { empty, map, switchLatest } from "@most/core"
 import designSheet from '../../style/designSheet'
+import { combineState } from '../../utils/state'
 import { dismissOp, interactionOp } from "./form"
 import { Input, InputType } from './types'
 
@@ -12,18 +13,28 @@ export interface Field extends Input<string | number> {
   type?: InputType
   placeholder?: string
   name?: string
+  autocomplete?: boolean
+  fieldStyle?: StyleCSS
 }
 
-export const $Field = ({ type = InputType.TEXT, value = empty(), name, placeholder }: Field) => component((
+export const $Field = ({ type = InputType.TEXT, change: value = empty(), name, placeholder, autocomplete = true, fieldStyle = {}, validation = never }: Field) => component((
   [interactionBehavior, focusStyle]: Behavior<IBranch, true>,
   [dismissBehavior, dismissstyle]: Behavior<IBranch, false>,
   [sampleChange, change]: Behavior<IBranch<HTMLInputElement>, string>
 ) => {
 
+  const multicastValidation = O(validation, multicast)
+
+  const alert = multicastValidation(change)
+
+  const focus = merge(focusStyle, dismissstyle)
+  const state = combineState({ focus: false, alert: null }, { focus, alert })
+
   return [
     $element('input')(
-      attr({ name, type, placeholder }),
+      attr({ name, type, placeholder, autocomplete: autocomplete ? null : 'off' }),
       designSheet.input,
+      style(fieldStyle),
 
       sampleChange(
         event('input'),
@@ -37,10 +48,13 @@ export const $Field = ({ type = InputType.TEXT, value = empty(), name, placehold
       ),
 
       styleBehavior(
-        map(
-          active => active ? { borderBottom: `1px solid ${theme.primary}` } : null,
-          mergeArray([focusStyle, dismissstyle])
-        )
+        map(({ focus, alert }) => {
+          if (alert) {
+            return  { borderBottom: `2px solid ${pallete.negative}` }
+          }
+
+          return focus ? { borderBottom: `2px solid ${pallete.primary}` } : null
+        }, state)
       ),
 
       interactionBehavior(interactionOp),

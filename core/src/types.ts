@@ -57,4 +57,3 @@ export type Op<T, R> = (o: Stream<T>) => Stream<R>
 export type Sampler<A> = Op<A, A>
 
 export type Behavior<A, B = A> = [Sample<A, B>, Stream<B>]
-export type StateBehavior<A, B = A> = [Sample<A, B>, Stream<B>]

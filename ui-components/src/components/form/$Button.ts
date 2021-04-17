@@ -1,13 +1,14 @@
 import { map, mergeArray, never } from "@most/core"
-import { $Node, $element, Behavior, component, event, INode, styleBehavior, IBranch, attrBehavior } from '@aelea/core'
+import { $Node, $element, Behavior, component, event, INode, styleBehavior, IBranch, attrBehavior, StyleCSS } from '@aelea/core'
 import { dismissOp, interactionOp } from './form'
-import { theme } from '@aelea/ui-components-theme'
+import { pallete } from '@aelea/ui-components-theme'
 import designSheet from "../../style/designSheet"
 import { Control } from "./types"
 
 
 export interface IButton extends Control {
   $content: $Node,
+  buttonStyle?: StyleCSS
 }
 
 export const $Button = ({ disabled = never(), $content }: IButton) => component((
@@ -31,7 +32,7 @@ export const $Button = ({ disabled = never(), $content }: IButton) => component(
 
     styleBehavior(
       map(
-        active => active ? { borderColor: theme.primary } : null,
+        active => active ? { borderColor: pallete.primary } : null,
         mergeArray([focusStyle, dismissstyle])
       )
     ),

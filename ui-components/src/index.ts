@@ -3,6 +3,7 @@ import layoutSheet from './style/layoutSheet'
 
 export * from './$elements'
 export * as observer from './utils/elementObservers'
+export * as state from './utils/state'
 export * from './components/$NumberTicker'
 export * from './components/$QuantumScroll'
 export * from './components/$Sortable'

@@ -1,18 +1,18 @@
 
-import { $text, Behavior, component, StateBehavior, style } from '@aelea/core'
+import { $text, Behavior, component, style } from '@aelea/core'
 import { $column, $NumberTicker, $QuantumScroll, $row, $seperator, $TextField, layoutSheet, ScrollSegment } from '@aelea/ui-components'
-import { theme } from '@aelea/ui-components-theme'
+import { pallete } from '@aelea/ui-components-theme'
 import { at, debounce, map, merge, now, snapshot, switchLatest } from '@most/core'
 
-const formatNumber = Intl.NumberFormat().format
 
 
 export default component((
   [sampleScroll, scroll]: Behavior<ScrollSegment, ScrollSegment>,
-  [sampleDelayResponse, delayResponse]: StateBehavior<string, number>,
-  [sampleDebounceRequest, debounceRequest]: StateBehavior<string, number>,
+  [sampleDelayResponse, delayResponse]: Behavior<string, number>,
+  [sampleDebounceRequest, debounceRequest]: Behavior<string, number>,
 ) => {
 
+  const formatNumber = Intl.NumberFormat().format
   const initialDebounceRequestChange = now(1000)
   const initialDelayResponse = now(500)
 
@@ -44,15 +44,15 @@ export default component((
       $text('High performance dynamically loaded list based on scroll position and computed container height'),
       $row(layoutSheet.spacingBig)(
         $row(layoutSheet.spacingSmall, layoutSheet.flex)(
-          $text(style({ color: theme.system }))('Page: '),
+          $text(style({ color: pallete.description }))('Page: '),
           $NumberTicker({
             value$: map(l => Math.floor(l.to / l.pageSize), scroll),
-            decrementColor: theme.danger,
-            incrementColor: theme.secondary
+            decrementColor: pallete.negative,
+            incrementColor: pallete.positive
           }),
         ),
         $row(layoutSheet.spacingSmall)(
-          $text(style({ color: theme.system }))(`page size: `),
+          $text(style({ color: pallete.description }))(`page size: `),
           $text(
             map(l => String(l.pageSize), scroll)
           )
@@ -62,19 +62,20 @@ export default component((
       $row(layoutSheet.spacingBig)(
         $TextField({
           label: 'Debounce Request(ms)',
-          value: initialDebounceRequestChange,
-          hint: 'prevent bursts of page requests to a datasource during scroll'
+          change: initialDebounceRequestChange,
+          hint: 'prevent bursts of page requests to a datasource during scroll',
+          validation: map(value => isFinite(Number(value)) ? null : 'Field has to contain numbers only')
         })({
-          value: sampleDebounceRequest(
+          change: sampleDebounceRequest(
             map(Number)
           )
         }),
         $TextField({
           label: 'Delay Response(ms)',
-          value: initialDelayResponse,
+          change: initialDelayResponse,
           hint: 'Emulate the duration of our datasource response, show a stubbed $node instead'
         })({
-          value: sampleDelayResponse(
+          change: sampleDelayResponse(
             map(Number)
           )
         }),
@@ -85,7 +86,7 @@ export default component((
       $QuantumScroll({
         rowHeight: 31,
         dataSource,
-        containerStyle: { border: `1px solid ${theme.middleground}`, height: '400px' }
+        containerStyle: { border: `1px solid ${pallete.horizon}`, height: '400px' }
       })({
         requestSource: sampleScroll()
       })

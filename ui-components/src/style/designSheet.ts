@@ -1,7 +1,7 @@
 
 
 import { style, O, stylePseudo } from '@aelea/core'
-import { theme } from '@aelea/ui-components-theme'
+import { pallete } from '@aelea/ui-components-theme'
 
 const text = style({
   fontFamily: `'Nunito', Fira Code`,
@@ -10,7 +10,7 @@ const text = style({
 })
 const customScroll = O(
   stylePseudo('::-webkit-scrollbar-thumb', {
-    backgroundColor: theme.middleground
+    backgroundColor: pallete.description
   }),
   stylePseudo('::-webkit-scrollbar', {
     backgroundColor: 'transparent'
@@ -21,7 +21,7 @@ const control = O(
   text,
   style({
     border: '2px solid transparent',
-    color: theme.text,
+    color: pallete.message,
     outline: 'none',
     flexShrink: 0,
   })
@@ -34,10 +34,10 @@ export default {
     text,
     style({
       height: '100vh',
-      color: theme.text,
-      fill: theme.foreground,
+      color: pallete.message,
+      fill: pallete.message,
       overflowY: 'scroll',
-      backgroundColor: theme.background,
+      backgroundColor: pallete.background,
       margin: '0',
       scrollbarColor: 'auto',
       scrollbarWidth: 'thin',
@@ -52,12 +52,12 @@ export default {
       minWidth: '100px',
       backgroundColor: 'transparent',
       border: 'none',
-      borderBottom: `1px solid ${theme.system}`,
+      borderBottom: `2px solid ${pallete.description}`,
       paddingBottom: '2px',
       flex: 1,
     }),
     stylePseudo('::placeholder', {
-      color: theme.system
+      color: pallete.description
     })
   ),
   btn: O(
@@ -65,8 +65,8 @@ export default {
     style({
       cursor: 'pointer',
       backgroundColor: 'transparent',
-      border: `2px solid ${theme.system}`,
-      color: theme.foreground,
+      border: `2px solid ${pallete.description}`,
+      color: pallete.message,
       padding: '5px 15px',
       display: 'flex',
       alignItems: 'center',

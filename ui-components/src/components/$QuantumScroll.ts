@@ -1,11 +1,12 @@
 
 import { combine, delay, map, merge, mergeArray, multicast, skipRepeats, skipRepeatsWith, switchLatest } from "@most/core"
 import { Stream } from '@most/types'
-import { $node, $Branch, Behavior, component, IBranch, style, styleInline, $text, StyleCSS, $Node, event, replayLatest } from '@aelea/core'
+import { $node, $Branch, Behavior, component, IBranch, style, styleInline, $text, StyleCSS, $Node, event } from '@aelea/core'
 import { $column } from '../$elements'
-import { theme } from "@aelea/ui-components-theme"
+import { pallete } from "@aelea/ui-components-theme"
 import designSheet from "../style/designSheet"
 import { observer } from ".."
+import { replayLatest } from "../utils/state"
 
 
 export interface ScrollSegment {
@@ -46,7 +47,7 @@ function getPageRequest(offsetTop: number, containerHeight: number, rowHeight: n
 }
 
 
-const $itemLoading = $text(style({ color: theme.system, padding: '3px 10px' }))('loading...')
+const $itemLoading = $text(style({ color: pallete.description, padding: '3px 10px' }))('loading...')
 
 
 export const $QuantumScroll = ({ rowHeight, dataSource, threshold = 10, containerStyle = {}, contentStyle = {}, $loading = $itemLoading }: QuantumScroll) => component((

@@ -9,6 +9,9 @@ import $Examples from './examples/$Examples'
 import $Guide from './guide/$Guide'
 import { designSheet } from '@aelea/ui-components'
 import $MainMenu from './$MainMenu'
+import { $Picker } from '../components/$ThemePicker'
+import { dark, light } from '../common/theme'
+import { pallete } from '@aelea/ui-components-theme'
 
 
 
@@ -44,12 +47,12 @@ export default ({ baseRoute }: Website) => component((
   const examplesRoute = pagesRoute.create({ fragment: 'examples', title: 'Examples' })
 
   return [
-    $node(designSheet.main, style({ backgroundImage: `radial-gradient(at center center, 'rgb(43 52 55)' 50vh, rgb(0 0 0 / 33%))` }))(
+    $node(designSheet.main, style({ backgroundImage: `radial-gradient(at center center, ${pallete.middleground} 50vh, ${pallete.background})` }))(
       router.match(rootRoute)(
         $row(layoutSheet.flex, layoutSheet.spacingBig, style({ alignContent: 'center', alignItems: 'center', placeContent: 'center', textAlign: 'center', padding: '0 30px', }))(
           fadeIn(
             $column(style({ alignItems: 'center', maxWidth: '550px' }), layoutSheet.spacing)(
-              $Anchor({ $content: $icon({ $content: $aeleaLogo, width: 237, height: 115, viewBox: `0 0 147 90` }), url: '/', route: rootRoute })({
+              $Anchor({ $content: $icon({ $content: style({ fill: pallete.foreground }, $aeleaLogo), width: 237, height: 115, viewBox: `0 0 147 90` }), url: '/', route: rootRoute })({
                 click: sampleLinkClick()
               }),
               $text(`"aelea", is a UI Framework for reactive event programming`),
@@ -73,7 +76,7 @@ export default ({ baseRoute }: Website) => component((
               routeChange: sampleLinkClick()
             })
           ),
-          router.contains(guideRoute)(
+          router.match(guideRoute)(
             $Guide({ parentRoute: rootRoute })({})
           ),
           router.contains(examplesRoute)(
@@ -82,7 +85,10 @@ export default ({ baseRoute }: Website) => component((
             })
           )
         )
-      )
+      ),
+
+
+      $Picker([light, dark])({})
     )
 
   ]

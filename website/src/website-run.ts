@@ -1,4 +1,4 @@
-
+import './assignThemeSync'
 // @ts-ignore
 import { } from 'global.d.ts'
 

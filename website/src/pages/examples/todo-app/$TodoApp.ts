@@ -1,7 +1,7 @@
 
-import { $element, $text, behavior, Behavior, component, state, style } from '@aelea/core'
-import { $Checkbox, $column, $row, layoutSheet } from '@aelea/ui-components'
-import { theme } from '@aelea/ui-components-theme'
+import { $element, $text, behavior, Behavior, component, style } from '@aelea/core'
+import { $Checkbox, $column, $row, layoutSheet, state } from '@aelea/ui-components'
+import { pallete } from '@aelea/ui-components-theme'
 import { chain, combine, empty, mergeArray, now, switchLatest, until } from '@most/core'
 import $CreateTodo, { Todo } from './$CreateTodo'
 import $TodoItem from './$TodoItem'
@@ -10,22 +10,22 @@ import $TodoItem from './$TodoItem'
 
 export const $label = $element('label')(
   layoutSheet.row,
-  style({ cursor: 'pointer', alignItems: 'center', color: theme.system })
+  style({ cursor: 'pointer', alignItems: 'center', color: pallete.description })
 )
 
 
 export default (todos: Todo[]) => component((
-  [sampleCreateTodo, newTodo]: Behavior<Todo, Todo>
+  [sampleCreateTodo, newTodo]: Behavior<Todo, Todo>,
 ) => {
 
-  const [sampleShowCompletedList, showCompletedList] = state(false)
+  const [sampleShowCompletedList, showCompletedList] = state.stateBehavior(false)
 
   return [
     $column(layoutSheet.spacingBig)(
 
       $row(layoutSheet.spacingBig)(
         $label(layoutSheet.spacing)(
-          $Checkbox({ value: showCompletedList })({
+          $Checkbox({ change: showCompletedList })({
             check: sampleShowCompletedList()
           }),
           $text('Show completped ')
@@ -39,8 +39,7 @@ export default (todos: Todo[]) => component((
         chain((todo: Todo) => {
 
           const [sampleRemove, remove] = behavior<MouseEvent, MouseEvent>()
-
-          const [sampleCompleted, completed] = state(todo.completed)
+          const [sampleCompleted, completed] = state.stateBehavior(todo.completed)
 
           return until(remove)(
             switchLatest(

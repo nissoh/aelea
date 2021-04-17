@@ -4,7 +4,7 @@ import { $Node, Behavior, component, event, INode, O, style, styleBehavior } fro
 import { dismissOp, interactionOp } from "./form"
 import { $icon } from "../../elemets/$icon"
 import designSheet from "../../style/designSheet"
-import { theme } from "@aelea/ui-components-theme"
+import { pallete } from "@aelea/ui-components-theme"
 
 
 
@@ -16,7 +16,7 @@ export const $ButtonIcon = ($content: $Node) => component((
 
   const iconOp = O(
     designSheet.control,
-    style({ cursor: 'pointer', fill: theme.system, borderRadius: '50%', }),
+    style({ cursor: 'pointer', fill: pallete.description, borderRadius: '50%', }),
 
     interactionBehavior(interactionOp),
     dismissBehavior(dismissOp),
@@ -25,7 +25,7 @@ export const $ButtonIcon = ($content: $Node) => component((
 
     styleBehavior(
       map(
-        active => active ? { borderColor: theme.primary } : null,
+        active => active ? { borderColor: pallete.primary } : null,
         mergeArray([focusStyle, dismissstyle])
       )
     ),

@@ -2,7 +2,7 @@ import { awaitPromises, empty, map, never, switchLatest, filter, now, debounce, 
 import { $custom, $Node, $text, Behavior, component, motion, O, style, styleInline } from '@aelea/core'
 
 import { $column, $MonacoEditor, $row, layoutSheet, ModelChangeBehavior } from '@aelea/ui-components'
-import { theme } from '@aelea/ui-components-theme'
+import { pallete, theme } from '@aelea/ui-components-theme'
 
 
 interface IMonaco {
@@ -19,7 +19,7 @@ export default ({ code = '', readOnly = true }: IMonaco) => component((
     $row(
       styleInline(
         map(({ semanticDiagnostics, syntacticDiagnostics }) => {
-          return { backgroundColor: semanticDiagnostics.length || syntacticDiagnostics.length ? theme.danger : theme.system }
+          return { backgroundColor: semanticDiagnostics.length || syntacticDiagnostics.length ? pallete.negative : pallete.description }
         }, change)
       ),
       styleInline(
@@ -33,7 +33,7 @@ export default ({ code = '', readOnly = true }: IMonaco) => component((
         )
       ),
       layoutSheet.flex,
-      style({ backgroundColor: theme.system })
+      style({ backgroundColor: pallete.description })
     )()
   )
 
@@ -42,10 +42,10 @@ export default ({ code = '', readOnly = true }: IMonaco) => component((
 
   return [
     $column(layoutSheet.flex)(
-      $MonacoEditor({ code, config: { readOnly, automaticLayout: true }, containerStyle: { height: initalCodeBlockHeight + 'px' } })({
+      $MonacoEditor({ code, config: { readOnly, automaticLayout: true, theme: theme.name === 'light' ? 'vs-light': 'vs-dark' }, containerStyle: { height: initalCodeBlockHeight + 'px' } })({
         change: sampleChange()
       }),
-      $row(style({ backgroundColor: `rgb(255 255 255 / 3%)`, minHeight: '30px' }))(
+      $row(style({ backgroundColor: pallete.background, minHeight: '30px' }))(
         $loader,
 
         $custom('render-here')(style({ padding: '10px 15px' }))(
@@ -71,7 +71,7 @@ export default ({ code = '', readOnly = true }: IMonaco) => component((
               }),
               awaitPromises,
               filter(node => node !== never()),
-              startWith($text(style({ color: theme.system, fontSize: '75%' }))('Loading Typescript Service...'))
+              startWith($text(style({ color: pallete.description, fontSize: '75%' }))('Loading Typescript Service...'))
             )(change)
           )
         )

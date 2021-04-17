@@ -1,7 +1,7 @@
 
-import { $text, Behavior, behavior, component, O, state, style } from '@aelea/core'
+import { $text, Behavior, behavior, component, O, style } from '@aelea/core'
 import { $Button, $column, $row, $seperator, layoutSheet } from '@aelea/ui-components'
-import { chain, constant, map, merge, mergeArray, now, scan, snapshot, until } from '@most/core'
+import { chain, constant, map, merge, mergeArray, now, scan, snapshot, startWith, until } from '@most/core'
 import { $TrashBtn } from '../../../elements/$common'
 import $Counter from './$Counter'
 
@@ -43,7 +43,9 @@ export default component((
       chain(() => {
 
         const [sampleRemove, remove] = behavior<PointerEvent, PointerEvent>()
-        const [sampleValue, value$] = state(0)
+        const [sampleValueChange, valueChange] = behavior<number, number>()
+
+        const value = startWith(0, valueChange)
 
 
         return until(remove)(
@@ -55,23 +57,21 @@ export default component((
                   sampleRemove(),
                   sampleDisposeCounter(),
                   sampleDisposedCounterCount(
-                    snapshot((value) => -value, value$)
+                    snapshot(val => -val, value)
                   ),
                 )
               }),
-              $Counter({ value$ })({
+              $Counter({ value })({
                 increment: O(
                   sampleCountersIncrement(),               
-
-                  sampleValue(
-                    snapshot((value, increment) => value + increment, value$)
+                  sampleValueChange(
+                    snapshot((val, increment) => val + increment, value)
                   ),
                 ),
                 decrement: O(
                   sampleCountersDecrement(),
-
-                  sampleValue(
-                    snapshot((value, increment) => value + increment, value$)
+                  sampleValueChange(
+                    snapshot((val, increment) => val + increment, value)
                   ),
                 )
               })

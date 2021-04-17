@@ -1,5 +1,5 @@
 import { $custom, $node, style } from '@aelea/core'
-import { theme } from '@aelea/ui-components-theme'
+import { pallete } from '@aelea/ui-components-theme'
 import layoutSheet from './style/layoutSheet'
 
 
@@ -8,7 +8,7 @@ export const $column = $custom('column')(layoutSheet.column)
 
 export const $card = $column(style({
   padding: '16px',
-  backgroundColor: theme.middleground,
+  backgroundColor: pallete.middleground,
   boxShadow: '10px 10px 0px -6px rgba(0, 0, 0, .25)',
 }))
 
@@ -18,7 +18,7 @@ export const $seperator = $node(
   style({
     minHeight: '1px',
     minWidth: '1px',
-    background: theme.system
+    background: pallete.description
   })
 )()
 

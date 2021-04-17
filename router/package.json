@@ -6,6 +6,7 @@
   "files": [
     ".dist"
   ],
+  "sideEffects": false,
   "types": ".dist/types/index.d.ts",
   "scripts": {
     "clean": "yarn g:tsc:clean",

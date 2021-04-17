@@ -3,6 +3,7 @@
 
 
 .dist
+dist
 .DS_STORE
 
 tsconfig.tsbuildinfo

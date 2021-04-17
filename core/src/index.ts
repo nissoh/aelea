@@ -9,7 +9,6 @@ export * from './run'
 export * from './source/behavior'
 export * from './source/fromCallback'
 export * from './source/node'
-export * from './source/state'
 export * from './types'
 export * from './utils'
 

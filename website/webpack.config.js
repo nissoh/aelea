@@ -1,12 +1,16 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 
 module.exports = {
   mode: "development",
   watch: false,
   context: __dirname, // to automatically find tsconfig.json
   devtool: 'source-map',
+  entry: {
+    theme: './src/assignThemeSync.ts',
+    main: './src/website-run.ts',
+  },
   module: {
     rules: [
       {
@@ -15,8 +19,8 @@ module.exports = {
         use: {
           loader: "ts-loader",
           options: {
-            "transpileOnly": true, // Set to true if you are using fork-ts-checker-webpack-plugin
-            "projectReferences": true
+            transpileOnly: true, // Set to true if you are using fork-ts-checker-webpack-plugin
+            projectReferences: true
           }
         }
       }
@@ -39,5 +43,9 @@ module.exports = {
   devServer: {
     port: 3000,
     historyApiFallback: true
+  },
+  output: {
+    filename: '[name].[contenthash].js',
+    path: path.resolve(__dirname, '.dist')
   }
 }

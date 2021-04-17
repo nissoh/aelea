@@ -3,7 +3,7 @@ import { $icon, $row, layoutSheet } from '@aelea/ui-components'
 import { $Link } from '../components/$Link'
 import { $github } from '../elements/$icons'
 import { Route } from '@aelea/router'
-import { theme } from '@aelea/ui-components-theme'
+import { pallete } from '@aelea/ui-components-theme'
 
 
 
@@ -19,7 +19,7 @@ export default ({ parentRoute }: MainMenu) => component((
   const guideRoute = parentRoute.create({ fragment: 'guide', title: 'Guide' })
   const examplesRoute = parentRoute.create({ fragment: 'examples', title: 'Examples' })
 
-  const $seperator = $text(style({ color: theme.system, pointerEvents: 'none' }))('|')
+  const $seperator = $text(style({ color: pallete.description, pointerEvents: 'none' }))('|')
   return [
     $row(layoutSheet.spacingSmall, style({ alignItems: 'center', placeContent: 'center' }))(
 
@@ -31,12 +31,12 @@ export default ({ parentRoute }: MainMenu) => component((
         click: sampleRouteChange()
       }),
       $seperator,
-      $Link({ $content: $text('Examples'), url: '/p/examples/drag-and-sort', route: examplesRoute })({
+      $Link({ $content: $text('Examples'), url: '/p/examples/theme', route: examplesRoute })({
         click: sampleRouteChange()
       }),
       $seperator,
 
-      $element('a')(stylePseudo(':hover', { fill: theme.primary }), layoutSheet.displayFlex, style({ padding: '0 4px' }), attr({ href: 'https://github.com/nissoh/aelea' }))(
+      $element('a')(stylePseudo(':hover', { fill: pallete.primary }), layoutSheet.displayFlex, style({ padding: '0 4px' }), attr({ href: 'https://github.com/nissoh/aelea' }))(
         $icon({ $content: $github, width: 25, viewBox: `0 0 1024 1024` })
       ),
 
