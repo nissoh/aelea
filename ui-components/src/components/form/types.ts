@@ -11,6 +11,6 @@ export interface Control {
 }
 
 export interface Input<T> extends Control {
-  change: Stream<T>
+  value: Stream<T>
   validation?: Op<T, string | null>
 }

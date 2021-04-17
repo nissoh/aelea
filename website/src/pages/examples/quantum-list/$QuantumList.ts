@@ -62,7 +62,7 @@ export default component((
       $row(layoutSheet.spacingBig)(
         $TextField({
           label: 'Debounce Request(ms)',
-          change: initialDebounceRequestChange,
+          value: initialDebounceRequestChange,
           hint: 'prevent bursts of page requests to a datasource during scroll',
           validation: map(value => isFinite(Number(value)) ? null : 'Field has to contain numbers only')
         })({
@@ -72,7 +72,7 @@ export default component((
         }),
         $TextField({
           label: 'Delay Response(ms)',
-          change: initialDelayResponse,
+          value: initialDelayResponse,
           hint: 'Emulate the duration of our datasource response, show a stubbed $node instead'
         })({
           change: sampleDelayResponse(

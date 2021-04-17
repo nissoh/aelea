@@ -12,7 +12,7 @@ export interface Autocomplete extends Input<string | number> {
   name?: string
 }
 
-export const $Autocomplete = ({ type = InputType.TEXT, change: value = empty(), name, placeholder }: Autocomplete) => component((
+export const $Autocomplete = ({ type = InputType.TEXT, value = empty(), name, placeholder }: Autocomplete) => component((
   [sampleFocus, focus]: Behavior<IBranch, true>,
   [dismissBehavior, dismissstyle]: Behavior<IBranch, false>,
   [sampleChange, change]: Behavior<IBranch<HTMLInputElement>, string>

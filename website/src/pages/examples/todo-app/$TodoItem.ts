@@ -24,10 +24,10 @@ export default ({ todo, completed }: TodoItem) => component((
 
   return [
     $row(rowStyle)(
-      $Checkbox({ change: completed })({
+      $Checkbox({ value: completed })({
         check: sampleComplete()
       }),
-      $Field({ change: now(todo.text) })({
+      $Field({ value: now(todo.text) })({
         change: sampleText()
       }),
       $TrashBtn({

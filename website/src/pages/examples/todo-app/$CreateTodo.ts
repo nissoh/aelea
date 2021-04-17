@@ -36,7 +36,7 @@ export default component((
 
   return [
     $row(layoutSheet.flex)(
-      $Field({ change: value })({
+      $Field({ value })({
         change: sampleInputChange()
       }),
       $Button({ $content: $text('add'), disabled })({

@@ -33,10 +33,10 @@ export default component((
           $text('+')
         ),
         $column(layoutSheet.spacingTiny)(
-          $Field({ change: empty(), placeholder: '0' })({
+          $Field({ value: empty(), placeholder: '0' })({
             change: sampleX(extractValue)
           }),
-          $Field({ change: empty(), placeholder: '0' })({
+          $Field({ value: empty(), placeholder: '0' })({
             change: sampleY(extractValue)
           })
         )

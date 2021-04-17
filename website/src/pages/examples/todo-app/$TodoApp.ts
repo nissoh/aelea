@@ -25,7 +25,7 @@ export default (todos: Todo[]) => component((
 
       $row(layoutSheet.spacingBig)(
         $label(layoutSheet.spacing)(
-          $Checkbox({ change: showCompletedList })({
+          $Checkbox({ value: showCompletedList })({
             check: sampleShowCompletedList()
           }),
           $text('Show completped ')

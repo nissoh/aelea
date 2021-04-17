@@ -11,7 +11,7 @@ export default component((
 ) =>
   [
     $column(layoutSheet.spacingSmall)(
-      $Autocomplete({ change: empty() })({})
+      $Autocomplete({ value: empty() })({})
     )
   ]
 )

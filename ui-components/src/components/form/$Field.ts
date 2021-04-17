@@ -17,7 +17,7 @@ export interface Field extends Input<string | number> {
   fieldStyle?: StyleCSS
 }
 
-export const $Field = ({ type = InputType.TEXT, change: value = empty(), name, placeholder, autocomplete = true, fieldStyle = {}, validation = never }: Field) => component((
+export const $Field = ({ type = InputType.TEXT, value = empty(), name, placeholder, autocomplete = true, fieldStyle = {}, validation = never }: Field) => component((
   [interactionBehavior, focusStyle]: Behavior<IBranch, true>,
   [dismissBehavior, dismissstyle]: Behavior<IBranch, false>,
   [sampleChange, change]: Behavior<IBranch<HTMLInputElement>, string>

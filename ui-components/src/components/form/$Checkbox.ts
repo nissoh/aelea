@@ -9,7 +9,7 @@ import { Input } from "./types"
 export interface Checkbox extends Input<boolean> {
 }
 
-export const $Checkbox = ({ change: value }: Checkbox) => component((
+export const $Checkbox = ({ value }: Checkbox) => component((
   [interactionBehavior, focusStyle]: Behavior<IBranch, true>,
   [dismissBehavior, dismissstyle]: Behavior<IBranch, false>,
   [sampleCheck, check]: Behavior<IBranch<HTMLInputElement>, boolean>
