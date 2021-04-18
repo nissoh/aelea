@@ -1,6 +1,8 @@
 
 import { BehaviorSource, Op, Pipe, Sample } from "@aelea/core"
-import { combineArray, multicast, skip, startWith, tap } from "@most/core"
+import { filter } from "@most/core"
+import { merge } from "@most/core"
+import { chain, combineArray, constant, multicast, skip, startWith, tap } from "@most/core"
 import { curry2 } from "@most/prelude"
 import { Disposable, Scheduler, Sink, Stream } from "@most/types"
 
@@ -112,16 +114,19 @@ export const localStorageTreeFactory = (rootChainKey: string) => <T>(key: string
   const storeData = localStorage.getItem(mktTree)
   const initialState = storeData ? JSON.parse(storeData) as T : initialDefaultState
 
-
   const storeCurry: StoreFnCurry<T> = curry2((writePipe = (x => x), stream) => {
-    const writeOp = writePipe(stream)
+    const multicastSource = multicast(stream)
+    const writeOp = writePipe(multicastSource)
 
-    const writeEffect = tap(state => {
+    // ignore 
+    const writeEffect = filter(state => {
       scope.state = state
       localStorage.setItem(mktTree, JSON.stringify(state))
+
+      return false
     }, writeOp)
 
-    return writeEffect
+    return merge(writeEffect, multicastSource)
   })
   
   let _state = initialState
@@ -139,5 +144,6 @@ export const localStorageTreeFactory = (rootChainKey: string) => <T>(key: string
 
   return scope
 }
+  
   
 

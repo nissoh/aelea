@@ -20,6 +20,7 @@ export interface Field extends Input<string | number> {
 export const $Field = ({ type = InputType.TEXT, value = empty(), name, placeholder, autocomplete = true, fieldStyle = {}, validation = never }: Field) => component((
   [interactionBehavior, focusStyle]: Behavior<IBranch, true>,
   [dismissBehavior, dismissstyle]: Behavior<IBranch, false>,
+  [sampleBlur, blur]: Behavior<IBranch, FocusEvent>,
   [sampleChange, change]: Behavior<IBranch<HTMLInputElement>, string>
 ) => {
 
@@ -50,7 +51,7 @@ export const $Field = ({ type = InputType.TEXT, value = empty(), name, placehold
       styleBehavior(
         map(({ focus, alert }) => {
           if (alert) {
-            return  { borderBottom: `2px solid ${pallete.negative}` }
+            return { borderBottom: `2px solid ${pallete.negative}` }
           }
 
           return focus ? { borderBottom: `2px solid ${pallete.primary}` } : null
@@ -59,6 +60,8 @@ export const $Field = ({ type = InputType.TEXT, value = empty(), name, placehold
 
       interactionBehavior(interactionOp),
       dismissBehavior(dismissOp),
+
+      sampleBlur(event('blur')),
 
       O(
         map(node =>
@@ -76,7 +79,8 @@ export const $Field = ({ type = InputType.TEXT, value = empty(), name, placehold
     )(),
 
     {
-      change
+      change,
+      blur
     }
   ]
 })
