@@ -1,6 +1,7 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
+const CopyPlugin = require("copy-webpack-plugin")
 
 module.exports = {
   mode: "development",
@@ -37,7 +38,13 @@ module.exports = {
     new ForkTsCheckerWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: 'index.html'
-    })
+    }),
+    new CopyPlugin({
+      patterns: [
+        { from: "404.html" },
+        { from: "CNAME" },
+      ]
+    }),
   ],
   // node: { crypto: true, stream: true },
   devServer: {
@@ -45,6 +52,7 @@ module.exports = {
     historyApiFallback: true
   },
   output: {
+    clean: true,
     filename: '[name].[contenthash].js',
     path: path.resolve(__dirname, 'dist')
   }

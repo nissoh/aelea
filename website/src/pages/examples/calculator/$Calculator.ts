@@ -16,7 +16,7 @@ const extractValue = O(
 const $plus = $node(
   style({
     justifyContent: 'center', alignItems: 'center',
-    width: '36px', color: pallete.description
+    width: '36px', color: pallete.foreground
   }),
   layoutSheet.displayFlex
 )

@@ -1,8 +1,8 @@
 
-import { BehaviorSource, Op, Pipe, Sample } from "@aelea/core"
+import { Op, Pipe } from "@aelea/core"
 import { filter } from "@most/core"
 import { merge } from "@most/core"
-import { chain, combineArray, constant, multicast, skip, startWith, tap } from "@most/core"
+import { combineArray, multicast, startWith } from "@most/core"
 import { curry2 } from "@most/prelude"
 import { Disposable, Scheduler, Sink, Stream } from "@most/types"
 
@@ -12,15 +12,6 @@ type StreamInput<T> = {
 
 type StreamInputArray<T extends any[]> = {
   [P in keyof T]: Stream<T[P]>
-}
-
-export type StateBehavior<A, B = A> = [Sample<A, B>, Stream<B>]
-
-export function stateBehavior<A, B = A>(initialState: A): StateBehavior<B, A> {
-  const bs = new BehaviorSource<A, B>()
-  const mbs = multicast(bs)
-
-  return [bs.sample, replayLatest(mbs, initialState)]
 }
 
 
@@ -36,17 +27,6 @@ class StateSink<A> extends Pipe<A, A> {
     this.sink.event(t, x)
   }
 }
-
-
-export function replayLatest<A>(s: Stream<A>, initialState?: A): ReplayLatest<A> {
-  if (arguments.length === 1) {
-    return new ReplayLatest(s)
-  } else {
-    return new ReplayLatest(s, initialState)
-  }
-}
-
-
 export class ReplayLatest<A> implements Stream<A> {
   latestvalue!: A
   hasValue = false
@@ -72,22 +52,29 @@ export class ReplayLatest<A> implements Stream<A> {
 }
 
 
-export function combineState<A, B extends A, K extends keyof A>(initialState: B, state: StreamInput<Partial<A>>): Stream<A> {
-  const entries = Object.entries(state) as [keyof A, A[K]][]
-  const streams = entries.map(([k, s]) => {
-    return startWith(initialState[k], s as any)
-  })
 
-  const combinedWithInitial = combineArray((...arrgs) => {
+export function replayLatest<A>(s: Stream<A>, initialState?: A): ReplayLatest<A> {
+  if (arguments.length === 1) {
+    return new ReplayLatest(s)
+  } else {
+    return new ReplayLatest(s, initialState)
+  }
+}
+
+export function combineState<A, K extends keyof A>(state: StreamInput<A>): Stream<A> {
+  const entries = Object.entries(state) as [keyof A, Stream<A[K]>][]
+  const streams = entries.map(([_, stream]) => stream)
+
+  const combinedWithInitial = combineArray((...arrgs: A[K][]) => {
     return arrgs.reduce((seed, val, idx) => {
       const key = entries[idx][0]
       seed[key] = val
 
       return seed
-    }, { ...initialState })
+    }, {} as A)
   }, streams)
 
-  return skip(1, combinedWithInitial)
+  return combinedWithInitial
 }
 
 

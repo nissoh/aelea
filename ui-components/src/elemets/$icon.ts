@@ -12,7 +12,7 @@ interface Icon {
 }
 
 
-export const $icon = ({ $content, width = 24, height = width, viewBox = `0 0 ${width} ${height}`, fill = pallete.description }: Icon) => (
+export const $icon = ({ $content, width = 24, height = width, viewBox = `0 0 ${width} ${height}`, fill = pallete.foreground }: Icon) => (
   $svg('svg')(
     attr({ viewBox, width, height, fill }),
   )($content)

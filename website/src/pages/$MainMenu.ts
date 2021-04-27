@@ -19,7 +19,8 @@ export default ({ parentRoute }: MainMenu) => component((
   const guideRoute = parentRoute.create({ fragment: 'guide', title: 'Guide' })
   const examplesRoute = parentRoute.create({ fragment: 'examples', title: 'Examples' })
 
-  const $seperator = $text(style({ color: pallete.description, pointerEvents: 'none' }))('|')
+  const $seperator = $text(style({ color: pallete.foreground, pointerEvents: 'none' }))('|')
+  
   return [
     $row(layoutSheet.spacingSmall, style({ alignItems: 'center', placeContent: 'center' }))(
 

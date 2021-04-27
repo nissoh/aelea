@@ -16,7 +16,7 @@ export const $ButtonIcon = ($content: $Node) => component((
 
   const iconOp = O(
     designSheet.control,
-    style({ cursor: 'pointer', fill: pallete.description, borderRadius: '50%', }),
+    style({ cursor: 'pointer', fill: pallete.message, borderRadius: '50%', }),
 
     interactionBehavior(interactionOp),
     dismissBehavior(dismissOp),

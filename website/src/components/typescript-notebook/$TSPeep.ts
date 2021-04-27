@@ -19,7 +19,7 @@ export default ({ code = '', readOnly = true }: IMonaco) => component((
     $row(
       styleInline(
         map(({ semanticDiagnostics, syntacticDiagnostics }) => {
-          return { backgroundColor: semanticDiagnostics.length || syntacticDiagnostics.length ? pallete.negative : pallete.description }
+          return { backgroundColor: semanticDiagnostics.length || syntacticDiagnostics.length ? pallete.negative : pallete.foreground }
         }, change)
       ),
       styleInline(
@@ -33,7 +33,7 @@ export default ({ code = '', readOnly = true }: IMonaco) => component((
         )
       ),
       layoutSheet.flex,
-      style({ backgroundColor: pallete.description })
+      style({ backgroundColor: pallete.foreground })
     )()
   )
 
@@ -71,7 +71,7 @@ export default ({ code = '', readOnly = true }: IMonaco) => component((
               }),
               awaitPromises,
               filter(node => node !== never()),
-              startWith($text(style({ color: pallete.description, fontSize: '75%' }))('Loading Typescript Service...'))
+              startWith($text(style({ color: pallete.foreground, fontSize: '75%' }))('Loading Typescript Service...'))
             )(change)
           )
         )

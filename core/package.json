@@ -6,7 +6,9 @@
   "files": [
     ".dist"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "construct-style-sheets-polyfill"
+  ],
   "types": ".dist/types/index.d.ts",
   "scripts": {
     "clean": "yarn g:tsc:clean",

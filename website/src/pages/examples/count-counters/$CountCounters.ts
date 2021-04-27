@@ -1,6 +1,7 @@
 
 import { $text, Behavior, behavior, component, O, style } from '@aelea/core'
 import { $Button, $column, $row, $seperator, layoutSheet } from '@aelea/ui-components'
+import { pallete } from '@aelea/ui-components-theme'
 import { chain, constant, map, merge, mergeArray, now, scan, snapshot, startWith, until } from '@most/core'
 import { $TrashBtn } from '../../../elements/$common'
 import $Counter from './$Counter'
@@ -30,11 +31,15 @@ export default component((
 
     $column(layoutSheet.spacing)(
       $row(style({ placeContent: 'space-between', alignItems: 'center' }), layoutSheet.spacing)(
-        $text(
-          map(n => `Counters: ${n}`, sumWithInitial(merge(constant(1, addCounter), constant(-1, disposeCounter))))
+        $row(layoutSheet.spacingSmall)(
+          $text(style({ color: pallete.foreground }))('Counters: '),
+          $text(
+            map(String, sumWithInitial(merge(constant(1, addCounter), constant(-1, disposeCounter))))
+          ),
         ),
-        $text(
-          map(n => `Sum: ${n}`, totalCount)
+        $row(layoutSheet.spacingSmall)(
+          $text(style({ color: pallete.foreground }))('Sum: '),
+          $text(map(String, totalCount))
         ),
         $AddBtn({
           click: sampleAddedCounter()

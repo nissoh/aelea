@@ -5,6 +5,7 @@ import { loop, map, mergeArray, tap } from '@most/core'
 import { disposeAll, disposeNone, disposeWith } from '@most/disposable'
 import { useStylePseudoRule, useStyleRule } from './utils/styleUtils'
 import { nullSink } from './utils'
+import SettableDisposable from './utils/SettableDisposable'
 
 
 function appendToSlot(parent: IBranchElement, child: INodeElement, insertAt: number) {
@@ -28,9 +29,18 @@ export function runBrowser(config: Partial<RunEnvironment> = {}) {
 
   document.adoptedStyleSheets = [...document.adoptedStyleSheets, composedConfig.style.stylesheet]
 
+  const rootNode: IBranch = {
+    element: composedConfig.rootNode,
+    $segments: [],
+    disposable: new SettableDisposable(),
+    styleBehavior: [],
+    insertAscending: true,
+    attributesBehavior: [],
+    stylePseudo: []
+  }
  
   return ($root: $Branch) => {
-    const s = new BranchEffectsSink(composedConfig, composedConfig.rootNode, 0, [0])
+    const s = new BranchEffectsSink(composedConfig, rootNode, 0, [0])
 
     map(node => ({ ...node, segmentPosition: 0 }), $root)
       .run(s, composedConfig.scheduler)
@@ -44,7 +54,7 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
   segmentsSlotsMap: Map<IBranch | INode, Disposable>[] = []
 
   constructor(private env: RunEnvironment,
-              private parentElement: IBranchElement,
+              private parentNode: IBranch,
               private segmentPosition: number,
               private segmentsCount: number[]) { }
 
@@ -67,15 +77,21 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
       throw new Error(`Cannot append node that have already been rendered, check invalid node operations under ^`)
     }
 
-    this.segmentsCount[this.segmentPosition]++
 
     let slot = 0
 
-    for (let s = 0; s < this.segmentPosition; s++) {
-      slot += this.segmentsCount[s]
+    for (let sIdx = 0; sIdx < this.segmentPosition; sIdx++) {
+      slot += this.segmentsCount[sIdx]
     }
 
-    appendToSlot(this.parentElement, node.element, slot)
+    const insertAt = this.parentNode.insertAscending
+      ? slot
+      : slot + this.segmentsCount[this.segmentPosition]
+
+    appendToSlot(this.parentNode.element, node.element, insertAt)
+
+    this.segmentsCount[this.segmentPosition]++
+
 
     if ('style' in node && node.style && Object.keys(node.style).length) {
       const selector = useStyleRule(this.env.style, node.style)
@@ -150,7 +166,7 @@ class BranchChildrenSinkList implements Disposable {
 
     for (let i = 0; i < l; ++i) {
       const $child = $segments[i]
-      const sink = new BranchEffectsSink(this.env, node.element, i, segmentsCount)
+      const sink = new BranchEffectsSink(this.env, node, i, segmentsCount)
 
       this.disposables.set($child, $child.run(sink, this.env.scheduler))
     }

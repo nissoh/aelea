@@ -19,6 +19,7 @@ export interface INode<A extends INodeElement = INodeElement> {
 }
 export interface IBranch<A extends IBranchElement = IBranchElement, B = {}> extends INode<A> {
   $segments: Array<$Node>
+  insertAscending: boolean
 
   style?: StyleCSS
   stylePseudo: Array<{ style: StyleCSS, class: string }>
@@ -46,7 +47,10 @@ export interface Sample<A, B> {
   (o1: Op<A, B>): Sampler<A>
   <B1>(o1: Op<A, B1>, o2: Op<B1, B>): Sampler<A>
   <B1, B2>(o1: Op<A, B1>, o2: Op<B1, B2>, o3: Op<B2, B>): Sampler<A>
-  <B1, B2, B3>(o1: Op<A, B1>, o2: Op<B1, B2>, o3: Op<B2, B3>, ...oos: Op<unknown, B>[]): Sampler<A>
+  <B1, B2, B3, B4>(o1: Op<A, B1>, o2: Op<B1, B2>, o3: Op<B2, B3>, o4: Op<B3, B4>): Sampler<A>
+  <B1, B2, B3, B4, B5>(o1: Op<A, B1>, o2: Op<B1, B2>, o3: Op<B2, B3>, o4: Op<B3, B4>, o5: Op<B4, B5>): Sampler<A>
+  <B1, B2, B3, B4, B5, B6>(o1: Op<A, B1>, o2: Op<B1, B2>, o3: Op<B2, B3>, o4: Op<B3, B4>, o5: Op<B5, B6>): Sampler<A>
+  <B1, B2, B3, B4, B5, B6>(o1: Op<A, B1>, o2: Op<B1, B2>, o3: Op<B2, B3>, o4: Op<B3, B4>, o5: Op<B5, B6>, ...oos: Op<unknown, B>[]): Sampler<A>
 }
 
 export type $Branch<A extends IBranchElement = IBranchElement, B = {}> = Stream<IBranch<A, B>>

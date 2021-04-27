@@ -1,4 +1,4 @@
-import { map, never, now, switchLatest } from '@most/core'
+import { map, never, switchLatest } from '@most/core'
 import { id } from '@most/prelude'
 import { Disposable, Scheduler, Sink, Stream } from '@most/types'
 import { $Node, $Branch, INode, IBranch, IBranchElement, Op } from '../types'
@@ -30,6 +30,7 @@ export class NodeSource<A, B extends IBranchElement> implements Stream<IBranch<B
     sink.event(scheduler.currentTime(), {
       $segments, element, disposable,
       styleBehavior: [],
+      insertAscending: true,
       attributesBehavior: [],
       stylePseudo: []
     })

@@ -46,7 +46,7 @@ export const $Checkbox = ({ value }: Checkbox) => component((
         mergeArray([focusStyle, dismissstyle])
       )
     ),
-    style({ position: 'relative', width: '18px', height: '18px', border: `2px solid ${pallete.description}` }),
+    style({ position: 'relative', width: '18px', height: '18px', border: `2px solid ${pallete.message}` }),
   )
 
   return [

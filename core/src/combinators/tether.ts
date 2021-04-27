@@ -1,5 +1,5 @@
-import { disposeWith } from '@most/disposable';
-import { remove } from '@most/prelude';
+import { disposeNone, disposeWith } from '@most/disposable'
+import { remove } from '@most/prelude'
 import { Stream, Disposable, Scheduler, Sink, Time } from '@most/types'
 import { Pipe } from '../utils'
 
@@ -8,7 +8,7 @@ class SourceSink<A> implements Sink<A> {
   hasValue = false;
   value!: A;
 
-  constructor(private parent: Tether<A>, private sink: Sink<A>) { }
+  constructor(private parent: Tether<A>, public sink: Sink<A>) { }
 
   event(t: number, x: A): void {
     this.value = x
@@ -30,7 +30,7 @@ class SourceSink<A> implements Sink<A> {
 
 class TetherSink<A> extends Pipe<A, A> {
 
-  constructor(sink: Sink<A>) {
+  constructor(public sink: Sink<A>) {
     super(sink)
   }
 
@@ -42,9 +42,10 @@ class TetherSink<A> extends Pipe<A, A> {
 
 
 
-export class Tether<A> implements Stream<A> {
+class Tether<A> implements Stream<A> {
 
   sourceSink: SourceSink<A> | null = null;
+  sourceDisposable: Disposable = disposeNone();
   tetherSink: TetherSink<A>[] = [];
 
   constructor(private source: Stream<A>) { }
@@ -52,47 +53,48 @@ export class Tether<A> implements Stream<A> {
   run(sink: SourceSink<A> | TetherSink<A>, scheduler: Scheduler): Disposable {
 
     if (sink instanceof SourceSink) {
-
       if (this.sourceSink) {
-        throw new Error('Cannot split multiple sources')
+        // this.dispose()
+        throw new Error('tethering multiple sources is not allowed')
       }
-
       this.sourceSink = sink
 
-      const sourceDisposable = this.source.run(sink, scheduler);
+
+      const disposable = this.source.run(sink, scheduler)
+      this.sourceDisposable = disposable
 
       return {
         dispose: () => {
-          sourceDisposable.dispose()
-
-          this.tetherSink = []
-          this.sourceSink = null
+          const time = scheduler.currentTime()
+          // this.tetherSink.forEach(s => s.end(time))
+          // this.tetherSink.forEach(s => s.end(time))
+          // this.tetherSink = []
+          disposable.dispose()
         }
       }
     }
 
-    if (sink instanceof TetherSink) {
-      this.tetherSink.push(sink)
 
-      if (this.sourceSink?.hasValue) {
-        sink.event(scheduler.currentTime(), this.sourceSink.value)
-      }
+    this.tetherSink.push(sink)
 
-      return disposeWith(
-        s => {
-          const sinkIdx = this.tetherSink.indexOf(s)
-
-          if (sinkIdx > -1) {
-            this.tetherSink[sinkIdx].end(scheduler.currentTime())
-            remove(sinkIdx, this.tetherSink)
-          }
-        },
-        sink
-      )
+    if (this.sourceSink?.hasValue) {
+      sink.event(scheduler.currentTime(), this.sourceSink.value)
     }
 
-    throw new Error(`Sink is not an instance of ${SourceSink.name} or ${TetherSink.name}`)
+    return disposeWith(
+      ([tetherSinkList, sourceTetherSink]) => {
+        sourceTetherSink.end(scheduler.currentTime())
+        const sinkIdx = tetherSinkList.indexOf(sourceTetherSink)
+
+        if (sinkIdx > -1) {
+          remove(sinkIdx, tetherSinkList)
+        }
+      },
+      [this.tetherSink, sink] as const
+    )
   }
+
+
 
 }
 

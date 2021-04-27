@@ -47,12 +47,12 @@ export default ({ baseRoute }: Website) => component((
   const examplesRoute = pagesRoute.create({ fragment: 'examples', title: 'Examples' })
 
   return [
-    $node(designSheet.main, style({ backgroundImage: `radial-gradient(at center center, ${pallete.middleground} 50vh, ${pallete.background})` }))(
+    $node(designSheet.main, style({ backgroundImage: `radial-gradient(at center center, ${pallete.horizon} 50vh, ${pallete.background})`, }))(
       router.match(rootRoute)(
-        $row(layoutSheet.flex, layoutSheet.spacingBig, style({ alignContent: 'center', alignItems: 'center', placeContent: 'center', textAlign: 'center', padding: '0 30px', }))(
+        $row(layoutSheet.flex, layoutSheet.spacingBig, style({ minHeight: '100%', alignContent: 'center', alignItems: 'center', placeContent: 'center', textAlign: 'center', padding: '0 30px', }))(
           fadeIn(
             $column(style({ alignItems: 'center', maxWidth: '550px' }), layoutSheet.spacing)(
-              $Anchor({ $content: $icon({ $content: style({ fill: pallete.foreground }, $aeleaLogo), width: 237, height: 115, viewBox: `0 0 147 90` }), url: '/', route: rootRoute })({
+              $Anchor({ $content: $icon({ $content: style({ fill: pallete.message }, $aeleaLogo), width: 237, height: 115, viewBox: `0 0 147 90` }), url: '/', route: rootRoute })({
                 click: sampleLinkClick()
               }),
               $text(`"aelea", is a UI Framework for reactive event programming`),
@@ -69,7 +69,7 @@ export default ({ baseRoute }: Website) => component((
       router.contains(pagesRoute)(
         $column(layoutSheet.spacingBig, style({ maxWidth: '870px', width: '100%', margin: '0 auto', paddingBottom: '45px' }))(
           $row(style({ placeContent: 'space-between', padding: '0 15px' }))(
-            $Anchor({ $content: $icon({ $content: $aeleaLogo, width: 137, height: 115, viewBox: `0 0 147 90` }), url: '/', route: rootRoute })({
+            $Anchor({ $content: $icon({ $content: $aeleaLogo, fill: pallete.message, width: 137, height: 115, viewBox: `0 0 147 90` }), url: '/', route: rootRoute })({
               click: sampleLinkClick()
             }),
             $MainMenu({ parentRoute: pagesRoute })({

@@ -54,7 +54,7 @@ export function tryRunning<T>(stream: Stream<T>, sink: Sink<T>, scheduler: Sched
 
 
 
-export const nullSink = <Sink<unknown>>{
+export const nullSink = <Sink<never>>{
   // tslint:disable-next-line:no-empty
   event() { },
   // tslint:disable-next-line:no-empty

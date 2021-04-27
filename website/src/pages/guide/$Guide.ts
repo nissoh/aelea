@@ -44,7 +44,7 @@ export default ({ parentRoute }: Guide) => component((
 export default $text('Yellow World')`
         })({}),
 
-        $text(`Nothing fancy yet, the "default export" renders a message and there is this "$text" function, aelea semantically prefixes anything that will eventually emits elements with $ sign, this is jsut for readability, we see its usefulness later on`),
+        $text(`Nothing fancy yet, the "default export" renders a message and there is this "$text" function, "$" prefix is just a semantic for anything that will eventually emits DOM elements, it makes the code more readable to distinguish between different stream types, we'll see its usefulness later on`),
 
         $TSPeep({
           readOnly: false,
