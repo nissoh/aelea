@@ -4,10 +4,10 @@ import { $Button, $card, $column, $icon, $Popover, $row, $Slider, elevation2, la
 import { pallete } from '@aelea/ui-components-theme'
 import { constant, empty, map, merge, now, snapshot } from '@most/core'
 import { $alert } from '../../../elements/$common'
-import { $TokenInput } from './$TokenInput'
 import { $caretDblDown, $gaugeMetric } from './common'
 import { tokenList } from './state'
 import { Token } from './types'
+import { $TokenInput } from './$TokenInput'
 
 export interface AssetUnit {
   /** Unique identifier for the asset (typically a 3 or 4 character uppercase code) */
