@@ -1,12 +1,12 @@
 import { attr, attrBehavior, Behavior, component, event, INode, O, style } from "@aelea/core"
 import { $row, layoutSheet, $icon, $Popover, $Field } from "@aelea/ui-components"
 import { pallete } from "@aelea/ui-components-theme"
-import { constant, empty, map, merge, multicast, switchLatest } from "@most/core"
+import { constant, map, merge, multicast, switchLatest } from "@most/core"
 import { Stream } from "@most/types"
-import { $TokenList } from "./$TokenList"
 import { Token } from "./types"
 import { tokenList } from './state'
 import { $caretDown } from "./common"
+import { $TokenList } from "./$tokenList"
 
 
 
