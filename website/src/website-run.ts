@@ -1,3 +1,4 @@
+import 'construct-style-sheets-polyfill'
 import './assignThemeSync'
 // @ts-ignore
 import { } from 'global.d.ts'

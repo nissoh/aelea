@@ -1,5 +1,5 @@
 
-import { $node, $text, Behavior, component, O, style } from '@aelea/core'
+import { $node, $text, attr, Behavior, component, O, style } from '@aelea/core'
 import { $column, $Field, $NumberTicker, $row, layoutSheet } from '@aelea/ui-components'
 import { pallete } from '@aelea/ui-components-theme'
 import { combine, empty, map, startWith } from '@most/core'
@@ -16,14 +16,15 @@ const extractValue = O(
 const $plus = $node(
   style({
     justifyContent: 'center', alignItems: 'center',
-    width: '36px', color: pallete.description
+    width: '36px', color: pallete.foreground
   }),
   layoutSheet.displayFlex
 )
 
+const placeholderZero = attr({ placeholder: '0' })
 export default component((
-  [sampleX, x]: Behavior<string, number>,
-  [sampleY, y]: Behavior<string, number>
+  [x, XTether]: Behavior<string, number>,
+  [y, YTether]: Behavior<string, number>
 ) =>
   [
     $column(layoutSheet.spacingSmall)(
@@ -33,11 +34,11 @@ export default component((
           $text('+')
         ),
         $column(layoutSheet.spacingTiny)(
-          $Field({ value: empty(), placeholder: '0' })({
-            change: sampleX(extractValue)
+          $Field({ value: empty(), inputOp: placeholderZero })({
+            change: XTether(extractValue)
           }),
-          $Field({ value: empty(), placeholder: '0' })({
-            change: sampleY(extractValue)
+          $Field({ value: empty(), inputOp: placeholderZero })({
+            change: YTether(extractValue)
           })
         )
       ),

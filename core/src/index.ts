@@ -1,5 +1,3 @@
-import 'construct-style-sheets-polyfill'
-
 export * from './combinators/animate'
 export * from './combinators/attribute'
 export * from './combinators/component'

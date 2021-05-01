@@ -1,21 +1,21 @@
-import { disposeWith } from '@most/disposable';
-import { remove } from '@most/prelude';
+import { disposeNone, disposeWith } from '@most/disposable'
+import { remove } from '@most/prelude'
 import { Stream, Disposable, Scheduler, Sink, Time } from '@most/types'
 import { Pipe } from '../utils'
 
 
-class SourceSink<A> implements Sink<A> {
+class SourceSink<T> implements Sink<T> {
   hasValue = false;
-  value!: A;
+  latestValue!: T;
 
-  constructor(private parent: Tether<A>, private sink: Sink<A>) { }
+  constructor(private parent: Tether<T>, public sink: Sink<T>) { }
 
-  event(t: number, x: A): void {
-    this.value = x
+  event(t: number, x: T): void {
+    this.latestValue = x
     this.hasValue = true
 
     this.sink.event(t, x)
-    this.parent.tetherSink.forEach(s => s.event(t, x))
+    this.parent.tetherSinkList.forEach(s => s.event(t, x))
   }
 
   end(t: Time) {
@@ -25,12 +25,11 @@ class SourceSink<A> implements Sink<A> {
   error(t: Time, e: Error): void {
     this.sink.error(t, e)
   }
-
 }
 
 class TetherSink<A> extends Pipe<A, A> {
 
-  constructor(sink: Sink<A>) {
+  constructor(public sink: Sink<A>) {
     super(sink)
   }
 
@@ -42,74 +41,72 @@ class TetherSink<A> extends Pipe<A, A> {
 
 
 
-export class Tether<A> implements Stream<A> {
+class Tether<T> implements Stream<T> {
 
-  sourceSink: SourceSink<A> | null = null;
-  tetherSink: TetherSink<A>[] = [];
+  sourceSinkList: SourceSink<T>[] = [];
+  tetherSinkList: TetherSink<T>[] = [];
 
-  constructor(private source: Stream<A>) { }
+  sourceDisposable: Disposable = disposeNone()
 
-  run(sink: SourceSink<A> | TetherSink<A>, scheduler: Scheduler): Disposable {
+  constructor(private source: Stream<T>) { }
+
+  run(sink: SourceSink<T> | TetherSink<T>, scheduler: Scheduler): Disposable {
 
     if (sink instanceof SourceSink) {
 
-      if (this.sourceSink) {
-        throw new Error('Cannot split multiple sources')
-      }
+      this.sourceDisposable.dispose()
+      this.sourceSinkList.push(sink)
 
-      this.sourceSink = sink
-
-      const sourceDisposable = this.source.run(sink, scheduler);
+      this.sourceDisposable = this.source.run(sink, scheduler)
 
       return {
         dispose: () => {
-          sourceDisposable.dispose()
-
-          this.tetherSink = []
-          this.sourceSink = null
+          const srcIdx = this.sourceSinkList.indexOf(sink)
+          this.sourceSinkList.splice(srcIdx, 1)
+          this.sourceDisposable.dispose()
         }
       }
     }
 
-    if (sink instanceof TetherSink) {
-      this.tetherSink.push(sink)
+    this.tetherSinkList.push(sink)
 
-      if (this.sourceSink?.hasValue) {
-        sink.event(scheduler.currentTime(), this.sourceSink.value)
+    this.sourceSinkList.forEach(s => {
+      if (s.hasValue) {
+        sink.event(scheduler.currentTime(), s.latestValue)
       }
+    })
 
-      return disposeWith(
-        s => {
-          const sinkIdx = this.tetherSink.indexOf(s)
 
-          if (sinkIdx > -1) {
-            this.tetherSink[sinkIdx].end(scheduler.currentTime())
-            remove(sinkIdx, this.tetherSink)
-          }
-        },
-        sink
-      )
-    }
+    return disposeWith(
+      ([tetherSinkList, sourceTetherSink]) => {
+        sourceTetherSink.end(scheduler.currentTime())
+        const sinkIdx = tetherSinkList.indexOf(sourceTetherSink)
 
-    throw new Error(`Sink is not an instance of ${SourceSink.name} or ${TetherSink.name}`)
+        if (sinkIdx > -1) {
+          remove(sinkIdx, tetherSinkList)
+        }
+      },
+      [this.tetherSinkList, sink] as const
+    )
   }
+
 
 }
 
 
 
-export const tether = <A>(source: Stream<A>): [Stream<A>, Stream<A>] => {
-  const split = new Tether(source)
+export const tether = <T>(source: Stream<T>): [Stream<T>, Stream<T>] => {
+  const tetherSource = new Tether(source)
 
   return [
     {
       run(sink, scheduler) {
-        return split.run(new SourceSink(split, sink), scheduler)
+        return tetherSource.run(new SourceSink(tetherSource, sink), scheduler)
       }
     },
     {
       run(sink, scheduler) {
-        return split.run(new TetherSink(sink), scheduler)
+        return tetherSource.run(new TetherSink(sink), scheduler)
       }
     }
   ]

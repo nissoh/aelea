@@ -249,7 +249,7 @@ export interface IMonacoEditor {
 }
 
 export const $MonacoEditor = ({ code, config, override, containerStyle = { flex: 1 } }: IMonacoEditor) => component((
-  [sampleChange, change]: Behavior<IBranch<HTMLElement>, ModelChangeBehavior>
+  [change, changeTether]: Behavior<IBranch<HTMLElement>, ModelChangeBehavior>
 ) => {
  
   
@@ -330,7 +330,7 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
     const $editor = $wrapNativeElement(editorElement)(O(
       layoutSheet.column,
       style({ ...containerStyle  }),
-      sampleChange(
+      changeTether(
       // ensure we load editor only when it's visible on the screen
         elementBecameVisibleEvent,
         map(async elEvents => {

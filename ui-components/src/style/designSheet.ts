@@ -10,11 +10,17 @@ const text = style({
 })
 const customScroll = O(
   stylePseudo('::-webkit-scrollbar-thumb', {
-    backgroundColor: pallete.description
+    backgroundColor: pallete.foreground
+   
   }),
   stylePseudo('::-webkit-scrollbar', {
-    backgroundColor: 'transparent'
-  })
+    backgroundColor: 'transparent',
+    width: '6px',
+    height: '6px'
+  }),
+  stylePseudo('::-webkit-scrollbar-thumb:hover', {
+    backgroundColor: pallete.primary
+  }),
 )
 
 const control = O(
@@ -41,7 +47,7 @@ export default {
       margin: '0',
       scrollbarColor: 'auto',
       scrollbarWidth: 'thin',
-      display: 'flex'
+      display: 'block'
     }),
     customScroll
   ),
@@ -52,12 +58,14 @@ export default {
       minWidth: '100px',
       backgroundColor: 'transparent',
       border: 'none',
-      borderBottom: `2px solid ${pallete.description}`,
+      borderBottom: `2px solid ${pallete.message}`,
       paddingBottom: '2px',
       flex: 1,
+      padding: 0,
+      marginTop: '2px'
     }),
     stylePseudo('::placeholder', {
-      color: pallete.description
+      color: pallete.foreground
     })
   ),
   btn: O(
@@ -65,7 +73,7 @@ export default {
     style({
       cursor: 'pointer',
       backgroundColor: 'transparent',
-      border: `2px solid ${pallete.description}`,
+      border: `2px solid ${pallete.message}`,
       color: pallete.message,
       padding: '5px 15px',
       display: 'flex',

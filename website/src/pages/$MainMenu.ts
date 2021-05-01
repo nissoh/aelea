@@ -13,13 +13,14 @@ interface MainMenu {
 }
 
 export default ({ parentRoute }: MainMenu) => component((
-  [sampleRouteChange, routeChange]: Behavior<string, string>
+  [routeChange, routeChangeTether]: Behavior<string, string>
 ) => {
 
   const guideRoute = parentRoute.create({ fragment: 'guide', title: 'Guide' })
   const examplesRoute = parentRoute.create({ fragment: 'examples', title: 'Examples' })
 
-  const $seperator = $text(style({ color: pallete.description, pointerEvents: 'none' }))('|')
+  const $seperator = $text(style({ color: pallete.foreground, pointerEvents: 'none' }))('|')
+  
   return [
     $row(layoutSheet.spacingSmall, style({ alignItems: 'center', placeContent: 'center' }))(
 
@@ -28,11 +29,11 @@ export default ({ parentRoute }: MainMenu) => component((
       // }),
 
       $Link({ $content: $text('Developer\'s Guide'), url: '/p/guide', route: guideRoute })({
-        click: sampleRouteChange()
+        click: routeChangeTether()
       }),
       $seperator,
       $Link({ $content: $text('Examples'), url: '/p/examples/theme', route: examplesRoute })({
-        click: sampleRouteChange()
+        click: routeChangeTether()
       }),
       $seperator,
 

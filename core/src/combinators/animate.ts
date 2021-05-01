@@ -121,8 +121,8 @@ function stepFrame(target: number, state: MotionState, motionEnv: Motion) {
 
   const acceleration = spring - damper
 
-  const newVelocity = state.velocity + (acceleration * fps);
-  const newPosition = state.position + (newVelocity * fps);
+  const newVelocity = state.velocity + (acceleration * fps)
+  const newPosition = state.position + (newVelocity * fps)
 
   const settled = Math.abs(newVelocity) < motionEnv.precision && Math.abs(delta) < motionEnv.precision
 

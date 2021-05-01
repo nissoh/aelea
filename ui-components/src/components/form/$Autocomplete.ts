@@ -13,9 +13,9 @@ export interface Autocomplete extends Input<string | number> {
 }
 
 export const $Autocomplete = ({ type = InputType.TEXT, value = empty(), name, placeholder }: Autocomplete) => component((
-  [sampleFocus, focus]: Behavior<IBranch, true>,
-  [dismissBehavior, dismissstyle]: Behavior<IBranch, false>,
-  [sampleChange, change]: Behavior<IBranch<HTMLInputElement>, string>
+  [focus, focusTether]: Behavior<IBranch, true>,
+  [dismissstyle, dismissTether]: Behavior<IBranch, false>,
+  [change, changeTether]: Behavior<IBranch<HTMLInputElement>, string>
 ) => {
 
   return [
@@ -23,7 +23,7 @@ export const $Autocomplete = ({ type = InputType.TEXT, value = empty(), name, pl
       attr({ name, type, placeholder }),
       designSheet.input,
 
-      sampleChange(
+      changeTether(
         event('input'),
         map(inputEv => {
           if (inputEv.target instanceof HTMLInputElement) {
@@ -41,10 +41,10 @@ export const $Autocomplete = ({ type = InputType.TEXT, value = empty(), name, pl
         )
       ),
 
-      sampleFocus(interactionOp),
-      dismissBehavior(dismissOp),
+      focusTether(interactionOp),
+      dismissTether(dismissOp),
 
-      sampleChange(
+      changeTether(
         inputNode => snapshot((node, text) => {
           // applying by setting `HTMLInputElement.value` imperatively(only way known to me)
           node.element.value = String(text)

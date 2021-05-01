@@ -10,9 +10,9 @@ export interface ILink extends IAnchor {
 }
 
 export const $Link = ({ url, route, $content, styles = {} }: ILink) => component((
-  [sampleClick, click]: Behavior<string, string>,
-  [sampleContains, active]: Behavior<boolean, boolean>,
-  [sampleFocus, focus]: Behavior<boolean, boolean>,
+  [click, clickTether]: Behavior<string, string>,
+  [active, containsTether]: Behavior<boolean, boolean>,
+  [focus, focusTether]: Behavior<boolean, boolean>,
 ) => {
 
   const anchorOps = O(
@@ -33,9 +33,9 @@ export const $Link = ({ url, route, $content, styles = {} }: ILink) => component
   return [
     anchorOps(
       $Anchor({ $content, url, route })({
-        click: sampleClick(),
-        focus: sampleFocus(),
-        contains: sampleContains()
+        click: clickTether(),
+        focus: focusTether(),
+        contains: containsTether()
       })
     ),
 

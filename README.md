@@ -58,11 +58,11 @@ const sumFromZeroOp = scan((current: number, x: number) => current + x, 0)
 
 // Component that outputs state(optionally), this is currently not used anywhere, see next example to see it being consumed
 const $Counter = component((
-    [sampleIncrement, increment]: Behavior<INode, 1>,
-    [sampleDecrement, decrement]: Behavior<INode, -1>
+    [increment, incrementTether]: Behavior<INode, 1>,
+    [decrement, decrementTether]: Behavior<INode, -1>
   ) => {
-    const incrementBehavior = sampleIncrement(event('click'), constant(1))
-    const decrementBehavior = sampleDecrement(event('click'), constant(-1))
+    const incrementBehavior = incrementTether(event('click'), constant(1))
+    const decrementBehavior = decrementTether(event('click'), constant(-1))
 
     const count = sumFromZeroOp(merge(increment, decrement))
 
@@ -103,8 +103,8 @@ import { $text, Behavior, component, style, INode, runBrowser } from '@aelea/cor
 import $Counter, { $column, $row, spacingStyle } from './$Counter' // lets assume we default export $Counter and a few reusable $node's and style instead
 
 const $SumOfTwoCounters = component((
-  [sampleIncrements, increments]: Behavior<INode, 1>,
-  [sampleDecrements, decrements]: Behavior<INode, -1>
+  [increments, incrementsTether]: Behavior<INode, 1>,
+  [decrements, decrementsTether]: Behavior<INode, -1>
 ) => {
 
   const sumOfTwoCounters = scan((sum, count) =>  sum + count, 0 , merge(increments, decrements))
@@ -115,13 +115,13 @@ const $SumOfTwoCounters = component((
 
       $row(spacingStyle)(
         $Counter({
-          increment: sampleIncrements(),
-          decrement: sampleDecrements(),
+          increment: incrementsTether(),
+          decrement: decrementsTether(),
         }),
 
         $Counter({
-          increment: sampleIncrements(),
-          decrement: sampleDecrements(),
+          increment: incrementsTether(),
+          decrement: decrementsTether(),
         }),
       )
 

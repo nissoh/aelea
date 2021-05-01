@@ -12,14 +12,14 @@ interface IMonaco {
 
 
 export default ({ code = '', readOnly = true }: IMonaco) => component((
-  [sampleChange, change]: Behavior<ModelChangeBehavior, ModelChangeBehavior>
+  [change, changeTether]: Behavior<ModelChangeBehavior, ModelChangeBehavior>
 ) => {
 
   const $loader = $row(style({ width: '2px', backgroundColor: 'rgb(43 52 55)' }))(
     $row(
       styleInline(
         map(({ semanticDiagnostics, syntacticDiagnostics }) => {
-          return { backgroundColor: semanticDiagnostics.length || syntacticDiagnostics.length ? pallete.negative : pallete.description }
+          return { backgroundColor: semanticDiagnostics.length || syntacticDiagnostics.length ? pallete.negative : pallete.foreground }
         }, change)
       ),
       styleInline(
@@ -33,7 +33,7 @@ export default ({ code = '', readOnly = true }: IMonaco) => component((
         )
       ),
       layoutSheet.flex,
-      style({ backgroundColor: pallete.description })
+      style({ backgroundColor: pallete.foreground })
     )()
   )
 
@@ -43,7 +43,7 @@ export default ({ code = '', readOnly = true }: IMonaco) => component((
   return [
     $column(layoutSheet.flex)(
       $MonacoEditor({ code, config: { readOnly, automaticLayout: true, theme: theme.name === 'light' ? 'vs-light': 'vs-dark' }, containerStyle: { height: initalCodeBlockHeight + 'px' } })({
-        change: sampleChange()
+        change: changeTether()
       }),
       $row(style({ backgroundColor: pallete.background, minHeight: '30px' }))(
         $loader,
@@ -71,7 +71,7 @@ export default ({ code = '', readOnly = true }: IMonaco) => component((
               }),
               awaitPromises,
               filter(node => node !== never()),
-              startWith($text(style({ color: pallete.description, fontSize: '75%' }))('Loading Typescript Service...'))
+              startWith($text(style({ color: pallete.foreground, fontSize: '75%' }))('Loading Typescript Service...'))
             )(change)
           )
         )

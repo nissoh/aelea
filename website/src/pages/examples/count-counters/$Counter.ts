@@ -10,8 +10,8 @@ interface Counter {
 }
 
 export default ({ value }: Counter) => component((
-  [sampleIncrement, increment]: Behavior<PointerEvent, 1>,
-  [sampleDecrement, decrement]: Behavior<PointerEvent, -1>
+  [increment, incrementTether]: Behavior<PointerEvent, 1>,
+  [decrement, decrementTether]: Behavior<PointerEvent, -1>
 ) => {
 
 
@@ -20,12 +20,12 @@ export default ({ value }: Counter) => component((
     $row(style({ alignItems: 'center', placeContent: 'space-between' }), layoutSheet.spacing)(
       $column(style({ borderRadius: '5px', alignItems: 'center' }), layoutSheet.spacing)(
         $Button({ $content: $text('+') })({
-          click: sampleIncrement(
+          click: incrementTether(
             constant(1)
           )
         }),
         $Button({ $content: $text('-') })({
-          click: sampleDecrement(
+          click: decrementTether(
             constant(-1)
           )
         }),

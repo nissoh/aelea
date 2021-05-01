@@ -13,8 +13,8 @@ const $anchor = $element('a')(
 )
 
 export const $Anchor = ({ url, route, $content }: IAnchor) => component((
-  [sampleClick, click]: Behavior<IBranch, string>,
-  [sampleFocus, focus]: Behavior<IBranch, boolean>,
+  [click, clickTether]: Behavior<IBranch, string>,
+  [focus, focusTether]: Behavior<IBranch, boolean>,
 ) => {
 
   const trailingSlash = /\/$/
@@ -28,7 +28,7 @@ export const $Anchor = ({ url, route, $content }: IAnchor) => component((
   return [
     $anchor(
       attr({ href }),
-      sampleClick(
+      clickTether(
         event('click'),
         map((clickEv): string => {
           clickEv.preventDefault()
@@ -49,7 +49,7 @@ export const $Anchor = ({ url, route, $content }: IAnchor) => component((
           
         })
       ),
-      sampleFocus(
+      focusTether(
         $anchor => {
           const focus = constant(true, merge(event('focus', $anchor), event('pointerenter', $anchor)))
           const blur = constant(false, merge(event('blur', $anchor), event('pointerleave', $anchor)))

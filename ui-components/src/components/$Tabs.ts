@@ -16,7 +16,7 @@ export interface Tabs {
 
 export const $Tabs = (config: Tabs) => {
   return component((
-    [sampleClickTab, clickTab]: Behavior<any, Tab>
+    [clickTab, clickTabTether]: Behavior<any, Tab>
   ) => {
 
 
@@ -24,7 +24,7 @@ export const $Tabs = (config: Tabs) => {
       merge(
         $node(
           ...config.tabs.map(t => {
-            return sampleClickTab(
+            return clickTabTether(
               event('click'),
               map(clickEvent => {
                 return t

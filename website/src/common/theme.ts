@@ -8,16 +8,15 @@ export const light: Theme = {
     primary: '#f00',
 
     message: '#000000',
-    description: '#616058',
 
-    background: '#e8dab4',
-    horizon: '#ded7cb',
-    middleground: '#fff5de',
-    foreground: '#80600d',
+    background: '#ffffff',
+    horizon: '#fff5de',
+    middleground: '#e0d0ab',
+    foreground: '#866724',
 
-    positive: '#6bc36b',
-    negative: '#e07070',
-    indeterminate: '#c5bd61',
+    positive: '#0fd25e',
+    negative: '#b70636',
+    indeterminate: '#dccb07',
   }
 }
 export const dark: Theme = {
@@ -26,10 +25,9 @@ export const dark: Theme = {
     primary: '#ea607e',
 
     message: '#ffffff',
-    description: '#a5b6bd',
 
-    background: '#1e282b',
-    horizon: '#50676f',
+    background: '#151b1d',
+    horizon: '#1e282b',
     middleground: '#2d363a',
     foreground: '#a5b6bd',
 

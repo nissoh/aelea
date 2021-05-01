@@ -1,20 +1,20 @@
 import { map, merge, now } from "@most/core"
 import { Stream } from "@most/types"
 import { $Branch, $text, Behavior, component, INode, O, Op, style, StyleCSS, stylePseudo } from '@aelea/core'
-import { $row } from "../$elements"
-import { $QuantumScroll, QuantumScroll, ScrollSegment } from "./$QuantumScroll"
+import { $row } from "../elements/$elements"
+import { $VirtualScroll, QuantumScroll, ScrollRequest } from "./$VirtualScroll"
 import { pallete } from "@aelea/ui-components-theme"
 import layoutSheet from "../style/layoutSheet"
 
 
-export interface Response<T> {
+export interface TablePageResponse<T> {
   data: T[]
-  totalItems: number,
+  pageSize: number,
 }
 
 export interface TableOption<T> extends Omit<QuantumScroll, 'dataSource'> {
   columns: TableColumn<T>[]
-  dataSource: Stream<Response<T>>
+  dataSource: Stream<TablePageResponse<T>>
 }
 
 export interface TableColumn<T> {
@@ -29,15 +29,13 @@ const elipsisTextOverflow = style({
   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
 })
 const tableCellStyle = O(
-  style({
-    padding: '3px 6px'
-  }),
+  style({ padding: '3px 6px' }),
   layoutSheet.flex
 )
 
 const $headerCell = $row(
   tableCellStyle,
-  style({ fontSize: '15px', color: pallete.description, }),
+  style({ fontSize: '15px', color: pallete.foreground, }),
 )
 
 const $bodyCell = $row(
@@ -45,53 +43,48 @@ const $bodyCell = $row(
 )
 
 const $rowContainer = $row(layoutSheet.spacing)
+const $rowHeaderContainer = $rowContainer(style({ overflowY: 'scroll' }), stylePseudo('::-webkit-scrollbar', { backgroundColor: 'transparent', width: '6px' }))
 
 
+export const $Table = <T>(config: TableOption<T>) => component((
+  [requestList, requestListTether]: Behavior<ScrollRequest, ScrollRequest>
+) => {
 
-export const $Table = <T>(config: TableOption<T>) => {
-  return component((
-    [sampleRequestList, requestList]: Behavior<ScrollSegment, ScrollSegment>
-  ) => {
+  const $header = $rowHeaderContainer(
+    ...config.columns.map(col => {
+      return $headerCell(style(col.cellStyle ?? { }))(
+        col.header ?? elipsisTextOverflow($text(String(col.id)))
+      )
+    })
+  )
 
-    const $header = $rowContainer(style({ overflowY: 'scroll' }), stylePseudo('::-webkit-scrollbar', { backgroundColor: 'transparent' }))(
-      ...config.columns.map(col => {
-        return $headerCell(style(col.cellStyle ?? { height: config.rowHeight + 'px' }))(
-          col.header ?? elipsisTextOverflow($text(String(col.id)))
-        )
-      })
-    )
-
-    const dataStream = map(({ data, totalItems }) => {
-
-      const $items = data.map(rowData =>
-        $rowContainer(
-          ...config.columns.map(col =>
-            $bodyCell(style(col.cellStyle ?? {}))(
-              col.value(now(rowData))
-            )
+  const dataSource = map(({ data, pageSize }) => {
+    const $items = data.map(rowData =>
+      $rowContainer(
+        ...config.columns.map(col =>
+          $bodyCell(style(col.cellStyle ?? {}))(
+            col.value(now(rowData))
           )
         )
       )
+    )
+    return { $items, pageSize }
+  }, config.dataSource)
 
-      return { $items, totalItems }
-    }, config.dataSource)
-
-    const $body = $QuantumScroll({
-      ...config,
-      dataSource: dataStream
-    })({
-      requestSource: sampleRequestList()
-    })
-
-    return [
-      merge(
-        $body,
-        $header,
-      ),
-
-      { requestList }
-    ]
-
+  const $body = $VirtualScroll({
+    ...config,
+    dataSource
+  })({
+    scrollRequest: requestListTether()
   })
 
-}
+  return [
+    merge(
+      $body,
+      $header,
+    ),
+
+    { requestList }
+  ]
+
+})

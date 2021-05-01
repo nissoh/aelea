@@ -7,7 +7,7 @@ import { merge, tap } from "@most/core"
 
 
 export const $Picker = (themes: Theme[]) => component((
-  [sampleChangeThemeEffect, changeThemeEffect]: Behavior<any, any>
+  [changeThemeEffect, changeThemeEffectTether]: Behavior<any, any>
 ) => {
 
   const current = JSON.parse(localStorage.getItem(THEME_PALLETE_SELECTED_KEY)!) as Theme
@@ -15,7 +15,7 @@ export const $Picker = (themes: Theme[]) => component((
   const applyOps = O(
     style({ position: 'absolute', left: '15px', top: '15px', cursor: 'pointer' }),
     stylePseudo(':hover', { fill: pallete.primary }),
-    sampleChangeThemeEffect(
+    changeThemeEffectTether(
       event('click'),
       tap(() => {
         const themeNameList = themes.map(t => t.name)

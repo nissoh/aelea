@@ -1,6 +1,6 @@
-import { $element, attr, Behavior, component, event, IBranch, O, style, styleBehavior, StyleCSS } from '@aelea/core'
+import { $element, Behavior, component, event, IBranch, O, Op, style, styleBehavior, StyleCSS } from '@aelea/core'
 import { pallete } from '@aelea/ui-components-theme'
-import { multicast, never, now, tap } from '@most/core'
+import { multicast, never, now, startWith, tap } from '@most/core'
 import { filter } from '@most/core'
 import { merge } from '@most/core'
 import { empty, map, switchLatest } from "@most/core"
@@ -11,33 +11,32 @@ import { Input, InputType } from './types'
 
 export interface Field extends Input<string | number> {
   type?: InputType
-  placeholder?: string
   name?: string
-  autocomplete?: boolean
   fieldStyle?: StyleCSS
+
+  inputOp?: Op<IBranch, IBranch>
 }
 
-export const $Field = ({ type = InputType.TEXT, value = empty(), name, placeholder, autocomplete = true, fieldStyle = {}, validation = never }: Field) => component((
-  [interactionBehavior, focusStyle]: Behavior<IBranch, true>,
-  [dismissBehavior, dismissstyle]: Behavior<IBranch, false>,
-  [sampleBlur, blur]: Behavior<IBranch, FocusEvent>,
-  [sampleChange, change]: Behavior<IBranch<HTMLInputElement>, string>
+export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, inputOp = O() }: Field) => component((
+  [focusStyle, interactionTether]: Behavior<IBranch, true>,
+  [dismissstyle, dismissTether]: Behavior<IBranch, false>,
+  [blur, blurTether]: Behavior<IBranch, FocusEvent>,
+  [change, changeTether]: Behavior<IBranch<HTMLInputElement>, string>
 ) => {
 
-  const multicastValidation = O(validation, multicast)
+  const multicastValidation = O(validation, startWith(''), multicast)
 
   const alert = multicastValidation(change)
 
   const focus = merge(focusStyle, dismissstyle)
-  const state = combineState({ focus: false, alert: null }, { focus, alert })
+  const state = combineState({ focus, alert })
 
   return [
     $element('input')(
-      attr({ name, type, placeholder, autocomplete: autocomplete ? null : 'off' }),
       designSheet.input,
       style(fieldStyle),
 
-      sampleChange(
+      changeTether(
         event('input'),
         map(inputEv => {
           if (inputEv.target instanceof HTMLInputElement) {
@@ -47,6 +46,8 @@ export const $Field = ({ type = InputType.TEXT, value = empty(), name, placehold
           return ''
         })
       ),
+
+      inputOp,
 
       styleBehavior(
         map(({ focus, alert }) => {
@@ -58,10 +59,10 @@ export const $Field = ({ type = InputType.TEXT, value = empty(), name, placehold
         }, state)
       ),
 
-      interactionBehavior(interactionOp),
-      dismissBehavior(dismissOp),
+      interactionTether(interactionOp),
+      dismissTether(dismissOp),
 
-      sampleBlur(event('blur')),
+      blurTether(event('blur')),
 
       O(
         map(node =>
