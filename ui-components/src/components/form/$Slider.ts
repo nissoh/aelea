@@ -1,7 +1,6 @@
 import { filter, map, merge, now, switchLatest, tap } from "@most/core"
-import { $element, attr, Behavior, component, IBranch, event, style, attrBehavior, stylePseudo, StyleCSS, O } from '@aelea/core'
+import { $element, attr, Behavior, component, IBranch, event, style, stylePseudo, StyleCSS, O } from '@aelea/core'
 import { pallete } from "@aelea/ui-components-theme"
-import layoutSheet from "../../style/layoutSheet"
 import { Input } from "./types"
 
 
@@ -10,7 +9,7 @@ export interface Slider extends Input<number> {
 }
 
 export const $Slider = ({ value, step = .01 }: Slider) => component((
-  [sampleChange, change]: Behavior<IBranch<HTMLInputElement>, number>
+  [change, changeTether]: Behavior<IBranch<HTMLInputElement>, number>
 ) => {
 
 
@@ -29,7 +28,7 @@ export const $Slider = ({ value, step = .01 }: Slider) => component((
       style({ width: '100%', height: '3px', margin: '0', transition: 'opacity .2s', appearance: 'none', outline: 'none', background: pallete.message }),
       stylePseudo('::-webkit-slider-thumb', sliderThunmbStyle),
       // stylePseudo('::-moz-range-thumb', sliderThunmbStyle),
-      sampleChange(
+      changeTether(
         event('input'),
         map(evt => {
           const target: HTMLInputElement = evt.target! as any

@@ -48,10 +48,10 @@ export function applyStyleBehavior(styleBehavior: Stream<StyleCSS | null>, node:
 function styleObjectAsString(styleObj: StyleCSS) {
   return Object.entries(styleObj)
     .map(([key, val]) => {
-      const kebabCaseKey = key.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
-      return `${kebabCaseKey}:${val};`;
+      const kebabCaseKey = key.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase()
+      return `${kebabCaseKey}:${val};`
     })
-    .join("");
+    .join("")
 }
 
 

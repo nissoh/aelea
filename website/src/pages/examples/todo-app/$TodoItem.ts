@@ -17,21 +17,21 @@ interface TodoItem {
 }
 
 export default ({ todo, completed }: TodoItem) => component((
-  [sampleRemove, remove]: Behavior<MouseEvent, MouseEvent>,
-  [sampleComplete, complete]: Behavior<boolean, boolean>,
-  [sampleText, text]: Behavior<string, string>
+  [remove, removeTether]: Behavior<MouseEvent, MouseEvent>,
+  [complete, completeTether]: Behavior<boolean, boolean>,
+  [text, textTether]: Behavior<string, string>
 ) => {
 
   return [
     $row(rowStyle)(
       $Checkbox({ value: completed })({
-        check: sampleComplete()
+        check: completeTether()
       }),
       $Field({ value: now(todo.text) })({
-        change: sampleText()
+        change: textTether()
       }),
       $TrashBtn({
-        click: sampleRemove()
+        click: removeTether()
       })
     ),
 

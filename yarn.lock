@@ -14,7 +14,6 @@ __metadata:
     "@most/prelude": 1.8.0
     "@most/scheduler": 1.3.0
     "@most/types": 1.1.0
-    construct-style-sheets-polyfill: 2.4.16
     csstype: 3.0.7
   languageName: unknown
   linkType: soft
@@ -67,6 +66,7 @@ __metadata:
     "@most/prelude": 1.8.0
     "@most/scheduler": 1.3.0
     "@most/types": 1.1.0
+    construct-style-sheets-polyfill: 2.4.16
     copy-webpack-plugin: ^8.1.1
     fork-ts-checker-webpack-plugin: 6.2.1
     gh-pages: ^3.1.0

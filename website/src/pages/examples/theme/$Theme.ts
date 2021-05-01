@@ -25,7 +25,7 @@ export const $Pallete = (themeDef: Theme) => component(() => {
   const theme = themeDef.pallete
 
   return [
-    $card(layoutSheet.spacingBig, elevation2, style({ color: theme.message, padding: '15px', backgroundColor: theme.background }))(
+    $card(layoutSheet.spacingBig, layoutSheet.flex, elevation2, style({ color: theme.message, padding: '15px', backgroundColor: theme.background }))(
       $text(style({ fontSize: '120%' }))(themeDef.name),
       getPallete(theme, 'Action', pallete.slice(0, 1)),
       getPallete(theme, 'Story', pallete.slice(1, 2)),

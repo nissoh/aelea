@@ -82,7 +82,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@most/prelude", "npm:1.8.0"],
             ["@most/scheduler", "npm:1.3.0"],
             ["@most/types", "npm:1.1.0"],
-            ["construct-style-sheets-polyfill", "npm:2.4.16"],
             ["csstype", "npm:3.0.7"]
           ],
           "linkType": "SOFT",
@@ -144,6 +143,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@most/prelude", "npm:1.8.0"],
             ["@most/scheduler", "npm:1.3.0"],
             ["@most/types", "npm:1.1.0"],
+            ["construct-style-sheets-polyfill", "npm:2.4.16"],
             ["copy-webpack-plugin", "virtual:da54780a64c4828d914b45cdf0f6e23267cdabde642cfddfe75debb2a5c7ed9db1bb9dbfe5cae394a2d07d0bed757529ace05d8ff96c00c12affdf8b5fe23a04#npm:8.1.1"],
             ["fork-ts-checker-webpack-plugin", "virtual:da54780a64c4828d914b45cdf0f6e23267cdabde642cfddfe75debb2a5c7ed9db1bb9dbfe5cae394a2d07d0bed757529ace05d8ff96c00c12affdf8b5fe23a04#npm:6.2.1"],
             ["gh-pages", "npm:3.1.0"],

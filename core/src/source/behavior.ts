@@ -3,7 +3,6 @@ import { Behavior, Op } from '../types'
 import { disposeWith } from '@most/disposable'
 import { O } from '../utils'
 import { tether } from '../combinators/tether'
-import { multicast } from '@most/core'
 
 export class BehaviorSource<A, B> implements Stream<A> {
   queuedSamplers: Stream<A>[] = []
@@ -40,7 +39,7 @@ export class BehaviorSource<A, B> implements Stream<A> {
       // @ts-ignore
       const bops: Stream<A> = ops.length ? O(...ops)(tetherSource) : tetherSource
 
-      this.queuedSamplers.push(multicast(bops))
+      this.queuedSamplers.push(bops)
       this.sinks.forEach((sourcesMap, sink) => {
         sourcesMap.set(bops, this.runBehavior(sink, bops))
       })
@@ -56,7 +55,7 @@ export class BehaviorSource<A, B> implements Stream<A> {
 export function behavior<A, B>(): Behavior<A, B> {
   const ss = new BehaviorSource<B, A>()
 
-  return [ss.sample, ss]
+  return [ss, ss.sample]
 }
 
 

@@ -12,14 +12,14 @@ export interface IButton extends Control {
 }
 
 export const $Button = ({ disabled = never(), $content }: IButton) => component((
-  [interactionBehavior, focusStyle]: Behavior<IBranch, true>,
-  [dismissBehavior, dismissstyle]: Behavior<IBranch, false>,
-  [sampleClick, click]: Behavior<INode, PointerEvent>
+  [focusStyle, interactionTether]: Behavior<IBranch, true>,
+  [dismissstyle, dismissTether]: Behavior<IBranch, false>,
+  [click, clickTether]: Behavior<INode, PointerEvent>
 ) => {
 
   const $button = $element('button')(
     designSheet.btn,
-    sampleClick(
+    clickTether(
       event('pointerup')
     ),
     styleBehavior(
@@ -37,8 +37,8 @@ export const $Button = ({ disabled = never(), $content }: IButton) => component(
       )
     ),
 
-    interactionBehavior(interactionOp),
-    dismissBehavior(dismissOp)
+    interactionTether(interactionOp),
+    dismissTether(dismissOp)
   )
 
   return [

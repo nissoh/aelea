@@ -5,6 +5,7 @@ import { pallete } from '@aelea/ui-components-theme'
 
 import $Example from '../../components/$Example'
 import $TSPeep from '../../components/typescript-notebook/$TSPeep'
+import { $alert } from '../../elements/$common'
 
 
 
@@ -14,7 +15,7 @@ interface Guide {
 
 export default ({ parentRoute }: Guide) => component((
   // []: Behavior<NodeChild, any>,
-  [sampleLinkClick, routeChanges]: Behavior<string, string>
+  [routeChanges, linkClickTether]: Behavior<string, string>
 ) => {
 
   return [
@@ -22,9 +23,7 @@ export default ({ parentRoute }: Guide) => component((
     $column(layoutSheet.spacingBig, layoutSheet.flex, style({ alignItems: 'center' }))(
 
       $Example({ file: 'src/components/$QuantumList.ts' })(
-        $row(style({ border: `1px solid ${pallete.negative}`, padding: '10px' }))(
-          $text(style({ fontSize: '75%' }))(`WIP: still in progress, external imports name have been encoded because of Monaco editor issue: https://github.com/microsoft/monaco-editor/issues/1306. `)
-        ),
+        $alert(`WIP: still in progress, external imports name have been encoded because of Monaco editor issue: https://github.com/microsoft/monaco-editor/issues/1306. `),
 
         $node(
           $text(`aelea uses a reactive toolkit called `),
@@ -88,7 +87,7 @@ export default $node(
           readOnly: false,
           code:
 `import { constant, map, merge, scan } from '@most/core'
-import { $custom, $element, $text, Behavior, component, style, event, INode, runBrowser } from '@aelea/core'
+import { $custom, $element, $text, Behavior, component, style, event, INode } from '@aelea/core'
 
 // composable style
 const displayFlex = style({ display: 'flex' })
@@ -100,18 +99,18 @@ const $column = $custom('column')(displayFlex, style({ flexDirection: 'column' }
 
 // Component that outputs state(optionally), this is currently not used anywhere, see next example to see it being consumed
 export default component((
-    [sampleIncrement, increment]: Behavior<INode, 1>,
-    [sampleDecrement, decrement]: Behavior<INode, -1>
+    [increment, incrementTether]: Behavior<INode, 1>,
+    [decrement, decrementTether]: Behavior<INode, -1>
   ) => {
 
     return [ // Component has to return [$Node, Behavior(optionally)] in the next example we will use these outputted behaviors
 
       $row(spacingStyle)(
         $column(
-          $element('button')(sampleIncrement(event('click'), constant(1)))(
+          $element('button')(incrementTether(event('click'), constant(1)))(
             $text('+')
           ),
-          $element('button')(sampleDecrement(event('click'), constant(-1)))(
+          $element('button')(decrementTether(event('click'), constant(-1)))(
             $text('-')
           )
         ),

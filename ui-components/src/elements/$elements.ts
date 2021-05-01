@@ -1,6 +1,6 @@
 import { $custom, $node, style } from '@aelea/core'
 import { pallete } from '@aelea/ui-components-theme'
-import layoutSheet from './style/layoutSheet'
+import layoutSheet from '../style/layoutSheet'
 
 
 export const $row = $custom('row')(layoutSheet.row)

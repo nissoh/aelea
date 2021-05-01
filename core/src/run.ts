@@ -8,6 +8,7 @@ import { nullSink } from './utils'
 import SettableDisposable from './utils/SettableDisposable'
 
 
+
 function appendToSlot(parent: IBranchElement, child: INodeElement, insertAt: number) {
   if (insertAt === 0) return parent.prepend(child)
 
@@ -27,7 +28,10 @@ export function runBrowser(config: Partial<RunEnvironment> = {}) {
     ...config
   }
 
-  document.adoptedStyleSheets = [...document.adoptedStyleSheets, composedConfig.style.stylesheet]
+  document.adoptedStyleSheets = [
+    ...document.adoptedStyleSheets,
+    composedConfig.style.stylesheet,
+  ]
 
   const rootNode: IBranch = {
     element: composedConfig.rootNode,
@@ -73,7 +77,7 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
         }, node)
       )
     } catch (e) {
-      console.error(node.element)
+      console.error(node.element.nodeName)
       throw new Error(`Cannot append node that have already been rendered, check invalid node operations under ^`)
     }
 

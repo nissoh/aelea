@@ -12,10 +12,10 @@ export function hexAlpha(color: string, opacity: number): string {
 }
 
 export const $PopoverExample = component((
-  [samplePop, pop]: Behavior<any, any>,
-  [samplePopCard, popCard]: Behavior<any, any>,
-  [sampleCountUp, countUp]: Behavior<1, 1>,
-  [sampleCountDown, countDown]: Behavior<-1, -1>
+  [pop, popTether]: Behavior<any, any>,
+  [popCard, popCardTether]: Behavior<any, any>,
+  [countUp, countUpTether]: Behavior<1, 1>,
+  [countDown, countDownTether]: Behavior<-1, -1>
 ) => {
 
   const count = merge(countUp, countDown)
@@ -23,7 +23,7 @@ export const $PopoverExample = component((
   const $popContent = $column(layoutSheet.spacing)(
     $text('Well, hello $Counter component!'),
     $row(style({ placeContent: 'center' }))(
-      $Counter({ value: scan((s, n) => s + n, 0, count) })({ decrement: sampleCountDown(), increment: sampleCountUp() })
+      $Counter({ value: scan((s, n) => s + n, 0, count) })({ decrement: countDownTether(), increment: countUpTether() })
     )
   )
   const $$popContent = constant($popContent, pop)
@@ -37,17 +37,17 @@ export const $PopoverExample = component((
         $text('This button is a target(context)'),
         $Popover({ $$popContent })(
           $Button({ $content: $text('Pop!') })({
-            click: samplePop()
+            click: popTether()
           })
         )({}),
       ),
       $Popover({ $$popContent: $$popContentCard })(
         $column(style({ backgroundColor: pallete.background, border: `1px solid ${pallete.horizon}`, padding: '30px' }))(
           $row(layoutSheet.spacing)(
-            $TextField({ label: 'Example', value: now('') })({}),
-            $TextField({ label: 'Example', value: now('') })({}),
+            $TextField({ label: 'One', value: now('') })({}),
+            $TextField({ label: 'Two', value: now('') })({}),
             $Button({ $content: $text('Advanced') })({
-              click: samplePopCard()
+              click: popCardTether()
             })
           )
         )

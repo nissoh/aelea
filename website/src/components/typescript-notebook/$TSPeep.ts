@@ -12,7 +12,7 @@ interface IMonaco {
 
 
 export default ({ code = '', readOnly = true }: IMonaco) => component((
-  [sampleChange, change]: Behavior<ModelChangeBehavior, ModelChangeBehavior>
+  [change, changeTether]: Behavior<ModelChangeBehavior, ModelChangeBehavior>
 ) => {
 
   const $loader = $row(style({ width: '2px', backgroundColor: 'rgb(43 52 55)' }))(
@@ -43,7 +43,7 @@ export default ({ code = '', readOnly = true }: IMonaco) => component((
   return [
     $column(layoutSheet.flex)(
       $MonacoEditor({ code, config: { readOnly, automaticLayout: true, theme: theme.name === 'light' ? 'vs-light': 'vs-dark' }, containerStyle: { height: initalCodeBlockHeight + 'px' } })({
-        change: sampleChange()
+        change: changeTether()
       }),
       $row(style({ backgroundColor: pallete.background, minHeight: '30px' }))(
         $loader,

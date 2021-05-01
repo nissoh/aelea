@@ -3,10 +3,10 @@ import { map } from '@most/core'
 import { $element, $node, $text, Behavior, component, IBranch, event } from '@aelea/core'
 
 export default component((
-  [sampleInput, input]: Behavior<IBranch<HTMLInputElement>, string>
+  [input, inputTether]: Behavior<IBranch<HTMLInputElement>, string>
 ) => {
 
-  const inputBehavior = sampleInput(
+  const inputBehavior = inputTether(
     event('input'),
     map(inputEv => {
       if (inputEv.target instanceof HTMLInputElement) {

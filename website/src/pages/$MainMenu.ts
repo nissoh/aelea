@@ -13,7 +13,7 @@ interface MainMenu {
 }
 
 export default ({ parentRoute }: MainMenu) => component((
-  [sampleRouteChange, routeChange]: Behavior<string, string>
+  [routeChange, routeChangeTether]: Behavior<string, string>
 ) => {
 
   const guideRoute = parentRoute.create({ fragment: 'guide', title: 'Guide' })
@@ -29,11 +29,11 @@ export default ({ parentRoute }: MainMenu) => component((
       // }),
 
       $Link({ $content: $text('Developer\'s Guide'), url: '/p/guide', route: guideRoute })({
-        click: sampleRouteChange()
+        click: routeChangeTether()
       }),
       $seperator,
       $Link({ $content: $text('Examples'), url: '/p/examples/theme', route: examplesRoute })({
-        click: sampleRouteChange()
+        click: routeChangeTether()
       }),
       $seperator,
 

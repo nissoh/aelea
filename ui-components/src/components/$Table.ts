@@ -1,7 +1,7 @@
 import { map, merge, now } from "@most/core"
 import { Stream } from "@most/types"
 import { $Branch, $text, Behavior, component, INode, O, Op, style, StyleCSS, stylePseudo } from '@aelea/core'
-import { $row } from "../$elements"
+import { $row } from "../elements/$elements"
 import { $VirtualScroll, QuantumScroll, ScrollRequest } from "./$VirtualScroll"
 import { pallete } from "@aelea/ui-components-theme"
 import layoutSheet from "../style/layoutSheet"
@@ -9,7 +9,7 @@ import layoutSheet from "../style/layoutSheet"
 
 export interface TablePageResponse<T> {
   data: T[]
-  totalItems: number,
+  pageSize: number,
 }
 
 export interface TableOption<T> extends Omit<QuantumScroll, 'dataSource'> {
@@ -43,11 +43,11 @@ const $bodyCell = $row(
 )
 
 const $rowContainer = $row(layoutSheet.spacing)
-const $rowHeaderContainer = $rowContainer(style({ overflowY: 'scroll' }), stylePseudo('::-webkit-scrollbar', { backgroundColor: 'transparent' }))
+const $rowHeaderContainer = $rowContainer(style({ overflowY: 'scroll' }), stylePseudo('::-webkit-scrollbar', { backgroundColor: 'transparent', width: '6px' }))
 
 
 export const $Table = <T>(config: TableOption<T>) => component((
-  [sampleRequestList, requestList]: Behavior<ScrollRequest, ScrollRequest>
+  [requestList, requestListTether]: Behavior<ScrollRequest, ScrollRequest>
 ) => {
 
   const $header = $rowHeaderContainer(
@@ -58,7 +58,7 @@ export const $Table = <T>(config: TableOption<T>) => component((
     })
   )
 
-  const dataSource = map(({ data }) => {
+  const dataSource = map(({ data, pageSize }) => {
     const $items = data.map(rowData =>
       $rowContainer(
         ...config.columns.map(col =>
@@ -68,14 +68,14 @@ export const $Table = <T>(config: TableOption<T>) => component((
         )
       )
     )
-    return { $items }
+    return { $items, pageSize }
   }, config.dataSource)
 
   const $body = $VirtualScroll({
     ...config,
     dataSource
   })({
-    scrollRequest: sampleRequestList()
+    scrollRequest: requestListTether()
   })
 
   return [

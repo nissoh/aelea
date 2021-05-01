@@ -9,7 +9,7 @@ import { nullSink } from '../utils'
 export type IComponentOutputBehaviors<T> = {
   [P in keyof T]: Stream<T[P]>
 }
-export type OutputBehaviors<A> = { [P in keyof A]?: Op<A[P], A[P]> }
+export type OutputTethers<A> = { [P in keyof A]?: Op<A[P], A[P]> }
 
 
 export type ComponentFunction<A extends INodeElement, B extends $Node<A>, D> = (
@@ -19,22 +19,22 @@ export type ComponentFunction<A extends INodeElement, B extends $Node<A>, D> = (
 
 export function componentFn<A extends INodeElement, B extends $Node<A>, D>(
   inputComp: ComponentFunction<A, B, D>,
-  projectBehaviors: OutputBehaviors<D>
+  outputTethers: OutputTethers<D>
 ): $Node<A> {
   return {
     run(sink, scheduler) {
       // fill stubbed aguments as a behavior
       const behaviors = Array(inputComp.length).fill(null).map(behavior)
-      const [view, outputBehaviors] = inputComp(...behaviors)
+      const [view, outputSources] = inputComp(...behaviors)
       const outputDisposables: Disposable[] = []
 
-      if (projectBehaviors) {
-        for (const k in projectBehaviors) {
-          if (projectBehaviors[k] && outputBehaviors) {
-            const consumerSampler = projectBehaviors[k]
+      if (outputTethers) {
+        for (const k in outputTethers) {
+          if (outputTethers[k] && outputSources) {
+            const consumerSampler = outputTethers[k]
 
             if (consumerSampler) {
-              const componentOutputBehavior = outputBehaviors[k]
+              const componentOutputBehavior = outputSources[k]
               const outputDisposable = consumerSampler(componentOutputBehavior).run(nullSink, scheduler)
               outputDisposables.push(outputDisposable)
             }
@@ -56,8 +56,8 @@ export function componentFn<A extends INodeElement, B extends $Node<A>, D>(
 
 
 interface ComponentCurry {
-  <A extends INodeElement, B extends $Node<A>, D>(inputComp: ComponentFunction<A, B, D>, projectBehaviors: OutputBehaviors<D>): B
-  <A extends INodeElement, B extends $Node<A>, D>(inputComp: ComponentFunction<A, B, D>): (projectBehaviors: OutputBehaviors<D>) => B
+  <A extends INodeElement, B extends $Node<A>, D>(inputComp: ComponentFunction<A, B, D>, projectBehaviors: OutputTethers<D>): B
+  <A extends INodeElement, B extends $Node<A>, D>(inputComp: ComponentFunction<A, B, D>): (projectBehaviors: OutputTethers<D>) => B
 }
 
 export const component: ComponentCurry = curry2(componentFn)

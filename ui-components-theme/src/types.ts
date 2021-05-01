@@ -5,7 +5,6 @@ export type Action = {
 
 export type Story = {
   message: string
-  foreground: string
 }
 
 export type Landscape = {

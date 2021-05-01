@@ -14,7 +14,6 @@ type StreamInputArray<T extends any[]> = {
   [P in keyof T]: Stream<T[P]>
 }
 
-
 class StateSink<A> extends Pipe<A, A> {
   constructor(private parent: ReplayLatest<A>, public sink: Sink<A>) {
     super(sink)
@@ -27,6 +26,7 @@ class StateSink<A> extends Pipe<A, A> {
     this.sink.event(t, x)
   }
 }
+
 export class ReplayLatest<A> implements Stream<A> {
   latestvalue!: A
   hasValue = false

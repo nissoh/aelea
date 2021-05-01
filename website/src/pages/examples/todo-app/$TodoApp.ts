@@ -15,13 +15,11 @@ export const $label = $element('label')(
 
 
 export default (todos: Todo[]) => component((
-  [sampleCreateTodo, newTodo]: Behavior<Todo, Todo>,
-  [sampleShowCompletedList, showCompletedList]: Behavior<boolean, boolean>,
+  [newTodo, createTodoTether]: Behavior<Todo, Todo>,
+  [showCompletedList, showCompletedListTether]: Behavior<boolean, boolean>,
 ) => {
 
-  // const [sampleShowCompletedList, showCompletedList] = state.stateBehavior(false)
   const INITIAL_SHOW_COMPLETED = false
-
   const showCompleteState = state.replayLatest(showCompletedList, INITIAL_SHOW_COMPLETED)
 
   return [
@@ -29,21 +27,21 @@ export default (todos: Todo[]) => component((
 
       $row(layoutSheet.spacingBig)(
         $label(layoutSheet.spacing)(
-          $Checkbox({ value: now(INITIAL_SHOW_COMPLETED) })({
-            check: sampleShowCompletedList()
+          $Checkbox({ value: showCompleteState })({
+            check: showCompletedListTether()
           }),
           $text('Show completped ')
         ),
         $CreateTodo({
-          add: sampleCreateTodo()
+          add: createTodoTether()
         }),
       ),
 
       $column(layoutSheet.spacingSmall)(
         chain((todo: Todo) => {
 
-          const [sampleRemove, remove] = behavior<MouseEvent, MouseEvent>()
-          const [sampleCompleted, completed] = behavior<boolean, boolean>()
+          const [remove, removeTether] = behavior<MouseEvent, MouseEvent>()
+          const [completed, completedTether] = behavior<boolean, boolean>()
 
           const todoCompleted = state.replayLatest(completed, todo.completed)
 
@@ -52,8 +50,8 @@ export default (todos: Todo[]) => component((
               combine(
                 (onlyCompleted, isCompleted) => onlyCompleted === isCompleted
                   ? $TodoItem({ todo, completed: take(1, todoCompleted) })({
-                    remove: sampleRemove(),
-                    complete: sampleCompleted()
+                    remove: removeTether(),
+                    complete: completedTether()
                   })
                   : empty(),
                 showCompleteState,

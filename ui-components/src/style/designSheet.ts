@@ -11,10 +11,16 @@ const text = style({
 const customScroll = O(
   stylePseudo('::-webkit-scrollbar-thumb', {
     backgroundColor: pallete.foreground
+   
   }),
   stylePseudo('::-webkit-scrollbar', {
-    backgroundColor: 'transparent'
-  })
+    backgroundColor: 'transparent',
+    width: '6px',
+    height: '6px'
+  }),
+  stylePseudo('::-webkit-scrollbar-thumb:hover', {
+    backgroundColor: pallete.primary
+  }),
 )
 
 const control = O(

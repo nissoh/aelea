@@ -20,8 +20,8 @@ export function createTodo(text: string): Todo {
 
 
 export default component((
-  [sampleAdd, create]: Behavior<PointerEvent, PointerEvent>,
-  [sampleInputChange, inputChange]: Behavior<string, string>
+  [create, addTether]: Behavior<PointerEvent, PointerEvent>,
+  [inputChange, inputChangeTether]: Behavior<string, string>
 ) => {
 
   const inputState = startWith('', inputChange)
@@ -37,10 +37,10 @@ export default component((
   return [
     $row(layoutSheet.flex)(
       $Field({ value })({
-        change: sampleInputChange()
+        change: inputChangeTether()
       }),
       $Button({ $content: $text('add'), disabled })({
-        click: sampleAdd()
+        click: addTether()
       })
     ),
 

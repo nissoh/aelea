@@ -1,45 +1,48 @@
-import { $text, Behavior, component } from "@aelea/core"
-import { $Table, ScrollRequest, TablePageResponse } from "@aelea/ui-components"
+import { $text, Behavior, component, style } from "@aelea/core"
+import { $card, $Table, ScrollRequest, TablePageResponse } from "@aelea/ui-components"
 import { chain, map } from "@most/core"
 
 
 export const $TableExample = component((
-  [sampleRequestList, requestList]: Behavior<ScrollRequest, ScrollRequest>
+  [requestList, requestListTether]: Behavior<ScrollRequest, ScrollRequest>
 ) => {
 
+  const PAGE_SIZE = 100
   let i = 0
 
   const dataSource = map((): TablePageResponse<{ id: string }> => {
     const id = ++i
-    const data = Array(100).fill(null).map((x, i) => {
+    const data = Array(PAGE_SIZE).fill(null).map(() => {
       return { id: 'item-#' + id }
     })
 
-    return { data, totalItems: 1000 }
+    return { data, pageSize: PAGE_SIZE }
   }, requestList)
 
   return [
-    $Table({
-      dataSource,
-      containerStyle: {
-        height: '400px'
-      },
-      columns: [
-        {
-          id: 'id',
-          value: chain(x => $text(x.id)),
-        },
-        {
-          id: 'id',
-          value: chain(x => $text(x.id)),
-        },
-        {
-          id: 'id',
-          value: chain(x => $text(x.id)),
-        }
-      ],
-    })({
-      requestList: sampleRequestList()
-    })
+    $card(
+      $Table({
+        dataSource,
+        containerOps: style({
+          height: '400px'
+        }),
+        columns: [
+          {
+            id: 'id',
+            value: chain(x => $text(x.id)),
+          },
+          {
+            id: 'id',
+            value: chain(x => $text(x.id)),
+          },
+          {
+            id: 'id',
+            value: chain(x => $text(x.id)),
+          }
+        ],
+      })({
+        requestList: requestListTether()
+      })
+    )
   ]
 })

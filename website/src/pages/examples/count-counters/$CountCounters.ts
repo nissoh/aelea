@@ -1,8 +1,8 @@
 
 import { $text, Behavior, behavior, component, O, style } from '@aelea/core'
-import { $Button, $column, $row, $seperator, layoutSheet } from '@aelea/ui-components'
+import { $Button, $column, $row, $seperator, layoutSheet, state } from '@aelea/ui-components'
 import { pallete } from '@aelea/ui-components-theme'
-import { chain, constant, map, merge, mergeArray, now, scan, snapshot, startWith, until } from '@most/core'
+import { chain, constant, map, merge, mergeArray, multicast, now, scan, snapshot, until } from '@most/core'
 import { $TrashBtn } from '../../../elements/$common'
 import $Counter from './$Counter'
 
@@ -12,11 +12,11 @@ const $AddBtn = $Button({
 export const sumAdd = scan((current: number, x: number) => current + x)
 
 export default component((
-  [sampleAddedCounter, addedCounter]: Behavior<PointerEvent, PointerEvent>,
-  [sampleDisposeCounter, disposeCounter]: Behavior<PointerEvent, PointerEvent>,
-  [sampleCountersIncrement, counterIncrement]: Behavior<1, 1>,
-  [sampleCountersDecrement, counterDecrement]: Behavior<-1, -1>,
-  [sampleDisposedCounterCount, disposedCounterCount]: Behavior<any, number>,
+  [addedCounter, addedCounterTether]: Behavior<PointerEvent, PointerEvent>,
+  [disposeCounter, disposeCounterTether]: Behavior<PointerEvent, PointerEvent>,
+  [counterIncrement, countersIncrementTether]: Behavior<1, 1>,
+  [counterDecrement, countersDecrementTether]: Behavior<-1, -1>,
+  [disposedCounterCount, disposedCounterCountTether]: Behavior<any, number>,
 ) => {
 
   const INITAL_COUNT = 0
@@ -42,15 +42,15 @@ export default component((
           $text(map(String, totalCount))
         ),
         $AddBtn({
-          click: sampleAddedCounter()
+          click: addedCounterTether()
         }),
       ),
       chain(() => {
 
-        const [sampleRemove, remove] = behavior<PointerEvent, PointerEvent>()
-        const [sampleValueChange, valueChange] = behavior<number, number>()
+        const [remove, removeTether] = behavior<PointerEvent, PointerEvent>()
+        const [valueChange, valueChangeTether] = behavior<number, number>()
 
-        const value = startWith(0, valueChange)
+        const value = state.replayLatest(multicast(valueChange), 0)
 
 
         return until(remove)(
@@ -59,23 +59,23 @@ export default component((
             $row(style({ alignItems: 'center' }), layoutSheet.spacingBig)(
               $TrashBtn({
                 click: O(
-                  sampleRemove(),
-                  sampleDisposeCounter(),
-                  sampleDisposedCounterCount(
+                  removeTether(),
+                  disposeCounterTether(),
+                  disposedCounterCountTether(
                     snapshot(val => -val, value)
                   ),
                 )
               }),
               $Counter({ value })({
                 increment: O(
-                  sampleCountersIncrement(),               
-                  sampleValueChange(
+                  countersIncrementTether(),               
+                  valueChangeTether(
                     snapshot((val, increment) => val + increment, value)
                   ),
                 ),
                 decrement: O(
-                  sampleCountersDecrement(),
-                  sampleValueChange(
+                  countersDecrementTether(),
+                  valueChangeTether(
                     snapshot((val, increment) => val + increment, value)
                   ),
                 )

@@ -1,7 +1,7 @@
 import { chain, combine, filter, map, merge, multicast, now, skipAfter, skipRepeats, snapshot, startWith, switchLatest } from "@most/core"
 import { remove } from "@most/prelude"
 import { $Branch, Behavior, behavior, component, event, eventElementTarget, motion, INode, O, style, styleInline, styleBehavior } from '@aelea/core'
-import { $column, $row } from "../$elements"
+import { $column, $row } from "../elements/$elements"
 import layoutSheet from "../style/layoutSheet"
 
 const clamp = (val: number, min: number, max: number) => val > max ? max : val < min ? min : val
@@ -33,7 +33,7 @@ interface DraggingState<T extends $Branch> {
 }
 
 export const $Sortable = <T extends $Branch>(config: DraggableList<T>) => component((
-  [sampleOrderChange, orderChange]: Behavior<DraggingState<T>, DraggingState<T>>
+  [orderChange, orderChangeTether]: Behavior<DraggingState<T>, DraggingState<T>>
 ) => {
   const gap = (config.gap ?? 0)
   const listLength = config.$list.length
@@ -48,7 +48,7 @@ export const $Sortable = <T extends $Branch>(config: DraggableList<T>) => compon
     $column(layoutSheet.flex, style({ flex: 1, userSelect: 'none', position: 'relative', height: containerHeight + 'px' }))(
       ...config.$list.map(($item, i) => {
 
-        const [sampleDragY, dragY]: Behavior<INode, DraggingState<T>> = behavior()
+        const [dragY, dragYTether]: Behavior<INode, DraggingState<T>> = behavior()
 
         const multicastedDrag = multicast(dragY)
         const isDraggingStream = skipRepeats(map(x => x.isDragging, multicastedDrag))
@@ -83,7 +83,7 @@ export const $Sortable = <T extends $Branch>(config: DraggableList<T>) => compon
 
         return $dragItem(
 
-          sampleDragY(
+          dragYTether(
             event('pointerdown'),
             // list order continously changing, snapshot is used to get a(snapshot) of the latest list
             snapshot((list, startEv) => {
@@ -106,7 +106,7 @@ export const $Sortable = <T extends $Branch>(config: DraggableList<T>) => compon
               }, move)
             }, $listChangesWithInitial),
             switchLatest,
-            sampleOrderChange()
+            orderChangeTether()
           ),
 
           styleInline(
