@@ -1,18 +1,17 @@
-import { component, Behavior, IBranch, attr, $Node, event, style, $element } from "@aelea/core"
+import { component, Behavior, IBranch, attr, event, style, O, $Branch, Op } from "@aelea/core"
 import { constant, map, merge, startWith } from "@most/core"
 import { Route } from "../types"
 
 export interface IAnchor {
   url: string,
-  $content: $Node,
   route: Route
+  $anchor: $Branch
+  anchorOp?: Op<IBranch<HTMLAnchorElement>, IBranch<HTMLAnchorElement>>
 }
 
-const $anchor = $element('a')(
-  style({ textDecoration: 'none', })
-)
 
-export const $Anchor = ({ url, route, $content }: IAnchor) => component((
+
+export const $RouterAnchor = ({ url, route, $anchor, anchorOp = O() }: IAnchor) => component((
   [click, clickTether]: Behavior<IBranch, string>,
   [focus, focusTether]: Behavior<IBranch, boolean>,
 ) => {
@@ -25,39 +24,44 @@ export const $Anchor = ({ url, route, $content }: IAnchor) => component((
     constant(false, route.miss)
   )
 
-  return [
-    $anchor(
-      attr({ href }),
-      clickTether(
-        event('click'),
-        map((clickEv): string => {
-          clickEv.preventDefault()
+  const anchorOps = O(
+    attr({ href }),
+    style({ textDecoration: 'none', padding: '1px 5px' }),
+    clickTether(
+      event('click'),
+      map((clickEv): string => {
+        clickEv.preventDefault()
 
-          const pathName = clickEv.currentTarget instanceof HTMLAnchorElement ? clickEv.currentTarget.pathname : null
+        const pathName = clickEv.currentTarget instanceof HTMLAnchorElement ? clickEv.currentTarget.pathname : null
 
-          if (pathName) {
+        if (pathName) {
 
-            // avoid repeated adjacent states
-            if (location.pathname !== pathName) {
-              history.pushState(null, '', pathName)
-            }
-
-            return pathName
-          } else {
-            throw new Error('target anchor contains no href')
+          // avoid repeated adjacent states
+          if (location.pathname !== pathName) {
+            history.pushState(null, '', pathName)
           }
-          
-        })
-      ),
-      focusTether(
-        $anchor => {
-          const focus = constant(true, merge(event('focus', $anchor), event('pointerenter', $anchor)))
-          const blur = constant(false, merge(event('blur', $anchor), event('pointerleave', $anchor)))
 
-          return startWith(false, merge(focus, blur))
-        },
-      ),
-    )($content),
+          return pathName
+        } else {
+          throw new Error('target anchor contains no href')
+        }
+      })
+    ),
+    focusTether(
+      $anchor => {
+        const focus = constant(true, merge(event('focus', $anchor), event('pointerenter', $anchor)))
+        const blur = constant(false, merge(event('blur', $anchor), event('pointerleave', $anchor)))
+
+        return startWith(false, merge(focus, blur))
+      },
+    ),
+    anchorOp
+  )
+
+  return [
+    anchorOps(
+      $anchor
+    ),
 
     { click, match: route.match, contains, focus }
   ]

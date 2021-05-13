@@ -14,12 +14,12 @@ export const $Slider = ({ value, step = .01 }: Slider) => component((
 
 
   const sliderThunmbStyle: StyleCSS = {
-    cursor: 'pointer',
     backgroundColor: pallete.primary,
     borderRadius: '50%',
     width: '25px',
     height: '25px',
     appearance: 'none',
+    cursor: 'grab'
   }
 
 

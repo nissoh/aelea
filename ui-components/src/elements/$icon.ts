@@ -1,18 +1,20 @@
-import { $Node, $svg, attr, style } from "@aelea/core"
-import { pallete } from "@aelea/ui-components-theme"
+import { $Node, $svg, attr, IBranch, O, Op, style } from "@aelea/core"
 
 
 interface Icon {
-  width?: number // in pixels
-  height?: number // in pixels
-  $content: $Node
+  /**  in pixels */
+  width?: string
+  height?: string
   viewBox?: string
   fill?: string
+
+  $content: $Node
+  svgOps?: Op<IBranch<SVGSVGElement>, IBranch<SVGSVGElement>>
 }
 
 
-export const $icon = ({ $content, width = 24, height = width, viewBox = `0 0 ${width} ${height}`, fill = 'inherit' }: Icon) => (
-  $svg('svg')(attr({ viewBox, width, height }), style({ fill }))(
+export const $icon = ({ $content, width = '24px', height = width, viewBox = `0 0 ${parseInt(width)} ${parseInt(height)}`, fill = 'inherit', svgOps = O() }: Icon) => (
+  $svg('svg')(attr({ viewBox, fill }), style({ width, height }), svgOps)(
     $content
   )
 )

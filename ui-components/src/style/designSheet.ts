@@ -55,7 +55,8 @@ export default {
   input: O(
     control,
     style({
-      minWidth: '100px',
+      minWidth: '25px',
+      width: '100%',
       backgroundColor: 'transparent',
       border: 'none',
       borderBottom: `2px solid ${pallete.message}`,

@@ -1,8 +1,8 @@
 import { $text, Behavior, component, event, INode, O, style } from "@aelea/core"
-import { $VirtualScroll, $row, layoutSheet, $icon, ScrollResponse, $column, $TextField, ScrollRequest } from "@aelea/ui-components"
-import { pallete } from "@aelea/ui-components-theme"
+import { $VirtualScroll, layoutSheet, ScrollResponse, $column, $TextField, ScrollRequest } from "@aelea/ui-components"
 import { constant, empty, map, multicast, startWith, switchLatest } from "@most/core"
-import { Token } from "./types"
+import { $tokenLabel } from "../$elements"
+import { Token } from "../types"
 
 function objectValuesContainsText<T>(obj: T, text: string) {
   const match = Object.values(obj).find(value => {
@@ -12,7 +12,7 @@ function objectValuesContainsText<T>(obj: T, text: string) {
   return match !== undefined
 }
 
-export const $TokenList = <T extends Token>(list: T[]) => component((
+export const $TokenList = <T extends Readonly<Token>>(list: readonly T[]) => component((
   [choose, chooseTether]: Behavior<INode, T>,
   [scrollRequest, scrollRequestTether]: Behavior<ScrollRequest, ScrollRequest>,
   [filterListInput, filterListInputTether]: Behavior<string, string>,
@@ -35,14 +35,7 @@ export const $TokenList = <T extends Token>(list: T[]) => component((
               const $items = list.filter(obj => objectValuesContainsText(obj, filter)).map(token => {
                 const changeTokenBehavior = chooseTether(event('click'), constant(token))
 
-                return $row(changeTokenBehavior, layoutSheet.spacing, style({ cursor: 'pointer', alignItems: 'center' }))(
-                  $icon({ $content: token.$icon, fill: pallete.message, width: 42, viewBox: '0 0 32 32' }),
-                  $column(layoutSheet.flex)(
-                    $text(style({ fontWeight: 'bold' }))(token.symbol),
-                    $text(style({ fontSize: '75%', color: pallete.foreground }))(token.label)
-                  ),
-                  $text(token.balance.toLocaleString())
-                )
+                return changeTokenBehavior($tokenLabel(token, $text(token.contract.balanceReadable)))
               })
 
               return { $items, pageSize: 20 }

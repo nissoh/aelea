@@ -2,7 +2,6 @@
 import { Scheduler, Sink, Stream, Disposable } from '@most/types'
 import { disposeNone, disposeWith } from '@most/disposable'
 
-// copied & modified from https://github.com/mostjs/x-animation-frame/tree/master
 class FromCallbackSource<T> {
   constructor(private callbackFunction: (cb: (ev: T) => any) => any, private context: any) { }
 

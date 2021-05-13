@@ -1,5 +1,5 @@
-import { IBranch, IBranchElement } from "@aelea/core"
-import { chain } from "@most/core"
+import { eventElementTarget, IBranch, IBranchElement } from "@aelea/core"
+import { chain, constant, continueWith, filter, switchLatest, until } from "@most/core"
 import { disposeWith } from "@most/disposable"
 import { Stream } from "@most/types"
 
@@ -60,4 +60,15 @@ export const mutation = (config: MutationObserverInit = { attributes: true, chil
     }
   }))
 
+
+const documentVisibilityChange = eventElementTarget('visibilitychange', document)
+const documentVisible = filter(() => document.visibilityState === 'visible', documentVisibilityChange)
+const documentHidden = filter(() => document.visibilityState === 'hidden', documentVisibilityChange)
+
+
+export const duringWindowActivity = <T>(source: Stream<T>) => {
+  const sourceUntilInactivity = until(documentHidden, source)
+  const activity = continueWith((): Stream<T> => switchLatest(constant(activity, documentVisible)), sourceUntilInactivity)
+  return activity
+}
 

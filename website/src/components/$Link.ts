@@ -1,26 +1,25 @@
-import { component, Behavior, O, styleBehavior, StyleCSS, style } from "@aelea/core"
-import { IAnchor, $Anchor } from "@aelea/router"
+import { component, Behavior, styleBehavior, StyleCSS, $Branch, $element, attr, style } from "@aelea/core"
+import { IAnchor, $RouterAnchor } from "@aelea/router"
 import { combine } from "@most/core"
 import { pallete } from "@aelea/ui-components-theme"
 
 
-
-export interface ILink extends IAnchor {
-  styles?: StyleCSS
+export interface ILink extends Omit<IAnchor, '$anchor'> {
+  $content: $Branch<HTMLAnchorElement>
 }
 
-export const $Link = ({ url, route, $content, styles = {} }: ILink) => component((
+const $anchor = $element('a')(
+  style({
+    color: pallete.message
+  }),
+)
+
+export const $Link = ({ url, route, $content, anchorOp }: ILink) => component((
   [click, clickTether]: Behavior<string, string>,
   [active, containsTether]: Behavior<boolean, boolean>,
   [focus, focusTether]: Behavior<boolean, boolean>,
 ) => {
-
-  const anchorOps = O(
-    style({
-      color: pallete.message,
-      padding: '2px 4px',
-      ...styles,
-    }),
+  const $anchorEl = $anchor(
     styleBehavior(
       combine((isActive, isFocus): StyleCSS | null => {
         return isActive ? { color: pallete.primary, cursor: 'default' }
@@ -28,16 +27,14 @@ export const $Link = ({ url, route, $content, styles = {} }: ILink) => component
             : null
       }, active, focus)
     )
-  )
+  )($content)
 
   return [
-    anchorOps(
-      $Anchor({ $content, url, route })({
-        click: clickTether(),
-        focus: focusTether(),
-        contains: containsTether()
-      })
-    ),
+    $RouterAnchor({ $anchor: $anchorEl, url, route, anchorOp })({
+      click: clickTether(),
+      focus: focusTether(),
+      contains: containsTether()
+    }),
 
     { click, active, focus }
   ]

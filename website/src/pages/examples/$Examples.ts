@@ -2,11 +2,10 @@ import { $node, $text, Behavior, component, style } from '@aelea/core'
 import { match, Route } from '@aelea/router'
 import { $column, $row, layoutSheet } from '@aelea/ui-components'
 import { pallete } from '@aelea/ui-components-theme'
+import { awaitPromises, chain, map, now } from '@most/core'
 import $Example from '../../components/$Example'
 import { $Link } from '../../components/$Link'
 import { fadeIn } from '../../components/transitions/enter'
-import { $AtomicSwapExample } from './atomicSwap/$AtomicSwap'
-import { $AutocompleteExample } from './autocomplete/$Autocomplete'
 import $Calculator from './calculator/$Calculator'
 import $CountCounters from './count-counters/$CountCounters'
 import $DragList from './dragList/$DragList'
@@ -38,7 +37,7 @@ export default ({ router }: Website) => component((
   // const autocompleteRoute = router.create({ fragment: 'autocomplete', title: 'Autocomplete' })
   const popoverRoute = router.create({ fragment: 'popover', title: 'Popover' })
   const themeRoute = router.create({ fragment: 'theme', title: 'Theme' })
-  const atomicSwapRoute = router.create({ fragment: 'atomic-swap', title: 'Atomic Swap' })
+  const ethSendRoute = router.create({ fragment: 'ethereum-metamask', title: 'Send Ethereum' })
 
 
 
@@ -56,7 +55,7 @@ export default ({ router }: Website) => component((
               $Link({ $content: $text('Theme'), url: '/p/examples/theme', route: themeRoute })({
                 click: linkClickTether()
               }),
-              $Link({ $content: $text('Atomic Swap'), url: '/p/examples/atomic-swap', route: atomicSwapRoute })({
+              $Link({ $content: $text('Metamask Gate'), url: '/p/examples/ethereum-metamask', route: ethSendRoute })({
                 click: linkClickTether()
               }),
               $Link({ $content: $text('Drag And Sort'), url: '/p/examples/drag-and-sort', route: dragAngDropRoute })({
@@ -105,10 +104,10 @@ export default ({ router }: Website) => component((
           )({})
         ),
 
-        match(atomicSwapRoute)(
+        match(ethSendRoute)(
           $Example({ file: 'src/components/$Table.ts' })(
             $column(
-              $AtomicSwapExample({})
+              chain(mod => mod.$EtherSwapExample({}), awaitPromises(map(x => import('./ethSwap/$MetamaskSend'), now(null))))
             )
           )({})
         ),

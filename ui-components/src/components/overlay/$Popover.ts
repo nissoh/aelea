@@ -29,7 +29,7 @@ export const $Popover = ({ $$popContent, offset = 16, padding = 24, dismiss = em
 
   const $overlay = $node(
     style({
-      position: 'absolute',
+      position: 'absolute', zIndex: 99999,
       top: 0, left: 0, right: 0, bottom: 0
     }),
     overlayClickTether(
@@ -40,10 +40,10 @@ export const $Popover = ({ $$popContent, offset = 16, padding = 24, dismiss = em
         const { y, x } = IntersectiontargetRect.intersectionRect
 
         const width = Math.max(contentResize.contentRect.width, IntersectiontargetRect.intersectionRect.width) + (padding * 2) + offset
-        const height = contentResize.contentRect.height + IntersectiontargetRect.intersectionRect.height + offset
+        const height = contentResize.contentRect.height + IntersectiontargetRect.intersectionRect.height + offset + padding * 2
 
         const left = x + (IntersectiontargetRect.intersectionRect.width / 2) + 'px'
-        const top = y + (height / 2) + 'px'
+        const top = y - padding + (height / 2) + 'px'
 
 
         return {
@@ -80,7 +80,7 @@ export const $Popover = ({ $$popContent, offset = 16, padding = 24, dismiss = em
         }
       }, targetIntersection)
     ),
-    style({ zIndex: 1000, position: 'absolute', opacity: 0 }),
+    style({ zIndex: 100000, position: 'absolute', opacity: 0 }),
   )
 
   const dismissOverlay = until(merge(overlayClick, dismiss))
@@ -105,7 +105,7 @@ export const $Popover = ({ $$popContent, offset = 16, padding = 24, dismiss = em
     ),
     styleBehavior(
       merge(
-        constant({ zIndex: 1000, position: 'relative' }, $$popContentMulticast),
+        constant({ zIndex: 100000, position: 'relative' }, $$popContentMulticast),
         constant(null, overlayClick)
       )
     )

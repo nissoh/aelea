@@ -1,6 +1,6 @@
 {
   "name": "@aelea/website",
-  "version": "15.0.0",
+  "version": "16.0.0",
   "license": "MIT",
   "module": ".dist/esm/website-run.js",
   "files": [
@@ -13,6 +13,7 @@
     "build": "yarn build:project",
     "build:production": "webpack --mode production",
     "website-dev": "webpack serve",
+    "website-prod": "webpack serve --mode production",
     "gh-pages": "gh-pages -d dist"
   },
   "dependencies": {
@@ -20,12 +21,21 @@
     "@aelea/router": "workspace:*",
     "@aelea/ui-components": "workspace:*",
     "@aelea/ui-components-theme": "workspace:*",
+    "@ethersproject/abi": "5.0.13",
+    "@ethersproject/bytes": "5.0.11",
+    "@ethersproject/contracts": "5.0.12",
+    "@ethersproject/providers": "5.0.24",
+    "@metamask/detect-provider": "^1.2.0",
     "@most/core": "1.6.1",
     "@most/disposable": "1.3.0",
     "@most/prelude": "1.8.0",
     "@most/scheduler": "1.3.0",
     "@most/types": "1.1.0",
-    "construct-style-sheets-polyfill": "2.4.16"
+    "bn.js": "5.2.0",
+    "construct-style-sheets-polyfill": "2.4.16",
+    "ethers": "5.1.4",
+    "hash.js": "1.1.7",
+    "jazzicon": "^1.5.0"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^8.1.1",

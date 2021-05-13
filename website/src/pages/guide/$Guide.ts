@@ -1,11 +1,10 @@
-import { $element, $node, $text, attr, Behavior, component, style } from '@aelea/core'
+import { $node, $text, attr, Behavior, component, style } from '@aelea/core'
 import { Route } from '@aelea/router'
-import { $column, $row, layoutSheet } from '@aelea/ui-components'
-import { pallete } from '@aelea/ui-components-theme'
+import { $column, layoutSheet } from '@aelea/ui-components'
 
 import $Example from '../../components/$Example'
 import $TSPeep from '../../components/typescript-notebook/$TSPeep'
-import { $alert } from '../../elements/$common'
+import { $alert, $anchor } from '../../elements/$common'
 
 
 
@@ -23,11 +22,13 @@ export default ({ parentRoute }: Guide) => component((
     $column(layoutSheet.spacingBig, layoutSheet.flex, style({ alignItems: 'center' }))(
 
       $Example({ file: 'src/components/$QuantumList.ts' })(
-        $alert(`WIP: still in progress, external imports name have been encoded because of Monaco editor issue: https://github.com/microsoft/monaco-editor/issues/1306. `),
+        $alert(
+          $text(`WIP: still in progress, external imports name have been encoded because of Monaco editor issue: https://github.com/microsoft/monaco-editor/issues/1306. `)
+        ),
 
         $node(
           $text(`aelea uses a reactive toolkit called `),
-          $element('a')(style({ color: pallete.primary }), attr({ href: 'https://mostcore.readthedocs.io/en/latest/index.html' }))(
+          $anchor(attr({ href: 'https://mostcore.readthedocs.io/en/latest/index.html' }))(
             $text('@most/core')
           ),
           $text(` Some basic understanding of functional programming and typescript is required, if you use Visual Studio Code IDE these code blocks will look familiar`)

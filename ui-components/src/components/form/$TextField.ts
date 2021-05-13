@@ -40,7 +40,7 @@ export const $TextField = (config: TextField) => component((
     $row(fieldOp, style({ alignItems: 'flex-start' }))(
       $label(layoutSheet.flex, layoutSheet.spacingTiny)(
         $row(layoutSheet.flex, layoutSheet.spacingSmall)(
-          $text(style({ alignSelf: 'flex-end', paddingBottom: '1px', ...config.labelStyle }))(config.label),
+          $text(style({ alignSelf: 'flex-end', cursor: 'pointer', paddingBottom: '1px', ...config.labelStyle }))(config.label),
           $Field({ ...config, validation: multicastValidation })({
             change: valueTether(),
             blur: blurTether()

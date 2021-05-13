@@ -1,5 +1,5 @@
 import { map, mergeArray, never } from "@most/core"
-import { $Node, $element, Behavior, component, event, INode, styleBehavior, IBranch, attrBehavior, StyleCSS } from '@aelea/core'
+import { $Node, $element, Behavior, component, event, INode, styleBehavior, IBranch, attrBehavior, StyleCSS, Op, O } from '@aelea/core'
 import { dismissOp, interactionOp } from './form'
 import { pallete } from '@aelea/ui-components-theme'
 import designSheet from "../../style/designSheet"
@@ -9,9 +9,10 @@ import { Control } from "./types"
 export interface IButton extends Control {
   $content: $Node,
   buttonStyle?: StyleCSS
+  buttonOp?: Op<IBranch<HTMLButtonElement>, IBranch<HTMLButtonElement>>
 }
 
-export const $Button = ({ disabled = never(), $content }: IButton) => component((
+export const $Button = ({ disabled = never(), $content, buttonOp = O() }: IButton) => component((
   [focusStyle, interactionTether]: Behavior<IBranch, true>,
   [dismissstyle, dismissTether]: Behavior<IBranch, false>,
   [click, clickTether]: Behavior<INode, PointerEvent>
@@ -38,7 +39,8 @@ export const $Button = ({ disabled = never(), $content }: IButton) => component(
     ),
 
     interactionTether(interactionOp),
-    dismissTether(dismissOp)
+    dismissTether(dismissOp),
+    buttonOp,
   )
 
   return [

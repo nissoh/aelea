@@ -38,7 +38,7 @@ export default ({ parentRoute }: MainMenu) => component((
       $seperator,
 
       $element('a')(stylePseudo(':hover', { fill: pallete.primary }), layoutSheet.displayFlex, style({ padding: '0 4px' }), attr({ href: 'https://github.com/nissoh/aelea' }))(
-        $icon({ $content: $github, width: 25, viewBox: `0 0 1024 1024` })
+        $icon({ $content: $github, width: '25px', viewBox: `0 0 1024 1024` })
       ),
 
     ),

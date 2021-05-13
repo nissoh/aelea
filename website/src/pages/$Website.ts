@@ -1,6 +1,6 @@
-import { $node, $text, Behavior, component, eventElementTarget, style } from '@aelea/core'
+import { $element, $node, $text, Behavior, component, eventElementTarget, style } from '@aelea/core'
 import * as router from '@aelea/router'
-import { $Anchor } from '@aelea/router'
+import { $RouterAnchor } from '@aelea/router'
 import { $column, $icon, $row, layoutSheet } from '@aelea/ui-components'
 import { map, merge, multicast, now } from '@most/core'
 import { $aeleaLogo } from '../elements/$icons'
@@ -52,7 +52,7 @@ export default ({ baseRoute }: Website) => component((
         $row(layoutSheet.flex, layoutSheet.spacingBig, style({ minHeight: '100%', alignContent: 'center', alignItems: 'center', placeContent: 'center', textAlign: 'center', padding: '0 30px', }))(
           fadeIn(
             $column(style({ alignItems: 'center', maxWidth: '550px' }), layoutSheet.spacing)(
-              $Anchor({ $content: $icon({ $content: style({ fill: pallete.message }, $aeleaLogo), width: 237, height: 115, viewBox: `0 0 147 90` }), url: '/', route: rootRoute })({
+              $RouterAnchor({ url: '/', route: rootRoute, $anchor: $element('a')($icon({ $content: style({ fill: pallete.message }, $aeleaLogo), width: '237px', height: '115px', viewBox: `0 0 147 90` })) })({
                 click: linkClickTether()
               }),
               $text(`"aelea", is a UI Framework for reactive event programming`),
@@ -69,7 +69,7 @@ export default ({ baseRoute }: Website) => component((
       router.contains(pagesRoute)(
         $column(layoutSheet.spacingBig, style({ maxWidth: '870px', width: '100%', margin: '0 auto', paddingBottom: '45px' }))(
           $row(style({ placeContent: 'space-between', padding: '0 15px' }))(
-            $Anchor({ $content: $icon({ $content: $aeleaLogo, fill: pallete.message, width: 137, height: 115, viewBox: `0 0 147 90` }), url: '/', route: rootRoute })({
+            $RouterAnchor({ $anchor: $element('a')($icon({ $content: $aeleaLogo, fill: pallete.message, width: '137px', height: '115px', viewBox: `0 0 147 90` })), url: '/', route: rootRoute })({
               click: linkClickTether()
             }),
             $MainMenu({ parentRoute: pagesRoute })({

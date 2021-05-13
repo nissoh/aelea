@@ -61,7 +61,7 @@ export function replayLatest<A>(s: Stream<A>, initialState?: A): ReplayLatest<A>
   }
 }
 
-export function combineState<A, K extends keyof A>(state: StreamInput<A>): Stream<A> {
+export function combineState<A, K extends keyof A = keyof A>(state: StreamInput<A>): Stream<A> {
   const entries = Object.entries(state) as [keyof A, Stream<A[K]>][]
   const streams = entries.map(([_, stream]) => stream)
 

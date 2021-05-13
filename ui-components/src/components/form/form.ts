@@ -21,7 +21,7 @@ export const $form = $element('form')(layoutSheet.column)
 
 export const $label = $element('label')(
   layoutSheet.column,
-  style({ cursor: 'pointer', color: pallete.foreground })
+  style({ color: pallete.foreground })
 )
 
 

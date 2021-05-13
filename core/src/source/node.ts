@@ -1,4 +1,4 @@
-import { map, never, switchLatest } from '@most/core'
+import { map, never, skipRepeats, switchLatest } from '@most/core'
 import { id } from '@most/prelude'
 import { Disposable, Scheduler, Sink, Stream } from '@most/types'
 import { $Node, $Branch, INode, IBranch, IBranchElement, Op } from '../types'
@@ -76,7 +76,7 @@ function $textFn<A extends HTMLElement>(postOp: Op<IBranch<A>, IBranch<A>> = O(x
       return $textFn(O(postOp, ...input) as Op<IBranch<A>, IBranch<A>>) as any
 
     const children: Stream<INode<Text>>[] = input.map((x) => {
-      return typeof x === 'string' ? node(x) : switchLatest(map(node, x))
+      return typeof x === 'string' ? node(x) : switchLatest(map(node, skipRepeats(x)))
     })
 
     return branch(() => document.createElement('text'), postOp)(null)(...children)

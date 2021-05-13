@@ -32,7 +32,11 @@ module.exports = {
       "node_modules",
       path.resolve(__dirname)
     ],
-    extensions: [".ts", '.js']
+    extensions: [".ts", '.js'],
+    alias: {
+      "bn.js": require.resolve('bn.js'),
+      "hash.js": require.resolve('hash.js'),
+    }
   },
   plugins: [
     new ForkTsCheckerWebpackPlugin(),
