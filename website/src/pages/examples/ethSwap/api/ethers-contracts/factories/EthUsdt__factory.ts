@@ -2,19 +2,11 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer } from "ethers";
+import { Interface } from "@ethersproject/abi";
+import { Signer } from "@ethersproject/abstract-signer";
+import { Contract } from "@ethersproject/contracts";
 import { Provider } from "@ethersproject/providers";
-
-import type { EthUsdt } from "../EthUsdt";
-
-export class EthUsdt__factory {
-  static connect(
-    address: string,
-    signerOrProvider: Signer | Provider
-  ): EthUsdt {
-    return new Contract(address, _abi, signerOrProvider) as EthUsdt;
-  }
-}
+import type { EthUsdt, EthUsdtInterface } from "../EthUsdt";
 
 const _abi = [
   {
@@ -687,3 +679,16 @@ const _abi = [
     type: "event",
   },
 ];
+
+export class EthUsdt__factory {
+  static readonly abi = _abi;
+  static createInterface(): EthUsdtInterface {
+    return new Interface(_abi) as EthUsdtInterface;
+  }
+  static connect(
+    address: string,
+    signerOrProvider: Signer | Provider
+  ): EthUsdt {
+    return new Contract(address, _abi, signerOrProvider) as EthUsdt;
+  }
+}

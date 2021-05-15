@@ -8,7 +8,7 @@ import { $Transaction } from './components/$Transaction'
 import { ITransaction } from './api/types'
 import { $AccountConnectivity } from './components/$ConnectAccount'
 import { $CreateTransaction } from './components/$CreateTransaction'
-import { ContractTransaction } from 'ethers'
+import { ContractTransaction } from '@ethersproject/contracts'
 
 
 

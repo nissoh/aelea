@@ -34,7 +34,7 @@ module.exports = {
     ],
     extensions: [".ts", '.js'],
     alias: {
-      "bn.js": require.resolve('bn.js'),
+      // "bn.js": require.resolve('bn.js'),
       "hash.js": require.resolve('hash.js'),
     }
   },

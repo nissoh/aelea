@@ -1,4 +1,4 @@
-import { Contract } from "ethers"
+import { Contract } from "@ethersproject/contracts"
 import { Token } from "../types"
 
 export type Address = string

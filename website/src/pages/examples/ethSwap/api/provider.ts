@@ -1,10 +1,10 @@
 import { fromCallback, O, Op } from "@aelea/core"
 import { duringWindowActivity } from "@aelea/ui-components/src/utils/elementObservers"
+import { Web3Provider } from "@ethersproject/providers"
 import detectEthereumProvider from "@metamask/detect-provider"
 import { awaitPromises, now, at, map, chain, recoverWith, continueWith, switchLatest, take } from "@most/core"
 import { disposeWith } from "@most/disposable"
 import { Stream } from "@most/types"
-import { ethers } from "ethers"
 
 export enum CHAIN {
   ETH = 1,
@@ -15,7 +15,7 @@ export enum CHAIN {
 }
 
 export type InitWalletProvider = {
-  w3p: ethers.providers.Web3Provider;
+  w3p: Web3Provider;
   metamask: any;
 }
 
@@ -29,7 +29,7 @@ export const provider = awaitPromises(
       throw new Error('No provider')
     }
 
-    const w3p = new ethers.providers.Web3Provider(metamask)
+    const w3p = new Web3Provider(metamask)
 
     return { w3p, metamask } as InitWalletProvider
   }, now(null))

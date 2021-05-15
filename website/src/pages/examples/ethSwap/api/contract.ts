@@ -1,5 +1,4 @@
 import { awaitPromises, combine, map, skipRepeatsWith, switchLatest } from "@most/core"
-import { BigNumber, constants, Contract, ContractTransaction, Signer, utils } from "ethers"
 import { account } from "./account"
 import { awaitProvider, CHAIN, metamaskEvent, providerAction } from "./provider"
 import contract from "./address/contract"
@@ -10,11 +9,15 @@ import { state } from "@aelea/ui-components"
 import { Stream } from "@most/types"
 import { EthExrd__factory, EthSushi__factory } from "./ethers-contracts"
 import { SYMBOL } from "./address/symbol"
-import { bnToHex } from "./utils"
+import { bnToHex, formatFixed } from "./utils"
+import { BigNumber } from "@ethersproject/bignumber"
+import { Contract, ContractTransaction } from "@ethersproject/contracts"
+import { Signer } from "@ethersproject/abstract-signer"
+import { AddressZero } from "./address/token"
 
 const UPDATE_CONTRACT_INTERVAL = 1350
 
-const formatBN = map((bnb: BigNumber) => utils.formatUnits(bnb))
+const formatBN = map((bnb: BigNumber) => formatFixed(bnb.toBigInt()))
 const skipRepeatedBns = skipRepeatsWith((bn1: BigNumber, bn2: BigNumber) => bn1.eq(bn2))
 export const mainchainBalance = providerAction(UPDATE_CONTRACT_INTERVAL, combine(async (accountHash, provider) => provider.w3p.getBalance(accountHash), account))
 export const mainchainBalanceReadable = formatBN(mainchainBalance)
@@ -71,7 +74,7 @@ function baseActions<T extends Contract>(address: Address, contractFactory: Conn
 
 export const ethContracts = {
   MAINCHAIN: {
-    address: constants.AddressZero,
+    address: AddressZero,
     balance: skipRepeatedBns(mainchainBalance),
     balanceReadable: mainchainBalanceReadable,
     contract: null as any, // look into a way to make a compatible interface with mainnet

@@ -2,19 +2,11 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer } from "ethers";
+import { Interface } from "@ethersproject/abi";
+import { Signer } from "@ethersproject/abstract-signer";
+import { Contract } from "@ethersproject/contracts";
 import { Provider } from "@ethersproject/providers";
-
-import type { EthSushi } from "../EthSushi";
-
-export class EthSushi__factory {
-  static connect(
-    address: string,
-    signerOrProvider: Signer | Provider
-  ): EthSushi {
-    return new Contract(address, _abi, signerOrProvider) as EthSushi;
-  }
-}
+import type { EthSushi, EthSushiInterface } from "../EthSushi";
 
 const _abi = [
   {
@@ -614,3 +606,16 @@ const _abi = [
     type: "function",
   },
 ];
+
+export class EthSushi__factory {
+  static readonly abi = _abi;
+  static createInterface(): EthSushiInterface {
+    return new Interface(_abi) as EthSushiInterface;
+  }
+  static connect(
+    address: string,
+    signerOrProvider: Signer | Provider
+  ): EthSushi {
+    return new Contract(address, _abi, signerOrProvider) as EthSushi;
+  }
+}

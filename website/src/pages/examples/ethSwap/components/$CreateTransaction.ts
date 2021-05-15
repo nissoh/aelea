@@ -2,7 +2,6 @@
 import { $text, attr, Behavior, component, event, IBranch, O, style } from '@aelea/core'
 import { state, $column, $Slider, layoutSheet, $Popover, $row, $Field, $Button } from '@aelea/ui-components'
 import { switchLatest, merge, constant, snapshot, map, sample, awaitPromises, startWith, filter, mergeArray, multicast } from '@most/core'
-import { Contract } from 'ethers'
 import { $TokenInput } from './$TokenInput'
 import { account } from '../api/account'
 import { ITransaction } from '../api/types'
@@ -10,7 +9,7 @@ import { $gaugeMetric, $labeledDivider } from '../$elements'
 import { tokenList } from '../state'
 import { Token } from '../types'
 import { formatFixed, isAddress, parseFixed } from '../api/utils'
-import { formatUnits } from 'ethers/lib/utils'
+import { Contract } from '@ethersproject/contracts'
 
 export const $CreateTransaction = component((
   [inputValueChange,     inputValueChangeTether]: Behavior<string, string>,
@@ -34,7 +33,7 @@ export const $CreateTransaction = component((
   }, balance, divideBySlider)
 
   const divideByInput = snapshot((balance, inputValue) => {
-    return Number(formatFixed(parseFixed(inputValue))) / Number(formatUnits(balance))
+    return Number(formatFixed(parseFixed(inputValue))) / Number(formatFixed(balance.toBigInt()))
   }, balance, inputValueChange)
 
   const transaction = multicast(

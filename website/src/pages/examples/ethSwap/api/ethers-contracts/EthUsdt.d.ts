@@ -2,24 +2,16 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import {
-  ethers,
-  EventFilter,
-  Signer,
-  BigNumber,
-  BigNumberish,
-  PopulatedTransaction,
-  Contract,
-  ContractTransaction,
-  Overrides,
-  CallOverrides,
-} from "ethers";
+
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
-import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
-import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
+import { FunctionFragment, EventFragment, Result, Interface } from "@ethersproject/abi";
+import { TypedEventFilter, TypedListener } from "./commons";
+import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
+import { BaseContract, CallOverrides, ContractTransaction, Overrides, PopulatedTransaction } from "@ethersproject/contracts";
+import { Signer } from "@ethersproject/abstract-signer";
 
-interface EthUsdtInterface extends ethers.utils.Interface {
+interface EthUsdtInterface extends Interface {
   functions: {
     "name()": FunctionFragment;
     "deprecate(address)": FunctionFragment;
@@ -238,7 +230,7 @@ interface EthUsdtInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Unpause"): EventFragment;
 }
 
-export class EthUsdt extends Contract {
+export class EthUsdt extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -277,21 +269,14 @@ export class EthUsdt extends Contract {
     event: TypedEventFilter<EventArgsArray, EventArgsObject>,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
+  ): Promise<Array<any>>;
 
   interface: EthUsdtInterface;
 
   functions: {
     name(overrides?: CallOverrides): Promise<[string]>;
 
-    "name()"(overrides?: CallOverrides): Promise<[string]>;
-
     deprecate(
-      _upgradedAddress: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    "deprecate(address)"(
       _upgradedAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -302,29 +287,14 @@ export class EthUsdt extends Contract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    "approve(address,uint256)"(
-      _spender: string,
-      _value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     deprecated(overrides?: CallOverrides): Promise<[boolean]>;
-
-    "deprecated()"(overrides?: CallOverrides): Promise<[boolean]>;
 
     addBlackList(
       _evilUser: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    "addBlackList(address)"(
-      _evilUser: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     totalSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    "totalSupply()"(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     transferFrom(
       _from: string,
@@ -333,50 +303,21 @@ export class EthUsdt extends Contract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    "transferFrom(address,address,uint256)"(
-      _from: string,
-      _to: string,
-      _value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     upgradedAddress(overrides?: CallOverrides): Promise<[string]>;
-
-    "upgradedAddress()"(overrides?: CallOverrides): Promise<[string]>;
 
     balances(arg0: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    "balances(address)"(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
     decimals(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    "decimals()"(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     maximumFee(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    "maximumFee()"(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     _totalSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    "_totalSupply()"(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     unpause(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    "unpause()"(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     getBlackListStatus(
-      _maker: string,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    "getBlackListStatus(address)"(
       _maker: string,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
@@ -387,50 +328,21 @@ export class EthUsdt extends Contract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    "allowed(address,address)"(
-      arg0: string,
-      arg1: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
     paused(overrides?: CallOverrides): Promise<[boolean]>;
 
-    "paused()"(overrides?: CallOverrides): Promise<[boolean]>;
-
     balanceOf(who: string, overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    "balanceOf(address)"(
-      who: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
 
     pause(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    "pause()"(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     getOwner(overrides?: CallOverrides): Promise<[string]>;
-
-    "getOwner()"(overrides?: CallOverrides): Promise<[string]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
-    "owner()"(overrides?: CallOverrides): Promise<[string]>;
-
     symbol(overrides?: CallOverrides): Promise<[string]>;
 
-    "symbol()"(overrides?: CallOverrides): Promise<[string]>;
-
     transfer(
-      _to: string,
-      _value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    "transfer(address,uint256)"(
       _to: string,
       _value: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -442,28 +354,12 @@ export class EthUsdt extends Contract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    "setParams(uint256,uint256)"(
-      newBasisPoints: BigNumberish,
-      newMaxFee: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     issue(
       amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    "issue(uint256)"(
-      amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     redeem(
-      amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    "redeem(uint256)"(
       amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -474,43 +370,18 @@ export class EthUsdt extends Contract {
       overrides?: CallOverrides
     ): Promise<[BigNumber] & { remaining: BigNumber }>;
 
-    "allowance(address,address)"(
-      _owner: string,
-      _spender: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber] & { remaining: BigNumber }>;
-
     basisPointsRate(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    "basisPointsRate()"(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     isBlackListed(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
-
-    "isBlackListed(address)"(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
 
     removeBlackList(
       _clearedUser: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    "removeBlackList(address)"(
-      _clearedUser: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     MAX_UINT(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    "MAX_UINT()"(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    "transferOwnership(address)"(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -519,23 +390,11 @@ export class EthUsdt extends Contract {
       _blackListedUser: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    "destroyBlackFunds(address)"(
-      _blackListedUser: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
   };
 
   name(overrides?: CallOverrides): Promise<string>;
 
-  "name()"(overrides?: CallOverrides): Promise<string>;
-
   deprecate(
-    _upgradedAddress: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  "deprecate(address)"(
     _upgradedAddress: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -546,29 +405,14 @@ export class EthUsdt extends Contract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  "approve(address,uint256)"(
-    _spender: string,
-    _value: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   deprecated(overrides?: CallOverrides): Promise<boolean>;
-
-  "deprecated()"(overrides?: CallOverrides): Promise<boolean>;
 
   addBlackList(
     _evilUser: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  "addBlackList(address)"(
-    _evilUser: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
-
-  "totalSupply()"(overrides?: CallOverrides): Promise<BigNumber>;
 
   transferFrom(
     _from: string,
@@ -577,50 +421,21 @@ export class EthUsdt extends Contract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  "transferFrom(address,address,uint256)"(
-    _from: string,
-    _to: string,
-    _value: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   upgradedAddress(overrides?: CallOverrides): Promise<string>;
-
-  "upgradedAddress()"(overrides?: CallOverrides): Promise<string>;
 
   balances(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-  "balances(address)"(
-    arg0: string,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   decimals(overrides?: CallOverrides): Promise<BigNumber>;
-
-  "decimals()"(overrides?: CallOverrides): Promise<BigNumber>;
 
   maximumFee(overrides?: CallOverrides): Promise<BigNumber>;
 
-  "maximumFee()"(overrides?: CallOverrides): Promise<BigNumber>;
-
   _totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
-
-  "_totalSupply()"(overrides?: CallOverrides): Promise<BigNumber>;
 
   unpause(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  "unpause()"(
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   getBlackListStatus(
-    _maker: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  "getBlackListStatus(address)"(
     _maker: string,
     overrides?: CallOverrides
   ): Promise<boolean>;
@@ -631,50 +446,21 @@ export class EthUsdt extends Contract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  "allowed(address,address)"(
-    arg0: string,
-    arg1: string,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   paused(overrides?: CallOverrides): Promise<boolean>;
 
-  "paused()"(overrides?: CallOverrides): Promise<boolean>;
-
   balanceOf(who: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-  "balanceOf(address)"(
-    who: string,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
 
   pause(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  "pause()"(
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   getOwner(overrides?: CallOverrides): Promise<string>;
-
-  "getOwner()"(overrides?: CallOverrides): Promise<string>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
-  "owner()"(overrides?: CallOverrides): Promise<string>;
-
   symbol(overrides?: CallOverrides): Promise<string>;
 
-  "symbol()"(overrides?: CallOverrides): Promise<string>;
-
   transfer(
-    _to: string,
-    _value: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  "transfer(address,uint256)"(
     _to: string,
     _value: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -686,28 +472,12 @@ export class EthUsdt extends Contract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  "setParams(uint256,uint256)"(
-    newBasisPoints: BigNumberish,
-    newMaxFee: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   issue(
     amount: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  "issue(uint256)"(
-    amount: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   redeem(
-    amount: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  "redeem(uint256)"(
     amount: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -718,43 +488,18 @@ export class EthUsdt extends Contract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  "allowance(address,address)"(
-    _owner: string,
-    _spender: string,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   basisPointsRate(overrides?: CallOverrides): Promise<BigNumber>;
 
-  "basisPointsRate()"(overrides?: CallOverrides): Promise<BigNumber>;
-
   isBlackListed(arg0: string, overrides?: CallOverrides): Promise<boolean>;
-
-  "isBlackListed(address)"(
-    arg0: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
 
   removeBlackList(
     _clearedUser: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  "removeBlackList(address)"(
-    _clearedUser: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   MAX_UINT(overrides?: CallOverrides): Promise<BigNumber>;
 
-  "MAX_UINT()"(overrides?: CallOverrides): Promise<BigNumber>;
-
   transferOwnership(
-    newOwner: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  "transferOwnership(address)"(
     newOwner: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -764,22 +509,10 @@ export class EthUsdt extends Contract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  "destroyBlackFunds(address)"(
-    _blackListedUser: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   callStatic: {
     name(overrides?: CallOverrides): Promise<string>;
 
-    "name()"(overrides?: CallOverrides): Promise<string>;
-
     deprecate(
-      _upgradedAddress: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "deprecate(address)"(
       _upgradedAddress: string,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -790,26 +523,11 @@ export class EthUsdt extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "approve(address,uint256)"(
-      _spender: string,
-      _value: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     deprecated(overrides?: CallOverrides): Promise<boolean>;
-
-    "deprecated()"(overrides?: CallOverrides): Promise<boolean>;
 
     addBlackList(_evilUser: string, overrides?: CallOverrides): Promise<void>;
 
-    "addBlackList(address)"(
-      _evilUser: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "totalSupply()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     transferFrom(
       _from: string,
@@ -818,46 +536,19 @@ export class EthUsdt extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "transferFrom(address,address,uint256)"(
-      _from: string,
-      _to: string,
-      _value: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     upgradedAddress(overrides?: CallOverrides): Promise<string>;
-
-    "upgradedAddress()"(overrides?: CallOverrides): Promise<string>;
 
     balances(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    "balances(address)"(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     decimals(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "decimals()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     maximumFee(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "maximumFee()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     _totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "_totalSupply()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     unpause(overrides?: CallOverrides): Promise<void>;
 
-    "unpause()"(overrides?: CallOverrides): Promise<void>;
-
     getBlackListStatus(
-      _maker: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    "getBlackListStatus(address)"(
       _maker: string,
       overrides?: CallOverrides
     ): Promise<boolean>;
@@ -868,46 +559,19 @@ export class EthUsdt extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "allowed(address,address)"(
-      arg0: string,
-      arg1: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     paused(overrides?: CallOverrides): Promise<boolean>;
-
-    "paused()"(overrides?: CallOverrides): Promise<boolean>;
 
     balanceOf(who: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    "balanceOf(address)"(
-      who: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     pause(overrides?: CallOverrides): Promise<void>;
-
-    "pause()"(overrides?: CallOverrides): Promise<void>;
 
     getOwner(overrides?: CallOverrides): Promise<string>;
 
-    "getOwner()"(overrides?: CallOverrides): Promise<string>;
-
     owner(overrides?: CallOverrides): Promise<string>;
-
-    "owner()"(overrides?: CallOverrides): Promise<string>;
 
     symbol(overrides?: CallOverrides): Promise<string>;
 
-    "symbol()"(overrides?: CallOverrides): Promise<string>;
-
     transfer(
-      _to: string,
-      _value: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "transfer(address,uint256)"(
       _to: string,
       _value: BigNumberish,
       overrides?: CallOverrides
@@ -919,25 +583,9 @@ export class EthUsdt extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "setParams(uint256,uint256)"(
-      newBasisPoints: BigNumberish,
-      newMaxFee: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     issue(amount: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
-    "issue(uint256)"(
-      amount: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     redeem(amount: BigNumberish, overrides?: CallOverrides): Promise<void>;
-
-    "redeem(uint256)"(
-      amount: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     allowance(
       _owner: string,
@@ -945,43 +593,18 @@ export class EthUsdt extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "allowance(address,address)"(
-      _owner: string,
-      _spender: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     basisPointsRate(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "basisPointsRate()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     isBlackListed(arg0: string, overrides?: CallOverrides): Promise<boolean>;
-
-    "isBlackListed(address)"(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
 
     removeBlackList(
       _clearedUser: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "removeBlackList(address)"(
-      _clearedUser: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     MAX_UINT(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "MAX_UINT()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     transferOwnership(
-      newOwner: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "transferOwnership(address)"(
       newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -990,57 +613,52 @@ export class EthUsdt extends Contract {
       _blackListedUser: string,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    "destroyBlackFunds(address)"(
-      _blackListedUser: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
   };
 
   filters: {
-    Issue(amount: null): TypedEventFilter<[BigNumber], { amount: BigNumber }>;
+    Issue(amount?: null): TypedEventFilter<[BigNumber], { amount: BigNumber }>;
 
-    Redeem(amount: null): TypedEventFilter<[BigNumber], { amount: BigNumber }>;
+    Redeem(amount?: null): TypedEventFilter<[BigNumber], { amount: BigNumber }>;
 
     Deprecate(
-      newAddress: null
+      newAddress?: null
     ): TypedEventFilter<[string], { newAddress: string }>;
 
     Params(
-      feeBasisPoints: null,
-      maxFee: null
+      feeBasisPoints?: null,
+      maxFee?: null
     ): TypedEventFilter<
       [BigNumber, BigNumber],
       { feeBasisPoints: BigNumber; maxFee: BigNumber }
     >;
 
     DestroyedBlackFunds(
-      _blackListedUser: null,
-      _balance: null
+      _blackListedUser?: null,
+      _balance?: null
     ): TypedEventFilter<
       [string, BigNumber],
       { _blackListedUser: string; _balance: BigNumber }
     >;
 
-    AddedBlackList(_user: null): TypedEventFilter<[string], { _user: string }>;
+    AddedBlackList(_user?: null): TypedEventFilter<[string], { _user: string }>;
 
     RemovedBlackList(
-      _user: null
+      _user?: null
     ): TypedEventFilter<[string], { _user: string }>;
 
     Approval(
-      owner: string | null,
-      spender: string | null,
-      value: null
+      owner?: string | null,
+      spender?: string | null,
+      value?: null
     ): TypedEventFilter<
       [string, string, BigNumber],
       { owner: string; spender: string; value: BigNumber }
     >;
 
     Transfer(
-      from: string | null,
-      to: string | null,
-      value: null
+      from?: string | null,
+      to?: string | null,
+      value?: null
     ): TypedEventFilter<
       [string, string, BigNumber],
       { from: string; to: string; value: BigNumber }
@@ -1054,14 +672,7 @@ export class EthUsdt extends Contract {
   estimateGas: {
     name(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "name()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     deprecate(
-      _upgradedAddress: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    "deprecate(address)"(
       _upgradedAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -1072,38 +683,16 @@ export class EthUsdt extends Contract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    "approve(address,uint256)"(
-      _spender: string,
-      _value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     deprecated(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "deprecated()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     addBlackList(
       _evilUser: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    "addBlackList(address)"(
-      _evilUser: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "totalSupply()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     transferFrom(
-      _from: string,
-      _to: string,
-      _value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    "transferFrom(address,address,uint256)"(
       _from: string,
       _to: string,
       _value: BigNumberish,
@@ -1112,41 +701,19 @@ export class EthUsdt extends Contract {
 
     upgradedAddress(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "upgradedAddress()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     balances(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    "balances(address)"(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     decimals(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "decimals()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     maximumFee(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "maximumFee()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     _totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "_totalSupply()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     unpause(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    "unpause()"(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     getBlackListStatus(
-      _maker: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "getBlackListStatus(address)"(
       _maker: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -1157,50 +724,21 @@ export class EthUsdt extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "allowed(address,address)"(
-      arg0: string,
-      arg1: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     paused(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "paused()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     balanceOf(who: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    "balanceOf(address)"(
-      who: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     pause(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    "pause()"(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     getOwner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "getOwner()"(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "owner()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     symbol(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "symbol()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     transfer(
-      _to: string,
-      _value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    "transfer(address,uint256)"(
       _to: string,
       _value: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1212,28 +750,12 @@ export class EthUsdt extends Contract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    "setParams(uint256,uint256)"(
-      newBasisPoints: BigNumberish,
-      newMaxFee: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     issue(
       amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    "issue(uint256)"(
-      amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     redeem(
-      amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    "redeem(uint256)"(
       amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -1244,43 +766,18 @@ export class EthUsdt extends Contract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "allowance(address,address)"(
-      _owner: string,
-      _spender: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     basisPointsRate(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "basisPointsRate()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     isBlackListed(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    "isBlackListed(address)"(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     removeBlackList(
       _clearedUser: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    "removeBlackList(address)"(
-      _clearedUser: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     MAX_UINT(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "MAX_UINT()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    "transferOwnership(address)"(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -1289,24 +786,12 @@ export class EthUsdt extends Contract {
       _blackListedUser: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
-
-    "destroyBlackFunds(address)"(
-      _blackListedUser: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "name()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     deprecate(
-      _upgradedAddress: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "deprecate(address)"(
       _upgradedAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
@@ -1317,29 +802,14 @@ export class EthUsdt extends Contract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    "approve(address,uint256)"(
-      _spender: string,
-      _value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     deprecated(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "deprecated()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     addBlackList(
       _evilUser: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    "addBlackList(address)"(
-      _evilUser: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     totalSupply(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "totalSupply()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     transferFrom(
       _from: string,
@@ -1348,55 +818,24 @@ export class EthUsdt extends Contract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    "transferFrom(address,address,uint256)"(
-      _from: string,
-      _to: string,
-      _value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     upgradedAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "upgradedAddress()"(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
 
     balances(
       arg0: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    "balances(address)"(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     decimals(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "decimals()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     maximumFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "maximumFee()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     _totalSupply(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "_totalSupply()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     unpause(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    "unpause()"(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     getBlackListStatus(
-      _maker: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "getBlackListStatus(address)"(
       _maker: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -1407,22 +846,9 @@ export class EthUsdt extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    "allowed(address,address)"(
-      arg0: string,
-      arg1: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     paused(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "paused()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     balanceOf(
-      who: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "balanceOf(address)"(
       who: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -1431,29 +857,13 @@ export class EthUsdt extends Contract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    "pause()"(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     getOwner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "getOwner()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "owner()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     symbol(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "symbol()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     transfer(
-      _to: string,
-      _value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "transfer(address,uint256)"(
       _to: string,
       _value: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1465,28 +875,12 @@ export class EthUsdt extends Contract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    "setParams(uint256,uint256)"(
-      newBasisPoints: BigNumberish,
-      newMaxFee: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     issue(
       amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    "issue(uint256)"(
-      amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     redeem(
-      amount: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "redeem(uint256)"(
       amount: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
@@ -1497,24 +891,9 @@ export class EthUsdt extends Contract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    "allowance(address,address)"(
-      _owner: string,
-      _spender: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     basisPointsRate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "basisPointsRate()"(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     isBlackListed(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "isBlackListed(address)"(
       arg0: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -1524,31 +903,14 @@ export class EthUsdt extends Contract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    "removeBlackList(address)"(
-      _clearedUser: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     MAX_UINT(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "MAX_UINT()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    "transferOwnership(address)"(
-      newOwner: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     destroyBlackFunds(
-      _blackListedUser: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "destroyBlackFunds(address)"(
       _blackListedUser: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;

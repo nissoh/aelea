@@ -1,5 +1,4 @@
-import { constants } from "ethers"
-
+export const AddressZero = "0x0000000000000000000000000000000000000000"
 
 export const TOKENS_BSC = [
   {
@@ -18,7 +17,7 @@ export const TOKENS_BSC = [
     name: "Binance Coin",
     symbol: 'BNB',
     decimals: 18,
-    address: constants.AddressZero,
+    address: AddressZero,
   },
   {
     name: "USD Gambit",

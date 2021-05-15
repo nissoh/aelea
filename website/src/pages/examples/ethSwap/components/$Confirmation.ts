@@ -1,7 +1,7 @@
 import { event, $text, Behavior, component, INode, style } from "@aelea/core"
 import { $Button, $column, $row, layoutSheet } from "@aelea/ui-components"
+import { ContractTransaction } from "@ethersproject/contracts"
 import { awaitPromises, snapshot, switchLatest } from "@most/core"
-import { ContractTransaction } from "ethers"
 import { $labeledDivider, $tokenLabel } from "../$elements"
 import { $anchor } from "../../../../elements/$common"
 import { awaitProvider } from "../api/provider"

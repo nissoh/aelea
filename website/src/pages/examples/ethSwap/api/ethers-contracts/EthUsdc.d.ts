@@ -2,25 +2,16 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import {
-  ethers,
-  EventFilter,
-  Signer,
-  BigNumber,
-  BigNumberish,
-  PopulatedTransaction,
-  Contract,
-  ContractTransaction,
-  Overrides,
-  PayableOverrides,
-  CallOverrides,
-} from "ethers";
+
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
-import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
-import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
+import { FunctionFragment, EventFragment, Result, Interface } from "@ethersproject/abi";
+import { TypedEventFilter, TypedListener } from "./commons";
+import { BaseContract, CallOverrides, ContractTransaction, Overrides, PayableOverrides, PopulatedTransaction } from "@ethersproject/contracts";
+import { Signer } from "@ethersproject/abstract-signer";
+import { BigNumber } from "@ethersproject/bignumber";
 
-interface EthUsdcInterface extends ethers.utils.Interface {
+interface EthUsdcInterface extends Interface {
   functions: {
     "upgradeTo(address)": FunctionFragment;
     "upgradeToAndCall(address,bytes)": FunctionFragment;
@@ -65,7 +56,7 @@ interface EthUsdcInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
 }
 
-export class EthUsdc extends Contract {
+export class EthUsdc extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -104,17 +95,12 @@ export class EthUsdc extends Contract {
     event: TypedEventFilter<EventArgsArray, EventArgsObject>,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
+  ): Promise<Array<any>>;
 
   interface: EthUsdcInterface;
 
   functions: {
     upgradeTo(
-      newImplementation: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    "upgradeTo(address)"(
       newImplementation: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -125,37 +111,17 @@ export class EthUsdc extends Contract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    "upgradeToAndCall(address,bytes)"(
-      newImplementation: string,
-      data: BytesLike,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     implementation(overrides?: CallOverrides): Promise<[string]>;
-
-    "implementation()"(overrides?: CallOverrides): Promise<[string]>;
 
     changeAdmin(
       newAdmin: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    "changeAdmin(address)"(
-      newAdmin: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     admin(overrides?: CallOverrides): Promise<[string]>;
-
-    "admin()"(overrides?: CallOverrides): Promise<[string]>;
   };
 
   upgradeTo(
-    newImplementation: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  "upgradeTo(address)"(
     newImplementation: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -166,37 +132,17 @@ export class EthUsdc extends Contract {
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  "upgradeToAndCall(address,bytes)"(
-    newImplementation: string,
-    data: BytesLike,
-    overrides?: PayableOverrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   implementation(overrides?: CallOverrides): Promise<string>;
-
-  "implementation()"(overrides?: CallOverrides): Promise<string>;
 
   changeAdmin(
     newAdmin: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  "changeAdmin(address)"(
-    newAdmin: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   admin(overrides?: CallOverrides): Promise<string>;
-
-  "admin()"(overrides?: CallOverrides): Promise<string>;
 
   callStatic: {
     upgradeTo(
-      newImplementation: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "upgradeTo(address)"(
       newImplementation: string,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -207,39 +153,24 @@ export class EthUsdc extends Contract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "upgradeToAndCall(address,bytes)"(
-      newImplementation: string,
-      data: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     implementation(overrides?: CallOverrides): Promise<string>;
-
-    "implementation()"(overrides?: CallOverrides): Promise<string>;
 
     changeAdmin(newAdmin: string, overrides?: CallOverrides): Promise<void>;
 
-    "changeAdmin(address)"(
-      newAdmin: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     admin(overrides?: CallOverrides): Promise<string>;
-
-    "admin()"(overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {
     AdminChanged(
-      previousAdmin: null,
-      newAdmin: null
+      previousAdmin?: null,
+      newAdmin?: null
     ): TypedEventFilter<
       [string, string],
       { previousAdmin: string; newAdmin: string }
     >;
 
     Upgraded(
-      implementation: null
+      implementation?: null
     ): TypedEventFilter<[string], { implementation: string }>;
   };
 
@@ -249,18 +180,7 @@ export class EthUsdc extends Contract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    "upgradeTo(address)"(
-      newImplementation: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     upgradeToAndCall(
-      newImplementation: string,
-      data: BytesLike,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    "upgradeToAndCall(address,bytes)"(
       newImplementation: string,
       data: BytesLike,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
@@ -268,21 +188,12 @@ export class EthUsdc extends Contract {
 
     implementation(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "implementation()"(overrides?: CallOverrides): Promise<BigNumber>;
-
     changeAdmin(
       newAdmin: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    "changeAdmin(address)"(
-      newAdmin: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     admin(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "admin()"(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -291,18 +202,7 @@ export class EthUsdc extends Contract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    "upgradeTo(address)"(
-      newImplementation: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     upgradeToAndCall(
-      newImplementation: string,
-      data: BytesLike,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "upgradeToAndCall(address,bytes)"(
       newImplementation: string,
       data: BytesLike,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
@@ -310,22 +210,11 @@ export class EthUsdc extends Contract {
 
     implementation(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "implementation()"(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     changeAdmin(
       newAdmin: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    "changeAdmin(address)"(
-      newAdmin: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     admin(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "admin()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }
