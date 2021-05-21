@@ -14,6 +14,15 @@ export enum CHAIN {
   BSC_TESTNET = 97
 }
 
+export const EXPLORER_URL = {
+  [CHAIN.ETH]: "https://etherscan.io/",
+  [CHAIN.ETH_KOVAN]: "https://kovan.etherscan.io/",
+  [CHAIN.ETH_ROPSTEN]: "https://ropsten.etherscan.io/",
+  [CHAIN.BSC]: "https://bscscan.com/",
+  [CHAIN.BSC_TESTNET]: "https://testnet.bscscan.com/",
+} as const
+
+
 export type InitWalletProvider = {
   w3p: Web3Provider;
   metamask: any;

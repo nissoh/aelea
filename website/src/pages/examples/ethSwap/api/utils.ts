@@ -3,14 +3,6 @@ import { CHAIN } from "./provider"
 const zXAdressRegxp = /^(0x)?[0-9a-fA-F]{40}$/
 const validFractionalNumberRegxp = /^-?(0|[1-9]\d*)(\.\d+)?$/
 
-export const EXPLORER_URL = {
-  [CHAIN.ETH]: "https://etherscan.io/",
-  [CHAIN.ETH_KOVAN]: "https://kovan.etherscan.io/",
-  [CHAIN.ETH_ROPSTEN]: "https://ropsten.etherscan.io/",
-  [CHAIN.BSC]: "https://bscscan.com/",
-  [CHAIN.BSC_TESTNET]: "https://testnet.bscscan.com/",
-} as const
-
 
 
 // Constant to pull zeros from for multipliers
@@ -162,16 +154,6 @@ export const padDecimals = (amount: string, minDecimals: number) => {
     amountStr = amountStr + ".0000"
   }
   return amountStr
-}
-
-
-
-
-export function getAccountUrl(chainId: CHAIN, account: string) {
-  if (!account) {
-    return EXPLORER_URL[chainId]
-  }
-  return EXPLORER_URL[chainId] + "address/" + account
 }
 
 

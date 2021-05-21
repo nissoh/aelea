@@ -1,9 +1,9 @@
-import { $text, component, style, Behavior, $Node, $Branch, $node, attr } from "@aelea/core"
+import { $text, component, style, Behavior, $Node, $node, attr } from "@aelea/core"
 import { $Button, $column, $row, layoutSheet } from "@aelea/ui-components"
 import { pallete } from "@aelea/ui-components-theme"
 import { combine, map, merge, switchLatest } from "@most/core"
 import { network, account, requestAccounts } from "../api/account"
-import { awaitProvider, noProviderAlert } from "../api/provider"
+import { awaitProvider, CHAIN, noProviderAlert } from "../api/provider"
 import { $wrapNativeElement } from "@aelea/core"
 // @ts-ignore
 import jazzicon from 'jazzicon'
@@ -75,12 +75,12 @@ export const $AccountConnectivity = () => component((
           return $installMetamaskWarning
 
         return switchLatest(
-          combine((requestNetRes, account) => {
+          combine((chain, account) => {
             if (account === undefined)
               return $connectButton
 
 
-            if (requestNetRes.chainId !== 1)
+            if (chain !== CHAIN.ETH)
               return $accountAlert('Switch to Ethereum main network ', $text('Sending mainnet(ETH, BNB) tokens should be, other tokens are incompatible'))
 
             return $row(layoutSheet.spacing, style({ alignItems: 'center' }))(

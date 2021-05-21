@@ -36,7 +36,7 @@ export const $Confirmation = (swapState: IConfirmation) => component((
         $labeledDivider('Send To')
       ),
 
-      $text(style({ fontSize: '75%' }))(swapState.transaction.to),
+      $text(style({ fontSize: '75%', textAlign: 'center' }))(swapState.transaction.to),
 
       $row(layoutSheet.spacing, style({ placeContent: 'center', alignItems: 'center', paddingTop: '25px' }))(
         $anchor(backTether(event('click')))(

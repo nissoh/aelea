@@ -4,7 +4,7 @@ import { Network } from "@ethersproject/providers"
 import { awaitPromises, map, merge, switchLatest } from "@most/core"
 import { disposeWith } from "@most/disposable"
 import { Stream } from "@most/types"
-import { awaitProvider, InitWalletProvider } from "./provider"
+import { awaitProvider, CHAIN, InitWalletProvider } from "./provider"
 import { Address } from "./types"
 
 const metamaskEvent = <A, B = unknown>(eventName: string, action: (a: Stream<[InitWalletProvider, A]>) => Stream<Promise<B>>) => switchLatest(
@@ -22,13 +22,13 @@ const metamaskEvent = <A, B = unknown>(eventName: string, action: (a: Stream<[In
   }, awaitProvider)
 )
 
-const networkChange = metamaskEvent<string, Network>('chainChanged', map(([provider, _chainId]) => {
+const networkChange = metamaskEvent<string, CHAIN>('chainChanged', map(async ([provider, _chainId]) => {
   // ethers.js does not support provider switch, hacky reload is required.. pffft
   window.location.reload()
 
-  return provider.w3p.getNetwork()
+  return (await provider.w3p.getNetwork()).chainId
 }))
-const initialNetwork = awaitPromises(map(p => p.w3p.getNetwork(), awaitProvider))
+const initialNetwork = awaitPromises(map(async p => (await p.w3p.getNetwork()).chainId as CHAIN, awaitProvider))
 export const network = merge(initialNetwork, networkChange)
 
 const initialAccountList = awaitPromises(map(p => p.w3p.listAccounts(), awaitProvider))

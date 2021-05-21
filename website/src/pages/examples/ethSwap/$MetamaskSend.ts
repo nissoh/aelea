@@ -43,10 +43,6 @@ export const $EtherSwapExample = component((
       }),
       
       $card(elevation2, style({ borderRadius: '30px', padding: '30px', width: '470px' }))(
-
-        // $Transaction('0xbaa10b0e66f8960fb87ba96d4ff1b96822e4bf0f9f86b982307e21b46026b978')({
-        //   close: backToMainClickClick(),
-        // })
         switchLatest(
           mergeArray([
             map(() => $CreateTransaction({
