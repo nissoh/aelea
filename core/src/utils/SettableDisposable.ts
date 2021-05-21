@@ -1,7 +1,7 @@
-import { disposeNone } from '@most/disposable';
+import { disposeNone } from '@most/disposable'
 import { Disposable } from '@most/types'
 
-export default class SettableDisposable implements Disposable {
+export class SettableDisposable implements Disposable {
   private disposable: Disposable | undefined;
   private disposed = false
 

@@ -1,11 +1,11 @@
 import { map, never, propagateTask, skipRepeats, switchLatest } from '@most/core'
 import { disposeBoth } from '@most/disposable'
 import { id } from '@most/prelude'
-import { asap, delay } from '@most/scheduler'
+import { asap } from '@most/scheduler'
 import { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
 import { $Node, $Branch, INode, IBranch, IBranchElement, Op } from '../types'
 import { isFunction, O } from '../utils'
-import SettableDisposable from '../utils/SettableDisposable'
+import { SettableDisposable } from '../utils/SettableDisposable'
 
 
 export const $svg = branch(<K extends keyof SVGElementTagNameMap>(a: K) => document.createElementNS('http://www.w3.org/2000/svg', a))

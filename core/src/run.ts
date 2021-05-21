@@ -5,7 +5,7 @@ import { loop, map, mergeArray, tap } from '@most/core'
 import { disposeAll, disposeNone, disposeWith } from '@most/disposable'
 import { useStylePseudoRule, useStyleRule } from './utils/styleUtils'
 import { nullSink } from './utils'
-import SettableDisposable from './utils/SettableDisposable'
+import { SettableDisposable } from './utils/SettableDisposable'
 
 
 
