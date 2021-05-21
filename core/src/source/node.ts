@@ -1,6 +1,8 @@
-import { map, never, skipRepeats, switchLatest } from '@most/core'
+import { map, never, propagateTask, skipRepeats, switchLatest } from '@most/core'
+import { disposeBoth } from '@most/disposable'
 import { id } from '@most/prelude'
-import { Disposable, Scheduler, Sink, Stream } from '@most/types'
+import { asap, delay } from '@most/scheduler'
+import { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
 import { $Node, $Branch, INode, IBranch, IBranchElement, Op } from '../types'
 import { isFunction, O } from '../utils'
 import SettableDisposable from '../utils/SettableDisposable'
@@ -27,16 +29,20 @@ export class NodeSource<A, B extends IBranchElement> implements Stream<IBranch<B
     const $segments = this.$segments
     const disposable = new SettableDisposable()
 
-    sink.event(scheduler.currentTime(), {
+    const nodeState: IBranch<B> = {
       $segments, element, disposable,
       styleBehavior: [],
       insertAscending: true,
       attributesBehavior: [],
       stylePseudo: []
-    })
+    }
 
-    return disposable
+    return disposeBoth(asap(propagateTask(runAt, nodeState, sink), scheduler), disposable)
   }
+}
+
+function runAt<A extends IBranchElement>(t: Time, x: IBranch<A>, sink: Sink<IBranch<A>>): void {
+  sink.event(t, x)
 }
 
 function node(text: string): $Node<Text> {

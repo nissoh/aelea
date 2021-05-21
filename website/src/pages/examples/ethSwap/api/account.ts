@@ -9,10 +9,10 @@ import { Address } from "./types"
 
 const metamaskEvent = <A, B = unknown>(eventName: string, action: (a: Stream<[InitWalletProvider, A]>) => Stream<Promise<B>>) => switchLatest(
   map(provider => {
-    const eventChange: Stream<A> = fromCallback(cb => {
+    const eventChange: Stream<A> = map(args => args[0], fromCallback(cb => {
       provider.metamask.on(eventName, cb)
       return disposeWith(() => provider.metamask.removeListener(eventName, cb), null)
-    })
+    }))
 
     return O(
       map((ev: A) => [provider, ev]),

@@ -11,7 +11,6 @@ import { $CreateTransaction } from './components/$CreateTransaction'
 import { ContractTransaction } from '@ethersproject/contracts'
 
 
-
 export interface ExchangeUnit {
   symbol: string
   exchangeScale: number
@@ -31,7 +30,7 @@ export interface ExchangeUnit {
 export const $EtherSwapExample = component((
   [send, sendTether]: Behavior<ITransaction, ITransaction>,
   [backToMainClick, backToMainClickClick]: Behavior<PointerEvent, PointerEvent>,
-  [txHash, sampleTxHash]: Behavior<ContractTransaction, ContractTransaction>,
+  [txHash, sampleTxHash]: Behavior<ContractTransaction | string, ContractTransaction | string>,
   [account, accountTether]: Behavior<string, string>,
 ) => {
 
@@ -43,26 +42,28 @@ export const $EtherSwapExample = component((
         account: accountTether()
       }),
       
-      $card(elevation2, style({ borderRadius: '30px', padding: '30px', maxWidth: '470px' }))(
+      $card(elevation2, style({ borderRadius: '30px', padding: '30px', width: '470px' }))(
+
+        // $Transaction('0xbaa10b0e66f8960fb87ba96d4ff1b96822e4bf0f9f86b982307e21b46026b978')({
+        //   close: backToMainClickClick(),
+        // })
         switchLatest(
           mergeArray([
             map(() => $CreateTransaction({
               send: sendTether()
-            }), initialSwapCard ),
+            }), initialSwapCard),
             map(transaction =>
               fadeIn(
                 $Confirmation({ transaction })({
                   confirm: sampleTxHash(),
                   back: backToMainClickClick()
                 })
-              ),
-            send
-            ),
+              )
+            , send),
             map(tx =>
               fadeIn(
-                $Transaction(tx.hash)({
+                $Transaction(typeof tx === 'string' ? tx : tx.hash )({
                   close: backToMainClickClick(),
-                  
                 })
               ),
             txHash

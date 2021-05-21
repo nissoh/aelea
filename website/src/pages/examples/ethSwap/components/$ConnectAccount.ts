@@ -81,7 +81,7 @@ export const $AccountConnectivity = () => component((
 
 
             if (requestNetRes.chainId !== 1)
-              return $accountAlert('Switch to Ethereum main network ', $text('Sending mainnet(ETH, BNB) tokens should be compatible, other tokens are incompatible'))
+              return $accountAlert('Switch to Ethereum main network ', $text('Sending mainnet(ETH, BNB) tokens should be, other tokens are incompatible'))
 
             return $row(layoutSheet.spacing, style({ alignItems: 'center' }))(
               $text(style({ color: pallete.foreground }))('Account: '),

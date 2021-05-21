@@ -1,5 +1,5 @@
 import { fromCallback, O, Op } from "@aelea/core"
-import { duringWindowActivity } from "@aelea/ui-components/src/utils/elementObservers"
+import { observer } from "@aelea/ui-components"
 import { Web3Provider } from "@ethersproject/providers"
 import detectEthereumProvider from "@metamask/detect-provider"
 import { awaitPromises, now, at, map, chain, recoverWith, continueWith, switchLatest, take } from "@most/core"
@@ -36,7 +36,7 @@ export const provider = awaitPromises(
 )
 
 // TODO(await fix) ATM recovering from provider failure is not possible with metamask
-export const awaitProvider: typeof provider = duringWindowActivity(
+export const awaitProvider: typeof provider = observer.duringWindowActivity(
   recoverWith(err => {
     console.error(err)
     return chain(() => awaitProvider, at(3000, null))
@@ -59,15 +59,15 @@ export const providerAction = <T>(interval: number, actionOp: Op<InitWalletProvi
       return switchLatest(at(interval, tx))
     }),
   )(awaitProvider)
-  return duringWindowActivity(tx)
+  return observer.duringWindowActivity(tx)
 }
 
 export const metamaskEvent = <A>(eventName: string): Stream<A> => switchLatest(
   map(provider => {
-    const eventChange: Stream<A> = fromCallback(cb => {
+    const eventChange: Stream<A> = map(args => args[0], fromCallback(cb => {
       provider.metamask.on(eventName, cb)
       return disposeWith(() => provider.metamask.removeListener(eventName, cb), null)
-    })
+    }))
 
     return O(
     )(eventChange)

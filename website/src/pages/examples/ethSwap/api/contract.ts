@@ -1,7 +1,6 @@
 import { awaitPromises, combine, map, skipRepeatsWith, switchLatest } from "@most/core"
 import { account } from "./account"
 import { awaitProvider, CHAIN, metamaskEvent, providerAction } from "./provider"
-import contract from "./address/contract"
 import { Provider } from "@ethersproject/providers"
 import { Address } from "./types"
 import { fromCallback } from "@aelea/core"
@@ -14,6 +13,7 @@ import { BigNumber } from "@ethersproject/bignumber"
 import { Contract, ContractTransaction } from "@ethersproject/contracts"
 import { Signer } from "@ethersproject/abstract-signer"
 import { AddressZero } from "./address/token"
+import { ETH_CONTRACT } from "./address/contract"
 
 const UPDATE_CONTRACT_INTERVAL = 1350
 
@@ -29,11 +29,11 @@ export interface IContractBase<T extends Contract> {
   balanceReadable: Stream<string>
 
   contract: Stream<T>
-  listen: <A>(eventName: string) => Stream<A>
+  listen: <A extends any[]>(eventName: string) => Stream<A>
 }
 
 export interface IContract<T extends Contract> extends IContractBase<T> {
-  transfer(to: string, amount: bigint): Stream<ContractTransaction>
+  transfer(to: string, amount: bigint): Stream<ContractTransaction | string>
 }
 
 
@@ -80,11 +80,12 @@ export const ethContracts = {
     contract: null as any, // look into a way to make a compatible interface with mainnet
     listen: metamaskEvent,
     transfer(to: string, amount: bigint) {
-      const accountAndContract = state.combineState({ awaitProvider, account })
-      const request = map(async (w3) => {
+      const accountAndContract = state.combineState({ provider: awaitProvider, account })
+      const request = map(async (w3): Promise<string> => {
         // txHash is a hex string
         // As with any RPC call, it may throw an error
-        const txHash = await w3.awaitProvider.metamask.request({
+        // w3.provider.w3p.sendTransaction
+        const txHash = await w3.provider.metamask.request({
           method: 'eth_sendTransaction',
           params: [
             { from: w3.account, to, value: bnToHex(amount) },
@@ -98,24 +99,24 @@ export const ethContracts = {
     }
   },
   [SYMBOL.EXRD]: {
-    ...baseActions(contract[CHAIN.ETH].EXRD, EthExrd__factory.connect),
-    address: contract[CHAIN.ETH].EXRD,
+    ...baseActions(ETH_CONTRACT[CHAIN.ETH].EXRD, EthExrd__factory.connect),
+    address: ETH_CONTRACT[CHAIN.ETH].EXRD,
     transfer(to: string, amount: bigint) {
       const transferSignal = awaitPromises(map(cont => cont.transfer(to, BigNumber.from(amount)), this.contract))
       return transferSignal
     }
   },
   [SYMBOL.SUSHI]: {
-    ...baseActions(contract[CHAIN.ETH].SUSHI, EthSushi__factory.connect),
-    address: contract[CHAIN.ETH].SUSHI,
+    ...baseActions(ETH_CONTRACT[CHAIN.ETH].SUSHI, EthSushi__factory.connect),
+    address: ETH_CONTRACT[CHAIN.ETH].SUSHI,
     transfer (to: string, amount: bigint) {
       const transferSignal = awaitPromises(map(cont => cont.transfer(to, BigNumber.from(amount)), this.contract))
       return transferSignal
     }
   },
   [SYMBOL.USDT]: {
-    ...baseActions(contract[CHAIN.ETH].USDT, EthSushi__factory.connect),
-    address: contract[CHAIN.ETH].USDT,
+    ...baseActions(ETH_CONTRACT[CHAIN.ETH].USDT, EthSushi__factory.connect),
+    address: ETH_CONTRACT[CHAIN.ETH].USDT,
     transfer (to: string, amount: bigint) {
       const transferSignal = awaitPromises(map(cont => cont.transfer(to, BigNumber.from(amount)), this.contract))
       return transferSignal

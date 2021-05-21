@@ -14,7 +14,7 @@ export interface IConfirmation {
 
 
 export const $Confirmation = (swapState: IConfirmation) => component((
-  [confirm, confirmTether]: Behavior<any, ContractTransaction>,
+  [confirm, confirmTether]: Behavior<any, ContractTransaction | string>,
   [back,    backTether]: Behavior<INode, PointerEvent>,
 ) => {
 

@@ -49,14 +49,16 @@ export default ({ baseRoute }: Website) => component((
   return [
     $node(designSheet.main, style({ backgroundImage: `radial-gradient(at center center, ${pallete.horizon} 50vh, ${pallete.background})`, }))(
       router.match(rootRoute)(
-        $row(layoutSheet.flex, layoutSheet.spacingBig, style({ minHeight: '100%', alignContent: 'center', alignItems: 'center', placeContent: 'center', textAlign: 'center', padding: '0 30px', }))(
+        $row(layoutSheet.flex, style({ minHeight: '100%', alignContent: 'center', alignItems: 'center', placeContent: 'center', textAlign: 'center', padding: '0 30px', }))(
           fadeIn(
-            $column(style({ alignItems: 'center', maxWidth: '550px' }), layoutSheet.spacing)(
+            $column(style({ alignItems: 'center', maxWidth: '550px' }), layoutSheet.spacingBig)(
               $RouterAnchor({ url: '/', route: rootRoute, $anchor: $element('a')($icon({ $content: style({ fill: pallete.message }, $aeleaLogo), width: '237px', height: '115px', viewBox: `0 0 147 90` })) })({
                 click: linkClickTether()
               }),
-              $text(`"aelea", is a UI Framework for reactive event programming`),
-              $text(`It helps you write composable and performant building blocks by composing functional event streams`),
+              $column(layoutSheet.spacingSmall)(
+                $text(`"aelea", is a UI Framework for reactive event programming`),
+                $text(`It helps you write composable and performant building blocks by composing functional event streams`),
+              ),
 
               $MainMenu({ parentRoute: pagesRoute })({
                 routeChange: linkClickTether()

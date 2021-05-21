@@ -1,7 +1,7 @@
 import { CHAIN } from "../provider"
 import { SYMBOL } from "./symbol"
 
-export default {
+export const ETH_CONTRACT = {
   [CHAIN.ETH]: {
     [SYMBOL.EXRD]: "0x6468e79a80c0eab0f9a2b574c8d5bc374af59414",
     [SYMBOL.SUSHI]: "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2",

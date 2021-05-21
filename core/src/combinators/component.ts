@@ -34,8 +34,8 @@ export function componentFn<A extends INodeElement, B extends $Node<A>, D>(
             const consumerSampler = outputTethers[k]
 
             if (consumerSampler) {
-              const componentOutputBehavior = outputSources[k]
-              const outputDisposable = consumerSampler(componentOutputBehavior).run(nullSink, scheduler)
+              const componentOutputTethers = outputSources[k]
+              const outputDisposable = consumerSampler(componentOutputTethers).run(nullSink, scheduler)
               outputDisposables.push(outputDisposable)
             }
           }
