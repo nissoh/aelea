@@ -73,10 +73,10 @@ export const providerAction = <T>(interval: number, actionOp: Op<InitWalletProvi
 
 export const metamaskEvent = <A>(eventName: string): Stream<A> => switchLatest(
   map(provider => {
-    const eventChange: Stream<A> = map(args => args[0], fromCallback(cb => {
+    const eventChange: Stream<A> = fromCallback(cb => {
       provider.metamask.on(eventName, cb)
       return disposeWith(() => provider.metamask.removeListener(eventName, cb), null)
-    }))
+    })
 
     return O(
     )(eventChange)

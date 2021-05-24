@@ -29,7 +29,7 @@ class FromCallbackSource<T, Targs extends any[]> {
 }
 
 
-export const fromCallback = <T, FnArgs extends any[]>(cbf: (cb: (...args: FnArgs) => any) => any, mapFn: (...args: FnArgs) => T, context: any = null): Stream<T> =>
+export const fromCallback = <T, FnArgs extends any[]>(cbf: (cb: (...args: FnArgs) => any) => any, mapFn: (...args: FnArgs) => T = (...args) => args[0], context: any = null): Stream<T> =>
   new FromCallbackSource(cbf, mapFn, context)
 
 
