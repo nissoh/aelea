@@ -19,6 +19,7 @@ export const light: Theme = {
     indeterminate: '#dccb07',
   }
 }
+
 export const dark: Theme = {
   name: 'dark',
   pallete: {

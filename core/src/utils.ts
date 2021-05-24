@@ -52,6 +52,13 @@ export function tryRunning<T>(stream: Stream<T>, sink: Sink<T>, scheduler: Sched
   }
 }
 
+export function tryEvent <A>(t: Time, x: A, sink: Sink<A>): void {
+  try {
+    sink.event(t, x)
+  } catch (e) {
+    sink.error(t, e)
+  }
+}
 
 
 export const nullSink = <Sink<never>>{

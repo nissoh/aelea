@@ -1,15 +1,19 @@
 
 import { Scheduler, Sink, Stream, Disposable } from '@most/types'
 import { disposeNone, disposeWith } from '@most/disposable'
+import { tryEvent } from '..'
 
-class FromCallbackSource<Targs extends any[]> {
-  constructor(private callbackFunction: (cb: (...ev: Targs) => any) => any, private context: any) { }
+class FromCallbackSource<T, Targs extends any[]> {
+  constructor(private callbackFunction: (cb: (...ev: Targs) => any) => any, private mapFn: (...args: Targs) => T, private context: any) { }
 
-  run(sink: Sink<Targs>, scheduler: Scheduler): Disposable {
+  run(sink: Sink<T>, scheduler: Scheduler): Disposable {
 
     // very common that callback functions returns a destructor, perhaps a Disposable in a "most" case
-    const maybeDisposable = this.callbackFunction.bind(this.context)((...args) => {
-      sink.event(scheduler.currentTime(), args)
+    const maybeDisposable = this.callbackFunction.call(this.context, (...args) => {
+      const time = scheduler.currentTime()
+      const value = this.mapFn(...args)
+
+      tryEvent(time, value, sink)
     })
 
     if (maybeDisposable instanceof Function) {
@@ -25,7 +29,7 @@ class FromCallbackSource<Targs extends any[]> {
 }
 
 
-export const fromCallback = <Targs extends any[]>(cbf: (cb: (...args: Targs) => any) => any, context: any = null): Stream<Targs> =>
-  new FromCallbackSource(cbf, context)
+export const fromCallback = <T, FnArgs extends any[]>(cbf: (cb: (...args: FnArgs) => any) => any, mapFn: (...args: FnArgs) => T, context: any = null): Stream<T> =>
+  new FromCallbackSource(cbf, mapFn, context)
 
 

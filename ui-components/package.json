@@ -1,6 +1,6 @@
 {
   "name": "@aelea/ui-components",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "license": "MIT",
   "main": ".dist/commonjs/index.js",
   "module": ".dist/esm/index.js",

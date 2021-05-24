@@ -3,7 +3,7 @@ import { pallete } from "@aelea/ui-components-theme"
 import { constant, empty, map, merge, multicast, never, switchLatest, until } from "@most/core"
 import { Stream } from "@most/types"
 import { observer } from "../.."
-import { hexAlpha } from "../../utils/color"
+import { colorAlpha } from "@aelea/ui-components-theme"
 import { combineArrayMap } from "../../utils/state"
 
 
@@ -47,7 +47,7 @@ export const $Popover = ({ $$popContent, offset = 16, padding = 24, dismiss = em
 
 
         return {
-          backgroundImage: `radial-gradient(${width}px ${height}px at top ${top} left ${left}, ${pallete.background} ${width / 2}px, ${hexAlpha(pallete.horizon, .65)})`,
+          backgroundImage: `radial-gradient(${width}px ${height}px at top ${top} left ${left}, ${pallete.background} ${width / 2}px, ${colorAlpha(pallete.horizon, .65)})`,
           // backdropFilter: 'blur(2px)'
         }
       }, popoverContentDimension, popoverContentIntersection, targetIntersection)

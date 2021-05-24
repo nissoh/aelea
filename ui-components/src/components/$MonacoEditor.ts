@@ -336,8 +336,8 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
         map(async elEvents => {
           const node = elEvents[0].target as HTMLElement
  
-          const modelChangeWithDelay = delay(10, fromCallback(model.onDidChangeContent, model)) // delay is required because change emits an event before diagnostics and other stuff are finished
-          const editorChanges = map(() => model.getValue(), modelChangeWithDelay)
+          const modelChangeWithDelay = delay(10, fromCallback(model.onDidChangeContent, () => model.getValue(), model)) // delay is required because change emits an event before diagnostics and other stuff are finished
+          const editorChanges = modelChangeWithDelay
           const changesWithInitial = merge(now(model.getValue()), editorChanges)
           const ignoreWhitespaceChanges = skipRepeatsWith((prev, next) =>
             prev.replace(whitespaceRegexp, '') === next.replace(whitespaceRegexp, '')
