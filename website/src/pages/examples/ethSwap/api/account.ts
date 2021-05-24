@@ -1,6 +1,5 @@
 import { O } from "@aelea/core"
 import { fromCallback } from "@aelea/core"
-import { Network } from "@ethersproject/providers"
 import { awaitPromises, map, merge, switchLatest } from "@most/core"
 import { disposeWith } from "@most/disposable"
 import { Stream } from "@most/types"

@@ -3,7 +3,7 @@ import { Scheduler, Sink, Stream, Disposable } from '@most/types'
 import { disposeNone, disposeWith } from '@most/disposable'
 import { tryEvent } from '..'
 
-class FromCallbackSource<T, Targs extends any[]> {
+class FromCallbackSource<T, Targs extends any[] = T[]> {
   constructor(private callbackFunction: (cb: (...ev: Targs) => any) => any, private mapFn: (...args: Targs) => T, private context: any) { }
 
   run(sink: Sink<T>, scheduler: Scheduler): Disposable {
@@ -29,7 +29,7 @@ class FromCallbackSource<T, Targs extends any[]> {
 }
 
 
-export const fromCallback = <T, FnArgs extends any[]>(cbf: (cb: (...args: FnArgs) => any) => any, mapFn: (...args: FnArgs) => T = (...args) => args[0], context: any = null): Stream<T> =>
+export const fromCallback = <T, FnArgs extends any[] = T[]>(cbf: (cb: (...args: FnArgs) => any) => any, mapFn: (...args: FnArgs) => T = (...args) => args[0], context: any = null): Stream<T> =>
   new FromCallbackSource(cbf, mapFn, context)
 
 
