@@ -1,6 +1,6 @@
 {
   "name": "@aelea/website",
-  "version": "21.0.0",
+  "version": "22.0.0",
   "license": "MIT",
   "module": ".dist/esm/website-run.js",
   "files": [
@@ -36,14 +36,14 @@
     "@types/node": "15.6.0",
     "construct-style-sheets-polyfill": "2.4.16",
     "hash.js": "^1.1.7",
-    "jazzicon": "^1.5.0"
+    "jazzicon": "^1.5.0",
+    "monaco-editor": "0.24.0"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^9.0.0",
     "fork-ts-checker-webpack-plugin": "6.2.10",
     "gh-pages": "^3.1.0",
     "html-webpack-plugin": "5.3.1",
-    "monaco-editor": "0.24.0",
     "ts-loader": "9.2.1",
     "tsconfig-paths-webpack-plugin": "3.5.1",
     "webpack": "5.37.1",

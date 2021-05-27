@@ -114,8 +114,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@most/disposable", "npm:1.3.0"],
             ["@most/prelude", "npm:1.8.0"],
             ["@most/scheduler", "npm:1.3.0"],
-            ["@most/types", "npm:1.1.0"],
-            ["monaco-editor", "npm:0.24.0"]
+            ["@most/types", "npm:1.1.0"]
           ],
           "linkType": "SOFT",
         }]

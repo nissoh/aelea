@@ -3,8 +3,8 @@ import { Behavior, component, fromCallback, IBranch, O, style, $wrapNativeElemen
 import { at, awaitPromises, combine, continueWith, delay, empty, filter, fromPromise, join, map, merge, multicast, now, recoverWith, skipRepeatsWith, startWith, switchLatest, take } from '@most/core'
 import { Stream } from '@most/types'
 import type * as monaco from 'monaco-editor'
-import layoutSheet from '../style/layoutSheet'
-import * as observer from '../utils/elementObservers'
+import layoutSheet from '@aelea/ui-components/src/style/layoutSheet'
+import * as observer from '@aelea/ui-components/src/utils/elementObservers'
 
 
 

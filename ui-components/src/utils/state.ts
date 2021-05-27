@@ -1,5 +1,5 @@
 
-import { Op, Pipe } from "@aelea/core"
+import { O, Op, Pipe } from "@aelea/core"
 import { filter } from "@most/core"
 import { merge } from "@most/core"
 import { combineArray, multicast, startWith } from "@most/core"
@@ -84,29 +84,26 @@ export function combineArrayMap<A extends any[], B>(cb: (...args: A) => B, ...st
 }
 
 
-interface StoreFnCurry<STORE> {
-  <Z>(writePipe: Op<Z, STORE> | undefined, s: Stream<Z>): Stream<Z>
-  <Z>(writePipe?: Op<Z, STORE> | undefined): (s: Stream<Z>) => Stream<Z>
-}
+type StoreFn<STORE> = <Z>(stream: Stream<Z>, writePipe: Op<Z, STORE>) => Stream<Z | STORE>
 
 export type BrowserStore<STORE> = {
   state: STORE
-  store: StoreFnCurry<STORE>
+  store: StoreFn<STORE>
   craete: <T>(key: string, intitialState: T) => BrowserStore<T>
 }
 
 
-export const localStorageTreeFactory = (rootChainKey: string) => <T>(key: string, initialDefaultState: T): BrowserStore<T> => {
-  const mktTree = `${rootChainKey}.${key}`
+export const createLocalStorageChain = (keyChain: string) => <T>(key: string, initialDefaultState: T): BrowserStore<T> => {
+  const mktTree = `${keyChain}.${key}`
   const storeData = localStorage.getItem(mktTree)
   const initialState = storeData ? JSON.parse(storeData) as T : initialDefaultState
 
-  const storeCurry: StoreFnCurry<T> = curry2((writePipe = (x => x), stream) => {
+  const storeCurry: StoreFn<T> = <Z>(stream: Stream<Z>, writePipe: Op<Z | T, T> = O()) => {
     const multicastSource = multicast(stream)
-    const writeOp = writePipe(multicastSource)
+    const writeOp = (writePipe ?? O())(multicastSource)
 
     // ignore 
-    const writeEffect = filter(state => {
+    const writeEffect: Stream<never> = filter(state => {
       scope.state = state
       localStorage.setItem(mktTree, JSON.stringify(state))
 
@@ -114,7 +111,7 @@ export const localStorageTreeFactory = (rootChainKey: string) => <T>(key: string
     }, writeOp)
 
     return merge(writeEffect, multicastSource)
-  })
+  }
   
   let _state = initialState
 
@@ -126,11 +123,11 @@ export const localStorageTreeFactory = (rootChainKey: string) => <T>(key: string
       _state = newState
     },
     store: storeCurry,
-    craete: localStorageTreeFactory(mktTree)
+    craete: createLocalStorageChain(mktTree)
   }
 
   return scope
 }
-  
+
   
 
