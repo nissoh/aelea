@@ -1,12 +1,11 @@
 import { $element, Behavior, component, event, IBranch, style, styleBehavior, StyleCSS } from '@aelea/core'
-import { O, Op } from '@aelea/utils'
+import { O, Op, combineObject } from '@aelea/utils'
 import { pallete } from '@aelea/ui-components-theme'
 import { multicast, never, now, startWith, tap } from '@most/core'
 import { filter } from '@most/core'
 import { merge } from '@most/core'
 import { empty, map, switchLatest } from "@most/core"
 import designSheet from '../../style/designSheet'
-import { combineState } from '../../utils/state'
 import { dismissOp, interactionOp } from "./form"
 import { Input, InputType } from './types'
 
@@ -30,7 +29,7 @@ export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, i
   const alert = multicastValidation(change)
 
   const focus = merge(focusStyle, dismissstyle)
-  const state = combineState({ focus, alert })
+  const state = combineObject({ focus, alert })
 
   return [
     $element('input')(

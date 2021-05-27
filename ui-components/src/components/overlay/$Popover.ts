@@ -1,11 +1,10 @@
 import { $node, $Node, Behavior, component, event, INode, style, styleBehavior } from "@aelea/core"
-import { O } from '@aelea/utils'
+import { O, combineArray } from '@aelea/utils'
 import { pallete } from "@aelea/ui-components-theme"
 import { constant, empty, map, merge, multicast, switchLatest, until } from "@most/core"
 import { Stream } from "@most/types"
 import { observer } from "../.."
 import { colorAlpha } from "@aelea/ui-components-theme"
-import { combineArrayMap } from "../../utils/state"
 
 
 interface IPocus {
@@ -37,7 +36,7 @@ export const $Popover = ({ $$popContent, offset = 16, padding = 24, dismiss = em
       event('click')
     ),
     styleBehavior(
-      combineArrayMap(([contentResize], [intersectionContentRect], [IntersectiontargetRect]) => {
+      combineArray(([contentResize], [intersectionContentRect], [IntersectiontargetRect]) => {
         const { y, x } = IntersectiontargetRect.intersectionRect
 
         const width = Math.max(contentResize.contentRect.width, IntersectiontargetRect.intersectionRect.width) + (padding * 2) + offset

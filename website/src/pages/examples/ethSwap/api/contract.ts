@@ -3,8 +3,7 @@ import { account } from "./account"
 import { awaitProvider, CHAIN, metamaskEvent, providerAction } from "./provider"
 import { Provider } from "@ethersproject/providers"
 import { Address } from "./types"
-import { fromCallback } from '@aelea/utils'
-import { state } from "@aelea/ui-components"
+import { combineObject, fromCallback } from '@aelea/utils'
 import { Stream } from "@most/types"
 import { EthExrd__factory, EthSushi__factory } from "./ethers-contracts"
 import { SYMBOL } from "./address/symbol"
@@ -59,7 +58,7 @@ function baseActions<T extends Contract>(address: Address, contractFactory: Conn
     }, accountAndContract)
   )
 
-  const accountAndContract = state.combineState({ contract, account })
+  const accountAndContract = combineObject({ contract, account })
 
   const balanceSource = combine(async ({ contract, account }) => {
     return contract.balanceOf(account)
@@ -80,7 +79,7 @@ export const ethContracts = {
     contract: null as any, // look into a way to make a compatible interface with mainnet
     listen: metamaskEvent,
     transfer(to: string, amount: bigint) {
-      const accountAndContract = state.combineState({ provider: awaitProvider, account })
+      const accountAndContract = combineObject({ provider: awaitProvider, account })
       const request = map(async (w3): Promise<string> => {
         // txHash is a hex string
         // As with any RPC call, it may throw an error

@@ -96,3 +96,12 @@ export function O<R extends Function[]>(...fns: R) {
   return fns.length ? fns.reduceRight(compose) : id
 }
 
+export function groupByMap<A, B extends A[keyof A]>(list: A[], keyGetter: (v: A) => B) {
+  const map = new Map<B, A>()
+  list.forEach((item) => {
+    const key = keyGetter(item)
+    map.set(key, item)
+  })
+  return map
+}
+

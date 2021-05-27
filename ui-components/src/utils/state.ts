@@ -1,16 +1,10 @@
 import { O, Op, Pipe } from '@aelea/utils'
 import { filter } from "@most/core"
 import { merge } from "@most/core"
-import { combineArray, multicast, startWith } from "@most/core"
+import { multicast, startWith } from "@most/core"
 import { Disposable, Scheduler, Sink, Stream } from "@most/types"
 
-type StreamInput<T> = {
-  [P in keyof T]: Stream<T[P]>
-}
 
-type StreamInputArray<T extends any[]> = {
-  [P in keyof T]: Stream<T[P]>
-}
 
 class StateSink<A> extends Pipe<A, A> {
   constructor(private parent: ReplayLatest<A>, public sink: Sink<A>) {
@@ -57,28 +51,6 @@ export function replayLatest<A>(s: Stream<A>, initialState?: A): ReplayLatest<A>
   } else {
     return new ReplayLatest(s, initialState)
   }
-}
-
-export function combineState<A, K extends keyof A = keyof A>(state: StreamInput<A>): Stream<A> {
-  const entries = Object.entries(state) as [keyof A, Stream<A[K]>][]
-  const streams = entries.map(([_, stream]) => stream)
-
-  const combinedWithInitial = combineArray((...arrgs: A[K][]) => {
-    return arrgs.reduce((seed, val, idx) => {
-      const key = entries[idx][0]
-      seed[key] = val
-
-      return seed
-    }, {} as A)
-  }, streams)
-
-  return combinedWithInitial
-}
-
-
-// temorary typings fix for this issue https://github.com/mostjs/core/pull/543
-export function combineArrayMap<A extends any[], B>(cb: (...args: A) => B, ...streamList: StreamInputArray<A>): Stream<B> {
-  return combineArray(cb, streamList)
 }
 
 
