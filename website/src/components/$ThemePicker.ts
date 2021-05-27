@@ -1,6 +1,7 @@
-import { $svg, attr, Behavior, component, event, O, style, stylePseudo } from "@aelea/core"
+import { $svg, attr, Behavior, component, event, style, stylePseudo } from "@aelea/core"
 import { $icon } from "@aelea/ui-components"
 import { changeTheme, pallete, Theme, THEME_PALLETE_SELECTED_KEY } from "@aelea/ui-components-theme"
+import { O } from "@aelea/utils"
 import { merge, tap } from "@most/core"
 
 
@@ -10,7 +11,7 @@ export const $Picker = (themes: Theme[]) => component((
   [changeThemeEffect, changeThemeEffectTether]: Behavior<any, any>
 ) => {
 
-  const current = JSON.parse(localStorage.getItem(THEME_PALLETE_SELECTED_KEY)!) as Theme
+  const current = JSON.parse(sessionStorage.getItem(THEME_PALLETE_SELECTED_KEY)!) as Theme
 
   const applyOps = O(
     style({ position: 'absolute', left: '15px', top: '15px', cursor: 'pointer' }),

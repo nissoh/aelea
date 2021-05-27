@@ -1,4 +1,5 @@
-import { eventElementTarget, nullSink } from "@aelea/core"
+import { eventElementTarget } from "@aelea/core"
+import { nullSink } from "@aelea/utils"
 import { empty, tap, chain } from "@most/core"
 import { disposeWith, disposeBoth } from "@most/disposable"
 import { Stream } from "@most/types"

@@ -1,6 +1,6 @@
 {
   "name": "@aelea/router",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "main": ".dist/commonjs/index.js",
   "module": ".dist/esm/index.js",
   "files": [
@@ -17,6 +17,7 @@
   "homepage": "https://github.com/nissoh/aelea",
   "dependencies": {
     "@aelea/core": "workspace:*",
+    "@aelea/utils": "workspace:*",
     "@most/core": "1.6.1",
     "@most/disposable": "1.3.0",
     "@most/prelude": "1.8.0",

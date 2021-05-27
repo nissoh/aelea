@@ -1,9 +1,10 @@
 import { awaitPromises, empty, map, never, switchLatest, filter, now, debounce, startWith } from '@most/core'
-import { $custom, $Node, $text, Behavior, component, motion, O, style, styleInline } from '@aelea/core'
+import { $custom, $Node, $text, Behavior, component, motion, style, styleInline } from '@aelea/core'
 
 import { $column, $row, layoutSheet } from '@aelea/ui-components'
 import { pallete, theme } from '@aelea/ui-components-theme'
 import { $MonacoEditor, ModelChangeBehavior } from '../$MonacoEditor'
+import { O } from '@aelea/utils'
 
 
 interface IMonaco {

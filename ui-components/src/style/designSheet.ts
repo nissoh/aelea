@@ -1,6 +1,7 @@
 
 
-import { style, O, stylePseudo } from '@aelea/core'
+import { style, stylePseudo } from '@aelea/core'
+import { O } from '@aelea/utils'
 import { pallete } from '@aelea/ui-components-theme'
 
 const text = style({

@@ -1,4 +1,5 @@
-import { $element, Behavior, component, event, IBranch, O, Op, style, styleBehavior, StyleCSS } from '@aelea/core'
+import { $element, Behavior, component, event, IBranch, style, styleBehavior, StyleCSS } from '@aelea/core'
+import { O, Op } from '@aelea/utils'
 import { pallete } from '@aelea/ui-components-theme'
 import { multicast, never, now, startWith, tap } from '@most/core'
 import { filter } from '@most/core'

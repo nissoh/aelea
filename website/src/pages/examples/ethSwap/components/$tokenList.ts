@@ -1,4 +1,5 @@
-import { $text, Behavior, component, event, INode, O, style } from "@aelea/core"
+import { $text, Behavior, component, event, INode, style } from "@aelea/core"
+import { O } from '@aelea/utils'
 import { $VirtualScroll, layoutSheet, ScrollResponse, $column, $TextField, ScrollRequest } from "@aelea/ui-components"
 import { constant, empty, map, multicast, startWith, switchLatest } from "@most/core"
 import { $tokenLabel } from "../$elements"

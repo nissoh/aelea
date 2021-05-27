@@ -1,5 +1,6 @@
 import { filter, map, merge, now, switchLatest, tap } from "@most/core"
-import { $element, attr, Behavior, component, IBranch, event, style, stylePseudo, StyleCSS, O } from '@aelea/core'
+import { O } from '@aelea/utils'
+import { $element, attr, Behavior, component, IBranch, event, style, stylePseudo, StyleCSS } from '@aelea/core'
 import { pallete } from "@aelea/ui-components-theme"
 import { Input } from "./types"
 

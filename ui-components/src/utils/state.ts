@@ -1,9 +1,7 @@
-
-import { O, Op, Pipe } from "@aelea/core"
+import { O, Op, Pipe } from '@aelea/utils'
 import { filter } from "@most/core"
 import { merge } from "@most/core"
 import { combineArray, multicast, startWith } from "@most/core"
-import { curry2 } from "@most/prelude"
 import { Disposable, Scheduler, Sink, Stream } from "@most/types"
 
 type StreamInput<T> = {

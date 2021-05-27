@@ -1,6 +1,7 @@
 import { map, merge, now, switchLatest } from "@most/core"
 import { Stream } from "@most/types"
-import { $Node, Behavior, component, INode, O, Op, style, stylePseudo } from '@aelea/core'
+import { O, Op } from '@aelea/utils'
+import { $Node, Behavior, component, INode, style, stylePseudo } from '@aelea/core'
 import { $row } from "../elements/$elements"
 import { $VirtualScroll, QuantumScroll, ScrollRequest } from "./$VirtualScroll"
 import { pallete } from "@aelea/ui-components-theme"

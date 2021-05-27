@@ -3,8 +3,8 @@ import { disposeBoth } from '@most/disposable'
 import { id } from '@most/prelude'
 import { asap } from '@most/scheduler'
 import { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
-import { $Node, $Branch, INode, IBranch, IBranchElement, Op } from '../types'
-import { isFunction, O } from '../utils'
+import { $Node, $Branch, INode, IBranch, IBranchElement } from '../types'
+import { isFunction, O, Op } from '@aelea/utils'
 import { SettableDisposable } from '../utils/SettableDisposable'
 
 

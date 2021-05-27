@@ -39,6 +39,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:ui-components-theme"
       },
       {
+        "name": "@aelea/utils",
+        "reference": "workspace:utils"
+      },
+      {
         "name": "@aelea/website",
         "reference": "workspace:website"
       }
@@ -50,6 +54,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["@aelea/router", ["workspace:router"]],
       ["@aelea/ui-components", ["workspace:ui-components"]],
       ["@aelea/ui-components-theme", ["workspace:ui-components-theme"]],
+      ["@aelea/utils", ["workspace:utils"]],
       ["@aelea/website", ["workspace:website"]],
       ["aelea", ["workspace:."]]
     ],
@@ -77,6 +82,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./core/",
           "packageDependencies": [
             ["@aelea/core", "workspace:core"],
+            ["@aelea/utils", "workspace:utils"],
             ["@most/core", "npm:1.6.1"],
             ["@most/disposable", "npm:1.3.0"],
             ["@most/prelude", "npm:1.8.0"],
@@ -93,6 +99,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["@aelea/router", "workspace:router"],
             ["@aelea/core", "workspace:core"],
+            ["@aelea/utils", "workspace:utils"],
             ["@most/core", "npm:1.6.1"],
             ["@most/disposable", "npm:1.3.0"],
             ["@most/prelude", "npm:1.8.0"],
@@ -110,6 +117,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@aelea/core", "workspace:core"],
             ["@aelea/router", "workspace:router"],
             ["@aelea/ui-components-theme", "workspace:ui-components-theme"],
+            ["@aelea/utils", "workspace:utils"],
             ["@most/core", "npm:1.6.1"],
             ["@most/disposable", "npm:1.3.0"],
             ["@most/prelude", "npm:1.8.0"],
@@ -128,6 +136,21 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "SOFT",
         }]
       ]],
+      ["@aelea/utils", [
+        ["workspace:utils", {
+          "packageLocation": "./utils/",
+          "packageDependencies": [
+            ["@aelea/utils", "workspace:utils"],
+            ["@most/core", "npm:1.6.1"],
+            ["@most/disposable", "npm:1.3.0"],
+            ["@most/prelude", "npm:1.8.0"],
+            ["@most/scheduler", "npm:1.3.0"],
+            ["@most/types", "npm:1.1.0"],
+            ["csstype", "npm:3.0.8"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
       ["@aelea/website", [
         ["workspace:website", {
           "packageLocation": "./website/",
@@ -137,6 +160,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@aelea/router", "workspace:router"],
             ["@aelea/ui-components", "workspace:ui-components"],
             ["@aelea/ui-components-theme", "workspace:ui-components-theme"],
+            ["@aelea/utils", "workspace:utils"],
             ["@ethersproject/abi", "npm:5.2.0"],
             ["@ethersproject/abstract-signer", "npm:5.2.0"],
             ["@ethersproject/bignumber", "npm:5.2.0"],

@@ -9,6 +9,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@aelea/core@workspace:core"
   dependencies:
+    "@aelea/utils": "workspace:*"
     "@most/core": 1.6.1
     "@most/disposable": 1.3.0
     "@most/prelude": 1.8.0
@@ -23,6 +24,7 @@ __metadata:
   resolution: "@aelea/router@workspace:router"
   dependencies:
     "@aelea/core": "workspace:*"
+    "@aelea/utils": "workspace:*"
     "@most/core": 1.6.1
     "@most/disposable": 1.3.0
     "@most/prelude": 1.8.0
@@ -44,11 +46,25 @@ __metadata:
     "@aelea/core": "workspace:*"
     "@aelea/router": "workspace:*"
     "@aelea/ui-components-theme": "workspace:*"
+    "@aelea/utils": "workspace:*"
     "@most/core": 1.6.1
     "@most/disposable": 1.3.0
     "@most/prelude": 1.8.0
     "@most/scheduler": 1.3.0
     "@most/types": 1.1.0
+  languageName: unknown
+  linkType: soft
+
+"@aelea/utils@workspace:*, @aelea/utils@workspace:utils":
+  version: 0.0.0-use.local
+  resolution: "@aelea/utils@workspace:utils"
+  dependencies:
+    "@most/core": 1.6.1
+    "@most/disposable": 1.3.0
+    "@most/prelude": 1.8.0
+    "@most/scheduler": 1.3.0
+    "@most/types": 1.1.0
+    csstype: 3.0.8
   languageName: unknown
   linkType: soft
 
@@ -60,6 +76,7 @@ __metadata:
     "@aelea/router": "workspace:*"
     "@aelea/ui-components": "workspace:*"
     "@aelea/ui-components-theme": "workspace:*"
+    "@aelea/utils": "workspace:*"
     "@ethersproject/abi": 5.2.0
     "@ethersproject/abstract-signer": ^5.2.0
     "@ethersproject/bignumber": 5.2.0

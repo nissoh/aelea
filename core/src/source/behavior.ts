@@ -1,7 +1,7 @@
 import { Stream, Disposable, Sink, Scheduler } from '@most/types'
-import { Behavior, Op } from '../types'
+import { Behavior } from '../types'
 import { disposeWith } from '@most/disposable'
-import { O } from '../utils'
+import { O, Op } from '@aelea/utils'
 import { tether } from '../combinators/tether'
 
 export class BehaviorSource<A, B> implements Stream<A> {

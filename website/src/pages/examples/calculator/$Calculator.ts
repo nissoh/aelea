@@ -1,5 +1,6 @@
 
-import { $node, $text, attr, Behavior, component, O, style } from '@aelea/core'
+import { $node, $text, attr, Behavior, component, style } from '@aelea/core'
+import { O } from '@aelea/utils'
 import { $column, $Field, $NumberTicker, $row, layoutSheet } from '@aelea/ui-components'
 import { pallete } from '@aelea/ui-components-theme'
 import { combine, empty, map, startWith } from '@most/core'

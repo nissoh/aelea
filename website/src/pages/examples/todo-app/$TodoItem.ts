@@ -1,9 +1,11 @@
-import { Behavior, component, O, style } from '@aelea/core'
+import { Behavior, component, style } from '@aelea/core'
+import { O } from '@aelea/utils'
 import { $Checkbox, $Field, $row, layoutSheet } from "@aelea/ui-components"
 import { now } from "@most/core"
 import { Stream } from "@most/types"
 import { $TrashBtn } from '../../../elements/$common'
 import { Todo } from "./$CreateTodo"
+
 
 
 const rowStyle = O(

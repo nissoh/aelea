@@ -1,4 +1,4 @@
-import { Op } from "@aelea/core"
+import { Op } from "@aelea/utils"
 import { Stream } from "@most/types"
 
 export enum InputType {

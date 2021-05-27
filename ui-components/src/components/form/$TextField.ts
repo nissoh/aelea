@@ -1,4 +1,5 @@
-import { $text, Behavior, component, IBranch, O, Op, style, StyleCSS } from '@aelea/core'
+import { $text, Behavior, component, IBranch, style, StyleCSS } from '@aelea/core'
+import { O, Op } from '@aelea/utils'
 import { pallete } from '@aelea/ui-components-theme'
 import { empty, map, merge, multicast, never, now, sample, skipRepeats, switchLatest } from '@most/core'
 import { $row } from "../../elements/$elements"

@@ -4,7 +4,7 @@ import { newDefaultScheduler } from '@most/scheduler'
 import { loop, map, mergeArray, tap } from '@most/core'
 import { disposeAll, disposeNone, disposeWith } from '@most/disposable'
 import { useStylePseudoRule, useStyleRule } from './utils/styleUtils'
-import { nullSink } from './utils'
+import { nullSink } from '@aelea/utils'
 import { SettableDisposable } from './utils/SettableDisposable'
 
 

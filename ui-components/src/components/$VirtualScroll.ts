@@ -1,7 +1,8 @@
 
 import { chain, delay, empty, filter, loop, map, merge, mergeArray, multicast, scan, skip, startWith, switchLatest } from "@most/core"
 import { Stream } from '@most/types'
-import { $Branch, Behavior, component, IBranch, style, $text, $Node, $custom, Op, O } from '@aelea/core'
+import { O, Op } from '@aelea/utils'
+import { $Branch, Behavior, component, IBranch, style, $text, $Node, $custom } from '@aelea/core'
 import { $column } from '../elements/$elements'
 import { pallete } from "@aelea/ui-components-theme"
 import * as observer from "../utils/elementObservers"

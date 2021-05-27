@@ -1,5 +1,6 @@
 
-import { $text, attr, Behavior, component, event, IBranch, O, style } from '@aelea/core'
+import { $text, attr, Behavior, component, event, IBranch, style } from '@aelea/core'
+import { O } from "@aelea/utils"
 import { state, $column, $Slider, layoutSheet, $Popover, $row, $Field, $Button } from '@aelea/ui-components'
 import { switchLatest, merge, constant, snapshot, map, sample, awaitPromises, startWith, filter, mergeArray, multicast } from '@most/core'
 import { $TokenInput } from './$TokenInput'

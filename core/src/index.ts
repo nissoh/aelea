@@ -5,8 +5,6 @@ export * from './combinators/event'
 export * from './combinators/style'
 export * from './run'
 export * from './source/behavior'
-export * from './source/fromCallback'
 export * from './source/node'
 export * from './types'
-export * from './utils'
 

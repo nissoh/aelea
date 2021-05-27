@@ -1,6 +1,7 @@
-import { $node, $Node, Behavior, component, event, INode, O, style, styleBehavior } from "@aelea/core"
+import { $node, $Node, Behavior, component, event, INode, style, styleBehavior } from "@aelea/core"
+import { O } from '@aelea/utils'
 import { pallete } from "@aelea/ui-components-theme"
-import { constant, empty, map, merge, multicast, never, switchLatest, until } from "@most/core"
+import { constant, empty, map, merge, multicast, switchLatest, until } from "@most/core"
 import { Stream } from "@most/types"
 import { observer } from "../.."
 import { colorAlpha } from "@aelea/ui-components-theme"

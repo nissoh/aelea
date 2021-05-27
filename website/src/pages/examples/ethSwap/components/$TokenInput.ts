@@ -1,4 +1,5 @@
-import { attrBehavior, Behavior, component, event, INode, O, style } from "@aelea/core"
+import { attrBehavior, Behavior, component, event, INode, style } from "@aelea/core"
+import { O } from "@aelea/utils"
 import { $row, layoutSheet, $icon, $Popover, $Field, $column } from "@aelea/ui-components"
 import { constant, map, merge, multicast, switchLatest } from "@most/core"
 import { Stream } from "@most/types"

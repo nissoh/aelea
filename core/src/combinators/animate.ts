@@ -2,7 +2,7 @@
 import { Scheduler, Sink, Stream, Disposable } from '@most/types'
 import { currentTime, } from '@most/scheduler'
 import { skipAfter, map, continueWith, constant, switchLatest, loop, startWith } from '@most/core'
-import { O } from '../utils'
+import { O } from '@aelea/utils'
 import { disposeWith } from '@most/disposable'
 import { compose, curry3 } from '@most/prelude'
 

@@ -1,5 +1,6 @@
 import { at, map, merge, multicast, now, scan, skip, skipRepeats, skipRepeatsWith, switchLatest } from '@most/core'
-import { $node, $text, O, style, styleBehavior, StyleCSS } from '@aelea/core'
+import { O } from '@aelea/utils'
+import { $node, $text, style, styleBehavior, StyleCSS } from '@aelea/core'
 import { Stream } from '@most/types'
 
 export const sumFromZeroOp = scan((current: number, x: number) => current + x, 0)

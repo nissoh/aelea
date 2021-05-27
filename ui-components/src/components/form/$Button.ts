@@ -1,5 +1,6 @@
 import { map, mergeArray, never } from "@most/core"
-import { $Node, $element, Behavior, component, event, INode, styleBehavior, IBranch, attrBehavior, StyleCSS, Op, O } from '@aelea/core'
+import { O, Op } from '@aelea/utils'
+import { $Node, $element, Behavior, component, event, INode, styleBehavior, IBranch, attrBehavior, StyleCSS } from '@aelea/core'
 import { dismissOp, interactionOp } from './form'
 import { pallete } from '@aelea/ui-components-theme'
 import designSheet from "../../style/designSheet"

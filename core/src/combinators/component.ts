@@ -1,10 +1,10 @@
 
-import { Behavior, $Node, INodeElement, Op } from '../types'
+import { Behavior, $Node, INodeElement } from '../types'
 import { behavior } from '../source/behavior'
-import { disposeAll, disposeWith } from '@most/disposable'
+import { disposeAll } from '@most/disposable'
 import { Disposable, Stream } from '@most/types'
 import { curry2 } from '@most/prelude'
-import { nullSink } from '../utils'
+import { nullSink, Op } from '@aelea/utils'
 
 export type IComponentOutputBehaviors<T> = {
   [P in keyof T]: Stream<T[P]>

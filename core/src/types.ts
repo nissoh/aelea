@@ -2,6 +2,7 @@
 import * as CSS from 'csstype'
 import { Scheduler, Stream } from '@most/types'
 import { SettableDisposable } from './utils/SettableDisposable'
+import { Op } from '@aelea/utils'
 
 export type StyleCSS = CSS.Properties
 
@@ -59,7 +60,6 @@ export interface Tether<A, B> {
 export type $Branch<A extends IBranchElement = IBranchElement, B = {}> = Stream<IBranch<A, B>>
 export type $Node<A extends INodeElement = INodeElement> = Stream<INode<A>>
 
-export type Op<T, R> = (o: Stream<T>) => Stream<R>
 
 
 export type Behavior<A, B = A> = [Stream<B>, Tether<A, B>]

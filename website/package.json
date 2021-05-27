@@ -1,6 +1,6 @@
 {
   "name": "@aelea/website",
-  "version": "22.0.0",
+  "version": "23.0.0",
   "license": "MIT",
   "module": ".dist/esm/website-run.js",
   "files": [
@@ -21,6 +21,7 @@
     "@aelea/router": "workspace:*",
     "@aelea/ui-components": "workspace:*",
     "@aelea/ui-components-theme": "workspace:*",
+    "@aelea/utils": "workspace:*",
     "@ethersproject/abi": "5.2.0",
     "@ethersproject/abstract-signer": "^5.2.0",
     "@ethersproject/bignumber": "5.2.0",
