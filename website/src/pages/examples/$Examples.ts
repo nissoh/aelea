@@ -9,7 +9,7 @@ import { fadeIn } from '../../components/transitions/enter'
 import $Calculator from './calculator/$Calculator'
 import $CountCounters from './count-counters/$CountCounters'
 import $DragList from './dragList/$DragList'
-import { $PopoverExample } from './overlay/popoverExample'
+import { $PopoverExample } from './overlay/$PopoverExample'
 import { $TableExample } from './table/$TableExample'
 
 import { $Theme } from './theme/$Theme'

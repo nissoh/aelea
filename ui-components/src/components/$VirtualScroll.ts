@@ -22,13 +22,14 @@ export interface QuantumScroll {
   $loading?: $Node
 
   containerOps?: Op<IBranch, IBranch>
+  rowOps?: Op<IBranch, IBranch>
 }
 
 
 const $defaultLoader = $text(style({ color: pallete.foreground, padding: '3px 10px' }))('loading...')
 
 
-export const $VirtualScroll = ({ dataSource, containerOps = O(), $loading = $defaultLoader }: QuantumScroll) => component((
+export const $VirtualScroll = ({ dataSource, containerOps = O(), rowOps = O(), $loading = $defaultLoader }: QuantumScroll) => component((
   [intersecting, intersectingTether]: Behavior<IBranch, IntersectionObserverEntry>,
 ) => {
 
@@ -55,26 +56,26 @@ export const $VirtualScroll = ({ dataSource, containerOps = O(), $loading = $def
 
   const newLocal = delay(45, multicastDatasource)
   const loadState = merge(
-    map(data => ({ $show: $observer, data }), newLocal),
-    map(() => ({ $show: $loading, }), scrollReuqestWithInitial)
+    map(data => ({ $intermediate: $observer, data }), newLocal),
+    map(() => ({ $intermediate: $loading, }), scrollReuqestWithInitial)
   )
   
   const $itemLoader = loop((seed, state) => {
 
     if ('data' in state && state.data) {
       const hasMoreItems = state.data.pageSize === state.data.$items.length
-      const value = hasMoreItems ? state.$show : empty()
+      const value = hasMoreItems ? state.$intermediate : empty()
 
       return { seed, value }
     }
 
-    return { seed, value: state.$show }
+    return { seed, value: state.$intermediate }
   }, {  }, loadState)
 
   return [
     $container(
       chain(node => {
-        return mergeArray(node.$items) // TODO optimze this. batching pages is not very efficient. use continous render per item during scroll
+        return mergeArray(node.$items.map($item => rowOps($item))) // TODO optimze this. batching pages is not very efficient. use continous render per item during scroll
       }, multicastDatasource),
       switchLatest(
         startWith($observer, $itemLoader)

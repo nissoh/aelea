@@ -47,7 +47,7 @@ export default ({ baseRoute }: Website) => component((
   const examplesRoute = pagesRoute.create({ fragment: 'examples', title: 'Examples' })
 
   return [
-    $node(designSheet.main, style({ backgroundImage: `radial-gradient(at center center, ${pallete.horizon} 50vh, ${pallete.background})`, }))(
+    $node(designSheet.main, style({ fontFamily: `'Nunito', Fira Code`, backgroundImage: `radial-gradient(at center center, ${pallete.horizon} 50vh, ${pallete.background})`, }))(
       router.match(rootRoute)(
         $row(layoutSheet.flex, style({ minHeight: '100%', alignContent: 'center', alignItems: 'center', placeContent: 'center', textAlign: 'center', padding: '0 30px', }))(
           fadeIn(

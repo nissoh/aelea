@@ -17,7 +17,7 @@ interface IPocus {
   // overlayAlpha?: string
 }
 
-export const $Popover = ({ $$popContent, offset = 16, padding = 24, dismiss = empty() }: IPocus) => ($target: $Node) => component((
+export const $Popover = ({ $$popContent, offset = 26, padding = 24, dismiss = empty() }: IPocus) => ($target: $Node) => component((
   [overlayClick, overlayClickTether]: Behavior<any, any>,
   [targetIntersection, targetIntersectionTether]: Behavior<INode, IntersectionObserverEntry[]>,
   [popoverContentDimension, popoverContentDimensionTether]: Behavior<INode, ResizeObserverEntry[]>,
@@ -37,13 +37,17 @@ export const $Popover = ({ $$popContent, offset = 16, padding = 24, dismiss = em
     ),
     styleBehavior(
       combineArray(([contentResize], [intersectionContentRect], [IntersectiontargetRect]) => {
-        const { y, x } = IntersectiontargetRect.intersectionRect
+        const { y, x, bottom } = IntersectiontargetRect.intersectionRect
+
 
         const width = Math.max(contentResize.contentRect.width, IntersectiontargetRect.intersectionRect.width) + (padding * 2) + offset
-        const height = contentResize.contentRect.height + IntersectiontargetRect.intersectionRect.height + offset + padding * 2
+        const height = contentResize.contentRect.height + IntersectiontargetRect.intersectionRect.height + offset + padding
 
         const left = x + (IntersectiontargetRect.intersectionRect.width / 2) + 'px'
-        const top = y - padding + (height / 2) + 'px'
+
+        const bottomSpace =  window.innerHeight - bottom
+        const goDown = bottomSpace > bottom
+        const top = (goDown ? y + (height / 2) : y - offset - padding) + 'px'
 
 
         return {
@@ -65,18 +69,16 @@ export const $Popover = ({ $$popContent, offset = 16, padding = 24, dismiss = em
       map(([rect]) => {
         const { y, x, width, bottom } = rect.intersectionRect
 
-        const bottomSpace =  window.innerHeight - bottom
-        const topSpace = bottom
+        const bottomSpcace =  window.innerHeight - bottom
+        const goDown = bottomSpcace > bottom
 
-        const isUp = bottomSpace > topSpace
-
-        const top = (isUp ? topSpace + offset : y - offset) + 'px'
+        const top = (goDown ? bottom + offset : y - offset) + 'px'
         const left = x + (width / 2) + 'px'
 
         return {
           top, left,
           opacity: 1,
-          transform: `translate(-50%, ${isUp ? '0': '-100%'})`
+          transform: `translate(-50%, ${goDown ? '0': '-100%'})`
         }
       }, targetIntersection)
     ),

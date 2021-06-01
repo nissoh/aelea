@@ -54,7 +54,7 @@ export function replayLatest<A>(s: Stream<A>, initialState?: A): ReplayLatest<A>
 }
 
 
-type StoreFn<STORE> = <Z>(stream: Stream<Z>, writePipe: Op<Z, STORE>) => Stream<Z | STORE>
+type StoreFn<STORE> = <Z>(stream: Stream<Z>, writePipe: Op<Z, STORE>) => Stream<Z>
 
 export type BrowserStore<STORE> = {
   state: STORE
@@ -63,14 +63,14 @@ export type BrowserStore<STORE> = {
 }
 
 
-export const createLocalStorageChain = (keyChain: string) => <T>(key: string, initialDefaultState: T): BrowserStore<T> => {
+export const createLocalStorageChain = (keyChain: string) => <STORE>(key: string, initialDefaultState: STORE): BrowserStore<STORE> => {
   const mktTree = `${keyChain}.${key}`
   const storeData = localStorage.getItem(mktTree)
-  const initialState = storeData ? JSON.parse(storeData) as T : initialDefaultState
+  const initialState = storeData ? JSON.parse(storeData) as STORE : initialDefaultState
 
-  const storeCurry: StoreFn<T> = <Z>(stream: Stream<Z>, writePipe: Op<Z | T, T> = O()) => {
+  const storeCurry: StoreFn<STORE> = <Z>(stream: Stream<Z>, writePipe: Op<Z, STORE>) => {
     const multicastSource = multicast(stream)
-    const writeOp = (writePipe ?? O())(multicastSource)
+    const writeOp = writePipe(multicastSource)
 
     // ignore 
     const writeEffect: Stream<never> = filter(state => {

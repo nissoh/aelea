@@ -4,17 +4,19 @@ import { disposeWith } from '@most/disposable'
 import { O, Op } from '@aelea/utils'
 import { tether } from '../combinators/tether'
 
+type SinkMap<T> = Map<Sink<T>, Map<Stream<T>, Disposable | null>>
+
 export class BehaviorSource<A, B> implements Stream<A> {
   queuedSamplers: Stream<A>[] = []
 
-  sinks: Map<Sink<A>, Map<Stream<A>, Disposable | null>> = new Map()
+  sinksMap: SinkMap<A> = new Map()
   scheduler: Scheduler | undefined
 
   run(sink: Sink<A>, scheduler: Scheduler): Disposable {
     this.scheduler = scheduler
 
     const sourcesMap = new Map<Stream<A>, Disposable | null>()
-    this.sinks.set(sink, sourcesMap)
+    this.sinksMap.set(sink, sourcesMap)
 
     this.queuedSamplers.forEach(s => {
       sourcesMap.set(s, this.runBehavior(sink, s))
@@ -24,7 +26,7 @@ export class BehaviorSource<A, B> implements Stream<A> {
       sinkSrc.end(scheduler.currentTime())
       sinkMap.get(sinkSrc)?.forEach(x => x?.dispose())
       sinkMap.delete(sinkSrc)
-    }, [sink, this.sinks] as const)
+    }, [sink, this.sinksMap] as [Sink<A>, SinkMap<A>])
   }
 
 
@@ -40,7 +42,7 @@ export class BehaviorSource<A, B> implements Stream<A> {
       const bops: Stream<A> = ops.length ? O(...ops)(tetherSource) : tetherSource
 
       this.queuedSamplers.push(bops)
-      this.sinks.forEach((sourcesMap, sink) => {
+      this.sinksMap.forEach((sourcesMap, sink) => {
         sourcesMap.set(bops, this.runBehavior(sink, bops))
       })
 

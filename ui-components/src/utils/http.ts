@@ -1,6 +1,6 @@
 import { eventElementTarget } from "@aelea/core"
 import { nullSink } from "@aelea/utils"
-import { empty, tap, chain } from "@most/core"
+import { empty, tap, chain, fromPromise } from "@most/core"
 import { disposeWith, disposeBoth } from "@most/disposable"
 import { Stream } from "@most/types"
 
@@ -24,4 +24,13 @@ export function fromWebsocket<OUTPUT, INPUT>(url: string, input: Stream<INPUT> =
       return disposeBoth(diposeSocket, inputS)
     }
   }
+}
+
+export const fetchJson = <T>(input: RequestInfo, init: RequestInit & { parseJson?: (a: T) => T } = {}): Promise<T> => {
+  const json = fetch(input, init).then(async res => {
+    const { parseJson = x => x } = init
+    return parseJson(await res.json())
+  })
+
+  return json
 }

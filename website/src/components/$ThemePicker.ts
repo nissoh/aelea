@@ -11,7 +11,7 @@ export const $Picker = (themes: Theme[]) => component((
   [changeThemeEffect, changeThemeEffectTether]: Behavior<any, any>
 ) => {
 
-  const current = JSON.parse(sessionStorage.getItem(THEME_PALLETE_SELECTED_KEY)!) as Theme
+  const current = JSON.parse(localStorage.getItem(THEME_PALLETE_SELECTED_KEY)!) as Theme
 
   const applyOps = O(
     style({ position: 'absolute', left: '15px', top: '15px', cursor: 'pointer' }),
@@ -23,7 +23,7 @@ export const $Picker = (themes: Theme[]) => component((
         const toIdx = (themeNameList.indexOf(current.name) + 1) % themes.length
         const toTheme = themes[toIdx]
 
-        changeTheme(toTheme.name, toTheme.pallete)
+        changeTheme(toTheme)
       })
     )
   )

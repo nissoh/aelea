@@ -5,11 +5,11 @@ import { at, awaitPromises, combine, continueWith, delay, empty, filter, fromPro
 import { Stream } from '@most/types'
 import type * as monaco from 'monaco-editor'
 import { layoutSheet } from '@aelea/ui-components'
-import { observer } from '@aelea/ui-components'
+import { http, observer } from '@aelea/ui-components'
+import { fetchJson } from '@aelea/ui-components/src/utils/http'
 
 
 
-const fetchJson = async <T>(input: RequestInfo, init?: RequestInit): Promise<T> => (await fetch(input, init)).json()
 
 interface JSDelivrFlat {
   files: JSDelivrMeta[]
@@ -119,7 +119,7 @@ export async function fetchAndCacheDependancyTree(name: string, version = 'lates
   const pkgPath = `https://cdn.jsdelivr.net/npm/${name}@${version}/package.json`
 
   const pkg = await cacheGet(pkgPath, async () => {
-    const pkgJson: { dependencies: PackageJsonDependencies, typings?: string, types?: string } = await fetchJson(pkgPath)
+    const pkgJson: { dependencies: PackageJsonDependencies, typings?: string, types?: string } = await http.fetchJson(pkgPath)
     const dependencies = pkgJson?.dependencies ?? {}
     const files = await fetchFileListContent(name, version)
     const typings = pkgJson.typings ?? pkgJson.types

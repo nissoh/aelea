@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import { Result } from "@ethersproject/abi";
-import { EventFilter } from "@ethersproject/contracts";
+import { EventFilter, Event } from "@ethersproject/contracts";
 
 export interface TypedEventFilter<_EventArgsArray, _EventArgsObject>
   extends EventFilter {}

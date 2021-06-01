@@ -5,7 +5,7 @@ import { O } from '@aelea/utils'
 import { pallete } from '@aelea/ui-components-theme'
 
 const text = style({
-  fontFamily: `'Nunito', Fira Code`,
+  fontFamily: 'inherit',
   fontWeight: 100,
   fontSize: '1.15rem'
 })
