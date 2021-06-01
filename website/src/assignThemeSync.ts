@@ -9,9 +9,9 @@ const themeList = [dark, light]
 function setTheme<T extends Theme>(theme: T) {
   localStorage.setItem(THEME_PALLETE_SELECTED_KEY, JSON.stringify(theme))
 }
+const darkModePreferance = self?.matchMedia('(prefers-color-scheme: dark)').matches
 
 if (themeFromStorage === null) {
-  const darkModePreferance = self?.matchMedia('(prefers-color-scheme: dark)').matches
   const defaultTheme = darkModePreferance ? light : dark
 
   setTheme(defaultTheme)
@@ -21,7 +21,10 @@ if (themeFromStorage === null) {
   if (currentTheme) {
     setTheme(currentTheme)
   } else {
-    console.error('unable to set theme, stored theme does not match existing one.')
+    console.warn('unable to set theme, stored version seems different. reassigning local version')
+    const defaultTheme = darkModePreferance ? light : dark
+
+    setTheme(defaultTheme)
   }
   
 }

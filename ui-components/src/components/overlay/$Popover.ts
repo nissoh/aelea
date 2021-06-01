@@ -3,8 +3,8 @@ import { O, combineArray } from '@aelea/utils'
 import { pallete } from "@aelea/ui-components-theme"
 import { constant, empty, map, merge, multicast, switchLatest, until } from "@most/core"
 import { Stream } from "@most/types"
-import { observer } from "../.."
 import { colorAlpha } from "@aelea/ui-components-theme"
+import { observer } from "../.."
 
 
 interface IPocus {
@@ -17,7 +17,7 @@ interface IPocus {
   // overlayAlpha?: string
 }
 
-export const $Popover = ({ $$popContent, offset = 26, padding = 24, dismiss = empty() }: IPocus) => ($target: $Node) => component((
+export const $Popover = ({ $$popContent, offset = 30, padding = 76, dismiss = empty() }: IPocus) => ($target: $Node) => component((
   [overlayClick, overlayClickTether]: Behavior<any, any>,
   [targetIntersection, targetIntersectionTether]: Behavior<INode, IntersectionObserverEntry[]>,
   [popoverContentDimension, popoverContentDimensionTether]: Behavior<INode, ResizeObserverEntry[]>,
@@ -41,17 +41,19 @@ export const $Popover = ({ $$popContent, offset = 26, padding = 24, dismiss = em
 
 
         const width = Math.max(contentResize.contentRect.width, IntersectiontargetRect.intersectionRect.width) + (padding * 2) + offset
-        const height = contentResize.contentRect.height + IntersectiontargetRect.intersectionRect.height + offset + padding
+        const targetHeight = IntersectiontargetRect.intersectionRect.height
+        const contentHeight = contentResize.contentRect.height
+        const height = contentHeight + targetHeight + offset
 
         const left = x + (IntersectiontargetRect.intersectionRect.width / 2) + 'px'
 
         const bottomSpace =  window.innerHeight - bottom
-        const goDown = bottomSpace > bottom
-        const top = (goDown ? y + (height / 2) : y - offset - padding) + 'px'
+        const popDown = bottomSpace > bottom
+        const top = (popDown ? y + (height / 2) : y - ((height - padding) / 2) ) + 'px'
 
 
         return {
-          backgroundImage: `radial-gradient(${width}px ${height}px at top ${top} left ${left}, ${pallete.background} ${width / 2}px, ${colorAlpha(pallete.horizon, .65)})`,
+          backgroundImage: `radial-gradient(${width}px ${height + padding * 2}px at top ${top} left ${left}, ${pallete.background} ${width / 2}px, ${colorAlpha(pallete.horizon, .45)})`,
           // backdropFilter: 'blur(2px)'
         }
       }, popoverContentDimension, popoverContentIntersection, targetIntersection)
