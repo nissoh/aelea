@@ -1,4 +1,4 @@
-import { O, Op, Pipe } from '@aelea/utils'
+import { Op, Pipe } from '@aelea/utils'
 import { filter } from "@most/core"
 import { merge } from "@most/core"
 import { multicast, startWith } from "@most/core"
@@ -56,14 +56,14 @@ export function replayLatest<A>(s: Stream<A>, initialState?: A): ReplayLatest<A>
 
 type StoreFn<STORE> = <Z>(stream: Stream<Z>, writePipe: Op<Z, STORE>) => Stream<Z>
 
-export type BrowserStore<STORE> = {
+export type BrowserStore<STORE, StoreKey extends string> = {
   state: STORE
   store: StoreFn<STORE>
-  craete: <T>(key: string, intitialState: T) => BrowserStore<T>
+  craete: <T, CreateStoreKey extends string>(key: CreateStoreKey, intitialState: T) => BrowserStore<T, `${StoreKey}.${CreateStoreKey}`>
 }
 
 
-export const createLocalStorageChain = (keyChain: string) => <STORE>(key: string, initialDefaultState: STORE): BrowserStore<STORE> => {
+export const createLocalStorageChain = (keyChain: string) => <STORE, TKey extends string>(key: TKey, initialDefaultState: STORE): BrowserStore<STORE, TKey> => {
   const mktTree = `${keyChain}.${key}`
   const storeData = localStorage.getItem(mktTree)
   const initialState = storeData ? JSON.parse(storeData) as STORE : initialDefaultState
@@ -98,6 +98,4 @@ export const createLocalStorageChain = (keyChain: string) => <STORE>(key: string
 
   return scope
 }
-
-  
 

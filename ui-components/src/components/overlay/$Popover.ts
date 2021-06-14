@@ -1,5 +1,5 @@
-import { $node, $Node, Behavior, component, event, INode, style, styleBehavior } from "@aelea/core"
-import { O, combineArray } from '@aelea/utils'
+import { $node, $Node, Behavior, component, event, IBranch, INode, style, styleBehavior } from "@aelea/core"
+import { O, combineArray, Op } from '@aelea/utils'
 import { pallete } from "@aelea/ui-components-theme"
 import { constant, empty, map, merge, multicast, switchLatest, until } from "@most/core"
 import { Stream } from "@most/types"
@@ -8,6 +8,7 @@ import { observer } from "../.."
 
 
 interface IPocus {
+  containerOp?: Op<IBranch, IBranch>
   $$popContent: Stream<$Node>
   offset?: number
   padding?: number
@@ -17,8 +18,8 @@ interface IPocus {
   // overlayAlpha?: string
 }
 
-export const $Popover = ({ $$popContent, offset = 30, padding = 76, dismiss = empty() }: IPocus) => ($target: $Node) => component((
-  [overlayClick, overlayClickTether]: Behavior<any, any>,
+export const $Popover = ({ $$popContent, offset = 30, padding = 76, dismiss = empty(), containerOp = O() }: IPocus) => ($target: $Node) => component((
+  [overlayClick, overlayClickTether]: Behavior<INode, any>,
   [targetIntersection, targetIntersectionTether]: Behavior<INode, IntersectionObserverEntry[]>,
   [popoverContentDimension, popoverContentDimensionTether]: Behavior<INode, ResizeObserverEntry[]>,
   [popoverContentIntersection, popoverContentIntersectionTether]: Behavior<INode, IntersectionObserverEntry[]>,
@@ -36,9 +37,8 @@ export const $Popover = ({ $$popContent, offset = 30, padding = 76, dismiss = em
       event('click')
     ),
     styleBehavior(
-      combineArray(([contentResize], [intersectionContentRect], [IntersectiontargetRect]) => {
+      combineArray(([contentResize], [_intersectionContentRect], [IntersectiontargetRect]) => {
         const { y, x, bottom } = IntersectiontargetRect.intersectionRect
-
 
         const width = Math.max(contentResize.contentRect.width, IntersectiontargetRect.intersectionRect.width) + (padding * 2) + offset
         const targetHeight = IntersectiontargetRect.intersectionRect.height
@@ -79,12 +79,11 @@ export const $Popover = ({ $$popContent, offset = 30, padding = 76, dismiss = em
 
         return {
           top, left,
-          opacity: 1,
           transform: `translate(-50%, ${goDown ? '0': '-100%'})`
         }
       }, targetIntersection)
     ),
-    style({ zIndex: 100000, position: 'absolute', opacity: 0 }),
+    style({ zIndex: 100000, position: 'absolute' }),
   )
 
   const dismissOverlay = until(merge(overlayClick, dismiss))
@@ -92,11 +91,10 @@ export const $Popover = ({ $$popContent, offset = 30, padding = 76, dismiss = em
 
   const $popover = switchLatest(
     map($content => {
-
       return dismissOverlay(
         merge(
-          contentOps($content),
           $overlay(),
+          contentOps($content),
         )
       )
     }, $$popContentMulticast)
@@ -116,7 +114,7 @@ export const $Popover = ({ $$popContent, offset = 30, padding = 76, dismiss = em
   )
 
   return [
-    $node(map(node => ({ ...node, insertAscending: true })))(
+    $node(map(node => ({ ...node, insertAscending: true })), containerOp)(
       targetOp($target),
       $popover,
     ),

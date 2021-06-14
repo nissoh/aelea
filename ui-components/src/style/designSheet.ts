@@ -4,25 +4,29 @@ import { style, stylePseudo } from '@aelea/core'
 import { O } from '@aelea/utils'
 import { pallete } from '@aelea/ui-components-theme'
 
+const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
+
+
 const text = style({
   fontFamily: 'inherit',
   fontWeight: 100,
   fontSize: '1.15rem'
 })
-const customScroll = O(
-  stylePseudo('::-webkit-scrollbar-thumb', {
-    backgroundColor: pallete.foreground
-   
-  }),
-  stylePseudo('::-webkit-scrollbar', {
-    backgroundColor: 'transparent',
-    width: '6px',
-    height: '6px'
-  }),
-  stylePseudo('::-webkit-scrollbar-thumb:hover', {
-    backgroundColor: pallete.primary
-  }),
-)
+const customScroll = isFirefox
+  ? style({ scrollbarColor: `${pallete.foreground} transparent` })
+  : O(
+    stylePseudo('::-webkit-scrollbar-thumb:hover', {
+      backgroundColor: pallete.primary
+    }),
+    stylePseudo('::-webkit-scrollbar-thumb', {
+      backgroundColor: pallete.foreground
+    }),
+    stylePseudo('::-webkit-scrollbar', {
+      backgroundColor: 'transparent',
+      width: '6px',
+      height: '6px'
+    })
+  )
 
 const control = O(
   text,

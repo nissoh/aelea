@@ -20,7 +20,10 @@ export function colorAlpha(color: string, opacity: number): string {
 
   if (isRgb) {
     return color.replace(/[^,]+(?=\))/, String(opacity))
-  } else {
+  } else if (color.startsWith('#')) {
     return colorAlpha(convertHexToRGBA(color), opacity)
   }
+
+  console.error('Color has to be either hex or rgb[a]')
+  return color
 }
