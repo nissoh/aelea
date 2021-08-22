@@ -1,4 +1,4 @@
-import { attrBehavior, component, event, INode, style } from '@aelea/dom'
+import { attrBehavior, component, nodeEvent, INode, style } from '@aelea/dom'
 import { Behavior, O } from "@aelea/core"
 import { $row, layoutSheet, $icon, $Popover, $Field, $column } from "@aelea/ui-components"
 import { constant, map, merge, multicast, switchLatest } from "@most/core"
@@ -43,7 +43,7 @@ export const $TokenInput = ({ token, changeInput }: CoinInput) => component((
         dismiss: switchToken
         // overlayBackgroundColor: pallete.background
       })(
-        $row(switchTokenPopoverTether(event('click')), layoutSheet.spacingSmall, style({ alignItems: 'center', cursor: 'pointer' }))(
+        $row(switchTokenPopoverTether(nodeEvent('click')), layoutSheet.spacingSmall, style({ alignItems: 'center', cursor: 'pointer' }))(
           // switchLatest(map(t => style({ width: '48px', height: '48x' }, t.$icon), token)),
           $icon({ $content: $caretDown, width: '10px', viewBox: '0 0 32 19.43' })
         )

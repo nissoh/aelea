@@ -1,7 +1,7 @@
 import { chain, combine, filter, map, merge, multicast, now, skipAfter, skipRepeats, snapshot, startWith, switchLatest } from "@most/core"
 import { remove } from "@most/prelude"
 import { behavior, Behavior, O } from '@aelea/core'
-import { $Branch, component, event, eventElementTarget, motion, INode, style, styleInline, styleBehavior } from '@aelea/dom'
+import { $Branch, component, nodeEvent, eventElementTarget, motion, INode, style, styleInline, styleBehavior } from '@aelea/dom'
 import { $column, $row } from "../elements/$elements"
 import layoutSheet from "../style/layoutSheet"
 
@@ -85,7 +85,7 @@ export const $Sortable = <T extends $Branch>(config: DraggableList<T>) => compon
         return $dragItem(
 
           dragYTether(
-            event('pointerdown'),
+            nodeEvent('pointerdown'),
             // list order continously changing, snapshot is used to get a(snapshot) of the latest list
             snapshot((list, startEv) => {
               const drag = merge(eventElementTarget('pointerup', window), eventElementTarget('pointermove', window))

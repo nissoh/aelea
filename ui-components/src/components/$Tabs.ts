@@ -1,5 +1,5 @@
 import { map, merge, switchLatest } from "@most/core"
-import { $node, $Node, component, event } from '@aelea/dom'
+import { $node, $Node, component, nodeEvent } from '@aelea/dom'
 import { Behavior } from '@aelea/core'
 import { Stream } from "@most/types"
 
@@ -26,7 +26,7 @@ export const $Tabs = (config: Tabs) => {
         $node(
           ...config.tabs.map(t => {
             return clickTabTether(
-              event('click'),
+              nodeEvent('click'),
               map(clickEvent => {
                 return t
               })

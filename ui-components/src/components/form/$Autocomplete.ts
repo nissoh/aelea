@@ -1,5 +1,5 @@
 import { Behavior } from '@aelea/core'
-import { $element, attr, component, event, IBranch, styleBehavior } from '@aelea/dom'
+import { $element, attr, component, nodeEvent, IBranch, styleBehavior } from '@aelea/dom'
 import { pallete } from '@aelea/ui-components-theme'
 import { empty, map, mergeArray, snapshot } from "@most/core"
 import designSheet from '../../style/designSheet'
@@ -25,7 +25,7 @@ export const $Autocomplete = ({ type = InputType.TEXT, value = empty(), name, pl
       designSheet.input,
 
       changeTether(
-        event('input'),
+        nodeEvent('input'),
         map(inputEv => {
           if (inputEv.target instanceof HTMLInputElement) {
             const text = inputEv.target.value

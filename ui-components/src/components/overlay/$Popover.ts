@@ -1,4 +1,4 @@
-import { $node, $Node, component, event, IBranch, INode, style, styleBehavior } from '@aelea/dom'
+import { $node, $Node, component, nodeEvent, IBranch, INode, style, styleBehavior } from '@aelea/dom'
 import { O, Op, Behavior } from '@aelea/core'
 import { pallete } from "@aelea/ui-components-theme"
 import { constant, empty, map, merge, multicast, switchLatest, until } from "@most/core"
@@ -35,7 +35,7 @@ export const $Popover = ({ $$popContent, offset = 30, padding = 76, dismiss = em
       top: 0, left: 0, right: 0, bottom: 0
     }),
     overlayClickTether(
-      event('click')
+      nodeEvent('click')
     ),
     styleBehavior(
       combineArray(([contentResize], [_intersectionContentRect], [IntersectiontargetRect]) => {

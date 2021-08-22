@@ -1,6 +1,6 @@
 import { map, mergeArray } from "@most/core"
 import { Behavior, O } from '@aelea/core'
-import { $element, $node, attr, component, IBranch, event, style, styleBehavior, attrBehavior } from '@aelea/dom'
+import { $element, $node, attr, component, IBranch, nodeEvent, style, styleBehavior, attrBehavior } from '@aelea/dom'
 import { dismissOp, interactionOp } from "./form"
 import { pallete } from "@aelea/ui-components-theme"
 import layoutSheet from "../../style/layoutSheet"
@@ -28,7 +28,7 @@ export const $Checkbox = ({ value }: Checkbox) => component((
     style({ opacity: 0, width: 'inherit', height: 'inherit', margin: '0', cursor: 'pointer', }),
     layoutSheet.stretch,
     checkTether(
-      event('change'),
+      nodeEvent('change'),
       map(evt => (<HTMLInputElement>evt.target).checked),
     ),
     attr({ type: 'checkbox' }),

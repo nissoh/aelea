@@ -1,6 +1,6 @@
 
 import { map } from '@most/core'
-import { $element, $node, $text, component, IBranch, event } from '@aelea/dom'
+import { $element, $node, $text, component, IBranch, nodeEvent } from '@aelea/dom'
 import { Behavior } from '@aelea/core'
 
 export default component((
@@ -8,7 +8,7 @@ export default component((
 ) => {
 
   const inputBehavior = inputTether(
-    event('input'),
+    nodeEvent('input'),
     map(inputEv => {
       if (inputEv.target instanceof HTMLInputElement) {
         return inputEv.target.value

@@ -1,5 +1,5 @@
 import { Behavior } from '@aelea/core'
-import { event, $text, component, INode, style } from '@aelea/dom'
+import { nodeEvent, $text, component, INode, style } from '@aelea/dom'
 import { $Button, $column, $row, layoutSheet } from "@aelea/ui-components"
 import { ContractTransaction } from "@ethersproject/contracts"
 import { awaitPromises, snapshot, switchLatest } from "@most/core"
@@ -40,7 +40,7 @@ export const $Confirmation = (swapState: IConfirmation) => component((
       $text(style({ fontSize: '75%', textAlign: 'center' }))(swapState.transaction.to),
 
       $row(layoutSheet.spacing, style({ placeContent: 'center', alignItems: 'center', paddingTop: '25px' }))(
-        $anchor(backTether(event('click')))(
+        $anchor(backTether(nodeEvent('click')))(
           $text('Back')
         ),
         $Button({ $content: $text('Send') })({

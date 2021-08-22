@@ -47,7 +47,7 @@ export interface NodeEvent {
 }
 
 
-export const event: NodeEvent = curry2((eventType, node) => {
+export const nodeEvent: NodeEvent = curry2((eventType, node) => {
   return join(
     map(ns => eventElementTarget(eventType, ns.element, { capture: true }), node)
   )

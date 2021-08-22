@@ -1,5 +1,5 @@
 
-import { $text, attr, component, event, IBranch, style } from '@aelea/dom'
+import { $text, attr, component, nodeEvent, IBranch, style } from '@aelea/dom'
 import { O, combineObject } from "@aelea/core"
 import { state, $column, $Slider, layoutSheet, $Popover, $row, $Field, $Button } from '@aelea/ui-components'
 import { switchLatest, merge, constant, snapshot, map, sample, awaitPromises, startWith, filter, mergeArray, multicast } from '@most/core'
@@ -73,7 +73,7 @@ export const $CreateTransaction = component((
             change: inputValueChangeTether(),
             switchToken: switchTokenSourceTether()
           }),
-          clickOnDivideTether(event('click'))(
+          clickOnDivideTether(nodeEvent('click'))(
             $gaugeMetric({ value: sliceAmount, size: '36px', styleCSS: { height: '100%', cursor: 'pointer' } })
           )
         )
@@ -88,7 +88,7 @@ export const $CreateTransaction = component((
         fieldStyle: { borderBottomColor: 'transparent', fontWeight: 'bolder', fontSize: '88%' },
         inputOp: O(
           clipboardInputTether(
-            event('focus'),
+            nodeEvent('focus'),
             map(async focusEvent => navigator.clipboard.readText().catch(() => '')),
             awaitPromises,
             filter(clipBoard => isAddress(clipBoard)),

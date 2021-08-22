@@ -1,5 +1,5 @@
 import { O, Op } from '@aelea/core'
-import { component, IBranch, attr, event, style, $Branch } from '@aelea/dom'
+import { component, IBranch, attr, nodeEvent, style, $Branch } from '@aelea/dom'
 import { Behavior } from '@aelea/core'
 import { constant, map, merge, startWith } from "@most/core"
 import { Route } from "../types"
@@ -30,7 +30,7 @@ export const $RouterAnchor = ({ url, route, $anchor, anchorOp = O() }: IAnchor) 
     attr({ href }),
     style({ textDecoration: 'none', padding: '1px 5px' }),
     clickTether(
-      event('click'),
+      nodeEvent('click'),
       map((clickEv): string => {
         clickEv.preventDefault()
 
@@ -51,8 +51,8 @@ export const $RouterAnchor = ({ url, route, $anchor, anchorOp = O() }: IAnchor) 
     ),
     focusTether(
       $anchor => {
-        const focus = constant(true, merge(event('focus', $anchor), event('pointerenter', $anchor)))
-        const blur = constant(false, merge(event('blur', $anchor), event('pointerleave', $anchor)))
+        const focus = constant(true, merge(nodeEvent('focus', $anchor), nodeEvent('pointerenter', $anchor)))
+        const blur = constant(false, merge(nodeEvent('blur', $anchor), nodeEvent('pointerleave', $anchor)))
 
         return startWith(false, merge(focus, blur))
       },

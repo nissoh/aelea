@@ -1,4 +1,4 @@
-import { $text, component, event, INode, style } from '@aelea/dom'
+import { $text, component, nodeEvent, INode, style } from '@aelea/dom'
 import { Behavior, O } from '@aelea/core'
 import { $VirtualScroll, layoutSheet, ScrollResponse, $column, $TextField, ScrollRequest } from "@aelea/ui-components"
 import { constant, empty, map, multicast, startWith, switchLatest } from "@most/core"
@@ -34,7 +34,7 @@ export const $TokenList = <T extends Readonly<Token>>(list: readonly T[]) => com
             containerOps: O(layoutSheet.spacing, style({ width: '300px' })),
             dataSource: map((): ScrollResponse => {
               const $items = list.filter(obj => objectValuesContainsText(obj, filter)).map(token => {
-                const changeTokenBehavior = chooseTether(event('click'), constant(token))
+                const changeTokenBehavior = chooseTether(nodeEvent('click'), constant(token))
 
                 return changeTokenBehavior($tokenLabel(token, $text(token.contract.balanceReadable)))
               })

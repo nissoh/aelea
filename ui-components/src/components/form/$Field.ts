@@ -1,4 +1,4 @@
-import { $element, component, event, IBranch, style, styleBehavior, StyleCSS } from '@aelea/dom'
+import { $element, component, nodeEvent, IBranch, style, styleBehavior, StyleCSS } from '@aelea/dom'
 import { O, Op, combineObject, Behavior } from '@aelea/core'
 import { pallete } from '@aelea/ui-components-theme'
 import { multicast, never, now, startWith, tap } from '@most/core'
@@ -37,7 +37,7 @@ export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, i
       style(fieldStyle),
 
       changeTether(
-        event('input'),
+        nodeEvent('input'),
         map(inputEv => {
           if (inputEv.target instanceof HTMLInputElement) {
             const text = inputEv.target.value
@@ -62,7 +62,7 @@ export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, i
       interactionTether(interactionOp),
       dismissTether(dismissOp),
 
-      blurTether(event('blur')),
+      blurTether(nodeEvent('blur')),
 
       O(
         map(node =>

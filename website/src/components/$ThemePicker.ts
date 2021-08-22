@@ -1,4 +1,4 @@
-import { $svg, attr, component, event, style, stylePseudo } from '@aelea/dom'
+import { $svg, attr, component, nodeEvent, style, stylePseudo } from '@aelea/dom'
 import { $icon } from "@aelea/ui-components"
 import { changeTheme, pallete, Theme, THEME_PALLETE_SELECTED_KEY } from "@aelea/ui-components-theme"
 import { O, Behavior } from "@aelea/core"
@@ -17,7 +17,7 @@ export const $Picker = (themes: Theme[]) => component((
     style({ position: 'absolute', left: '15px', top: '15px', cursor: 'pointer' }),
     stylePseudo(':hover', { fill: pallete.primary }),
     changeThemeEffectTether(
-      event('click'),
+      nodeEvent('click'),
       tap(() => {
         const themeNameList = themes.map(t => t.name)
         const toIdx = (themeNameList.indexOf(current.name) + 1) % themes.length

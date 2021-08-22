@@ -1,7 +1,7 @@
 
 import { map, mergeArray } from "@most/core"
 import { O, Behavior } from '@aelea/core'
-import { $Node, component, event, INode, style, styleBehavior } from '@aelea/dom'
+import { $Node, component, nodeEvent, INode, style, styleBehavior } from '@aelea/dom'
 import { dismissOp, interactionOp } from "./form"
 import { $icon } from "../../elements/$icon"
 import designSheet from "../../style/designSheet"
@@ -22,7 +22,7 @@ export const $ButtonIcon = ($content: $Node) => component((
     interactionTether(interactionOp),
     dismissTether(dismissOp),
 
-    clickTether(event('pointerup')),
+    clickTether(nodeEvent('pointerup')),
 
     styleBehavior(
       map(
