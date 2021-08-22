@@ -1,4 +1,4 @@
-import { $svg, attr, StyleCSS, motion, MOTION_NO_WOBBLE, styleInline, style, $node, $text, $Node } from "@aelea/core"
+import { $svg, attr, StyleCSS, motion, MOTION_NO_WOBBLE, styleInline, style, $node, $text, $Node } from '@aelea/dom'
 import { $column, $icon, $row, layoutSheet } from "@aelea/ui-components"
 import { pallete } from "@aelea/ui-components-theme"
 import { empty, map } from "@most/core"
@@ -79,7 +79,7 @@ export const $gaugeMetric = ({ value, size = '24px', styleCSS }: Gauge) => {
 
 export const $tokenLabel = (token: Token, $label?: $Node) => {
   return $row(layoutSheet.spacing, style({ cursor: 'pointer', alignItems: 'center' }))(
-    token.$icon,
+    // token.$icon,
     $column(layoutSheet.flex)(
       $text(style({ fontWeight: 'bold' }))(token.symbol),
       $text(style({ fontSize: '75%', color: pallete.foreground }))(token.label)

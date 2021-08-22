@@ -1,5 +1,6 @@
 
-import { $element, $text, behavior, Behavior, component, style } from '@aelea/core'
+import { behavior, Behavior } from '@aelea/core'
+import { $element, $text, component, style } from '@aelea/dom'
 import { $Checkbox, $column, $row, layoutSheet, state } from '@aelea/ui-components'
 import { pallete } from '@aelea/ui-components-theme'
 import { chain, combine, empty, mergeArray, now, switchLatest, take, until } from '@most/core'

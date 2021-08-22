@@ -1,10 +1,11 @@
-import { $node, $Node, Behavior, component, event, IBranch, INode, style, styleBehavior } from "@aelea/core"
-import { O, combineArray, Op } from '@aelea/utils'
+import { $node, $Node, component, event, IBranch, INode, style, styleBehavior } from '@aelea/dom'
+import { O, Op, Behavior } from '@aelea/core'
 import { pallete } from "@aelea/ui-components-theme"
 import { constant, empty, map, merge, multicast, switchLatest, until } from "@most/core"
 import { Stream } from "@most/types"
 import { colorAlpha } from "@aelea/ui-components-theme"
 import { observer } from "../.."
+import { combineArray } from '@aelea/core'
 
 
 interface IPocus {

@@ -1,4 +1,5 @@
-import { $text, Behavior, component, style } from "@aelea/core"
+import { Behavior } from '@aelea/core'
+import { $text, component, style } from '@aelea/dom'
 import { $card, $Table, ScrollRequest } from "@aelea/ui-components"
 import { map } from "@most/core"
 

@@ -1,5 +1,5 @@
-import { style } from "@aelea/core"
-import { O } from '@aelea/utils'
+import { style } from '@aelea/dom'
+import { O } from '@aelea/core'
 
 const stretch = style({
   position: 'absolute',

@@ -1,7 +1,7 @@
 import { chain, combine, filter, map, merge, multicast, now, skipAfter, skipRepeats, snapshot, startWith, switchLatest } from "@most/core"
 import { remove } from "@most/prelude"
-import { O } from '@aelea/utils'
-import { $Branch, Behavior, behavior, component, event, eventElementTarget, motion, INode, style, styleInline, styleBehavior } from '@aelea/core'
+import { behavior, Behavior, O } from '@aelea/core'
+import { $Branch, component, event, eventElementTarget, motion, INode, style, styleInline, styleBehavior } from '@aelea/dom'
 import { $column, $row } from "../elements/$elements"
 import layoutSheet from "../style/layoutSheet"
 

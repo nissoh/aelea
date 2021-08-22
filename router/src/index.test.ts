@@ -1,7 +1,7 @@
 import { mergeArray, now, runEffects, take, tap } from '@most/core'
 import { curry2 } from '@most/prelude'
 import { newDefaultScheduler } from '@most/scheduler'
-import { O } from '@aelea/core'
+import { O } from '@aelea/dom'
 import { match, resolve, router } from './index'
 import { Stream, Time } from '@most/types'
 import { Suite, assert, expect } from "cynic"

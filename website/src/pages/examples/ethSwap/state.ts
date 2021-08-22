@@ -6,8 +6,8 @@ import { Contract } from "@ethersproject/contracts"
 
 
 export const tokenList: Token<Contract>[]= [
-  { $icon: $eth, contract: ethContracts.MAINCHAIN, label: 'Ethereum', symbol: SYMBOL.ETH },
-  { $icon: $usdt, contract: ethContracts.USDT, label: 'Tether', symbol: SYMBOL.USDT },
-  { $icon: $sushi, contract: ethContracts.SUSHI, label: 'Sushi', symbol: SYMBOL.SUSHI },
-  { $icon: $xrd, contract: ethContracts.EXRD, label: 'e-Radix', symbol: SYMBOL.EXRD },
+  {  contract: ethContracts.MAINCHAIN, label: 'Ethereum', symbol: SYMBOL.ETH },
+  {  contract: ethContracts.USDT, label: 'Tether', symbol: SYMBOL.USDT },
+  {  contract: ethContracts.SUSHI, label: 'Sushi', symbol: SYMBOL.SUSHI },
+  {  contract: ethContracts.EXRD, label: 'e-Radix', symbol: SYMBOL.EXRD },
 ]

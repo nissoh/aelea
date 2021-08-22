@@ -1,0 +1,53 @@
+
+import * as CSS from 'csstype'
+import { Scheduler, Stream } from '@most/types'
+import { SettableDisposable } from './utils/SettableDisposable'
+
+export type StyleCSS = CSS.Properties
+
+export type IAttrProperties<T> = {
+  [P in keyof T]: T[P]
+}
+
+export type IText = Stream<Text>
+export type INodeElement = Node & ChildNode
+export type IBranchElement = HTMLElement | SVGElement
+
+export interface IElementConfig<B = {}> {
+  style?: StyleCSS
+  stylePseudo: Array<{ style: StyleCSS, class: string }>
+  styleBehavior: Stream<StyleCSS | null>[]
+
+  attributes?: IAttrProperties<B>
+  attributesBehavior: Stream<IAttrProperties<B>>[]
+}
+
+export interface INode<A extends INodeElement = INodeElement> {
+  element: A
+  disposable: SettableDisposable
+}
+
+export interface IBranch<A extends IBranchElement = IBranchElement, B = {}> extends INode<A>, IElementConfig<B> {
+  $segments: Array<$Node>
+  insertAscending: boolean
+}
+
+export interface StyleEnvironment {
+  cache: string[]
+  namespace: string
+  stylesheet: CSSStyleSheet
+}
+
+export interface RunEnvironment {
+  rootNode: IBranchElement,
+  style: StyleEnvironment,
+  scheduler: Scheduler
+}
+
+
+
+export type $Branch<A extends IBranchElement = IBranchElement, B = {}> = Stream<IBranch<A, B>>
+export type $Node<A extends INodeElement = INodeElement> = Stream<INode<A>>
+
+export type Op<T, R> = (o: Stream<T>) => Stream<R>
+

@@ -1,4 +1,5 @@
-import { event, $text, Behavior, component, INode, style } from "@aelea/core"
+import { Behavior } from '@aelea/core'
+import { event, $text, component, INode, style } from '@aelea/dom'
 import { $Button, $column, $row, layoutSheet } from "@aelea/ui-components"
 import { ContractTransaction } from "@ethersproject/contracts"
 import { awaitPromises, snapshot, switchLatest } from "@most/core"

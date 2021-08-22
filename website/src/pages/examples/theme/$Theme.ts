@@ -1,5 +1,5 @@
 
-import { $node, $text, component, style } from '@aelea/core'
+import { $node, $text, component, style } from '@aelea/dom'
 import { $card, $column, $row, elevation2, layoutSheet } from '@aelea/ui-components'
 import { Pallete, Theme } from '@aelea/ui-components-theme'
 import { dark, light } from '../../../common/theme'

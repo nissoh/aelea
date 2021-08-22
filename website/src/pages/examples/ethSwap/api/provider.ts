@@ -1,4 +1,4 @@
-import { O, Op, fromCallback } from '@aelea/utils'
+import { O, Op, fromCallback } from '@aelea/core'
 import { observer } from "@aelea/ui-components"
 import { Web3Provider } from "@ethersproject/providers"
 import detectEthereumProvider from "@metamask/detect-provider"

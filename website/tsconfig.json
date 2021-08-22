@@ -13,10 +13,10 @@
       "path": "../core"
     },
     {
-      "path": "../router"
+      "path": "../dom"
     },
     {
-      "path": "../utils"
+      "path": "../router"
     },
     {
       "path": "../ui-components"

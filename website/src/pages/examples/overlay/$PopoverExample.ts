@@ -1,4 +1,5 @@
-import { $text, Behavior, component, style } from "@aelea/core"
+import { Behavior } from '@aelea/core'
+import { $text, component, style } from '@aelea/dom'
 import { $Button, $column, $Popover, $row, $TextField, layoutSheet } from "@aelea/ui-components"
 import { pallete } from "@aelea/ui-components-theme"
 import { constant, merge, now, scan } from "@most/core"

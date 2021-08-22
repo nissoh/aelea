@@ -1,6 +1,6 @@
 
-import { $text, Behavior, behavior, component, style } from '@aelea/core'
-import { O } from '@aelea/utils'
+import { $text, component, style } from '@aelea/dom'
+import { Behavior, behavior, O } from '@aelea/core'
 import { $Button, $column, $row, $seperator, layoutSheet, state } from '@aelea/ui-components'
 import { pallete } from '@aelea/ui-components-theme'
 import { chain, constant, map, merge, mergeArray, multicast, now, scan, snapshot, until } from '@most/core'

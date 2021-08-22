@@ -1,6 +1,7 @@
 
 import { map } from '@most/core'
-import { $element, $node, $text, Behavior, component, IBranch, event } from '@aelea/core'
+import { $element, $node, $text, component, IBranch, event } from '@aelea/dom'
+import { Behavior } from '@aelea/core'
 
 export default component((
   [input, inputTether]: Behavior<IBranch<HTMLInputElement>, string>

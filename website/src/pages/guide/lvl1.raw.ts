@@ -1,4 +1,4 @@
-import { $text, runBrowser } from '@aelea/core'
+import { $text, runBrowser } from '@aelea/dom'
 import { constant, map, periodic, scan } from '@most/core'
 
 const eventEverySecond = periodic(1000)

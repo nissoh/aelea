@@ -1,6 +1,6 @@
 
-import { $text, attr, Behavior, component, event, IBranch, style } from '@aelea/core'
-import { O, combineObject } from "@aelea/utils"
+import { $text, attr, component, event, IBranch, style } from '@aelea/dom'
+import { O, combineObject } from "@aelea/core"
 import { state, $column, $Slider, layoutSheet, $Popover, $row, $Field, $Button } from '@aelea/ui-components'
 import { switchLatest, merge, constant, snapshot, map, sample, awaitPromises, startWith, filter, mergeArray, multicast } from '@most/core'
 import { $TokenInput } from './$TokenInput'
@@ -11,6 +11,7 @@ import { tokenList } from '../state'
 import { Token } from '../types'
 import { formatFixed, isAddress, parseFixed } from '../api/utils'
 import { Contract } from '@ethersproject/contracts'
+import { Behavior } from '@aelea/core'
 
 export const $CreateTransaction = component((
   [inputValueChange,     inputValueChangeTether]: Behavior<string, string>,

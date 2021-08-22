@@ -1,4 +1,4 @@
-import { Op, Pipe } from '@aelea/utils'
+import { Op, Pipe } from '@aelea/core'
 import { filter } from "@most/core"
 import { merge } from "@most/core"
 import { multicast, startWith } from "@most/core"

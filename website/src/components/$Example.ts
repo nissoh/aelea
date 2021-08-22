@@ -1,5 +1,5 @@
 
-import { $Branch, component, style } from '@aelea/core'
+import { $Branch, component, style } from '@aelea/dom'
 import { $column, layoutSheet } from '@aelea/ui-components'
 import { fadeIn } from './transitions/enter'
 

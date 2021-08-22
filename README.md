@@ -14,7 +14,7 @@ Functional Reactive Programming UI library based on [@most/core](https://github.
 
 ### Increment number periodically
 ```typescript
-import { $node, $text, O, runBrowser } from '@aelea/core'
+import { $node, $text, O, runBrowser } from '@aelea/dom'
 import { constant, map, periodic, scan } from '@most/core'
 
 const add = (n1: number, n2: number) => n1 + n2
@@ -44,7 +44,7 @@ Sanboxed version [https://codesandbox.io/s/ancient-hooks-909qq?file=/src/index.t
 
 ```typescript
 import { constant, map, merge, scan } from '@most/core'
-import { $custom, $element, $text, Behavior, component, style, event, INode, runBrowser } from '@aelea/core'
+import { $custom, $element, $text, Behavior, component, style, event, INode, runBrowser } from '@aelea/dom'
 
 // composable style
 const displayFlex = style({ display: 'flex' })
@@ -99,7 +99,7 @@ In previous example we didn't do much except creating a counter component and dr
 this time, lets play with with the $Component output behaviors
 ```typescript
 import { constant, map, merge, scan } from '@most/core'
-import { $text, Behavior, component, style, INode, runBrowser } from '@aelea/core'
+import { $text, Behavior, component, style, INode, runBrowser } from '@aelea/dom'
 import $Counter, { $column, $row, spacingStyle } from './$Counter' // lets assume we default export $Counter and a few reusable $node's and style instead
 
 const $SumOfTwoCounters = component((

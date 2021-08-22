@@ -1,7 +1,7 @@
 
 import { map, mergeArray } from "@most/core"
-import { O } from '@aelea/utils'
-import { $Node, Behavior, component, event, INode, style, styleBehavior } from '@aelea/core'
+import { O, Behavior } from '@aelea/core'
+import { $Node, component, event, INode, style, styleBehavior } from '@aelea/dom'
 import { dismissOp, interactionOp } from "./form"
 import { $icon } from "../../elements/$icon"
 import designSheet from "../../style/designSheet"

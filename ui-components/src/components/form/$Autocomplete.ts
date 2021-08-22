@@ -1,4 +1,5 @@
-import { $element, attr, Behavior, component, event, IBranch, styleBehavior } from '@aelea/core'
+import { Behavior } from '@aelea/core'
+import { $element, attr, component, event, IBranch, styleBehavior } from '@aelea/dom'
 import { pallete } from '@aelea/ui-components-theme'
 import { empty, map, mergeArray, snapshot } from "@most/core"
 import designSheet from '../../style/designSheet'

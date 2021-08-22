@@ -1,5 +1,5 @@
 
-import { Behavior, component, style } from '@aelea/core'
+import { component, style } from '@aelea/dom'
 import { $card, $column, elevation2, layoutSheet } from '@aelea/ui-components'
 import { map, merge, mergeArray, now, switchLatest } from '@most/core'
 import { fadeIn } from '../../../components/transitions/enter'
@@ -9,6 +9,7 @@ import { ITransaction } from './api/types'
 import { $AccountConnectivity } from './components/$ConnectAccount'
 import { $CreateTransaction } from './components/$CreateTransaction'
 import { ContractTransaction } from '@ethersproject/contracts'
+import { Behavior } from '@aelea/core'
 
 
 export interface ExchangeUnit {

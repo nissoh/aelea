@@ -3,7 +3,7 @@ import './assignThemeSync'
 // @ts-ignore
 import { } from 'global.d.ts'
 
-import { runBrowser } from '@aelea/core'
+import { runBrowser } from '@aelea/dom'
 import $Website from './pages/$Website'
 
 

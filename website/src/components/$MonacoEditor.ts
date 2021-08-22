@@ -1,6 +1,7 @@
 
-import { Behavior, component, IBranch, style, $wrapNativeElement, StyleCSS, $node } from '@aelea/core'
-import { O, fromCallback } from '@aelea/utils'
+import { component, IBranch, style, $wrapNativeElement, StyleCSS, $node } from '@aelea/dom'
+import { Behavior } from '@aelea/core'
+import { O, fromCallback } from '@aelea/core'
 import { at, awaitPromises, combine, continueWith, delay, empty, filter, fromPromise, join, map, merge, multicast, now, recoverWith, skipRepeatsWith, startWith, switchLatest, take } from '@most/core'
 import { Stream } from '@most/types'
 import type * as monaco from 'monaco-editor'
@@ -196,6 +197,8 @@ export async function asyncloadMonacoEditor() {
   // @ts-ignore
   const monacoQuery: Promise<typeof monaco> = import(/* webpackIgnore: true */'https://cdn.skypack.dev/pin/monaco-editor@v0.23.0-nVyIshjiDqruq90zejl0/mode=imports,min/optimized/monaco-editor.js')
   const precacheAeleaDependanciesQuery = fetchAndCacheDependancyTree('@aelea/core', '0.11.0')
+
+  debugger
   // @ts-ignore
   const codiConQuery: Promise<any> = new FontFace('codicon', `url('https://cdn.jsdelivr.net/npm/monaco-editor@0.23.0/min/vs/base/browser/ui/codicons/codicon/codicon.ttf')`)
 

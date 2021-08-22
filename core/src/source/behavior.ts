@@ -1,8 +1,8 @@
 import { Stream, Disposable, Sink, Scheduler } from '@most/types'
-import { Behavior } from '../types'
+import { Behavior, Op } from '../types'
 import { disposeWith } from '@most/disposable'
-import { O, Op } from '@aelea/utils'
 import { tether } from '../combinators/tether'
+import { O } from '../common'
 
 type SinkMap<T> = Map<Sink<T>, Map<Stream<T>, Disposable | null>>
 

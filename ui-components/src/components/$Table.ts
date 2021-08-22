@@ -1,10 +1,10 @@
 import { map, merge, now, switchLatest } from "@most/core"
 import { Stream } from "@most/types"
-import { $Node, Behavior, component, INode, style, stylePseudo } from '@aelea/core'
+import { $Node, component, INode, style, stylePseudo } from '@aelea/dom'
 import { pallete } from "@aelea/ui-components-theme"
-import { O, Op } from "@aelea/utils"
 import { $VirtualScroll, QuantumScroll, ScrollRequest } from "./$VirtualScroll"
 import { $row, layoutSheet } from ".."
+import { Behavior, O, Op } from "@aelea/core"
 
 
 export interface TablePageResponse<T> {

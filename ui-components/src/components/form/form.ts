@@ -1,6 +1,6 @@
 import { constant, filter, merge } from '@most/core'
-import { O } from '@aelea/utils'
-import { $Node, $element, event, style } from '@aelea/core'
+import { O } from '@aelea/core'
+import { $Node, $element, event, style } from '@aelea/dom'
 import layoutSheet from '../../style/layoutSheet'
 import { pallete } from '@aelea/ui-components-theme'
 

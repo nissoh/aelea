@@ -1,5 +1,5 @@
-import { $Node, $svg, attr, IBranch, style } from "@aelea/core"
-import { O, Op } from '@aelea/utils'
+import { $Node, $svg, attr, IBranch, style } from '@aelea/dom'
+import { O, Op } from '@aelea/core'
 
 
 interface Icon {

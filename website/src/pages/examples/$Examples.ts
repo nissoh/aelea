@@ -1,4 +1,5 @@
-import { $node, $text, Behavior, component, style } from '@aelea/core'
+import { $node, $text, component, style } from '@aelea/dom'
+import { Behavior } from '@aelea/core'
 import { match, Route } from '@aelea/router'
 import { $column, $row, layoutSheet } from '@aelea/ui-components'
 import { pallete } from '@aelea/ui-components-theme'

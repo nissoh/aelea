@@ -1,4 +1,4 @@
-import { $element, $node, $text, Behavior, component, eventElementTarget, style } from '@aelea/core'
+import { $element, $node, $text, component, eventElementTarget, style } from '@aelea/dom'
 import * as router from '@aelea/router'
 import { $RouterAnchor } from '@aelea/router'
 import { $column, $icon, $row, layoutSheet } from '@aelea/ui-components'
@@ -12,6 +12,7 @@ import $MainMenu from './$MainMenu'
 import { $Picker } from '../components/$ThemePicker'
 import { dark, light } from '../common/theme'
 import { pallete } from '@aelea/ui-components-theme'
+import { Behavior } from '@aelea/core'
 
 
 

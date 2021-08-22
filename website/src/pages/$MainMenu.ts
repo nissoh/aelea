@@ -1,4 +1,5 @@
-import { $element, $text, attr, Behavior, component, style, stylePseudo } from '@aelea/core'
+import { $element, $text, attr, component, style, stylePseudo } from '@aelea/dom'
+import { Behavior } from '@aelea/core'
 import { $icon, $row, layoutSheet } from '@aelea/ui-components'
 import { $Link } from '../components/$Link'
 import { $github } from '../elements/$icons'

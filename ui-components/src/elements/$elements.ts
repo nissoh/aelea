@@ -1,4 +1,4 @@
-import { $custom, $node, style } from '@aelea/core'
+import { $custom, $node, style } from '@aelea/dom'
 import { pallete } from '@aelea/ui-components-theme'
 import layoutSheet from '../style/layoutSheet'
 

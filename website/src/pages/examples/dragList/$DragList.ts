@@ -1,4 +1,5 @@
-import { component, Behavior, $Branch, IBranchElement, style, $text } from "@aelea/core"
+import { Behavior } from '@aelea/core'
+import { component, $Branch, IBranchElement, style, $text } from '@aelea/dom'
 import { $card, $column, $row, $Sortable, elevation1, elevation12, elevation2, layoutSheet } from "@aelea/ui-components"
 import { pallete } from "@aelea/ui-components-theme"
 

@@ -1,5 +1,5 @@
-import { Behavior, component, style } from '@aelea/core'
-import { O } from '@aelea/utils'
+import { component, style } from '@aelea/dom'
+import { Behavior, O } from '@aelea/core'
 import { $Checkbox, $Field, $row, layoutSheet } from "@aelea/ui-components"
 import { now } from "@most/core"
 import { Stream } from "@most/types"

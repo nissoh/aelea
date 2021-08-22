@@ -1,14 +1,12 @@
 {
   "name": "@aelea/core",
-  "version": "0.18.0",
+  "version": "1.0.0",
   "main": ".dist/commonjs/index.js",
   "module": ".dist/esm/index.js",
   "files": [
     ".dist"
   ],
-  "sideEffects": [
-    "construct-style-sheets-polyfill"
-  ],
+  "sideEffects": false,
   "types": ".dist/types/index.d.ts",
   "scripts": {
     "clean": "yarn g:tsc:clean",
@@ -18,13 +16,11 @@
   },
   "homepage": "https://github.com/nissoh/aelea",
   "dependencies": {
-    "@aelea/utils": "workspace:*",
     "@most/core": "1.6.1",
     "@most/disposable": "1.3.0",
     "@most/prelude": "1.8.0",
     "@most/scheduler": "1.3.0",
-    "@most/types": "1.1.0",
-    "csstype": "3.0.8"
+    "@most/types": "1.1.0"
   },
   "license": "MIT",
   "author": "Nissan Hanina <nissan@yo.ma>"

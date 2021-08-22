@@ -1,4 +1,5 @@
-import { $node, $text, attr, Behavior, component, style } from '@aelea/core'
+import { Behavior } from '@aelea/core'
+import { $node, $text, attr, component, style } from '@aelea/dom'
 import { Route } from '@aelea/router'
 import { $column, layoutSheet } from '@aelea/ui-components'
 
@@ -23,7 +24,7 @@ export default ({ parentRoute }: Guide) => component((
 
       $Example({ file: 'src/components/$QuantumList.ts' })(
         $alert(
-          $text(`WIP: still in progress, external imports name have been encoded because of Monaco editor issue: https://github.com/microsoft/monaco-editor/issues/1306. `)
+          $text(`WIP: still in progress, external imports name have been encoded because of Monaco editor issue: https://github.com/microsoft/monaco-editor/issues/1306 `)
         ),
 
         $node(
@@ -39,7 +40,7 @@ export default ({ parentRoute }: Guide) => component((
         $TSPeep({
           readOnly: false,
           code:
-`import { $text } from '@aelea/core'
+`import { $text } from '@aelea/dom'
 
 export default $text('Yellow World')`
         })({}),
@@ -49,7 +50,7 @@ export default $text('Yellow World')`
         $TSPeep({
           readOnly: false,
           code:
-`import { $text, $node, style } from '@aelea/core'
+`import { $text, $node, style } from '@aelea/dom'
 
 const colorStyle = style({ color: 'yellow' })
 const containerStyle = style({ padding: '10px', display: 'block', border: '1px dashed yellow', borderRadius: '50px' })
@@ -69,7 +70,7 @@ export default $container(style({alignSelf: 'center'}))(
         $TSPeep({
           readOnly: false,
           code:
-`import { $text, $node } from '@aelea/core'
+`import { $text, $node } from '@aelea/dom'
 import { constant, map, periodic, scan } from '@most/core'
 
 const eventEverySecond = periodic(1000)       // stream of undefined every 1000 milliseconds
@@ -88,7 +89,7 @@ export default $node(
           readOnly: false,
           code:
 `import { constant, map, merge, scan } from '@most/core'
-import { $custom, $element, $text, Behavior, component, style, event, INode } from '@aelea/core'
+import { $custom, $element, $text, Behavior, component, style, event, INode } from '@aelea/dom'
 
 // composable style
 const displayFlex = style({ display: 'flex' })

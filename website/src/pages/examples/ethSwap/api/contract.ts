@@ -3,7 +3,7 @@ import { account } from "./account"
 import { awaitProvider, CHAIN, metamaskEvent, providerAction } from "./provider"
 import { Provider } from "@ethersproject/providers"
 import { Address } from "./types"
-import { combineObject, fromCallback } from '@aelea/utils'
+import { combineObject, fromCallback } from '@aelea/core'
 import { Stream } from "@most/types"
 import { EthExrd__factory, EthSushi__factory } from "./ethers-contracts"
 import { SYMBOL } from "./address/symbol"

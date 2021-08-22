@@ -1,5 +1,6 @@
 import { map, merge, switchLatest } from "@most/core"
-import { $node, $Node, Behavior, component, event } from '@aelea/core'
+import { $node, $Node, component, event } from '@aelea/dom'
+import { Behavior } from '@aelea/core'
 import { Stream } from "@most/types"
 
 

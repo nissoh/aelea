@@ -1,4 +1,4 @@
-import { eventElementTarget, IBranch, IBranchElement } from "@aelea/core"
+import { eventElementTarget, IBranch, IBranchElement } from '@aelea/dom'
 import { chain, constant, continueWith, filter, switchLatest, until } from "@most/core"
 import { disposeWith } from "@most/disposable"
 import { Stream } from "@most/types"

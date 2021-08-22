@@ -1,7 +1,7 @@
-import { $svg, attr, Behavior, component, event, style, stylePseudo } from "@aelea/core"
+import { $svg, attr, component, event, style, stylePseudo } from '@aelea/dom'
 import { $icon } from "@aelea/ui-components"
 import { changeTheme, pallete, Theme, THEME_PALLETE_SELECTED_KEY } from "@aelea/ui-components-theme"
-import { O } from "@aelea/utils"
+import { O, Behavior } from "@aelea/core"
 import { merge, tap } from "@most/core"
 
 

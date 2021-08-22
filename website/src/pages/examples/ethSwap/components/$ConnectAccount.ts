@@ -1,13 +1,14 @@
-import { $text, component, style, Behavior, $Node, $node, attr } from "@aelea/core"
+import { $text, component, style, $Node, $node, attr } from '@aelea/dom'
 import { $Button, $column, $row, layoutSheet } from "@aelea/ui-components"
 import { pallete } from "@aelea/ui-components-theme"
 import { combine, map, merge, switchLatest } from "@most/core"
 import { network, account, requestAccounts } from "../api/account"
 import { awaitProvider, CHAIN, noProviderAlert } from "../api/provider"
-import { $wrapNativeElement } from "@aelea/core"
+import { $wrapNativeElement } from '@aelea/dom'
 // @ts-ignore
 import jazzicon from 'jazzicon'
 import { $alert, $anchor } from "../../../../elements/$common"
+import { Behavior } from '@aelea/core'
 
 
 export function $jazzicon(addres: string) {
