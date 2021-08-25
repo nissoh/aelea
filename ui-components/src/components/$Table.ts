@@ -23,6 +23,7 @@ export interface TableOption<T> {
   cellOp?: Op<INode, INode>
   headerCellOp?: Op<INode, INode>
   bodyCellOp?: Op<INode, INode>
+  bodyRowOp?: Op<INode, INode>
 }
 
 export interface TableColumn<T> {
@@ -34,11 +35,7 @@ export interface TableColumn<T> {
 
 
 
-const $rowContainer = $row(layoutSheet.spacing)
-const $rowHeaderContainer = $rowContainer(style({ overflowY: 'scroll' }), stylePseudo('::-webkit-scrollbar', { backgroundColor: 'transparent', width: '6px' }))
-
-
-export const $Table = <T>({ dataSource, columns, scrollConfig, cellOp, headerCellOp, bodyCellOp, bodyContainerOp }: TableOption<T>) => component((
+export const $Table = <T>({ dataSource, columns, scrollConfig, cellOp, bodyRowOp, headerCellOp, bodyCellOp, bodyContainerOp }: TableOption<T>) => component((
   [requestList, requestListTether]: Behavior<ScrollRequest, ScrollRequest>
 ) => {
 
@@ -60,6 +57,10 @@ export const $Table = <T>({ dataSource, columns, scrollConfig, cellOp, headerCel
     cellOp || O(),
     bodyCellOp || O()
   )
+
+  const $rowContainer = $row(layoutSheet.spacing, bodyRowOp || O())
+
+  const $rowHeaderContainer = $rowContainer(style({ overflowY: 'scroll' }), stylePseudo('::-webkit-scrollbar', { backgroundColor: 'transparent', width: '6px' }))
 
   const $header = $rowHeaderContainer(
     ...columns.map(col => {

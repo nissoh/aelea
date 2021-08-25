@@ -196,7 +196,7 @@ window.MonacoEnvironment = {
 export async function asyncloadMonacoEditor() {
   // @ts-ignore
   const monacoQuery: Promise<typeof monaco> = import(/* webpackIgnore: true */'https://cdn.skypack.dev/pin/monaco-editor@v0.23.0-nVyIshjiDqruq90zejl0/mode=imports,min/optimized/monaco-editor.js')
-  const precacheAeleaDependanciesQuery = fetchAndCacheDependancyTree('@aelea/dom', '0.0.2')
+  const precacheAeleaDependanciesQuery = fetchAndCacheDependancyTree('@aelea/dom', '0.1.0')
 
   // @ts-ignore
   const codiConQuery: Promise<any> = new FontFace('codicon', `url('https://cdn.jsdelivr.net/npm/monaco-editor@0.23.0/min/vs/base/browser/ui/codicons/codicon/codicon.ttf')`)

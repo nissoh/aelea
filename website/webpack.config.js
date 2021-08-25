@@ -2,6 +2,7 @@ const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 const CopyPlugin = require("copy-webpack-plugin")
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 module.exports = {
   mode: "development",
@@ -32,11 +33,7 @@ module.exports = {
       "node_modules",
       path.resolve(__dirname)
     ],
-    extensions: [".ts", '.js'],
-    alias: {
-      // "bn.js": require.resolve('bn.js'),
-      "hash.js": require.resolve('hash.js'),
-    }
+    extensions: [".ts", '.js']
   },
   plugins: [
     new ForkTsCheckerWebpackPlugin(),
@@ -49,6 +46,7 @@ module.exports = {
         { from: "CNAME" },
       ]
     }),
+    // new BundleAnalyzerPlugin()
   ],
   // node: { crypto: true, stream: true },
   devServer: {
