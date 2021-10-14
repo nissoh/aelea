@@ -46,7 +46,7 @@ export abstract class Pipe<A, B = A> implements Sink<A> {
 export function tryRunning<T>(stream: Stream<T>, sink: Sink<T>, scheduler: Scheduler, time = scheduler.currentTime()) {
   try {
     return run(sink, scheduler, stream)
-  } catch (e) {
+  } catch (e: any) {
     sink.error(time, e)
     return disposeNone()
   }
@@ -55,7 +55,7 @@ export function tryRunning<T>(stream: Stream<T>, sink: Sink<T>, scheduler: Sched
 export function tryEvent <A>(t: Time, x: A, sink: Sink<A>): void {
   try {
     sink.event(t, x)
-  } catch (e) {
+  } catch (e: any) {
     sink.error(t, e)
   }
 }

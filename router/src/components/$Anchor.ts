@@ -28,7 +28,7 @@ export const $RouterAnchor = ({ url, route, $anchor, anchorOp = O() }: IAnchor) 
 
   const anchorOps = O(
     attr({ href }),
-    style({ textDecoration: 'none', padding: '1px 5px' }),
+    style({ textDecoration: 'none' }),
     clickTether(
       nodeEvent('click'),
       map((clickEv): string => {

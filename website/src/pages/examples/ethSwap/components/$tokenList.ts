@@ -39,7 +39,7 @@ export const $TokenList = <T extends Readonly<Token>>(list: readonly T[]) => com
                 return changeTokenBehavior($tokenLabel(token, $text(token.contract.balanceReadable)))
               })
 
-              return { $items, pageSize: 20 }
+              return $items
             }, multicast(scrollRequest))
           })({
             scrollRequest: scrollRequestTether()

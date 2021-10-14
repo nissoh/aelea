@@ -1,16 +1,15 @@
-import { map, merge, now, switchLatest } from "@most/core"
+import { chain, constant, map, merge, never, now, scan, startWith, switchLatest, until } from "@most/core"
 import { Stream } from "@most/types"
-import { $Node, component, INode, style, stylePseudo } from '@aelea/dom'
+import { $Node, $svg, attr, component, INode, nodeEvent, style, stylePseudo } from '@aelea/dom'
 import { pallete } from "@aelea/ui-components-theme"
-import { $VirtualScroll, QuantumScroll, ScrollRequest } from "./$VirtualScroll"
-import { $row, layoutSheet } from ".."
+import { $VirtualScroll, IScrollPagableReponse, QuantumScroll, ScrollRequest, ScrollResponse } from "./$VirtualScroll"
 import { Behavior, O, Op } from "@aelea/core"
+import { $column, $row } from "../elements/$elements"
+import layoutSheet from "../style/layoutSheet"
+import { $icon, } from "../elements/$icon"
 
 
-export interface TablePageResponse<T> {
-  data: T[]
-  pageSize: number,
-}
+export type TablePageResponse<T> = T[] | Omit<IScrollPagableReponse, '$items'> & { data: T[] }
 
 export interface TableOption<T> {
   columns: TableColumn<T>[]
@@ -23,20 +22,42 @@ export interface TableOption<T> {
   cellOp?: Op<INode, INode>
   headerCellOp?: Op<INode, INode>
   bodyCellOp?: Op<INode, INode>
-  bodyRowOp?: Op<INode, INode>
+
+  sortChange?: Stream<ISortBy<T>>
+  $sortArrowDown?: $Node
 }
 
 export interface TableColumn<T> {
   $head: $Node
-  valueOp: Op<T, $Node>
+  $body: Op<T, $Node>
+  sortBy?: keyof T,
+
 
   columnOp?: Op<INode, INode>
 }
 
+export interface IPageRequest {
+  page: ScrollRequest,
+  pageSize: number
+}
+
+export interface ISortBy<T> {
+  direction: 'asc' | 'desc'
+  name: keyof T
+}
 
 
-export const $Table = <T>({ dataSource, columns, scrollConfig, cellOp, bodyRowOp, headerCellOp, bodyCellOp, bodyContainerOp }: TableOption<T>) => component((
-  [requestList, requestListTether]: Behavior<ScrollRequest, ScrollRequest>
+export const $caretDown = $svg('path')(attr({ d: 'M4.616.296c.71.32 1.326.844 2.038 1.163L13.48 4.52a6.105 6.105 0 005.005 0l6.825-3.061c.71-.32 1.328-.84 2.038-1.162l.125-.053A3.308 3.308 0 0128.715 0a3.19 3.19 0 012.296.976c.66.652.989 1.427.989 2.333 0 .906-.33 1.681-.986 2.333L18.498 18.344a3.467 3.467 0 01-1.14.765c-.444.188-.891.291-1.345.314a3.456 3.456 0 01-1.31-.177 2.263 2.263 0 01-1.038-.695L.95 5.64A3.22 3.22 0 010 3.309C0 2.403.317 1.628.95.98c.317-.324.68-.568 1.088-.732a3.308 3.308 0 011.24-.244 3.19 3.19 0 011.338.293z' }))()
+
+
+export const $Table = <T>({
+  dataSource, columns, scrollConfig, cellOp,
+  headerCellOp, bodyCellOp, bodyContainerOp,
+  sortChange = never(),
+  $sortArrowDown = $caretDown
+}: TableOption<T>) => component((
+  [requestList, requestListTether]: Behavior<ScrollRequest, ScrollRequest>,
+  [sortBy, sortByTether]: Behavior<INode, keyof T>
 ) => {
 
 
@@ -45,28 +66,62 @@ export const $Table = <T>({ dataSource, columns, scrollConfig, cellOp, bodyRowOp
     layoutSheet.flex,
   )
 
-  const $CellHeader = $row(
+  const $cellHeader = $row(
     cellStyle,
+    layoutSheet.spacingSmall,
     style({ fontSize: '15px', color: pallete.foreground, }),
     cellOp || O(),
     headerCellOp || O()
   )
 
-  const $CellBody = $row(
+  const cellBodyOp = O(
     cellStyle,
     cellOp || O(),
     bodyCellOp || O()
   )
 
-  const $rowContainer = $row(layoutSheet.spacing, bodyRowOp || O())
+  const $rowContainer = $row(layoutSheet.spacing)
 
   const $rowHeaderContainer = $rowContainer(style({ overflowY: 'scroll' }), stylePseudo('::-webkit-scrollbar', { backgroundColor: 'transparent', width: '6px' }))
 
+  const sortState = chain((state) => {
+    const changeState = scan((seed, change): ISortBy<T> => {
+      const direction = seed.name === change ?
+        seed.direction === 'asc' ? 'desc' : 'asc'
+        : 'desc'
+      
+      return { direction, name: change }
+    }, state, sortBy)
+
+    return startWith(state, changeState)
+  }, sortChange)
+
   const $header = $rowHeaderContainer(
     ...columns.map(col => {
-      return $CellHeader(col.columnOp || O())(
+
+      if (col.sortBy) {
+        const behavior = sortByTether(
+          nodeEvent('click'),
+          constant(col.sortBy)
+        )
+
+        return $cellHeader(behavior, col.columnOp || O())(
+          style({ cursor: 'pointer' }, col.$head),
+          switchLatest(map(s => {
+
+            return $column(style({ cursor: 'pointer' }))(
+              $icon({ $content: $sortArrowDown, fill: s.name === col.sortBy ? s.direction === 'asc' ? pallete.foreground : '' : pallete.foreground, svgOps: style({ transform: 'rotate(180deg)' }), width: '6px', viewBox: '0 0 32 19.43' }),
+              $icon({ $content: $sortArrowDown, fill: s.name === col.sortBy ? s.direction === 'desc' ? pallete.foreground : '' : pallete.foreground, width: '6px', viewBox: '0 0 32 19.43' })
+            )
+          }, sortState))
+        )
+      }
+            
+      const $headCell = $cellHeader(col.columnOp || O())(
         col.$head
       )
+
+      return $headCell
     })
   )
 
@@ -74,17 +129,28 @@ export const $Table = <T>({ dataSource, columns, scrollConfig, cellOp, bodyRowOp
   const $body = $VirtualScroll({
     ...scrollConfig,
     containerOps: bodyContainerOp,
-    dataSource: map(({ data, pageSize }) => {
-      const $items = data.map(rowData =>
+    dataSource: map((res): ScrollResponse => {
+      const $items = (Array.isArray(res) ? res : res.data).map(rowData => until(sortBy)(
         $rowContainer(
-          ...columns.map(col =>
-            $CellBody(col.columnOp || O())(
-              switchLatest(col.valueOp(now(rowData)))
-            )
+          ...columns.map(col => O(cellBodyOp, col.columnOp || O())(
+            switchLatest(col.$body(now(rowData)))
+          )
           )
         )
-      )
-      return { $items, pageSize }
+      ))
+
+      if (Array.isArray(res)) {
+        return $items
+      } else {
+        return {
+          $items,
+          offset: res.offset,
+          pageSize: res.pageSize
+        }
+      }
+
+
+      return $items
     }, dataSource)
   })({
     scrollRequest: requestListTether()
@@ -96,7 +162,7 @@ export const $Table = <T>({ dataSource, columns, scrollConfig, cellOp, bodyRowOp
       $header,
     ),
 
-    { requestList }
+    { requestList, sortBy: sortState }
   ]
 
 })

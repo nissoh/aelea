@@ -2,7 +2,6 @@ const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 const CopyPlugin = require("copy-webpack-plugin")
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 module.exports = {
   mode: "development",
@@ -50,7 +49,7 @@ module.exports = {
   ],
   // node: { crypto: true, stream: true },
   devServer: {
-    port: 3000,
+    port: 3333,
     historyApiFallback: true
   },
   output: {

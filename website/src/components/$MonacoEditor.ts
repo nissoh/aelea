@@ -289,7 +289,7 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
       hover: { delay: 0 },
       padding: { top: 16, bottom: 16 },
       renderLineHighlight: 'none',
-      renderIndentGuides: false,
+      // renderIndentGuides: false,
       scrollBeyondLastLine: false,
       automaticLayout: false,
       model,

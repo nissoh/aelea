@@ -8,28 +8,30 @@ import { pallete } from "@aelea/ui-components-theme"
 import * as observer from "../utils/elementObservers"
 import designSheet from "../style/designSheet"
 
-
 export type ScrollRequest = number
 
-export interface ScrollResponse {
+export type IScrollPagableReponse = {
   $items: $Branch[]
   pageSize: number
+  offset: number
 }
+
+export type ScrollResponse = $Branch[] | IScrollPagableReponse
 
 export interface QuantumScroll {
   dataSource: Stream<ScrollResponse>
 
-  $loading?: $Node
+
+  $loader?: $Node
 
   containerOps?: Op<IBranch, IBranch>
-  rowOps?: Op<IBranch, IBranch>
 }
 
 
 const $defaultLoader = $text(style({ color: pallete.foreground, padding: '3px 10px' }))('loading...')
 
 
-export const $VirtualScroll = ({ dataSource, containerOps = O(), rowOps = O(), $loading = $defaultLoader }: QuantumScroll) => component((
+export const $VirtualScroll = ({ dataSource, containerOps = O(), $loader: $loading = $defaultLoader }: QuantumScroll) => component((
   [intersecting, intersectingTether]: Behavior<IBranch, IntersectionObserverEntry>,
 ) => {
 
@@ -54,15 +56,20 @@ export const $VirtualScroll = ({ dataSource, containerOps = O(), rowOps = O(), $
 
   const $observer = $custom('observer')(intersectedLoader)()
 
-  const newLocal = delay(45, multicastDatasource)
+  const delayDatasource = delay(45, multicastDatasource)
   const loadState = merge(
-    map(data => ({ $intermediate: $observer, data }), newLocal),
+    map(data => ({ $intermediate: $observer, data }), delayDatasource),
     map(() => ({ $intermediate: $loading, }), scrollReuqestWithInitial)
   )
   
   const $itemLoader = loop((seed, state) => {
 
     if ('data' in state && state.data) {
+      
+      if (Array.isArray(state.data)) {
+        return { seed, value: empty() }
+      }
+
       const hasMoreItems = state.data.pageSize === state.data.$items.length
       const value = hasMoreItems ? state.$intermediate : empty()
 
@@ -74,8 +81,9 @@ export const $VirtualScroll = ({ dataSource, containerOps = O(), rowOps = O(), $
 
   return [
     $container(
-      chain(node => {
-        return mergeArray(node.$items.map($item => rowOps($item))) // TODO optimze this. batching pages is not very efficient. use continous render per item during scroll
+      chain($list => {
+        const $items = Array.isArray($list) ? $list : $list.$items
+        return mergeArray($items)
       }, multicastDatasource),
       switchLatest(
         startWith($observer, $itemLoader)

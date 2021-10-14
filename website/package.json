@@ -1,6 +1,6 @@
 {
   "name": "@aelea/website",
-  "version": "30.0.0",
+  "version": "31.0.0",
   "license": "MIT",
   "module": ".dist/esm/website-run.js",
   "private": true,
@@ -23,33 +23,33 @@
     "@aelea/router": "workspace:*",
     "@aelea/ui-components": "workspace:*",
     "@aelea/ui-components-theme": "workspace:*",
-    "@ethersproject/abi": "5.4.0",
+    "@ethersproject/abi": "5.4.1",
     "@ethersproject/abstract-signer": "^5.4.1",
-    "@ethersproject/bignumber": "5.4.1",
+    "@ethersproject/bignumber": "5.4.2",
     "@ethersproject/bytes": "5.4.0",
     "@ethersproject/contracts": "5.4.1",
-    "@ethersproject/providers": "5.4.4",
+    "@ethersproject/providers": "5.4.5",
     "@metamask/detect-provider": "^1.2.0",
     "@most/core": "1.6.1",
     "@most/disposable": "1.3.0",
     "@most/prelude": "1.8.0",
     "@most/scheduler": "1.3.0",
     "@most/types": "1.1.0",
-    "@types/node": "16.7.1",
-    "construct-style-sheets-polyfill": "3.0.0",
+    "@types/node": "16.10.9",
+    "construct-style-sheets-polyfill": "3.0.4",
     "hash.js": "^1.1.7",
     "jazzicon": "^1.5.0",
-    "monaco-editor": "0.27.0"
+    "monaco-editor": "0.29.1"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^9.0.1",
-    "fork-ts-checker-webpack-plugin": "6.3.2",
+    "fork-ts-checker-webpack-plugin": "6.3.4",
     "gh-pages": "^3.2.3",
     "html-webpack-plugin": "5.3.2",
-    "ts-loader": "9.2.5",
+    "ts-loader": "9.2.6",
     "tsconfig-paths-webpack-plugin": "3.5.1",
-    "webpack": "5.51.1",
-    "webpack-cli": "4.8.0",
-    "webpack-dev-server": "4.0.0"
+    "webpack": "5.58.2",
+    "webpack-cli": "4.9.0",
+    "webpack-dev-server": "4.3.1"
   }
 }

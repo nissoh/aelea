@@ -89,7 +89,8 @@ export default $node(
           readOnly: false,
           code:
 `import { constant, map, merge, scan } from '@most/core'
-import { $custom, $element, $text, Behavior, component, style, event, INode } from '@aelea/dom'
+import { $custom, $element, $text, component, style, INode, nodeEvent } from '@aelea/dom'
+import { Behavior } from '@aelea/core'
 
 // composable style
 const displayFlex = style({ display: 'flex' })
@@ -109,10 +110,10 @@ export default component((
 
       $row(spacingStyle)(
         $column(
-          $element('button')(incrementTether(event('click'), constant(1)))(
+          $element('button')(incrementTether(nodeEvent('click'), constant(1)))(
             $text('+')
           ),
-          $element('button')(decrementTether(event('click'), constant(-1)))(
+          $element('button')(decrementTether(nodeEvent('click'), constant(-1)))(
             $text('-')
           )
         ),

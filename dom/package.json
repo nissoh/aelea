@@ -1,7 +1,7 @@
 {
   "name": "@aelea/dom",
-  "version": "0.1.0",
-  "main": ".dist/commonjs/index.js",
+  "version": "0.2.0",
+  "main": ".dist/cjs/index.js",
   "module": ".dist/esm/index.js",
   "files": [
     ".dist"
@@ -22,7 +22,7 @@
     "@most/prelude": "1.8.0",
     "@most/scheduler": "1.3.0",
     "@most/types": "1.1.0",
-    "csstype": "3.0.8"
+    "csstype": "3.0.9"
   },
   "license": "MIT",
   "author": "Nissan Hanina <nissan@yo.ma>"

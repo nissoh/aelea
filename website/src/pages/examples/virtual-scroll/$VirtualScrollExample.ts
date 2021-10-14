@@ -25,7 +25,7 @@ export const $VirtualScrollExample = component((
   [filter, filterTether]: Behavior<string, string>,
 ) => {
 
-  const PAGE_SIZE = 100
+  const PAGE_SIZE = 25
   const TOTAL_ITEMS = 1000
 
   const formatNumber = Intl.NumberFormat().format
@@ -49,7 +49,7 @@ export const $VirtualScrollExample = component((
         return $item(id)
       })
 
-      return at(delay, { $items, pageSize: PAGE_SIZE })
+      return at(delay, { $items: $items, offset: 0, pageSize: PAGE_SIZE })
     }, delayWithInitial, scrollRequest)
   )
 
@@ -94,12 +94,12 @@ export const $VirtualScrollExample = component((
 
       $card(style({ padding: 0 }))(
         switchLatest(
-          map(f =>
+          map(searchText =>
             $VirtualScroll({
-              dataSource: dataSourceFilter(f),
+              dataSource: dataSourceFilter(searchText),
               containerOps: style({ padding: '8px', maxHeight: '400px' })
             })({
-              scrollRequest: scrollRequestTether()
+              scrollRequest: scrollRequestTether(),
             })
           , debouncedFilterText)
         )
