@@ -1,10 +1,11 @@
-
-import { Behavior, O, Op } from '@aelea/core'
-import { $Branch, $custom, $Node, $text, component, IBranch, style } from '@aelea/dom'
-import { $column, designSheet, observer } from "@aelea/ui-components"
+import { Behavior, O, Op } from "@aelea/core"
+import { $Branch, $custom, $Node, $text, component, IBranch, style } from "@aelea/dom"
 import { pallete } from "@aelea/ui-components-theme"
-import { chain, delay, empty, filter, loop, map, merge, mergeArray, multicast, scan, skip, startWith, switchLatest } from "@most/core"
-import { Stream } from '@most/types'
+import { multicast, skip, scan, filter, delay, merge, loop, empty, chain, mergeArray, switchLatest, startWith, map } from "@most/core"
+import { Stream } from "@most/types"
+import { designSheet, observer } from ".."
+import { $column } from "../elements/$elements"
+
 
 
 export type ScrollRequest = number
