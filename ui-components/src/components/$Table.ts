@@ -1,9 +1,11 @@
 import { Behavior, O, Op } from "@aelea/core"
 import { $Node, $svg, attr, component, INode, nodeEvent, style, stylePseudo } from '@aelea/dom'
-import { $column, $icon, $row, layoutSheet } from "@aelea/ui-components"
 import { pallete } from "@aelea/ui-components-theme"
 import { chain, constant, map, merge, never, now, scan, startWith, switchLatest } from "@most/core"
 import { Stream } from "@most/types"
+import { $column, $row } from "../elements/$elements"
+import { $icon } from "../elements/$icon"
+import layoutSheet from "../style/layoutSheet"
 import { $VirtualScroll, IScrollPagableReponse, QuantumScroll, ScrollRequest, ScrollResponse } from "./$VirtualScroll"
 
 
