@@ -99,7 +99,7 @@ export const $VirtualScrollExample = component((
               dataSource: dataSourceFilter(searchText),
               containerOps: style({ padding: '8px', maxHeight: '400px' })
             })({
-              scrollRequest: scrollRequestTether(),
+              scrollIndex: scrollRequestTether(),
             })
           , debouncedFilterText)
         )

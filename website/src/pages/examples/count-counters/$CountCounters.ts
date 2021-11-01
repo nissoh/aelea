@@ -1,7 +1,7 @@
 
 import { $text, component, style } from '@aelea/dom'
-import { Behavior, behavior, O } from '@aelea/core'
-import { $Button, $column, $row, $seperator, layoutSheet, state } from '@aelea/ui-components'
+import { Behavior, behavior, O, replayLatest } from '@aelea/core'
+import { $Button, $column, $row, $seperator, layoutSheet } from '@aelea/ui-components'
 import { pallete } from '@aelea/ui-components-theme'
 import { chain, constant, map, merge, mergeArray, multicast, now, scan, snapshot, until } from '@most/core'
 import { $TrashBtn } from '../../../elements/$common'
@@ -51,7 +51,7 @@ export default component((
         const [remove, removeTether] = behavior<PointerEvent, PointerEvent>()
         const [valueChange, valueChangeTether] = behavior<number, number>()
 
-        const value = state.replayLatest(multicast(valueChange), 0)
+        const value = replayLatest(multicast(valueChange), 0)
 
 
         return until(remove)(

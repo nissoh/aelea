@@ -1,5 +1,5 @@
 
-import { behavior, Behavior } from '@aelea/core'
+import { behavior, Behavior, replayLatest } from '@aelea/core'
 import { $element, $text, component, style } from '@aelea/dom'
 import { $Checkbox, $column, $row, layoutSheet, state } from '@aelea/ui-components'
 import { pallete } from '@aelea/ui-components-theme'
@@ -21,7 +21,7 @@ export default (todos: Todo[]) => component((
 ) => {
 
   const INITIAL_SHOW_COMPLETED = false
-  const showCompleteState = state.replayLatest(showCompletedList, INITIAL_SHOW_COMPLETED)
+  const showCompleteState = replayLatest(showCompletedList, INITIAL_SHOW_COMPLETED)
 
   return [
     $column(layoutSheet.spacingBig)(
@@ -44,7 +44,7 @@ export default (todos: Todo[]) => component((
           const [remove, removeTether] = behavior<MouseEvent, MouseEvent>()
           const [completed, completedTether] = behavior<boolean, boolean>()
 
-          const todoCompleted = state.replayLatest(completed, todo.completed)
+          const todoCompleted = replayLatest(completed, todo.completed)
 
           return until(remove)(
             switchLatest(

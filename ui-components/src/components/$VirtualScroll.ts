@@ -1,12 +1,11 @@
 
+import { Behavior, O, Op } from '@aelea/core'
+import { $Branch, $custom, $Node, $text, component, IBranch, style } from '@aelea/dom'
+import { $column, designSheet, observer } from "@aelea/ui-components"
+import { pallete } from "@aelea/ui-components-theme"
 import { chain, delay, empty, filter, loop, map, merge, mergeArray, multicast, scan, skip, startWith, switchLatest } from "@most/core"
 import { Stream } from '@most/types'
-import { O, Op, Behavior } from '@aelea/core'
-import { $Branch, component, IBranch, style, $text, $Node, $custom } from '@aelea/dom'
-import { $column } from '../elements/$elements'
-import { pallete } from "@aelea/ui-components-theme"
-import * as observer from "../utils/elementObservers"
-import designSheet from "../style/designSheet"
+
 
 export type ScrollRequest = number
 
@@ -21,7 +20,6 @@ export type ScrollResponse = $Branch[] | IScrollPagableReponse
 export interface QuantumScroll {
   dataSource: Stream<ScrollResponse>
 
-
   $loader?: $Node
 
   containerOps?: Op<IBranch, IBranch>
@@ -31,7 +29,7 @@ export interface QuantumScroll {
 const $defaultLoader = $text(style({ color: pallete.foreground, padding: '3px 10px' }))('loading...')
 
 
-export const $VirtualScroll = ({ dataSource, containerOps = O(), $loader: $loading = $defaultLoader }: QuantumScroll) => component((
+export const $VirtualScroll = ({ dataSource, containerOps = O(), $loader = $defaultLoader }: QuantumScroll) => component((
   [intersecting, intersectingTether]: Behavior<IBranch, IntersectionObserverEntry>,
 ) => {
 
@@ -59,7 +57,7 @@ export const $VirtualScroll = ({ dataSource, containerOps = O(), $loader: $loadi
   const delayDatasource = delay(45, multicastDatasource)
   const loadState = merge(
     map(data => ({ $intermediate: $observer, data }), delayDatasource),
-    map(() => ({ $intermediate: $loading, }), scrollReuqestWithInitial)
+    map(() => ({ $intermediate: $loader, }), scrollReuqestWithInitial)
   )
   
   const $itemLoader = loop((seed, state) => {
@@ -90,6 +88,6 @@ export const $VirtualScroll = ({ dataSource, containerOps = O(), $loader: $loadi
       )
     ),
 
-    { scrollRequest: scrollReuqestWithInitial }
+    { scrollIndex: scrollReuqestWithInitial }
   ]
 })

@@ -1,6 +1,6 @@
 
 import { $text, attr, component, nodeEvent, IBranch, style } from '@aelea/dom'
-import { O, combineObject } from "@aelea/core"
+import { O, combineObject, replayLatest } from "@aelea/core"
 import { state, $column, $Slider, layoutSheet, $Popover, $row, $Field, $Button } from '@aelea/ui-components'
 import { switchLatest, merge, constant, snapshot, map, sample, awaitPromises, startWith, filter, mergeArray, multicast } from '@most/core'
 import { $TokenInput } from './$TokenInput'
@@ -24,7 +24,7 @@ export const $CreateTransaction = component((
 ) => {
 
   const initialTokenValue = tokenList[0]
-  const token = state.replayLatest(switchTokenSource, initialTokenValue)
+  const token = replayLatest(switchTokenSource, initialTokenValue)
   const balance = switchLatest(map(t => t.contract.balance, token))
 
   const divideBalanceReadableBySlider = snapshot((balance, divide) => {
@@ -52,7 +52,7 @@ export const $CreateTransaction = component((
 
   const sendTransaction = sample(transaction, send)
 
-  const sliceAmount = state.replayLatest(mergeArray([divideByInput, divideBySlider]), 0)
+  const sliceAmount = replayLatest(mergeArray([divideByInput, divideBySlider]), 0)
 
 
   const $allocateDivisionPopover = $column(style({ padding: '0 0 10px' }))(

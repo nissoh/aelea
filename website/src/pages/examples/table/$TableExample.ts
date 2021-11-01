@@ -49,7 +49,9 @@ export const $TableExample = component((
     $card(
       $Table({
         dataSource,
-        bodyContainerOp: style({ height: '400px' }),
+        scrollConfig: {
+          containerOps: style({ height: '400px' })
+        },
         sortChange: initialSort,
         columns: [
           {
@@ -68,7 +70,7 @@ export const $TableExample = component((
           }
         ],
       })({
-        requestList: requestListTether(),
+        scrollIndex: requestListTether(),
         sortBy: sortByTether()
       })
     )

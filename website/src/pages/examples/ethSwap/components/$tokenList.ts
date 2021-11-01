@@ -42,7 +42,7 @@ export const $TokenList = <T extends Readonly<Token>>(list: readonly T[]) => com
               return $items
             }, multicast(scrollRequest))
           })({
-            scrollRequest: scrollRequestTether()
+            scrollIndex: scrollRequestTether()
           })
         , filterWithInitial)
       )
