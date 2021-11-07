@@ -1,5 +1,6 @@
 export * from './combinators/combine'
 export * from './combinators/fromCallback'
+export * from './combinators/tether'
 export * from './source/behavior'
 export * from './source/replay'
 export * from './types'
