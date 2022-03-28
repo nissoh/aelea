@@ -41,8 +41,13 @@ function resolveRoute(pathChange: Stream<PathEvent>, parentFragments: Fragment[]
 
     const match = O(
       map((evt: PathEvent) => {
-        const lastTarget = evt.slice(-1)[0]
-        return isMatched(fragment, lastTarget)
+        if (evt.length !== fragments.length) {
+          return false
+        }
+        
+        const everyMatched = evt.every((f, i) => isMatched(fragments[i], f))
+
+        return everyMatched
       }),
       tap(isMatched => {
         if (isMatched) {
