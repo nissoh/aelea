@@ -1,6 +1,6 @@
 {
   "name": "@aelea/ui-components",
-  "version": "0.28.0",
+  "version": "0.28.1",
   "license": "MIT",
   "main": ".dist/cjs/index.js",
   "module": ".dist/esm/index.js",
@@ -19,10 +19,10 @@
     "@aelea/core": "workspace:*",
     "@aelea/dom": "workspace:*",
     "@aelea/ui-components-theme": "workspace:*",
-    "@most/core": "1.6.1",
-    "@most/disposable": "1.3.0",
-    "@most/prelude": "1.8.0",
-    "@most/scheduler": "1.3.0",
-    "@most/types": "1.1.0"
+    "@most/core": "^1.6.1",
+    "@most/disposable": "^1.3.0",
+    "@most/prelude": "^1.8.0",
+    "@most/scheduler": "^1.3.0",
+    "@most/types": "^1.1.0"
   }
 }
