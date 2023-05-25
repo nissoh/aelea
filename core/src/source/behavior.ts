@@ -31,7 +31,7 @@ export class BehaviorSource<A, B> implements Stream<A> {
 
 
   protected runBehavior(sink: Sink<A>, x: Stream<A>) {
-    return x.run(sink, this.scheduler!)
+    return x.run(new BehaviourSink(sink), this.scheduler!)
   }
 
   sample = (...ops: Op<B, A>[]) => {
@@ -52,6 +52,26 @@ export class BehaviorSource<A, B> implements Stream<A> {
 
 }
 
+
+class BehaviourSink<T> implements Sink<T> {
+  constructor(private sink: Sink<T> | null) { }
+
+  event(time: number, value: T): void {
+    if (this.sink) {
+      this.sink.event(time, value)
+    }
+  }
+  end(time: number): void {
+    this.sink = null
+  }
+  error(time: number, err: Error): void {
+    if (this.sink) {
+      this.sink.error(time, err)
+    } else {
+      throw new Error(err.message)
+    }
+  }
+}
 
 
 export function behavior<A, B>(): Behavior<A, B> {
