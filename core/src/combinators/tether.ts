@@ -5,8 +5,8 @@ import { Pipe } from '../common'
 
 
 class SourceSink<T> implements Sink<T> {
-  hasValue = false;
-  latestValue!: T;
+  hasValue = false
+  latestValue!: T
 
   constructor(private parent: Tether<T>, public sink: Sink<T>) { }
 
@@ -27,14 +27,25 @@ class SourceSink<T> implements Sink<T> {
   }
 }
 
-class TetherSink<A> extends Pipe<A, A> {
+class TetherSink<A> implements Sink<A> {
+  constructor(public sink: Sink<A> | null) {}
 
-  constructor(public sink: Sink<A>) {
-    super(sink)
+  event(time: number, value: A): void {
+    if (this.sink) {
+      this.sink.event(time, value)
+    }
   }
 
-  event(t: number, x: A): void {
-    this.sink.event(t, x)
+  end(): void {
+    this.sink = null
+  }
+
+  error(time: number, err: Error): void {
+    if (this.sink) {
+      this.sink.error(time, err)
+    } else {
+      throw new Error(err.message)
+    }
   }
 
 }
@@ -43,8 +54,8 @@ class TetherSink<A> extends Pipe<A, A> {
 
 class Tether<T> implements Stream<T> {
 
-  sourceSinkList: SourceSink<T>[] = [];
-  tetherSinkList: TetherSink<T>[] = [];
+  sourceSinkList: SourceSink<T>[] = []
+  tetherSinkList: TetherSink<T>[] = []
 
   sourceDisposable: Disposable = disposeNone()
 
@@ -79,7 +90,7 @@ class Tether<T> implements Stream<T> {
 
     return disposeWith(
       ([tetherSinkList, sourceTetherSink]) => {
-        sourceTetherSink.end(scheduler.currentTime())
+        sourceTetherSink.end()
         const sinkIdx = tetherSinkList.indexOf(sourceTetherSink)
 
         if (sinkIdx > -1) {
@@ -89,8 +100,6 @@ class Tether<T> implements Stream<T> {
       [this.tetherSinkList, sink] as const
     )
   }
-
-
 }
 
 
