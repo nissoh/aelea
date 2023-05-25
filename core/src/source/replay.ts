@@ -3,7 +3,6 @@ import { Disposable, Scheduler, Sink, Stream } from "@most/types"
 import { Pipe } from "../common"
 
 
-
 class StateSink<A> extends Pipe<A, A> {
   constructor(private parent: ReplayLatest<A>, public sink: Sink<A>) {
     super(sink)
