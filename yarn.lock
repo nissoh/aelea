@@ -9,11 +9,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@aelea/core@workspace:core"
   dependencies:
-    "@most/core": 1.6.1
-    "@most/disposable": 1.3.0
-    "@most/prelude": 1.8.0
-    "@most/scheduler": 1.3.0
-    "@most/types": 1.1.0
+    "@most/core": ^1.6.1
+    "@most/disposable": ^1.3.0
+    "@most/prelude": ^1.8.0
+    "@most/scheduler": ^1.3.0
+    "@most/types": ^1.1.0
   languageName: unknown
   linkType: soft
 
@@ -22,12 +22,12 @@ __metadata:
   resolution: "@aelea/dom@workspace:dom"
   dependencies:
     "@aelea/core": "workspace:*"
-    "@most/core": 1.6.1
-    "@most/disposable": 1.3.0
-    "@most/prelude": 1.8.0
-    "@most/scheduler": 1.3.0
-    "@most/types": 1.1.0
-    csstype: 3.0.11
+    "@most/core": ^1.6.1
+    "@most/disposable": ^1.3.0
+    "@most/prelude": ^1.8.0
+    "@most/scheduler": ^1.3.0
+    "@most/types": ^1.1.0
+    csstype: ^3.0.11
   languageName: unknown
   linkType: soft
 
@@ -58,11 +58,11 @@ __metadata:
     "@aelea/core": "workspace:*"
     "@aelea/dom": "workspace:*"
     "@aelea/ui-components-theme": "workspace:*"
-    "@most/core": 1.6.1
-    "@most/disposable": 1.3.0
-    "@most/prelude": 1.8.0
-    "@most/scheduler": 1.3.0
-    "@most/types": 1.1.0
+    "@most/core": ^1.6.1
+    "@most/disposable": ^1.3.0
+    "@most/prelude": ^1.8.0
+    "@most/scheduler": ^1.3.0
+    "@most/types": ^1.1.0
   languageName: unknown
   linkType: soft
 
@@ -495,7 +495,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@most/core@npm:1.6.1":
+"@most/core@npm:1.6.1, @most/core@npm:^1.6.1":
   version: 1.6.1
   resolution: "@most/core@npm:1.6.1"
   dependencies:
@@ -1989,10 +1989,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"csstype@npm:3.0.11":
-  version: 3.0.11
-  resolution: "csstype@npm:3.0.11"
-  checksum: 95e56abfe9ca219ae065acb4e43f61771a03170eed919127f558dfa168240867aba7629c8d98a201a0dd06d9a5ce82686f0570031c928516c61816adbc7c877f
+"csstype@npm:^3.0.11":
+  version: 3.1.2
+  resolution: "csstype@npm:3.1.2"
+  checksum: e1a52e6c25c1314d6beef5168da704ab29c5186b877c07d822bd0806717d9a265e8493a2e35ca7e68d0f5d472d43fac1cdce70fd79fd0853dff81f3028d857b5
   languageName: node
   linkType: hard
 

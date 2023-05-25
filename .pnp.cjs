@@ -92,7 +92,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@most/prelude", "npm:1.8.0"],\
             ["@most/scheduler", "npm:1.3.0"],\
             ["@most/types", "npm:1.1.0"],\
-            ["csstype", "npm:3.0.11"]\
+            ["csstype", "npm:3.1.2"]\
           ],\
           "linkType": "SOFT"\
         }]\
@@ -2467,10 +2467,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["csstype", [\
-        ["npm:3.0.11", {\
-          "packageLocation": "./.yarn/cache/csstype-npm-3.0.11-b49897178d-95e56abfe9.zip/node_modules/csstype/",\
+        ["npm:3.1.2", {\
+          "packageLocation": "./.yarn/cache/csstype-npm-3.1.2-cead7d99b2-e1a52e6c25.zip/node_modules/csstype/",\
           "packageDependencies": [\
-            ["csstype", "npm:3.0.11"]\
+            ["csstype", "npm:3.1.2"]\
           ],\
           "linkType": "HARD"\
         }]\
