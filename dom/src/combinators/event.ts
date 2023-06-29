@@ -6,7 +6,7 @@ import { INodeElement, $Node } from '../types'
 type PickEvent<A, B> = A extends keyof B ? B[A] : Event
 
 
-type ElementEventList = DocumentEventMap & SVGElementEventMap & HTMLElementEventMap & WindowEventMap
+type ElementEventList = DocumentEventMap & SVGElementEventMap & HTMLElementEventMap & WindowEventMap & IDBOpenDBRequestEventMap
 type ElementEventNameList = keyof ElementEventList
 type GuessByName<A extends ElementEventNameList> = ElementEventList[A]
 
