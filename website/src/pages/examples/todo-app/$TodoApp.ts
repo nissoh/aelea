@@ -1,16 +1,14 @@
 
-import { behavior, Behavior, replayLatest } from '@aelea/core'
-import { $element, $text, component, style } from '@aelea/dom'
-import { $Checkbox, $column, $row, layoutSheet, state } from '@aelea/ui-components'
-import { pallete } from '@aelea/ui-components-theme'
 import { chain, combine, empty, mergeArray, now, switchLatest, take, until } from '@most/core'
-import $CreateTodo, { Todo } from './$CreateTodo'
 import $TodoItem from './$TodoItem'
+import { $element, style } from 'aelea/dom'
+import { spacing } from 'aelea/ui-components'
+import { pallete } from '../../../theme'
 
 
 
 export const $label = $element('label')(
-  layoutSheet.row,
+  spacing.row,
   style({ cursor: 'pointer', alignItems: 'center', color: pallete.foreground })
 )
 
@@ -24,10 +22,10 @@ export default (todos: Todo[]) => component((
   const showCompleteState = replayLatest(showCompletedList, INITIAL_SHOW_COMPLETED)
 
   return [
-    $column(layoutSheet.spacingBig)(
+    $column(spacing.big)(
 
-      $row(layoutSheet.spacingBig)(
-        $label(layoutSheet.spacing)(
+      $row(spacing.big)(
+        $label(spacing.spacing)(
           $Checkbox({ value: showCompleteState })({
             check: showCompletedListTether()
           }),
@@ -38,7 +36,7 @@ export default (todos: Todo[]) => component((
         }),
       ),
 
-      $column(layoutSheet.spacingSmall)(
+      $column(spacing.small)(
         chain((todo: Todo) => {
 
           const [remove, removeTether] = behavior<MouseEvent, MouseEvent>()

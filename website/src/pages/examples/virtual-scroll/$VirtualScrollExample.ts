@@ -1,10 +1,11 @@
+import { at, debounce, empty, join, map, merge, now, snapshot, startWith, switchLatest } from "@most/core"
+import type { Stream } from "@most/types"
+import type { Behavior } from "aelea/core"
+import { $text, component, style } from "aelea/dom"
+import { $TextField, $VirtualScroll, $card, $column, $row, $seperator, spacing } from "aelea/ui-components"
+import type { ScrollRequest } from "aelea/ui-components"
+import { pallete } from "../../../theme"
 
-import { Behavior } from '@aelea/core'
-import { $text, component, style } from '@aelea/dom'
-import { $card, $column, $row, $seperator, $TextField, $VirtualScroll, layoutSheet, ScrollRequest, ScrollResponse } from '@aelea/ui-components'
-import { pallete } from '@aelea/ui-components-theme'
-import { at, debounce, empty, join, map, merge, now, snapshot, startWith, switchLatest } from '@most/core'
-import { Stream } from '@most/types'
 
 
 function filterArrayByText(array: string[], filter: string) {
@@ -14,7 +15,7 @@ function filterArrayByText(array: string[], filter: string) {
   )
 }
 
-const $label = (label: string, value: Stream<string> | string) => $row(layoutSheet.spacingSmall)(
+const $label = (label: string, value: Stream<string> | string) => $row(spacing.small)(
   $text(style({ color: pallete.foreground }))(label),
   $text(value)
 )
@@ -39,7 +40,7 @@ export const $VirtualScrollExample = component((
     `item: ${Math.random().toString(36).substring(7)} ${formatNumber(++i)}`
   )
 
-  
+
   const dataSourceFilter = (filter: string) => join(
     snapshot((delay, requestNumber): Stream<ScrollResponse> => {
       const pageStart = requestNumber * PAGE_SIZE
@@ -59,22 +60,22 @@ export const $VirtualScrollExample = component((
   const debouncedFilterText = debounce(300, filterText)
 
   return [
-    $column(layoutSheet.spacingBig)(
-      $text(`High performance dynamically loaded list based on Intersection Observer Web API. this example shows a very common pagination and REST like fetching asynchnously more pages`),
-      $row(layoutSheet.spacingBig)(
+    $column(spacing.big)(
+      $text('High performance dynamically loaded list based on Intersection Observer Web API. this example shows a very common pagination and REST like fetching asynchnously more pages'),
+      $row(spacing.big)(
 
         $label('Page: ', map(l => String(l), scrollRequest)),
-        $label(`Page Size:`, String(PAGE_SIZE)),
-        $label(`Total Items:`, String(TOTAL_ITEMS)),
-        
+        $label('Page Size:', String(PAGE_SIZE)),
+        $label("Total Items:", String(TOTAL_ITEMS)),
+
       ),
 
-      $row(layoutSheet.spacingBig)(
+      $row(spacing.big)(
         $TextField({
           label: 'Filter',
           value: empty(),
           hint: 'Remove any items that does not match filter and debounce changes by 300ms to prevert spamming',
-          containerOp: layoutSheet.flex
+          containerOp: style({ flex: 1 })
         })({
           change: filterTether()
         }),
@@ -82,7 +83,7 @@ export const $VirtualScrollExample = component((
           label: 'Delay Response(ms)',
           value: initialDelayResponse,
           hint: 'Emulate the duration of a datasource response, show a stubbed $node instead',
-          containerOp: layoutSheet.flex
+          containerOp: style({ flex: 1 })
         })({
           change: delayResponseTether(
             map(Number)
@@ -101,7 +102,7 @@ export const $VirtualScrollExample = component((
             })({
               scrollIndex: scrollRequestTether(),
             })
-          , debouncedFilterText)
+            , debouncedFilterText)
         )
       )
 

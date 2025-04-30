@@ -19,7 +19,8 @@ export const $wrapNativeElement = branch(<A extends IBranchElement>(rootNode: A)
 // childless nodes
 export const $text = $textFn(id)
 
-export class NodeSource<A, B extends IBranchElement> implements Stream<IBranch<B>> {
+
+class NodeSource<A, B extends IBranchElement> implements Stream<IBranch<B>> {
   constructor(private sourceValue: A,
               private sourceOp: (a: A) => B,
               private $segments: $Node[]) { }

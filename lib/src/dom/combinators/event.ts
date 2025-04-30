@@ -13,9 +13,9 @@ type GuessByName<A extends ElementEventNameList> = ElementEventList[A]
 
 type ElementEventTypeMap<A extends ElementEventNameList, B> =
   B extends Window ? PickEvent<A, WindowEventMap>
-    : B extends HTMLElement ? PickEvent<A, DocumentEventMap>
-      : B extends SVGAElement ? PickEvent<A, SVGElementEventMap>
-        : GuessByName<A>
+  : B extends HTMLElement ? PickEvent<A, DocumentEventMap>
+  : B extends SVGAElement ? PickEvent<A, SVGElementEventMap>
+  : GuessByName<A>
 
 
 
@@ -41,11 +41,10 @@ export function eventElementTarget<A extends ElementEventNameList, B extends Eve
 }
 
 
-export interface NodeEvent {
+interface NodeEvent {
   <A extends ElementEventNameList, B extends INodeElement>(eventType: A, node: $Node<B>): Stream<ElementEventTypeMap<A, B>>
   <A extends ElementEventNameList, B extends INodeElement>(eventType: A): (node: $Node<B>) => Stream<ElementEventTypeMap<A, B>>
 }
-
 
 export const nodeEvent: NodeEvent = curry2((eventType, node) => {
   return join(

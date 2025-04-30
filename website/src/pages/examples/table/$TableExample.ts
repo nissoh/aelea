@@ -1,8 +1,8 @@
-import { Behavior } from '@aelea/core'
-import { $text, component, style } from '@aelea/dom'
-import { $card, $Table, ISortBy, ScrollRequest, TablePageResponse } from "@aelea/ui-components"
-import { combine, map, merge, now, snapshot } from "@most/core"
-import { Stream } from '@most/types'
+import { now, merge, combine } from "@most/core"
+import { map } from "@most/prelude"
+import type { Behavior } from "aelea/core"
+import { component, style, $text } from "aelea/dom"
+import { type ScrollRequest, type ISortBy, $card, $Table } from "aelea/ui-components"
 
 
 interface ITableRow {
@@ -19,7 +19,7 @@ export const $TableExample = component((
   let i = 0
 
   const data: ITableRow[] = Array(PAGE_SIZE).fill(null).map(() => {
-    return { id: 'item-#' + ++i, random: Math.round(Math.random() * 100) }
+    return { id: `item-#${++i}`, random: Math.round(Math.random() * 100) }
   })
 
   const initialSort: Stream<ISortBy<ITableRow>> = now({ direction: 'asc', name: 'id' })

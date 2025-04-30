@@ -1,10 +1,7 @@
 import type { Stream } from "@most/types"
 
-
 export type Path = string
 export type Fragment = string | RegExp
-
-
 export type PathEvent = Path[]
 
 export type Route = {
@@ -19,3 +16,4 @@ export type RouteConfig = {
   fragment: Fragment
   title?: string
 }
+

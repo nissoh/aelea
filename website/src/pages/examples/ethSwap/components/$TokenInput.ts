@@ -36,14 +36,14 @@ export const $TokenInput = ({ token, changeInput }: CoinInput) => component((
   )
 
   return [
-    $row(layoutSheet.spacing, style({ alignItems: 'center', flex: 1 }))(
+    $row(spacing.spacing, style({ alignItems: 'center', flex: 1 }))(
     
       $Popover({
         $$popContent: constant($tokenList, switchTokenPopover),
         dismiss: switchToken
         // overlayBackgroundColor: pallete.background
       })(
-        $row(switchTokenPopoverTether(nodeEvent('click')), layoutSheet.spacingSmall, style({ alignItems: 'center', cursor: 'pointer' }))(
+        $row(switchTokenPopoverTether(nodeEvent('click')), spacing.small, style({ alignItems: 'center', cursor: 'pointer' }))(
           // switchLatest(map(t => style({ width: '48px', height: '48x' }, t.$icon), token)),
           $icon({ $content: $caretDown, width: '10px', viewBox: '0 0 32 19.43' })
         )

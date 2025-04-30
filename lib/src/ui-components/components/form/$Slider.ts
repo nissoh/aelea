@@ -1,8 +1,8 @@
-import { merge, now, filter, tap, switchLatest, map } from "@most/core"
+import { filter, map, merge, now, switchLatest, tap } from "@most/core"
 import { O } from "../../../core/common.js"
 import type { Behavior } from "../../../core/types.js"
-import { component, $element, style, stylePseudo, nodeEvent, attr } from "../../../dom/index.js"
-import type { IBranch, StyleCSS } from "../../../dom/types.js"
+import { $element, attr, component, nodeEvent, style, stylePseudo } from "../../../dom/index.js"
+import type { IBranch, IStyleCSS } from "../../../dom/types.js"
 import { pallete } from "../../../ui-components-theme/globalState.js"
 import type { Input } from "./types.js"
 
@@ -16,7 +16,7 @@ export const $Slider = ({ value, step = .01 }: Slider) => component((
 ) => {
 
 
-  const sliderThunmbStyle: StyleCSS = {
+  const sliderThunmbStyle: IStyleCSS = {
     backgroundColor: pallete.primary,
     borderRadius: '50%',
     width: '25px',

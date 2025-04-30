@@ -7,7 +7,7 @@ import { pallete } from "@aelea/ui-components-theme"
 export default component(([order, orderTether]: Behavior<$Branch<IBranchElement, {}>[], $Branch<IBranchElement, {}>[]>) => {
 
   const $list = Array(4).fill(null).map((_, i) =>
-    $card(layoutSheet.flex, elevation2, style({ backgroundColor: pallete.background, placeContent: 'center', height: '90px', alignItems: 'center' }))(
+    $card(flex, elevation2, style({ backgroundColor: pallete.background, placeContent: 'center', height: '90px', alignItems: 'center' }))(
       $text('node: ' + i)
     )
   )

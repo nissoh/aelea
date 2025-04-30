@@ -20,7 +20,7 @@ export default ({ parentRoute }: Guide) => component((
 
   return [
 
-    $column(layoutSheet.spacingBig, layoutSheet.flex, style({ alignItems: 'center' }))(
+    $column(spacing.big, flex, style({ alignItems: 'center' }))(
 
       $Example({ file: 'src/components/$QuantumList.ts' })(
         $alert(

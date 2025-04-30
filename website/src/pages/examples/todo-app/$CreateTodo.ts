@@ -1,7 +1,7 @@
-import { Behavior } from '@aelea/core'
-import { $text, component } from '@aelea/dom'
-import { $Button, $Field, $row, layoutSheet } from "@aelea/ui-components"
 import { constant, map, merge, now, snapshot, startWith } from "@most/core"
+import type { Behavior } from "aelea/core"
+import { $text, component, style } from "aelea/dom"
+import { $Button, $Field, $row } from "aelea/ui-components"
 
 let iid = 0
 
@@ -36,7 +36,7 @@ export default component((
   )
 
   return [
-    $row(layoutSheet.flex)(
+    $row(style({ flex: 1 }))(
       $Field({ value })({
         change: inputChangeTether()
       }),

@@ -1,22 +1,22 @@
-import { $node, $text, component, style } from '@aelea/dom'
-import { Behavior } from '@aelea/core'
-import { match, Route } from '@aelea/router'
-import { $column, $row, layoutSheet } from '@aelea/ui-components'
-import { pallete } from '@aelea/ui-components-theme'
+
 import { awaitPromises, chain, map, now } from '@most/core'
+import { $node, $text, component, style } from 'aelea/dom'
+import { $column, $row, spacing } from 'aelea/ui-components'
 import $Example from '../../components/$Example'
 import { $Link } from '../../components/$Link'
 import { fadeIn } from '../../components/transitions/enter'
+import { pallete } from '../../theme'
 import $Calculator from './calculator/$Calculator'
 import $CountCounters from './count-counters/$CountCounters'
 import $DragList from './dragList/$DragList'
 import { $PopoverExample } from './overlay/$PopoverExample'
 import { $TableExample } from './table/$TableExample'
-
 import { $Theme } from './theme/$Theme'
 import { createTodo } from './todo-app/$CreateTodo'
 import $TodoApp from './todo-app/$TodoApp'
 import { $VirtualScrollExample } from './virtual-scroll/$VirtualScrollExample'
+import { match, type Route } from 'aelea/router'
+import type { Behavior } from 'aelea/core'
 
 
 
@@ -45,13 +45,13 @@ export default ({ router }: Website) => component((
 
   return [
 
-    $row(layoutSheet.spacingBig, layoutSheet.flex, style({ placeContent: 'center' }))(
+    $row(spacing.big, style({ placeContent: 'center', flex: 1 }))(
 
       fadeIn(
-        $column(layoutSheet.spacing, style({ top: '10vh', placeContent: 'center flex-start' }))(
+        $column(spacing.default, style({ top: '10vh', placeContent: 'center flex-start' }))(
 
-          $column(layoutSheet.spacingBig, style({ whiteSpace: 'nowrap' }))(
-            $column(layoutSheet.spacingTiny)(
+          $column(spacing.big, style({ whiteSpace: 'nowrap' }))(
+            $column(spacing.tiny)(
               $text(style({ color: pallete.foreground, fontSize: '75%' }))('Demos'),
               $Link({ $content: $text('Theme'), url: '/p/examples/theme', route: themeRoute })({
                 click: linkClickTether()
@@ -73,7 +73,7 @@ export default ({ router }: Website) => component((
               }),
             ),
 
-            $column(layoutSheet.spacingTiny)(
+            $column(spacing.tiny)(
               $text(style({ color: pallete.foreground, fontSize: '75%' }))('UI Components'),
               // $Link({ $content: $text('Autocomplete'), url: '/p/examples/autocomplete', route: autocompleteRoute })({
               //   click: sampleLinkClick()
@@ -108,11 +108,11 @@ export default ({ router }: Website) => component((
         match(ethSendRoute)(
           $Example({ file: 'src/components/$Table.ts' })(
             $column(
-              chain(mod => mod.$EtherSwapExample({}), awaitPromises(map(x => import('./ethSwap/$MetamaskSend'), now(null))))
+              chain(mod => mod.$EtherSwapExample({}), awaitPromises(map(_ => import('./ethSwap/$MetamaskSend'), now(null))))
             )
           )({})
         ),
-        
+
 
         match(dragAngDropRoute)(
           $Example({ file: 'src/components/$DragSort.ts' })(

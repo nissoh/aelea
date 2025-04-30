@@ -1,5 +1,5 @@
-
-export * from './components/$Anchor.js'
-export * from './resolveUrl.js'
-export * from './types.js'
+// biome-ignore lint/performance/noBarrelFile: entrypoint module
+export { $RouterAnchor } from './components/$Anchor.js'
+export { contains, create, isMatched, match } from './resolveUrl.js'
+export type { Fragment, Path, PathEvent, Route, RouteConfig } from './types.js'
 

@@ -22,7 +22,7 @@ export const $PopoverExample = component((
 
   const count = merge(countUp, countDown)
 
-  const $popContent = $column(layoutSheet.spacing)(
+  const $popContent = $column(spacing.spacing)(
     $text('Well, hello $Counter component!'),
     $row(style({ placeContent: 'center' }))(
       $Counter({ value: scan((s, n) => s + n, 0, count) })({ decrement: countDownTether(), increment: countUpTether() })
@@ -34,9 +34,9 @@ export const $PopoverExample = component((
 
 
   return [
-    $column(layoutSheet.spacing)(
+    $column(spacing.spacing)(
       $text(`Shows extra details with visible and actionable context in a floating buddle`),
-      $row(layoutSheet.spacing)(
+      $row(spacing.spacing)(
         $text('This button is a target(context)'),
         $Popover({ $$popContent })(
           $Button({ $content: $text('Pop!') })({
@@ -47,7 +47,7 @@ export const $PopoverExample = component((
       
       $Popover({ $$popContent: $$popContentCard })(
         $column(style({ backgroundColor: pallete.background, border: `1px solid ${pallete.horizon}`, padding: '30px' }))(
-          $row(layoutSheet.spacing)(
+          $row(spacing.spacing)(
             $TextField({ label: 'One', value: now('') })({}),
             $TextField({ label: 'Two', value: now('') })({}),
             $Button({ $content: $text('Advanced') })({
@@ -64,7 +64,7 @@ export const $PopoverExample = component((
 
       $Popover({ $$popContent: $$popContentCardBottom })(
         $column(style({ backgroundColor: pallete.background, border: `1px solid ${pallete.horizon}`, padding: '30px' }))(
-          $row(layoutSheet.spacing)(
+          $row(spacing.spacing)(
             $TextField({ label: 'One', value: now('') })({}),
             $TextField({ label: 'Two', value: now('') })({}),
             $Button({ $content: $text('Advanced') })({

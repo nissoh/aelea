@@ -1,7 +1,9 @@
 # aelea - Tiny Composable UI Framework
+
 Functional Reactive Programming UI library based on [@most/core](https://github.com/mostjs/core) paradigm and [architecture](https://github.com/cujojs/most/wiki/Architecture)
 
 # Why?
+
 - Everything is programatic. bulit by applying First Principle
 - A lot is meant to compose well together. elements, style, behaviors are reusable and stateless. All Built to scale
 - State UI naturally by declaring Behaviors, state managers are obsolete
@@ -9,10 +11,10 @@ Functional Reactive Programming UI library based on [@most/core](https://github.
 - CSS Declarations only exists when they are displayed, reducing paint time
 - Components are similar to a function, AS I/O, Outputs(Automatically Typed) outout(unlike any other libraries)
 - Typed. Less friction and more feedback. Style(csstype), Elements(either custom or specific(form, button etc)) and even Dom Events(based on element type)
-- Animations. done using Spring physics https://www.youtube.com/watch?v=1tavDv5hXpo
-
+- Animations. done using Spring physics <https://www.youtube.com/watch?v=1tavDv5hXpo>
 
 ### Increment number periodically
+
 ```typescript
 import { $node, $text, O, runBrowser } from '@aelea/dom'
 import { constant, map, periodic, scan } from '@most/core'
@@ -38,6 +40,7 @@ runBrowser({ rootNode: document.body })($pinkishCountUp )
 ```
 
 ### Simple UI Counter - View, Style and Behavior
+
 This is a dumbed down version where everything is packed into a single file
 
 Sanboxed version [https://codesandbox.io/s/ancient-hooks-909qq?file=/src/index.ts](https://codesandbox.io/s/ancient-hooks-909qq?file=/src/index.ts)
@@ -94,9 +97,11 @@ runBrowser({ rootNode: document.body })($Counter({}))
 ```
 
 ### Using $Counter Typed Output Behaviors
+
 In previous example we didn't do much except creating a counter component and drawing it using `runBrowser` on `document.body`
 
 this time, lets play with with the $Component output behaviors
+
 ```typescript
 import { constant, map, merge, scan } from '@most/core'
 import { $text, Behavior, component, style, INode, runBrowser } from '@aelea/dom'
@@ -144,10 +149,9 @@ There are various examples and whole lot of different tools avaible at the examp
 
 ### to see it running
 
-- install NodeJS, https://nodejs.org/en/
+- install NodeJS, <https://nodejs.org/en/>
 - `npm install -g yarn` cmd to install yarn package and project manager
 - `cd ./examples`
 - `yarn run showcase`
-
 
 `cd ./examples` and `yarn run`

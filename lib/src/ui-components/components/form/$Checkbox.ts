@@ -3,10 +3,10 @@ import { O } from "../../../core/common.js"
 import type { Behavior } from "../../../core/types.js"
 import { component, $node, style, styleBehavior, $element, nodeEvent, attr, attrBehavior } from "../../../dom/index.js"
 import type { IBranch } from "../../../dom/types.js"
-import { layoutSheet } from "../../index.js"
 import { interactionOp, dismissOp } from "./form.js"
 import type { Input } from "./types.js"
 import { pallete } from "../../../ui-components-theme/globalState.js"
+import { stretch } from "../../style/layoutSheet.js"
 
 
 export interface Checkbox extends Input<boolean> {
@@ -19,7 +19,7 @@ export const $Checkbox = ({ value }: Checkbox) => component((
 ) => {
 
   const $overlay = $node(
-    layoutSheet.stretch,
+    stretch,
     style({ flex: 1, margin: '3px', }),
     styleBehavior(
       map(ch => ch ? { backgroundColor: pallete.message } : null, value)
@@ -28,7 +28,7 @@ export const $Checkbox = ({ value }: Checkbox) => component((
 
   const $checkInput = $element('input')(
     style({ opacity: 0, width: 'inherit', height: 'inherit', margin: '0', cursor: 'pointer', }),
-    layoutSheet.stretch,
+    stretch,
     checkTether(
       nodeEvent('change'),
       map(evt => (<HTMLInputElement>evt.target).checked),

@@ -2,14 +2,10 @@
   "name": "aelea",
   "version": "0.0.1",
   "type": "module",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/types/index.d.ts",
-  "typings": "./dist/types/index.d.ts",
   "scripts": {
     "build": "bun run build:clean && bun run build:esm",
     "build:esm": "tsc -b",
-    "build:clean": "rm -rf middleware/dist",
-    "clean:tsc": "rm -fr dist/*"
+    "build:clean": "rm -rf dist"
   },
   "license": "MIT",
   "author": "Nissan Hanina <nissanhanina@gmail.com>",

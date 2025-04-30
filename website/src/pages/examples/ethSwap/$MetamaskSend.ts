@@ -38,7 +38,7 @@ export const $EtherSwapExample = component((
   const initialSwapCard = merge(now(null), backToMainClick)
 
   return [
-    $column(layoutSheet.spacingBig, style({ placeContent: 'center', alignItems: 'center' }))(
+    $column(spacing.big, style({ placeContent: 'center', alignItems: 'center' }))(
       $AccountConnectivity()({
         account: accountTether()
       }),

@@ -29,15 +29,15 @@ export default component((
 
   return [
 
-    $column(layoutSheet.spacing)(
-      $row(style({ placeContent: 'space-between', alignItems: 'center' }), layoutSheet.spacing)(
-        $row(layoutSheet.spacingSmall)(
+    $column(spacing.spacing)(
+      $row(style({ placeContent: 'space-between', alignItems: 'center' }), spacing.spacing)(
+        $row(spacing.small)(
           $text(style({ color: pallete.foreground }))('Counters: '),
           $text(
             map(String, sumWithInitial(merge(constant(1, addCounter), constant(-1, disposeCounter))))
           ),
         ),
-        $row(layoutSheet.spacingSmall)(
+        $row(spacing.small)(
           $text(style({ color: pallete.foreground }))('Sum: '),
           $text(map(String, totalCount))
         ),
@@ -54,9 +54,9 @@ export default component((
 
 
         return until(remove)(
-          $column(layoutSheet.spacing)(
+          $column(spacing.spacing)(
             $seperator,
-            $row(style({ alignItems: 'center' }), layoutSheet.spacingBig)(
+            $row(style({ alignItems: 'center' }), spacing.big)(
               $TrashBtn({
                 click: O(
                   removeTether(),

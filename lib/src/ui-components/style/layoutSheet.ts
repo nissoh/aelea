@@ -10,21 +10,6 @@ export const stretch = style({
 })
 
 
-export const spacingTiny = style({
-  gap: '4px'
-})
-
-export const spacingSmall = style({
-  gap: '8px'
-})
-
-export const spacing = style({
-  gap: '16px'
-})
-
-export const spacingBig = style({
-  gap: '26px'
-})
 
 
 

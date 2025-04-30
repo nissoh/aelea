@@ -1,6 +1,6 @@
 import { combine } from "@most/core"
 import { Behavior } from "aelea/core"
-import { $Branch, $element, style, component, styleBehavior, StyleCSS } from "aelea/dom"
+import { $Branch, $element, style, component, styleBehavior, IStyleCSS } from "aelea/dom"
 import { IAnchor, $RouterAnchor } from "aelea/router"
 import { pallete } from "../theme"
 
@@ -23,7 +23,7 @@ export const $Link = ({ url, route, $content, anchorOp }: ILink) => component((
 ) => {
   const $anchorEl = $anchor(
     styleBehavior(
-      combine((isActive, isFocus): StyleCSS | null => {
+      combine((isActive, isFocus): IStyleCSS | null => {
         return isActive ? { color: pallete.primary, cursor: 'default' }
           : isFocus ? { backgroundColor: pallete.primary }
             : null

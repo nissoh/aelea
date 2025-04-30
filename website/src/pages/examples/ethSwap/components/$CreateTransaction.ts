@@ -63,12 +63,12 @@ export const $CreateTransaction = component((
 
   return [
 
-    $column(layoutSheet.spacingBig)(
+    $column(spacing.big)(
       $Popover({
         $$popContent: constant($allocateDivisionPopover, clickOnDivide),
         padding: 50
       })(
-        $row(layoutSheet.spacing, style({ alignItems: 'center' }))(
+        $row(spacing.spacing, style({ alignItems: 'center' }))(
           $TokenInput({ token: token, changeInput: map(x => x.valueReadable, divideBalanceReadableBySlider) })({
             change: inputValueChangeTether(),
             switchToken: switchTokenSourceTether()

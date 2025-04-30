@@ -1,10 +1,10 @@
-import { $custom, style, $node } from "../../dom/index.js"
+import { $custom, $node, style } from "../../dom/index.js"
 import { pallete } from "../../ui-components-theme/globalState.js"
-import { layoutSheet } from "../index.js"
+import { column, row } from "../style/layoutSheet.js"
 
 
-export const $row = $custom('row')(layoutSheet.row)
-export const $column = $custom('column')(layoutSheet.column)
+export const $row = $custom('row')(row)
+export const $column = $custom('column')(column)
 
 
 

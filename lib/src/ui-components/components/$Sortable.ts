@@ -9,7 +9,7 @@ import { nodeEvent, eventElementTarget } from "../../dom/combinators/event.js"
 import { style, styleInline, styleBehavior } from "../../dom/combinators/style.js"
 import type { $Branch, INode } from "../../dom/types.js"
 import { $row, $column } from "../elements/$elements.js"
-import { layoutSheet } from "../index.js"
+import { flex } from "../style/layoutSheet.js"
 
 
 const clamp = (val: number, min: number, max: number) => val > max ? max : val < min ? min : val
@@ -53,7 +53,7 @@ export const $Sortable = <T extends $Branch>(config: DraggableList<T>) => compon
   const draggingMotion = motion({ stiffness: 150, damping: 20 })
 
   return [
-    $column(layoutSheet.flex, style({ flex: 1, userSelect: 'none', position: 'relative', height: containerHeight + 'px' }))(
+    $column(flex, style({ flex: 1, userSelect: 'none', position: 'relative', height: `${containerHeight}px` }))(
       ...config.$list.map(($item, i) => {
 
         const [dragY, dragYTether]: Behavior<INode, DraggingState<T>> = behavior()
@@ -71,9 +71,9 @@ export const $Sortable = <T extends $Branch>(config: DraggableList<T>) => compon
           chain(s => {
             if (s.isDragging) {
               return now(s.delta)
-            } else {
-              return draggingMotion(s.delta, now(s.list.indexOf($item) * iHeight))
             }
+
+            return draggingMotion(s.delta, now(s.list.indexOf($item) * iHeight))
           }, multicastedDrag),
           draggingMotion(i * iHeight, yMotion)
         )

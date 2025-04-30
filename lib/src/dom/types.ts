@@ -1,23 +1,23 @@
 
 import type { Scheduler, Stream } from '@most/types'
-import * as CSS from 'csstype'
+import type * as CSS from 'csstype'
 import type { SettableDisposable } from './utils/SettableDisposable.js'
 import type { Op } from './utils.js'
 
-export type StyleCSS = CSS.Properties
+export type IStyleCSS = CSS.Properties
 
 export type IAttrProperties<T> = {
   [P in keyof T]: T[P]
 }
 
-export type IText = Stream<Text>
+export type $Text = Stream<Text>
 export type INodeElement = Node & ChildNode
 export type IBranchElement = HTMLElement | SVGElement
 
 export interface IElementConfig<B = {}> {
-  style?: StyleCSS
-  stylePseudo: Array<{ style: StyleCSS, class: string }>
-  styleBehavior: Stream<StyleCSS | null>[]
+  style?: IStyleCSS
+  stylePseudo: Array<{ style: IStyleCSS, class: string }>
+  styleBehavior: Stream<IStyleCSS | null>[]
 
   attributes?: IAttrProperties<B>
   attributesBehavior: Stream<IAttrProperties<B>>[]
@@ -29,7 +29,7 @@ export interface INode<A extends INodeElement = INodeElement> {
 }
 
 export interface IBranch<A extends IBranchElement = IBranchElement, B = {}> extends INode<A>, IElementConfig<B> {
-  $segments: Array<$Node>
+  $segments: $Node[]
   insertAscending: boolean
 }
 

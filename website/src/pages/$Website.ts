@@ -1,17 +1,16 @@
-import { $element, $node, $text, component, eventElementTarget, style } from '@aelea/dom'
-import * as router from '@aelea/router'
-import { $RouterAnchor } from '@aelea/router'
-import { $column, $icon, $row, layoutSheet } from '@aelea/ui-components'
-import { map, merge, multicast, now } from '@most/core'
-import { $aeleaLogo } from '../elements/$icons'
-import { fadeIn } from '../components/transitions/enter'
-import $Examples from './examples/$Examples'
-import $Guide from './guide/$Guide'
-import { designSheet } from '@aelea/ui-components'
-import $MainMenu from './$MainMenu'
-import { $Picker } from '../components/$ThemePicker'
-import { Behavior } from '@aelea/core'
-import { pallete, themeList } from '../theme'
+import { now, merge, multicast, map } from "@most/core"
+import { Behavior } from "aelea/core"
+import { eventElementTarget, component, $node, style, $element, $text } from "aelea/dom"
+import * as router from "aelea/router"
+import { $RouterAnchor } from "aelea/router"
+import { designSheet, $row, layoutSheet, $column, $icon } from "aelea/ui-components"
+import { $Picker } from "../components/$ThemePicker"
+import { fadeIn } from "../components/transitions/enter"
+import { $aeleaLogo } from "../elements/$icons"
+import { pallete, themeList } from "../theme"
+import $MainMenu from "./$MainMenu"
+import $Examples from "./examples/$Examples"
+import $Guide from "./guide/$Guide"
 
 
 
@@ -49,13 +48,13 @@ export default ({ baseRoute }: Website) => component((
   return [
     $node(designSheet.main, style({ fontFamily: `'Nunito', Fira Code`, backgroundImage: `radial-gradient(at center center, ${pallete.horizon} 50vh, ${pallete.background})`, }))(
       router.match(rootRoute)(
-        $row(layoutSheet.flex, style({ minHeight: '100%', alignContent: 'center', alignItems: 'center', placeContent: 'center', textAlign: 'center', padding: '0 30px', }))(
+        $row(flex, style({ minHeight: '100%', alignContent: 'center', alignItems: 'center', placeContent: 'center', textAlign: 'center', padding: '0 30px', }))(
           fadeIn(
-            $column(style({ alignItems: 'center', maxWidth: '550px' }), layoutSheet.spacingBig)(
+            $column(style({ alignItems: 'center', maxWidth: '550px' }), spacing.big)(
               $RouterAnchor({ url: '/', route: rootRoute, $anchor: $element('a')($icon({ $content: style({ fill: pallete.message }, $aeleaLogo), width: '237px', height: '115px', viewBox: `0 0 147 90` })) })({
                 click: linkClickTether()
               }),
-              $column(layoutSheet.spacingSmall)(
+              $column(spacing.small)(
                 $text(`"aelea", is a UI Framework for reactive event programming`),
                 $text(`It helps you write composable and performant building blocks by composing functional event streams`),
               ),
@@ -69,7 +68,7 @@ export default ({ baseRoute }: Website) => component((
       ),
 
       router.contains(pagesRoute)(
-        $column(layoutSheet.spacingBig, style({ maxWidth: '870px', width: '100%', margin: '0 auto', paddingBottom: '45px' }))(
+        $column(spacing.big, style({ maxWidth: '870px', width: '100%', margin: '0 auto', paddingBottom: '45px' }))(
           $row(style({ placeContent: 'space-between', padding: '0 15px' }))(
             $RouterAnchor({ $anchor: $element('a')($icon({ $content: $aeleaLogo, fill: pallete.message, width: '137px', height: '115px', viewBox: `0 0 147 90` })), url: '/', route: rootRoute })({
               click: linkClickTether()

@@ -9,12 +9,7 @@
     "website"
   ],
   "devDependencies": {
-    "typescript-eslint": "8.31.1",
-    "@eslint/js": "^9.25.1",
-    "@stylistic/eslint-plugin": "^4.2.0",
-    "@stylistic/eslint-plugin-ts": "^4.2.0",
-    "eslint": "^9.25.1",
-    "globals": "^16.0.0",
+    "@biomejs/biome": "^1.9.4",
     "typescript": "^5.8.3"
   },
   "packageManager": "bun@1.2.9"

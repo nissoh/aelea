@@ -1,19 +1,17 @@
-import { merge, constant, startWith, map } from "@most/core"
+import { constant, map, merge, startWith } from "@most/core"
 import { O } from "../../core/common.js"
-import type { Op, Behavior } from "../../core/types.js"
-import { component, attr, style, nodeEvent } from "../../dom/index.js"
+import type { Behavior, Op } from "../../core/types.js"
+import { attr, component, nodeEvent, style } from "../../dom/index.js"
 import type { $Branch, IBranch } from "../../dom/types.js"
 import type { Route } from "../types.js"
 
 
-export interface IAnchor {
+interface IAnchor {
   url: string,
   route: Route
   $anchor: $Branch
   anchorOp?: Op<IBranch<HTMLAnchorElement>, IBranch<HTMLAnchorElement>>
 }
-
-
 
 export const $RouterAnchor = ({ url, route, $anchor, anchorOp = O() }: IAnchor) => component((
   [click, clickTether]: Behavior<IBranch, string>,
@@ -38,17 +36,16 @@ export const $RouterAnchor = ({ url, route, $anchor, anchorOp = O() }: IAnchor) 
 
         const pathName = clickEv.currentTarget instanceof HTMLAnchorElement ? clickEv.currentTarget.pathname : null
 
-        if (pathName) {
-
-          // avoid repeated adjacent states
-          if (location.pathname !== pathName) {
-            history.pushState(null, '', pathName)
-          }
-
-          return pathName
-        } else {
+        if (!pathName) {
           throw new Error('target anchor contains no href')
         }
+
+        // avoid repeated adjacent states
+        if (location.pathname !== pathName) {
+          history.pushState(null, '', pathName)
+        }
+
+        return pathName
       })
     ),
     focusTether(

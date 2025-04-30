@@ -6,7 +6,7 @@ import type { Behavior, Op } from "../types.js"
 
 type SinkMap<T> = Map<Sink<T>, Map<Stream<T>, Disposable | null>>
 
-export class BehaviorSource<A, B> implements Stream<A> {
+class BehaviorSource<A, B> implements Stream<A> {
   queuedSamplers: Stream<A>[] = []
 
   sinksMap: SinkMap<A> = new Map()
@@ -18,13 +18,18 @@ export class BehaviorSource<A, B> implements Stream<A> {
     const sourcesMap = new Map<Stream<A>, Disposable | null>()
     this.sinksMap.set(sink, sourcesMap)
 
-    this.queuedSamplers.forEach(s => {
+    for (const s of this.queuedSamplers) {
       sourcesMap.set(s, this.runBehavior(sink, s))
-    })
+    }
 
     return disposeWith(([sinkSrc, sinkMap]) => {
       sinkSrc.end(scheduler.currentTime())
-      sinkMap.get(sinkSrc)?.forEach(x => x?.dispose())
+      const disposables = sinkMap.get(sinkSrc)
+      if (disposables) {
+        for (const disposable of disposables.values()) {
+          disposable?.dispose()
+        }
+      }
       sinkMap.delete(sinkSrc)
     }, [sink, this.sinksMap] as [Sink<A>, SinkMap<A>])
   }
@@ -32,7 +37,7 @@ export class BehaviorSource<A, B> implements Stream<A> {
 
   protected runBehavior(sink: Sink<A>, x: Stream<A>) {
     if (!this.scheduler) {
-      throw `BehaviorSource: scheduler is not defined`
+      throw 'BehaviorSource: scheduler is not defined'
     }
 
     return x.run(sink, this.scheduler)
@@ -55,10 +60,6 @@ export class BehaviorSource<A, B> implements Stream<A> {
   }
 
 }
-
-
-
-
 
 export function behavior<A, B>(): Behavior<A, B> {
   const ss = new BehaviorSource<B, A>()

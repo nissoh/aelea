@@ -10,7 +10,7 @@ export const $AutocompleteExample = component((
 
 ) =>
   [
-    $column(layoutSheet.spacingSmall)(
+    $column(spacing.small)(
       $TextField({ value: now(''), label: 'dd' })({})
     )
   ]

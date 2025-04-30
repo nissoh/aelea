@@ -1,18 +1,17 @@
-
-import { $Branch, component, style } from '@aelea/dom'
-import { $column, layoutSheet } from '@aelea/ui-components'
-import { fadeIn } from './transitions/enter'
+import { type $Branch, component, style } from "aelea/dom"
+import { $column, spacing } from "aelea/ui-components"
+import { fadeIn } from "./transitions/enter"
 
 
 interface Example {
   file: string,
 }
 
-export default (config: Example) => (...$content: $Branch[]) => component(() => {
+export default (_: Example) => (...$content: $Branch[]) => component(() => {
 
   return [
     fadeIn(
-      $column(layoutSheet.spacingBig, style({ flex: 1 }))(
+      $column(spacing.big, style({ flex: 1 }))(
         ...$content
       )
     )

@@ -9,7 +9,7 @@ import { Todo } from "./$CreateTodo"
 
 
 const rowStyle = O(
-  layoutSheet.spacing,
+  spacing.spacing,
   style({ alignItems: 'center' })
 )
 

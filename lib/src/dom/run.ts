@@ -3,7 +3,7 @@ import { disposeAll, disposeNone, disposeWith } from '@most/disposable'
 import { newDefaultScheduler } from '@most/scheduler'
 import type { Disposable, Sink, Stream, Time } from '@most/types'
 import { nullSink } from '../core/common.js'
-import type { $Branch, $Node, IAttrProperties, IBranch, IBranchElement, INode, INodeElement, RunEnvironment, StyleCSS, StyleEnvironment } from './types.js'
+import type { $Branch, $Node, IAttrProperties, IBranch, IBranchElement, INode, INodeElement, RunEnvironment, IStyleCSS, StyleEnvironment } from './types.js'
 import { SettableDisposable } from './utils/SettableDisposable.js'
 import { useStylePseudoRule, useStyleRule } from './utils/styleUtils.js'
 
@@ -42,7 +42,7 @@ export function runBrowser(config: Partial<RunEnvironment> = {}) {
     attributesBehavior: [],
     stylePseudo: []
   }
- 
+
   return ($root: $Branch) => {
     const s = new BranchEffectsSink(composedConfig, rootNode, 0, [0])
 
@@ -58,15 +58,15 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
   segmentsSlotsMap: Map<IBranch | INode, Disposable>[] = []
 
   constructor(private env: RunEnvironment,
-              private parentNode: IBranch,
-              private segmentPosition: number,
-              private segmentsCount: number[]) { }
+    private parentNode: IBranch,
+    private segmentPosition: number,
+    private segmentsCount: number[]) { }
 
   event(_: Time, node: INode | IBranch) {
 
     try {
       node?.disposable.setDisposable(
-        disposeWith(node => { 
+        disposeWith(node => {
           this.segmentsCount[this.segmentPosition]--
           node.element.remove()
           const slot = this.segmentsSlotsMap[this.segmentPosition]
@@ -76,9 +76,9 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
 
         }, node)
       )
-    } catch (e) {
+    } catch {
       console.error(node.element.nodeName)
-      throw new Error(`Cannot append node that have already been rendered, check invalid node operations under ^`)
+      throw new Error('Cannot append node that have already been rendered, check invalid node operations under ^')
     }
 
 
@@ -103,10 +103,10 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
     }
 
     if ('stylePseudo' in node) {
-      node.stylePseudo.forEach(styleDeclaration => {
+      for (const styleDeclaration of node.stylePseudo) {
         const selector = useStylePseudoRule(this.env.style, styleDeclaration.style, styleDeclaration.class)
         node.element.classList.add(selector)
-      })
+      }
     }
 
     if ('attributes' in node && node.attributes) {
@@ -145,16 +145,18 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
     }
 
     this.segmentsSlotsMap[this.segmentPosition].set(node, disposeAll([...this.disposables, newDisp]))
-    
+
   }
 
   end(_t: Time) {
-    this.segmentsSlotsMap.forEach(s => {
-      s.forEach(d => d.dispose())
-    })
+    for (const s of this.segmentsSlotsMap) {
+      for (const d of s) {
+        d[1].dispose()
+      }
+    }
   }
 
-  error(t: Time, err: Error) {
+  error(_: Time, err: Error) {
     console.error(err)
   }
 
@@ -178,12 +180,14 @@ class BranchChildrenSinkList implements Disposable {
   }
 
   dispose(): void {
-    this.disposables.forEach(d => d.dispose())
+    for (const d of this.disposables.values()) {
+      d.dispose()
+    }
   }
 }
 
 
-function styleBehavior(styleBehavior: Stream<StyleCSS | null>, node: IBranch, cacheService: StyleEnvironment) {
+function styleBehavior(styleBehavior: Stream<IStyleCSS | null>, node: IBranch, cacheService: StyleEnvironment) {
 
   let latestClass: string
 
@@ -195,15 +199,15 @@ function styleBehavior(styleBehavior: Stream<StyleCSS | null>, node: IBranch, ca
           node.element.classList.remove(previousCssRule)
 
           return { seed: null, value: '' }
-        } else {
-          const cashedCssClas = useStyleRule(cacheService, styleObject)
+        }
 
-          if (previousCssRule !== cashedCssClas) {
-            node.element.classList.replace(latestClass, cashedCssClas)
-            latestClass = cashedCssClas
+        const cashedCssClas = useStyleRule(cacheService, styleObject)
 
-            return { seed: cashedCssClas, value: cashedCssClas }
-          }
+        if (previousCssRule !== cashedCssClas) {
+          node.element.classList.replace(latestClass, cashedCssClas)
+          latestClass = cashedCssClas
+
+          return { seed: cashedCssClas, value: cashedCssClas }
         }
       }
 
@@ -225,15 +229,15 @@ function styleBehavior(styleBehavior: Stream<StyleCSS | null>, node: IBranch, ca
 
 
 
-export function applyAttrFn(attrs: IAttrProperties<unknown>, node: IBranchElement) {
+function applyAttrFn(attrs: IAttrProperties<unknown>, node: IBranchElement) {
   if (attrs) {
-    Object.entries(attrs).forEach(([attrKey, value]) => {
+    for (const [attrKey, value] of Object.entries(attrs)) {
       if (value === undefined || value === null) {
         node.removeAttribute(attrKey)
       } else {
         node.setAttribute(attrKey, String(value))
       }
-    })
+    }
   }
 
   return node

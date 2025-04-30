@@ -3,7 +3,7 @@ import { O } from "../../../core/common.js"
 import { $element, nodeEvent, style } from "../../../dom/index.js"
 import type { $Node } from "../../../dom/types.js"
 import { pallete } from "../../../ui-components-theme/globalState.js"
-import { layoutSheet } from "../../index.js"
+import { column } from "../../style/layoutSheet.js"
 
 
 
@@ -19,10 +19,10 @@ export const dismissOp = O(
 )
 
 
-export const $form = $element('form')(layoutSheet.column)
+export const $form = $element('form')(column)
 
 export const $label = $element('label')(
-  layoutSheet.column,
+  column,
   style({ color: pallete.foreground })
 )
 

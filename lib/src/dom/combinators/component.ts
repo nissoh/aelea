@@ -8,18 +8,18 @@ import type { $Node, INodeElement } from "../types.js"
 import type { Op } from "../utils.js"
 
 
-export type IComponentOutputBehaviors<T> = {
+type IComponentOutputBehaviors<T> = {
   [P in keyof T]: Stream<T[P]>
 }
-export type OutputTethers<A> = { [P in keyof A]?: Op<A[P], A[P]> }
+type OutputTethers<A> = { [P in keyof A]?: Op<A[P], A[P]> }
 
 
-export type ComponentFunction<A extends INodeElement, B extends $Node<A>, D> = (
+type ComponentFunction<A extends INodeElement, B extends $Node<A>, D> = (
   ...args: Behavior<unknown, unknown>[]
 ) => [B, IComponentOutputBehaviors<D>] | [B]
 
 
-export function componentFn<A extends INodeElement, B extends $Node<A>, D>(
+function componentFn<A extends INodeElement, B extends $Node<A>, D>(
   inputComp: ComponentFunction<A, B, D>,
   outputTethers: OutputTethers<D>
 ): $Node<A> {

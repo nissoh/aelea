@@ -3,9 +3,9 @@ import type { Behavior } from "../../../core/types.js"
 import { $element, attr, component, nodeEvent, styleBehavior } from "../../../dom/index.js"
 import type { IBranch } from "../../../dom/types.js"
 import { pallete } from "../../../ui-components-theme/globalState.js"
-import { designSheet } from "../../index.js"
 import { dismissOp, interactionOp } from "./form.js"
 import { InputType, type Input } from "./types.js"
+import { input } from "../../style/designSheet.js"
 
 
 
@@ -24,7 +24,7 @@ export const $Autocomplete = ({ type = InputType.TEXT, value = empty(), name, pl
   return [
     $element('input')(
       attr({ name, type, placeholder }),
-      designSheet.input,
+      input,
 
       changeTether(
         nodeEvent('input'),

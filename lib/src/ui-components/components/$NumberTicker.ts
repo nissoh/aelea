@@ -2,18 +2,12 @@ import { scan, skipRepeats, skip, multicast, switchLatest, skipRepeatsWith, at, 
 import type { Stream } from "@most/types"
 import { O } from "../../core/common.js"
 import { $node, $text, style, styleBehavior } from "../../dom/index.js"
-import type { StyleCSS } from "../../dom/types.js"
+import type { IStyleCSS } from "../../dom/types.js"
 
 
 export const sumFromZeroOp = scan((current: number, x: number) => current + x, 0)
 
-export interface NumberConfig {
-  value$: Stream<number>,
-  incrementColor: string,
-  decrementColor: string,
-  textStyle?: StyleCSS,
-  slots?: number // can be deprecated
-}
+
 
 enum Direction {
   INCREMENT,
@@ -27,15 +21,13 @@ type CountState = {
   changeStr: string
 }
 
-
-
-function getDetlaSlotIdex(current: string, change: string, i: number): number {
-  if (current[i] !== change[i] || i > change.length)
-    return i
-
-  return getDetlaSlotIdex(current, change, i + 1)
+interface NumberConfig {
+  value$: Stream<number>,
+  incrementColor: string,
+  decrementColor: string,
+  textStyle?: IStyleCSS,
+  slots?: number // can be deprecated
 }
-
 export const $NumberTicker = ({ value$, incrementColor, decrementColor, textStyle = {}, slots = 10 }: NumberConfig) => {
 
   const uniqueValues$ = skipRepeats(value$)
@@ -99,3 +91,10 @@ export const $NumberTicker = ({ value$, incrementColor, decrementColor, textStyl
   )
 }
 
+
+function getDetlaSlotIdex(current: string, change: string, i: number): number {
+  if (current[i] !== change[i] || i > change.length)
+    return i
+
+  return getDetlaSlotIdex(current, change, i + 1)
+}

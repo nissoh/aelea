@@ -1,2 +1,2 @@
-export * from './domThemeLoader.js'
-export * from './color.js'
+// biome-ignore lint/performance/noBarrelFile: <explanation>
+export { getCurrentTheme, loadTheme, setTheme } from './domThemeLoader.js'

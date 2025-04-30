@@ -23,7 +23,7 @@ export const $TokenList = <T extends Readonly<Token>>(list: readonly T[]) => com
   const filterWithInitial = startWith('', filterListInput)
 
   return [
-    $column(layoutSheet.spacingBig)(
+    $column(spacing.big)(
       $TextField({ label: 'Filter', value: empty() })({
         change: filterListInputTether()
       }),
@@ -31,7 +31,7 @@ export const $TokenList = <T extends Readonly<Token>>(list: readonly T[]) => com
       switchLatest(
         map(filter =>
           $VirtualScroll({
-            containerOps: O(layoutSheet.spacing, style({ width: '300px' })),
+            containerOps: O(spacing.spacing, style({ width: '300px' })),
             dataSource: map((): ScrollResponse => {
               const $items = list.filter(obj => objectValuesContainsText(obj, filter)).map(token => {
                 const changeTokenBehavior = chooseTether(nodeEvent('click'), constant(token))

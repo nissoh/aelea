@@ -2,75 +2,88 @@ import { writeTheme } from "../ui-components-theme/globalState.js"
 import type { Theme } from "../ui-components-theme/types.js"
 
 
-const prefix = 'aelea-'
 const localStorageKey = '__AELEA_THEME__'
 
+
+function parseCSSStyleValue(rule: CSSStyleRule, key: string): string | undefined {
+  return rule.styleMap.get(key)?.toString().replace(/['"]/g, '').trim()
+}
+
 export function loadTheme() {
-  const themeList: string[] = []
-  const bodySelectorPrefix = `body.${prefix}`
-  const configSheetName = 'aelea-theme-config'
-  const styleSheets = Array.from(document.styleSheets)
-  const configSheet = styleSheets.find(sheet =>
-    sheet.ownerNode instanceof Element && sheet.ownerNode.getAttribute('name') === configSheetName
-  )
+  const themeList: Theme[] = []
+  const configStyleId = 'aelea-theme-config'
+  // get the <style id="aelea-theme-config"> node
+  const configNode = document.querySelector<HTMLStyleElement>(`style#${configStyleId}`)
+  if (!configNode || !configNode.sheet) {
+    throw new Error(`CRITICAL: <style id="${configStyleId}"> not found or missing sheet. Cannot discover themes.`)
+  }
+  // now you have your CSSStyleSheet directly
+  const configSheet = configNode.sheet as CSSStyleSheet
 
   if (!configSheet) {
-    throw new Error(`CRITICAL: Stylesheet with name="${configSheetName}" not found. Cannot discover themes.`)
+    throw new Error(`CRITICAL: Stylesheet with name="${configStyleId}" not found. Cannot discover themes.`)
   }
 
   if (!configSheet.cssRules || !(configSheet.cssRules instanceof CSSRuleList) || configSheet.cssRules.length === 0) {
-    throw new Error(`CRITICAL: No CSS rules found in the '${configSheetName}' stylesheet. Ensure it contains valid theme definitions.`)
+    throw new Error(`CRITICAL: No CSS rules found in the '${configStyleId}' stylesheet. Ensure it contains valid theme definitions.`)
   }
 
   try {
     for (const rule of Array.from(configSheet.cssRules)) {
       if (rule instanceof CSSStyleRule && rule.selectorText) {
-        const selector = rule.selectorText
+        const name = parseCSSStyleValue(rule, '--name')
 
-        if (selector.startsWith(bodySelectorPrefix)) {
-          const potentialName = selector.substring(bodySelectorPrefix.length)
-
-          if (potentialName && /^[a-zA-Z0-9-]+$/.test(potentialName)) {
-            if (!themeList.includes(potentialName)) {
-              themeList.push(potentialName)
+        if (name) {
+          themeList.push({
+            name,
+            pallete: {
+              primary: parseCSSStyleValue(rule, '--primary') || '',
+              message: parseCSSStyleValue(rule, '--message') || '',
+              background: parseCSSStyleValue(rule, '--background') || '',
+              horizon: parseCSSStyleValue(rule, '--horizon') || '',
+              middleground: parseCSSStyleValue(rule, '--middleground') || '',
+              foreground: parseCSSStyleValue(rule, '--foreground') || '',
+              positive: parseCSSStyleValue(rule, '--positive') || '',
+              negative: parseCSSStyleValue(rule, '--negative') || '',
+              indeterminate: parseCSSStyleValue(rule, '--indeterminate') || ''
             }
-          }
+          })
         }
       }
     }
   } catch (e) {
-    throw new Error(`CRITICAL: Could not read rules from the '${configSheetName}' stylesheet. Ensure it's accessible and contains valid theme definitions. Error: ${e}`)
+    throw new Error(`CRITICAL: Could not read rules from the '${configStyleId}' stylesheet. Ensure it's accessible and contains valid theme definitions. Error: ${e}`)
   }
 
-
   if (themeList.length === 0) {
-    throw new Error(`CRITICAL: No theme definitions found matching the '${bodySelectorPrefix}' prefix in the CSS sheet named '${configSheetName}'. Application cannot initialize themes.`)
+    throw new Error(`CRITICAL: No themes found in the '${configStyleId}' stylesheet. Ensure it contains valid theme definitions.`)
   }
 
   const storedThemeName = localStorage.getItem(localStorageKey)
-  let themeName = themeList[0]
+  let theme = themeList[0]
 
   if (storedThemeName) {
-    if (themeList.includes(storedThemeName)) {
-      themeName = storedThemeName
+    const matchedTheme = themeList.find(name => name.name === storedThemeName)
+    if (matchedTheme) {
+      theme = matchedTheme
     } else {
       console.warn(`Stored theme "${storedThemeName}" not found in the list of available themes. Falling back to the first theme in the list.`)
     }
   } else {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     if (prefersDark) {
-      const darkTheme = themeList.find(name => name.includes('dark'))
+      const darkTheme = themeList.find(theme => theme.name.includes('dark'))
       if (darkTheme) {
-        themeName = darkTheme
+        theme = darkTheme
       } else {
-        console.warn(`System prefered dark theme not found. Falling back to the first theme in the list.`)
+        console.warn('System prefered dark theme not found. Falling back to the first theme in the list.')
       }
     }
   }
 
-  applyTheme(themeList, themeName)
-  const domComputedTheme = getCurrentTheme()
-  const theme = writeTheme(domComputedTheme)
+  applyTheme(themeList, theme)
+  // const domComputedTheme = getCurrentTheme()
+  // const theme = writeTheme(domComputedTheme)
 
   return { themeList, theme }
 }
@@ -79,41 +92,44 @@ export function loadTheme() {
 export function getCurrentTheme(): Theme {
   const styles = getComputedStyle(document.documentElement)
   return {
-    name: styles.getPropertyValue('--theme-name').replace(/['"]/g, '').trim(),
+    name: styles.getPropertyValue('--name').replace(/['"]/g, '').trim(),
     pallete: {
-      primary: styles.getPropertyValue('--theme-aelea-primary').trim(),
-      message: styles.getPropertyValue('--theme-aelea-message').trim(),
-      background: styles.getPropertyValue('--theme-aelea-background').trim(),
-      horizon: styles.getPropertyValue('--theme-aelea-horizon').trim(),
-      middleground: styles.getPropertyValue('--theme-aelea-middleground').trim(),
-      foreground: styles.getPropertyValue('--theme-aelea-foreground').trim(),
-      positive: styles.getPropertyValue('--theme-aelea-positive').trim(),
-      negative: styles.getPropertyValue('--theme-aelea-negative').trim(),
-      indeterminate: styles.getPropertyValue('--theme-aelea-indeterminate').trim(),
+      primary: styles.getPropertyValue('--primary').trim(),
+      message: styles.getPropertyValue('--message').trim(),
+      background: styles.getPropertyValue('--background').trim(),
+      horizon: styles.getPropertyValue('--horizon').trim(),
+      middleground: styles.getPropertyValue('--middleground').trim(),
+      foreground: styles.getPropertyValue('--foreground').trim(),
+      positive: styles.getPropertyValue('--positive').trim(),
+      negative: styles.getPropertyValue('--negative').trim(),
+      indeterminate: styles.getPropertyValue('--indeterminate').trim(),
     }
   }
 }
-function applyTheme(themeList: string[], themeName: string): void {
-  const matchedTheme = themeList.includes(themeName)
+function applyTheme(themeList: Theme[], theme: Theme): void {
+  const matchedTheme = themeList.find(name => name.name === theme.name)
+
 
   if (!matchedTheme) {
-    throw new Error(`Theme "${themeName}" not found in the list of available themes. Available themes: ${themeList.join(', ')}`)
+    throw new Error(`Theme "${theme.name}" not found in the list of available themes. Available themes: ${themeList.map(x => x.name).join(', ')}`)
   }
+
+  writeTheme(matchedTheme)
 
   const body = document.body
 
-  themeList.forEach(name => {
-    body.classList.remove(prefix + name)
-  })
+  for (const theme of themeList) {
+    body.classList.remove(theme.name)
+  }
 
-  body.classList.add(prefix + themeName)
+  body.classList.add(theme.name)
 
-  document.documentElement.style.setProperty('--theme-name', themeName)
+  // document.documentElement.style.setProperty('--name', theme.name)
 }
 
-export function setTheme(themeList: string[], themeName: string): void {
-  applyTheme(themeList, themeName)
+export function setTheme(themeList: Theme[], theme: Theme): void {
+  applyTheme(themeList, theme)
 
-  localStorage.setItem(localStorageKey, themeName)
+  localStorage.setItem(localStorageKey, theme.name)
 }
 

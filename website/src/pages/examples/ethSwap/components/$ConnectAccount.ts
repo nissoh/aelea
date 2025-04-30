@@ -32,7 +32,7 @@ const $userConnectionStatus = (address: string) => {
 
 
 const $accountAlert = (title: string, $description: $Node) => {
-  return $alert(layoutSheet.column, layoutSheet.spacingTiny)(
+  return $alert(spacing.column, spacing.tiny)(
     $text(style({ fontWeight: 'bold' }))(title),
     $column(style({ color: pallete.foreground, marginBottom: '6px' }))(
       $description
@@ -84,7 +84,7 @@ export const $AccountConnectivity = () => component((
             if (chain !== CHAIN.ETH)
               return $accountAlert('Switch to Ethereum main network ', $text('Sending mainnet(ETH, BNB) tokens should be, other tokens are incompatible'))
 
-            return $row(layoutSheet.spacing, style({ alignItems: 'center' }))(
+            return $row(spacing.spacing, style({ alignItems: 'center' }))(
               $text(style({ color: pallete.foreground }))('Account: '),
               $userConnectionStatus(account)
             )

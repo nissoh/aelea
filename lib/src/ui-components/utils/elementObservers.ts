@@ -2,23 +2,7 @@ import { chain, constant, continueWith, filter, switchLatest, until } from "@mos
 import { disposeWith } from "@most/disposable"
 import type { Stream } from "@most/types";
 import { eventElementTarget } from "../../dom/index.js";
-import type { IBranchElement, IBranch } from "../../dom/types.js";
-
-
-
-
-// https://github.com/microsoft/TypeScript-DOM-lib-generator/pull/948/files
-declare interface ResizeObserverEntry {
-  readonly borderBoxSize: ReadonlyArray<ResizeObserverSize>;
-  readonly contentBoxSize: ReadonlyArray<ResizeObserverSize>;
-  readonly contentRect: DOMRectReadOnly;
-  readonly target: Element;
-}
-
-declare interface ResizeObserverSize {
-  readonly blockSize: number;
-  readonly inlineSize: number;
-}
+import type { IBranch, IBranchElement } from "../../dom/types.js";
 
 
 export const intersection = (config: IntersectionObserverInit = {}) => chain(<A extends IBranchElement>(node: IBranch<A>): Stream<IntersectionObserverEntry[]> => ({
@@ -73,3 +57,10 @@ export const duringWindowActivity = <T>(source: Stream<T>) => {
   return activity
 }
 
+export const observer = {
+  intersection,
+  resize,
+  mutation,
+  documentVisibilityChange,
+  duringWindowActivity
+}

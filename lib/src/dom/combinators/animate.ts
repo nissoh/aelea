@@ -13,7 +13,7 @@ type RafHandler = (dts: RafHandlerId) => void
 type AnimationFrameRequestTime = number
 type AnimationFrameResponseTime = number
 
-export interface AnimationFrame {
+interface AnimationFrame {
   requestTime: AnimationFrameRequestTime,
   responseTime: AnimationFrameResponseTime
 }

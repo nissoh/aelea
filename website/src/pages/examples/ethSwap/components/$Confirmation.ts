@@ -20,12 +20,12 @@ export const $Confirmation = (swapState: IConfirmation) => component((
 ) => {
 
   return [
-    $column(layoutSheet.spacingBig)(
+    $column(spacing.big)(
       $text(style({ textAlign: 'center', fontSize: '25px' }))(
         'Review Transaction'
       ),
 
-      $column(layoutSheet.spacingSmall, style({ alignItems: 'center' }))(
+      $column(spacing.small, style({ alignItems: 'center' }))(
         $tokenLabel(swapState.transaction.token),
         // $icon({ $content: swapState.transaction.token.$icon, fill: pallete.message, width: '42px', viewBox: '0 0 32 32' }),
         $text(style({ fontWeight: 'bold' }))(
@@ -39,7 +39,7 @@ export const $Confirmation = (swapState: IConfirmation) => component((
 
       $text(style({ fontSize: '75%', textAlign: 'center' }))(swapState.transaction.to),
 
-      $row(layoutSheet.spacing, style({ placeContent: 'center', alignItems: 'center', paddingTop: '25px' }))(
+      $row(spacing.spacing, style({ placeContent: 'center', alignItems: 'center', paddingTop: '25px' }))(
         $anchor(backTether(nodeEvent('click')))(
           $text('Back')
         ),

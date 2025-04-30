@@ -1,9 +1,9 @@
 import { loop } from "@most/core"
 import type { Stream } from "@most/types"
-import type { StyleCSS, IBranch, StyleEnvironment } from "../types.js"
+import type { IStyleCSS, IBranch, StyleEnvironment } from "../types.js"
 
 
-export function applyStyleBehavior(styleBehavior: Stream<StyleCSS | null>, node: IBranch, styleEnv: StyleEnvironment) {
+export function applyStyleBehavior(styleBehavior: Stream<IStyleCSS | null>, node: IBranch, styleEnv: StyleEnvironment) {
 
   let latestClass: string
 
@@ -43,7 +43,7 @@ export function applyStyleBehavior(styleBehavior: Stream<StyleCSS | null>, node:
   )
 }
 
-function styleObjectAsString(styleObj: StyleCSS) {
+function styleObjectAsString(styleObj: IStyleCSS) {
   return Object.entries(styleObj)
     .map(([key, val]) => {
       const kebabCaseKey = key.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase()
@@ -53,7 +53,7 @@ function styleObjectAsString(styleObj: StyleCSS) {
 }
 
 
-export function useStyleRule(cacheService: StyleEnvironment, styleDefinition: StyleCSS) {
+export function useStyleRule(cacheService: StyleEnvironment, styleDefinition: IStyleCSS) {
   const properties = styleObjectAsString(styleDefinition)
   const cachedRuleIdx = cacheService.cache.indexOf(properties)
 
@@ -69,7 +69,7 @@ export function useStyleRule(cacheService: StyleEnvironment, styleDefinition: St
   return `${cacheService.namespace + cachedRuleIdx}`
 }
 
-export function useStylePseudoRule(cacheService: StyleEnvironment, styleDefinition: StyleCSS, pseudo = '') {
+export function useStylePseudoRule(cacheService: StyleEnvironment, styleDefinition: IStyleCSS, pseudo = '') {
   const properties = styleObjectAsString(styleDefinition)
   const index = cacheService.stylesheet.cssRules.length
   const rule = `.${cacheService.namespace + index + pseudo} {${properties}}`

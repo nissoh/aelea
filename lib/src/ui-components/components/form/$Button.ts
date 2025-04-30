@@ -2,17 +2,17 @@ import { map, mergeArray, never } from "@most/core"
 import { O } from "../../../core/common.js"
 import type { Behavior, Op } from "../../../core/types.js"
 import { $element, attrBehavior, component, nodeEvent, styleBehavior } from "../../../dom/index.js"
-import type { $Node, IBranch, INode, StyleCSS } from "../../../dom/types.js"
+import type { $Node, IBranch, INode, IStyleCSS } from "../../../dom/types.js"
 import { pallete } from "../../../ui-components-theme/globalState.js"
-import { designSheet } from "../../index.js"
 import { dismissOp, interactionOp } from "./form.js"
 import type { Control } from "./types.js"
+import { btn } from "../../style/designSheet.js"
 
 
 
 export interface IButton extends Control {
   $content: $Node,
-  buttonStyle?: StyleCSS
+  buttonStyle?: IStyleCSS
   buttonOp?: Op<IBranch<HTMLButtonElement>, IBranch<HTMLButtonElement>>
 }
 
@@ -23,7 +23,7 @@ export const $Button = ({ disabled = never(), $content, buttonOp = O() }: IButto
 ) => {
 
   const $button = $element('button')(
-    designSheet.btn,
+    btn,
     clickTether(
       nodeEvent('pointerup')
     ),

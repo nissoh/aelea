@@ -19,8 +19,8 @@ export default ({ value }: Counter) => component((
 
   return [
 
-    $row(style({ alignItems: 'center', placeContent: 'space-between' }), layoutSheet.spacing)(
-      $column(style({ borderRadius: '5px', alignItems: 'center' }), layoutSheet.spacing)(
+    $row(style({ alignItems: 'center', placeContent: 'space-between' }), spacing.spacing)(
+      $column(style({ borderRadius: '5px', alignItems: 'center' }), spacing.spacing)(
         $Button({ $content: $text('+') })({
           click: incrementTether(
             constant(1)

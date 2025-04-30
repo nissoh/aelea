@@ -1,5 +1,5 @@
 
-import { $node, $text, attr, component, style } from '@aelea/dom'
+import { $node, $text, attr, component, style } from 'aelea/dom'
 import { Behavior, O } from '@aelea/core'
 import { $column, $Field, $NumberTicker, $row, layoutSheet } from '@aelea/ui-components'
 import { pallete } from '@aelea/ui-components-theme'
@@ -19,7 +19,7 @@ const $plus = $node(
     justifyContent: 'center', alignItems: 'center',
     width: '36px', color: pallete.foreground
   }),
-  layoutSheet.displayFlex
+  spacing.displayFlex
 )
 
 const placeholderZero = attr({ placeholder: '0' })
@@ -28,13 +28,13 @@ export default component((
   [y, YTether]: Behavior<string, number>
 ) =>
   [
-    $column(layoutSheet.spacingSmall)(
+    $column(spacing.small)(
 
       $row(
         $plus(
           $text('+')
         ),
-        $column(layoutSheet.spacingTiny)(
+        $column(spacing.tiny)(
           $Field({ value: empty(), inputOp: placeholderZero })({
             change: XTether(extractValue)
           }),

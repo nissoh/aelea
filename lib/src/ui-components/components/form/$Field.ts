@@ -3,17 +3,17 @@ import { combineState } from "../../../core/combinators/combine.js"
 import { O } from "../../../core/common.js"
 import type { Behavior, Op } from "../../../core/types.js"
 import { $element, component, nodeEvent, style, styleBehavior } from "../../../dom/index.js"
-import type { IBranch, StyleCSS } from "../../../dom/types.js"
+import type { IBranch, IStyleCSS } from "../../../dom/types.js"
 import { pallete } from "../../../ui-components-theme/globalState.js"
-import { designSheet } from "../../index.js"
 import { dismissOp, interactionOp } from "./form.js"
 import type { Input, InputType } from "./types.js"
+import { input } from "../../style/designSheet.js"
 
 
 export interface Field extends Input<string | number> {
   type?: InputType
   name?: string
-  fieldStyle?: StyleCSS
+  fieldStyle?: IStyleCSS
 
   inputOp?: Op<IBranch, IBranch>
 }
@@ -34,7 +34,7 @@ export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, i
 
   return [
     $element('input')(
-      designSheet.input,
+      input,
       style(fieldStyle),
 
       changeTether(

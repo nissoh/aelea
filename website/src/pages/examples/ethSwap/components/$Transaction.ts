@@ -51,19 +51,19 @@ export const $Transaction = (txHash: string) => component((
 
 
   return [
-    $column(layoutSheet.spacingBig, style({ alignItems: 'center' }))(
+    $column(spacing.big, style({ alignItems: 'center' }))(
       $text(style({ fontSize: '25px' }))(
         'Transaction Details'
       ),
 
       $status,
 
-      $row(layoutSheet.spacingTiny)(
+      $row(spacing.tiny)(
         $text('Confirmations: '),
         $NumberTicker({ incrementColor: pallete.positive, decrementColor: pallete.message, value$: confirmations })
       ),
 
-      $row(layoutSheet.spacing)(
+      $row(spacing.spacing)(
         $text('Tx Hash: '),
         $element('a')(style({ color: pallete.primary }), attrBehavior(map(chain => ({ href: EXPLORER_URL[chain] + 'tx/' + txHash }), network)))(
           $text(shortenTxAddress(txHash))

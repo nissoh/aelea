@@ -7,11 +7,11 @@ import { dark, light } from '../../../common/theme'
 
 
 function getPallete(theme: Pallete, name: string, colors: [name: string, color: string][]) {
-  return $column(layoutSheet.spacingTiny)(
+  return $column(spacing.tiny)(
     $text(name),
 
     ...colors.map(([name, color]) =>
-      $row(layoutSheet.spacing, style({ height: '30px', alignItems: 'center' }))(
+      $row(spacing.spacing, style({ height: '30px', alignItems: 'center' }))(
         $node(style({ width: '30px', height: '30px', backgroundColor: color }))(),
         $text(style({ flex: 1, color: theme.foreground, fontSize: '12px' }))(color),
         $text(style({ flex: 1 }))(name),
@@ -25,7 +25,7 @@ export const $Pallete = (themeDef: Theme) => component(() => {
   const theme = themeDef.pallete
 
   return [
-    $card(layoutSheet.spacingBig, layoutSheet.flex, elevation2, style({ color: theme.message, padding: '15px', backgroundColor: theme.background }))(
+    $card(spacing.big, flex, elevation2, style({ color: theme.message, padding: '15px', backgroundColor: theme.background }))(
       $text(style({ fontSize: '120%' }))(themeDef.name),
       getPallete(theme, 'Action', pallete.slice(0, 1)),
       getPallete(theme, 'Story', pallete.slice(1, 2)),
@@ -40,7 +40,7 @@ export const $Theme = component((
   
 
   return [
-    $row(layoutSheet.spacingBig)(
+    $row(spacing.big)(
       ...[dark, light].map(themeDef => {
         return $Pallete(themeDef)({})
       })

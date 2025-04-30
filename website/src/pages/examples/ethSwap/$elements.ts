@@ -78,9 +78,9 @@ export const $gaugeMetric = ({ value, size = '24px', styleCSS }: Gauge) => {
 
 
 export const $tokenLabel = (token: Token, $label?: $Node) => {
-  return $row(layoutSheet.spacing, style({ cursor: 'pointer', alignItems: 'center' }))(
+  return $row(spacing.spacing, style({ cursor: 'pointer', alignItems: 'center' }))(
     // token.$icon,
-    $column(layoutSheet.flex)(
+    $column(flex)(
       $text(style({ fontWeight: 'bold' }))(token.symbol),
       $text(style({ fontSize: '75%', color: pallete.foreground }))(token.label)
     ),
@@ -89,9 +89,9 @@ export const $tokenLabel = (token: Token, $label?: $Node) => {
 }
 
 export const $labeledDivider = (label: string) => {
-  return $row(layoutSheet.spacing, style({ placeContent: 'center', alignItems: 'center' }))(
+  return $row(spacing.spacing, style({ placeContent: 'center', alignItems: 'center' }))(
     $column(style({ flex: 1, borderBottom: `1px solid ${pallete.middleground}` }))(),
-    $row(layoutSheet.spacingSmall, style({ color: pallete.foreground, alignItems: 'center' }))(
+    $row(spacing.small, style({ color: pallete.foreground, alignItems: 'center' }))(
       $text(style({ fontSize: '75%' }))(label),
       $icon({ $content: $caretDblDown, width: '10px', viewBox: '0 0 32 32', fill: pallete.foreground }),
     ),

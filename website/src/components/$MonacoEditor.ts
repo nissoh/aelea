@@ -331,7 +331,7 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
 
 
     const $editor = $wrapNativeElement(editorElement)(O(
-      layoutSheet.column,
+      spacing.column,
       style({ ...containerStyle  }),
       changeTether(
       // ensure we load editor only when it's visible on the screen

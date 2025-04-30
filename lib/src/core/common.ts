@@ -10,7 +10,7 @@ type Fn<T, R> = (a: T) => R
 
 export const xForver = <T>(x: T) => startWith(x, never())
 
-export function MaybeOp<A, B, C>(a: Op<A, B>, b?: Op<B, C>) {
+export function maybeOp<A, B, C>(a: Op<A, B>, b?: Op<B, C>) {
   return b ? compose(b, a) : a
 }
 
@@ -34,11 +34,11 @@ export abstract class Pipe<A, B = A> implements Sink<A> {
   abstract event(t: Time, x: A): void
 
   end(t: Time): void {
-    return this.sink.end(t)
+    this.sink.end(t)
   }
 
   error(t: Time, e: Error): void {
-    return this.sink.error(t, e)
+    this.sink.error(t, e)
   }
 }
 
@@ -100,10 +100,10 @@ export function O(...fns: Fn<any, any>[]): Fn<any, any> {
 
 export function groupByMap<A, B extends A[keyof A]>(list: A[], keyGetter: (v: A) => B) {
   const map = new Map<B, A>()
-  list.forEach((item) => {
+  for (const item of list) {
     const key = keyGetter(item)
     map.set(key, item)
-  })
+  }
   return map
 }
 

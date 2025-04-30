@@ -1,23 +1,35 @@
-import { never, chain, scan, startWith, constant, switchLatest, merge, now, map } from "@most/core"
+import { chain, constant, map, merge, never, now, scan, startWith, switchLatest } from "@most/core"
 import type { Stream } from "@most/types"
 import { O } from "../../core/common.js"
-import type { Op, Behavior } from "../../core/types.js"
+import type { Behavior, Op } from "../../core/types.js"
 import { attr } from "../../dom/combinators/attribute.js"
 import { component } from "../../dom/combinators/component.js"
 import { nodeEvent } from "../../dom/combinators/event.js"
 import { style, stylePseudo } from "../../dom/combinators/style.js"
 import { $svg } from "../../dom/source/node.js"
-import type { INode, $Node } from "../../dom/types.js"
+import type { $Node, INode } from "../../dom/types.js"
+import { pallete } from "../../ui-components-theme/globalState.js"
 import { $column, $row } from "../elements/$elements.js"
 import { $icon } from "../elements/$icon.js"
-import { layoutSheet } from "../index.js"
-import { type IScrollPagableReponse, type QuantumScroll,  $VirtualScroll, type ScrollResponse, type ScrollRequest } from "./$VirtualScroll.js"
-import { pallete } from "../../ui-components-theme/globalState.js"
-
+import { $VirtualScroll, type IScrollPagableReponse, type QuantumScroll, type ScrollRequest, type ScrollResponse } from "./$VirtualScroll.js"
+import { flex } from "../style/layoutSheet.js"
+import { spacing } from "../style/spacing.js"
 
 
 
 export type TablePageResponse<T> = T[] | Omit<IScrollPagableReponse, '$items'> & { data: T[] }
+
+
+export interface IPageRequest {
+  page: ScrollRequest,
+  pageSize: number
+}
+
+export interface ISortBy<T> {
+  direction: 'asc' | 'desc'
+  name: keyof T
+}
+
 
 export interface TableOption<T, FilterState> {
   columns: TableColumn<T>[]
@@ -45,20 +57,6 @@ export interface TableColumn<T> {
   columnOp?: Op<INode, INode>
 }
 
-export interface IPageRequest {
-  page: ScrollRequest,
-  pageSize: number
-}
-
-export interface ISortBy<T> {
-  direction: 'asc' | 'desc'
-  name: keyof T
-}
-
-
-export const $caretDown = $svg('path')(attr({ d: 'M4.616.296c.71.32 1.326.844 2.038 1.163L13.48 4.52a6.105 6.105 0 005.005 0l6.825-3.061c.71-.32 1.328-.84 2.038-1.162l.125-.053A3.308 3.308 0 0128.715 0a3.19 3.19 0 012.296.976c.66.652.989 1.427.989 2.333 0 .906-.33 1.681-.986 2.333L18.498 18.344a3.467 3.467 0 01-1.14.765c-.444.188-.891.291-1.345.314a3.456 3.456 0 01-1.31-.177 2.263 2.263 0 01-1.038-.695L.95 5.64A3.22 3.22 0 010 3.309C0 2.403.317 1.628.95.98c.317-.324.68-.568 1.088-.732a3.308 3.308 0 011.24-.244 3.19 3.19 0 011.338.293z' }))()
-
-
 export const $Table = <T, FilterState = never>({
   dataSource, columns, scrollConfig, cellOp,
   headerCellOp, bodyCellOp,
@@ -74,12 +72,12 @@ export const $Table = <T, FilterState = never>({
 
   const cellStyle = O(
     style({ padding: '3px 6px', overflowWrap: 'break-word' }),
-    layoutSheet.flex,
+    flex,
   )
 
   const $cellHeader = $row(
     cellStyle,
-    layoutSheet.spacingSmall,
+    spacing.small,
     style({ fontSize: '15px', alignItems: 'center', color: pallete.foreground, }),
     cellOp || O(),
     headerCellOp || O()
@@ -91,7 +89,7 @@ export const $Table = <T, FilterState = never>({
     bodyCellOp || O()
   )
 
-  const $rowContainer = $row(layoutSheet.spacing)
+  const $rowContainer = $row(spacing.default)
 
   const $rowHeaderContainer = $rowContainer(style({ overflow: 'auto' }), stylePseudo('::-webkit-scrollbar', { backgroundColor: 'transparent', width: '6px' }))
 
@@ -100,7 +98,7 @@ export const $Table = <T, FilterState = never>({
       const direction = seed.name === change ?
         seed.direction === 'asc' ? 'desc' : 'asc'
         : 'desc'
-      
+
       return { direction, name: change }
     }, state, sortByChange)
 
@@ -127,7 +125,7 @@ export const $Table = <T, FilterState = never>({
           }, sortBy))
         )
       }
-            
+
       const $headCell = $cellHeader(col.columnOp || O())(
         col.$head
       )
@@ -152,12 +150,12 @@ export const $Table = <T, FilterState = never>({
 
         if (Array.isArray(res)) {
           return $items
-        } else {
-          return {
-            $items,
-            offset: res.offset,
-            pageSize: res.pageSize
-          }
+        }
+
+        return {
+          $items,
+          offset: res.offset,
+          pageSize: res.pageSize
         }
 
       }, dataSource)
@@ -180,3 +178,6 @@ export const $Table = <T, FilterState = never>({
   ]
 
 })
+
+export const $caretDown = $svg('path')(attr({ d: 'M4.616.296c.71.32 1.326.844 2.038 1.163L13.48 4.52a6.105 6.105 0 005.005 0l6.825-3.061c.71-.32 1.328-.84 2.038-1.162l.125-.053A3.308 3.308 0 0128.715 0a3.19 3.19 0 012.296.976c.66.652.989 1.427.989 2.333 0 .906-.33 1.681-.986 2.333L18.498 18.344a3.467 3.467 0 01-1.14.765c-.444.188-.891.291-1.345.314a3.456 3.456 0 01-1.31-.177 2.263 2.263 0 01-1.038-.695L.95 5.64A3.22 3.22 0 010 3.309C0 2.403.317 1.628.95.98c.317-.324.68-.568 1.088-.732a3.308 3.308 0 011.24-.244 3.19 3.19 0 011.338.293z' }))()
+

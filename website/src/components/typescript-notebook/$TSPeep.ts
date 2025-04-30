@@ -34,7 +34,7 @@ export default ({ code = '', readOnly = true }: IMonaco) => component((
           )
         )
       ),
-      layoutSheet.flex,
+      flex,
       style({ backgroundColor: pallete.foreground })
     )()
   )
@@ -43,7 +43,7 @@ export default ({ code = '', readOnly = true }: IMonaco) => component((
 
 
   return [
-    $column(layoutSheet.flex)(
+    $column(flex)(
       $MonacoEditor({ code, config: { readOnly, automaticLayout: true, theme: theme.name === 'light' ? 'vs-light': 'vs-dark' }, containerStyle: { height: initalCodeBlockHeight + 'px' } })({
         change: changeTether()
       }),
