@@ -6,7 +6,7 @@ import type { $Branch, IBranch } from "../../dom/types.js"
 import type { Route } from "../types.js"
 
 
-interface IAnchor {
+export interface IAnchor {
   url: string,
   route: Route
   $anchor: $Branch

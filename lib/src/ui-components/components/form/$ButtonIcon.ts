@@ -6,7 +6,7 @@ import type { $Node, INode } from "../../../dom/types.js"
 import { pallete } from "../../../ui-components-theme/globalState.js"
 import { $icon } from "../../elements/$icon.js"
 import { interactionOp, dismissOp } from "./form.js"
-import { control } from "../../style/designSheet.js"
+import { designSheet } from "../../style/designSheet.js"
 
 
 
@@ -17,7 +17,7 @@ export const $ButtonIcon = ($content: $Node) => component((
 ) => {
 
   const iconOp = O(
-    control,
+    designSheet.control,
     style({ cursor: 'pointer', fill: pallete.message, borderRadius: '50%', }),
 
     interactionTether(interactionOp),

@@ -1,56 +1,53 @@
-import { Behavior } from '@aelea/core'
-import { $node, $text, attr, component, style } from '@aelea/dom'
-import { Route } from '@aelea/router'
-import { $column, layoutSheet } from '@aelea/ui-components'
-
-import $Example from '../../components/$Example'
+import { $node, $text, attr, component, style } from 'aelea/dom'
+import { $column, spacing } from 'aelea/ui-components'
+import { $Example } from '../../components/$Example'
 import $TSPeep from '../../components/typescript-notebook/$TSPeep'
 import { $alert, $anchor } from '../../elements/$common'
 
-
-
-interface Guide {
-  parentRoute: Route
-}
-
-export default ({ parentRoute }: Guide) => component((
-  // []: Behavior<NodeChild, any>,
-  [routeChanges, linkClickTether]: Behavior<string, string>
-) => {
-
-  return [
-
-    $column(spacing.big, flex, style({ alignItems: 'center' }))(
-
-      $Example({ file: 'src/components/$QuantumList.ts' })(
-        $alert(
-          $text(`WIP: still in progress, external imports name have been encoded because of Monaco editor issue: https://github.com/microsoft/monaco-editor/issues/1306 `)
-        ),
-
-        $node(
-          $text(`aelea uses a reactive toolkit called `),
-          $anchor(attr({ href: 'https://mostcore.readthedocs.io/en/latest/index.html' }))(
-            $text('@most/core')
+export default () =>
+  component(() => {
+    return [
+      $column(
+        spacing.big,
+        style({ flex: 1, alignItems: 'center' }),
+      )(
+        $Example({ file: 'src/components/$QuantumList.ts' })(
+          $alert(
+            $text(
+              'WIP: still in progress, external imports name have been encoded because of Monaco editor issue: https://github.com/microsoft/monaco-editor/issues/1306 ',
+            ),
           ),
-          $text(` Some basic understanding of functional programming and typescript is required, if you use Visual Studio Code IDE these code blocks will look familiar`)
-        ),
 
-        $text(`The ultimate way to learn is to get your hands a little dirty, any changes in the code below will reflect it visually right below the code block`),
+          $node(
+            $text('aelea uses a reactive toolkit called '),
+            $anchor(
+              attr({
+                href: 'https://mostcore.readthedocs.io/en/latest/index.html',
+              }),
+            )($text('@most/core')),
+            $text(
+              ' Some basic understanding of functional programming and typescript is required, if you use Visual Studio Code IDE these code blocks will look familiar',
+            ),
+          ),
 
-        $TSPeep({
-          readOnly: false,
-          code:
-`import { $text } from '@aelea/dom'
+          $text(
+            'The ultimate way to learn is to get your hands a little dirty, any changes in the code below will reflect it visually right below the code block',
+          ),
 
-export default $text('Yellow World')`
-        })({}),
+          $TSPeep({
+            readOnly: false,
+            code: `import { $text } from '@aelea/dom'
 
-        $text(`Nothing fancy yet, the "default export" renders a message and there is this "$text" function, "$" prefix is just a semantic for anything that will eventually emits DOM elements, it makes the code more readable to distinguish between different stream types, we'll see its usefulness later on`),
+export default $text('Yellow World')`,
+          })({}),
 
-        $TSPeep({
-          readOnly: false,
-          code:
-`import { $text, $node, style } from '@aelea/dom'
+          $text(
+            `Nothing fancy yet, the "default export" renders a message and there is this "$text" function, "$" prefix is just a semantic for anything that will eventually emits DOM elements, it makes the code more readable to distinguish between different stream types, we'll see its usefulness later on`,
+          ),
+
+          $TSPeep({
+            readOnly: false,
+            code: `import { $text, $node, style } from '@aelea/dom'
 
 const colorStyle = style({ color: 'yellow' })
 const containerStyle = style({ padding: '10px', display: 'block', border: '1px dashed yellow', borderRadius: '50px' })
@@ -61,16 +58,16 @@ export default $container(style({alignSelf: 'center'}))(
     $container(
         $text('Yellow World')
     )
-)`
-        })({}),
+)`,
+          })({}),
 
-        $text(`in this guide we will be creating different types of Counters in different levels of complexity`),
+          $text(
+            'in this guide we will be creating different types of Counters in different levels of complexity',
+          ),
 
-
-        $TSPeep({
-          readOnly: false,
-          code:
-`import { $text, $node } from '@aelea/dom'
+          $TSPeep({
+            readOnly: false,
+            code: `import { $text, $node } from '@aelea/dom'
 import { constant, map, periodic, scan } from '@most/core'
 
 const eventEverySecond = periodic(1000)       // stream of undefined every 1000 milliseconds
@@ -82,13 +79,12 @@ const toString = map(String, accumulate)
 
 export default $node(
   $text(toString)
-)`
-        })({}),
+)`,
+          })({}),
 
-        $TSPeep({
-          readOnly: false,
-          code:
-`import { constant, map, merge, scan } from '@most/core'
+          $TSPeep({
+            readOnly: false,
+            code: `import { constant, map, merge, scan } from '@most/core'
 import { $custom, $element, $text, component, style, INode, nodeEvent } from '@aelea/dom'
 import { Behavior } from '@aelea/core'
 
@@ -125,14 +121,9 @@ export default component((
       { increment, decrement }
     ]
   }
-)({})`
-        })({})
-
-      )({}),
-
-
-    )
-
-  ]
-})
-
+)({})`,
+          })({}),
+        )({}),
+      ),
+    ]
+  })

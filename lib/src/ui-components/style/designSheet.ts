@@ -1,42 +1,42 @@
-import { O } from "../../core/common.js"
-import { style, stylePseudo } from "../../dom/index.js"
-import { pallete } from "../../ui-components-theme/globalState.js"
+import { O } from '../../core/common.js'
+import { style, stylePseudo } from '../../dom/index.js'
+import { pallete } from '../../ui-components-theme/globalState.js'
 
+export const isFirefox =
+  navigator.userAgent.toLowerCase().indexOf('firefox') > -1
 
-export const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
-
-export const text = style({
+const text = style({
   fontFamily: 'inherit',
   fontWeight: 100,
-  fontSize: '1.15rem'
+  fontSize: '1.15rem',
 })
-export const customScroll = isFirefox
+const customScroll = isFirefox
   ? style({ scrollbarColor: `${pallete.foreground} transparent` })
   : O(
-    stylePseudo('::-webkit-scrollbar-thumb:hover', {
-      backgroundColor: pallete.primary
-    }),
-    stylePseudo('::-webkit-scrollbar-thumb', {
-      backgroundColor: pallete.foreground
-    }),
-    stylePseudo('::-webkit-scrollbar', {
-      backgroundColor: 'transparent',
-      width: '6px',
-      height: '6px'
-    })
-  )
+      stylePseudo('::-webkit-scrollbar-thumb:hover', {
+        backgroundColor: pallete.primary,
+      }),
+      stylePseudo('::-webkit-scrollbar-thumb', {
+        backgroundColor: pallete.foreground,
+      }),
+      stylePseudo('::-webkit-scrollbar', {
+        backgroundColor: 'transparent',
+        width: '6px',
+        height: '6px',
+      }),
+    )
 
-export const control = O(
+const control = O(
   text,
   style({
     border: '2px solid transparent',
     color: pallete.message,
     outline: 'none',
     flexShrink: 0,
-  })
+  }),
 )
 
-export const main = O(
+const main = O(
   text,
   style({
     height: '100vh',
@@ -47,12 +47,12 @@ export const main = O(
     margin: '0',
     scrollbarColor: 'auto',
     scrollbarWidth: 'thin',
-    display: 'block'
+    display: 'block',
   }),
-  customScroll
+  customScroll,
 )
 
-export const input = O(
+const input = O(
   control,
   style({
     minWidth: '25px',
@@ -63,14 +63,14 @@ export const input = O(
     paddingBottom: '2px',
     flex: 1,
     padding: 0,
-    marginTop: '2px'
+    marginTop: '2px',
   }),
   stylePseudo('::placeholder', {
-    color: pallete.foreground
-  })
+    color: pallete.foreground,
+  }),
 )
 
-export const btn = O(
+const btn = O(
   control,
   style({
     cursor: 'pointer',
@@ -80,16 +80,14 @@ export const btn = O(
     padding: '5px 15px',
     display: 'flex',
     alignItems: 'center',
-  })
+  }),
 )
 
-
-
-
-
-
-
-
-
-
-
+export const designSheet = {
+  main,
+  customScroll,
+  text,
+  input,
+  btn,
+  control,
+}

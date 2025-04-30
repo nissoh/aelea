@@ -6,7 +6,7 @@ import { $custom, $text, component, style } from "../../dom/index.js"
 import type { $Branch, $Node, IBranch } from "../../dom/types.js"
 import { pallete } from "../../ui-components-theme/globalState.js"
 import { $column } from "../elements/$elements.js"
-import { customScroll } from "../style/designSheet.js"
+import { designSheet } from "../style/designSheet.js"
 import { observer } from "../utils/elementObservers.js"
 
 
@@ -42,7 +42,7 @@ export const $VirtualScroll = ({ dataSource, containerOps = O(), $loader = $defa
   const scrollReuqestWithInitial: Stream<ScrollRequest> = skip(1, scan(seed => seed + 1, -1, intersecting))
 
   const $container = $column(
-    customScroll,
+    designSheet.customScroll,
     style({ overflow: 'auto' }),
     map(node => ({ ...node, insertAscending: false })),
     containerOps

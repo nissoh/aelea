@@ -29,6 +29,10 @@
       "types": "./dist/types/ui-components/index.d.ts",
       "import": "./dist/esm/ui-components/index.js"
     },
+    "./ui-components-theme": {
+      "types": "./dist/types/ui-components-theme/index.d.ts",
+      "import": "./dist/esm/ui-components-theme/index.js"
+    },
     "./ui-components-theme-dom": {
       "types": "./dist/types/ui-components-theme-dom/index.d.ts",
       "import": "./dist/esm/ui-components-theme-dom/index.js"

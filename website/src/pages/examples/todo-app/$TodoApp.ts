@@ -1,14 +1,17 @@
 
 import { chain, combine, empty, mergeArray, now, switchLatest, take, until } from '@most/core'
 import $TodoItem from './$TodoItem'
-import { $element, style } from 'aelea/dom'
-import { spacing } from 'aelea/ui-components'
+import { $element, $text, component, style } from 'aelea/dom'
+import { $Checkbox, $column, $row, spacing } from 'aelea/ui-components'
 import { pallete } from '../../../theme'
+import type { Todo } from './$CreateTodo'
+import { type Behavior, replayLatest, behavior } from 'aelea/core'
+import $CreateTodo from './$CreateTodo'
 
 
 
 export const $label = $element('label')(
-  spacing.row,
+  style({display: 'flex', flexDirection: 'row' }),
   style({ cursor: 'pointer', alignItems: 'center', color: pallete.foreground })
 )
 
@@ -25,7 +28,7 @@ export default (todos: Todo[]) => component((
     $column(spacing.big)(
 
       $row(spacing.big)(
-        $label(spacing.spacing)(
+        $label(spacing.default)(
           $Checkbox({ value: showCompleteState })({
             check: showCompletedListTether()
           }),

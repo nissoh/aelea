@@ -1,13 +1,17 @@
-import { empty, map, mergeArray, snapshot } from "@most/core"
-import type { Behavior } from "../../../core/types.js"
-import { $element, attr, component, nodeEvent, styleBehavior } from "../../../dom/index.js"
-import type { IBranch } from "../../../dom/types.js"
-import { pallete } from "../../../ui-components-theme/globalState.js"
-import { dismissOp, interactionOp } from "./form.js"
-import { InputType, type Input } from "./types.js"
-import { input } from "../../style/designSheet.js"
-
-
+import { empty, map, mergeArray, snapshot } from '@most/core'
+import type { Behavior } from '../../../core/types.js'
+import {
+  $element,
+  attr,
+  component,
+  nodeEvent,
+  styleBehavior,
+} from '../../../dom/index.js'
+import type { IBranch } from '../../../dom/types.js'
+import { pallete } from '../../../ui-components-theme/globalState.js'
+import { dismissOp, interactionOp } from './form.js'
+import { InputType, type Input } from './types.js'
+import { designSheet } from '../../style/designSheet.js'
 
 export interface Autocomplete extends Input<string | number> {
   type?: InputType
@@ -15,50 +19,63 @@ export interface Autocomplete extends Input<string | number> {
   name?: string
 }
 
-export const $Autocomplete = ({ type = InputType.TEXT, value = empty(), name, placeholder }: Autocomplete) => component((
-  [focus, focusTether]: Behavior<IBranch, true>,
-  [dismissstyle, dismissTether]: Behavior<IBranch, false>,
-  [change, changeTether]: Behavior<IBranch<HTMLInputElement>, string>
-) => {
+export const $Autocomplete = ({
+  type = InputType.TEXT,
+  value = empty(),
+  name,
+  placeholder,
+}: Autocomplete) =>
+  component(
+    (
+      [focus, focusTether]: Behavior<IBranch, true>,
+      [dismissstyle, dismissTether]: Behavior<IBranch, false>,
+      [change, changeTether]: Behavior<IBranch<HTMLInputElement>, string>,
+    ) => {
+      return [
+        $element('input')(
+          attr({ name, type, placeholder }),
+          designSheet.input,
 
-  return [
-    $element('input')(
-      attr({ name, type, placeholder }),
-      input,
+          changeTether(
+            nodeEvent('input'),
+            map((inputEv) => {
+              if (inputEv.target instanceof HTMLInputElement) {
+                const text = inputEv.target.value
+                return text || ''
+              }
+              return ''
+            }),
+          ),
 
-      changeTether(
-        nodeEvent('input'),
-        map(inputEv => {
-          if (inputEv.target instanceof HTMLInputElement) {
-            const text = inputEv.target.value
-            return text || ''
-          }
-          return ''
-        })
-      ),
+          styleBehavior(
+            map(
+              (active) =>
+                active
+                  ? { borderBottom: `1px solid ${pallete.primary}` }
+                  : null,
+              mergeArray([focus, dismissstyle]),
+            ),
+          ),
 
-      styleBehavior(
-        map(
-          active => active ? { borderBottom: `1px solid ${pallete.primary}` } : null,
-          mergeArray([focus, dismissstyle])
-        )
-      ),
+          focusTether(interactionOp),
+          dismissTether(dismissOp),
 
-      focusTether(interactionOp),
-      dismissTether(dismissOp),
+          changeTether((inputNode) =>
+            snapshot(
+              (node, text) => {
+                // applying by setting `HTMLInputElement.value` imperatively(only way known to me)
+                node.element.value = String(text)
+                return text
+              },
+              inputNode,
+              value,
+            ),
+          ),
+        )(),
 
-      changeTether(
-        inputNode => snapshot((node, text) => {
-          // applying by setting `HTMLInputElement.value` imperatively(only way known to me)
-          node.element.value = String(text)
-          return text
-        }, inputNode, value)
-      )
-
-    )(),
-
-    {
-      change
-    }
-  ]
-})
+        {
+          change,
+        },
+      ]
+    },
+  )

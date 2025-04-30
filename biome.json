@@ -33,7 +33,8 @@
       "performance": {
         "noBarrelFile": "error",
         "noReExportAll": "error",
-        "noDelete": "off"
+        "noDelete": "off",
+        "noAccumulatingSpread": "off"
       },
       "style": {
         "useEnumInitializers": "off",

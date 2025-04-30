@@ -1,7 +1,7 @@
 import { combine } from "@most/core"
-import { Behavior } from "aelea/core"
-import { $Branch, $element, style, component, styleBehavior, IStyleCSS } from "aelea/dom"
-import { IAnchor, $RouterAnchor } from "aelea/router"
+import type { Behavior } from "aelea/core"
+import { type $Branch, $element, style, component, styleBehavior, type IStyleCSS } from "aelea/dom"
+import { type IAnchor, $RouterAnchor } from "aelea/router"
 import { pallete } from "../theme"
 
 

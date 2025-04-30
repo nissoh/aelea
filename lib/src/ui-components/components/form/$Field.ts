@@ -7,7 +7,7 @@ import type { IBranch, IStyleCSS } from "../../../dom/types.js"
 import { pallete } from "../../../ui-components-theme/globalState.js"
 import { dismissOp, interactionOp } from "./form.js"
 import type { Input, InputType } from "./types.js"
-import { input } from "../../style/designSheet.js"
+import { designSheet } from "../../style/designSheet.js"
 
 
 export interface Field extends Input<string | number> {
@@ -34,18 +34,18 @@ export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, i
 
   return [
     $element('input')(
-      input,
+      designSheet.input,
       style(fieldStyle),
 
       changeTether(
         nodeEvent('input'),
-        map(inputEv => {
+        map((inputEv) => {
           if (inputEv.target instanceof HTMLInputElement) {
             const text = inputEv.target.value
             return text || ''
           }
           return ''
-        })
+        }),
       ),
 
       inputOp,
@@ -57,7 +57,7 @@ export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, i
           }
 
           return focus ? { borderBottom: `2px solid ${pallete.primary}` } : null
-        }, state)
+        }, state),
       ),
 
       interactionTether(interactionOp),
@@ -66,23 +66,25 @@ export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, i
       blurTether(nodeEvent('blur')),
 
       O(
-        map(node =>
+        map((node) =>
           merge(
             now(node),
-            filter(() => false, tap(val => {
-              // applying by setting `HTMLInputElement.value` imperatively(only way known to me)
-              node.element.value = String(val)
-            }, value))
-          )
+            filter(
+              () => false,
+              tap((val) => {
+                // applying by setting `HTMLInputElement.value` imperatively(only way known to me)
+                node.element.value = String(val)
+              }, value),
+            ),
+          ),
         ),
-        switchLatest
-      )
-
+        switchLatest,
+      ),
     )(),
 
     {
       change,
-      blur
-    }
+      blur,
+    },
   ]
 })

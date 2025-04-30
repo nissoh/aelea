@@ -7,7 +7,7 @@ interface Example {
   file: string,
 }
 
-export default (_: Example) => (...$content: $Branch[]) => component(() => {
+export const $Example = (_: Example) => (...$content: $Branch[]) => component(() => {
 
   return [
     fadeIn(

@@ -2,6 +2,7 @@
   "name": "monorepo",
   "version": "0.0.1",
   "license": "MIT",
+  "type": "module",
   "author": "Nissan Hanina <nissanhanina@gmail.com>",
   "private": true,
   "workspaces": [

@@ -4,9 +4,9 @@ import type { Behavior, Op } from "../../../core/types.js"
 import { $element, attrBehavior, component, nodeEvent, styleBehavior } from "../../../dom/index.js"
 import type { $Node, IBranch, INode, IStyleCSS } from "../../../dom/types.js"
 import { pallete } from "../../../ui-components-theme/globalState.js"
+import { designSheet } from "../../style/designSheet.js"
 import { dismissOp, interactionOp } from "./form.js"
 import type { Control } from "./types.js"
-import { btn } from "../../style/designSheet.js"
 
 
 
@@ -23,7 +23,7 @@ export const $Button = ({ disabled = never(), $content, buttonOp = O() }: IButto
 ) => {
 
   const $button = $element('button')(
-    btn,
+    designSheet.btn,
     clickTether(
       nodeEvent('pointerup')
     ),

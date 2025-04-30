@@ -1,91 +1,117 @@
-import { scan, mergeArray, merge, now, constant, chain, multicast, until, snapshot, map } from "@most/core"
-import { Behavior, behavior, replayLatest, O } from "aelea/core"
-import { $text, component, style } from "aelea/dom"
-import { $Button, $column, layoutSheet, $row, $seperator } from "aelea/ui-components"
-import { $TrashBtn } from "../../../elements/$common"
-import { pallete } from "../../../theme"
-import $Counter from "./$Counter"
+import {
+  scan,
+  mergeArray,
+  merge,
+  now,
+  constant,
+  chain,
+  multicast,
+  until,
+  snapshot,
+  map,
+} from '@most/core'
+import { type Behavior, behavior, replayLatest, O } from 'aelea/core'
+import { $text, component, style } from 'aelea/dom'
+import {
+  $Button,
+  $column,
+  $row,
+  $seperator,
+  spacing,
+} from 'aelea/ui-components'
+import { $TrashBtn } from '../../../elements/$common'
+import { pallete } from '../../../theme'
+import $Counter from './$Counter'
 
 const $AddBtn = $Button({
-  $content: $text('Add One')
+  $content: $text('Add One'),
 })
 export const sumAdd = scan((current: number, x: number) => current + x)
 
-export default component((
-  [addedCounter, addedCounterTether]: Behavior<PointerEvent, PointerEvent>,
-  [disposeCounter, disposeCounterTether]: Behavior<PointerEvent, PointerEvent>,
-  [counterIncrement, countersIncrementTether]: Behavior<1, 1>,
-  [counterDecrement, countersDecrementTether]: Behavior<-1, -1>,
-  [disposedCounterCount, disposedCounterCountTether]: Behavior<any, number>,
-) => {
+export default component(
+  (
+    [addedCounter, addedCounterTether]: Behavior<PointerEvent, PointerEvent>,
+    [disposeCounter, disposeCounterTether]: Behavior<
+      PointerEvent,
+      PointerEvent
+    >,
+    [counterIncrement, countersIncrementTether]: Behavior<1, 1>,
+    [counterDecrement, countersDecrementTether]: Behavior<-1, -1>,
+    [disposedCounterCount, disposedCounterCountTether]: Behavior<any, number>,
+  ) => {
+    const INITAL_COUNT = 0
+    const sumWithInitial = sumAdd(INITAL_COUNT)
 
-  const INITAL_COUNT = 0
-  const sumWithInitial = sumAdd(INITAL_COUNT)
+    const counting = mergeArray([
+      disposedCounterCount,
+      counterIncrement,
+      counterDecrement,
+    ])
+    const totalCount = sumWithInitial(counting)
 
-  const counting = mergeArray([disposedCounterCount, counterIncrement, counterDecrement])
-  const totalCount = sumWithInitial(counting)
+    const addCounter = merge(addedCounter, now(null))
 
-  const addCounter = merge(addedCounter, now(null))
-
-  return [
-
-    $column(spacing.spacing)(
-      $row(style({ placeContent: 'space-between', alignItems: 'center' }), spacing.spacing)(
-        $row(spacing.small)(
-          $text(style({ color: pallete.foreground }))('Counters: '),
-          $text(
-            map(String, sumWithInitial(merge(constant(1, addCounter), constant(-1, disposeCounter))))
-          ),
-        ),
-        $row(spacing.small)(
-          $text(style({ color: pallete.foreground }))('Sum: '),
-          $text(map(String, totalCount))
-        ),
-        $AddBtn({
-          click: addedCounterTether()
-        }),
-      ),
-      chain(() => {
-
-        const [remove, removeTether] = behavior<PointerEvent, PointerEvent>()
-        const [valueChange, valueChangeTether] = behavior<number, number>()
-
-        const value = replayLatest(multicast(valueChange), 0)
-
-
-        return until(remove)(
-          $column(spacing.spacing)(
-            $seperator,
-            $row(style({ alignItems: 'center' }), spacing.big)(
-              $TrashBtn({
-                click: O(
-                  removeTether(),
-                  disposeCounterTether(),
-                  disposedCounterCountTether(
-                    snapshot(val => -val, value)
-                  ),
-                )
-              }),
-              $Counter({ value })({
-                increment: O(
-                  countersIncrementTether(),
-                  valueChangeTether(
-                    snapshot((val, increment) => val + increment, value)
-                  ),
+    return [
+      $column(spacing.default)(
+        $row(
+          style({ placeContent: 'space-between', alignItems: 'center' }),
+          spacing.default,
+        )(
+          $row(spacing.small)(
+            $text(style({ color: pallete.foreground }))('Counters: '),
+            $text(
+              map(
+                String,
+                sumWithInitial(
+                  merge(constant(1, addCounter), constant(-1, disposeCounter)),
                 ),
-                decrement: O(
-                  countersDecrementTether(),
-                  valueChangeTether(
-                    snapshot((val, increment) => val + increment, value)
+              ),
+            ),
+          ),
+          $row(spacing.small)(
+            $text(style({ color: pallete.foreground }))('Sum: '),
+            $text(map(String, totalCount)),
+          ),
+          $AddBtn({
+            click: addedCounterTether(),
+          }),
+        ),
+        chain(() => {
+          const [remove, removeTether] = behavior<PointerEvent, PointerEvent>()
+          const [valueChange, valueChangeTether] = behavior<number, number>()
+
+          const value = replayLatest(multicast(valueChange), 0)
+
+          return until(remove)(
+            $column(spacing.default)(
+              $seperator,
+              $row(style({ alignItems: 'center' }), spacing.big)(
+                $TrashBtn({
+                  click: O(
+                    removeTether(),
+                    disposeCounterTether(),
+                    disposedCounterCountTether(snapshot((val) => -val, value)),
                   ),
-                )
-              })
-            )
+                }),
+                $Counter({ value })({
+                  increment: O(
+                    countersIncrementTether(),
+                    valueChangeTether(
+                      snapshot((val, increment) => val + increment, value),
+                    ),
+                  ),
+                  decrement: O(
+                    countersDecrementTether(),
+                    valueChangeTether(
+                      snapshot((val, increment) => val + increment, value),
+                    ),
+                  ),
+                }),
+              ),
+            ),
           )
-        )
-      }, addCounter)
-    )
-
-  ]
-})
-
+        }, addCounter),
+      ),
+    ]
+  },
+)
