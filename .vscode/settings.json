@@ -1,10 +1,16 @@
 {
-  "search.exclude": {
-    "**/.yarn": true,
-    "**/.pnp.*": true
+  "npm.packageManager": "bun",
+  "npm.scriptRunner": "bun",
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/dist": true
   },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bun.lock": true,
+    "**/dist": true
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
   "editor.tabSize": 2,
-  "eslint.nodePath": ".yarn/sdks",
-  "typescript.tsdk": ".yarn/sdks/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
 }

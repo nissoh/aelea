@@ -1,4 +1,4 @@
-import { Op } from '@aelea/core'
+import { Op } from '../../core'
 import { filter } from "@most/core"
 import { merge } from "@most/core"
 import { multicast } from "@most/core"

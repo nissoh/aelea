@@ -1,9 +1,28 @@
 {
   // This configuration is used for local development and type checking.
   "extends": "./tsconfig.base.json",
-  "references": [],
-  "compilerOptions": {},
-  "exclude": [
-    "**/node_modules",
-  ]
+  "include": [
+    "src",
+    "test/src"
+  ],
+  "exclude": [],
+  "references": [
+    {
+      "path": "./scripts/tsconfig.json"
+    }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "~contracts/*": [
+        "./contracts/*"
+      ],
+      "~viem/*": [
+        "./src/*"
+      ],
+      "~test/*": [
+        "./test/*"
+      ]
+    }
+  }
 }

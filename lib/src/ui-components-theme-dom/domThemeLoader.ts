@@ -1,4 +1,4 @@
-import { Theme } from "./types"
+import { Theme } from "../ui-components-theme"
 
 const prefix = 'aelea-'
 const localStorageKey = '__AELEA_THEME__'

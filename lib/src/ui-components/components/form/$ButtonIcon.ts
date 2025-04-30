@@ -1,11 +1,11 @@
 
+import { pallete } from "@aelea/ui-components-theme"
 import { map, mergeArray } from "@most/core"
-import { O, Behavior } from '@aelea/core'
-import { $Node, component, nodeEvent, INode, style, styleBehavior } from '@aelea/dom'
-import { dismissOp, interactionOp } from "./form"
+import { Behavior, O } from '../../../core'
+import { $Node, component, INode, nodeEvent, style, styleBehavior } from '../../../dom'
 import { $icon } from "../../elements/$icon"
 import designSheet from "../../style/designSheet"
-import { pallete } from "@aelea/ui-components-theme"
+import { dismissOp, interactionOp } from "./form"
 
 
 

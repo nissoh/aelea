@@ -1,8 +1,8 @@
 
 
-import { style, stylePseudo } from '@aelea/dom'
-import { O } from '@aelea/core'
-import { pallete } from '@aelea/ui-components-theme'
+import { O } from '../../core'
+import { style, stylePseudo } from '../../dom'
+import { pallete } from '../../ui-components-theme/types'
 
 const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
 

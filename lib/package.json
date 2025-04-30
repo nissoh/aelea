@@ -1,0 +1,46 @@
+{
+  "name": "aelea",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "bun run build:clean && bun run build:esm",
+    "build:esm": "tsc --project tsconfig.build.json",
+    "build:clean": "rm -rf middleware/dist",
+    "clean:tsc": "rm -fr dist/*"
+  },
+  "license": "MIT",
+  "author": "Nissan Hanina <nissanhanina@gmail.com>",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "./core": {
+      "types": "./dist/types/core/index.d.ts",
+      "import": "./dist/esm/core/index.js"
+    },
+    "./dom": {
+      "types": "./dist/types/dom/index.d.ts",
+      "import": "./dist/esm/dom/index.js"
+    },
+    "./router": {
+      "types": "./dist/types/router/index.d.ts",
+      "import": "./dist/esm/router/index.js"
+    },
+    "./ui-components": {
+      "types": "./dist/types/ui-components/index.d.ts",
+      "import": "./dist/esm/ui-components/index.js"
+    },
+    "./ui-components-theme-dom": {
+      "types": "./dist/types/ui-components-theme-dom/index.d.ts",
+      "import": "./dist/esm/ui-components-theme-dom/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@most/core": "^1.6.1",
+    "@most/disposable": "^1.3.0",
+    "@most/prelude": "^1.8.0",
+    "@most/scheduler": "^1.3.0",
+    "@most/types": "^1.1.0"
+  },
+  "packageManager": "yarn@3.5.1"
+}
