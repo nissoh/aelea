@@ -2,10 +2,11 @@ import { map, never, propagateTask, skipRepeats, switchLatest } from '@most/core
 import { disposeBoth } from '@most/disposable'
 import { id } from '@most/prelude'
 import { asap } from '@most/scheduler'
-import { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
-import { $Node, $Branch, INode, IBranch, IBranchElement } from '../types'
-import { isFunction, O, Op } from '@aelea/core'
-import { SettableDisposable } from '../utils/SettableDisposable'
+import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
+import { isFunction, O } from '../../core/common.js'
+import type { $Branch, $Node, IBranch, IBranchElement, INode } from '../types.js'
+import type { Op } from '../utils.js'
+import { SettableDisposable } from '../utils/SettableDisposable.js'
 
 
 export const $svg = branch(<K extends keyof SVGElementTagNameMap>(a: K) => document.createElementNS('http://www.w3.org/2000/svg', a))

@@ -1,4 +1,4 @@
-import { loadTheme } from "@aelea/ui-components-theme";
+import { loadTheme } from "aelea/ui-components-theme-dom"
 
 const domLoad = loadTheme()
 

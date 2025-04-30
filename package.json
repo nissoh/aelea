@@ -5,7 +5,8 @@
   "author": "Nissan Hanina <nissanhanina@gmail.com>",
   "private": true,
   "workspaces": [
-    "lib"
+    "lib",
+    "website"
   ],
   "devDependencies": {
     "typescript-eslint": "8.31.1",

@@ -1,8 +1,6 @@
-import { Op } from '../../core'
-import { filter } from "@most/core"
-import { merge } from "@most/core"
-import { multicast } from "@most/core"
-import { Stream } from "@most/types"
+import { multicast, filter, merge } from "@most/core"
+import type { Stream } from "@most/types"
+import type { Op } from "../../core/types.js"
 
 
 type StoreFn<STORE> = <Z>(stream: Stream<Z>, writePipe: Op<Z, STORE>) => Stream<Z>

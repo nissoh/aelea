@@ -1,7 +1,7 @@
-import { empty, tap, chain } from "@most/core"
-import { disposeWith, disposeBoth } from "@most/disposable"
+import { chain, empty, tap } from "@most/core"
+import { disposeBoth, disposeWith } from "@most/disposable"
 import type { Stream } from "@most/types"
-import { nullSink } from "../../core/utils"
+import { nullSink } from "../../core/common.js"
 import { eventElementTarget } from "../../dom/combinators/event.js"
 
 

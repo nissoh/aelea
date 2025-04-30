@@ -1,10 +1,10 @@
 import { startWith } from "@most/core"
-import { Disposable, Scheduler, Sink, Stream } from "@most/types"
-import { Pipe } from "../common"
+import type { Sink, Stream, Scheduler, Disposable } from "@most/types"
+import { Pipe } from "../common.js"
 
 
 class StateSink<A> extends Pipe<A, A> {
-  constructor(private parent: ReplayLatest<A>, public sink: Sink<A>) {
+  constructor(private parent: ReplayLatest<A>, public override sink: Sink<A>) {
     super(sink)
   }
 
@@ -22,7 +22,7 @@ export class ReplayLatest<A> implements Stream<A> {
   hasInitial
 
   constructor(private source: Stream<A>,
-              private initialState?: A,) {
+    private initialState?: A,) {
     this.hasInitial = arguments.length === 2
   }
 

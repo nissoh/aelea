@@ -1,7 +1,7 @@
+import { disposeWith, disposeNone } from "@most/disposable"
+import type { Sink, Scheduler, Disposable, Stream } from "@most/types"
+import { tryEvent } from "../common.js"
 
-import { Scheduler, Sink, Stream, Disposable } from '@most/types'
-import { disposeNone, disposeWith } from '@most/disposable'
-import { tryEvent } from '../common'
 
 class FromCallbackSource<T, Targs extends any[] = T[]> {
   constructor(private callbackFunction: (cb: (...ev: Targs) => any) => any, private mapFn: (...args: Targs) => T, private context: any) { }

@@ -1,6 +1,7 @@
 import { combineArray as combineArrayMost, now } from "@most/core"
-import { Stream } from "@most/types"
-import { isStream } from "../common"
+import type { Stream } from "@most/types"
+import { isStream } from "../common.js"
+
 
 type StreamInput<T> = {
   [P in keyof T]: Stream<T[P]> | T[P]

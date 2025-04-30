@@ -1,7 +1,8 @@
-import { eventElementTarget, IBranch, IBranchElement } from '@aelea/dom'
 import { chain, constant, continueWith, filter, switchLatest, until } from "@most/core"
 import { disposeWith } from "@most/disposable"
-import { Stream } from "@most/types"
+import type { Stream } from "@most/types";
+import { eventElementTarget } from "../../dom/index.js";
+import type { IBranchElement, IBranch } from "../../dom/types.js";
 
 
 

@@ -1,7 +1,7 @@
-import { style } from '@aelea/dom'
-import { O } from '@aelea/core'
+import { O } from "../../core/common.js"
+import { style } from "../../dom/combinators/style.js"
 
-const stretch = style({
+export const stretch = style({
   position: 'absolute',
   top: '0',
   bottom: '0',
@@ -10,32 +10,28 @@ const stretch = style({
 })
 
 
-const spacingTiny = style({
+export const spacingTiny = style({
   gap: '4px'
 })
 
-const spacingSmall = style({
+export const spacingSmall = style({
   gap: '8px'
 })
 
-const spacing = style({
+export const spacing = style({
   gap: '16px'
 })
 
-const spacingBig = style({
+export const spacingBig = style({
   gap: '26px'
 })
 
 
 
-const flex = style({ flex: 1 })
-const displayFlex = style({ display: 'flex' })
-const row = O(displayFlex, style({ flexDirection: 'row' }))
-const column = O(displayFlex, style({ flexDirection: 'column' }))
-const rowFlex = O(row, flex)
-const columnFlex = O(column, flex)
+export const flex = style({ flex: 1 })
+export const displayFlex = style({ display: 'flex' })
+export const row = O(displayFlex, style({ flexDirection: 'row' }))
+export const column = O(displayFlex, style({ flexDirection: 'column' }))
+export const rowFlex = O(row, flex)
+export const columnFlex = O(column, flex)
 
-
-export default {
-  stretch, spacingTiny, spacingSmall, spacing, spacingBig, flex, displayFlex, row, column, rowFlex, columnFlex
-}

@@ -1,4 +1,6 @@
-import { Theme } from "../ui-components-theme"
+import { writeTheme } from "../ui-components-theme/globalState.js"
+import type { Theme } from "../ui-components-theme/types.js"
+
 
 const prefix = 'aelea-'
 const localStorageKey = '__AELEA_THEME__'
@@ -67,8 +69,8 @@ export function loadTheme() {
   }
 
   applyTheme(themeList, themeName)
-
-  const theme = getCurrentTheme()
+  const domComputedTheme = getCurrentTheme()
+  const theme = writeTheme(domComputedTheme)
 
   return { themeList, theme }
 }

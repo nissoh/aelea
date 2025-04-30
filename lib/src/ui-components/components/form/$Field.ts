@@ -1,13 +1,12 @@
-import { $element, component, nodeEvent, IBranch, style, styleBehavior, StyleCSS } from '@aelea/dom'
-import { O, Op, combineObject, Behavior } from '@aelea/core'
-import { pallete } from '@aelea/ui-components-theme'
-import { multicast, never, now, startWith, tap } from '@most/core'
-import { filter } from '@most/core'
-import { merge } from '@most/core'
-import { empty, map, switchLatest } from "@most/core"
-import designSheet from '../../style/designSheet'
-import { dismissOp, interactionOp } from "./form"
-import { Input, InputType } from './types'
+import { empty, never, startWith, multicast, merge, now, filter, tap, switchLatest, map } from "@most/core"
+import { O } from "../../../core/common.js"
+import type { Op, Behavior } from "../../../core/types.js"
+import { component, $element, style, nodeEvent, styleBehavior } from "../../../dom/index.js"
+import type { StyleCSS, IBranch } from "../../../dom/types.js"
+import { designSheet } from "../../index.js"
+import { interactionOp, dismissOp } from "./form.js"
+import type { Input, InputType } from "./types.js"
+
 
 export interface Field extends Input<string | number> {
   type?: InputType

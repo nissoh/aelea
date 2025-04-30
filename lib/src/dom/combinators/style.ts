@@ -1,8 +1,8 @@
-import * as CSS from 'csstype'
 import { filter, map, tap } from '@most/core'
 import { curry2, curry3 } from '@most/prelude'
-import { Stream } from '@most/types'
-import { $Branch, IBranchElement, StyleCSS } from '../types'
+import type { Stream } from '@most/types'
+import * as CSS from 'csstype'
+import type { $Branch, IBranchElement, StyleCSS } from '../types.js'
 
 
 interface StyleCurry {
@@ -46,14 +46,10 @@ function styleBehaviorFn<C extends IBranchElement, D>(style: Stream<StyleCSS | n
 export const styleInline = <A extends IBranchElement, B>(style: Stream<StyleCSS>,) => ($node: $Branch<A, B>): $Branch<A, B> => {
 
   return map(node => {
-    const applyInlineStyleStream = tap((styleObj) => {
+    const applyInlineStyleStream = tap(styleObj => {
       for (const prop in styleObj) {
         if (Object.prototype.hasOwnProperty.call(styleObj, prop)) {
-          // @ts-ignore
-          const val = styleObj[prop]
-
-          // @ts-ignore
-          node.element.style[prop] = val
+          node.element.style[prop] = styleObj[prop]
         }
       }
     }, style)

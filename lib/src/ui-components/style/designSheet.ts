@@ -1,8 +1,8 @@
+import { O } from "../../core/common.js"
+import { style, stylePseudo } from "../../dom/index.js"
+import { pallete } from "../../ui-components-theme/globalState.js"
 
 
-import { O } from '../../core'
-import { style, stylePseudo } from '../../dom'
-import { pallete } from '../../ui-components-theme/types'
 
 const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
 

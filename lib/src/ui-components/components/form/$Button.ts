@@ -1,10 +1,12 @@
-import { map, mergeArray, never } from "@most/core"
-import { Behavior, O, Op } from '@aelea/core'
-import { $Node, $element, component, nodeEvent, INode, styleBehavior, IBranch, attrBehavior, StyleCSS } from '@aelea/dom'
-import { dismissOp, interactionOp } from './form'
-import { pallete } from '@aelea/ui-components-theme'
-import designSheet from "../../style/designSheet"
-import { Control } from "./types"
+import { never, mergeArray, map } from "@most/core"
+import { O } from "../../../core/common.js"
+import type { Op, Behavior } from "../../../core/types.js"
+import { component, $element, nodeEvent, styleBehavior, attrBehavior } from "../../../dom/index.js"
+import type { $Node, StyleCSS, IBranch, INode } from "../../../dom/types.js"
+import { designSheet } from "../../index.js"
+import { interactionOp, dismissOp } from "./form.js"
+import type { Control } from "./types.js"
+
 
 
 export interface IButton extends Control {

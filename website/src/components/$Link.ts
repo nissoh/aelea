@@ -1,8 +1,9 @@
-import { component, styleBehavior, StyleCSS, $Branch, $element, attr, style } from '@aelea/dom'
-import { IAnchor, $RouterAnchor } from "@aelea/router"
-import { Behavior } from "@aelea/core"
 import { combine } from "@most/core"
-import { pallete } from "@aelea/ui-components-theme"
+import { Behavior } from "aelea/core"
+import { $Branch, $element, style, component, styleBehavior, StyleCSS } from "aelea/dom"
+import { IAnchor, $RouterAnchor } from "aelea/router"
+import { pallete } from "../theme"
+
 
 
 export interface ILink extends Omit<IAnchor, '$anchor'> {

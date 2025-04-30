@@ -1,8 +1,8 @@
-import { Stream, Disposable, Sink, Scheduler } from '@most/types'
-import { Behavior, Op } from '../types'
-import { disposeWith } from '@most/disposable'
-import { tether } from '../combinators/tether'
-import { O } from '../common'
+import { disposeWith } from "@most/disposable"
+import type { Sink, Stream, Disposable, Scheduler } from "@most/types"
+import { tether } from "../combinators/tether.js"
+import type { Op, Behavior } from "../types.js"
+import { O } from "../common.js"
 
 type SinkMap<T> = Map<Sink<T>, Map<Stream<T>, Disposable | null>>
 
@@ -31,14 +31,17 @@ export class BehaviorSource<A, B> implements Stream<A> {
 
 
   protected runBehavior(sink: Sink<A>, x: Stream<A>) {
-    return x.run(sink, this.scheduler!)
+    if (!this.scheduler) {
+      throw `BehaviorSource: scheduler is not defined`
+    }
+
+    return x.run(sink, this.scheduler)
   }
 
   sample = (...ops: Op<B, A>[]) => {
     return (sb: Stream<B>): Stream<B> => {
       const [source, tetherSource] = tether(sb)
 
-      // @ts-ignore
       const bops: Stream<A> = ops.length ? O(...ops)(tetherSource) : tetherSource
 
       this.queuedSamplers.push(bops)

@@ -1,2 +1,2 @@
-export * from './domThemeLoader'
-export * from './color'
+export * from './domThemeLoader.js'
+export * from './color.js'

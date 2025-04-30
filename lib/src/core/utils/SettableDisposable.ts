@@ -1,5 +1,5 @@
 import { disposeNone } from '@most/disposable'
-import { Disposable } from '@most/types'
+import type { Disposable } from '@most/types';
 
 export class SettableDisposable implements Disposable {
   private disposable: Disposable | undefined;

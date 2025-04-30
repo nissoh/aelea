@@ -1,10 +1,11 @@
 import { map, mergeArray } from "@most/core"
-import { Behavior, O } from '@aelea/core'
-import { $element, $node, attr, component, IBranch, nodeEvent, style, styleBehavior, attrBehavior } from '@aelea/dom'
-import { dismissOp, interactionOp } from "./form"
-import { pallete } from "@aelea/ui-components-theme"
-import layoutSheet from "../../style/layoutSheet"
-import { Input } from "./types"
+import { O } from "../../../core/common.js"
+import type { Behavior } from "../../../core/types.js"
+import { component, $node, style, styleBehavior, $element, nodeEvent, attr, attrBehavior } from "../../../dom/index.js"
+import type { IBranch } from "../../../dom/types.js"
+import { layoutSheet } from "../../index.js"
+import { interactionOp, dismissOp } from "./form.js"
+import type { Input } from "./types.js"
 
 
 export interface Checkbox extends Input<boolean> {

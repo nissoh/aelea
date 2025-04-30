@@ -1,5 +1,5 @@
 
-export * from './components/$Anchor'
-export * from './resolveUrl'
-export * from './types'
+export * from './components/$Anchor.js'
+export * from './resolveUrl.js'
+export * from './types.js'
 

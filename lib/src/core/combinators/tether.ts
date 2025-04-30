@@ -1,7 +1,6 @@
-import { disposeNone, disposeWith } from '@most/disposable'
-import { remove } from '@most/prelude'
-import { Stream, Disposable, Scheduler, Sink, Time } from '@most/types'
-import { Pipe } from '../common'
+import { disposeNone, disposeWith } from "@most/disposable"
+import { remove } from "@most/prelude"
+import type { Sink, Time, Stream, Disposable, Scheduler } from "@most/types"
 
 
 class SourceSink<T> implements Sink<T> {

@@ -1,11 +1,11 @@
-import { $Branch, $Node, IAttrProperties, IBranch, IBranchElement, INode, INodeElement, RunEnvironment, StyleCSS, StyleEnvironment } from './types'
-import { Disposable, Sink, Stream, Time } from '@most/types'
-import { newDefaultScheduler } from '@most/scheduler'
 import { loop, map, mergeArray, tap } from '@most/core'
 import { disposeAll, disposeNone, disposeWith } from '@most/disposable'
-import { useStylePseudoRule, useStyleRule } from './utils/styleUtils'
-import { nullSink } from '@aelea/core'
-import { SettableDisposable } from './utils/SettableDisposable'
+import { newDefaultScheduler } from '@most/scheduler'
+import type { Disposable, Sink, Stream, Time } from '@most/types'
+import { nullSink } from '../core/common.js'
+import type { $Branch, $Node, IAttrProperties, IBranch, IBranchElement, INode, INodeElement, RunEnvironment, StyleCSS, StyleEnvironment } from './types.js'
+import { SettableDisposable } from './utils/SettableDisposable.js'
+import { useStylePseudoRule, useStyleRule } from './utils/styleUtils.js'
 
 
 

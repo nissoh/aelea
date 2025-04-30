@@ -1,10 +1,10 @@
+import { constant, continueWith, loop, map, skipAfter, startWith, switchLatest } from "@most/core"
+import { disposeWith } from "@most/disposable"
+import { curry3 } from "@most/prelude"
+import { currentTime } from "@most/scheduler"
+import type { Disposable, Scheduler, Sink, Stream } from "@most/types"
+import { O } from "../../core/common.js"
 
-import { Scheduler, Sink, Stream, Disposable } from '@most/types'
-import { currentTime, } from '@most/scheduler'
-import { skipAfter, map, continueWith, constant, switchLatest, loop, startWith } from '@most/core'
-import { O } from '@aelea/core'
-import { disposeWith } from '@most/disposable'
-import { compose, curry3 } from '@most/prelude'
 
 type RafHandlerId = number
 type RafHandler = (dts: RafHandlerId) => void
@@ -48,10 +48,9 @@ export const animationFrames = (afp: AnimationFrames = window): Stream<Animation
 
 
 
-export const drawLatest = compose(
-  // @ts-ignore
-  switchLatest,
+export const drawLatest = O(
   map(x => constant(x, nextAnimationFrame(window))),
+  switchLatest,
 ) as <A>(x: Stream<A>) => Stream<A>
 
 

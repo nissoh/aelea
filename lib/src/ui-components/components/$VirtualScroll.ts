@@ -1,10 +1,13 @@
-import { Behavior, O, Op } from "@aelea/core"
-import { $Branch, $custom, $Node, $text, component, IBranch, style } from "@aelea/dom"
-import { pallete } from "@aelea/ui-components-theme"
 import { multicast, skip, scan, filter, delay, merge, loop, empty, chain, mergeArray, switchLatest, startWith, map } from "@most/core"
-import { Stream } from "@most/types"
-import { designSheet, observer } from ".."
-import { $column } from "../elements/$elements"
+
+import type { Stream } from "@most/types"
+import { O } from "../../core/common.js"
+import type { Op, Behavior } from "../../core/types.js"
+import { $text, style, component, $custom } from "../../dom/index.js"
+import type { $Branch, $Node, IBranch } from "../../dom/types.js"
+import { $column } from "../elements/$elements.js"
+import { designSheet, observer } from "../index.js"
+
 
 
 

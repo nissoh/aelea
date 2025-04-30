@@ -1,9 +1,12 @@
+import { disposeAll } from "@most/disposable"
+import { curry2 } from "@most/prelude"
+import type { Disposable, Stream } from "@most/types"
+import { nullSink } from "../../core/common.js"
+import { behavior } from "../../core/index.js"
+import type { Behavior } from "../../core/types.js"
+import type { $Node, INodeElement } from "../types.js"
+import type { Op } from "../utils.js"
 
-import { $Node, INodeElement } from '../types'
-import { disposeAll } from '@most/disposable'
-import { Disposable, Stream } from '@most/types'
-import { curry2 } from '@most/prelude'
-import { Behavior, behavior, nullSink, Op } from '@aelea/core'
 
 export type IComponentOutputBehaviors<T> = {
   [P in keyof T]: Stream<T[P]>

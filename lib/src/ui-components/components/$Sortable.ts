@@ -1,9 +1,16 @@
-import { chain, combine, filter, map, merge, multicast, now, skipAfter, skipRepeats, snapshot, startWith, switchLatest } from "@most/core"
+import { multicast, startWith, skipRepeats, filter, merge, chain, now, combine, snapshot, skipAfter, switchLatest, map } from "@most/core"
 import { remove } from "@most/prelude"
-import { behavior, Behavior, O } from '@aelea/core'
-import { $Branch, component, nodeEvent, eventElementTarget, motion, INode, style, styleInline, styleBehavior } from '@aelea/dom'
-import { $column, $row } from "../elements/$elements"
-import layoutSheet from "../style/layoutSheet"
+import { O } from "../../core/common.js"
+import { behavior } from "../../core/index.js"
+import type { Behavior } from "../../core/types.js"
+import { motion } from "../../dom/combinators/animate.js"
+import { component } from "../../dom/combinators/component.js"
+import { nodeEvent, eventElementTarget } from "../../dom/combinators/event.js"
+import { style, styleInline, styleBehavior } from "../../dom/combinators/style.js"
+import type { $Branch, INode } from "../../dom/types.js"
+import { $row, $column } from "../elements/$elements.js"
+import { layoutSheet } from "../index.js"
+
 
 const clamp = (val: number, min: number, max: number) => val > max ? max : val < min ? min : val
 

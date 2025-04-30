@@ -1,9 +1,7 @@
 
+import type { Scheduler, Stream } from '@most/types'
 import * as CSS from 'csstype'
-import { Scheduler, Stream } from '@most/types'
-import { SettableDisposable } from './utils/SettableDisposable'
-import { Op } from '@aelea/core'
-
+import type { SettableDisposable } from './utils/SettableDisposable.js'
 export type StyleCSS = CSS.Properties
 
 export type IAttrProperties<T> = {

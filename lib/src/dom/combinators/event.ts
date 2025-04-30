@@ -1,7 +1,7 @@
-import { join, map } from '@most/core'
-import { curry2 } from '@most/prelude'
-import { Stream } from '@most/types'
-import { INodeElement, $Node } from '../types'
+import { join, map } from "@most/core"
+import { curry2 } from "@most/prelude"
+import type { Stream } from "@most/types"
+import type { INodeElement, $Node } from "../types.js"
 
 type PickEvent<A, B> = A extends keyof B ? B[A] : Event
 

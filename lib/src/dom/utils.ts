@@ -1,7 +1,8 @@
 
+import type { Stream, Scheduler } from '@most/types'
 import * as CSS from 'csstype'
-import { Scheduler, Stream } from '@most/types'
-import { SettableDisposable } from './utils/SettableDisposable'
+import type { SettableDisposable } from './utils/SettableDisposable.js'
+
 
 export type StyleCSS = CSS.Properties
 
