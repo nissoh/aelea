@@ -1,8 +1,10 @@
-import { nullSink } from '@aelea/core'
-import { eventElementTarget } from '@aelea/dom'
 import { empty, tap, chain } from "@most/core"
 import { disposeWith, disposeBoth } from "@most/disposable"
-import { Stream } from "@most/types"
+import type { Stream } from "@most/types"
+import { nullSink } from "../../core/utils"
+import { eventElementTarget } from "../../dom/combinators/event.js"
+
+
 
 export function fromWebsocket<OUTPUT, INPUT>(url: string, input: Stream<INPUT> = empty(), protocols: string | string[] | undefined = undefined): Stream<OUTPUT> {
   return {

@@ -1,9 +1,9 @@
+import { startWith, never, empty, run } from "@most/core"
+import { disposeNone } from "@most/disposable"
+import { compose } from "@most/prelude"
+import type { Stream, Sink, Time, Scheduler, Disposable } from "@most/types"
+import type { Op } from "./types"
 
-import { Sink, Disposable, Time, Stream, Scheduler } from '@most/types'
-import { compose, id } from '@most/prelude'
-import { Op } from './types'
-import { empty, never, run, startWith } from '@most/core'
-import { disposeNone } from '@most/disposable'
 
 
 type Fn<T, R> = (a: T) => R
