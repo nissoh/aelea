@@ -11,7 +11,8 @@ import type { INode, $Node } from "../../dom/types.js"
 import { $column, $row } from "../elements/$elements.js"
 import { $icon } from "../elements/$icon.js"
 import { layoutSheet } from "../index.js"
-import { type IScrollPagableReponse, type QuantumScroll, ScrollRequest, $VirtualScroll, type ScrollResponse } from "./$VirtualScroll.js"
+import { type IScrollPagableReponse, type QuantumScroll,  $VirtualScroll, type ScrollResponse, type ScrollRequest } from "./$VirtualScroll.js"
+import { pallete } from "../../ui-components-theme/globalState.js"
 
 
 

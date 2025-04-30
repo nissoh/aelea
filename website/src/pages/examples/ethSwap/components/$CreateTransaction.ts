@@ -1,17 +1,17 @@
+import { formatFixed, parseFixed } from "@ethersproject/bignumber"
+import { Contract } from "@ethersproject/contracts"
+import { switchLatest, snapshot, multicast, merge, mergeArray, sample, constant, startWith, awaitPromises, filter, map } from "@most/core"
+import { Behavior, replayLatest, combineState, O } from "aelea/core"
+import { component, IBranch, style, nodeEvent, attr, $text } from "aelea/dom"
+import { $column, $Slider, layoutSheet, $Popover, $row, $Field, $Button } from "aelea/ui-components"
+import { $gaugeMetric, $labeledDivider } from "../$elements"
+import { account } from "../api/account"
+import { isAddress } from "../api/utils"
+import { tokenList } from "../state"
+import { $TokenInput } from "./$TokenInput"
+import { Token } from "../types"
+import { ITransaction } from "../api/types"
 
-import { $text, attr, component, nodeEvent, IBranch, style } from '@aelea/dom'
-import { O, combineObject, replayLatest } from "@aelea/core"
-import { state, $column, $Slider, layoutSheet, $Popover, $row, $Field, $Button } from '@aelea/ui-components'
-import { switchLatest, merge, constant, snapshot, map, sample, awaitPromises, startWith, filter, mergeArray, multicast } from '@most/core'
-import { $TokenInput } from './$TokenInput'
-import { account } from '../api/account'
-import { ITransaction } from '../api/types'
-import { $gaugeMetric, $labeledDivider } from '../$elements'
-import { tokenList } from '../state'
-import { Token } from '../types'
-import { formatFixed, isAddress, parseFixed } from '../api/utils'
-import { Contract } from '@ethersproject/contracts'
-import { Behavior } from '@aelea/core'
 
 export const $CreateTransaction = component((
   [inputValueChange,     inputValueChangeTether]: Behavior<string, string>,
@@ -39,7 +39,7 @@ export const $CreateTransaction = component((
   }, balance, inputValueChange)
 
   const transaction = multicast(
-    combineObject<ITransaction>({
+    combineState<ITransaction>({
       token,
       from: account,
       to: merge(clipboardInput, destination),

@@ -1,126 +1,154 @@
-import { $node, $Node, component, nodeEvent, IBranch, INode, style, styleBehavior } from '@aelea/dom'
-import { O, Op, Behavior } from '@aelea/core'
-import { pallete } from "@aelea/ui-components-theme"
-import { constant, empty, map, merge, multicast, switchLatest, until } from "@most/core"
-import { Stream } from "@most/types"
-import { colorAlpha } from "@aelea/ui-components-theme"
-import { observer } from "../.."
-import { combineArray } from '@aelea/core'
+import { empty, multicast, zip, filter, constant, merge, switchLatest, until, mergeArray, map } from "@most/core"
+import type { Stream } from "@most/types"
+import { O } from "../../../core/common.js"
+import type { Behavior } from "../../../core/types.js"
+import { style, $node, component, styleBehavior, nodeEvent } from "../../../dom/index.js"
+import type { NodeComposeFn } from "../../../dom/types.js"
+import type { $Node, INode } from "../../../dom/utils.js"
+import { colorAlpha } from "../../../ui-components-theme-dom/color.js"
+import { pallete } from "../../../ui-components-theme/globalState.js"
+import { $column } from "../../elements/$elements.js"
+import { observer } from "../../index.js"
 
+
+
+export const $defaultPopoverContentContainer = $column(style({
+  backgroundColor: pallete.middleground,
+  padding: '36px',
+  borderRadius: '24px',
+  border: '1px solid ' + pallete.background,
+  boxShadow: '0 0 10px 0 ' + colorAlpha(pallete.background, .5)
+}))
 
 interface IPocus {
-  containerOp?: Op<IBranch, IBranch>
-  $$popContent: Stream<$Node>
-  offset?: number
-  padding?: number
+  open: Stream<$Node>
   dismiss?: Stream<any>
 
-  // overlayBackgroundColor?: string
-  // overlayAlpha?: string
+  $target: $Node
+
+  $contentContainer?: NodeComposeFn<$Node>
+  $container?: NodeComposeFn<$Node>
+  spacing?: number
 }
 
-export const $Popover = ({ $$popContent, offset = 30, padding = 76, dismiss = empty(), containerOp = O() }: IPocus) => ($target: $Node) => component((
-  [overlayClick, overlayClickTether]: Behavior<INode, any>,
+export const $Popover = ({
+  open,
+  dismiss = empty(),
+  spacing = 10,
+  $contentContainer = $defaultPopoverContentContainer,
+  $container = $node,
+  $target
+}: IPocus) => component((
+  [overlayClick, overlayClickTether]: Behavior<INode, false>,
   [targetIntersection, targetIntersectionTether]: Behavior<INode, IntersectionObserverEntry[]>,
   [popoverContentDimension, popoverContentDimensionTether]: Behavior<INode, ResizeObserverEntry[]>,
-  [popoverContentIntersection, popoverContentIntersectionTether]: Behavior<INode, IntersectionObserverEntry[]>,
 ) => {
 
+  const openMulticast = multicast(open)
 
-  const $$popContentMulticast = multicast($$popContent)
+  const contentOps = $contentContainer(
+    popoverContentDimensionTether(
+      observer.resize({})
+    ),
+    styleBehavior(
+      zip(([contentRect], [targetRect]) => {
+        const screenWidth = targetRect.rootBounds?.width ?? window.innerWidth
+        const targetBound = targetRect.intersectionRect
+        const bottomSpace = window.innerHeight - targetBound.bottom
+        const goDown = bottomSpace > targetBound.bottom
+
+        // clamp width to screen minus both side‑spacings
+        const maxWidth = screenWidth - (spacing * 2)
+
+        const measured = contentRect.target.clientWidth
+        const width = Math.min(measured, maxWidth)
+
+        // center on target, then clamp left within [spacing, screenWidth - width - spacing]
+        const centerX = targetBound.x + targetBound.width / 2
+        const rawLeft = centerX - (width / 2)
+        const maxLeft = screenWidth - width - spacing
+        const left = Math.max(spacing, Math.min(rawLeft, maxLeft)) + 'px'
+
+        const top = (goDown ? targetBound.bottom + spacing : targetBound.y - spacing) + 'px'
+
+        return {
+          top,
+          left,
+          width: width + 'px',
+          maxWidth: maxWidth + 'px',
+          transition: 'opacity .2s ease-in-out',
+          visibility: 'visible',
+          transform: `translate(0, ${goDown ? '0' : '-100%'})`
+        }
+      }, popoverContentDimension, targetIntersection)
+    ),
+    style({ position: 'fixed', visibility: 'hidden' }),
+  )
+
+
 
   const $overlay = $node(
     style({
-      position: 'absolute', zIndex: 99999,
-      top: 0, left: 0, right: 0, bottom: 0
+      position: 'fixed', zIndex: 2321, backgroundColor: colorAlpha(pallete.background, .8),
+      top: 0, left: 0, right: 0, bottom: 0, // visibility: 'hidden',
     }),
     overlayClickTether(
-      nodeEvent('click')
-    ),
-    styleBehavior(
-      combineArray(([contentResize], [_intersectionContentRect], [IntersectiontargetRect]) => {
-        const { y, x, bottom } = IntersectiontargetRect.intersectionRect
-
-        const width = Math.max(contentResize.contentRect.width, IntersectiontargetRect.intersectionRect.width) + (padding * 2) + offset
-        const targetHeight = IntersectiontargetRect.intersectionRect.height
-        const contentHeight = contentResize.contentRect.height
-        const height = contentHeight + targetHeight + offset
-
-        const left = x + (IntersectiontargetRect.intersectionRect.width / 2) + 'px'
-
-        const bottomSpace =  window.innerHeight - bottom
-        const popDown = bottomSpace > bottom
-        const top = (popDown ? y + (height / 2) : y - ((height - padding) / 2) ) + 'px'
-
-
-        return {
-          backgroundImage: `radial-gradient(${width}px ${height + padding * 2}px at top ${top} left ${left}, ${pallete.background} ${width / 2}px, ${colorAlpha(pallete.horizon, .45)})`,
-          // backdropFilter: 'blur(2px)'
+      nodeEvent('pointerdown'),
+      filter(ev => {
+        if (ev.target instanceof HTMLElement) {
+          const computedStyle = getComputedStyle(ev.target)
+          if (computedStyle.zIndex === '2321' && computedStyle.inset === '0px') {
+            return true
+          }
         }
-      }, popoverContentDimension, popoverContentIntersection, targetIntersection)
-    )
+
+        return false
+      }),
+      constant(false)
+    ),
   )
 
-  const contentOps = O(
-    popoverContentIntersectionTether(
-      observer.intersection(),
-    ),
-    popoverContentDimensionTether(
-      observer.resize({ })
-    ),
-    styleBehavior(
-      map(([rect]) => {
-        const { y, x, width, bottom } = rect.intersectionRect
 
-        const bottomSpcace =  window.innerHeight - bottom
-        const goDown = bottomSpcace > bottom
-
-        const top = (goDown ? bottom + offset : y - offset) + 'px'
-        const left = x + (width / 2) + 'px'
-
-        return {
-          top, left,
-          transform: `translate(-50%, ${goDown ? '0': '-100%'})`
-        }
-      }, targetIntersection)
-    ),
-    style({ zIndex: 100000, position: 'absolute' }),
-  )
-
-  const dismissOverlay = until(merge(overlayClick, dismiss))
+  const dismissEvent = merge(overlayClick, dismiss)
 
 
-  const $popover = switchLatest(
-    map($content => {
-      return dismissOverlay(
-        merge(
-          $overlay(),
-          contentOps($content),
-        )
-      )
-    }, $$popContentMulticast)
+  const $content = switchLatest(
+    map(content => {
+      return until(dismissEvent, mergeArray([
+        style({ zIndex: 3456 })(contentOps(content)),
+        $overlay(),
+      ]))
+    }, openMulticast)
   )
 
 
   const targetOp = O(
     targetIntersectionTether(
-      observer.intersection()
+      observer.intersection(),
+      // map(node => {
+      //   const root = node.element instanceof HTMLElement && node.element.offsetParent || null
+      //   return observer.intersection({ root })(now(node))
+      // }),
+      // switchLatest
     ),
     styleBehavior(
       merge(
-        constant({ zIndex: 100000, position: 'relative' }, $$popContentMulticast),
-        constant(null, overlayClick)
+        constant({ zIndex: 2345, position: 'relative' }, openMulticast),
+        constant(null, dismissEvent)
       )
     )
   )
 
   return [
-    $node(map(node => ({ ...node, insertAscending: true })), containerOp)(
+    $container(
       targetOp($target),
-      $popover,
+      $content,
     ),
 
-    { overlayClick }
+    {
+      overlayClick
+    }
   ]
 })
+
 

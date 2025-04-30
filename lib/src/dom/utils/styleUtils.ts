@@ -1,8 +1,6 @@
 import { loop } from "@most/core"
-import { Stream } from "@most/types"
-import { IBranch, StyleCSS, StyleEnvironment } from "../types"
-
-
+import type { Stream } from "@most/types"
+import type { StyleCSS, IBranch, StyleEnvironment } from "../types.js"
 
 
 export function applyStyleBehavior(styleBehavior: Stream<StyleCSS | null>, node: IBranch, styleEnv: StyleEnvironment) {

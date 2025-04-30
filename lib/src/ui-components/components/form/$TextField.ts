@@ -1,11 +1,7 @@
-import { $text, component, IBranch, style, StyleCSS } from '@aelea/dom'
-import { O, Op, Behavior } from '@aelea/core'
-import { pallete } from '@aelea/ui-components-theme'
-import { empty, map, merge, multicast, never, now, sample, skipRepeats, switchLatest } from '@most/core'
-import { $row } from "../../elements/$elements"
-import layoutSheet from '../../style/layoutSheet'
-import { $Field, Field } from "./$Field"
-import { $label } from "./form"
+import type { Op } from "../../../core/types.js"
+import type { StyleCSS, IBranch } from "../../../dom/types.js"
+import { type Field } from "./$Field.js"
+
 
 export interface TextField extends Field {
   label: string
@@ -15,42 +11,3 @@ export interface TextField extends Field {
   containerOp?: Op<IBranch<HTMLInputElement>, IBranch<HTMLInputElement>>
 }
 
-export const $TextField = (config: TextField) => component((
-  [change, valueTether]: Behavior<string, string>,
-  [blur, blurTether]: Behavior<FocusEvent, FocusEvent>,
-) => {
-  const { hint } = config
-  const multicastValidation = config.validation ? O(config.validation, src => sample(src, blur), multicast) : undefined
-  const fieldOp = config.containerOp ?? O()
-  const validation = multicastValidation ? skipRepeats(multicastValidation(change)) : never()
-
-  const $messageLabel = $text(style({ fontSize: '75%', width: '100%' }))
-  const $hint = hint ? now($messageLabel(hint)) : never()
-
-  const $alert = map(msg => {
-    if (msg) {
-      const negativeStyle = style({ color: pallete.negative })
-      return negativeStyle($messageLabel(msg) as any)
-    }
-    return hint ? $messageLabel(hint) : empty()
-  }, validation)
-
-  const $message = switchLatest(merge($hint, $alert))
-
-  return [
-    $row(fieldOp, style({ alignItems: 'flex-start' }))(
-      $label(layoutSheet.flex, layoutSheet.spacingTiny)(
-        $row(layoutSheet.flex, layoutSheet.spacingSmall)(
-          $text(style({ alignSelf: 'flex-end', cursor: 'pointer', paddingBottom: '1px', ...config.labelStyle }))(config.label),
-          $Field({ ...config, validation: multicastValidation })({
-            change: valueTether(),
-            blur: blurTether()
-          })
-        ),
-        $message
-      )
-    ),
-
-    { change, }
-  ]
-})

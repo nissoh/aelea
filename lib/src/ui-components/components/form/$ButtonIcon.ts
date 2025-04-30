@@ -1,11 +1,12 @@
-
-import { pallete } from "@aelea/ui-components-theme"
 import { map, mergeArray } from "@most/core"
-import { Behavior, O } from '../../../core'
-import { $Node, component, INode, nodeEvent, style, styleBehavior } from '../../../dom'
-import { $icon } from "../../elements/$icon"
-import designSheet from "../../style/designSheet"
-import { dismissOp, interactionOp } from "./form"
+import { O } from "../../../core/common.js"
+import type { Behavior } from "../../../core/types.js"
+import { component, style, nodeEvent, styleBehavior } from "../../../dom/index.js"
+import type { $Node, INode } from "../../../dom/types.js"
+import { pallete } from "../../../ui-components-theme/globalState.js"
+import { $icon } from "../../elements/$icon.js"
+import { designSheet } from "../../index.js"
+import { interactionOp, dismissOp } from "./form.js"
 
 
 

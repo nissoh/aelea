@@ -6,6 +6,7 @@ import type { IBranch } from "../../../dom/types.js"
 import { layoutSheet } from "../../index.js"
 import { interactionOp, dismissOp } from "./form.js"
 import type { Input } from "./types.js"
+import { pallete } from "../../../ui-components-theme/globalState.js"
 
 
 export interface Checkbox extends Input<boolean> {

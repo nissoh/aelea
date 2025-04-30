@@ -1,6 +1,6 @@
-import { $custom, $node, style } from '@aelea/dom'
-import { pallete } from '@aelea/ui-components-theme'
-import layoutSheet from '../style/layoutSheet'
+import { $custom, style, $node } from "../../dom/index.js"
+import { pallete } from "../../ui-components-theme/globalState.js"
+import { layoutSheet } from "../index.js"
 
 
 export const $row = $custom('row')(layoutSheet.row)

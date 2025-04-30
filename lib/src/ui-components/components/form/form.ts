@@ -1,8 +1,9 @@
-import { constant, filter, merge } from '@most/core'
-import { O } from '@aelea/core'
-import { $Node, $element, nodeEvent, style } from '@aelea/dom'
-import layoutSheet from '../../style/layoutSheet'
-import { pallete } from '@aelea/ui-components-theme'
+import { constant, filter, merge } from "@most/core"
+import { O } from "../../../core/common.js"
+import { $element, nodeEvent, style } from "../../../dom/index.js"
+import type { $Node } from "../../../dom/types.js"
+import { pallete } from "../../../ui-components-theme/globalState.js"
+import { layoutSheet } from "../../index.js"
 
 
 

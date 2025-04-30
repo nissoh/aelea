@@ -1,8 +1,8 @@
 import { map, merge, switchLatest } from "@most/core"
-import { $node, $Node, component, nodeEvent } from '@aelea/dom'
-import { Behavior } from '@aelea/core'
-import { Stream } from "@most/types"
-
+import type { Stream } from "@most/types"
+import type { Behavior } from "../../core/types.js"
+import { component, $node, nodeEvent } from "../../dom/index.js"
+import type { $Node } from "../../dom/types.js"
 
 export interface Tab {
   content: $Node

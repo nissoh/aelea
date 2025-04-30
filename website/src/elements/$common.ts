@@ -1,6 +1,6 @@
-import { $element, attr, style, stylePseudo } from '@aelea/dom'
-import { $ButtonIcon, $column, $row, layoutSheet } from "@aelea/ui-components"
-import { pallete } from "@aelea/ui-components-theme"
+import { style, $element, stylePseudo } from "aelea/dom"
+import { $ButtonIcon, $column, layoutSheet, $row } from "aelea/ui-components"
+import { pallete } from "../theme"
 import { $trash } from "./$icons"
 
 export const $TrashBtn = $ButtonIcon($trash)

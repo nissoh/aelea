@@ -1,10 +1,11 @@
-import { never, mergeArray, map } from "@most/core"
+import { map, mergeArray, never } from "@most/core"
 import { O } from "../../../core/common.js"
-import type { Op, Behavior } from "../../../core/types.js"
-import { component, $element, nodeEvent, styleBehavior, attrBehavior } from "../../../dom/index.js"
-import type { $Node, StyleCSS, IBranch, INode } from "../../../dom/types.js"
+import type { Behavior, Op } from "../../../core/types.js"
+import { $element, attrBehavior, component, nodeEvent, styleBehavior } from "../../../dom/index.js"
+import type { $Node, IBranch, INode, StyleCSS } from "../../../dom/types.js"
+import { pallete } from "../../../ui-components-theme/globalState.js"
 import { designSheet } from "../../index.js"
-import { interactionOp, dismissOp } from "./form.js"
+import { dismissOp, interactionOp } from "./form.js"
 import type { Control } from "./types.js"
 
 

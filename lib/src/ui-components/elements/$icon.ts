@@ -1,5 +1,7 @@
-import { $Node, $svg, attr, IBranch, style } from '@aelea/dom'
-import { O, Op } from '@aelea/core'
+import { O } from "../../core/common.js"
+import type { Op } from "../../core/types.js"
+import { $svg, attr, style } from "../../dom/index.js"
+import type { $Node, IBranch } from "../../dom/types.js"
 
 
 interface Icon {

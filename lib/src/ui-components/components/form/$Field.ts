@@ -1,10 +1,12 @@
-import { empty, never, startWith, multicast, merge, now, filter, tap, switchLatest, map } from "@most/core"
+import { empty, filter, map, merge, multicast, never, now, startWith, switchLatest, tap } from "@most/core"
+import { combineState } from "../../../core/combinators/combine.js"
 import { O } from "../../../core/common.js"
-import type { Op, Behavior } from "../../../core/types.js"
-import { component, $element, style, nodeEvent, styleBehavior } from "../../../dom/index.js"
-import type { StyleCSS, IBranch } from "../../../dom/types.js"
+import type { Behavior, Op } from "../../../core/types.js"
+import { $element, component, nodeEvent, style, styleBehavior } from "../../../dom/index.js"
+import type { IBranch, StyleCSS } from "../../../dom/types.js"
+import { pallete } from "../../../ui-components-theme/globalState.js"
 import { designSheet } from "../../index.js"
-import { interactionOp, dismissOp } from "./form.js"
+import { dismissOp, interactionOp } from "./form.js"
 import type { Input, InputType } from "./types.js"
 
 
@@ -28,7 +30,7 @@ export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, i
   const alert = multicastValidation(change)
 
   const focus = merge(focusStyle, dismissstyle)
-  const state = combineObject({ focus, alert })
+  const state = combineState({ focus, alert })
 
   return [
     $element('input')(

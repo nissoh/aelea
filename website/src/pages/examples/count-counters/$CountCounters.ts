@@ -1,11 +1,10 @@
-
-import { $text, component, style } from '@aelea/dom'
-import { Behavior, behavior, O, replayLatest } from '@aelea/core'
-import { $Button, $column, $row, $seperator, layoutSheet } from '@aelea/ui-components'
-import { pallete } from '@aelea/ui-components-theme'
-import { chain, constant, map, merge, mergeArray, multicast, now, scan, snapshot, until } from '@most/core'
-import { $TrashBtn } from '../../../elements/$common'
-import $Counter from './$Counter'
+import { scan, mergeArray, merge, now, constant, chain, multicast, until, snapshot, map } from "@most/core"
+import { Behavior, behavior, replayLatest, O } from "aelea/core"
+import { $text, component, style } from "aelea/dom"
+import { $Button, $column, layoutSheet, $row, $seperator } from "aelea/ui-components"
+import { $TrashBtn } from "../../../elements/$common"
+import { pallete } from "../../../theme"
+import $Counter from "./$Counter"
 
 const $AddBtn = $Button({
   $content: $text('Add One')
@@ -69,7 +68,7 @@ export default component((
               }),
               $Counter({ value })({
                 increment: O(
-                  countersIncrementTether(),               
+                  countersIncrementTether(),
                   valueChangeTether(
                     snapshot((val, increment) => val + increment, value)
                   ),

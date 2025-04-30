@@ -1,10 +1,10 @@
-import { multicast, skip, scan, filter, delay, merge, loop, empty, chain, mergeArray, switchLatest, startWith, map } from "@most/core"
-
+import { chain, delay, empty, filter, loop, map, merge, mergeArray, multicast, scan, skip, startWith, switchLatest } from "@most/core"
 import type { Stream } from "@most/types"
 import { O } from "../../core/common.js"
-import type { Op, Behavior } from "../../core/types.js"
-import { $text, style, component, $custom } from "../../dom/index.js"
+import type { Behavior, Op } from "../../core/types.js"
+import { $custom, $text, component, style } from "../../dom/index.js"
 import type { $Branch, $Node, IBranch } from "../../dom/types.js"
+import { pallete } from "../../ui-components-theme/globalState.js"
 import { $column } from "../elements/$elements.js"
 import { designSheet, observer } from "../index.js"
 

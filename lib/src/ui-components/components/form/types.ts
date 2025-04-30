@@ -1,5 +1,6 @@
-import { Op } from "@aelea/core"
-import { Stream } from "@most/types"
+import type { Stream } from "@most/types"
+import type { Op } from "../../../core/types.js"
+
 
 export enum InputType {
   TEXT = 'text',

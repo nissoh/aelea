@@ -1,7 +1,9 @@
-import { at, map, merge, multicast, now, scan, skip, skipRepeats, skipRepeatsWith, switchLatest } from '@most/core'
-import { O } from '@aelea/core'
-import { $node, $text, style, styleBehavior, StyleCSS } from '@aelea/dom'
-import { Stream } from '@most/types'
+import { scan, skipRepeats, skip, multicast, switchLatest, skipRepeatsWith, at, merge, now, map, empty } from "@most/core"
+import type { Stream } from "@most/types"
+import { O } from "../../core/common.js"
+import { $node, $text, style, styleBehavior } from "../../dom/index.js"
+import type { StyleCSS } from "../../dom/types.js"
+
 
 export const sumFromZeroOp = scan((current: number, x: number) => current + x, 0)
 
@@ -82,7 +84,7 @@ export const $NumberTicker = ({ value$, incrementColor, decrementColor, textStyl
                 }
 
                 return merge(
-                  now(dirStyleMap[dir!]),
+                  dir ? now(dirStyleMap[dir]) : empty(),
                   decayColor
                 )
               })

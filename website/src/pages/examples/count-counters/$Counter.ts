@@ -1,9 +1,10 @@
-import { Behavior } from '@aelea/core'
-import { $text, component, style } from '@aelea/dom'
-import { $Button, $column, $NumberTicker, $row, layoutSheet } from '@aelea/ui-components'
-import { pallete } from '@aelea/ui-components-theme'
-import { constant } from '@most/core'
-import { Stream } from '@most/types'
+import { constant } from "@most/core"
+import { Stream } from "@most/types"
+import { Behavior } from "aelea/core"
+import { $text, component, style } from "aelea/dom"
+import { $Button, $column, $NumberTicker, $row, layoutSheet } from "aelea/ui-components"
+import { pallete } from "../../../theme"
+
 
 
 interface Counter {

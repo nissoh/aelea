@@ -3,16 +3,14 @@ import { style, stylePseudo } from "../../dom/index.js"
 import { pallete } from "../../ui-components-theme/globalState.js"
 
 
+export const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
 
-const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
-
-
-const text = style({
+export const text = style({
   fontFamily: 'inherit',
   fontWeight: 100,
   fontSize: '1.15rem'
 })
-const customScroll = isFirefox
+export const customScroll = isFirefox
   ? style({ scrollbarColor: `${pallete.foreground} transparent` })
   : O(
     stylePseudo('::-webkit-scrollbar-thumb:hover', {
@@ -28,7 +26,7 @@ const customScroll = isFirefox
     })
   )
 
-const control = O(
+export const control = O(
   text,
   style({
     border: '2px solid transparent',
@@ -38,56 +36,53 @@ const control = O(
   })
 )
 
-export default {
-  customScroll,
+export const main = O(
   text,
-  main: O(
-    text,
-    style({
-      height: '100vh',
-      color: pallete.message,
-      fill: pallete.message,
-      overflowY: 'scroll',
-      backgroundColor: pallete.background,
-      margin: '0',
-      scrollbarColor: 'auto',
-      scrollbarWidth: 'thin',
-      display: 'block'
-    }),
-    customScroll
-  ),
-  control,
-  input: O(
-    control,
-    style({
-      minWidth: '25px',
-      width: '100%',
-      backgroundColor: 'transparent',
-      border: 'none',
-      borderBottom: `2px solid ${pallete.message}`,
-      paddingBottom: '2px',
-      flex: 1,
-      padding: 0,
-      marginTop: '2px'
-    }),
-    stylePseudo('::placeholder', {
-      color: pallete.foreground
-    })
-  ),
-  btn: O(
-    control,
-    style({
-      cursor: 'pointer',
-      backgroundColor: 'transparent',
-      border: `2px solid ${pallete.message}`,
-      color: pallete.message,
-      padding: '5px 15px',
-      display: 'flex',
-      alignItems: 'center',
-    })
-  )
+  style({
+    height: '100vh',
+    color: pallete.message,
+    fill: pallete.message,
+    overflowY: 'scroll',
+    backgroundColor: pallete.background,
+    margin: '0',
+    scrollbarColor: 'auto',
+    scrollbarWidth: 'thin',
+    display: 'block'
+  }),
+  customScroll
+)
 
-}
+export const input = O(
+  control,
+  style({
+    minWidth: '25px',
+    width: '100%',
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderBottom: `2px solid ${pallete.message}`,
+    paddingBottom: '2px',
+    flex: 1,
+    padding: 0,
+    marginTop: '2px'
+  }),
+  stylePseudo('::placeholder', {
+    color: pallete.foreground
+  })
+)
+
+export const btn = O(
+  control,
+  style({
+    cursor: 'pointer',
+    backgroundColor: 'transparent',
+    border: `2px solid ${pallete.message}`,
+    color: pallete.message,
+    padding: '5px 15px',
+    display: 'flex',
+    alignItems: 'center',
+  })
+)
+
 
 
 

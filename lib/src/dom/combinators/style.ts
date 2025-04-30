@@ -47,9 +47,18 @@ export const styleInline = <A extends IBranchElement, B>(style: Stream<StyleCSS>
 
   return map(node => {
     const applyInlineStyleStream = tap(styleObj => {
-      for (const prop in styleObj) {
+
+      const keys = Object.keys(styleObj)
+
+      for (let i = 0; i < keys.length; i++) {
+        const prop = keys[i]
+
         if (Object.prototype.hasOwnProperty.call(styleObj, prop)) {
-          node.element.style[prop] = styleObj[prop]
+          const styleDec = node.element.style
+          const value = styleObj[prop as keyof StyleCSS]
+
+          // Ensure value is a string or null for setProperty
+          styleDec.setProperty(prop, value === null || value === undefined ? null : String(value))
         }
       }
     }, style)

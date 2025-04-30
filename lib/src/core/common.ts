@@ -2,7 +2,7 @@ import { startWith, never, empty, run } from "@most/core"
 import { disposeNone } from "@most/disposable"
 import { compose } from "@most/prelude"
 import type { Stream, Sink, Time, Scheduler, Disposable } from "@most/types"
-import type { Op } from "./types"
+import type { Op } from "./types.js"
 
 
 
@@ -62,24 +62,23 @@ export function tryEvent <A>(t: Time, x: A, sink: Sink<A>): void {
 
 
 export const nullSink = <Sink<never>>{
-  // tslint:disable-next-line:no-empty
   event() { },
-  // tslint:disable-next-line:no-empty
   end() { },
-  // tslint:disable-next-line:no-empty
   error(_, x) {
-    // tslint:disable-next-line: no-console
     console.error(x)
   }
 }
 
 export const nullDisposable = <Disposable>{
-  // tslint:disable-next-line:no-empty
   dispose() { }
 }
 
-// /* tslint:disable:max-line-length */
-export function O<T>(): Fn<T, T>
+// Define or import the identity function if not already available
+const id = <T>(x: T): T => x;
+
+// Overloads define the function composition signature (left-to-right: O(f,g,h)(x) = h(g(f(x))))
+// Kept existing overloads for clarity and type inference up to 8 arguments.
+export function O(): <T>(a: T) => T
 export function O<T, A>(fn1: Fn<T, A>): Fn<T, A>
 export function O<T, A, B>(fn1: Fn<T, A>, fn2: Fn<A, B>): Fn<T, B>
 export function O<T, A, B, C>(fn1: Fn<T, A>, fn2: Fn<A, B>, fn3: Fn<B, C>): Fn<T, C>
@@ -88,12 +87,15 @@ export function O<T, A, B, C, D, E>(fn1: Fn<T, A>, fn2: Fn<A, B>, fn3: Fn<B, C>,
 export function O<T, A, B, C, D, E, F>(fn1: Fn<T, A>, fn2: Fn<A, B>, fn3: Fn<B, C>, fn4: Fn<C, D>, fn5: Fn<D, E>, fn6: Fn<E, F>): Fn<T, F>
 export function O<T, A, B, C, D, E, F, G>(fn1: Fn<T, A>, fn2: Fn<A, B>, fn3: Fn<B, C>, fn4: Fn<C, D>, fn5: Fn<D, E>, fn6: Fn<E, F>, fn7: Fn<F, G>): Fn<T, G>
 export function O<T, A, B, C, D, E, F, G, H>(fn1: Fn<T, A>, fn2: Fn<A, B>, fn3: Fn<B, C>, fn4: Fn<C, D>, fn5: Fn<D, E>, fn6: Fn<E, F>, fn7: Fn<F, G>, fn8: Fn<G, H>): Fn<T, H>
-export function O<T, A, B, C, D, E, F, G, H, I>(fn1: Fn<T, A>, fn2: Fn<A, B>, fn3: Fn<B, C>, fn4: Fn<C, D>, fn5: Fn<D, E>, fn6: Fn<E, F>, fn7: Fn<F, G>, fn8: Fn<G, H>, ...fn9: Fn<unknown, I>[]): Fn<T, I>
-// /* tslint:enable:max-line-length */
+// Removed the previous final overload `...fn9: Fn<unknown, I>[]` as it was less type-safe.
 
-export function O<R extends Function[]>(...fns: R) {
-  // @ts-ignore
-  return fns.length ? fns.reduceRight(compose) : id
+// Implementation: Corrected to perform left-to-right composition matching the overloads.
+// compose(g, f) applies f first, then g.
+// We use reduce starting with the first function and compose subsequent functions onto the accumulator.
+export function O(...fns: Fn<any, any>[]): Fn<any, any> {
+  if (fns.length === 0) return id
+
+  return fns.slice(1).reduce((acc, fn) => compose(fn, acc), fns[0])
 }
 
 export function groupByMap<A, B extends A[keyof A]>(list: A[], keyGetter: (v: A) => B) {

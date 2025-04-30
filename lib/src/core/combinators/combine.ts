@@ -12,7 +12,7 @@ type StreamInputArray<T extends any[]> = {
 }
 
 
-export function combineState<A extends object, K extends keyof A>(state: StreamInput<A>): Stream<A> {
+export function combineState<A extends object, K extends keyof A = keyof A>(state: StreamInput<A>): Stream<A> {
   const entries = Object.entries(state) as [keyof A, Stream<A[K] | A[K]>][]
   const streams = entries.map(([_, stream]) => {
     return isStream(stream) ? stream : now(stream)

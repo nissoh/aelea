@@ -1,10 +1,12 @@
-import { Behavior } from '@aelea/core'
-import { $element, attr, component, nodeEvent, IBranch, styleBehavior } from '@aelea/dom'
-import { pallete } from '@aelea/ui-components-theme'
 import { empty, map, mergeArray, snapshot } from "@most/core"
-import designSheet from '../../style/designSheet'
-import { dismissOp, interactionOp } from "./form"
-import { Input, InputType } from './types'
+import type { Behavior } from "../../../core/types.js"
+import { $element, attr, component, nodeEvent, styleBehavior } from "../../../dom/index.js"
+import type { IBranch } from "../../../dom/types.js"
+import { pallete } from "../../../ui-components-theme/globalState.js"
+import { designSheet } from "../../index.js"
+import { dismissOp, interactionOp } from "./form.js"
+import { InputType, type Input } from "./types.js"
+
 
 
 export interface Autocomplete extends Input<string | number> {
