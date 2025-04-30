@@ -1,20 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <base href="/">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style> * { box-sizing: border-box; } body { margin: 0; overflow: hidden; } </style>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700');
-    </style>
-    <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;800');
-    
+
         @keyframes spinner {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg) }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg)
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+    <style name="aelea-theme-config">
+        body.light {
+            --name: 'light';
+            --primary: #ff96ba;
+            --message: #171B1F;
+            --background: #ffffff;
+            --horizon: #ecf3fc;
+            --middleground: #edf5ff;
+            --foreground: #51585f;
+            --positive: #0cab00;
+            --negative: #ea004c;
+            --indeterminate: #F6964C;
+        }
+
+        body.dark {
+            --name: 'dark';
+            --primary: #964565;
+            --message: #ffffff;
+            --background: #101217;
+            --horizon: #292c37;
+            --middleground: #1d202b;
+            --foreground: #94a4c2;
+            --positive: #38E567;
+            --negative: #ff6050;
+            --indeterminate: #ffc000;
         }
     </style>
 </head>
+
 <body></body>
+
 </html>

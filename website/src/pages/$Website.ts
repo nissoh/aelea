@@ -10,9 +10,8 @@ import $Guide from './guide/$Guide'
 import { designSheet } from '@aelea/ui-components'
 import $MainMenu from './$MainMenu'
 import { $Picker } from '../components/$ThemePicker'
-import { dark, light } from '../common/theme'
-import { pallete } from '@aelea/ui-components-theme'
 import { Behavior } from '@aelea/core'
+import { pallete, themeList } from '../theme'
 
 
 
@@ -91,7 +90,7 @@ export default ({ baseRoute }: Website) => component((
       ),
 
 
-      $Picker([light, dark])({})
+      $Picker(themeList)({})
     )
 
   ]

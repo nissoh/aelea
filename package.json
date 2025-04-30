@@ -1,34 +1,44 @@
 {
-  "name": "monorepo",
+  "name": "aelea",
+  "version": "0.0.1",
   "license": "MIT",
   "author": "Nissan Hanina <nissanhanina@gmail.com>",
-  "private": true,
-  "workspaces": [
-    "*"
+  "files": [
+    "dist"
   ],
+  "exports": {
+    "./core": {
+      "types": "./dist/types/core/index.d.ts",
+      "import": "./dist/esm/core/index.js"
+    },
+    "./dom": {
+      "types": "./dist/types/dom/index.d.ts",
+      "import": "./dist/esm/dom/index.js"
+    },
+    "./router": {
+      "types": "./dist/types/router/index.d.ts",
+      "import": "./dist/esm/router/index.js"
+    },
+    "./ui-components": {
+      "types": "./dist/types/ui-components/index.d.ts",
+      "import": "./dist/esm/ui-components/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "build": "yarn workspaces foreach --verbose --topological --parallel run build",
-    "clean": "yarn workspaces foreach --verbose --parallel run clean",
-    "lint": "eslint . --ext .ts",
-    "check-version": "yarn version check --interactive",
-    "check-version:apply": "yarn run check-version && yarn version apply --all",
-    "publish": "yarn workspaces foreach --no-private --verbose npm publish --tolerate-republish --access public",
-    "upgrade-interactive": "yarn upgrade-interactive",
-    "                    ": "_______GLOBAL_TASKS_____",
-    "g:tsc:clean": "cd $INIT_CWD && tsc -b --clean",
-    "g:dev": "cd $INIT_CWD && tsc -b --clean",
-    "g:tsc:all": "yarn run build",
-    "g:tsc:project": "cd $INIT_CWD && tsc -b --verbose",
-    "g:tsc:project:watch": "cd $INIT_CWD && tsc -b -w --verbose",
-    "g:tsc:cjs": "cd $INIT_CWD && tsc --outDir .dist/cjs --module CommonJS --declarationMap false --composite false --declaration false --declarationDir null",
-    "g:parallel": "cd $INIT_CWD && concurrently"
+    "build": "bun run build:clean && bun run build:esm",
+    "build:esm": "tsc --project tsconfig.build.json",
+    "build:clean": "rm -rf middleware/dist",
+    "clean:tsc": "rm -fr dist/*"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "5.16.0",
-    "@typescript-eslint/parser": "5.16.0",
-    "concurrently": "^7.0.0",
-    "eslint": "8.12.0",
-    "typescript": "^4.6.3"
+    "typescript-eslint": "8.31.1",
+    "@eslint/js": "^9.25.1",
+    "@stylistic/eslint-plugin": "^4.2.0",
+    "@stylistic/eslint-plugin-ts": "^4.2.0",
+    "eslint": "^9.25.1",
+    "globals": "^16.0.0",
+    "typescript": "^5.8.3"
   },
   "packageManager": "yarn@3.5.1"
 }

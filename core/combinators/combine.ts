@@ -1,8 +1,9 @@
-import { combineArray as combineArrayMost } from "@most/core"
+import { combineArray as combineArrayMost, now } from "@most/core"
 import { Stream } from "@most/types"
+import { isStream } from "../common"
 
 type StreamInput<T> = {
-  [P in keyof T]: Stream<T[P]>
+  [P in keyof T]: Stream<T[P]> | T[P]
 }
 
 type StreamInputArray<T extends any[]> = {
@@ -10,21 +11,24 @@ type StreamInputArray<T extends any[]> = {
 }
 
 
-export function combineObject<A, K extends keyof A = keyof A>(state: StreamInput<A>): Stream<A> {
-  const entries = Object.entries(state) as [keyof A, Stream<A[K]>][]
-  const streams = entries.map(([_, stream]) => stream)
+export function combineState<A extends object, K extends keyof A>(state: StreamInput<A>): Stream<A> {
+  const entries = Object.entries(state) as [keyof A, Stream<A[K] | A[K]>][]
+  const streams = entries.map(([_, stream]) => {
+    return isStream(stream) ? stream : now(stream)
+  })
 
-  const combinedWithInitial = combineArrayMost((...arrgs: A[K][]) => {
+  const combined = combineArray((...arrgs: A[K][]) => {
     return arrgs.reduce((seed, val, idx) => {
       const key = entries[idx][0]
       seed[key] = val
 
       return seed
     }, {} as A)
-  }, streams)
+  }, ...streams)
 
-  return combinedWithInitial
+  return combined
 }
+
 
 
 // temorary typings fix for this issue https://github.com/mostjs/core/pull/543
