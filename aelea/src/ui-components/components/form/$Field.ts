@@ -10,9 +10,9 @@ import {
   switchLatest,
   tap,
 } from '@most/core'
-import { combineState } from '../../../core/combinators/combine.js'
+import { combineState } from '../../../core/combinator/combine.js'
 import { O } from '../../../core/common.js'
-import type { Behavior, Op } from '../../../core/types.js'
+import type { Behavior, Os } from '../../../core/types.js'
 import {
   $element,
   component,
@@ -31,7 +31,7 @@ export interface Field extends Input<string | number> {
   name?: string
   fieldStyle?: IStyleCSS
 
-  inputOp?: Op<IBranch, IBranch>
+  inputOp?: Os<IBranch, IBranch>
 }
 
 export const $Field = ({

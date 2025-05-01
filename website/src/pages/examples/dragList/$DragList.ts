@@ -6,10 +6,8 @@ import {
   component,
   style,
 } from 'aelea/dom'
-import { $Sortable, $card, $row } from 'aelea/ui-components'
+import { $Sortable, $card, $row, designSheet, layoutSheet } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
-import { elevation2 } from '../../../../../lib/src/ui-components/elements/$elements'
-import { flex } from '../../../../../lib/src/ui-components/style/layoutSheet'
 
 export default component(
   ([_, orderTether]: Behavior<
@@ -20,8 +18,8 @@ export default component(
       .fill(null)
       .map((_, i) =>
         $card(
-          flex,
-          elevation2,
+          layoutSheet.flex,
+          designSheet.elevation2,
           style({
             backgroundColor: pallete.background,
             placeContent: 'center',

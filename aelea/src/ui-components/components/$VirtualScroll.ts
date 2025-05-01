@@ -15,7 +15,7 @@ import {
 } from '@most/core'
 import type { Stream } from '@most/types'
 import { O } from '../../core/common.js'
-import type { Behavior, Op } from '../../core/types.js'
+import type { Behavior, Os } from '../../core/types.js'
 import { $custom, $text, component, style } from '../../dom/index.js'
 import type { $Branch, $Node, IBranch } from '../../dom/types.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
@@ -38,7 +38,7 @@ export interface QuantumScroll {
 
   $loader?: $Node
 
-  containerOps?: Op<IBranch, IBranch>
+  containerOps?: Os<IBranch, IBranch>
 }
 
 const $defaultLoader = $text(

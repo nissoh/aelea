@@ -2,13 +2,13 @@ import { empty, never, run, startWith } from '@most/core'
 import { disposeNone } from '@most/disposable'
 import { compose } from '@most/prelude'
 import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
-import type { Op } from './types.js'
+import type { Os } from './types.js'
 
 type Fn<T, R> = (a: T) => R
 
 export const xForver = <T>(x: T) => startWith(x, never())
 
-export function maybeOp<A, B, C>(a: Op<A, B>, b?: Op<B, C>) {
+export function maybeOp<A, B, C>(a: Os<A, B>, b?: Os<B, C>) {
   return b ? compose(b, a) : a
 }
 
@@ -16,7 +16,7 @@ export function isStream(s: unknown): s is Stream<unknown> {
   return s instanceof Object && 'run' in s
 }
 
-export function isFunction(s: unknown): s is Op<unknown, unknown> {
+export function isFunction(s: unknown): s is Os<unknown, unknown> {
   return s instanceof Function
 }
 
@@ -126,6 +126,9 @@ export function O<T, A, B, C, D, E, F, G, H>(
   fn7: Fn<F, G>,
   fn8: Fn<G, H>,
 ): Fn<T, H>
+export function O<T, R>(
+  ...fn9: Fn<T, R>[]
+): Fn<T, R>
 // Removed the previous final overload `...fn9: Fn<unknown, I>[]` as it was less type-safe.
 
 // Implementation: Corrected to perform left-to-right composition matching the overloads.

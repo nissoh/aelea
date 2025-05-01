@@ -16,17 +16,17 @@ import { remove } from '@most/prelude'
 import { O } from '../../core/common.js'
 import { behavior } from '../../core/index.js'
 import type { Behavior } from '../../core/types.js'
-import { motion } from '../../dom/combinators/animate.js'
-import { component } from '../../dom/combinators/component.js'
-import { eventElementTarget, nodeEvent } from '../../dom/combinators/event.js'
+import { motion } from '../../dom/combinator/animate.js'
+import { component } from '../../dom/combinator/component.js'
+import { eventElementTarget, nodeEvent } from '../../dom/combinator/event.js'
 import {
   style,
   styleBehavior,
   styleInline,
-} from '../../dom/combinators/style.js'
+} from '../../dom/combinator/style.js'
 import type { $Branch, INode } from '../../dom/types.js'
 import { $column, $row } from '../elements/$elements.js'
-import { flex } from '../style/layoutSheet.js'
+import { layoutSheet } from '../style/layoutSheet.js'
 
 const clamp = (val: number, min: number, max: number) =>
   val > max ? max : val < min ? min : val
@@ -81,7 +81,7 @@ export const $Sortable = <T extends $Branch>(config: DraggableList<T>) =>
 
       return [
         $column(
-          flex,
+          layoutSheet.flex,
           style({
             flex: 1,
             userSelect: 'none',

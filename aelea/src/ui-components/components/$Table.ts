@@ -11,17 +11,16 @@ import {
 } from '@most/core'
 import type { Stream } from '@most/types'
 import { O } from '../../core/common.js'
-import type { Behavior, Op } from '../../core/types.js'
-import { attr } from '../../dom/combinators/attribute.js'
-import { component } from '../../dom/combinators/component.js'
-import { nodeEvent } from '../../dom/combinators/event.js'
-import { style, stylePseudo } from '../../dom/combinators/style.js'
+import type { Behavior, Os } from '../../core/types.js'
+import { attr } from '../../dom/combinator/attribute.js'
+import { component } from '../../dom/combinator/component.js'
+import { nodeEvent } from '../../dom/combinator/event.js'
+import { style, stylePseudo } from '../../dom/combinator/style.js'
 import { $svg } from '../../dom/source/node.js'
 import type { $Node, INode } from '../../dom/types.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column, $row } from '../elements/$elements.js'
 import { $icon } from '../elements/$icon.js'
-import { flex } from '../style/layoutSheet.js'
 import { spacing } from '../style/spacing.js'
 import {
   $VirtualScroll,
@@ -30,6 +29,7 @@ import {
   type ScrollRequest,
   type ScrollResponse,
 } from './$VirtualScroll.js'
+import { layoutSheet } from '../style/layoutSheet.js'
 
 export type TablePageResponse<T> =
   | T[]
@@ -51,11 +51,11 @@ export interface TableOption<T, FilterState> {
   dataSource: Stream<TablePageResponse<T>>
   scrollConfig?: Omit<QuantumScroll, 'dataSource'>
 
-  bodyContainerOp?: Op<INode, INode>
+  bodyContainerOp?: Os<INode, INode>
 
-  cellOp?: Op<INode, INode>
-  headerCellOp?: Op<INode, INode>
-  bodyCellOp?: Op<INode, INode>
+  cellOp?: Os<INode, INode>
+  headerCellOp?: Os<INode, INode>
+  bodyCellOp?: Os<INode, INode>
 
   sortChange?: Stream<ISortBy<T>>
   filterChange?: Stream<FilterState>
@@ -64,10 +64,10 @@ export interface TableOption<T, FilterState> {
 
 export interface TableColumn<T> {
   $head: $Node
-  $body: Op<T, $Node>
+  $body: Os<T, $Node>
   sortBy?: keyof T
 
-  columnOp?: Op<INode, INode>
+  columnOp?: Os<INode, INode>
 }
 
 export const $Table = <T, FilterState = never>({
@@ -89,7 +89,7 @@ export const $Table = <T, FilterState = never>({
     ) => {
       const cellStyle = O(
         style({ padding: '3px 6px', overflowWrap: 'break-word' }),
-        flex,
+        layoutSheet.flex,
       )
 
       const $cellHeader = $row(

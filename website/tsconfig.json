@@ -28,7 +28,7 @@
   },
   "references": [
     {
-      "path": "../lib"
+      "path": "../aelea"
     }
   ],
   "include": [

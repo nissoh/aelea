@@ -25,14 +25,14 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Lint
-        run: bun run lint
+        run: bun run biome:check
 
       - name: Build
-        run: bun run build
+        run: cd aelea && bun run build
 
       - name: Release via Changesets
         uses: changesets/action@v1
         with:
-          publish: bun run changeset:publis
+          publish: bun run changeset:publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_AUTH }}

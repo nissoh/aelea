@@ -11,7 +11,7 @@ import {
 } from 'aelea/dom'
 import { $icon } from 'aelea/ui-components'
 import { type Theme, pallete, theme } from 'aelea/ui-components-theme'
-import { setTheme } from 'aelea/ui-components-theme-dom'
+import { setTheme } from 'aelea/ui-components-theme-browser'
 
 export const $Picker = (themeList: Theme[]) =>
   component(

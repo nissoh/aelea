@@ -83,6 +83,28 @@ const btn = O(
   }),
 )
 
+export const elevation1 = style({ border: `1px solid ${pallete.horizon}` })
+export const elevation2 = style({
+  boxShadow:
+    '0px 1px 1px rgba(0, 0, 0, 0.14), 0px 2px 1px rgba(0, 0, 0, 0.12), 0px 1px 3px rgba(0, 0, 0, 0.2)',
+})
+export const elevation3 = style({
+  boxShadow:
+    '0px 2px 2px rgba(0, 0, 0, 0.14), 0px 3px 1px rgba(0, 0, 0, 0.12), 0px 1px 5px rgba(0, 0, 0, 0.2)',
+})
+export const elevation4 = style({
+  boxShadow:
+    '0px 3px 4px rgba(0, 0, 0, 0.14), 0px 3px 3px rgba(0, 0, 0, 0.12), 0px 1px 8px rgba(0, 0, 0, 0.2)',
+})
+export const elevation6 = style({
+  boxShadow:
+    '0px 6px 10px rgba(0, 0, 0, 0.14), 0px 1px 18px rgba(0, 0, 0, 0.12), 0px 3px 5px rgba(0, 0, 0, 0.2)',
+})
+export const elevation12 = style({
+  boxShadow:
+    '0px 12px 17px rgba(0, 0, 0, 0.14), 0px 5px 22px rgba(0, 0, 0, 0.12), 0px 7px 8px rgba(0, 0, 0, 0.2)',
+})
+
 export const designSheet = {
   main,
   customScroll,
@@ -90,4 +112,10 @@ export const designSheet = {
   input,
   btn,
   control,
+  elevation1,
+  elevation2,
+  elevation3,
+  elevation4,
+  elevation6,
+  elevation12,
 }

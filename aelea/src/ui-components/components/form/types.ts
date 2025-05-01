@@ -1,5 +1,5 @@
 import type { Stream } from '@most/types'
-import type { Op } from '../../../core/types.js'
+import type { Os } from '../../../core/types.js'
 
 export enum InputType {
   TEXT = 'text',
@@ -21,5 +21,5 @@ export interface Control {
 
 export interface Input<T> extends Control {
   value: Stream<T>
-  validation?: Op<T, string | null>
+  validation?: Os<T, string | null>
 }

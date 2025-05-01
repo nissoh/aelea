@@ -2,7 +2,7 @@ import { chain, empty, tap } from '@most/core'
 import { disposeBoth, disposeWith } from '@most/disposable'
 import type { Stream } from '@most/types'
 import { nullSink } from '../../core/common.js'
-import { eventElementTarget } from '../../dom/combinators/event.js'
+import { eventElementTarget } from '../../dom/combinator/event.js'
 
 export function fromWebsocket<OUTPUT, INPUT>(
   url: string,

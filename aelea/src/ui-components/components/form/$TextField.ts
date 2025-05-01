@@ -10,14 +10,14 @@ import {
   switchLatest,
 } from '@most/core'
 import { O } from '../../../core/common.js'
-import type { Behavior, Op } from '../../../core/types.js'
-import { component } from '../../../dom/combinators/component.js'
-import { style } from '../../../dom/combinators/style.js'
+import type { Behavior, Os } from '../../../core/types.js'
+import { component } from '../../../dom/combinator/component.js'
+import { style } from '../../../dom/combinator/style.js'
 import { $text } from '../../../dom/source/node.js'
 import type { IBranch, IStyleCSS } from '../../../dom/types.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $row } from '../../elements/$elements.js'
-import { flex } from '../../style/layoutSheet.js'
+import { layoutSheet } from '../../style/layoutSheet.js'
 import { spacing } from '../../style/spacing.js'
 import { $Field, type Field } from './$Field.js'
 import { $label } from './form.js'
@@ -27,7 +27,7 @@ export interface TextField extends Field {
   hint?: string
   labelStyle?: IStyleCSS
 
-  containerOp?: Op<IBranch<HTMLInputElement>, IBranch<HTMLInputElement>>
+  containerOp?: Os<IBranch<HTMLInputElement>, IBranch<HTMLInputElement>>
 }
 
 export const $TextField = (config: TextField) =>
@@ -63,8 +63,8 @@ export const $TextField = (config: TextField) =>
           fieldOp,
           style({ alignItems: 'flex-start' }),
         )(
-          $label(flex, spacing.tiny)(
-            $row(flex, spacing.small)(
+          $label(layoutSheet.flex, spacing.tiny)(
+            $row(layoutSheet.flex, spacing.small)(
               $text(
                 style({
                   alignSelf: 'flex-end',

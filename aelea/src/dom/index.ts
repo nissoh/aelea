@@ -5,16 +5,16 @@ export {
   nextAnimationFrame,
   motion,
   motionState,
-} from './combinators/animate.js'
-export { attr, attrBehavior } from './combinators/attribute.js'
-export { component } from './combinators/component.js'
-export { eventElementTarget, nodeEvent } from './combinators/event.js'
+} from './combinator/animate.js'
+export { attr, attrBehavior } from './combinator/attribute.js'
+export { component } from './combinator/component.js'
+export { eventElementTarget, nodeEvent } from './combinator/event.js'
 export {
   style,
   styleBehavior,
   styleInline,
   stylePseudo,
-} from './combinators/style.js'
+} from './combinator/style.js'
 export { runBrowser } from './run.js'
 export {
   $custom,

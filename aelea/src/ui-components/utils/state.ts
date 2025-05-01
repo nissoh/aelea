@@ -1,10 +1,10 @@
 import { filter, merge, multicast } from '@most/core'
 import type { Stream } from '@most/types'
-import type { Op } from '../../core/types.js'
+import type { Os } from '../../core/types.js'
 
 type StoreFn<STORE> = <Z>(
   stream: Stream<Z>,
-  writePipe: Op<Z, STORE>,
+  writePipe: Os<Z, STORE>,
 ) => Stream<Z>
 
 export type BrowserStore<STORE, StoreKey extends string> = {
@@ -30,7 +30,7 @@ export const createLocalStorageChain =
 
     const storeCurry: StoreFn<STORE> = <Z>(
       stream: Stream<Z>,
-      writePipe: Op<Z, STORE>,
+      writePipe: Os<Z, STORE>,
     ) => {
       const multicastSource = multicast(stream)
       const writeOp = writePipe(multicastSource)

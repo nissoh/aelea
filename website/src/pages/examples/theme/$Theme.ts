@@ -1,9 +1,7 @@
 import { $node, $text, component, style } from 'aelea/dom'
-import { $card, $column, $row, spacing } from 'aelea/ui-components'
+import { $card, $column, $row, designSheet, layoutSheet, spacing } from 'aelea/ui-components'
 import type { Pallete, Theme } from 'aelea/ui-components-theme'
 import { themeList } from 'aelea/ui-components-theme'
-import { elevation2 } from '../../../../../lib/src/ui-components/elements/$elements'
-import { flex } from '../../../../../lib/src/ui-components/style/layoutSheet'
 
 function getPallete(
   theme: Pallete,
@@ -35,8 +33,8 @@ export const $Pallete = (themeDef: Theme) =>
     return [
       $card(
         spacing.big,
-        flex,
-        elevation2,
+        layoutSheet.flex,
+        designSheet.elevation2,
         style({
           color: theme.message,
           padding: '15px',

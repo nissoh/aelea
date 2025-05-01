@@ -13,7 +13,7 @@ import {
 } from '../../../dom/index.js'
 import type { IBranch } from '../../../dom/types.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
-import { stretch } from '../../style/layoutSheet.js'
+import { layoutSheet } from '../../style/layoutSheet.js'
 import { dismissOp, interactionOp } from './form.js'
 import type { Input } from './types.js'
 
@@ -27,7 +27,7 @@ export const $Checkbox = ({ value }: Checkbox) =>
       [check, checkTether]: Behavior<IBranch<HTMLInputElement>, boolean>,
     ) => {
       const $overlay = $node(
-        stretch,
+        layoutSheet.stretch,
         style({ flex: 1, margin: '3px' }),
         styleBehavior(
           map(
@@ -45,7 +45,7 @@ export const $Checkbox = ({ value }: Checkbox) =>
           margin: '0',
           cursor: 'pointer',
         }),
-        stretch,
+        layoutSheet.stretch,
         checkTether(
           nodeEvent('change'),
           map((evt) => (<HTMLInputElement>evt.target).checked),

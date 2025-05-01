@@ -1,6 +1,6 @@
 import { map, mergeArray, never } from '@most/core'
 import { O } from '../../../core/common.js'
-import type { Behavior, Op } from '../../../core/types.js'
+import type { Behavior, Os } from '../../../core/types.js'
 import {
   $element,
   attrBehavior,
@@ -17,7 +17,7 @@ import type { Control } from './types.js'
 export interface IButton extends Control {
   $content: $Node
   buttonStyle?: IStyleCSS
-  buttonOp?: Op<IBranch<HTMLButtonElement>, IBranch<HTMLButtonElement>>
+  buttonOp?: Os<IBranch<HTMLButtonElement>, IBranch<HTMLButtonElement>>
 }
 
 export const $Button = ({

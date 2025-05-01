@@ -1,6 +1,6 @@
 import { constant, map, merge, startWith } from '@most/core'
 import { O } from '../../core/common.js'
-import type { Behavior, Op } from '../../core/types.js'
+import type { Behavior, Os } from '../../core/types.js'
 import { attr, component, nodeEvent, style } from '../../dom/index.js'
 import type { $Branch, IBranch } from '../../dom/types.js'
 import type { Route } from '../types.js'
@@ -9,7 +9,7 @@ export interface IAnchor {
   url: string
   route: Route
   $anchor: $Branch
-  anchorOp?: Op<IBranch<HTMLAnchorElement>, IBranch<HTMLAnchorElement>>
+  anchorOp?: Os<IBranch<HTMLAnchorElement>, IBranch<HTMLAnchorElement>>
 }
 
 export const $RouterAnchor = ({
