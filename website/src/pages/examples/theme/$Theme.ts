@@ -1,9 +1,9 @@
-import { $text, style, $node, component } from 'aelea/dom'
-import { $column, spacing, $row, $card } from 'aelea/ui-components'
-import { elevation2 } from '../../../../../lib/src/ui-components/elements/$elements'
-import { flex } from '../../../../../lib/src/ui-components/style/layoutSheet'
+import { $node, $text, component, style } from 'aelea/dom'
+import { $card, $column, $row, spacing } from 'aelea/ui-components'
 import type { Pallete, Theme } from 'aelea/ui-components-theme'
 import { themeList } from 'aelea/ui-components-theme'
+import { elevation2 } from '../../../../../lib/src/ui-components/elements/$elements'
+import { flex } from '../../../../../lib/src/ui-components/style/layoutSheet'
 
 function getPallete(
   theme: Pallete,

@@ -1,31 +1,31 @@
 import {
-  empty,
-  multicast,
-  zip,
-  filter,
   constant,
+  empty,
+  filter,
+  map,
   merge,
+  mergeArray,
+  multicast,
   switchLatest,
   until,
-  mergeArray,
-  map,
+  zip,
 } from '@most/core'
 import type { Stream } from '@most/types'
 import { O } from '../../../core/common.js'
 import type { Behavior } from '../../../core/types.js'
 import {
-  style,
   $node,
   component,
-  styleBehavior,
   nodeEvent,
+  style,
+  styleBehavior,
 } from '../../../dom/index.js'
 import type { NodeComposeFn } from '../../../dom/types.js'
 import type { $Node, INode } from '../../../dom/utils.js'
 import { colorAlpha } from '../../../ui-components-theme/color.js'
+import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $column } from '../../elements/$elements.js'
 import { observer } from '../../index.js'
-import { pallete } from '../../../ui-components-theme/globalState.js'
 
 export const $defaultPopoverContentContainer = $column(
   style({

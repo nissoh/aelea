@@ -4,6 +4,7 @@
     "ignore": [
       "**/dist",
       "**/node_modules",
+      ".vscode",
       "bun.lockb",
       "contracts",
       "tsconfig.json",

@@ -9,9 +9,7 @@
   },
   "license": "MIT",
   "author": "Nissan Hanina <nissanhanina@gmail.com>",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "exports": {
     "./core": {
       "types": "./dist/types/core/index.d.ts",

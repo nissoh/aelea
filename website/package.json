@@ -4,9 +4,7 @@
   "license": "MIT",
   "type": "module",
   "private": true,
-  "files": [
-    ".dist"
-  ],
+  "files": [".dist"],
   "sideEffects": true,
   "scripts": {
     "dev": "bun vite",

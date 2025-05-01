@@ -4,9 +4,9 @@ import {
   $element,
   $node,
   $text,
+  type IBranch,
   component,
   nodeEvent,
-  type IBranch,
 } from 'aelea/dom'
 
 export default component(

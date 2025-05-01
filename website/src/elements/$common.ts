@@ -1,7 +1,7 @@
 import { $element, style, stylePseudo } from 'aelea/dom'
 import { $ButtonIcon, $column, $row, spacing } from 'aelea/ui-components'
-import { $trash } from './$icons'
 import { pallete } from 'aelea/ui-components-theme'
+import { $trash } from './$icons'
 
 export const $TrashBtn = $ButtonIcon($trash)
 

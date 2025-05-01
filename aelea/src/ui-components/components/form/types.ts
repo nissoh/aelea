@@ -1,6 +1,5 @@
-import type { Stream } from "@most/types"
-import type { Op } from "../../../core/types.js"
-
+import type { Stream } from '@most/types'
+import type { Op } from '../../../core/types.js'
 
 export enum InputType {
   TEXT = 'text',
@@ -17,7 +16,7 @@ export enum InputType {
 }
 
 export interface Control {
-  disabled?: Stream<boolean>,
+  disabled?: Stream<boolean>
 }
 
 export interface Input<T> extends Control {

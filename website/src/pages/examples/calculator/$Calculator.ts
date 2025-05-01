@@ -1,13 +1,13 @@
-import { $node, $text, attr, component, style } from 'aelea/dom'
 import { combine, empty, map, startWith } from '@most/core'
+import { type Behavior, O } from 'aelea/core'
+import { $node, $text, attr, component, style } from 'aelea/dom'
 import {
-  $column,
   $Field,
   $NumberTicker,
+  $column,
   $row,
   spacing,
 } from 'aelea/ui-components'
-import { type Behavior, O } from 'aelea/core'
 import { pallete } from 'aelea/ui-components-theme'
 
 const add = (x: number, y: number) => x + y

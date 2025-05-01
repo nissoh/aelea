@@ -12,7 +12,6 @@ export function convertHexToRGBA(hexCode: string, opacity = 1) {
   return `rgba(${r},${g},${b},${opacity / 100})`
 }
 
-
 const validRGB = /rgba\((\s*\d+\s*,){3}[\d.]+\)/
 
 export function colorAlpha(color: string, opacity: number): string {
@@ -20,7 +19,8 @@ export function colorAlpha(color: string, opacity: number): string {
 
   if (isRgb) {
     return color.replace(/[^,]+(?=\))/, String(opacity))
-  } if (color.startsWith('#')) {
+  }
+  if (color.startsWith('#')) {
     return colorAlpha(convertHexToRGBA(color), opacity)
   }
 

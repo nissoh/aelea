@@ -1,4 +1,3 @@
-
 export type Action = {
   primary: string
 }
@@ -26,4 +25,3 @@ export type Theme = {
   name: string
   pallete: Pallete
 }
-

@@ -1,23 +1,23 @@
-import { now, merge, multicast, map } from '@most/core'
+import { map, merge, multicast, now } from '@most/core'
 import type { Behavior } from 'aelea/core'
 import {
-  eventElementTarget,
-  component,
-  $node,
-  style,
   $element,
+  $node,
   $text,
+  component,
+  eventElementTarget,
+  style,
 } from 'aelea/dom'
 import * as router from 'aelea/router'
 import { $RouterAnchor } from 'aelea/router'
-import { $row, $column, $icon, spacing, designSheet } from 'aelea/ui-components'
+import { $column, $icon, $row, designSheet, spacing } from 'aelea/ui-components'
+import { pallete, themeList } from 'aelea/ui-components-theme'
 import { $Picker } from '../components/$ThemePicker'
 import { fadeIn } from '../components/transitions/enter'
 import { $aeleaLogo } from '../elements/$icons'
 import $MainMenu from './$MainMenu'
 import $Examples from './examples/$Examples'
 import $Guide from './guide/$Guide'
-import { pallete, themeList } from 'aelea/ui-components-theme'
 
 const popStateEvent = eventElementTarget('popstate', window)
 const initialLocation = now(document.location)

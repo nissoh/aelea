@@ -1,16 +1,16 @@
 import { constant, map, merge, now, scan, switchLatest } from '@most/core'
-import $Counter from '../count-counters/$Counter'
 import type { Behavior } from 'aelea/core'
-import { component, $text, style } from 'aelea/dom'
+import { $text, component, style } from 'aelea/dom'
 import {
-  $column,
-  spacing,
-  $row,
-  $Popover,
   $Button,
+  $Popover,
   $TextField,
+  $column,
+  $row,
+  spacing,
 } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
+import $Counter from '../count-counters/$Counter'
 
 export function hexAlpha(color: string, opacity: number): string {
   // coerce values so ti is between 0 and 1.

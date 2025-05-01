@@ -1,8 +1,8 @@
-import { disposeWith } from "@most/disposable"
-import type { Disposable, Scheduler, Sink, Stream } from "@most/types"
-import { tether } from "../combinators/tether.js"
-import { O } from "../common.js"
-import type { Behavior, Op } from "../types.js"
+import { disposeWith } from '@most/disposable'
+import type { Disposable, Scheduler, Sink, Stream } from '@most/types'
+import { tether } from '../combinators/tether.js'
+import { O } from '../common.js'
+import type { Behavior, Op } from '../types.js'
 
 type SinkMap<T> = Map<Sink<T>, Map<Stream<T>, Disposable | null>>
 
@@ -22,18 +22,20 @@ class BehaviorSource<A, B> implements Stream<A> {
       sourcesMap.set(s, this.runBehavior(sink, s))
     }
 
-    return disposeWith(([sinkSrc, sinkMap]) => {
-      sinkSrc.end(scheduler.currentTime())
-      const disposables = sinkMap.get(sinkSrc)
-      if (disposables) {
-        for (const disposable of disposables.values()) {
-          disposable?.dispose()
+    return disposeWith(
+      ([sinkSrc, sinkMap]) => {
+        sinkSrc.end(scheduler.currentTime())
+        const disposables = sinkMap.get(sinkSrc)
+        if (disposables) {
+          for (const disposable of disposables.values()) {
+            disposable?.dispose()
+          }
         }
-      }
-      sinkMap.delete(sinkSrc)
-    }, [sink, this.sinksMap] as [Sink<A>, SinkMap<A>])
+        sinkMap.delete(sinkSrc)
+      },
+      [sink, this.sinksMap] as [Sink<A>, SinkMap<A>],
+    )
   }
-
 
   protected runBehavior(sink: Sink<A>, x: Stream<A>) {
     if (!this.scheduler) {
@@ -48,7 +50,9 @@ class BehaviorSource<A, B> implements Stream<A> {
       const [source, tetherSource] = tether(sb)
 
       // @ts-ignore
-      const bops: Stream<A> = ops.length ? O(...ops)(tetherSource) : tetherSource
+      const bops: Stream<A> = ops.length
+        ? O(...ops)(tetherSource)
+        : tetherSource
 
       this.queuedSamplers.push(bops)
       this.sinksMap.forEach((sourcesMap, sink) => {
@@ -58,7 +62,6 @@ class BehaviorSource<A, B> implements Stream<A> {
       return source
     }
   }
-
 }
 
 export function behavior<A, B>(): Behavior<A, B> {
@@ -66,5 +69,3 @@ export function behavior<A, B>(): Behavior<A, B> {
 
   return [ss, ss.sample]
 }
-
-

@@ -1,20 +1,24 @@
-import { disposeNone, disposeWith } from "@most/disposable"
-import { remove } from "@most/prelude"
-import type { Sink, Time, Stream, Disposable, Scheduler } from "@most/types"
-
+import { disposeNone, disposeWith } from '@most/disposable'
+import { remove } from '@most/prelude'
+import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
 
 class SourceSink<T> implements Sink<T> {
   hasValue = false
   latestValue!: T
 
-  constructor(private parent: Tether<T>, public sink: Sink<T>) { }
+  constructor(
+    private parent: Tether<T>,
+    public sink: Sink<T>,
+  ) {}
 
   event(t: number, x: T): void {
     this.latestValue = x
     this.hasValue = true
 
     this.sink.event(t, x)
-    this.parent.tetherSinkList.forEach(s => s.event(t, x))
+    for (const s of this.parent.tetherSinkList) {
+      s.event(t, x)
+    }
   }
 
   end(t: Time) {
@@ -46,24 +50,18 @@ class TetherSink<A> implements Sink<A> {
       throw new Error(err.message)
     }
   }
-
 }
 
-
-
 class Tether<T> implements Stream<T> {
-
   sourceSinkList: SourceSink<T>[] = []
   tetherSinkList: TetherSink<T>[] = []
 
   sourceDisposable: Disposable = disposeNone()
 
-  constructor(private source: Stream<T>) { }
+  constructor(private source: Stream<T>) {}
 
   run(sink: SourceSink<T> | TetherSink<T>, scheduler: Scheduler): Disposable {
-
     if (sink instanceof SourceSink) {
-
       this.sourceDisposable.dispose()
       this.sourceSinkList.push(sink)
 
@@ -74,18 +72,17 @@ class Tether<T> implements Stream<T> {
           const srcIdx = this.sourceSinkList.indexOf(sink)
           this.sourceSinkList.splice(srcIdx, 1)
           this.sourceDisposable.dispose()
-        }
+        },
       }
     }
 
     this.tetherSinkList.push(sink)
 
-    this.sourceSinkList.forEach(s => {
+    for (const s of this.sourceSinkList) {
       if (s.hasValue) {
         sink.event(scheduler.currentTime(), s.latestValue)
       }
-    })
-
+    }
 
     return disposeWith(
       ([tetherSinkList, sourceTetherSink]) => {
@@ -96,12 +93,10 @@ class Tether<T> implements Stream<T> {
           remove(sinkIdx, tetherSinkList)
         }
       },
-      [this.tetherSinkList, sink] as const
+      [this.tetherSinkList, sink] as const,
     )
   }
 }
-
-
 
 export const tether = <T>(source: Stream<T>): [Stream<T>, Stream<T>] => {
   const tetherSource = new Tether(source)
@@ -110,15 +105,12 @@ export const tether = <T>(source: Stream<T>): [Stream<T>, Stream<T>] => {
     {
       run(sink, scheduler) {
         return tetherSource.run(new SourceSink(tetherSource, sink), scheduler)
-      }
+      },
     },
     {
       run(sink, scheduler) {
         return tetherSource.run(new TetherSink(sink), scheduler)
-      }
-    }
+      },
+    },
   ]
 }
-
-
-

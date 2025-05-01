@@ -1,16 +1,16 @@
 import {
-  scan,
-  mergeArray,
-  merge,
-  now,
-  constant,
   chain,
-  multicast,
-  until,
-  snapshot,
+  constant,
   map,
+  merge,
+  mergeArray,
+  multicast,
+  now,
+  scan,
+  snapshot,
+  until,
 } from '@most/core'
-import { type Behavior, behavior, replayLatest, O } from 'aelea/core'
+import { type Behavior, O, behavior, replayLatest } from 'aelea/core'
 import { $text, component, style } from 'aelea/dom'
 import {
   $Button,
@@ -19,9 +19,9 @@ import {
   $seperator,
   spacing,
 } from 'aelea/ui-components'
+import { pallete } from 'aelea/ui-components-theme'
 import { $TrashBtn } from '../../../elements/$common'
 import $Counter from './$Counter'
-import { pallete } from 'aelea/ui-components-theme'
 
 const $AddBtn = $Button({
   $content: $text('Add One'),

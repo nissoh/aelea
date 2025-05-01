@@ -1,10 +1,12 @@
-import { startWith } from "@most/core"
-import type { Sink, Stream, Scheduler, Disposable } from "@most/types"
-import { Pipe } from "../common.js"
-
+import { startWith } from '@most/core'
+import type { Disposable, Scheduler, Sink, Stream } from '@most/types'
+import { Pipe } from '../common.js'
 
 class StateSink<A> extends Pipe<A, A> {
-  constructor(private parent: ReplayLatest<A>, public override sink: Sink<A>) {
+  constructor(
+    private parent: ReplayLatest<A>,
+    public override sink: Sink<A>,
+  ) {
     super(sink)
   }
 
@@ -20,10 +22,11 @@ export class ReplayLatest<A> implements Stream<A> {
   latestvalue!: A
   hasValue = false
   hasInitial
-
-  constructor(private source: Stream<A>,
-    private initialState?: A,) {
-    this.hasInitial = arguments.length === 2
+  constructor(
+    private source: Stream<A>,
+    private initialState?: A,
+  ) {
+    this.hasInitial = initialState !== undefined
   }
 
   run(sink: Sink<A>, scheduler: Scheduler): Disposable {
@@ -33,20 +36,20 @@ export class ReplayLatest<A> implements Stream<A> {
         ? startWith(this.initialState)
         : null
 
-    const withReplayedValue = startWithReplay ? startWithReplay(this.source) : this.source
+    const withReplayedValue = startWithReplay
+      ? startWithReplay(this.source)
+      : this.source
 
     return withReplayedValue.run(new StateSink(this, sink), scheduler)
   }
-
 }
 
-
-
-export function replayLatest<A>(s: Stream<A>, initialState?: A): ReplayLatest<A> {
-  if (arguments.length === 1) {
+export function replayLatest<A>(
+  s: Stream<A>,
+  initialState?: A,
+): ReplayLatest<A> {
+  if (initialState === undefined) {
     return new ReplayLatest(s)
-  } else {
-    return new ReplayLatest(s, initialState)
   }
+  return new ReplayLatest(s, initialState)
 }
-

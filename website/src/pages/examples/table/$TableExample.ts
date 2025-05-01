@@ -1,12 +1,12 @@
-import { now, merge, combine, map } from '@most/core'
+import { combine, map, merge, now } from '@most/core'
 import type { Stream } from '@most/types'
 import type { Behavior } from 'aelea/core'
-import { component, style, $text } from 'aelea/dom'
+import { $text, component, style } from 'aelea/dom'
 import {
-  type ScrollRequest,
-  type ISortBy,
-  $card,
   $Table,
+  $card,
+  type ISortBy,
+  type ScrollRequest,
   type TablePageResponse,
 } from 'aelea/ui-components'
 

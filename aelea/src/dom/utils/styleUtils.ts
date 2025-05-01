@@ -1,29 +1,29 @@
-import { loop } from "@most/core"
-import type { Stream } from "@most/types"
-import type { IStyleCSS, IBranch, StyleEnvironment } from "../types.js"
+import { loop } from '@most/core'
+import type { Stream } from '@most/types'
+import type { IBranch, IStyleCSS, StyleEnvironment } from '../types.js'
 
-
-export function applyStyleBehavior(styleBehavior: Stream<IStyleCSS | null>, node: IBranch, styleEnv: StyleEnvironment) {
-
+export function applyStyleBehavior(
+  styleBehavior: Stream<IStyleCSS | null>,
+  node: IBranch,
+  styleEnv: StyleEnvironment,
+) {
   let latestClass: string
 
   return loop(
     (previousCssRule: null | ReturnType<typeof useStyleRule>, styleObject) => {
-
       if (previousCssRule) {
         if (styleObject === null) {
           node.element.classList.remove(previousCssRule)
 
           return { seed: null, value: '' }
-        } else {
-          const cashedCssClas = useStyleRule(styleEnv, styleObject)
+        }
+        const cashedCssClas = useStyleRule(styleEnv, styleObject)
 
-          if (previousCssRule !== cashedCssClas) {
-            node.element.classList.replace(latestClass, cashedCssClas)
-            latestClass = cashedCssClas
+        if (previousCssRule !== cashedCssClas) {
+          node.element.classList.replace(latestClass, cashedCssClas)
+          latestClass = cashedCssClas
 
-            return { seed: cashedCssClas, value: cashedCssClas }
-          }
+          return { seed: cashedCssClas, value: cashedCssClas }
         }
       }
 
@@ -39,21 +39,23 @@ export function applyStyleBehavior(styleBehavior: Stream<IStyleCSS | null>, node
       return { seed: previousCssRule, value: '' }
     },
     null,
-    styleBehavior
+    styleBehavior,
   )
 }
 
 function styleObjectAsString(styleObj: IStyleCSS) {
   return Object.entries(styleObj)
     .map(([key, val]) => {
-      const kebabCaseKey = key.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase()
+      const kebabCaseKey = key.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
       return `${kebabCaseKey}:${val};`
     })
-    .join("")
+    .join('')
 }
 
-
-export function useStyleRule(cacheService: StyleEnvironment, styleDefinition: IStyleCSS) {
+export function useStyleRule(
+  cacheService: StyleEnvironment,
+  styleDefinition: IStyleCSS,
+) {
   const properties = styleObjectAsString(styleDefinition)
   const cachedRuleIdx = cacheService.cache.indexOf(properties)
 
@@ -69,7 +71,11 @@ export function useStyleRule(cacheService: StyleEnvironment, styleDefinition: IS
   return `${cacheService.namespace + cachedRuleIdx}`
 }
 
-export function useStylePseudoRule(cacheService: StyleEnvironment, styleDefinition: IStyleCSS, pseudo = '') {
+export function useStylePseudoRule(
+  cacheService: StyleEnvironment,
+  styleDefinition: IStyleCSS,
+  pseudo = '',
+) {
   const properties = styleObjectAsString(styleDefinition)
   const index = cacheService.stylesheet.cssRules.length
   const rule = `.${cacheService.namespace + index + pseudo} {${properties}}`
@@ -83,5 +89,3 @@ export function useStylePseudoRule(cacheService: StyleEnvironment, styleDefiniti
 
   return `${cacheService.namespace + cachedRuleIdx}`
 }
-
-

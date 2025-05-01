@@ -1,8 +1,8 @@
 import { disposeNone } from '@most/disposable'
-import type { Disposable } from '@most/types';
+import type { Disposable } from '@most/types'
 
 export class SettableDisposable implements Disposable {
-  private disposable: Disposable | undefined;
+  private disposable: Disposable | undefined
   private disposed = false
 
   constructor(private initialDiposable = disposeNone()) {}

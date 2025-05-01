@@ -1,5 +1,8 @@
+import type { Behavior } from 'aelea/core'
 import { $node, $text, component, style } from 'aelea/dom'
+import { type Route, match } from 'aelea/router'
 import { $column, $row, spacing } from 'aelea/ui-components'
+import { pallete } from 'aelea/ui-components-theme'
 import { $Example } from '../../components/$Example'
 import { $Link } from '../../components/$Link'
 import { fadeIn } from '../../components/transitions/enter'
@@ -12,9 +15,6 @@ import { $Theme } from './theme/$Theme'
 import { createTodo } from './todo-app/$CreateTodo'
 import $TodoApp from './todo-app/$TodoApp'
 import { $VirtualScrollExample } from './virtual-scroll/$VirtualScrollExample'
-import { match, type Route } from 'aelea/router'
-import type { Behavior } from 'aelea/core'
-import { pallete } from 'aelea/ui-components-theme'
 
 interface Website {
   router: Route

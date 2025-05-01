@@ -6,8 +6,6 @@
 // import { match } from "./resolveUrl.js"
 // import { expect, type Suite } from "cynic"
 
-
-
 // export default <Suite>{
 //   'match fragments': async () => {
 //     const route = O(match('main'), match('books'), match(/\d+/))
@@ -17,7 +15,7 @@
 
 //     expect(frsgs.fragments).equals(['main', 'books', /\d+/])
 //   },
-  
+
 //   'matches remainig target url': async () => {
 //     const changes = mergeArray([
 //       now('main'),
@@ -26,7 +24,6 @@
 //     ])
 
 //     const mainRoute = router(changes).create('main')
-
 
 //     expect((await collectOne(mainRoute.match)).fragments).equals(['main', 'books', /\d+/])
 //   }
@@ -37,13 +34,7 @@
 //   <T, K extends keyof T>(key: K, obj: T): T[K]
 // }
 
-
 // const prop: Prop = curry2((key, obj: any) => obj[key])
-
-
-
-
-
 
 // type Event<T> = { value: T, time: Time }
 
@@ -72,8 +63,6 @@
 
 // export const collectN: CollectNCurry = curry2(collectNFn)
 
-
 // export const collectOne = <T>(s: Stream<T>) =>
 //   collectEvents(take(1, s)).then(x => x[0].value)
-
 

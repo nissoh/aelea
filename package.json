@@ -6,13 +6,11 @@
   "scripts": {
     "sherif": "sherif",
     "sherif:fix": "sherif --fix",
+    "biome:check": "biome check",
     "changeset:publish": "changeset publish --access public",
     "changeset:version": "changeset version"
   },
-  "workspaces": [
-    "aelea",
-    "website"
-  ],
+  "workspaces": ["aelea", "website"],
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@changesets/cli": "^2.29.2",

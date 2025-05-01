@@ -1,10 +1,10 @@
+import type { Behavior } from 'aelea/core'
 import { $element, $text, attr, component, style, stylePseudo } from 'aelea/dom'
+import type { Route } from 'aelea/router'
+import { $icon, $row, spacing } from 'aelea/ui-components'
+import { pallete } from 'aelea/ui-components-theme'
 import { $Link } from '../components/$Link'
 import { $github } from '../elements/$icons'
-import type { Route } from 'aelea/router'
-import type { Behavior } from 'aelea/core'
-import { $row, spacing, $icon } from 'aelea/ui-components'
-import { pallete } from 'aelea/ui-components-theme'
 
 interface MainMenu {
   parentRoute: Route

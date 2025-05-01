@@ -1,59 +1,96 @@
-import { chain, constant, continueWith, filter, switchLatest, until } from "@most/core"
-import { disposeWith } from "@most/disposable"
-import type { Stream } from "@most/types";
-import { eventElementTarget } from "../../dom/index.js";
-import type { IBranch, IBranchElement } from "../../dom/types.js";
+import {
+  chain,
+  constant,
+  continueWith,
+  filter,
+  switchLatest,
+  until,
+} from '@most/core'
+import { disposeWith } from '@most/disposable'
+import type { Stream } from '@most/types'
+import { eventElementTarget } from '../../dom/index.js'
+import type { IBranch, IBranchElement } from '../../dom/types.js'
 
+export const intersection = (config: IntersectionObserverInit = {}) =>
+  chain(
+    <A extends IBranchElement>(
+      node: IBranch<A>,
+    ): Stream<IntersectionObserverEntry[]> => ({
+      run(sink, scheduler) {
+        const intersectionObserver = new IntersectionObserver((entries) => {
+          sink.event(scheduler.currentTime(), entries)
+        }, config)
 
-export const intersection = (config: IntersectionObserverInit = {}) => chain(<A extends IBranchElement>(node: IBranch<A>): Stream<IntersectionObserverEntry[]> => ({
-  run(sink, scheduler) {
+        intersectionObserver.observe(node.element)
 
-    const intersectionObserver = new IntersectionObserver(entries => {
-      sink.event(scheduler.currentTime(), entries)
-    }, config)
+        return disposeWith(([instance, el]) => instance.unobserve(el), [
+          intersectionObserver,
+          node.element,
+        ] as const)
+      },
+    }),
+  )
 
-    intersectionObserver.observe(node.element)
+export const resize = (config: ResizeObserverOptions = {}) =>
+  chain(
+    <A extends IBranchElement>(
+      node: IBranch<A>,
+    ): Stream<ResizeObserverEntry[]> => ({
+      run(sink, scheduler) {
+        const ro = new ResizeObserver((entries) => {
+          sink.event(scheduler.currentTime(), entries)
+        })
 
-    return disposeWith(([instance, el]) => instance.unobserve(el), [intersectionObserver, node.element] as const)
-  }
-}))
+        ro.observe(node.element, config)
 
-export const resize = (config: ResizeObserverOptions = {}) => chain(<A extends IBranchElement>(node: IBranch<A>): Stream<ResizeObserverEntry[]> => ({
-  run(sink, scheduler) {
+        return disposeWith(([instance, el]) => instance.unobserve(el), [
+          ro,
+          node.element,
+        ] as const)
+      },
+    }),
+  )
 
-    const ro = new ResizeObserver(entries => {
-      sink.event(scheduler.currentTime(), entries)
-    })
+export const mutation = (
+  config: MutationObserverInit = {
+    attributes: true,
+    childList: false,
+    subtree: false,
+  },
+) =>
+  chain(
+    <A extends IBranchElement>(node: IBranch<A>): Stream<MutationRecord[]> => ({
+      run(sink, scheduler) {
+        const ro = new MutationObserver((entries) => {
+          sink.event(scheduler.currentTime(), entries)
+        })
 
-    ro.observe(node.element, config)
+        ro.observe(node.element, config)
 
-    return disposeWith(([instance, el]) => instance.unobserve(el), [ro, node.element] as const)
-  }
-}))
+        return disposeWith((instance) => instance.disconnect(), ro)
+      },
+    }),
+  )
 
-export const mutation = (config: MutationObserverInit = { attributes: true, childList: false, subtree: false }) =>
-  chain(<A extends IBranchElement>(node: IBranch<A>): Stream<MutationRecord[]> => ({
-    run(sink, scheduler) {
-
-      const ro = new MutationObserver(entries => {
-        sink.event(scheduler.currentTime(), entries)
-      })
-
-      ro.observe(node.element, config)
-
-      return disposeWith(instance => instance.disconnect(), ro)
-    }
-  }))
-
-
-const documentVisibilityChange = eventElementTarget('visibilitychange', document)
-const documentVisible = filter(() => document.visibilityState === 'visible', documentVisibilityChange)
-const documentHidden = filter(() => document.visibilityState === 'hidden', documentVisibilityChange)
-
+const documentVisibilityChange = eventElementTarget(
+  'visibilitychange',
+  document,
+)
+const documentVisible = filter(
+  () => document.visibilityState === 'visible',
+  documentVisibilityChange,
+)
+const documentHidden = filter(
+  () => document.visibilityState === 'hidden',
+  documentVisibilityChange,
+)
 
 export const duringWindowActivity = <T>(source: Stream<T>) => {
   const sourceUntilInactivity = until(documentHidden, source)
-  const activity = continueWith((): Stream<T> => switchLatest(constant(activity, documentVisible)), sourceUntilInactivity)
+  const activity = continueWith(
+    (): Stream<T> => switchLatest(constant(activity, documentVisible)),
+    sourceUntilInactivity,
+  )
   return activity
 }
 
@@ -62,5 +99,5 @@ export const observer = {
   resize,
   mutation,
   documentVisibilityChange,
-  duringWindowActivity
+  duringWindowActivity,
 }

@@ -1,50 +1,63 @@
-import { multicast, filter, merge } from "@most/core"
-import type { Stream } from "@most/types"
-import type { Op } from "../../core/types.js"
+import { filter, merge, multicast } from '@most/core'
+import type { Stream } from '@most/types'
+import type { Op } from '../../core/types.js'
 
-
-type StoreFn<STORE> = <Z>(stream: Stream<Z>, writePipe: Op<Z, STORE>) => Stream<Z>
+type StoreFn<STORE> = <Z>(
+  stream: Stream<Z>,
+  writePipe: Op<Z, STORE>,
+) => Stream<Z>
 
 export type BrowserStore<STORE, StoreKey extends string> = {
   state: STORE
   store: StoreFn<STORE>
-  craete: <T, CreateStoreKey extends string>(key: CreateStoreKey, intitialState: T) => BrowserStore<T, `${StoreKey}.${CreateStoreKey}`>
+  craete: <T, CreateStoreKey extends string>(
+    key: CreateStoreKey,
+    intitialState: T,
+  ) => BrowserStore<T, `${StoreKey}.${CreateStoreKey}`>
 }
 
+export const createLocalStorageChain =
+  (keyChain: string) =>
+  <STORE, TKey extends string>(
+    key: TKey,
+    initialDefaultState: STORE,
+  ): BrowserStore<STORE, TKey> => {
+    const mktTree = `${keyChain}.${key}`
+    const storeData = localStorage.getItem(mktTree)
+    const initialState = storeData
+      ? (JSON.parse(storeData) as STORE)
+      : initialDefaultState
 
-export const createLocalStorageChain = (keyChain: string) => <STORE, TKey extends string>(key: TKey, initialDefaultState: STORE): BrowserStore<STORE, TKey> => {
-  const mktTree = `${keyChain}.${key}`
-  const storeData = localStorage.getItem(mktTree)
-  const initialState = storeData ? JSON.parse(storeData) as STORE : initialDefaultState
+    const storeCurry: StoreFn<STORE> = <Z>(
+      stream: Stream<Z>,
+      writePipe: Op<Z, STORE>,
+    ) => {
+      const multicastSource = multicast(stream)
+      const writeOp = writePipe(multicastSource)
 
-  const storeCurry: StoreFn<STORE> = <Z>(stream: Stream<Z>, writePipe: Op<Z, STORE>) => {
-    const multicastSource = multicast(stream)
-    const writeOp = writePipe(multicastSource)
+      // ignore
+      const writeEffect: Stream<never> = filter((state) => {
+        scope.state = state
+        localStorage.setItem(mktTree, JSON.stringify(state))
 
-    // ignore 
-    const writeEffect: Stream<never> = filter(state => {
-      scope.state = state
-      localStorage.setItem(mktTree, JSON.stringify(state))
+        return false
+      }, writeOp)
 
-      return false
-    }, writeOp)
+      return merge(writeEffect, multicastSource)
+    }
 
-    return merge(writeEffect, multicastSource)
+    let _state = initialState
+
+    const scope = {
+      get state() {
+        return _state
+      },
+      set state(newState) {
+        _state = newState
+      },
+      store: storeCurry,
+      craete: createLocalStorageChain(mktTree),
+    }
+
+    return scope
   }
-  
-  let _state = initialState
-
-  const scope = {
-    get state() {
-      return _state
-    },
-    set state(newState) {
-      _state = newState
-    },
-    store: storeCurry,
-    craete: createLocalStorageChain(mktTree)
-  }
-
-  return scope
-}
-

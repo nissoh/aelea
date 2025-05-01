@@ -1,10 +1,8 @@
-import { startWith, never, empty, run } from "@most/core"
-import { disposeNone } from "@most/disposable"
-import { compose } from "@most/prelude"
-import type { Stream, Sink, Time, Scheduler, Disposable } from "@most/types"
-import type { Op } from "./types.js"
-
-
+import { empty, never, run, startWith } from '@most/core'
+import { disposeNone } from '@most/disposable'
+import { compose } from '@most/prelude'
+import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
+import type { Op } from './types.js'
 
 type Fn<T, R> = (a: T) => R
 
@@ -28,8 +26,7 @@ export function isEmpty(s: Stream<unknown>): boolean {
 }
 
 export abstract class Pipe<A, B = A> implements Sink<A> {
-
-  constructor(protected readonly sink: Sink<B>) { }
+  constructor(protected readonly sink: Sink<B>) {}
 
   abstract event(t: Time, x: A): void
 
@@ -42,8 +39,12 @@ export abstract class Pipe<A, B = A> implements Sink<A> {
   }
 }
 
-
-export function tryRunning<T>(stream: Stream<T>, sink: Sink<T>, scheduler: Scheduler, time = scheduler.currentTime()) {
+export function tryRunning<T>(
+  stream: Stream<T>,
+  sink: Sink<T>,
+  scheduler: Scheduler,
+  time = scheduler.currentTime(),
+) {
   try {
     return run(sink, scheduler, stream)
   } catch (e: any) {
@@ -52,7 +53,7 @@ export function tryRunning<T>(stream: Stream<T>, sink: Sink<T>, scheduler: Sched
   }
 }
 
-export function tryEvent <A>(t: Time, x: A, sink: Sink<A>): void {
+export function tryEvent<A>(t: Time, x: A, sink: Sink<A>): void {
   try {
     sink.event(t, x)
   } catch (e: any) {
@@ -60,33 +61,71 @@ export function tryEvent <A>(t: Time, x: A, sink: Sink<A>): void {
   }
 }
 
-
 export const nullSink = <Sink<never>>{
-  event() { },
-  end() { },
+  event() {},
+  end() {},
   error(_, x) {
     console.error(x)
-  }
+  },
 }
 
 export const nullDisposable = <Disposable>{
-  dispose() { }
+  dispose() {},
 }
 
 // Define or import the identity function if not already available
-const id = <T>(x: T): T => x;
+const id = <T>(x: T): T => x
 
 // Overloads define the function composition signature (left-to-right: O(f,g,h)(x) = h(g(f(x))))
 // Kept existing overloads for clarity and type inference up to 8 arguments.
 export function O(): <T>(a: T) => T
 export function O<T, A>(fn1: Fn<T, A>): Fn<T, A>
 export function O<T, A, B>(fn1: Fn<T, A>, fn2: Fn<A, B>): Fn<T, B>
-export function O<T, A, B, C>(fn1: Fn<T, A>, fn2: Fn<A, B>, fn3: Fn<B, C>): Fn<T, C>
-export function O<T, A, B, C, D>(fn1: Fn<T, A>, fn2: Fn<A, B>, fn3: Fn<B, C>, fn4: Fn<C, D>): Fn<T, D>
-export function O<T, A, B, C, D, E>(fn1: Fn<T, A>, fn2: Fn<A, B>, fn3: Fn<B, C>, fn4: Fn<C, D>, fn5: Fn<D, E>): Fn<T, E>
-export function O<T, A, B, C, D, E, F>(fn1: Fn<T, A>, fn2: Fn<A, B>, fn3: Fn<B, C>, fn4: Fn<C, D>, fn5: Fn<D, E>, fn6: Fn<E, F>): Fn<T, F>
-export function O<T, A, B, C, D, E, F, G>(fn1: Fn<T, A>, fn2: Fn<A, B>, fn3: Fn<B, C>, fn4: Fn<C, D>, fn5: Fn<D, E>, fn6: Fn<E, F>, fn7: Fn<F, G>): Fn<T, G>
-export function O<T, A, B, C, D, E, F, G, H>(fn1: Fn<T, A>, fn2: Fn<A, B>, fn3: Fn<B, C>, fn4: Fn<C, D>, fn5: Fn<D, E>, fn6: Fn<E, F>, fn7: Fn<F, G>, fn8: Fn<G, H>): Fn<T, H>
+export function O<T, A, B, C>(
+  fn1: Fn<T, A>,
+  fn2: Fn<A, B>,
+  fn3: Fn<B, C>,
+): Fn<T, C>
+export function O<T, A, B, C, D>(
+  fn1: Fn<T, A>,
+  fn2: Fn<A, B>,
+  fn3: Fn<B, C>,
+  fn4: Fn<C, D>,
+): Fn<T, D>
+export function O<T, A, B, C, D, E>(
+  fn1: Fn<T, A>,
+  fn2: Fn<A, B>,
+  fn3: Fn<B, C>,
+  fn4: Fn<C, D>,
+  fn5: Fn<D, E>,
+): Fn<T, E>
+export function O<T, A, B, C, D, E, F>(
+  fn1: Fn<T, A>,
+  fn2: Fn<A, B>,
+  fn3: Fn<B, C>,
+  fn4: Fn<C, D>,
+  fn5: Fn<D, E>,
+  fn6: Fn<E, F>,
+): Fn<T, F>
+export function O<T, A, B, C, D, E, F, G>(
+  fn1: Fn<T, A>,
+  fn2: Fn<A, B>,
+  fn3: Fn<B, C>,
+  fn4: Fn<C, D>,
+  fn5: Fn<D, E>,
+  fn6: Fn<E, F>,
+  fn7: Fn<F, G>,
+): Fn<T, G>
+export function O<T, A, B, C, D, E, F, G, H>(
+  fn1: Fn<T, A>,
+  fn2: Fn<A, B>,
+  fn3: Fn<B, C>,
+  fn4: Fn<C, D>,
+  fn5: Fn<D, E>,
+  fn6: Fn<E, F>,
+  fn7: Fn<F, G>,
+  fn8: Fn<G, H>,
+): Fn<T, H>
 // Removed the previous final overload `...fn9: Fn<unknown, I>[]` as it was less type-safe.
 
 // Implementation: Corrected to perform left-to-right composition matching the overloads.
@@ -98,7 +137,10 @@ export function O(...fns: Fn<any, any>[]): Fn<any, any> {
   return fns.slice(1).reduce((acc, fn) => compose(fn, acc), fns[0])
 }
 
-export function groupByMap<A, B extends A[keyof A]>(list: A[], keyGetter: (v: A) => B) {
+export function groupByMap<A, B extends A[keyof A]>(
+  list: A[],
+  keyGetter: (v: A) => B,
+) {
   const map = new Map<B, A>()
   for (const item of list) {
     const key = keyGetter(item)
@@ -106,4 +148,3 @@ export function groupByMap<A, B extends A[keyof A]>(list: A[], keyGetter: (v: A)
   }
   return map
 }
-

@@ -4,8 +4,8 @@ import type { Behavior } from 'aelea/core'
 import { $text, component, style } from 'aelea/dom'
 import {
   $Button,
-  $column,
   $NumberTicker,
+  $column,
   $row,
   spacing,
 } from 'aelea/ui-components'

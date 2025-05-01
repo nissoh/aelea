@@ -19,13 +19,13 @@ import {
   take,
 } from '@most/core'
 import type { Stream } from '@most/types'
-import { type Behavior, fromCallback, O } from 'aelea/core'
+import { type Behavior, O, fromCallback } from 'aelea/core'
 import {
   $node,
   $wrapNativeElement,
-  component,
   type IBranch,
   type IStyleCSS,
+  component,
   style,
 } from 'aelea/dom'
 import { fetchJson, observer, spacing } from 'aelea/ui-components'

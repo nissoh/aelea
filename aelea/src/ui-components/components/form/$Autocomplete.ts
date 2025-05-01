@@ -9,9 +9,9 @@ import {
 } from '../../../dom/index.js'
 import type { IBranch } from '../../../dom/types.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
-import { dismissOp, interactionOp } from './form.js'
-import { InputType, type Input } from './types.js'
 import { designSheet } from '../../style/designSheet.js'
+import { dismissOp, interactionOp } from './form.js'
+import { type Input, InputType } from './types.js'
 
 export interface Autocomplete extends Input<string | number> {
   type?: InputType

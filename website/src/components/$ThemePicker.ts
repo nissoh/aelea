@@ -1,16 +1,16 @@
-import { startWith, snapshot } from '@most/core'
+import { snapshot, startWith } from '@most/core'
 import { type Behavior, O } from 'aelea/core'
 import {
-  component,
+  $svg,
   type INode,
+  attr,
+  component,
+  nodeEvent,
   style,
   stylePseudo,
-  nodeEvent,
-  $svg,
-  attr,
 } from 'aelea/dom'
 import { $icon } from 'aelea/ui-components'
-import { type Theme, theme, pallete } from 'aelea/ui-components-theme'
+import { type Theme, pallete, theme } from 'aelea/ui-components-theme'
 import { setTheme } from 'aelea/ui-components-theme-dom'
 
 export const $Picker = (themeList: Theme[]) =>
