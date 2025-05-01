@@ -9,7 +9,7 @@ import {
 import { $card, $row, $Sortable } from 'aelea/ui-components'
 import { elevation2 } from '../../../../../lib/src/ui-components/elements/$elements'
 import { flex } from '../../../../../lib/src/ui-components/style/layoutSheet'
-import { pallete } from '../../../theme'
+import { pallete } from 'aelea/ui-components-theme'
 
 export default component(
   ([_, orderTether]: Behavior<

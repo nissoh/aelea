@@ -3,10 +3,10 @@ import { chain, combine, empty, mergeArray, now, switchLatest, take, until } fro
 import $TodoItem from './$TodoItem'
 import { $element, $text, component, style } from 'aelea/dom'
 import { $Checkbox, $column, $row, spacing } from 'aelea/ui-components'
-import { pallete } from '../../../theme'
 import type { Todo } from './$CreateTodo'
 import { type Behavior, replayLatest, behavior } from 'aelea/core'
 import $CreateTodo from './$CreateTodo'
+import { pallete } from 'aelea/ui-components-theme'
 
 
 

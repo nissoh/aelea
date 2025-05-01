@@ -3,7 +3,6 @@ import { $column, $row, spacing } from 'aelea/ui-components'
 import { $Example } from '../../components/$Example'
 import { $Link } from '../../components/$Link'
 import { fadeIn } from '../../components/transitions/enter'
-import { pallete } from '../../theme'
 import $Calculator from './calculator/$Calculator'
 import $CountCounters from './count-counters/$CountCounters'
 import $DragList from './dragList/$DragList'
@@ -15,6 +14,7 @@ import $TodoApp from './todo-app/$TodoApp'
 import { $VirtualScrollExample } from './virtual-scroll/$VirtualScrollExample'
 import { match, type Route } from 'aelea/router'
 import type { Behavior } from 'aelea/core'
+import { pallete } from 'aelea/ui-components-theme'
 
 interface Website {
   router: Route

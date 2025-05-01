@@ -21,7 +21,7 @@ import {
 import { $MonacoEditor, type ModelChangeBehavior } from '../$MonacoEditor'
 import { type Behavior, O } from 'aelea/core'
 import { $column, $row } from 'aelea/ui-components'
-import { pallete, theme } from '../../theme'
+import { pallete, theme } from 'aelea/ui-components-theme'
 
 interface IMonaco {
   code: string

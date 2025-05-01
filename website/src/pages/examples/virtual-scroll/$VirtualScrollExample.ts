@@ -4,7 +4,7 @@ import type { Behavior } from "aelea/core"
 import { $text, component, style } from "aelea/dom"
 import { $TextField, $VirtualScroll, $card, $column, $row, $seperator, spacing } from "aelea/ui-components"
 import type { ScrollRequest, ScrollResponse } from "aelea/ui-components"
-import { pallete } from "../../../theme"
+import { pallete } from "aelea/ui-components-theme"
 
 
 

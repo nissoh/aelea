@@ -1,11 +1,6 @@
-import { $text, runBrowser, style } from 'aelea/dom'
+import { runBrowser } from 'aelea/dom'
+// biome-ignore lint/performance/noBarrelFile: effective applies the theme by loading this module
+export { setTheme } from 'aelea/ui-components-theme-dom'
 import $Website from './pages/$Website'
-import { loadTheme } from 'aelea/ui-components-theme-dom'
-import { $column } from 'aelea/ui-components'
-import { pallete } from './theme'
 
-loadTheme()
-
-runBrowser({ rootNode: document.body })(
-  $Website({ baseRoute: '' })({})
-)
+runBrowser({ rootNode: document.body })($Website({ baseRoute: '' })({}))

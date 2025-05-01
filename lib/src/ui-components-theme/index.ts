@@ -8,4 +8,4 @@ export type {
   Story,
   Theme,
 } from './types.js'
-export { pallete, theme, writeTheme } from './globalState.js'
+export { pallete, theme, writeTheme, themeList } from './globalState.js'

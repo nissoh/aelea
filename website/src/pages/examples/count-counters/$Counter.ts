@@ -9,7 +9,7 @@ import {
   $row,
   spacing,
 } from 'aelea/ui-components'
-import { pallete } from '../../../theme'
+import { pallete } from 'aelea/ui-components-theme'
 
 interface Counter {
   value: Stream<number>

@@ -20,8 +20,8 @@ import {
   spacing,
 } from 'aelea/ui-components'
 import { $TrashBtn } from '../../../elements/$common'
-import { pallete } from '../../../theme'
 import $Counter from './$Counter'
+import { pallete } from 'aelea/ui-components-theme'
 
 const $AddBtn = $Button({
   $content: $text('Add One'),

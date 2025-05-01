@@ -18,14 +18,14 @@ import {
   switchLatest,
   take,
 } from '@most/core'
-import { Stream } from '@most/types'
-import { Behavior, fromCallback, O } from 'aelea/core'
+import type { Stream } from '@most/types'
+import { type Behavior, fromCallback, O } from 'aelea/core'
 import {
   $node,
   $wrapNativeElement,
   component,
-  IBranch,
-  IStyleCSS,
+  type IBranch,
+  type IStyleCSS,
   style,
 } from 'aelea/dom'
 import { fetchJson, observer, spacing } from 'aelea/ui-components'

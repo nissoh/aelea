@@ -5,7 +5,7 @@ export const pallete = {
   middleground: '#FFFFFF',
   background: '#F0F0F0',
   horizon: '#CCCCCC',
-  message: '#333333',
+  message: 'red',
   primary: '#007BFF',
   positive: '#28A745',
   negative: '#DC3545',
@@ -17,7 +17,12 @@ export const theme: Theme = {
   pallete: pallete,
 }
 
-export function writeTheme(nextTheme: Theme) {
+export const themeList: Theme[] = []
+
+export function writeTheme(nextThemeList: Theme[], nextTheme: Theme) {
   Object.assign(theme, nextTheme)
   Object.assign(pallete, nextTheme.pallete)
-} 
+
+  themeList.length = 0
+  themeList.push(...nextThemeList)
+}

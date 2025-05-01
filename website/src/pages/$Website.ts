@@ -14,10 +14,10 @@ import { $row, $column, $icon, spacing, designSheet } from 'aelea/ui-components'
 import { $Picker } from '../components/$ThemePicker'
 import { fadeIn } from '../components/transitions/enter'
 import { $aeleaLogo } from '../elements/$icons'
-import { pallete, themeList } from '../theme'
 import $MainMenu from './$MainMenu'
 import $Examples from './examples/$Examples'
 import $Guide from './guide/$Guide'
+import { pallete, themeList } from 'aelea/ui-components-theme'
 
 const popStateEvent = eventElementTarget('popstate', window)
 const initialLocation = now(document.location)

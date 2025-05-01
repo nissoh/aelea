@@ -1,6 +1,5 @@
 import { $node, $text, attr, component, style } from 'aelea/dom'
 import { combine, empty, map, startWith } from '@most/core'
-import { pallete } from '../../../theme'
 import {
   $column,
   $Field,
@@ -9,6 +8,7 @@ import {
   spacing,
 } from 'aelea/ui-components'
 import { type Behavior, O } from 'aelea/core'
+import { pallete } from 'aelea/ui-components-theme'
 
 const add = (x: number, y: number) => x + y
 

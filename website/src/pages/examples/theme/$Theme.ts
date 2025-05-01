@@ -3,7 +3,7 @@ import { $column, spacing, $row, $card } from 'aelea/ui-components'
 import { elevation2 } from '../../../../../lib/src/ui-components/elements/$elements'
 import { flex } from '../../../../../lib/src/ui-components/style/layoutSheet'
 import type { Pallete, Theme } from 'aelea/ui-components-theme'
-import { themeList } from '../../../theme'
+import { themeList } from 'aelea/ui-components-theme'
 
 function getPallete(
   theme: Pallete,

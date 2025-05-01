@@ -10,7 +10,7 @@ import {
   $Button,
   $TextField,
 } from 'aelea/ui-components'
-import { pallete } from '../../../theme'
+import { pallete } from 'aelea/ui-components-theme'
 
 export function hexAlpha(color: string, opacity: number): string {
   // coerce values so ti is between 0 and 1.
