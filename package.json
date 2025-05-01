@@ -3,15 +3,19 @@
   "version": "0.0.1",
   "license": "MIT",
   "type": "module",
-  "author": "Nissan Hanina <nissanhanina@gmail.com>",
-  "private": true,
+  "scripts": {
+    "sherif": "sherif"
+  },
   "workspaces": [
     "lib",
     "website"
   ],
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "sherif": "1.5.0",
     "typescript": "^5.8.3"
   },
+  "author": "Nissan Hanina <nissanhanina@gmail.com>",
+  "private": true,
   "packageManager": "bun@1.2.9"
 }
