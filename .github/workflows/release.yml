@@ -18,21 +18,21 @@ jobs:
         with:
           node-version: 14.x
 
-      - name: Check if commit includes version information
-        # Run `yarn version check --interactive` before committing
-        run: yarn version check
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
 
       - name: Install Dependencies
-        run: yarn install --immutable
+        run: bun install --frozen-lockfile
 
       - name: Lint
-        run: yarn eslint
+        run: bun run lint
 
       - name: Build
-        run: yarn build
+        run: bun run build
 
-      - name: Publish if versioned
-        if: contains(github.ref, 'master')
-        run: yarn publish
+      - name: Release via Changesets
+        uses: changesets/action@v1
+        with:
+          publish: bun run changeset:publis
         env:
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH }}
+          NPM_TOKEN: ${{ secrets.NPM_AUTH }}
