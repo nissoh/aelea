@@ -13,6 +13,7 @@
   "workspaces": ["aelea", "website"],
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.29.2",
     "sherif": "1.5.0",
     "typescript": "^5.8.3"
