@@ -13,7 +13,7 @@ import { O } from '../../../core/common.js'
 import type { Behavior, Ops } from '../../../core/types.js'
 import { component } from '../../../dom/combinator/component.js'
 import { style } from '../../../dom/combinator/style.js'
-import { $p, $text } from '../../../dom/source/node.js'
+import { $node, $p, $text } from '../../../dom/source/node.js'
 import type { IBranch, IStyleCSS } from '../../../dom/types.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $row } from '../../elements/$elements.js'
@@ -45,7 +45,7 @@ export const $TextField = (config: TextField) =>
         ? skipRepeats(multicastValidation(change))
         : never()
 
-      const $messageLabel = $p(style({ fontSize: '75%', width: '100%' }))
+      const $messageLabel = $node(style({ fontSize: '75%', width: '100%' }))
       const $hint = hint ? now($messageLabel($text(hint))) : never()
 
       const $alert = map((msg) => {

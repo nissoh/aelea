@@ -1,4 +1,4 @@
-import { $node, $text, attr, component, style } from 'aelea/dom'
+import { $node, $p, $text, attr, component, style } from 'aelea/dom'
 import { $column, spacing } from 'aelea/ui-components'
 import { $Example } from '../../components/$Example'
 import $TSPeep from '../../components/typescript-notebook/$TSPeep'
@@ -9,40 +9,44 @@ export default () =>
     return [
       $column(
         spacing.big,
-        style({ flex: 1, alignItems: 'center' }),
+        style({ flex: 1, alignItems: 'center' })
       )(
         $Example({ file: 'src/components/$QuantumList.ts' })(
           $alert(
             $text(
-              'WIP: still in progress, external imports name have been encoded because of Monaco editor issue: https://github.com/microsoft/monaco-editor/issues/1306 ',
-            ),
+              'WIP: still in progress, external imports name have been encoded because of Monaco editor issue: https://github.com/microsoft/monaco-editor/issues/1306 '
+            )
           ),
 
           $node(
             $text('aelea uses a reactive toolkit called '),
             $anchor(
               attr({
-                href: 'https://mostcore.readthedocs.io/en/latest/index.html',
-              }),
+                href: 'https://mostcore.readthedocs.io/en/latest/index.html'
+              })
             )($text('@most/core')),
             $text(
-              ' Some basic understanding of functional programming and typescript is required, if you use Visual Studio Code IDE these code blocks will look familiar',
-            ),
+              ' Some basic understanding of functional programming and typescript is required, if you use Visual Studio Code IDE these code blocks will look familiar'
+            )
           ),
 
-          $text(
-            'The ultimate way to learn is to get your hands a little dirty, any changes in the code below will reflect it visually right below the code block',
+          $p(
+            $text(
+              'The ultimate way to learn is to get your hands a little dirty, any changes in the code below will reflect it visually right below the code block'
+            )
           ),
 
           $TSPeep({
             readOnly: false,
             code: `import { $text } from '@aelea/dom'
 
-export default $text('Yellow World')`,
+export default $text('Yellow World')`
           })({}),
 
-          $text(
-            `Nothing fancy yet, the "default export" renders a message and there is this "$text" function, "$" prefix is just a semantic for anything that will eventually emits DOM elements, it makes the code more readable to distinguish between different stream types, we'll see its usefulness later on`,
+          $p(
+            $text(
+              `Nothing fancy yet, the "default export" renders a message and there is this "$text" function, "$" prefix is just a semantic for anything that will eventually emits DOM elements, it makes the code more readable to distinguish between different stream types, we'll see its usefulness later on`
+            )
           ),
 
           $TSPeep({
@@ -58,12 +62,10 @@ export default $container(style({alignSelf: 'center'}))(
     $container(
         $text('Yellow World')
     )
-)`,
+)`
           })({}),
 
-          $text(
-            'in this guide we will be creating different types of Counters in different levels of complexity',
-          ),
+          $p($text('in this guide we will be creating different types of Counters in different levels of complexity')),
 
           $TSPeep({
             readOnly: false,
@@ -79,7 +81,7 @@ const toString = map(String, accumulate)
 
 export default $node(
   $text(toString)
-)`,
+)`
           })({}),
 
           $TSPeep({
@@ -121,9 +123,9 @@ export default component((
       { increment, decrement }
     ]
   }
-)({})`,
-          })({}),
-        )({}),
-      ),
+)({})`
+          })({})
+        )({})
+      )
     ]
   })

@@ -1,5 +1,5 @@
 import type { Behavior } from 'aelea/core'
-import { $element, $text, attr, component, style, stylePseudo } from 'aelea/dom'
+import { $element, $node, $p, $text, attr, component, style, stylePseudo } from 'aelea/dom'
 import type { Route } from 'aelea/router'
 import { $icon, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
@@ -15,18 +15,13 @@ export default ({ parentRoute }: MainMenu) =>
     const guideRoute = parentRoute.create({ fragment: 'guide', title: 'Guide' })
     const examplesRoute = parentRoute.create({
       fragment: 'examples',
-      title: 'Examples',
+      title: 'Examples'
     })
 
-    const $seperator = $text(
-      style({ color: pallete.foreground, pointerEvents: 'none' }),
-    )('|')
+    const $seperator = $node(style({ color: pallete.foreground, pointerEvents: 'none' }))($text('|'))
 
     return [
-      $row(
-        spacing.small,
-        style({ alignItems: 'center', placeContent: 'center' }),
-      )(
+      $row(spacing.small, style({ alignItems: 'center', placeContent: 'center' }))(
         // $Link({ $content: $text('Why?!'), href: '/drag-and-sort', route: guideRoute })({
         //   click: sampleLinkClick()
         // }),
@@ -34,29 +29,27 @@ export default ({ parentRoute }: MainMenu) =>
         $Link({
           $content: $text("Developer's Guide"),
           url: '/p/guide',
-          route: guideRoute,
+          route: guideRoute
         })({
-          click: routeChangeTether(),
+          click: routeChangeTether()
         }),
         $seperator,
         $Link({
           $content: $text('Examples'),
           url: '/p/examples/theme',
-          route: examplesRoute,
+          route: examplesRoute
         })({
-          click: routeChangeTether(),
+          click: routeChangeTether()
         }),
         $seperator,
 
         $element('a')(
           stylePseudo(':hover', { fill: pallete.primary }),
           style({ padding: '0 4px', display: 'flex' }),
-          attr({ href: 'https://github.com/nissoh/aelea' }),
-        )(
-          $icon({ $content: $github, width: '25px', viewBox: '0 0 1024 1024' }),
-        ),
+          attr({ href: 'https://github.com/nissoh/aelea' })
+        )($icon({ $content: $github, width: '25px', viewBox: '0 0 1024 1024' }))
       ),
 
-      { routeChange },
+      { routeChange }
     ]
   })

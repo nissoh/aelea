@@ -12,7 +12,7 @@ import {
 } from '@most/core'
 import type { Stream } from '@most/types'
 import type { Behavior } from 'aelea/core'
-import { $text, component, style } from 'aelea/dom'
+import { $node, $p, $text, component, style } from 'aelea/dom'
 import {
   $TextField,
   $VirtualScroll,
@@ -32,7 +32,7 @@ function filterArrayByText(array: string[], filter: string) {
 
 const $label = (label: string, value: Stream<string> | string) =>
   $row(spacing.small)(
-    $text(style({ color: pallete.foreground }))(label),
+    $node(style({ color: pallete.foreground }))($text(label)),
     $text(value),
   )
 
@@ -53,7 +53,7 @@ export const $VirtualScrollExample = component(
     const delayWithInitial = merge(initialDelayResponse, delayResponse)
 
     let i = 0
-    const $item = $text(style({ padding: '3px 10px' }))
+    const $item = $p(style({ padding: '3px 10px' }))
 
     const stubbedData = Array(TOTAL_ITEMS)
       .fill(null)
@@ -70,7 +70,7 @@ export const $VirtualScrollExample = component(
             const pageEnd = pageStart + PAGE_SIZE
             const filteredItems = filterArrayByText(stubbedData, filter)
             const $items = filteredItems.slice(pageStart, pageEnd).map((id) => {
-              return $item(id)
+              return $item($text(id))
             })
 
             return at(delay, { $items: $items, offset: 0, pageSize: PAGE_SIZE })

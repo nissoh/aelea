@@ -1,27 +1,19 @@
-import { $node, $text, component, style } from 'aelea/dom'
+import { $node, $p, $text, component, style } from 'aelea/dom'
 import { $card, $column, $row, designSheet, layoutSheet, spacing } from 'aelea/ui-components'
 import type { Pallete, Theme } from 'aelea/ui-components-theme'
 import { themeList } from 'aelea/ui-components-theme'
 
-function getPallete(
-  theme: Pallete,
-  name: string,
-  colors: [name: string, color: string][],
-) {
+function getPallete(theme: Pallete, name: string, colors: [name: string, color: string][]) {
   return $column(spacing.tiny)(
     $text(name),
 
     ...colors.map(([name, color]) =>
       $row(spacing.default, style({ height: '30px', alignItems: 'center' }))(
-        $node(
-          style({ width: '30px', height: '30px', backgroundColor: color }),
-        )(),
-        $text(style({ flex: 1, color: theme.foreground, fontSize: '12px' }))(
-          color,
-        ),
-        $text(style({ flex: 1 }))(name),
-      ),
-    ),
+        $node(style({ width: '30px', height: '30px', backgroundColor: color }))(),
+        $node(style({ flex: 1, color: theme.foreground, fontSize: '12px' }))($text(color)),
+        $node(style({ flex: 1 }))($text(name))
+      )
+    )
   )
 }
 
@@ -38,15 +30,15 @@ export const $Pallete = (themeDef: Theme) =>
         style({
           color: theme.message,
           padding: '15px',
-          backgroundColor: theme.background,
-        }),
+          backgroundColor: theme.background
+        })
       )(
-        $text(style({ fontSize: '120%' }))(themeDef.name),
+        $p(style({ fontSize: '120%' }))($text(themeDef.name)),
         getPallete(theme, 'Action', pallete.slice(0, 1)),
         getPallete(theme, 'Story', pallete.slice(1, 2)),
         getPallete(theme, 'Landscape', pallete.slice(2, 6)),
-        getPallete(theme, 'Attention', pallete.slice(6, 9)),
-      ),
+        getPallete(theme, 'Attention', pallete.slice(6, 9))
+      )
     ]
   })
 
@@ -55,7 +47,7 @@ export const $Theme = component(() => {
     $row(spacing.big)(
       ...themeList.map((themeDef) => {
         return $Pallete(themeDef)({})
-      }),
-    ),
+      })
+    )
   ]
 })

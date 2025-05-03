@@ -13,6 +13,8 @@ import { type Behavior, O } from 'aelea/core'
 import {
   type $Node,
   $custom,
+  $node,
+  $p,
   $text,
   component,
   motion,
@@ -75,14 +77,14 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
             config: {
               readOnly,
               automaticLayout: true,
-              theme: theme.name === 'light' ? 'vs-light' : 'vs-dark',
+              theme: theme.name === 'light' ? 'vs-light' : 'vs-dark'
             },
-            containerStyle: { height: `${initalCodeBlockHeight}px` },
+            containerStyle: { height: `${initalCodeBlockHeight}px` }
           })({
-            change: changeTether(),
+            change: changeTether()
           }),
           $row(
-            style({ backgroundColor: pallete.background, minHeight: '30px' }),
+            style({ backgroundColor: pallete.background, minHeight: '30px' })
           )(
             $loader,
 
@@ -95,7 +97,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                       model,
                       worker,
                       semanticDiagnostics,
-                      syntacticDiagnostics,
+                      syntacticDiagnostics
                     }: ModelChangeBehavior): Promise<$Node> => {
                       if (
                         semanticDiagnostics.length ||
@@ -105,40 +107,38 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                       }
 
                       const emittedFiles = await worker.getEmitOutput(
-                        model.uri.toString(),
+                        model.uri.toString()
                       )
                       const file = emittedFiles.outputFiles[0].text
                       const refImports = file.replace(
                         /(} from '%40)/g,
-                        `} from 'https://esm.run/@`,
+                        `} from 'https://esm.run/@`
                       )
 
                       const esModuleBlobUrl = URL.createObjectURL(
-                        new Blob([refImports], { type: 'text/javascript' }),
+                        new Blob([refImports], { type: 'text/javascript' })
                       )
-                      const esModule = await import(
-                        /* webpackIgnore: true */ esModuleBlobUrl
-                      )
+                      const esModule = await import(/* @vite-ignore */ esModuleBlobUrl)
 
                       const value: $Node = esModule.default ?? empty()
 
                       return value
-                    },
+                    }
                   ),
                   awaitPromises,
                   filter((node) => node !== never()),
                   startWith(
-                    $text(
-                      style({ color: pallete.foreground, fontSize: '75%' }),
-                    )('Loading Typescript Service...'),
-                  ),
-                )(change),
-              ),
-            ),
-          ),
+                    $node(style({ color: pallete.foreground, fontSize: '75%' }))(
+                      $text('Loading Typescript Service...')
+                    )
+                  )
+                )(change)
+              )
+            )
+          )
         ),
 
-        { change },
+        { change }
       ]
     },
   )
