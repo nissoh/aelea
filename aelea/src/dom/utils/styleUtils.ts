@@ -1,4 +1,4 @@
-import { loop } from '@most/core'
+import { scan } from '@most/core'
 import type { Stream } from '@most/types'
 import type { IBranch, IStyleCSS, StyleEnvironment } from '../types.js'
 
@@ -9,13 +9,13 @@ export function applyStyleBehavior(
 ) {
   let latestClass: string
 
-  return loop(
+  return scan(
     (previousCssRule: null | ReturnType<typeof useStyleRule>, styleObject) => {
       if (previousCssRule) {
         if (styleObject === null) {
           node.element.classList.remove(previousCssRule)
 
-          return { seed: null, value: '' }
+          return ''
         }
         const cashedCssClas = useStyleRule(styleEnv, styleObject)
 
@@ -23,7 +23,7 @@ export function applyStyleBehavior(
           node.element.classList.replace(latestClass, cashedCssClas)
           latestClass = cashedCssClas
 
-          return { seed: cashedCssClas, value: cashedCssClas }
+          return cashedCssClas
         }
       }
 
@@ -33,10 +33,10 @@ export function applyStyleBehavior(
         node.element.classList.add(cashedCssClas)
         latestClass = cashedCssClas
 
-        return { seed: cashedCssClas, value: cashedCssClas }
+        return cashedCssClas
       }
 
-      return { seed: previousCssRule, value: '' }
+      return ''
     },
     null,
     styleBehavior,

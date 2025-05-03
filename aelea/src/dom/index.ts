@@ -21,6 +21,7 @@ export {
   $element,
   $node,
   $svg,
+  $p,
   $text,
   $wrapNativeElement,
   branch,
@@ -33,7 +34,6 @@ export type {
   IElementConfig,
   INode,
   INodeElement,
-  $Text,
-  NodeComposeFn,
+  IComposeOrSeed,
   IStyleCSS,
 } from './types.js'

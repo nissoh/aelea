@@ -20,7 +20,7 @@ import {
   style,
   styleBehavior,
 } from '../../../dom/index.js'
-import type { NodeComposeFn } from '../../../dom/types.js'
+import type { IComposeOrSeed } from '../../../dom/types.js'
 import type { $Node, INode } from '../../../dom/utils.js'
 import { colorAlpha } from '../../../ui-components-theme/color.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
@@ -37,14 +37,14 @@ export const $defaultPopoverContentContainer = $column(
   }),
 )
 
-interface IPocus {
+interface IPopover {
   open: Stream<$Node>
   dismiss?: Stream<any>
 
   $target: $Node
 
-  $contentContainer?: NodeComposeFn<$Node>
-  $container?: NodeComposeFn<$Node>
+  $contentContainer?: IComposeOrSeed<$Node>
+  $container?: IComposeOrSeed<$Node>
   spacing?: number
 }
 
@@ -55,7 +55,7 @@ export const $Popover = ({
   $contentContainer = $defaultPopoverContentContainer,
   $container = $node,
   $target,
-}: IPocus) =>
+}: IPopover) =>
   component(
     (
       [overlayClick, overlayClickTether]: Behavior<INode, false>,

@@ -2,21 +2,19 @@ import { empty, never, run, startWith } from '@most/core'
 import { disposeNone } from '@most/disposable'
 import { compose } from '@most/prelude'
 import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
-import type { Os } from './types.js'
-
-type Fn<T, R> = (a: T) => R
+import type { Fn, Op, Ops } from './types.js'
 
 export const xForver = <T>(x: T) => startWith(x, never())
 
-export function maybeOp<A, B, C>(a: Os<A, B>, b?: Os<B, C>) {
-  return b ? compose(b, a) : a
+export function maybeOps<A, B>(a?: Ops<A, B>) {
+  return a ? a : O()
 }
 
 export function isStream(s: unknown): s is Stream<unknown> {
   return s instanceof Object && 'run' in s
 }
 
-export function isFunction(s: unknown): s is Os<unknown, unknown> {
+export function isFunction(s: unknown): s is Ops<unknown, unknown> {
   return s instanceof Function
 }
 
@@ -39,12 +37,7 @@ export abstract class Pipe<A, B = A> implements Sink<A> {
   }
 }
 
-export function tryRunning<T>(
-  stream: Stream<T>,
-  sink: Sink<T>,
-  scheduler: Scheduler,
-  time = scheduler.currentTime(),
-) {
+export function tryRunning<T>(stream: Stream<T>, sink: Sink<T>, scheduler: Scheduler, time = scheduler.currentTime()) {
   try {
     return run(sink, scheduler, stream)
   } catch (e: any) {
@@ -66,84 +59,21 @@ export const nullSink = <Sink<never>>{
   end() {},
   error(_, x) {
     console.error(x)
-  },
+  }
 }
 
 export const nullDisposable = <Disposable>{
-  dispose() {},
+  dispose() {}
 }
 
-// Define or import the identity function if not already available
-const id = <T>(x: T): T => x
-
-// Overloads define the function composition signature (left-to-right: O(f,g,h)(x) = h(g(f(x))))
-// Kept existing overloads for clarity and type inference up to 8 arguments.
-export function O(): <T>(a: T) => T
-export function O<T, A>(fn1: Fn<T, A>): Fn<T, A>
-export function O<T, A, B>(fn1: Fn<T, A>, fn2: Fn<A, B>): Fn<T, B>
-export function O<T, A, B, C>(
-  fn1: Fn<T, A>,
-  fn2: Fn<A, B>,
-  fn3: Fn<B, C>,
-): Fn<T, C>
-export function O<T, A, B, C, D>(
-  fn1: Fn<T, A>,
-  fn2: Fn<A, B>,
-  fn3: Fn<B, C>,
-  fn4: Fn<C, D>,
-): Fn<T, D>
-export function O<T, A, B, C, D, E>(
-  fn1: Fn<T, A>,
-  fn2: Fn<A, B>,
-  fn3: Fn<B, C>,
-  fn4: Fn<C, D>,
-  fn5: Fn<D, E>,
-): Fn<T, E>
-export function O<T, A, B, C, D, E, F>(
-  fn1: Fn<T, A>,
-  fn2: Fn<A, B>,
-  fn3: Fn<B, C>,
-  fn4: Fn<C, D>,
-  fn5: Fn<D, E>,
-  fn6: Fn<E, F>,
-): Fn<T, F>
-export function O<T, A, B, C, D, E, F, G>(
-  fn1: Fn<T, A>,
-  fn2: Fn<A, B>,
-  fn3: Fn<B, C>,
-  fn4: Fn<C, D>,
-  fn5: Fn<D, E>,
-  fn6: Fn<E, F>,
-  fn7: Fn<F, G>,
-): Fn<T, G>
-export function O<T, A, B, C, D, E, F, G, H>(
-  fn1: Fn<T, A>,
-  fn2: Fn<A, B>,
-  fn3: Fn<B, C>,
-  fn4: Fn<C, D>,
-  fn5: Fn<D, E>,
-  fn6: Fn<E, F>,
-  fn7: Fn<F, G>,
-  fn8: Fn<G, H>,
-): Fn<T, H>
-export function O<T, R>(
-  ...fn9: Fn<T, R>[]
-): Fn<T, R>
-// Removed the previous final overload `...fn9: Fn<unknown, I>[]` as it was less type-safe.
-
-// Implementation: Corrected to perform left-to-right composition matching the overloads.
 // compose(g, f) applies f first, then g.
 // We use reduce starting with the first function and compose subsequent functions onto the accumulator.
-export function O(...fns: Fn<any, any>[]): Fn<any, any> {
-  if (fns.length === 0) return id
-
-  return fns.slice(1).reduce((acc, fn) => compose(fn, acc), fns[0])
+// const applyLeft = (v: any, f: any) => f(v)
+export const O: Op =  function O(...fns: Fn<any, any>[]) {
+  return (x: any) => fns.reduce((v: any, f: any) => f(v), x)
 }
 
-export function groupByMap<A, B extends A[keyof A]>(
-  list: A[],
-  keyGetter: (v: A) => B,
-) {
+export function groupByMap<A, B extends A[keyof A]>(list: A[], keyGetter: (v: A) => B) {
   const map = new Map<B, A>()
   for (const item of list) {
     const key = keyGetter(item)

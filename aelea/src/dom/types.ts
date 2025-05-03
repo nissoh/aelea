@@ -1,7 +1,7 @@
 import type { Scheduler, Stream } from '@most/types'
 import type * as CSS from 'csstype'
-import type { Op } from './utils.js'
 import type { SettableDisposable } from './utils/SettableDisposable.js'
+import type { Ops } from '../core/types.js'
 
 export type IStyleCSS = CSS.Properties
 
@@ -9,7 +9,6 @@ export type IAttrProperties<T> = {
   [P in keyof T]: T[P]
 }
 
-export type $Text = Stream<Text>
 export type INodeElement = Node & ChildNode
 export type IBranchElement = HTMLElement | SVGElement
 
@@ -51,42 +50,42 @@ export type $Branch<A extends IBranchElement = IBranchElement, B = {}> = Stream<
 >
 export type $Node<A extends INodeElement = INodeElement> = Stream<INode<A>>
 
-export interface NodeComposeFn<
+export interface IComposeOrSeed<
   TChildren,
   A extends IBranchElement = IBranchElement,
   B = {},
   C = {},
 > {
   <BB1, CC1>(
-    o1: Op<IBranch<A, B>, IBranch<A, BB1>>,
-  ): NodeComposeFn<TChildren, A, B & BB1, C & CC1>
+    o1: Ops<IBranch<A, B>, IBranch<A, BB1>>,
+  ): IComposeOrSeed<TChildren, A, B & BB1, C & CC1>
   <BB1, CC1, BB2, CC2>(
-    o1: Op<IBranch<A, B>, IBranch<A, BB1>>,
-    o2: Op<IBranch<A, BB1>, IBranch<A, BB1>>,
-  ): NodeComposeFn<TChildren, A, B & BB1 & BB2, C & CC1 & CC2>
+    o1: Ops<IBranch<A, B>, IBranch<A, BB1>>,
+    o2: Ops<IBranch<A, BB1>, IBranch<A, BB1>>,
+  ): IComposeOrSeed<TChildren, A, B & BB1 & BB2, C & CC1 & CC2>
   <BB1, CC1, BB2, CC2, BB3, CC3>(
-    o1: Op<IBranch<A, B>, IBranch<A, BB1>>,
-    o2: Op<IBranch<A, BB1>, IBranch<A, BB1>>,
-    o3: Op<IBranch<A, BB1>, IBranch<A, BB1>>,
-  ): NodeComposeFn<TChildren, A, B & BB1 & BB2 & BB3, C & CC1 & CC2 & CC3>
+    o1: Ops<IBranch<A, B>, IBranch<A, BB1>>,
+    o2: Ops<IBranch<A, BB1>, IBranch<A, BB1>>,
+    o3: Ops<IBranch<A, BB1>, IBranch<A, BB1>>,
+  ): IComposeOrSeed<TChildren, A, B & BB1 & BB2 & BB3, C & CC1 & CC2 & CC3>
   <BB1, CC1, BB2, CC2, BB3, BB4, CC3, CC4>(
-    o1: Op<IBranch<A, B>, IBranch<A, BB1>>,
-    o2: Op<IBranch<A, BB1>, IBranch<A, BB1>>,
-    o3: Op<IBranch<A, BB1>, IBranch<A, BB1>>,
-    o4: Op<IBranch<A, BB1>, IBranch<A, BB1>>,
-  ): NodeComposeFn<
+    o1: Ops<IBranch<A, B>, IBranch<A, BB1>>,
+    o2: Ops<IBranch<A, BB1>, IBranch<A, BB1>>,
+    o3: Ops<IBranch<A, BB1>, IBranch<A, BB1>>,
+    o4: Ops<IBranch<A, BB1>, IBranch<A, BB1>>,
+  ): IComposeOrSeed<
     TChildren,
     A,
     B & BB1 & BB2 & BB3 & BB4,
     C & CC1 & CC2 & CC3 & CC4
   >
   <BB1, CC1, BB2, CC2, BB3, BB4, CC3, CC4, BB5, CC5>(
-    o1: Op<IBranch<A, B>, IBranch<A, BB1>>,
-    o2: Op<IBranch<A, BB1>, IBranch<A, BB1>>,
-    o3: Op<IBranch<A, BB1>, IBranch<A, BB1>>,
-    o4: Op<IBranch<A, BB1>, IBranch<A, BB1>>,
-    ...o5: Op<IBranch<A, unknown>, IBranch<A, BB1>>[]
-  ): NodeComposeFn<
+    o1: Ops<IBranch<A, B>, IBranch<A, BB1>>,
+    o2: Ops<IBranch<A, BB1>, IBranch<A, BB1>>,
+    o3: Ops<IBranch<A, BB1>, IBranch<A, BB1>>,
+    o4: Ops<IBranch<A, BB1>, IBranch<A, BB1>>,
+    ...o5: Ops<IBranch<A, unknown>, IBranch<A, BB1>>[]
+  ): IComposeOrSeed<
     TChildren,
     A,
     B & BB1 & BB2 & BB3 & BB4 & BB5,

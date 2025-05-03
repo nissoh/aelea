@@ -10,10 +10,10 @@ import {
   switchLatest,
 } from '@most/core'
 import { O } from '../../../core/common.js'
-import type { Behavior, Os } from '../../../core/types.js'
+import type { Behavior, Ops } from '../../../core/types.js'
 import { component } from '../../../dom/combinator/component.js'
 import { style } from '../../../dom/combinator/style.js'
-import { $text } from '../../../dom/source/node.js'
+import { $p, $text } from '../../../dom/source/node.js'
 import type { IBranch, IStyleCSS } from '../../../dom/types.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $row } from '../../elements/$elements.js'
@@ -27,7 +27,7 @@ export interface TextField extends Field {
   hint?: string
   labelStyle?: IStyleCSS
 
-  containerOp?: Os<IBranch<HTMLInputElement>, IBranch<HTMLInputElement>>
+  containerOp?: Ops<IBranch<HTMLInputElement>, IBranch<HTMLInputElement>>
 }
 
 export const $TextField = (config: TextField) =>
@@ -45,15 +45,15 @@ export const $TextField = (config: TextField) =>
         ? skipRepeats(multicastValidation(change))
         : never()
 
-      const $messageLabel = $text(style({ fontSize: '75%', width: '100%' }))
-      const $hint = hint ? now($messageLabel(hint)) : never()
+      const $messageLabel = $p(style({ fontSize: '75%', width: '100%' }))
+      const $hint = hint ? now($messageLabel($text(hint))) : never()
 
       const $alert = map((msg) => {
         if (msg) {
           const negativeStyle = style({ color: pallete.negative })
-          return negativeStyle($messageLabel(msg) as any)
+          return negativeStyle($messageLabel($text(msg)) as any)
         }
-        return hint ? $messageLabel(hint) : empty()
+        return hint ? $messageLabel($text(hint)) : empty()
       }, validation)
 
       const $message = switchLatest(merge($hint, $alert))
@@ -64,15 +64,13 @@ export const $TextField = (config: TextField) =>
           style({ alignItems: 'flex-start' }),
         )(
           $label(layoutSheet.flex, spacing.tiny)(
-            $row(layoutSheet.flex, spacing.small)(
-              $text(
-                style({
+            $row(layoutSheet.flex, spacing.small, style({
                   alignSelf: 'flex-end',
                   cursor: 'pointer',
                   paddingBottom: '1px',
                   ...config.labelStyle,
-                }),
-              )(config.label),
+                }))(
+              $text(config.label),
               $Field({ ...config, validation: multicastValidation })({
                 change: valueTether(),
                 blur: blurTether(),

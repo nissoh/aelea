@@ -1,4 +1,4 @@
-import { loop, map, mergeArray, tap } from '@most/core'
+import { map, mergeArray, scan, tap } from '@most/core'
 import { disposeAll, disposeNone, disposeWith } from '@most/disposable'
 import { newDefaultScheduler } from '@most/scheduler'
 import type { Disposable, Sink, Stream, Time } from '@most/types'
@@ -13,16 +13,12 @@ import type {
   INodeElement,
   IStyleCSS,
   RunEnvironment,
-  StyleEnvironment,
+  StyleEnvironment
 } from './types.js'
 import { SettableDisposable } from './utils/SettableDisposable.js'
 import { useStylePseudoRule, useStyleRule } from './utils/styleUtils.js'
 
-function appendToSlot(
-  parent: IBranchElement,
-  child: INodeElement,
-  insertAt: number,
-) {
+function appendToSlot(parent: IBranchElement, child: INodeElement, insertAt: number) {
   if (insertAt === 0) return parent.prepend(child)
 
   parent.insertBefore(child, parent.children[insertAt])
@@ -33,17 +29,14 @@ export function runBrowser(config: Partial<RunEnvironment> = {}) {
     style: {
       namespace: '•',
       stylesheet: new CSSStyleSheet(),
-      cache: [],
+      cache: []
     },
     rootNode: document.body,
     scheduler: newDefaultScheduler(),
-    ...config,
+    ...config
   }
 
-  document.adoptedStyleSheets = [
-    ...document.adoptedStyleSheets,
-    composedConfig.style.stylesheet,
-  ]
+  document.adoptedStyleSheets = [...document.adoptedStyleSheets, composedConfig.style.stylesheet]
 
   const rootNode: IBranch = {
     element: composedConfig.rootNode,
@@ -52,16 +45,13 @@ export function runBrowser(config: Partial<RunEnvironment> = {}) {
     styleBehavior: [],
     insertAscending: true,
     attributesBehavior: [],
-    stylePseudo: [],
+    stylePseudo: []
   }
 
   return ($root: $Branch) => {
     const s = new BranchEffectsSink(composedConfig, rootNode, 0, [0])
 
-    map((node) => ({ ...node, segmentPosition: 0 }), $root).run(
-      s,
-      composedConfig.scheduler,
-    )
+    map((node) => ({ ...node, segmentPosition: 0 }), $root).run(s, composedConfig.scheduler)
   }
 }
 
@@ -74,26 +64,25 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
     private env: RunEnvironment,
     private parentNode: IBranch,
     private segmentPosition: number,
-    private segmentsCount: number[],
+    private segmentsCount: number[]
   ) {}
 
   event(_: Time, node: INode | IBranch) {
     try {
       node?.disposable.setDisposable(
         disposeWith((node) => {
+          console.log(node.element)
           this.segmentsCount[this.segmentPosition]--
           node.element.remove()
           const slot = this.segmentsSlotsMap[this.segmentPosition]
           const disposableBranch = slot.get(node)
           slot.delete(node)
           disposableBranch?.dispose()
-        }, node),
+        }, node)
       )
     } catch {
       console.error(node.element.nodeName)
-      throw new Error(
-        'Cannot append node that have already been rendered, check invalid node operations under ^',
-      )
+      throw new Error('Cannot append node that have already been rendered, check invalid node operations under ^')
     }
 
     let slot = 0
@@ -102,9 +91,7 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
       slot += this.segmentsCount[sIdx]
     }
 
-    const insertAt = this.parentNode.insertAscending
-      ? slot
-      : slot + this.segmentsCount[this.segmentPosition]
+    const insertAt = this.parentNode.insertAscending ? slot : slot + this.segmentsCount[this.segmentPosition]
 
     appendToSlot(this.parentNode.element, node.element, insertAt)
 
@@ -117,11 +104,7 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
 
     if ('stylePseudo' in node) {
       for (const styleDeclaration of node.stylePseudo) {
-        const selector = useStylePseudoRule(
-          this.env.style,
-          styleDeclaration.style,
-          styleDeclaration.class,
-        )
+        const selector = useStylePseudoRule(this.env.style, styleDeclaration.style, styleDeclaration.class)
         node.element.classList.add(selector)
       }
     }
@@ -133,9 +116,10 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
     }
 
     if ('styleBehavior' in node && node.styleBehavior) {
-      const disposeStyle = mergeArray(
-        node.styleBehavior.map((sb) => styleBehavior(sb, node, this.env.style)),
-      ).run(nullSink, this.env.scheduler)
+      const disposeStyle = mergeArray(node.styleBehavior.map((sb) => styleBehavior(sb, node, this.env.style))).run(
+        nullSink,
+        this.env.scheduler
+      )
 
       this.disposables.push(disposeStyle)
     }
@@ -146,31 +130,27 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
           return tap((attr) => {
             applyAttrFn(attr, node.element)
           }, attrs)
-        }),
+        })
       ).run(nullSink, this.env.scheduler)
 
       this.disposables.push(disposeStyle)
     }
 
-    const newDisp =
-      '$segments' in node
-        ? new BranchChildrenSinkList(node.$segments, this.env, node)
-        : disposeNone()
+    const newDisp = '$segments' in node ? new BranchChildrenSinkList(node.$segments, this.env, node) : disposeNone()
 
     if (!this.segmentsSlotsMap[this.segmentPosition]) {
       this.segmentsSlotsMap[this.segmentPosition] = new Map()
     }
 
-    this.segmentsSlotsMap[this.segmentPosition].set(
-      node,
-      disposeAll([...this.disposables, newDisp]),
-    )
+    this.segmentsSlotsMap[this.segmentPosition].set(node, disposeAll([...this.disposables, newDisp]))
   }
 
   end(_t: Time) {
     for (const s of this.segmentsSlotsMap) {
-      for (const d of s) {
-        d[1].dispose()
+      if (s) {
+        for (const d of s.values()) {
+          d.dispose()
+        }
       }
     }
   }
@@ -186,7 +166,7 @@ class BranchChildrenSinkList implements Disposable {
   constructor(
     $segments: $Node<INodeElement>[],
     private env: RunEnvironment,
-    private node: IBranch,
+    private node: IBranch
   ) {
     const l = $segments.length
     const segmentsCount = new Array(l).fill(0)
@@ -206,20 +186,16 @@ class BranchChildrenSinkList implements Disposable {
   }
 }
 
-function styleBehavior(
-  styleBehavior: Stream<IStyleCSS | null>,
-  node: IBranch,
-  cacheService: StyleEnvironment,
-) {
+function styleBehavior(styleBehavior: Stream<IStyleCSS | null>, node: IBranch, cacheService: StyleEnvironment) {
   let latestClass: string
 
-  return loop(
+  return scan(
     (previousCssRule: null | ReturnType<typeof useStyleRule>, styleObject) => {
       if (previousCssRule) {
         if (styleObject === null) {
           node.element.classList.remove(previousCssRule)
 
-          return { seed: null, value: '' }
+          return ''
         }
 
         const cashedCssClas = useStyleRule(cacheService, styleObject)
@@ -228,7 +204,7 @@ function styleBehavior(
           node.element.classList.replace(latestClass, cashedCssClas)
           latestClass = cashedCssClas
 
-          return { seed: cashedCssClas, value: cashedCssClas }
+          return cashedCssClas
         }
       }
 
@@ -238,13 +214,13 @@ function styleBehavior(
         node.element.classList.add(cashedCssClas)
         latestClass = cashedCssClas
 
-        return { seed: cashedCssClas, value: cashedCssClas }
+        return cashedCssClas
       }
 
-      return { seed: previousCssRule, value: '' }
+      return ''
     },
     null,
-    styleBehavior,
+    styleBehavior
   )
 }
 

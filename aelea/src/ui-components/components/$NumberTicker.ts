@@ -9,21 +9,22 @@ import {
   skip,
   skipRepeats,
   skipRepeatsWith,
-  switchLatest,
+  switchLatest
 } from '@most/core'
 import type { Stream } from '@most/types'
 import { O } from '../../core/common.js'
 import { $node, $text, style, styleBehavior } from '../../dom/index.js'
 import type { IStyleCSS } from '../../dom/types.js'
+import { $p } from '../../dom/source/node.js'
 
 export const sumFromZeroOp = scan(
   (current: number, x: number) => current + x,
-  0,
+  0
 )
 
 enum Direction {
   INCREMENT,
-  DECREMENT,
+  DECREMENT
 }
 
 type CountState = {
@@ -45,7 +46,7 @@ export const $NumberTicker = ({
   incrementColor,
   decrementColor,
   textStyle = {},
-  slots = 10,
+  slots = 10
 }: NumberConfig) => {
   const uniqueValues$ = skipRepeats(value$)
   const incrementMulticast = O(
@@ -70,26 +71,28 @@ export const $NumberTicker = ({
       return { change, dir, pos, changeStr }
     }, null),
     skip(1), // skips inital null that scans emit - preventing count from getting an inital color
-    multicast,
+    multicast
   )(uniqueValues$)
 
   const dirStyleMap = {
     [Direction.INCREMENT]: { color: incrementColor },
-    [Direction.DECREMENT]: { color: decrementColor },
+    [Direction.DECREMENT]: { color: decrementColor }
   }
 
+  const styledTextTransition = style({ transition: 'ease-out .25s color', ...textStyle })
+  
   return $node(
     ...Array(slots)
       .fill(undefined)
       .map((_, slot) =>
-        $text(
-          style({ transition: 'ease-out .25s color', ...textStyle }),
+        $node(
+          styledTextTransition,
           styleBehavior(
             switchLatest(
               O(
                 skipRepeatsWith(
                   (x: CountState, y: CountState) =>
-                    x.changeStr[slot] === y.changeStr[slot] && slot < y.pos,
+                    x.changeStr[slot] === y.changeStr[slot] && slot < y.pos
                 ),
                 map(({ pos, dir }: CountState) => {
                   const decayColor = at(1000, {})
@@ -99,19 +102,23 @@ export const $NumberTicker = ({
 
                   return merge(
                     dir ? now(dirStyleMap[dir]) : empty(),
-                    decayColor,
+                    decayColor
                   )
-                }),
-              )(incrementMulticast),
-            ),
-          ),
+                })
+              )(incrementMulticast)
+            )
+          )
         )(
-          O(
-            map(({ changeStr }: CountState) => changeStr[slot] ?? ''),
-            skipRepeats,
-          )(incrementMulticast),
-        ),
-      ),
+          $text(
+            skipRepeats(
+              map(
+                ({ changeStr }: CountState) => changeStr[slot] ?? '',
+                incrementMulticast
+              )
+            )
+          )
+        )
+      )
   )
 }
 

@@ -1,46 +1,19 @@
-import {
-  map,
-  never,
-  propagateTask,
-  skipRepeats,
-  switchLatest,
-} from '@most/core'
-import { disposeBoth } from '@most/disposable'
+import { map, mergeArray, never, now, propagateTask, scan, skipRepeatsWith } from '@most/core'
+import { disposeAll, disposeBoth } from '@most/disposable'
 import { id } from '@most/prelude'
 import { asap } from '@most/scheduler'
 import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
 import { O, isFunction } from '../../core/common.js'
-
-import type {
-  $Node,
-  IBranch,
-  IBranchElement,
-  INode,
-  NodeComposeFn,
-} from '../types.js'
-import type { Op } from '../utils.js'
+import type { $Node, IBranch, IBranchElement, IComposeOrSeed, INode } from '../types.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
-
-export const $svg = branch(<K extends keyof SVGElementTagNameMap>(a: K) =>
-  document.createElementNS('http://www.w3.org/2000/svg', a),
-)
-export const $element = branch(<K extends keyof HTMLElementTagNameMap>(a: K) =>
-  document.createElement(a),
-)
-export const $custom = branch((a: string) => document.createElement(a))
-export const $node = $custom('node')
-
-export const $wrapNativeElement = branch(
-  <A extends IBranchElement>(rootNode: A) => rootNode,
-)
-// childless nodes
-export const $text = $textFn(id)
+import type { Ops } from '../../core/types.js'
+import { filterNull } from '../../utils/combinator.js'
 
 class NodeSource<A, B extends IBranchElement> implements Stream<IBranch<B>> {
   constructor(
     private sourceValue: A,
     private sourceOp: (a: A) => B,
-    private $segments: $Node[],
+    private $segments: $Node[]
   ) {}
 
   run(sink: Sink<IBranch<B>>, scheduler: Scheduler): Disposable {
@@ -55,80 +28,80 @@ class NodeSource<A, B extends IBranchElement> implements Stream<IBranch<B>> {
       styleBehavior: [],
       insertAscending: true,
       attributesBehavior: [],
-      stylePseudo: [],
+      stylePseudo: []
     }
 
-    return disposeBoth(
-      asap(propagateTask(runAt, nodeState, sink), scheduler),
-      disposable,
-    )
+    return disposeBoth(asap(propagateTask(runAt, nodeState, sink), scheduler), disposable)
   }
 }
 
-function runAt<A extends IBranchElement>(
-  t: Time,
-  x: IBranch<A>,
-  sink: Sink<IBranch<A>>,
-): void {
-  sink.event(t, x)
-}
+const runAt = <T>(t: Time, x: T, sink: Sink<T>) => sink.event(t, x)
 
-function node(text: string): $Node<Text> {
-  return {
-    run(sink, scheduler) {
-      const element = document.createTextNode(text)
-      const disposable = new SettableDisposable()
-
-      sink.event(scheduler.currentTime(), { element, disposable })
-
-      return disposable
-    },
-  }
-}
-
-export function branch<A, B extends IBranchElement>(
-  sourceOp: (a: A) => B,
-  postOp: Op<IBranch<B>, IBranch<B>> = id,
-) {
-  return (sourceOpValue: A): NodeComposeFn<$Node, B> => {
+export function branch<A, B extends IBranchElement>(sourceOp: (a: A) => B, postOp: Ops<IBranch<B>, IBranch<B>> = id) {
+  return (composeOrSeed: A): IComposeOrSeed<$Node, B> => {
     return function nodeComposeFn(...input: any[]): any {
       if (input.some(isFunction)) {
-        // @ts-ignore
         const composedOps = O(postOp, ...input)
 
-        return branch(
-          sourceOp,
-          composedOps as Op<IBranch<B>, IBranch<B>>,
-        )(sourceOpValue)
+        return branch(sourceOp, composedOps)(composeOrSeed)
       }
 
       const $segments = input.length ? (input as $Node<B>[]) : [never()]
-      const $branch = new NodeSource(sourceOpValue, sourceOp, $segments)
+      const $branch = new NodeSource(composeOrSeed, sourceOp, $segments)
 
       return postOp($branch)
     }
   }
 }
 
-function $textFn<A extends HTMLElement>(
-  postOp: Op<IBranch<A>, IBranch<A>> = O((x) => x),
-): NodeComposeFn<string | Stream<string>, A> {
-  return function textComp(...input: any[]) {
-    if (input.some(isFunction)) {
-      // @ts-ignore
-      const composedOps = O(postOp, ...input)
+class TextSource implements Stream<INode<Text>> {
+  constructor(private textSourceList: (Stream<string> | string)[]) {}
 
-      return $textFn(composedOps as Op<IBranch<A>, IBranch<A>>) as any
-    }
+  run(sink: Sink<INode<Text>>, scheduler: Scheduler): Disposable {
+    const disposableList = this.textSourceList.map((textSource) => {
+      const sourceDisposable = new SettableDisposable()
 
-    const children: Stream<INode<Text>>[] = input.map((x) => {
-      return typeof x === 'string'
-        ? node(x)
-        : switchLatest(map(node, skipRepeats(x)))
+      if (typeof textSource === 'string') {
+        const runDisposable = now({
+          disposable: sourceDisposable,
+          element: document.createTextNode(textSource)
+        }).run(sink, scheduler)
+
+        return disposeBoth(runDisposable, sourceDisposable)
+      }
+
+      let createdTextNode: Text
+
+      const runDisposable = filterNull(
+        map((nextValue) => {
+          if (createdTextNode) {
+            createdTextNode.nodeValue = nextValue
+            return null
+          }
+
+          createdTextNode = document.createTextNode(nextValue)
+
+          return {
+            disposable: sourceDisposable,
+            element: createdTextNode
+          }
+        }, textSource)
+      ).run(sink, scheduler)
+
+      return disposeBoth(runDisposable, sourceDisposable)
     })
-
-    return branch(() => document.createElement('text'), postOp)(null)(
-      ...children,
-    )
+    return disposeAll(disposableList)
   }
 }
+
+export const $text = (...textSourceList: (Stream<string> | string)[]) => new TextSource(textSourceList)
+
+export const $svg = branch(<K extends keyof SVGElementTagNameMap>(a: K) =>
+  document.createElementNS('http://www.w3.org/2000/svg', a)
+)
+export const $element = branch(<K extends keyof HTMLElementTagNameMap>(a: K) => document.createElement(a))
+export const $custom = branch((a: string) => document.createElement(a))
+export const $node = $custom('node')
+export const $p = $element('p')
+
+export const $wrapNativeElement = branch(<A extends IBranchElement>(rootNode: A) => rootNode)

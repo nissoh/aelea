@@ -15,13 +15,14 @@ import {
 } from '@most/core'
 import type { Stream } from '@most/types'
 import { O } from '../../core/common.js'
-import type { Behavior, Os } from '../../core/types.js'
+import type { Behavior, Ops } from '../../core/types.js'
 import { $custom, $text, component, style } from '../../dom/index.js'
 import type { $Branch, $Node, IBranch } from '../../dom/types.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column } from '../elements/$elements.js'
 import { designSheet } from '../style/designSheet.js'
 import { observer } from '../utils/elementObservers.js'
+import { $p } from '../../dom/source/node.js'
 
 export type ScrollRequest = number
 
@@ -38,12 +39,12 @@ export interface QuantumScroll {
 
   $loader?: $Node
 
-  containerOps?: Os<IBranch, IBranch>
+  containerOps?: Ops<IBranch, IBranch>
 }
 
-const $defaultLoader = $text(
+const $defaultLoader = $p(
   style({ color: pallete.foreground, padding: '3px 10px' }),
-)('loading...')
+)($text('Loading...'))
 
 export const $VirtualScroll = ({
   dataSource,

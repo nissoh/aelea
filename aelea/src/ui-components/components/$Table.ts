@@ -1,17 +1,7 @@
-import {
-  chain,
-  constant,
-  map,
-  merge,
-  never,
-  now,
-  scan,
-  startWith,
-  switchLatest,
-} from '@most/core'
+import { chain, constant, map, merge, never, now, scan, startWith, switchLatest } from '@most/core'
 import type { Stream } from '@most/types'
-import { O } from '../../core/common.js'
-import type { Behavior, Os } from '../../core/types.js'
+import { maybeOps, O } from '../../core/common.js'
+import type { Behavior, Ops } from '../../core/types.js'
 import { attr } from '../../dom/combinator/attribute.js'
 import { component } from '../../dom/combinator/component.js'
 import { nodeEvent } from '../../dom/combinator/event.js'
@@ -27,13 +17,11 @@ import {
   type IScrollPagableReponse,
   type QuantumScroll,
   type ScrollRequest,
-  type ScrollResponse,
+  type ScrollResponse
 } from './$VirtualScroll.js'
 import { layoutSheet } from '../style/layoutSheet.js'
 
-export type TablePageResponse<T> =
-  | T[]
-  | (Omit<IScrollPagableReponse, '$items'> & { data: T[] })
+export type TablePageResponse<T> = T[] | (Omit<IScrollPagableReponse, '$items'> & { data: T[] })
 
 export interface IPageRequest {
   page: ScrollRequest
@@ -51,11 +39,11 @@ export interface TableOption<T, FilterState> {
   dataSource: Stream<TablePageResponse<T>>
   scrollConfig?: Omit<QuantumScroll, 'dataSource'>
 
-  bodyContainerOp?: Os<INode, INode>
+  bodyContainerOp?: Ops<INode, INode>
 
-  cellOp?: Os<INode, INode>
-  headerCellOp?: Os<INode, INode>
-  bodyCellOp?: Os<INode, INode>
+  cellOp?: Ops<INode, INode>
+  headerCellOp?: Ops<INode, INode>
+  bodyCellOp?: Ops<INode, INode>
 
   sortChange?: Stream<ISortBy<T>>
   filterChange?: Stream<FilterState>
@@ -64,10 +52,10 @@ export interface TableOption<T, FilterState> {
 
 export interface TableColumn<T> {
   $head: $Node
-  $body: Os<T, $Node>
+  $body: Ops<T, $Node>
   sortBy?: keyof T
 
-  columnOp?: Os<INode, INode>
+  columnOp?: Ops<INode, INode>
 }
 
 export const $Table = <T, FilterState = never>({
@@ -80,17 +68,14 @@ export const $Table = <T, FilterState = never>({
   bodyContainerOp = O(),
   sortChange = never(),
   filterChange = never(),
-  $sortArrowDown = $caretDown,
+  $sortArrowDown = $caretDown
 }: TableOption<T, FilterState>) =>
   component(
     (
       [scrollIndex, scrollIndexTether]: Behavior<ScrollRequest, ScrollRequest>,
-      [sortByChange, sortByChangeTether]: Behavior<INode, keyof T>,
+      [sortByChange, sortByChangeTether]: Behavior<INode, keyof T>
     ) => {
-      const cellStyle = O(
-        style({ padding: '3px 6px', overflowWrap: 'break-word' }),
-        layoutSheet.flex,
-      )
+      const cellStyle = O(style({ padding: '3px 6px', overflowWrap: 'break-word' }), layoutSheet.flex)
 
       const $cellHeader = $row(
         cellStyle,
@@ -98,10 +83,10 @@ export const $Table = <T, FilterState = never>({
         style({
           fontSize: '15px',
           alignItems: 'center',
-          color: pallete.foreground,
+          color: pallete.foreground
         }),
         cellOp || O(),
-        headerCellOp || O(),
+        headerCellOp || O()
       )
 
       const cellBodyOp = O(cellStyle, cellOp || O(), bodyCellOp || O())
@@ -112,24 +97,19 @@ export const $Table = <T, FilterState = never>({
         style({ overflow: 'auto' }),
         stylePseudo('::-webkit-scrollbar', {
           backgroundColor: 'transparent',
-          width: '6px',
-        }),
+          width: '6px'
+        })
       )
 
       const sortBy = chain((state) => {
         const changeState = scan(
           (seed, change): ISortBy<T> => {
-            const direction =
-              seed.name === change
-                ? seed.direction === 'asc'
-                  ? 'desc'
-                  : 'asc'
-                : 'desc'
+            const direction = seed.name === change ? (seed.direction === 'asc' ? 'desc' : 'asc') : 'desc'
 
             return { direction, name: change }
           },
           state,
-          sortByChange,
+          sortByChange
         )
 
         return startWith(state, changeState)
@@ -138,10 +118,9 @@ export const $Table = <T, FilterState = never>({
       const $header = $rowHeaderContainer(
         ...columns.map((col) => {
           if (col.sortBy) {
-            const behavior = sortByChangeTether(
-              nodeEvent('click'),
-              constant(col.sortBy),
-            )
+            const behavior = sortByChangeTether(nodeEvent('click'), constant(col.sortBy))
+
+            // const newLocal_1 = col.columnOp ? $cellHeader(behavior, col.columnOp) : $cellHeader(behavior)
 
             return $cellHeader(behavior, col.columnOp || O())(
               style({ cursor: 'pointer' }, col.$head),
@@ -151,36 +130,28 @@ export const $Table = <T, FilterState = never>({
                     $icon({
                       $content: $sortArrowDown,
                       fill:
-                        s.name === col.sortBy
-                          ? s.direction === 'asc'
-                            ? pallete.foreground
-                            : ''
-                          : pallete.foreground,
+                        s.name === col.sortBy ? (s.direction === 'asc' ? pallete.foreground : '') : pallete.foreground,
                       svgOps: style({ transform: 'rotate(180deg)' }),
                       width: '8px',
-                      viewBox: '0 0 32 19.43',
+                      viewBox: '0 0 32 19.43'
                     }),
                     $icon({
                       $content: $sortArrowDown,
                       fill:
-                        s.name === col.sortBy
-                          ? s.direction === 'desc'
-                            ? pallete.foreground
-                            : ''
-                          : pallete.foreground,
+                        s.name === col.sortBy ? (s.direction === 'desc' ? pallete.foreground : '') : pallete.foreground,
                       width: '8px',
-                      viewBox: '0 0 32 19.43',
-                    }),
+                      viewBox: '0 0 32 19.43'
+                    })
                   )
-                }, sortBy),
-              ),
+                }, sortBy)
+              )
             )
           }
 
           const $headCell = $cellHeader(col.columnOp || O())(col.$head)
 
           return $headCell
-        }),
+        })
       )
 
       const requestPageFilters = merge(sortByChange, filterChange)
@@ -191,16 +162,10 @@ export const $Table = <T, FilterState = never>({
             return $VirtualScroll({
               ...scrollConfig,
               dataSource: map((res): ScrollResponse => {
-                const $items = (Array.isArray(res) ? res : res.data).map(
-                  (rowData) =>
-                    $rowContainer(
-                      ...columns.map((col) =>
-                        O(
-                          cellBodyOp,
-                          col.columnOp || O(),
-                        )(switchLatest(col.$body(now(rowData)))),
-                      ),
-                    ),
+                const $items = (Array.isArray(res) ? res : res.data).map((rowData) =>
+                  $rowContainer(
+                    ...columns.map((col) => O(cellBodyOp, col.columnOp || O())(switchLatest(col.$body(now(rowData)))))
+                  )
                 )
 
                 if (Array.isArray(res)) {
@@ -210,15 +175,15 @@ export const $Table = <T, FilterState = never>({
                 return {
                   $items,
                   offset: res.offset,
-                  pageSize: res.pageSize,
+                  pageSize: res.pageSize
                 }
-              }, dataSource),
+              }, dataSource)
             })({
-              scrollIndex: scrollIndexTether(),
+              scrollIndex: scrollIndexTether()
             })
           },
-          startWith(null, requestPageFilters),
-        ),
+          startWith(null, requestPageFilters)
+        )
       )
 
       return [
@@ -227,14 +192,14 @@ export const $Table = <T, FilterState = never>({
         {
           scrollIndex,
           sortBy,
-          filterChange,
-        },
+          filterChange
+        }
       ]
-    },
+    }
   )
 
 export const $caretDown = $svg('path')(
   attr({
-    d: 'M4.616.296c.71.32 1.326.844 2.038 1.163L13.48 4.52a6.105 6.105 0 005.005 0l6.825-3.061c.71-.32 1.328-.84 2.038-1.162l.125-.053A3.308 3.308 0 0128.715 0a3.19 3.19 0 012.296.976c.66.652.989 1.427.989 2.333 0 .906-.33 1.681-.986 2.333L18.498 18.344a3.467 3.467 0 01-1.14.765c-.444.188-.891.291-1.345.314a3.456 3.456 0 01-1.31-.177 2.263 2.263 0 01-1.038-.695L.95 5.64A3.22 3.22 0 010 3.309C0 2.403.317 1.628.95.98c.317-.324.68-.568 1.088-.732a3.308 3.308 0 011.24-.244 3.19 3.19 0 011.338.293z',
-  }),
+    d: 'M4.616.296c.71.32 1.326.844 2.038 1.163L13.48 4.52a6.105 6.105 0 005.005 0l6.825-3.061c.71-.32 1.328-.84 2.038-1.162l.125-.053A3.308 3.308 0 0128.715 0a3.19 3.19 0 012.296.976c.66.652.989 1.427.989 2.333 0 .906-.33 1.681-.986 2.333L18.498 18.344a3.467 3.467 0 01-1.14.765c-.444.188-.891.291-1.345.314a3.456 3.456 0 01-1.31-.177 2.263 2.263 0 01-1.038-.695L.95 5.64A3.22 3.22 0 010 3.309C0 2.403.317 1.628.95.98c.317-.324.68-.568 1.088-.732a3.308 3.308 0 011.24-.244 3.19 3.19 0 011.338.293z'
+  })
 )()

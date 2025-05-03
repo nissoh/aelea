@@ -50,4 +50,3 @@ export type $Branch<A extends IBranchElement = IBranchElement, B = {}> = Stream<
 >
 export type $Node<A extends INodeElement = INodeElement> = Stream<INode<A>>
 
-export type Op<T, R> = (o: Stream<T>) => Stream<R>

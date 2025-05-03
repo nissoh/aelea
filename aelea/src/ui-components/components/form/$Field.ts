@@ -12,7 +12,7 @@ import {
 } from '@most/core'
 import { combineState } from '../../../core/combinator/combine.js'
 import { O } from '../../../core/common.js'
-import type { Behavior, Os } from '../../../core/types.js'
+import type { Behavior, Ops } from '../../../core/types.js'
 import {
   $element,
   component,
@@ -31,7 +31,7 @@ export interface Field extends Input<string | number> {
   name?: string
   fieldStyle?: IStyleCSS
 
-  inputOp?: Os<IBranch, IBranch>
+  inputOp?: Ops<IBranch, IBranch>
 }
 
 export const $Field = ({
