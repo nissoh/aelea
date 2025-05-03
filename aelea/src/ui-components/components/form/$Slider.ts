@@ -1,8 +1,9 @@
 import { filter, map, merge, now, switchLatest, tap } from '@most/core'
 import { O } from '../../../core/common.js'
-import type { Behavior } from '../../../core/types.js'
-import { $element, attr, component, nodeEvent, style, stylePseudo } from '../../../dom/index.js'
-import type { IBranch, IStyleCSS } from '../../../dom/types.js'
+import type { IBehavior } from "../../../core/combinator/behavior.js"
+import { $element, attr, component, nodeEvent, style, stylePseudo } from '../../../core/index.js'
+import type { IStyleCSS } from '../../../core/combinator/style.js'
+import type { IBranch } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import type { Input } from './types.js'
 
@@ -11,7 +12,7 @@ export interface Slider extends Input<number> {
 }
 
 export const $Slider = ({ value, step = 0.01 }: Slider) =>
-  component(([change, changeTether]: Behavior<IBranch<HTMLInputElement>, number>) => {
+  component(([change, changeTether]: IBehavior<IBranch<HTMLInputElement>, number>) => {
     const sliderThunmbStyle: IStyleCSS = {
       backgroundColor: pallete.primary,
       borderRadius: '50%',

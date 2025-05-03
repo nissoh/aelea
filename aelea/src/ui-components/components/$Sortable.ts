@@ -15,14 +15,15 @@ import {
 import { remove } from '@most/prelude'
 import { O } from '../../core/common.js'
 import { behavior } from '../../core/index.js'
-import type { Behavior } from '../../core/types.js'
-import { motion } from '../../dom/combinator/animate.js'
-import { component } from '../../dom/combinator/component.js'
-import { eventElementTarget, nodeEvent } from '../../dom/combinator/event.js'
-import { style, styleBehavior, styleInline } from '../../dom/combinator/style.js'
-import type { $Branch, INode } from '../../dom/types.js'
+import { motion } from '../../core/combinator/animate.js'
+import { component } from '../../core/combinator/component.js'
+import { eventElementTarget, nodeEvent } from '../../core/combinator/event.js'
+import { style, styleBehavior, styleInline } from '../../core/combinator/style.js'
+import type { INode } from '../../core/types.js'
+import type { $Branch } from '../../core/source/node.js'
 import { $column, $row } from '../elements/$elements.js'
 import { layoutSheet } from '../style/layoutSheet.js'
+import type { IBehavior } from '../../core/combinator/behavior.js'
 
 const clamp = (val: number, min: number, max: number) => (val > max ? max : val < min ? min : val)
 
@@ -53,7 +54,7 @@ interface DraggingState<T extends $Branch> {
 }
 
 export const $Sortable = <T extends $Branch>(config: DraggableList<T>) =>
-  component(([orderChange, orderChangeTether]: Behavior<DraggingState<T>, DraggingState<T>>) => {
+  component(([orderChange, orderChangeTether]: IBehavior<DraggingState<T>, DraggingState<T>>) => {
     const gap = config.gap ?? 0
     const listLength = config.$list.length
     const itemHeight = gap + config.itemHeight
@@ -77,7 +78,7 @@ export const $Sortable = <T extends $Branch>(config: DraggableList<T>) =>
         })
       )(
         ...config.$list.map(($item, i) => {
-          const [dragY, dragYTether]: Behavior<INode, DraggingState<T>> = behavior()
+          const [dragY, dragYTether]: IBehavior<INode, DraggingState<T>> = behavior()
 
           const multicastedDrag = multicast(dragY)
           const isDraggingStream = skipRepeats(map((x) => x.isDragging, multicastedDrag))

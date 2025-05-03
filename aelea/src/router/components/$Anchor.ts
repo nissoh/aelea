@@ -1,19 +1,24 @@
 import { constant, map, merge, startWith } from '@most/core'
 import { O } from '../../core/common.js'
-import type { Behavior, Ops } from '../../core/types.js'
-import { attr, component, nodeEvent, style } from '../../dom/index.js'
-import type { $Branch, IBranch } from '../../dom/types.js'
+import type { IOps } from '../../core/types.js'
+import type { IBehavior } from '../../core/combinator/behavior.js'
+import type { $Branch } from '../../core/source/node.js'
+import type { IBranch } from '../../core/source/node.js'
 import type { Route } from '../types.js'
+import { component } from '../../core/combinator/component.js'
+import { attr } from '../../core/combinator/attribute.js'
+import { style } from '../../core/combinator/style.js'
+import { nodeEvent } from '../../core/combinator/event.js'
 
 export interface IAnchor {
   url: string
   route: Route
   $anchor: $Branch
-  anchorOp?: Ops<IBranch<HTMLAnchorElement>, IBranch<HTMLAnchorElement>>
+  anchorOp?: IOps<IBranch<HTMLAnchorElement>, IBranch<HTMLAnchorElement>>
 }
 
 export const $RouterAnchor = ({ url, route, $anchor, anchorOp = O() }: IAnchor) =>
-  component(([click, clickTether]: Behavior<IBranch, string>, [focus, focusTether]: Behavior<IBranch, boolean>) => {
+  component(([click, clickTether]: IBehavior<IBranch, string>, [focus, focusTether]: IBehavior<IBranch, boolean>) => {
     const trailingSlash = /\/$/
     const href = url.replace(trailingSlash, '')
 

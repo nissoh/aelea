@@ -1,13 +1,16 @@
 import { chain, constant, map, merge, never, now, scan, startWith, switchLatest } from '@most/core'
 import type { Stream } from '@most/types'
+import { component } from '../../core/combinator/component.js'
 import { O, maybeOps } from '../../core/common.js'
-import type { Behavior, Ops } from '../../core/types.js'
-import { attr } from '../../dom/combinator/attribute.js'
-import { component } from '../../dom/combinator/component.js'
-import { nodeEvent } from '../../dom/combinator/event.js'
-import { style, stylePseudo } from '../../dom/combinator/style.js'
-import { $node, $svg } from '../../dom/source/node.js'
-import type { $Branch, $Node, INode } from '../../dom/types.js'
+import type { IOps } from '../../core/types.js'
+import type { IBehavior } from "../../core/combinator/behavior.js"
+import type { INode } from '../../core/types.js'
+import type { $Branch } from '../../core/source/node.js'
+import type { $Node } from '../../core/source/node.js'
+import { attr } from '../../core/combinator/attribute.js'
+import { nodeEvent } from '../../core/combinator/event.js'
+import { style, stylePseudo } from '../../core/combinator/style.js'
+import { $node, $svg } from '../../core/source/node.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column, $row } from '../elements/$elements.js'
 import { $icon } from '../elements/$icon.js'
@@ -39,11 +42,11 @@ export interface TableOption<T, FilterState> {
   dataSource: Stream<TablePageResponse<T>>
   scrollConfig?: Omit<QuantumScroll, 'dataSource'>
 
-  bodyContainerOp?: Ops<INode, INode>
+  bodyContainerOp?: IOps<INode, INode>
 
-  cellOp?: Ops<INode, INode>
-  headerCellOp?: Ops<INode, INode>
-  bodyCellOp?: Ops<INode, INode>
+  cellOp?: IOps<INode, INode>
+  headerCellOp?: IOps<INode, INode>
+  bodyCellOp?: IOps<INode, INode>
 
   sortChange?: Stream<ISortBy<T>>
   filterChange?: Stream<FilterState>
@@ -52,10 +55,10 @@ export interface TableOption<T, FilterState> {
 
 export interface TableColumn<T> {
   $head: $Node
-  $body: Ops<T, $Branch>
+  $body: IOps<T, $Branch>
   sortBy?: keyof T
 
-  columnOp?: Ops<INode, INode>
+  columnOp?: IOps<INode, INode>
 }
 
 export const $Table = <T, FilterState = never>({
@@ -72,8 +75,8 @@ export const $Table = <T, FilterState = never>({
 }: TableOption<T, FilterState>) =>
   component(
     (
-      [scrollIndex, scrollIndexTether]: Behavior<ScrollRequest, ScrollRequest>,
-      [sortByChange, sortByChangeTether]: Behavior<INode, keyof T>
+      [scrollIndex, scrollIndexTether]: IBehavior<ScrollRequest, ScrollRequest>,
+      [sortByChange, sortByChangeTether]: IBehavior<INode, keyof T>
     ) => {
       const cellStyle = O(style({ padding: '3px 6px', overflowWrap: 'break-word' }), layoutSheet.flex)
 

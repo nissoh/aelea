@@ -1,14 +1,15 @@
 import { constant, empty, filter, map, merge, mergeArray, multicast, switchLatest, until, zip } from '@most/core'
 import type { Stream } from '@most/types'
 import { O } from '../../../core/common.js'
-import type { Behavior } from '../../../core/types.js'
-import { $node, component, nodeEvent, style, styleBehavior } from '../../../dom/index.js'
-import type { IComposeOrSeed } from '../../../dom/types.js'
-import type { $Node, INode } from '../../../dom/utils.js'
+import { $node, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
+import type { INode } from '../../../core/types.js'
+import type { IBranchCompose } from '../../../core/source/node.js'
+import type { $Node } from '../../../core/source/node.js'
 import { colorAlpha } from '../../../ui-components-theme/color.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $column } from '../../elements/$elements.js'
 import { observer } from '../../index.js'
+import type { IBehavior } from '../../../core/combinator/behavior.js'
 
 export const $defaultPopoverContentContainer = $column(
   style({
@@ -26,8 +27,8 @@ interface IPopover {
 
   $target: $Node
 
-  $contentContainer?: IComposeOrSeed<$Node>
-  $container?: IComposeOrSeed<$Node>
+  $contentContainer?: IBranchCompose<$Node>
+  $container?: IBranchCompose<$Node>
   spacing?: number
 }
 
@@ -41,9 +42,9 @@ export const $Popover = ({
 }: IPopover) =>
   component(
     (
-      [overlayClick, overlayClickTether]: Behavior<INode, false>,
-      [targetIntersection, targetIntersectionTether]: Behavior<INode, IntersectionObserverEntry[]>,
-      [popoverContentDimension, popoverContentDimensionTether]: Behavior<INode, ResizeObserverEntry[]>
+      [overlayClick, overlayClickTether]: IBehavior<INode, false>,
+      [targetIntersection, targetIntersectionTether]: IBehavior<INode, IntersectionObserverEntry[]>,
+      [popoverContentDimension, popoverContentDimensionTether]: IBehavior<INode, ResizeObserverEntry[]>
     ) => {
       const openMulticast = multicast(open)
 

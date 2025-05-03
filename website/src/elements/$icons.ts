@@ -1,4 +1,4 @@
-import { $svg, attr } from 'aelea/dom'
+import { $svg, attr } from 'aelea/core'
 
 export const $trash = $svg('path')(
   attr({

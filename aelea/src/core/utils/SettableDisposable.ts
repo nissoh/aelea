@@ -1,15 +1,16 @@
 import { disposeNone } from '@most/disposable'
 import type { Disposable } from '@most/types'
+import type { ISettableDisposable } from '../types.js'
 
-export class SettableDisposable implements Disposable {
+export class SettableDisposable implements ISettableDisposable {
   private disposable: Disposable | undefined
   private disposed = false
 
   constructor(private initialDiposable = disposeNone()) {}
 
-  setDisposable(disposable: Disposable): void {
+  set(disposable: Disposable): void {
     if (this.disposable !== undefined) {
-      throw new Error('setDisposable called more than once')
+      throw new Error('set() called more than once')
     }
 
     this.disposable = disposable

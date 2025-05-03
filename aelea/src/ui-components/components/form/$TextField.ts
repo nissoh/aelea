@@ -1,10 +1,13 @@
 import { empty, map, merge, multicast, never, now, sample, skipRepeats, switchLatest } from '@most/core'
 import { O } from '../../../core/common.js'
-import type { Behavior, Ops } from '../../../core/types.js'
-import { component } from '../../../dom/combinator/component.js'
-import { style } from '../../../dom/combinator/style.js'
-import { $node, $p, $text } from '../../../dom/source/node.js'
-import type { IBranch, IStyleCSS } from '../../../dom/types.js'
+import type { IOps } from '../../../core/types.js'
+import type { IBehavior } from "../../../core/combinator/behavior.js"
+import { component } from '../../../core/combinator/component.js'
+import { style } from '../../../core/combinator/style.js'
+import { $node, $p } from '../../../core/source/node.js'
+import { $text } from '../../../core/source/text.js'
+import type { IStyleCSS } from '../../../core/combinator/style.js'
+import type { IBranch } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $row } from '../../elements/$elements.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
@@ -17,11 +20,11 @@ export interface TextField extends Field {
   hint?: string
   labelStyle?: IStyleCSS
 
-  containerOp?: Ops<IBranch<HTMLInputElement>, IBranch<HTMLInputElement>>
+  containerOp?: IOps<IBranch<HTMLInputElement>, IBranch<HTMLInputElement>>
 }
 
 export const $TextField = (config: TextField) =>
-  component(([change, valueTether]: Behavior<string, string>, [blur, blurTether]: Behavior<FocusEvent, FocusEvent>) => {
+  component(([change, valueTether]: IBehavior<string, string>, [blur, blurTether]: IBehavior<FocusEvent, FocusEvent>) => {
     const { hint } = config
     const multicastValidation = config.validation
       ? O(config.validation, (src) => sample(src, blur), multicast)

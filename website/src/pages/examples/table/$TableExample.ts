@@ -1,7 +1,7 @@
 import { combine, map, merge, now } from '@most/core'
 import type { Stream } from '@most/types'
-import type { Behavior } from 'aelea/core'
-import { $node, $text, component, style } from 'aelea/dom'
+import type { Behavior } from 'aelea/core-types'
+import { $node, $text, component, style } from 'aelea/core'
 import { $Table, $card, type ISortBy, type ScrollRequest, type TablePageResponse } from 'aelea/ui-components'
 
 interface ITableRow {

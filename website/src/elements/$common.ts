@@ -1,4 +1,4 @@
-import { $element, style, stylePseudo } from 'aelea/dom'
+import { $element, style, stylePseudo } from 'aelea/core'
 import { $ButtonIcon, $column, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 import { $trash } from './$icons'

@@ -1,7 +1,8 @@
 import { O } from '../../core/common.js'
-import type { Ops } from '../../core/types.js'
-import { $svg, attr, style } from '../../dom/index.js'
-import type { $Node, IBranch } from '../../dom/types.js'
+import type { IOps } from '../../core/types.js'
+import { $svg, attr, style } from '../../core/index.js'
+import type { $Node } from '../../core/source/node.js'
+import type { IBranch } from '../../core/source/node.js'
 
 interface Icon {
   /**  in pixels */
@@ -11,7 +12,7 @@ interface Icon {
   fill?: string
 
   $content: $Node
-  svgOps?: Ops<IBranch<SVGSVGElement>, IBranch<SVGSVGElement>>
+  svgOps?: IOps<IBranch<SVGSVGElement>, IBranch<SVGSVGElement>>
 }
 
 export const $icon = ({

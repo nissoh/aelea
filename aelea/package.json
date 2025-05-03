@@ -15,9 +15,9 @@
       "types": "./dist/types/core/index.d.ts",
       "import": "./dist/esm/core/index.js"
     },
-    "./dom": {
-      "types": "./dist/types/dom/index.d.ts",
-      "import": "./dist/esm/dom/index.js"
+    "./core-types": {
+      "types": "./dist/types/core/types.d.ts",
+      "import": "./dist/esm/core/types.js"
     },
     "./router": {
       "types": "./dist/types/router/index.d.ts",

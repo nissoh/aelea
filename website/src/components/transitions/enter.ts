@@ -1,5 +1,6 @@
 import { combine, continueWith, now } from '@most/core'
-import { type $Node, motion, styleInline } from 'aelea/dom'
+import { motion, styleInline } from 'aelea/core'
+import type { $Node } from 'aelea/core-types'
 
 export function fadeIn($content: $Node) {
   const fadeIn = motion({ stiffness: 70, damping: 26, precision: 3 }, 0, now(100))

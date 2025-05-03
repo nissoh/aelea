@@ -1,4 +1,4 @@
-import { $node, $p, $text, component, style } from 'aelea/dom'
+import { $node, $p, $text, component, style } from 'aelea/core'
 import { $card, $column, $row, designSheet, layoutSheet, spacing } from 'aelea/ui-components'
 import type { Pallete, Theme } from 'aelea/ui-components-theme'
 import { themeList } from 'aelea/ui-components-theme'

@@ -1,7 +1,7 @@
 import { now } from '@most/core'
 import type { Stream } from '@most/types'
 import { type Behavior, O } from 'aelea/core'
-import { component, style } from 'aelea/dom'
+import { component, style } from 'aelea/core'
 import { $Checkbox, $Field, $row, spacing } from 'aelea/ui-components'
 import { $TrashBtn } from '../../../elements/$common'
 import type { Todo } from './$CreateTodo'

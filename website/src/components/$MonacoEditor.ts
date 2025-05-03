@@ -20,7 +20,7 @@ import {
 } from '@most/core'
 import type { Stream } from '@most/types'
 import { type Behavior, O, fromCallback } from 'aelea/core'
-import { $node, $wrapNativeElement, type IBranch, type IStyleCSS, component, style } from 'aelea/dom'
+import { $node, $wrapNativeElement, type IBranch, type IStyleCSS, component, style } from 'aelea/core'
 import { fetchJson, observer, spacing } from 'aelea/ui-components'
 import type * as monaco from 'monaco-editor'
 
@@ -207,7 +207,7 @@ export async function asyncloadMonacoEditor() {
   const monacoQuery: Promise<typeof monaco> = /* @vite-ignore */ import(
     'https://cdn.skypack.dev/pin/monaco-editor@v0.23.0-nVyIshjiDqruq90zejl0/mode=imports,min/optimized/monaco-editor.js'
   )
-  const precacheAeleaDependanciesQuery = fetchAndCacheDependancyTree('@aelea/dom', '0.1.0')
+  const precacheAeleaDependanciesQuery = fetchAndCacheDependancyTree('@aelea/core', '0.1.0')
 
   // @ts-ignore
   const codiConQuery: Promise<any> = new FontFace(

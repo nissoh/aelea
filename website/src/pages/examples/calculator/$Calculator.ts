@@ -1,6 +1,6 @@
 import { combine, empty, map, startWith } from '@most/core'
 import { type Behavior, O } from 'aelea/core'
-import { $node, $text, attr, component, style } from 'aelea/dom'
+import { $node, $text, attr, component, style } from 'aelea/core'
 import { $Field, $NumberTicker, $column, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 

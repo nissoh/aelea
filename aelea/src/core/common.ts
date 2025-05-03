@@ -1,12 +1,11 @@
 import { empty, never, run, startWith } from '@most/core'
 import { disposeNone } from '@most/disposable'
-import { compose } from '@most/prelude'
 import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
-import type { Fn, Op, Ops } from './types.js'
+import type { Fn, IOps } from './types.js'
 
 export const xForver = <T>(x: T) => startWith(x, never())
 
-export function maybeOps<A, B>(a?: Ops<A, B>) {
+export function maybeOps<A, B>(a?: IOps<A, B>) {
   return a ? a : O()
 }
 
@@ -14,7 +13,7 @@ export function isStream(s: unknown): s is Stream<unknown> {
   return s instanceof Object && 'run' in s
 }
 
-export function isFunction(s: unknown): s is Ops<unknown, unknown> {
+export function isFunction(s: unknown): s is IOps<unknown, unknown> {
   return s instanceof Function
 }
 
@@ -80,4 +79,42 @@ export function groupByMap<A, B extends A[keyof A]>(list: A[], keyGetter: (v: A)
     map.set(key, item)
   }
   return map
+}
+
+export interface Op {
+  (): <I>(x: I) => I
+  <I, O>(fn1: Fn<I, O>): Fn<I, O>
+  <I, O, A>(fn1: Fn<I, A>, fn2: Fn<A, O>): Fn<I, O>
+  <I, O, A, B>(fn1: Fn<I, A>, fn2: Fn<A, B>, fn3: Fn<B, O>): Fn<I, O>
+  <I, O, A, B, C>(fn1: Fn<I, A>, fn2: Fn<A, B>, fn3: Fn<B, C>, fn4: Fn<C, O>): Fn<I, O>
+  <I, O, A, B, C, D>(fn1: Fn<I, A>, fn2: Fn<A, B>, fn3: Fn<B, C>, fn4: Fn<C, D>, fn5: Fn<D, O>): Fn<I, O>
+  <I, O, A, B, C, D, E>(
+    fn1: Fn<I, A>,
+    fn2: Fn<A, B>,
+    fn3: Fn<B, C>,
+    fn4: Fn<C, D>,
+    fn5: Fn<D, E>,
+    fn6: Fn<E, O>
+  ): Fn<I, O>
+  <I, O, A, B, C, D, E, F>(
+    fn1: Fn<I, A>,
+    fn2: Fn<A, B>,
+    fn3: Fn<B, C>,
+    fn4: Fn<C, D>,
+    fn5: Fn<D, E>,
+    fn6: Fn<E, F>,
+    fn7: Fn<F, O>
+  ): Fn<I, O>
+  <I, O, A, B, C, D, E, F, G>(
+    fn1: Fn<I, A>,
+    fn2: Fn<A, B>,
+    fn3: Fn<B, C>,
+    fn4: Fn<C, D>,
+    fn5: Fn<D, E>,
+    fn6: Fn<E, F>,
+    fn7: Fn<F, G>,
+    fn8: Fn<G, O>
+  ): Fn<I, O>
+
+  <T, R>(...fn9: Fn<T, R>[]): Fn<T, R>
 }

@@ -1,5 +1,5 @@
 import { empty, now } from '@most/core'
-import { component } from 'aelea/dom'
+import { component } from 'aelea/core'
 import { $TextField, $column, spacing } from 'aelea/ui-components'
 
 export const $AutocompleteExample = component(() => [

@@ -2,14 +2,23 @@ import { filter, map, tap } from '@most/core'
 import { curry2, curry3 } from '@most/prelude'
 import type { Stream } from '@most/types'
 import type * as CSS from 'csstype'
-import type { $Branch, IBranchElement, IStyleCSS } from '../types.js'
+import type { IBranchElement } from '../../core/types.js'
+import type { $Branch } from '../source/node.js'
 
-interface StyleCurry {
+export type IStyleCSS = CSS.Properties
+
+export interface IStyleEnvironment {
+  cache: string[]
+  namespace: string
+  stylesheet: CSSStyleSheet
+}
+
+export interface IStyleCurry {
   <C extends IBranchElement, D>(styleInput: IStyleCSS, node: $Branch<C, D>): $Branch<C, D>
   <C extends IBranchElement, D>(styleInput: IStyleCSS): (node: $Branch<C, D>) => $Branch<C, D>
 }
 
-interface StylePseudoCurry {
+export interface IStylePseudoCurry {
   <C extends IBranchElement, E extends string>(
     pseudoClass: CSS.Pseudos | E,
     styleInput: IStyleCSS,
@@ -24,7 +33,7 @@ interface StylePseudoCurry {
   ): (styleInput: IStyleCSS) => (node: $Branch<C>) => $Branch<C>
 }
 
-interface StyleBehaviorCurry {
+export interface IStyleBehaviorCurry {
   <C extends IBranchElement, D>(styleInput: Stream<IStyleCSS | null>, node: $Branch<C, D>): $Branch<C, D>
   <C extends IBranchElement, D>(styleInput: Stream<IStyleCSS | null>): (node: $Branch<C, D>) => $Branch<C, D>
 }
@@ -88,6 +97,6 @@ export const styleInline =
   }
 
 // applyStyle
-export const style: StyleCurry = curry2(styleFn)
-export const stylePseudo: StylePseudoCurry = curry3(stylePseudoFn)
-export const styleBehavior: StyleBehaviorCurry = curry2(styleBehaviorFn)
+export const style: IStyleCurry = curry2(styleFn)
+export const stylePseudo: IStylePseudoCurry = curry3(stylePseudoFn)
+export const styleBehavior: IStyleBehaviorCurry = curry2(styleBehaviorFn)

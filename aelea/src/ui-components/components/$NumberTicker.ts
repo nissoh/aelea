@@ -13,9 +13,8 @@ import {
 } from '@most/core'
 import type { Stream } from '@most/types'
 import { O } from '../../core/common.js'
-import { $node, $text, style, styleBehavior } from '../../dom/index.js'
-import { $p } from '../../dom/source/node.js'
-import type { IStyleCSS } from '../../dom/types.js'
+import { $node, $text, style, styleBehavior } from '../../core/index.js'
+import type { IStyleCSS } from '../../core/combinator/style.js'
 
 export const sumFromZeroOp = scan((current: number, x: number) => current + x, 0)
 

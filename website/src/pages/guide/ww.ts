@@ -1,5 +1,5 @@
 // import { constant, map, merge, scan } from '@most/core'
-// import { $custom, $element, $text, component, style, INode, nodeEvent } from '@aelea/dom'
+// import { $custom, $element, $text, component, style, INode, nodeEvent } from '@aelea/core'
 // import { Behavior } from '@aelea/core'
 
 // // composable style

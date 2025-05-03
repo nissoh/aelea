@@ -1,8 +1,9 @@
 import { map, mergeArray } from '@most/core'
 import { O } from '../../../core/common.js'
-import type { Behavior } from '../../../core/types.js'
-import { component, nodeEvent, style, styleBehavior } from '../../../dom/index.js'
-import type { $Node, INode } from '../../../dom/types.js'
+import type { IBehavior } from "../../../core/combinator/behavior.js"
+import { component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
+import type { INode } from '../../../core/types.js'
+import type { $Node } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $icon } from '../../elements/$icon.js'
 import { designSheet } from '../../style/designSheet.js'
@@ -11,9 +12,9 @@ import { dismissOp, interactionOp } from './form.js'
 export const $ButtonIcon = ($content: $Node) =>
   component(
     (
-      [focusStyle, interactionTether]: Behavior<INode, true>,
-      [dismissstyle, dismissTether]: Behavior<INode, false>,
-      [click, clickTether]: Behavior<INode, PointerEvent>
+      [focusStyle, interactionTether]: IBehavior<INode, true>,
+      [dismissstyle, dismissTether]: IBehavior<INode, false>,
+      [click, clickTether]: IBehavior<INode, PointerEvent>
     ) => {
       const iconOp = O(
         designSheet.control,

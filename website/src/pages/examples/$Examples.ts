@@ -1,5 +1,5 @@
 import type { Behavior } from 'aelea/core'
-import { $node, $p, $text, component, style } from 'aelea/dom'
+import { $node, $p, $text, component, style } from 'aelea/core'
 import { type Route, match } from 'aelea/router'
 import { $column, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'

@@ -1,7 +1,7 @@
 import { at, debounce, empty, join, map, merge, now, snapshot, startWith, switchLatest } from '@most/core'
 import type { Stream } from '@most/types'
 import type { Behavior } from 'aelea/core'
-import { $node, $p, $text, component, style } from 'aelea/dom'
+import { $node, $p, $text, component, style } from 'aelea/core'
 import { $TextField, $VirtualScroll, $card, $column, $row, $seperator, spacing } from 'aelea/ui-components'
 import type { ScrollRequest, ScrollResponse } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'

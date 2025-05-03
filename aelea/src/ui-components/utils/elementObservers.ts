@@ -1,8 +1,9 @@
 import { chain, constant, continueWith, filter, switchLatest, until } from '@most/core'
 import { disposeWith } from '@most/disposable'
 import type { Stream } from '@most/types'
-import { eventElementTarget } from '../../dom/index.js'
-import type { IBranch, IBranchElement } from '../../dom/types.js'
+import { eventElementTarget } from '../../core/index.js'
+import type { IBranchElement } from '../../core/types.js'
+import type { IBranch } from '../../core/source/node.js'
 
 export const intersection = (config: IntersectionObserverInit = {}) =>
   chain(

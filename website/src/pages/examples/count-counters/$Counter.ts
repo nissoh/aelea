@@ -1,7 +1,7 @@
 import { constant } from '@most/core'
 import type { Stream } from '@most/types'
 import type { Behavior } from 'aelea/core'
-import { $text, component, style } from 'aelea/dom'
+import { $text, component, style } from 'aelea/core'
 import { $Button, $NumberTicker, $column, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 

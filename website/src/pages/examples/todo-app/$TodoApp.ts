@@ -1,6 +1,6 @@
 import { chain, combine, empty, mergeArray, now, switchLatest, take, until } from '@most/core'
 import { type Behavior, behavior, replayLatest } from 'aelea/core'
-import { $element, $text, component, style } from 'aelea/dom'
+import { $element, $text, component, style } from 'aelea/core'
 import { $Checkbox, $column, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 import type { Todo } from './$CreateTodo'

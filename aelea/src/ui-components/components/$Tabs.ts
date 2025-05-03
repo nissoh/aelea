@@ -1,8 +1,8 @@
 import { map, merge, switchLatest } from '@most/core'
 import type { Stream } from '@most/types'
-import type { Behavior } from '../../core/types.js'
-import { $node, component, nodeEvent } from '../../dom/index.js'
-import type { $Node } from '../../dom/types.js'
+import type { IBehavior } from '../../core/combinator/behavior.js'
+import { $node, component, nodeEvent } from '../../core/index.js'
+import type { $Node } from '../../core/source/node.js'
 
 export interface Tab {
   content: $Node
@@ -15,7 +15,7 @@ export interface Tabs {
 }
 
 export const $Tabs = (config: Tabs) => {
-  return component(([clickTab, clickTabTether]: Behavior<any, Tab>) => {
+  return component(([clickTab, clickTabTether]: IBehavior<any, Tab>) => {
     return [
       merge(
         $node(

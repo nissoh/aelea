@@ -1,4 +1,4 @@
-import { style } from '../../dom/combinator/style.js'
+import { style } from '../../core/combinator/style.js'
 
 export const spacing = {
   tiny: style({ gap: '4px' }),

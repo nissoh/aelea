@@ -1,7 +1,8 @@
 import { map } from '@most/core'
 import { curry2 } from '@most/prelude'
 import type { Stream } from '@most/types'
-import type { $Branch, IAttrProperties, IBranchElement } from '../types.js'
+import type { IBranchElement } from '../../core/types.js'
+import type { $Branch } from '../source/node.js'
 
 interface Attr {
   <A, B, C extends IBranchElement>(attrs: IAttrProperties<A>, ns: $Branch<C, B>): $Branch<C, A & B>
@@ -22,3 +23,6 @@ export const attr: Attr = curry2((attrs, source) =>
 export const attrBehavior: AttrBehaviorCurry = curry2((attrs, source) =>
   map((ns) => ({ ...ns, attributesBehavior: [...ns.attributesBehavior, attrs] }), source)
 )
+export type IAttrProperties<T> = {
+  [P in keyof T]: T[P]
+}

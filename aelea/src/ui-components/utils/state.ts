@@ -1,8 +1,8 @@
 import { filter, merge, multicast } from '@most/core'
 import type { Stream } from '@most/types'
-import type { Ops } from '../../core/types.js'
+import type { IOps } from '../../core/types.js'
 
-type StoreFn<STORE> = <Z>(stream: Stream<Z>, writePipe: Ops<Z, STORE>) => Stream<Z>
+type StoreFn<STORE> = <Z>(stream: Stream<Z>, writePipe: IOps<Z, STORE>) => Stream<Z>
 
 export type BrowserStore<STORE, StoreKey extends string> = {
   state: STORE
@@ -20,7 +20,7 @@ export const createLocalStorageChain =
     const storeData = localStorage.getItem(mktTree)
     const initialState = storeData ? (JSON.parse(storeData) as STORE) : initialDefaultState
 
-    const storeCurry: StoreFn<STORE> = <Z>(stream: Stream<Z>, writePipe: Ops<Z, STORE>) => {
+    const storeCurry: StoreFn<STORE> = <Z>(stream: Stream<Z>, writePipe: IOps<Z, STORE>) => {
       const multicastSource = multicast(stream)
       const writeOp = writePipe(multicastSource)
 

@@ -1,4 +1,4 @@
-import { $node, $p, $text, attr, component, style } from 'aelea/dom'
+import { $node, $p, $text, attr, component, style } from 'aelea/core'
 import { $column, spacing } from 'aelea/ui-components'
 import { $Example } from '../../components/$Example'
 import $TSPeep from '../../components/typescript-notebook/$TSPeep'
@@ -38,7 +38,7 @@ export default () =>
 
           $TSPeep({
             readOnly: false,
-            code: `import { $text } from '@aelea/dom'
+            code: `import { $text } from '@aelea/core'
 
 export default $text('Yellow World')`
           })({}),
@@ -51,7 +51,7 @@ export default $text('Yellow World')`
 
           $TSPeep({
             readOnly: false,
-            code: `import { $text, $node, style } from '@aelea/dom'
+            code: `import { $text, $node, style } from '@aelea/core'
 
 const colorStyle = style({ color: 'yellow' })
 const containerStyle = style({ padding: '10px', display: 'block', border: '1px dashed yellow', borderRadius: '50px' })
@@ -69,7 +69,7 @@ export default $container(style({alignSelf: 'center'}))(
 
           $TSPeep({
             readOnly: false,
-            code: `import { $text, $node } from '@aelea/dom'
+            code: `import { $text, $node } from '@aelea/core'
 import { constant, map, periodic, scan } from '@most/core'
 
 const eventEverySecond = periodic(1000)       // stream of undefined every 1000 milliseconds
@@ -87,7 +87,7 @@ export default $node(
           $TSPeep({
             readOnly: false,
             code: `import { constant, map, merge, scan } from '@most/core'
-import { $custom, $element, $text, component, style, INode, nodeEvent } from '@aelea/dom'
+import { $custom, $element, $text, component, style, INode, nodeEvent } from '@aelea/core'
 import { Behavior } from '@aelea/core'
 
 // composable style
