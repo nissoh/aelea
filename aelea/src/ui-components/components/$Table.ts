@@ -6,8 +6,8 @@ import { attr } from '../../dom/combinator/attribute.js'
 import { component } from '../../dom/combinator/component.js'
 import { nodeEvent } from '../../dom/combinator/event.js'
 import { style, stylePseudo } from '../../dom/combinator/style.js'
-import { $svg } from '../../dom/source/node.js'
-import type { $Node, INode } from '../../dom/types.js'
+import { $node, $svg } from '../../dom/source/node.js'
+import type { $Branch, $Node, INode } from '../../dom/types.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column, $row } from '../elements/$elements.js'
 import { $icon } from '../elements/$icon.js'
@@ -52,7 +52,7 @@ export interface TableOption<T, FilterState> {
 
 export interface TableColumn<T> {
   $head: $Node
-  $body: Ops<T, $Node>
+  $body: Ops<T, $Branch>
   sortBy?: keyof T
 
   columnOp?: Ops<INode, INode>
@@ -123,7 +123,7 @@ export const $Table = <T, FilterState = never>({
             // const newLocal_1 = col.columnOp ? $cellHeader(behavior, col.columnOp) : $cellHeader(behavior)
 
             return $cellHeader(behavior, col.columnOp || O())(
-              style({ cursor: 'pointer' }, col.$head),
+              $node(style({ cursor: 'pointer' }))(col.$head),
               switchLatest(
                 map((s) => {
                   return $column(style({ cursor: 'pointer' }))(
@@ -164,7 +164,10 @@ export const $Table = <T, FilterState = never>({
               dataSource: map((res): ScrollResponse => {
                 const $items = (Array.isArray(res) ? res : res.data).map((rowData) =>
                   $rowContainer(
-                    ...columns.map((col) => O(cellBodyOp, col.columnOp || O())(switchLatest(col.$body(now(rowData)))))
+                    ...columns.map((col) => {
+                      const cellOps = O(cellBodyOp, col.columnOp || O())
+                      return cellOps(switchLatest(col.$body(now(rowData))))
+                    })
                   )
                 )
 

@@ -1,7 +1,7 @@
 import { combine, map, merge, now } from '@most/core'
 import type { Stream } from '@most/types'
 import type { Behavior } from 'aelea/core'
-import { $text, component, style } from 'aelea/dom'
+import { $node, $text, component, style } from 'aelea/dom'
 import { $Table, $card, type ISortBy, type ScrollRequest, type TablePageResponse } from 'aelea/ui-components'
 
 interface ITableRow {
@@ -63,16 +63,16 @@ export const $TableExample = component(
           columns: [
             {
               $head: $text('First'),
-              $body: map((x) => $text(x.id)),
+              $body: map((x) => $node($text(x.id))),
               sortBy: 'id'
             },
             {
               $head: $text('Second'),
-              $body: map((x) => $text(x.id))
+              $body: map((x) => $node($text(x.id)))
             },
             {
               $head: $text('Random Number'),
-              $body: map((x) => $text(x.random.toString())),
+              $body: map((x) => $node($text(x.random.toString()))),
               sortBy: 'random'
             }
           ]
