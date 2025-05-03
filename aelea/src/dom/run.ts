@@ -71,7 +71,6 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
     try {
       node?.disposable.setDisposable(
         disposeWith((node) => {
-          console.log(node.element)
           this.segmentsCount[this.segmentPosition]--
           node.element.remove()
           const slot = this.segmentsSlotsMap[this.segmentPosition]
