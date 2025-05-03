@@ -36,3 +36,4 @@ jobs:
           publish: bun run changeset:publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_AUTH }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
