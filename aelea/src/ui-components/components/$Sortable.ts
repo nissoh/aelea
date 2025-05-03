@@ -10,7 +10,7 @@ import {
   skipRepeats,
   snapshot,
   startWith,
-  switchLatest,
+  switchLatest
 } from '@most/core'
 import { remove } from '@most/prelude'
 import { O } from '../../core/common.js'
@@ -19,22 +19,16 @@ import type { Behavior } from '../../core/types.js'
 import { motion } from '../../dom/combinator/animate.js'
 import { component } from '../../dom/combinator/component.js'
 import { eventElementTarget, nodeEvent } from '../../dom/combinator/event.js'
-import {
-  style,
-  styleBehavior,
-  styleInline,
-} from '../../dom/combinator/style.js'
+import { style, styleBehavior, styleInline } from '../../dom/combinator/style.js'
 import type { $Branch, INode } from '../../dom/types.js'
 import { $column, $row } from '../elements/$elements.js'
 import { layoutSheet } from '../style/layoutSheet.js'
 
-const clamp = (val: number, min: number, max: number) =>
-  val > max ? max : val < min ? min : val
+const clamp = (val: number, min: number, max: number) => (val > max ? max : val < min ? min : val)
 
 const swap = <T>(a: T, idx: number, arr: T[]) => {
   const currentIdx = arr.indexOf(a)
-  if (currentIdx === -1)
-    throw new Error('unable to find element within the array')
+  if (currentIdx === -1) throw new Error('unable to find element within the array')
 
   const newArr = remove(currentIdx, arr)
   newArr.splice(idx, 0, a)
@@ -42,9 +36,7 @@ const swap = <T>(a: T, idx: number, arr: T[]) => {
   return newArr
 }
 
-const $dragItem = $row(
-  style({ cursor: 'grab', width: '100%', position: 'absolute' }),
-)
+const $dragItem = $row(style({ cursor: 'grab', width: '100%', position: 'absolute' }))
 
 interface DraggableList<T extends $Branch> {
   $list: T[]
@@ -61,135 +53,109 @@ interface DraggingState<T extends $Branch> {
 }
 
 export const $Sortable = <T extends $Branch>(config: DraggableList<T>) =>
-  component(
-    ([orderChange, orderChangeTether]: Behavior<
-      DraggingState<T>,
-      DraggingState<T>
-    >) => {
-      const gap = config.gap ?? 0
-      const listLength = config.$list.length
-      const itemHeight = gap + config.itemHeight
-      const containerHeight =
-        listLength > 1 ? itemHeight * listLength : config.itemHeight
+  component(([orderChange, orderChangeTether]: Behavior<DraggingState<T>, DraggingState<T>>) => {
+    const gap = config.gap ?? 0
+    const listLength = config.$list.length
+    const itemHeight = gap + config.itemHeight
+    const containerHeight = listLength > 1 ? itemHeight * listLength : config.itemHeight
 
-      const orderMulticat = multicast(orderChange)
-      const $listChangesWithInitial = startWith(
-        config.$list,
-        map((s) => s.list, orderMulticat),
-      )
-      const draggingMotion = motion({ stiffness: 150, damping: 20 })
+    const orderMulticat = multicast(orderChange)
+    const $listChangesWithInitial = startWith(
+      config.$list,
+      map((s) => s.list, orderMulticat)
+    )
+    const draggingMotion = motion({ stiffness: 150, damping: 20 })
 
-      return [
-        $column(
-          layoutSheet.flex,
-          style({
-            flex: 1,
-            userSelect: 'none',
-            position: 'relative',
-            height: `${containerHeight}px`,
-          }),
-        )(
-          ...config.$list.map(($item, i) => {
-            const [dragY, dragYTether]: Behavior<
-              INode,
-              DraggingState<T>
-            > = behavior()
+    return [
+      $column(
+        layoutSheet.flex,
+        style({
+          flex: 1,
+          userSelect: 'none',
+          position: 'relative',
+          height: `${containerHeight}px`
+        })
+      )(
+        ...config.$list.map(($item, i) => {
+          const [dragY, dragYTether]: Behavior<INode, DraggingState<T>> = behavior()
 
-            const multicastedDrag = multicast(dragY)
-            const isDraggingStream = skipRepeats(
-              map((x) => x.isDragging, multicastedDrag),
+          const multicastedDrag = multicast(dragY)
+          const isDraggingStream = skipRepeats(map((x) => x.isDragging, multicastedDrag))
+          const iHeight = config.itemHeight + (config.gap ?? 0)
+
+          const yMotion = O(
+            filter(({ $draggedItem }: DraggingState<T>) => $draggedItem !== $item),
+            map(({ list }) => list.indexOf($item) * iHeight)
+          )(orderMulticat)
+
+          const yDragPosition = merge(
+            chain((s) => {
+              if (s.isDragging) {
+                return now(s.delta)
+              }
+
+              return draggingMotion(s.delta, now(s.list.indexOf($item) * iHeight))
+            }, multicastedDrag),
+            draggingMotion(i * iHeight, yMotion)
+          )
+
+          const applyTransformStyle = combine(
+            (ypos, scale) => ({
+              transform: `translateY(${ypos}px) scale(${scale})`
+            }),
+            yDragPosition,
+            draggingMotion(
+              1,
+              map((id) => (id ? 1.1 : 1), isDraggingStream)
             )
-            const iHeight = config.itemHeight + (config.gap ?? 0)
+          )
 
-            const yMotion = O(
-              filter(
-                ({ $draggedItem }: DraggingState<T>) => $draggedItem !== $item,
-              ),
-              map(({ list }) => list.indexOf($item) * iHeight),
-            )(orderMulticat)
-
-            const yDragPosition = merge(
-              chain((s) => {
-                if (s.isDragging) {
-                  return now(s.delta)
-                }
-
-                return draggingMotion(
-                  s.delta,
-                  now(s.list.indexOf($item) * iHeight),
-                )
-              }, multicastedDrag),
-              draggingMotion(i * iHeight, yMotion),
+          const applyBoxShadowStyle = map(
+            (shadow) => ({
+              boxShadow: `0px ${shadow}px ${shadow * 3}px 0px rgba(0, 0, 0, 0.25`
+            }),
+            draggingMotion(
+              0,
+              map((id) => (id ? 5 : 0), isDraggingStream)
             )
+          )
 
-            const applyTransformStyle = combine(
-              (ypos, scale) => ({
-                transform: `translateY(${ypos}px) scale(${scale})`,
-              }),
-              yDragPosition,
-              draggingMotion(
-                1,
-                map((id) => (id ? 1.1 : 1), isDraggingStream),
-              ),
-            )
+          return $dragItem(
+            dragYTether(
+              nodeEvent('pointerdown'),
+              // list order continously changing, snapshot is used to get a(snapshot) of the latest list
+              snapshot((list, startEv) => {
+                const drag = merge(eventElementTarget('pointerup', window), eventElementTarget('pointermove', window))
+                const move = skipAfter((ev) => ev.type === 'pointerup', drag)
 
-            const applyBoxShadowStyle = map(
-              (shadow) => ({
-                boxShadow: `0px ${shadow}px ${shadow * 3}px 0px rgba(0, 0, 0, 0.25`,
-              }),
-              draggingMotion(
-                0,
-                map((id) => (id ? 5 : 0), isDraggingStream),
-              ),
-            )
+                return map((pointerEvent: PointerEvent) => {
+                  const from = list.indexOf($item)
+                  const delta = pointerEvent.clientY - (startEv.clientY - from * iHeight)
+                  const to = clamp(Math.round(delta / iHeight), 0, list.length - 1)
+                  const isPositionChange = to !== from
+                  const isDragging = pointerEvent.type === 'pointermove'
 
-            return $dragItem(
-              dragYTether(
-                nodeEvent('pointerdown'),
-                // list order continously changing, snapshot is used to get a(snapshot) of the latest list
-                snapshot((list, startEv) => {
-                  const drag = merge(
-                    eventElementTarget('pointerup', window),
-                    eventElementTarget('pointermove', window),
-                  )
-                  const move = skipAfter((ev) => ev.type === 'pointerup', drag)
+                  return {
+                    delta,
+                    isDragging,
+                    to,
 
-                  return map((pointerEvent: PointerEvent) => {
-                    const from = list.indexOf($item)
-                    const delta =
-                      pointerEvent.clientY - (startEv.clientY - from * iHeight)
-                    const to = clamp(
-                      Math.round(delta / iHeight),
-                      0,
-                      list.length - 1,
-                    )
-                    const isPositionChange = to !== from
-                    const isDragging = pointerEvent.type === 'pointermove'
+                    $draggedItem: isDragging ? $item : null,
+                    list: isPositionChange ? swap($item, to, list) : list
+                  }
+                }, move)
+              }, $listChangesWithInitial),
+              switchLatest,
+              orderChangeTether()
+            ),
 
-                    return {
-                      delta,
-                      isDragging,
-                      to,
+            styleInline(merge(applyTransformStyle, applyBoxShadowStyle)),
 
-                      $draggedItem: isDragging ? $item : null,
-                      list: isPositionChange ? swap($item, to, list) : list,
-                    }
-                  }, move)
-                }, $listChangesWithInitial),
-                switchLatest,
-                orderChangeTether(),
-              ),
+            styleBehavior(map((x) => ({ zIndex: x ? 1000 : 0 }), isDraggingStream))
+          )($item)
+        })
+      ),
 
-              styleInline(merge(applyTransformStyle, applyBoxShadowStyle)),
-
-              styleBehavior(
-                map((x) => ({ zIndex: x ? 1000 : 0 }), isDraggingStream),
-              ),
-            )($item)
-          }),
-        ),
-
-        { orderChange: $listChangesWithInitial },
-      ]
-    },
-  )
+      { orderChange: $listChangesWithInitial }
+    ]
+  })

@@ -12,7 +12,7 @@ export enum InputType {
   DATE = 'date',
   TEL = 'tel',
   URL = 'url',
-  HIDDEN = 'hidden',
+  HIDDEN = 'hidden'
 }
 
 export interface Control {

@@ -2,28 +2,27 @@ import { O } from '../../core/common.js'
 import { style, stylePseudo } from '../../dom/index.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 
-export const isFirefox =
-  navigator.userAgent.toLowerCase().indexOf('firefox') > -1
+export const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
 
 const text = style({
   fontFamily: 'inherit',
   fontWeight: 100,
-  fontSize: '1.15rem',
+  fontSize: '1.15rem'
 })
 const customScroll = isFirefox
   ? style({ scrollbarColor: `${pallete.foreground} transparent` })
   : O(
       stylePseudo('::-webkit-scrollbar-thumb:hover', {
-        backgroundColor: pallete.primary,
+        backgroundColor: pallete.primary
       }),
       stylePseudo('::-webkit-scrollbar-thumb', {
-        backgroundColor: pallete.foreground,
+        backgroundColor: pallete.foreground
       }),
       stylePseudo('::-webkit-scrollbar', {
         backgroundColor: 'transparent',
         width: '6px',
-        height: '6px',
-      }),
+        height: '6px'
+      })
     )
 
 const control = O(
@@ -32,8 +31,8 @@ const control = O(
     border: '2px solid transparent',
     color: pallete.message,
     outline: 'none',
-    flexShrink: 0,
-  }),
+    flexShrink: 0
+  })
 )
 
 const main = O(
@@ -47,9 +46,9 @@ const main = O(
     margin: '0',
     scrollbarColor: 'auto',
     scrollbarWidth: 'thin',
-    display: 'block',
+    display: 'block'
   }),
-  customScroll,
+  customScroll
 )
 
 const input = O(
@@ -63,11 +62,11 @@ const input = O(
     paddingBottom: '2px',
     flex: 1,
     padding: 0,
-    marginTop: '2px',
+    marginTop: '2px'
   }),
   stylePseudo('::placeholder', {
-    color: pallete.foreground,
-  }),
+    color: pallete.foreground
+  })
 )
 
 const btn = O(
@@ -79,30 +78,25 @@ const btn = O(
     color: pallete.message,
     padding: '5px 15px',
     display: 'flex',
-    alignItems: 'center',
-  }),
+    alignItems: 'center'
+  })
 )
 
 export const elevation1 = style({ border: `1px solid ${pallete.horizon}` })
 export const elevation2 = style({
-  boxShadow:
-    '0px 1px 1px rgba(0, 0, 0, 0.14), 0px 2px 1px rgba(0, 0, 0, 0.12), 0px 1px 3px rgba(0, 0, 0, 0.2)',
+  boxShadow: '0px 1px 1px rgba(0, 0, 0, 0.14), 0px 2px 1px rgba(0, 0, 0, 0.12), 0px 1px 3px rgba(0, 0, 0, 0.2)'
 })
 export const elevation3 = style({
-  boxShadow:
-    '0px 2px 2px rgba(0, 0, 0, 0.14), 0px 3px 1px rgba(0, 0, 0, 0.12), 0px 1px 5px rgba(0, 0, 0, 0.2)',
+  boxShadow: '0px 2px 2px rgba(0, 0, 0, 0.14), 0px 3px 1px rgba(0, 0, 0, 0.12), 0px 1px 5px rgba(0, 0, 0, 0.2)'
 })
 export const elevation4 = style({
-  boxShadow:
-    '0px 3px 4px rgba(0, 0, 0, 0.14), 0px 3px 3px rgba(0, 0, 0, 0.12), 0px 1px 8px rgba(0, 0, 0, 0.2)',
+  boxShadow: '0px 3px 4px rgba(0, 0, 0, 0.14), 0px 3px 3px rgba(0, 0, 0, 0.12), 0px 1px 8px rgba(0, 0, 0, 0.2)'
 })
 export const elevation6 = style({
-  boxShadow:
-    '0px 6px 10px rgba(0, 0, 0, 0.14), 0px 1px 18px rgba(0, 0, 0, 0.12), 0px 3px 5px rgba(0, 0, 0, 0.2)',
+  boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.14), 0px 1px 18px rgba(0, 0, 0, 0.12), 0px 3px 5px rgba(0, 0, 0, 0.2)'
 })
 export const elevation12 = style({
-  boxShadow:
-    '0px 12px 17px rgba(0, 0, 0, 0.14), 0px 5px 22px rgba(0, 0, 0, 0.12), 0px 7px 8px rgba(0, 0, 0, 0.2)',
+  boxShadow: '0px 12px 17px rgba(0, 0, 0, 0.14), 0px 5px 22px rgba(0, 0, 0, 0.12), 0px 7px 8px rgba(0, 0, 0, 0.2)'
 })
 
 export const designSheet = {
@@ -117,5 +111,5 @@ export const designSheet = {
   elevation3,
   elevation4,
   elevation6,
-  elevation12,
+  elevation12
 }

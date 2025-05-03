@@ -4,9 +4,7 @@
     "@changesets/changelog-github",
     {
       "repo": "nissoh/aelea",
-      "baseBranches": [
-        "main"
-      ]
+      "baseBranches": ["main"]
     }
   ],
   "commit": false,

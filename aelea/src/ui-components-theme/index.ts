@@ -6,6 +6,6 @@ export type {
   Landscape,
   Pallete,
   Story,
-  Theme,
+  Theme
 } from './types.js'
 export { pallete, theme, writeTheme, themeList } from './globalState.js'

@@ -2,13 +2,7 @@ import { combine, map, merge, now } from '@most/core'
 import type { Stream } from '@most/types'
 import type { Behavior } from 'aelea/core'
 import { $text, component, style } from 'aelea/dom'
-import {
-  $Table,
-  $card,
-  type ISortBy,
-  type ScrollRequest,
-  type TablePageResponse,
-} from 'aelea/ui-components'
+import { $Table, $card, type ISortBy, type ScrollRequest, type TablePageResponse } from 'aelea/ui-components'
 
 interface ITableRow {
   id: string
@@ -18,7 +12,7 @@ interface ITableRow {
 export const $TableExample = component(
   (
     [requestList, requestListTether]: Behavior<ScrollRequest, ScrollRequest>,
-    [sortBy, sortByTether]: Behavior<ISortBy<ITableRow>, ISortBy<ITableRow>>,
+    [sortBy, sortByTether]: Behavior<ISortBy<ITableRow>, ISortBy<ITableRow>>
   ) => {
     const PAGE_SIZE = 25
     let i = 0
@@ -31,7 +25,7 @@ export const $TableExample = component(
 
     const initialSort: Stream<ISortBy<ITableRow>> = now({
       direction: 'asc',
-      name: 'id',
+      name: 'id'
     })
 
     const sortState = merge(initialSort, sortBy)
@@ -45,19 +39,17 @@ export const $TableExample = component(
             const valB = b[prop]
 
             if (typeof valA === 'string' && typeof valB === 'string') {
-              return sortField.direction === 'desc'
-                ? valA.localeCompare(valB)
-                : valB.localeCompare(valA)
+              return sortField.direction === 'desc' ? valA.localeCompare(valB) : valB.localeCompare(valA)
             }
             // @ts-ignore
             return sortField.direction === 'desc' ? valB - valA : valA - valB
           }),
           offset: 0,
-          pageSize: PAGE_SIZE,
+          pageSize: PAGE_SIZE
         }
       },
       sortState,
-      requestList,
+      requestList
     )
 
     return [
@@ -65,30 +57,30 @@ export const $TableExample = component(
         $Table({
           dataSource,
           scrollConfig: {
-            containerOps: style({ height: '400px' }),
+            containerOps: style({ height: '400px' })
           },
           sortChange: initialSort,
           columns: [
             {
               $head: $text('First'),
               $body: map((x) => $text(x.id)),
-              sortBy: 'id',
+              sortBy: 'id'
             },
             {
               $head: $text('Second'),
-              $body: map((x) => $text(x.id)),
+              $body: map((x) => $text(x.id))
             },
             {
               $head: $text('Random Number'),
               $body: map((x) => $text(x.random.toString())),
-              sortBy: 'random',
-            },
-          ],
+              sortBy: 'random'
+            }
+          ]
         })({
           scrollIndex: requestListTether(),
-          sortBy: sortByTether(),
-        }),
-      ),
+          sortBy: sortByTether()
+        })
+      )
     ]
-  },
+  }
 )

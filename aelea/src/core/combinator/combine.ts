@@ -10,9 +10,7 @@ type StreamInputArray<T extends any[]> = {
   [P in keyof T]: Stream<T[P]>
 }
 
-export function combineState<A extends object, K extends keyof A = keyof A>(
-  state: StreamInput<A>,
-): Stream<A> {
+export function combineState<A extends object, K extends keyof A = keyof A>(state: StreamInput<A>): Stream<A> {
   const entries = Object.entries(state) as [keyof A, Stream<A[K] | A[K]>][]
   const streams = entries.map(([_, stream]) => {
     return isStream(stream) ? stream : now(stream)
@@ -27,16 +25,13 @@ export function combineState<A extends object, K extends keyof A = keyof A>(
         return seed
       }, {} as A)
     },
-    ...streams,
+    ...streams
   )
 
   return combined
 }
 
 // temorary typings fix for this issue https://github.com/mostjs/core/pull/543
-export function combineArray<A extends any[], B>(
-  cb: (...args: A) => B,
-  ...streamList: StreamInputArray<A>
-): Stream<B> {
+export function combineArray<A extends any[], B>(cb: (...args: A) => B, ...streamList: StreamInputArray<A>): Stream<B> {
   return combineArrayMost(cb, streamList)
 }

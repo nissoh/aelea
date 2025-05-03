@@ -1,12 +1,4 @@
-import {
-  constant,
-  continueWith,
-  loop,
-  map,
-  skipAfter,
-  startWith,
-  switchLatest,
-} from '@most/core'
+import { constant, continueWith, loop, map, skipAfter, startWith, switchLatest } from '@most/core'
 import { disposeWith } from '@most/disposable'
 import { curry3 } from '@most/prelude'
 import { currentTime } from '@most/scheduler'
@@ -35,8 +27,7 @@ class AnimationFrameSource {
 
   run(sink: Sink<AnimationFrame>, scheduler: Scheduler): Disposable {
     const requestTime = currentTime(scheduler)
-    const propagate: RafHandler = () =>
-      eventThenEnd(requestTime, currentTime(scheduler), sink)
+    const propagate: RafHandler = () => eventThenEnd(requestTime, currentTime(scheduler), sink)
     const rafId = this.afp.requestAnimationFrame(propagate)
     return disposeWith((fid) => this.afp.cancelAnimationFrame(fid), rafId)
   }
@@ -45,24 +36,21 @@ class AnimationFrameSource {
 const eventThenEnd = (
   requestTime: AnimationFrameRequestTime,
   responseTime: AnimationFrameResponseTime,
-  sink: Sink<AnimationFrame>,
+  sink: Sink<AnimationFrame>
 ) => {
   sink.event(requestTime, { requestTime, responseTime })
   sink.end(requestTime)
 }
 
-export const nextAnimationFrame = (
-  afp: AnimationFrames = window,
-): Stream<AnimationFrame> => new AnimationFrameSource(afp)
+export const nextAnimationFrame = (afp: AnimationFrames = window): Stream<AnimationFrame> =>
+  new AnimationFrameSource(afp)
 
-export const animationFrames = (
-  afp: AnimationFrames = window,
-): Stream<AnimationFrame> =>
+export const animationFrames = (afp: AnimationFrames = window): Stream<AnimationFrame> =>
   continueWith(() => animationFrames(afp), nextAnimationFrame(afp))
 
 export const drawLatest = O(
   map((x) => constant(x, nextAnimationFrame(window))),
-  switchLatest,
+  switchLatest
 ) as <A>(x: Stream<A>) => Stream<A>
 
 interface Motion {
@@ -98,42 +86,30 @@ export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
  *  @see  modified-from https://github.com/chenglou/react-motion/blob/master/src/stepper.js
  */
 export const motion = curry3(
-  (
-    motionEnvironment: Partial<Motion>,
-    initialState: number,
-    change: Stream<number>,
-  ): Stream<number> => {
+  (motionEnvironment: Partial<Motion>, initialState: number, change: Stream<number>): Stream<number> => {
     const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
-    const ma = motionState(
-      motionEnv,
-      { position: initialState, velocity: 0 },
-      change,
-    )
+    const ma = motionState(motionEnv, { position: initialState, velocity: 0 }, change)
     return map((s) => s.position, ma)
-  },
+  }
 )
 
 // used in cases where velocity feedback is needed(for renimation)
 export const motionState = curry3(
-  (
-    motionEnvironment: Partial<Motion>,
-    initialState: MotionState,
-    change: Stream<number>,
-  ): Stream<MotionState> => {
+  (motionEnvironment: Partial<Motion>, initialState: MotionState, change: Stream<number>): Stream<MotionState> => {
     const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
 
     return O(
       loop((seed: MotionState, target: number) => {
         const frames = O(
           map(() => stepFrame(target, seed, motionEnv)),
-          skipAfter((n) => n.position === target),
+          skipAfter((n) => n.position === target)
         )
         return { seed, value: frames(animationFrames()) }
       }, initialState),
       switchLatest,
-      startWith(initialState),
+      startWith(initialState)
     )(change)
-  },
+  }
 )
 
 function stepFrame(target: number, state: MotionState, motionEnv: Motion) {
@@ -148,9 +124,7 @@ function stepFrame(target: number, state: MotionState, motionEnv: Motion) {
   const newVelocity = state.velocity + acceleration * fps
   const newPosition = state.position + newVelocity * fps
 
-  const settled =
-    Math.abs(newVelocity) < motionEnv.precision &&
-    Math.abs(delta) < motionEnv.precision
+  const settled = Math.abs(newVelocity) < motionEnv.precision && Math.abs(delta) < motionEnv.precision
 
   state.velocity = newVelocity
   state.position = settled ? target : newPosition

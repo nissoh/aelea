@@ -17,12 +17,12 @@ import type { Stream } from '@most/types'
 import { O } from '../../core/common.js'
 import type { Behavior, Ops } from '../../core/types.js'
 import { $custom, $text, component, style } from '../../dom/index.js'
+import { $node } from '../../dom/source/node.js'
 import type { $Branch, $Node, IBranch } from '../../dom/types.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column } from '../elements/$elements.js'
 import { designSheet } from '../style/designSheet.js'
 import { observer } from '../utils/elementObservers.js'
-import { $node } from '../../dom/source/node.js'
 
 export type ScrollRequest = number
 

@@ -1,6 +1,6 @@
 import { chain, constant, map, merge, never, now, scan, startWith, switchLatest } from '@most/core'
 import type { Stream } from '@most/types'
-import { maybeOps, O } from '../../core/common.js'
+import { O, maybeOps } from '../../core/common.js'
 import type { Behavior, Ops } from '../../core/types.js'
 import { attr } from '../../dom/combinator/attribute.js'
 import { component } from '../../dom/combinator/component.js'
@@ -11,6 +11,7 @@ import type { $Node, INode } from '../../dom/types.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column, $row } from '../elements/$elements.js'
 import { $icon } from '../elements/$icon.js'
+import { layoutSheet } from '../style/layoutSheet.js'
 import { spacing } from '../style/spacing.js'
 import {
   $VirtualScroll,
@@ -19,7 +20,6 @@ import {
   type ScrollRequest,
   type ScrollResponse
 } from './$VirtualScroll.js'
-import { layoutSheet } from '../style/layoutSheet.js'
 
 export type TablePageResponse<T> = T[] | (Omit<IScrollPagableReponse, '$items'> & { data: T[] })
 

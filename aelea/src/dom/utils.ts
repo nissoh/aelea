@@ -26,9 +26,7 @@ export interface INode<A extends INodeElement = INodeElement> {
   disposable: SettableDisposable
 }
 
-export interface IBranch<A extends IBranchElement = IBranchElement, B = {}>
-  extends INode<A>,
-    IElementConfig<B> {
+export interface IBranch<A extends IBranchElement = IBranchElement, B = {}> extends INode<A>, IElementConfig<B> {
   $segments: $Node[]
   insertAscending: boolean
 }
@@ -45,8 +43,5 @@ export interface RunEnvironment {
   scheduler: Scheduler
 }
 
-export type $Branch<A extends IBranchElement = IBranchElement, B = {}> = Stream<
-  IBranch<A, B>
->
+export type $Branch<A extends IBranchElement = IBranchElement, B = {}> = Stream<IBranch<A, B>>
 export type $Node<A extends INodeElement = INodeElement> = Stream<INode<A>>
-

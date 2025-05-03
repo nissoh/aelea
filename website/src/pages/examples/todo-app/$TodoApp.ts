@@ -1,13 +1,4 @@
-import {
-  chain,
-  combine,
-  empty,
-  mergeArray,
-  now,
-  switchLatest,
-  take,
-  until,
-} from '@most/core'
+import { chain, combine, empty, mergeArray, now, switchLatest, take, until } from '@most/core'
 import { type Behavior, behavior, replayLatest } from 'aelea/core'
 import { $element, $text, component, style } from 'aelea/dom'
 import { $Checkbox, $column, $row, spacing } from 'aelea/ui-components'
@@ -18,46 +9,37 @@ import $TodoItem from './$TodoItem'
 
 export const $label = $element('label')(
   style({ display: 'flex', flexDirection: 'row' }),
-  style({ cursor: 'pointer', alignItems: 'center', color: pallete.foreground }),
+  style({ cursor: 'pointer', alignItems: 'center', color: pallete.foreground })
 )
 
 export default (todos: Todo[]) =>
   component(
     (
       [newTodo, createTodoTether]: Behavior<Todo, Todo>,
-      [showCompletedList, showCompletedListTether]: Behavior<boolean, boolean>,
+      [showCompletedList, showCompletedListTether]: Behavior<boolean, boolean>
     ) => {
       const INITIAL_SHOW_COMPLETED = false
-      const showCompleteState = replayLatest(
-        showCompletedList,
-        INITIAL_SHOW_COMPLETED,
-      )
+      const showCompleteState = replayLatest(showCompletedList, INITIAL_SHOW_COMPLETED)
 
       return [
         $column(spacing.big)(
           $row(spacing.big)(
             $label(spacing.default)(
               $Checkbox({ value: showCompleteState })({
-                check: showCompletedListTether(),
+                check: showCompletedListTether()
               }),
-              $text('Show completped '),
+              $text('Show completped ')
             ),
             $CreateTodo({
-              add: createTodoTether(),
-            }),
+              add: createTodoTether()
+            })
           ),
 
           $column(spacing.small)(
             chain(
               (todo: Todo) => {
-                const [remove, removeTether] = behavior<
-                  MouseEvent,
-                  MouseEvent
-                >()
-                const [completed, completedTether] = behavior<
-                  boolean,
-                  boolean
-                >()
+                const [remove, removeTether] = behavior<MouseEvent, MouseEvent>()
+                const [completed, completedTether] = behavior<boolean, boolean>()
 
                 const todoCompleted = replayLatest(completed, todo.completed)
 
@@ -68,22 +50,22 @@ export default (todos: Todo[]) =>
                         onlyCompleted === isCompleted
                           ? $TodoItem({
                               todo,
-                              completed: take(1, todoCompleted),
+                              completed: take(1, todoCompleted)
                             })({
                               remove: removeTether(),
-                              complete: completedTether(),
+                              complete: completedTether()
                             })
                           : empty(),
                       showCompleteState,
-                      todoCompleted,
-                    ),
-                  ),
+                      todoCompleted
+                    )
+                  )
                 )
               },
-              mergeArray([newTodo, ...todos.map(now)]),
-            ),
-          ),
-        ),
+              mergeArray([newTodo, ...todos.map(now)])
+            )
+          )
+        )
       ]
-    },
+    }
   )

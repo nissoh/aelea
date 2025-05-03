@@ -8,11 +8,11 @@ export { $NumberTicker } from './components/$NumberTicker.js'
 export { $VirtualScroll } from './components/$VirtualScroll.js'
 export type {
   ScrollResponse,
-  ScrollRequest,
+  ScrollRequest
 } from './components/$VirtualScroll.js'
 export type {
   IScrollPagableReponse,
-  QuantumScroll,
+  QuantumScroll
 } from './components/$VirtualScroll.js'
 export { $Sortable } from './components/$Sortable.js'
 export { $Table, $caretDown } from './components/$Table.js'
@@ -26,7 +26,7 @@ export { $Checkbox } from './components/form/$Checkbox.js'
 export { $Slider } from './components/form/$Slider.js'
 export {
   $Popover,
-  $defaultPopoverContentContainer,
+  $defaultPopoverContentContainer
 } from './components/overlay/$Popover.js'
 export { InputType } from './components/form/types.js'
 export type { Control, Input } from './components/form/types.js'

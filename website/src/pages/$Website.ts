@@ -1,13 +1,6 @@
 import { map, merge, multicast, now } from '@most/core'
 import type { Behavior } from 'aelea/core'
-import {
-  $element,
-  $node,
-  $text,
-  component,
-  eventElementTarget,
-  style,
-} from 'aelea/dom'
+import { $element, $node, $text, component, eventElementTarget, style } from 'aelea/dom'
 import * as router from 'aelea/router'
 import { $RouterAnchor } from 'aelea/router'
 import { $column, $icon, $row, designSheet, spacing } from 'aelea/ui-components'
@@ -35,9 +28,7 @@ export default ({ baseRoute }: Website) =>
     const changes = merge(locationChange, multicast(routeChanges))
     const fragmentsChange = map(() => {
       const trailingSlash = /\/$/
-      const relativeUrl = location.href
-        .replace(trailingSlash, '')
-        .split(document.baseURI.replace(trailingSlash, ''))[1]
+      const relativeUrl = location.href.replace(trailingSlash, '').split(document.baseURI.replace(trailingSlash, ''))[1]
       const frags = relativeUrl.split('/')
       frags.splice(0, 1, baseRoute)
       return frags
@@ -46,13 +37,13 @@ export default ({ baseRoute }: Website) =>
     const rootRoute = router.create({
       fragment: baseRoute,
       title: 'aelea',
-      fragmentsChange,
+      fragmentsChange
     })
     const pagesRoute = rootRoute.create({ fragment: 'p', title: 'aelea' })
     const guideRoute = pagesRoute.create({ fragment: 'guide', title: 'Guide' })
     const examplesRoute = pagesRoute.create({
       fragment: 'examples',
-      title: 'Examples',
+      title: 'Examples'
     })
 
     return [
@@ -60,8 +51,8 @@ export default ({ baseRoute }: Website) =>
         designSheet.main,
         style({
           fontFamily: `'Nunito', Fira Code`,
-          backgroundImage: `radial-gradient(at center center, ${pallete.horizon} 50vh, ${pallete.background})`,
-        }),
+          backgroundImage: `radial-gradient(at center center, ${pallete.horizon} 50vh, ${pallete.background})`
+        })
       )(
         router.match(rootRoute)(
           $row(
@@ -72,14 +63,11 @@ export default ({ baseRoute }: Website) =>
               alignItems: 'center',
               placeContent: 'center',
               textAlign: 'center',
-              padding: '0 30px',
-            }),
+              padding: '0 30px'
+            })
           )(
             fadeIn(
-              $column(
-                style({ alignItems: 'center', maxWidth: '550px' }),
-                spacing.big,
-              )(
+              $column(style({ alignItems: 'center', maxWidth: '550px' }), spacing.big)(
                 $RouterAnchor({
                   url: '/',
                   route: rootRoute,
@@ -88,27 +76,25 @@ export default ({ baseRoute }: Website) =>
                       $content: style({ fill: pallete.message }, $aeleaLogo),
                       width: '237px',
                       height: '115px',
-                      viewBox: '0 0 147 90',
-                    }),
-                  ),
+                      viewBox: '0 0 147 90'
+                    })
+                  )
                 })({
-                  click: linkClickTether(),
+                  click: linkClickTether()
                 }),
                 $column(spacing.small)(
+                  $text(`"aelea", is a UI Framework for reactive event programming`),
                   $text(
-                    `"aelea", is a UI Framework for reactive event programming`,
-                  ),
-                  $text(
-                    'It helps you write composable and performant building blocks by composing functional event streams',
-                  ),
+                    'It helps you write composable and performant building blocks by composing functional event streams'
+                  )
                 ),
 
                 $MainMenu({ parentRoute: pagesRoute })({
-                  routeChange: linkClickTether(),
-                }),
-              ),
-            ),
-          ),
+                  routeChange: linkClickTether()
+                })
+              )
+            )
+          )
         ),
 
         router.contains(pagesRoute)(
@@ -118,8 +104,8 @@ export default ({ baseRoute }: Website) =>
               maxWidth: '870px',
               width: '100%',
               margin: '0 auto',
-              paddingBottom: '45px',
-            }),
+              paddingBottom: '45px'
+            })
           )(
             $row(style({ placeContent: 'space-between', padding: '0 15px' }))(
               $RouterAnchor({
@@ -129,28 +115,28 @@ export default ({ baseRoute }: Website) =>
                     fill: pallete.message,
                     width: '137px',
                     height: '115px',
-                    viewBox: '0 0 147 90',
-                  }),
+                    viewBox: '0 0 147 90'
+                  })
                 ),
                 url: '/',
-                route: rootRoute,
+                route: rootRoute
               })({
-                click: linkClickTether(),
+                click: linkClickTether()
               }),
               $MainMenu({ parentRoute: pagesRoute })({
-                routeChange: linkClickTether(),
-              }),
+                routeChange: linkClickTether()
+              })
             ),
             router.match(guideRoute)($Guide()({})),
             router.contains(examplesRoute)(
               $Examples({ router: examplesRoute })({
-                routeChanges: linkClickTether(),
-              }),
-            ),
-          ),
+                routeChanges: linkClickTether()
+              })
+            )
+          )
         ),
 
-        $Picker(themeList)({}),
-      ),
+        $Picker(themeList)({})
+      )
     ]
   })

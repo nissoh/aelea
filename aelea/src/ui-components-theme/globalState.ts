@@ -9,12 +9,12 @@ export const pallete = {
   primary: '#007BFF',
   positive: '#28A745',
   negative: '#DC3545',
-  indeterminate: '#FFC107',
+  indeterminate: '#FFC107'
 }
 
 export const theme: Theme = {
   name: 'default',
-  pallete: pallete,
+  pallete: pallete
 }
 
 export const themeList: Theme[] = []

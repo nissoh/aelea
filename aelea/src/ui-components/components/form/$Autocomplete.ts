@@ -1,12 +1,6 @@
 import { empty, map, mergeArray, snapshot } from '@most/core'
 import type { Behavior } from '../../../core/types.js'
-import {
-  $element,
-  attr,
-  component,
-  nodeEvent,
-  styleBehavior,
-} from '../../../dom/index.js'
+import { $element, attr, component, nodeEvent, styleBehavior } from '../../../dom/index.js'
 import type { IBranch } from '../../../dom/types.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
@@ -19,17 +13,12 @@ export interface Autocomplete extends Input<string | number> {
   name?: string
 }
 
-export const $Autocomplete = ({
-  type = InputType.TEXT,
-  value = empty(),
-  name,
-  placeholder,
-}: Autocomplete) =>
+export const $Autocomplete = ({ type = InputType.TEXT, value = empty(), name, placeholder }: Autocomplete) =>
   component(
     (
       [focus, focusTether]: Behavior<IBranch, true>,
       [dismissstyle, dismissTether]: Behavior<IBranch, false>,
-      [change, changeTether]: Behavior<IBranch<HTMLInputElement>, string>,
+      [change, changeTether]: Behavior<IBranch<HTMLInputElement>, string>
     ) => {
       return [
         $element('input')(
@@ -44,17 +33,14 @@ export const $Autocomplete = ({
                 return text || ''
               }
               return ''
-            }),
+            })
           ),
 
           styleBehavior(
             map(
-              (active) =>
-                active
-                  ? { borderBottom: `1px solid ${pallete.primary}` }
-                  : null,
-              mergeArray([focus, dismissstyle]),
-            ),
+              (active) => (active ? { borderBottom: `1px solid ${pallete.primary}` } : null),
+              mergeArray([focus, dismissstyle])
+            )
           ),
 
           focusTether(interactionOp),
@@ -68,14 +54,14 @@ export const $Autocomplete = ({
                 return text
               },
               inputNode,
-              value,
-            ),
-          ),
+              value
+            )
+          )
         )(),
 
         {
-          change,
-        },
+          change
+        }
       ]
-    },
+    }
   )

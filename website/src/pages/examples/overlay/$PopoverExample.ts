@@ -1,14 +1,7 @@
 import { constant, map, merge, now, scan, switchLatest } from '@most/core'
 import type { Behavior } from 'aelea/core'
 import { $text, component, style } from 'aelea/dom'
-import {
-  $Button,
-  $Popover,
-  $TextField,
-  $column,
-  $row,
-  spacing,
-} from 'aelea/ui-components'
+import { $Button, $Popover, $TextField, $column, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 import $Counter from '../count-counters/$Counter'
 
@@ -24,7 +17,7 @@ export const $PopoverExample = component(
     [popCard, popCardTether]: Behavior<any, any>,
     [popCardBottom, popCardBottomTether]: Behavior<any, any>,
     [countUp, countUpTether]: Behavior<1, 1>,
-    [countDown, countDownTether]: Behavior<-1, -1>,
+    [countDown, countDownTether]: Behavior<-1, -1>
   ) => {
     const count = merge(countUp, countDown)
 
@@ -33,26 +26,24 @@ export const $PopoverExample = component(
       $row(style({ placeContent: 'center' }))(
         $Counter({ value: scan((s, n) => s + n, 0, count) })({
           decrement: countDownTether(),
-          increment: countUpTether(),
-        }),
-      ),
+          increment: countUpTether()
+        })
+      )
     )
     const $$popContent = constant($popContent, pop)
     const $$popContentCard = constant($popContent, popCard)
 
     return [
       $column(spacing.default)(
-        $text(
-          'Shows extra details with visible and actionable context in a floating buddle',
-        ),
+        $text('Shows extra details with visible and actionable context in a floating buddle'),
         $row(spacing.default)(
           $text('This button is a target(context)'),
           $Popover({
             $target: $Button({ $content: $text('Pop!') })({
-              click: popTether(),
+              click: popTether()
             }),
-            open: $$popContent,
-          })({}),
+            open: $$popContent
+          })({})
         ),
 
         $Popover({
@@ -61,17 +52,17 @@ export const $PopoverExample = component(
             style({
               backgroundColor: pallete.background,
               border: `1px solid ${pallete.horizon}`,
-              padding: '30px',
-            }),
+              padding: '30px'
+            })
           )(
             $row(spacing.default)(
               $TextField({ label: 'One', value: now('') })({}),
               $TextField({ label: 'Two', value: now('') })({}),
               $Button({ $content: $text('Advanced') })({
-                click: popCardTether(),
-              }),
-            ),
-          ),
+                click: popCardTether()
+              })
+            )
+          )
         })({}),
 
         $column(style({ height: 'calc(100vh / 3)' }))($text('scroll down')),
@@ -81,22 +72,22 @@ export const $PopoverExample = component(
             style({
               backgroundColor: pallete.background,
               border: `1px solid ${pallete.horizon}`,
-              padding: '30px',
-            }),
+              padding: '30px'
+            })
           )(
             $row(spacing.default)(
               $TextField({ label: 'One', value: now('') })({}),
               $TextField({ label: 'Two', value: now('') })({}),
               $Button({ $content: $text('Advanced') })({
-                click: popCardBottomTether(),
-              }),
-            ),
+                click: popCardBottomTether()
+              })
+            )
           ),
-          open: constant($popContent, popCardBottom),
+          open: constant($popContent, popCardBottom)
         })({}),
 
-        $column(style({ height: '100vh' }))($text('scroll down')),
-      ),
+        $column(style({ height: '100vh' }))($text('scroll down'))
+      )
     ]
-  },
+  }
 )

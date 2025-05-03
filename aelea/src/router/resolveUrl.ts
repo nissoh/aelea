@@ -1,13 +1,4 @@
-import {
-  constant,
-  filter,
-  join,
-  map,
-  skipRepeatsWith,
-  switchLatest,
-  tap,
-  until,
-} from '@most/core'
+import { constant, filter, join, map, skipRepeatsWith, switchLatest, tap, until } from '@most/core'
 import type { Stream } from '@most/types'
 import { O } from '../core/common.js'
 import type { Fragment, Path, PathEvent, Route, RouteConfig } from './types.js'
@@ -16,11 +7,7 @@ type RootRouteConfig = RouteConfig & {
   fragmentsChange: Stream<PathEvent>
 }
 
-export const create = ({
-  fragment = '',
-  fragmentsChange,
-  title,
-}: RootRouteConfig) => {
+export const create = ({ fragment = '', fragmentsChange, title }: RootRouteConfig) => {
   const ignoreRepeatPathChanges = skipRepeatsWith((next, prev) => {
     return next.length === prev.length && next.every((f, i) => f === prev[i])
   }, fragmentsChange)
@@ -28,10 +15,7 @@ export const create = ({
   return resolveRoute(ignoreRepeatPathChanges, [])({ fragment, title })
 }
 
-function resolveRoute(
-  pathChange: Stream<PathEvent>,
-  parentFragments: Fragment[],
-) {
+function resolveRoute(pathChange: Stream<PathEvent>, parentFragments: Fragment[]) {
   return ({ fragment, title }: RouteConfig): Route => {
     const fragments = [...parentFragments, fragment]
     const fragIdx = parentFragments.length
@@ -39,14 +23,14 @@ function resolveRoute(
     const diff = O(
       skipRepeatsWith((prev: PathEvent, next: PathEvent) => {
         return next[fragIdx] === prev[fragIdx]
-      }),
+      })
     )
 
     const contains = O(
       diff,
       filter((next) => {
         return isMatched(fragment, next[fragIdx])
-      }),
+      })
     )
 
     const match = O(
@@ -63,12 +47,12 @@ function resolveRoute(
         if (isMatched) {
           document.title = title || ''
         }
-      }),
+      })
     )
 
     const miss = O(
       diff,
-      filter((next) => !isMatched(fragment, next[fragIdx])),
+      filter((next) => !isMatched(fragment, next[fragIdx]))
     )
 
     return {
@@ -76,7 +60,7 @@ function resolveRoute(
       contains: contains(pathChange),
       match: match(pathChange),
       miss: miss(pathChange),
-      fragments,
+      fragments
     }
   }
 }

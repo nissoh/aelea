@@ -20,8 +20,5 @@ export const $icon = ({
   height = width,
   viewBox = `0 0 ${Number.parseInt(width)} ${Number.parseInt(height)}`,
   fill = 'inherit',
-  svgOps = O(),
-}: Icon) =>
-  $svg('svg')(attr({ viewBox, fill }), style({ width, height }), svgOps)(
-    $content,
-  )
+  svgOps = O()
+}: Icon) => $svg('svg')(attr({ viewBox, fill }), style({ width, height }), svgOps)($content)

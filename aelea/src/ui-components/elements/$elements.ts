@@ -10,14 +10,14 @@ export const $card = $column(
   elevation2,
   style({
     padding: '16px',
-    backgroundColor: pallete.background,
-  }),
+    backgroundColor: pallete.background
+  })
 )
 
 export const $seperator = $node(
   style({
     minHeight: '1px',
     minWidth: '1px',
-    background: pallete.foreground,
-  }),
+    background: pallete.foreground
+  })
 )()

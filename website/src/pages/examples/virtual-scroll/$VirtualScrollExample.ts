@@ -1,27 +1,8 @@
-import {
-  at,
-  debounce,
-  empty,
-  join,
-  map,
-  merge,
-  now,
-  snapshot,
-  startWith,
-  switchLatest,
-} from '@most/core'
+import { at, debounce, empty, join, map, merge, now, snapshot, startWith, switchLatest } from '@most/core'
 import type { Stream } from '@most/types'
 import type { Behavior } from 'aelea/core'
 import { $node, $p, $text, component, style } from 'aelea/dom'
-import {
-  $TextField,
-  $VirtualScroll,
-  $card,
-  $column,
-  $row,
-  $seperator,
-  spacing,
-} from 'aelea/ui-components'
+import { $TextField, $VirtualScroll, $card, $column, $row, $seperator, spacing } from 'aelea/ui-components'
 import type { ScrollRequest, ScrollResponse } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 
@@ -31,19 +12,13 @@ function filterArrayByText(array: string[], filter: string) {
 }
 
 const $label = (label: string, value: Stream<string> | string) =>
-  $row(spacing.small)(
-    $node(style({ color: pallete.foreground }))($text(label)),
-    $text(value),
-  )
+  $row(spacing.small)($node(style({ color: pallete.foreground }))($text(label)), $text(value))
 
 export const $VirtualScrollExample = component(
   (
-    [scrollRequest, scrollRequestTether]: Behavior<
-      ScrollRequest,
-      ScrollRequest
-    >,
+    [scrollRequest, scrollRequestTether]: Behavior<ScrollRequest, ScrollRequest>,
     [delayResponse, delayResponseTether]: Behavior<string, number>,
-    [filter, filterTether]: Behavior<string, string>,
+    [filter, filterTether]: Behavior<string, string>
   ) => {
     const PAGE_SIZE = 25
     const TOTAL_ITEMS = 1000
@@ -57,10 +32,7 @@ export const $VirtualScrollExample = component(
 
     const stubbedData = Array(TOTAL_ITEMS)
       .fill(null)
-      .map(
-        () =>
-          `item: ${Math.random().toString(36).substring(7)} ${formatNumber(++i)}`,
-      )
+      .map(() => `item: ${Math.random().toString(36).substring(7)} ${formatNumber(++i)}`)
 
     const dataSourceFilter = (filter: string) =>
       join(
@@ -76,8 +48,8 @@ export const $VirtualScrollExample = component(
             return at(delay, { $items: $items, offset: 0, pageSize: PAGE_SIZE })
           },
           delayWithInitial,
-          scrollRequest,
-        ),
+          scrollRequest
+        )
       )
 
     const filterText = startWith('', filter)
@@ -86,15 +58,15 @@ export const $VirtualScrollExample = component(
     return [
       $column(spacing.big)(
         $text(
-          'High performance dynamically loaded list based on Intersection Observer Web API. this example shows a very common pagination and REST like fetching asynchnously more pages',
+          'High performance dynamically loaded list based on Intersection Observer Web API. this example shows a very common pagination and REST like fetching asynchnously more pages'
         ),
         $row(spacing.big)(
           $label(
             'Page: ',
-            map((l) => String(l), scrollRequest),
+            map((l) => String(l), scrollRequest)
           ),
           $label('Page Size:', String(PAGE_SIZE)),
-          $label('Total Items:', String(TOTAL_ITEMS)),
+          $label('Total Items:', String(TOTAL_ITEMS))
         ),
 
         $row(spacing.big)(
@@ -102,18 +74,18 @@ export const $VirtualScrollExample = component(
             label: 'Filter',
             value: empty(),
             hint: 'Remove any items that does not match filter and debounce changes by 300ms to prevert spamming',
-            containerOp: style({ flex: 1 }),
+            containerOp: style({ flex: 1 })
           })({
-            change: filterTether(),
+            change: filterTether()
           }),
           $TextField({
             label: 'Delay Response(ms)',
             value: initialDelayResponse,
             hint: 'Emulate the duration of a datasource response, show a stubbed $node instead',
-            containerOp: style({ flex: 1 }),
+            containerOp: style({ flex: 1 })
           })({
-            change: delayResponseTether(map(Number)),
-          }),
+            change: delayResponseTether(map(Number))
+          })
         ),
 
         $seperator,
@@ -124,15 +96,15 @@ export const $VirtualScrollExample = component(
               (searchText) =>
                 $VirtualScroll({
                   dataSource: dataSourceFilter(searchText),
-                  containerOps: style({ padding: '8px', maxHeight: '400px' }),
+                  containerOps: style({ padding: '8px', maxHeight: '400px' })
                 })({
-                  scrollIndex: scrollRequestTether(),
+                  scrollIndex: scrollRequestTether()
                 }),
-              debouncedFilterText,
-            ),
-          ),
-        ),
-      ),
+              debouncedFilterText
+            )
+          )
+        )
+      )
     ]
-  },
+  }
 )

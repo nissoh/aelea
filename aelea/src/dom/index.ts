@@ -4,7 +4,7 @@ export {
   drawLatest,
   nextAnimationFrame,
   motion,
-  motionState,
+  motionState
 } from './combinator/animate.js'
 export { attr, attrBehavior } from './combinator/attribute.js'
 export { component } from './combinator/component.js'
@@ -13,7 +13,7 @@ export {
   style,
   styleBehavior,
   styleInline,
-  stylePseudo,
+  stylePseudo
 } from './combinator/style.js'
 export { runBrowser } from './run.js'
 export {
@@ -24,7 +24,7 @@ export {
   $p,
   $text,
   $wrapNativeElement,
-  branch,
+  branch
 } from './source/node.js'
 export type {
   $Branch,
@@ -35,5 +35,5 @@ export type {
   INode,
   INodeElement,
   IComposeOrSeed,
-  IStyleCSS,
+  IStyleCSS
 } from './types.js'

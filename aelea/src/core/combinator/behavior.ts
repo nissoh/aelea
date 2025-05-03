@@ -1,8 +1,8 @@
 import { disposeWith } from '@most/disposable'
 import type { Disposable, Scheduler, Sink, Stream } from '@most/types'
-import { tether } from './tether.js'
 import { O } from '../common.js'
 import type { Behavior, Ops } from '../types.js'
+import { tether } from './tether.js'
 
 type SinkMap<T> = Map<Sink<T>, Map<Stream<T>, Disposable | null>>
 
@@ -33,7 +33,7 @@ class BehaviorSource<T, R> implements Stream<R> {
         }
         sinkMap.delete(sinkSrc)
       },
-      [sink, this.sinksMap] as [Sink<R>, SinkMap<R>],
+      [sink, this.sinksMap] as [Sink<R>, SinkMap<R>]
     )
   }
 

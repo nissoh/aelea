@@ -4,10 +4,10 @@ import { id } from '@most/prelude'
 import { asap } from '@most/scheduler'
 import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
 import { O, isFunction } from '../../core/common.js'
-import type { $Node, IBranch, IBranchElement, IComposeOrSeed, INode } from '../types.js'
-import { SettableDisposable } from '../utils/SettableDisposable.js'
 import type { Ops } from '../../core/types.js'
 import { filterNull } from '../../utils/combinator.js'
+import type { $Node, IBranch, IBranchElement, IComposeOrSeed, INode } from '../types.js'
+import { SettableDisposable } from '../utils/SettableDisposable.js'
 
 class NodeSource<A, B extends IBranchElement> implements Stream<IBranch<B>> {
   constructor(

@@ -13,10 +13,8 @@ export function imageAverageColor(imgEl: HTMLImageElement) {
     return defaultRGB
   }
 
-  const height = (canvas.height =
-    imgEl.naturalHeight || imgEl.offsetHeight || imgEl.height)
-  const width = (canvas.width =
-    imgEl.naturalWidth || imgEl.offsetWidth || imgEl.width)
+  const height = (canvas.height = imgEl.naturalHeight || imgEl.offsetHeight || imgEl.height)
+  const width = (canvas.width = imgEl.naturalWidth || imgEl.offsetWidth || imgEl.width)
 
   context.drawImage(imgEl, 0, 0)
 

@@ -6,7 +6,7 @@ const stretch = style({
   top: '0',
   bottom: '0',
   right: '0',
-  left: '0',
+  left: '0'
 })
 const flex = style({ flex: 1 })
 const displayFlex = style({ display: 'flex' })
@@ -15,7 +15,6 @@ const column = O(displayFlex, style({ flexDirection: 'column' }))
 const rowFlex = O(row, flex)
 const columnFlex = O(column, flex)
 
-
 export const layoutSheet = {
   stretch,
   flex,
@@ -23,5 +22,5 @@ export const layoutSheet = {
   row,
   column,
   rowFlex,
-  columnFlex,
+  columnFlex
 }

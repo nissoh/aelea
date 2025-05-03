@@ -5,54 +5,38 @@ import type * as CSS from 'csstype'
 import type { $Branch, IBranchElement, IStyleCSS } from '../types.js'
 
 interface StyleCurry {
-  <C extends IBranchElement, D>(
-    styleInput: IStyleCSS,
-    node: $Branch<C, D>,
-  ): $Branch<C, D>
-  <C extends IBranchElement, D>(
-    styleInput: IStyleCSS,
-  ): (node: $Branch<C, D>) => $Branch<C, D>
+  <C extends IBranchElement, D>(styleInput: IStyleCSS, node: $Branch<C, D>): $Branch<C, D>
+  <C extends IBranchElement, D>(styleInput: IStyleCSS): (node: $Branch<C, D>) => $Branch<C, D>
 }
 
 interface StylePseudoCurry {
   <C extends IBranchElement, E extends string>(
     pseudoClass: CSS.Pseudos | E,
     styleInput: IStyleCSS,
-    node: $Branch<C>,
+    node: $Branch<C>
   ): $Branch<C>
   <C extends IBranchElement, E extends string>(
     pseudoClass: CSS.Pseudos | E,
-    styleInput: IStyleCSS,
+    styleInput: IStyleCSS
   ): (node: $Branch<C>) => $Branch<C>
   <C extends IBranchElement, E extends string>(
-    pseudoClass: CSS.Pseudos | E,
+    pseudoClass: CSS.Pseudos | E
   ): (styleInput: IStyleCSS) => (node: $Branch<C>) => $Branch<C>
 }
 
 interface StyleBehaviorCurry {
-  <C extends IBranchElement, D>(
-    styleInput: Stream<IStyleCSS | null>,
-    node: $Branch<C, D>,
-  ): $Branch<C, D>
-  <C extends IBranchElement, D>(
-    styleInput: Stream<IStyleCSS | null>,
-  ): (node: $Branch<C, D>) => $Branch<C, D>
+  <C extends IBranchElement, D>(styleInput: Stream<IStyleCSS | null>, node: $Branch<C, D>): $Branch<C, D>
+  <C extends IBranchElement, D>(styleInput: Stream<IStyleCSS | null>): (node: $Branch<C, D>) => $Branch<C, D>
 }
 
-function styleFn<C extends IBranchElement, D>(
-  styleInput: IStyleCSS,
-  source: $Branch<C, D>,
-): $Branch<C, D> {
-  return map(
-    (node) => ({ ...node, style: { ...node.style, ...styleInput } }),
-    source,
-  )
+function styleFn<C extends IBranchElement, D>(styleInput: IStyleCSS, source: $Branch<C, D>): $Branch<C, D> {
+  return map((node) => ({ ...node, style: { ...node.style, ...styleInput } }), source)
 }
 
 function stylePseudoFn<C extends IBranchElement, E extends string>(
   pseudoClass: CSS.Pseudos | E,
   styleInput: IStyleCSS,
-  source: $Branch<C>,
+  source: $Branch<C>
 ): $Branch<C> {
   return map(
     (node) => ({
@@ -61,22 +45,19 @@ function stylePseudoFn<C extends IBranchElement, E extends string>(
         ...node.stylePseudo,
         {
           class: pseudoClass,
-          style: styleInput,
-        },
-      ],
+          style: styleInput
+        }
+      ]
     }),
-    source,
+    source
   )
 }
 
 function styleBehaviorFn<C extends IBranchElement, D>(
   style: Stream<IStyleCSS | null>,
-  $node: $Branch<C, D>,
+  $node: $Branch<C, D>
 ): $Branch<C, D> {
-  return map(
-    (node) => ({ ...node, styleBehavior: [...node.styleBehavior, style] }),
-    $node,
-  )
+  return map((node) => ({ ...node, styleBehavior: [...node.styleBehavior, style] }), $node)
 }
 
 export const styleInline =
@@ -94,20 +75,14 @@ export const styleInline =
             const value = styleObj[prop as keyof IStyleCSS]
 
             // Ensure value is a string or null for setProperty
-            styleDec.setProperty(
-              prop,
-              value === null || value === undefined ? null : String(value),
-            )
+            styleDec.setProperty(prop, value === null || value === undefined ? null : String(value))
           }
         }
       }, style)
 
       return {
         ...node,
-        styleBehavior: [
-          ...node.styleBehavior,
-          filter(() => false, applyInlineStyleStream),
-        ],
+        styleBehavior: [...node.styleBehavior, filter(() => false, applyInlineStyleStream)]
       }
     }, $node)
   }

@@ -69,7 +69,7 @@ export const nullDisposable = <Disposable>{
 // compose(g, f) applies f first, then g.
 // We use reduce starting with the first function and compose subsequent functions onto the accumulator.
 // const applyLeft = (v: any, f: any) => f(v)
-export const O: Op =  function O(...fns: Fn<any, any>[]) {
+export const O: Op = function O(...fns: Fn<any, any>[]) {
   return (x: any) => fns.reduce((v: any, f: any) => f(v), x)
 }
 

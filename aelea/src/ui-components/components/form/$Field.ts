@@ -1,25 +1,8 @@
-import {
-  empty,
-  filter,
-  map,
-  merge,
-  multicast,
-  never,
-  now,
-  startWith,
-  switchLatest,
-  tap,
-} from '@most/core'
+import { empty, filter, map, merge, multicast, never, now, startWith, switchLatest, tap } from '@most/core'
 import { combineState } from '../../../core/combinator/combine.js'
 import { O } from '../../../core/common.js'
 import type { Behavior, Ops } from '../../../core/types.js'
-import {
-  $element,
-  component,
-  nodeEvent,
-  style,
-  styleBehavior,
-} from '../../../dom/index.js'
+import { $element, component, nodeEvent, style, styleBehavior } from '../../../dom/index.js'
 import type { IBranch, IStyleCSS } from '../../../dom/types.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
@@ -34,18 +17,13 @@ export interface Field extends Input<string | number> {
   inputOp?: Ops<IBranch, IBranch>
 }
 
-export const $Field = ({
-  value = empty(),
-  fieldStyle = {},
-  validation = never,
-  inputOp = O(),
-}: Field) =>
+export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, inputOp = O() }: Field) =>
   component(
     (
       [focusStyle, interactionTether]: Behavior<IBranch, true>,
       [dismissstyle, dismissTether]: Behavior<IBranch, false>,
       [blur, blurTether]: Behavior<IBranch, FocusEvent>,
-      [change, changeTether]: Behavior<IBranch<HTMLInputElement>, string>,
+      [change, changeTether]: Behavior<IBranch<HTMLInputElement>, string>
     ) => {
       const multicastValidation = O(validation, startWith(''), multicast)
 
@@ -67,7 +45,7 @@ export const $Field = ({
                 return text || ''
               }
               return ''
-            }),
+            })
           ),
 
           inputOp,
@@ -78,10 +56,8 @@ export const $Field = ({
                 return { borderBottom: `2px solid ${pallete.negative}` }
               }
 
-              return focus
-                ? { borderBottom: `2px solid ${pallete.primary}` }
-                : null
-            }, state),
+              return focus ? { borderBottom: `2px solid ${pallete.primary}` } : null
+            }, state)
           ),
 
           interactionTether(interactionOp),
@@ -98,18 +74,18 @@ export const $Field = ({
                   tap((val) => {
                     // applying by setting `HTMLInputElement.value` imperatively(only way known to me)
                     node.element.value = String(val)
-                  }, value),
-                ),
-              ),
+                  }, value)
+                )
+              )
             ),
-            switchLatest,
-          ),
+            switchLatest
+          )
         )(),
 
         {
           change,
-          blur,
-        },
+          blur
+        }
       ]
-    },
+    }
   )

@@ -2,11 +2,7 @@ import { scan } from '@most/core'
 import type { Stream } from '@most/types'
 import type { IBranch, IStyleCSS, StyleEnvironment } from '../types.js'
 
-export function applyStyleBehavior(
-  styleBehavior: Stream<IStyleCSS | null>,
-  node: IBranch,
-  styleEnv: StyleEnvironment,
-) {
+export function applyStyleBehavior(styleBehavior: Stream<IStyleCSS | null>, node: IBranch, styleEnv: StyleEnvironment) {
   let latestClass: string
 
   return scan(
@@ -39,7 +35,7 @@ export function applyStyleBehavior(
       return ''
     },
     null,
-    styleBehavior,
+    styleBehavior
   )
 }
 
@@ -52,10 +48,7 @@ function styleObjectAsString(styleObj: IStyleCSS) {
     .join('')
 }
 
-export function useStyleRule(
-  cacheService: StyleEnvironment,
-  styleDefinition: IStyleCSS,
-) {
+export function useStyleRule(cacheService: StyleEnvironment, styleDefinition: IStyleCSS) {
   const properties = styleObjectAsString(styleDefinition)
   const cachedRuleIdx = cacheService.cache.indexOf(properties)
 
@@ -71,11 +64,7 @@ export function useStyleRule(
   return `${cacheService.namespace + cachedRuleIdx}`
 }
 
-export function useStylePseudoRule(
-  cacheService: StyleEnvironment,
-  styleDefinition: IStyleCSS,
-  pseudo = '',
-) {
+export function useStylePseudoRule(cacheService: StyleEnvironment, styleDefinition: IStyleCSS, pseudo = '') {
   const properties = styleObjectAsString(styleDefinition)
   const index = cacheService.stylesheet.cssRules.length
   const rule = `.${cacheService.namespace + index + pseudo} {${properties}}`

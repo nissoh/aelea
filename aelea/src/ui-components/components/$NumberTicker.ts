@@ -14,13 +14,10 @@ import {
 import type { Stream } from '@most/types'
 import { O } from '../../core/common.js'
 import { $node, $text, style, styleBehavior } from '../../dom/index.js'
-import type { IStyleCSS } from '../../dom/types.js'
 import { $p } from '../../dom/source/node.js'
+import type { IStyleCSS } from '../../dom/types.js'
 
-export const sumFromZeroOp = scan(
-  (current: number, x: number) => current + x,
-  0
-)
+export const sumFromZeroOp = scan((current: number, x: number) => current + x, 0)
 
 enum Direction {
   INCREMENT,
@@ -41,13 +38,7 @@ interface NumberConfig {
   textStyle?: IStyleCSS
   slots?: number // can be deprecated
 }
-export const $NumberTicker = ({
-  value$,
-  incrementColor,
-  decrementColor,
-  textStyle = {},
-  slots = 10
-}: NumberConfig) => {
+export const $NumberTicker = ({ value$, incrementColor, decrementColor, textStyle = {}, slots = 10 }: NumberConfig) => {
   const uniqueValues$ = skipRepeats(value$)
   const incrementMulticast = O(
     scan((seed: CountState | null, change: number): CountState => {
@@ -57,16 +48,12 @@ export const $NumberTicker = ({
         return { change, dir: null, pos: changeStr.length, changeStr }
       }
 
-      const dir =
-        change > seed.change ? Direction.INCREMENT : Direction.DECREMENT
+      const dir = change > seed.change ? Direction.INCREMENT : Direction.DECREMENT
       const currentStr = seed.change.toLocaleString()
       const isWholeNumber = changeStr.split('.').length === 1
 
       // TODO handle fractions
-      const pos =
-        isWholeNumber && changeStr.length > currentStr.length
-          ? 0
-          : getDetlaSlotIdex(currentStr, changeStr, 0)
+      const pos = isWholeNumber && changeStr.length > currentStr.length ? 0 : getDetlaSlotIdex(currentStr, changeStr, 0)
 
       return { change, dir, pos, changeStr }
     }, null),
@@ -80,7 +67,7 @@ export const $NumberTicker = ({
   }
 
   const styledTextTransition = style({ transition: 'ease-out .25s color', ...textStyle })
-  
+
   return $node(
     ...Array(slots)
       .fill(undefined)
@@ -91,8 +78,7 @@ export const $NumberTicker = ({
             switchLatest(
               O(
                 skipRepeatsWith(
-                  (x: CountState, y: CountState) =>
-                    x.changeStr[slot] === y.changeStr[slot] && slot < y.pos
+                  (x: CountState, y: CountState) => x.changeStr[slot] === y.changeStr[slot] && slot < y.pos
                 ),
                 map(({ pos, dir }: CountState) => {
                   const decayColor = at(1000, {})
@@ -100,24 +86,12 @@ export const $NumberTicker = ({
                     return decayColor
                   }
 
-                  return merge(
-                    dir ? now(dirStyleMap[dir]) : empty(),
-                    decayColor
-                  )
+                  return merge(dir ? now(dirStyleMap[dir]) : empty(), decayColor)
                 })
               )(incrementMulticast)
             )
           )
-        )(
-          $text(
-            skipRepeats(
-              map(
-                ({ changeStr }: CountState) => changeStr[slot] ?? '',
-                incrementMulticast
-              )
-            )
-          )
-        )
+        )($text(skipRepeats(map(({ changeStr }: CountState) => changeStr[slot] ?? '', incrementMulticast))))
       )
   )
 }

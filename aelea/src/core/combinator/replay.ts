@@ -5,7 +5,7 @@ import { Pipe } from '../common.js'
 class StateSink<A> extends Pipe<A, A> {
   constructor(
     private parent: ReplayLatest<A>,
-    public override sink: Sink<A>,
+    public override sink: Sink<A>
   ) {
     super(sink)
   }
@@ -24,7 +24,7 @@ export class ReplayLatest<A> implements Stream<A> {
   hasInitial
   constructor(
     private source: Stream<A>,
-    private initialState?: A,
+    private initialState?: A
   ) {
     this.hasInitial = initialState !== undefined
   }
@@ -36,18 +36,13 @@ export class ReplayLatest<A> implements Stream<A> {
         ? startWith(this.initialState)
         : null
 
-    const withReplayedValue = startWithReplay
-      ? startWithReplay(this.source)
-      : this.source
+    const withReplayedValue = startWithReplay ? startWithReplay(this.source) : this.source
 
     return withReplayedValue.run(new StateSink(this, sink), scheduler)
   }
 }
 
-export function replayLatest<A>(
-  s: Stream<A>,
-  initialState?: A,
-): ReplayLatest<A> {
+export function replayLatest<A>(s: Stream<A>, initialState?: A): ReplayLatest<A> {
   if (initialState === undefined) {
     return new ReplayLatest(s)
   }

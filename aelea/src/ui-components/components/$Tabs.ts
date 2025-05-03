@@ -24,14 +24,14 @@ export const $Tabs = (config: Tabs) => {
               nodeEvent('click'),
               map((_clickEvent) => {
                 return t
-              }),
+              })
             )(t.head)
-          }),
+          })
         ),
-        switchLatest(map((tab) => tab.content, config.selected)),
+        switchLatest(map((tab) => tab.content, config.selected))
       ),
 
-      { clickTab },
+      { clickTab }
     ]
   })
 }

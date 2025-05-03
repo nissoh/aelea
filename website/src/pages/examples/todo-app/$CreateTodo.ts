@@ -15,37 +15,33 @@ export function createTodo(text: string): Todo {
   return {
     id: iid++,
     text,
-    completed: false,
+    completed: false
   }
 }
 
 export default component(
   (
     [create, addTether]: Behavior<PointerEvent, PointerEvent>,
-    [inputChange, inputChangeTether]: Behavior<string, string>,
+    [inputChange, inputChangeTether]: Behavior<string, string>
   ) => {
     const inputState = startWith('', inputChange)
     const value = constant('', merge(create, now(null)))
     const valueChahnges = merge(inputChange, value)
     const disabled = map((x) => !x, valueChahnges)
 
-    const add = snapshot(
-      (text) => ({ id: iid++, text, completed: false }),
-      inputState,
-      create,
-    )
+    const add = snapshot((text) => ({ id: iid++, text, completed: false }), inputState, create)
 
     return [
       $row(style({ flex: 1 }))(
         $Field({ value })({
-          change: inputChangeTether(),
+          change: inputChangeTether()
         }),
         $Button({ $content: $text('add'), disabled })({
-          click: addTether(),
-        }),
+          click: addTether()
+        })
       ),
 
-      { add },
+      { add }
     ]
-  },
+  }
 )
