@@ -1,10 +1,10 @@
 import type { IBehavior } from 'aelea/core'
-import { type $Branch, $text, type IBranchElement, component, style } from 'aelea/core'
+import { type I$Branch, $text, type IBranchElement, component, style } from 'aelea/core'
 import { $Sortable, $card, $row, designSheet, layoutSheet } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 
 export default component(
-  ([_, orderTether]: IBehavior<$Branch<IBranchElement, {}>[], $Branch<IBranchElement, {}>[]>) => {
+  ([_, orderTether]: IBehavior<I$Branch<IBranchElement, {}>[], I$Branch<IBranchElement, {}>[]>) => {
     const $list = Array(4)
       .fill(null)
       .map((_, i) =>
