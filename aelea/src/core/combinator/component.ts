@@ -3,7 +3,7 @@ import { curry2 } from '@most/prelude'
 import type { Disposable, Stream } from '@most/types'
 import { type IOps, nullSink } from '../../core/common.js'
 import type { I$Node, INodeElement } from '../source/node.js'
-import { type IBehavior, behavior } from './behavior.js'
+import { behavior, type IBehavior } from './behavior.js'
 
 export type IOutputTethers<A> = { [P in keyof A]?: IOps<A[P], A[P]> }
 

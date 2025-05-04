@@ -41,7 +41,7 @@ export const styleInline =
         for (let i = 0; i < keys.length; i++) {
           const prop = keys[i]
 
-          if (Object.prototype.hasOwnProperty.call(styleObj, prop)) {
+          if (Object.hasOwn(styleObj, prop)) {
             const styleDec = node.element.style
             const value = styleObj[prop as keyof IStyleCSS]
 
