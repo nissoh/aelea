@@ -63,7 +63,6 @@ export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, i
 
           interactionTether(interactionOp),
           dismissTether(dismissOp),
-
           blurTether(nodeEvent('blur')),
 
           O(

@@ -1,4 +1,5 @@
 /** biome-ignore-all lint/performance/noBarrelFile: entrypoint module */
+
 export type { AnimationFrames } from './combinator/animate.js'
 export {
   animationFrames,
@@ -38,12 +39,13 @@ export {
   stylePseudo
 } from './combinator/style.js'
 export { tether } from './combinator/tether.js'
-export type { IOp, IOps } from './common.js'
+export type { Fn, IOp, IOps } from './common.js'
 export { groupByMap, isEmpty, isStream, maybeOps, nullSink, O, xForver } from './common.js'
 export type { IRunEnvironment, IStyleEnvironment } from './run.js'
 export { runBrowser } from './run.js'
 export type {
   I$Node,
+  I$Op,
   I$Slottable,
   INode,
   INodeCompose,
@@ -61,4 +63,4 @@ export {
   createNode
 } from './source/node.js'
 export type { I$Text } from './source/text.js'
-export { $text, $textNode } from './source/text.js'
+export { $text } from './source/text.js'

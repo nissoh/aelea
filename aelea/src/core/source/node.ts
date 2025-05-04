@@ -1,4 +1,4 @@
-import { never, propagateTask } from '@most/core'
+import { map, never, propagateTask } from '@most/core'
 import { disposeBoth } from '@most/disposable'
 import { id } from '@most/prelude'
 import { asap } from '@most/scheduler'
@@ -31,9 +31,69 @@ export interface INode<A extends INodeElement = INodeElement> extends ISlottable
 
 export type I$Node<A extends INodeElement = INodeElement> = Stream<INode<A>>
 
+export type I$Op<TElement extends INodeElement = INodeElement> = (x: I$Node<TElement>) => I$Node<TElement>
+
 export interface INodeCompose<TElement extends INodeElement = INodeElement> {
+  (op1: I$Op<TElement>): INodeCompose<TElement>
+  (op1: I$Op<TElement>, op2: I$Op<TElement>): INodeCompose<TElement>
+  (op1: I$Op<TElement>, op2: I$Op<TElement>, op3: I$Op<TElement>): INodeCompose<TElement>
+  (op1: I$Op<TElement>, op2: I$Op<TElement>, op3: I$Op<TElement>, op4: I$Op<TElement>): INodeCompose<TElement>
+  (
+    op1: I$Op<TElement>,
+    op2: I$Op<TElement>,
+    op3: I$Op<TElement>,
+    op4: I$Op<TElement>,
+    op5: I$Op<TElement>
+  ): INodeCompose<TElement>
+  (
+    op1: I$Op<TElement>,
+    op2: I$Op<TElement>,
+    op3: I$Op<TElement>,
+    op4: I$Op<TElement>,
+    op5: I$Op<TElement>,
+    op6: I$Op<TElement>
+  ): INodeCompose<TElement>
+  (
+    op1: I$Op<TElement>,
+    op2: I$Op<TElement>,
+    op3: I$Op<TElement>,
+    op4: I$Op<TElement>,
+    op5: I$Op<TElement>,
+    op6: I$Op<TElement>,
+    op7: I$Op<TElement>
+  ): INodeCompose<TElement>
+  (
+    op1: I$Op<TElement>,
+    op2: I$Op<TElement>,
+    op3: I$Op<TElement>,
+    op4: I$Op<TElement>,
+    op5: I$Op<TElement>,
+    op6: I$Op<TElement>,
+    op7: I$Op<TElement>,
+    op8: I$Op<TElement>
+  ): INodeCompose<TElement>
+  (
+    op1: I$Op<TElement>,
+    op2: I$Op<TElement>,
+    op3: I$Op<TElement>,
+    op4: I$Op<TElement>,
+    op5: I$Op<TElement>,
+    op6: I$Op<TElement>,
+    op7: I$Op<TElement>,
+    op9: I$Op<TElement>
+  ): INodeCompose<TElement>
+  (
+    op1: I$Op<TElement>,
+    op2: I$Op<TElement>,
+    op3: I$Op<TElement>,
+    op4: I$Op<TElement>,
+    op5: I$Op<TElement>,
+    op6: I$Op<TElement>,
+    op8: I$Op<TElement>,
+    op9: I$Op<TElement>,
+    op10: I$Op<TElement>
+  ): INodeCompose<TElement>
   (...$leafs: I$Slottable[]): I$Node<TElement>
-  (...ops: IOps<INode<TElement>, any>[]): INodeCompose<TElement>
 }
 
 class NodeSource<A, B extends INodeElement> implements Stream<INode<B>> {
@@ -94,3 +154,4 @@ export const $node = $custom('node')
 export const $p = $element('p')
 
 export const $wrapNativeElement = createNode(<A extends INodeElement>(rootNode: A) => rootNode)
+const eee = $p(map((xxxxx) => xxxxx))
