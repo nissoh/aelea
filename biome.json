@@ -1,16 +1,7 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
-    "ignore": [
-      "**/dist",
-      "**/node_modules",
-      "node_modules",
-      ".vscode",
-      "bun.lockb",
-      "contracts",
-      "tsconfig.json",
-      "tsconfig.*.json"
-    ]
+    "includes": ["**", "!**/dist", "!**/node_modules", "!**/.vscode", "!**/bun.lockb", "!**/contracts", "!**/tsconfig.json", "!**/tsconfig.*.json"]
   },
   "formatter": {
     "enabled": true,
@@ -41,13 +32,43 @@
       "style": {
         "useEnumInitializers": "off",
         "noNonNullAssertion": "off",
-        "useShorthandArrayType": "error"
+        "useConsistentArrayType": {
+          "level": "error",
+          "options": {
+            "syntax": "shorthand"
+          }
+        },
+        "useLiteralEnumMembers": "error",
+        "noCommaOperator": "error",
+        "useNodejsImportProtocol": "error",
+        "useAsConstAssertion": "error",
+        "useNumericLiterals": "error",
+        "useSelfClosingElements": "error",
+        "useConst": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumberNamespace": "error",
+        "noInferrableTypes": "error",
+        "useExponentiationOperator": "error",
+        "useTemplate": "error",
+        "noParameterAssign": "error",
+        "useDefaultParameterLast": "error",
+        "noArguments": "error",
+        "useImportType": "error",
+        "useExportType": "error",
+        "noUselessElse": "error",
+        "useShorthandFunctionType": "error"
       },
       "suspicious": {
         "noArrayIndexKey": "off",
         "noAssignInExpressions": "off",
         "noConfusingVoidType": "off",
-        "noConsoleLog": "error",
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": ["log"]
+          }
+        },
         "noExplicitAny": "off",
         "noRedeclare": "off"
       }
@@ -60,7 +81,11 @@
       "semicolons": "asNeeded"
     }
   },
-  "organizeImports": {
-    "enabled": true
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
   }
 }
