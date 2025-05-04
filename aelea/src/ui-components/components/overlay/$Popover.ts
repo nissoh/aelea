@@ -3,7 +3,7 @@ import type { Stream } from '@most/types'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
 import { O } from '../../../core/common.js'
 import { $node, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
-import type { I$Slot, INodeCompose, ISlottable } from '../../../core/source/node.js'
+import type { I$Slottable, INodeCompose, ISlottable } from '../../../core/source/node.js'
 import { colorAlpha } from '../../../ui-components-theme/color.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $column } from '../../elements/$elements.js'
@@ -20,10 +20,10 @@ export const $defaultPopoverContentContainer = $column(
 )
 
 interface IPopover {
-  open: Stream<I$Slot>
+  open: Stream<I$Slottable>
   dismiss?: Stream<any>
 
-  $target: I$Slot
+  $target: I$Slottable
 
   $contentContainer?: INodeCompose
   $container?: INodeCompose

@@ -5,7 +5,7 @@ import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
 import type { IAttributeProperties } from './combinator/attribute.js'
 import type { IStyleCSS } from './combinator/style.js'
 import { nullSink } from './common.js'
-import type { I$Node, I$Slot, INode, INodeElement, ISlottable } from './source/node.js'
+import type { I$Node, I$Slottable, INode, INodeElement, ISlottable } from './source/node.js'
 import { SettableDisposable } from './utils/SettableDisposable.js'
 
 export interface IStyleEnvironment {
@@ -125,10 +125,10 @@ class BranchEffectsSink implements Sink<INode | ISlottable> {
 }
 
 class BranchChildrenSinkList implements Disposable {
-  disposables = new Map<I$Slot<INodeElement>, Disposable>()
+  disposables = new Map<I$Slottable<INodeElement>, Disposable>()
 
   constructor(
-    $segments: I$Slot<INodeElement>[],
+    $segments: I$Slottable<INodeElement>[],
     private env: IRunEnvironment,
     private node: INode
   ) {

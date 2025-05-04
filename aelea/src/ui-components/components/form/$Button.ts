@@ -3,14 +3,14 @@ import type { IBehavior } from '../../../core/combinator/behavior.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
 import { type IOps, O } from '../../../core/common.js'
 import { $element, attrBehavior, component, nodeEvent, styleBehavior } from '../../../core/index.js'
-import type { I$Slot, INode, ISlottable } from '../../../core/source/node.js'
+import type { I$Slottable, INode, ISlottable } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'
 import type { Control } from './types.js'
 
 export interface IButton extends Control {
-  $content: I$Slot
+  $content: I$Slottable
   buttonStyle?: IStyleCSS
   buttonOp?: IOps<INode<HTMLButtonElement>, INode<HTMLButtonElement>>
 }

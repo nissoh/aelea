@@ -44,7 +44,7 @@ export type { IRunEnvironment, IStyleEnvironment } from './run.js'
 export { runBrowser } from './run.js'
 export type {
   I$Node,
-  I$Slot,
+  I$Slottable,
   INode,
   INodeCompose,
   INodeElement,
@@ -60,4 +60,5 @@ export {
   $wrapNativeElement,
   createNode
 } from './source/node.js'
-export { $text } from './source/text.js'
+export { $text, $textNode } from './source/text.js'
+export type { I$Text } from './source/text.js'

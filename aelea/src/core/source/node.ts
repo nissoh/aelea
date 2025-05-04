@@ -11,13 +11,15 @@ import { type ISettableDisposable, SettableDisposable } from '../utils/SettableD
 export type ISlottableElement = Slottable
 export type INodeElement = HTMLElement | SVGElement
 
+export type I$Slottable<A extends ISlottableElement = ISlottableElement> = Stream<ISlottable<A>>
+
 export interface ISlottable<A extends ISlottableElement = ISlottableElement> {
   element: A
   disposable: ISettableDisposable
 }
 
 export interface INode<A extends INodeElement = INodeElement> extends ISlottable<A> {
-  $segments: I$Slot[]
+  $segments: I$Slottable[]
   insertAscending: boolean
   style?: IStyleCSS
   stylePseudo: Array<{ style: IStyleCSS; class: string }>
@@ -27,11 +29,10 @@ export interface INode<A extends INodeElement = INodeElement> extends ISlottable
   attributesBehavior: Stream<IAttributeProperties<any>>[]
 }
 
-export type I$Slot<A extends ISlottableElement = ISlottableElement> = Stream<ISlottable<A>>
 export type I$Node<A extends INodeElement = INodeElement> = Stream<INode<A>>
 
 export interface INodeCompose<TElement extends INodeElement = INodeElement> {
-  (...$leafs: I$Slot[]): I$Node<TElement>
+  (...$leafs: I$Slottable[]): I$Node<TElement>
   (...ops: IOps<INode<TElement>, any>[]): INodeCompose<TElement>
 }
 
@@ -39,7 +40,7 @@ class NodeSource<A, B extends INodeElement> implements Stream<INode<B>> {
   constructor(
     private sourceValue: A,
     private sourceOp: (a: A) => B,
-    private $segments: I$Slot[]
+    private $segments: I$Slottable[]
   ) {}
 
   run(sink: Sink<INode<B>>, scheduler: Scheduler): Disposable {
@@ -76,7 +77,7 @@ export function createNode<A, B extends INodeElement>(sourceOp: (a: A) => B, pos
         return createNode(sourceOp, composedOps)(seedValue)
       }
 
-      const $segments = input.length ? (input as I$Slot[]) : [never()]
+      const $segments = input.length ? (input as I$Slottable[]) : [never()]
       const $branch = new NodeSource(seedValue, sourceOp, $segments)
 
       return postOp($branch)

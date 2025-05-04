@@ -2,7 +2,7 @@ import { chain } from '@most/core'
 import { curry2 } from '@most/prelude'
 import type { Stream } from '@most/types'
 import { isStream } from '../common.js'
-import type { I$Slot, INodeElement } from '../source/node.js'
+import type { I$Slottable, INodeElement } from '../source/node.js'
 
 type PickEvent<A, B> = A extends keyof B ? B[A] : Event
 
@@ -44,18 +44,18 @@ export function eventElementTarget<A extends INodeElementEventNameList, B extend
 }
 
 type INodeEventDescriptor<B extends INodeElement> = {
-  $node: I$Slot<B>
+  $node: I$Slottable<B>
   options: boolean | AddEventListenerOptions
 }
 
 export interface INodeEventCurry {
   <A extends INodeElementEventNameList, B extends INodeElement>(
     eventType: A,
-    descriptor: I$Slot<B> | INodeEventDescriptor<B>
+    descriptor: I$Slottable<B> | INodeEventDescriptor<B>
   ): Stream<INodeElementEventTypeMap<A, B>>
   <A extends INodeElementEventNameList, B extends INodeElement>(
     eventType: A
-  ): (descriptor: I$Slot<B> | INodeEventDescriptor<B>) => Stream<INodeElementEventTypeMap<A, B>>
+  ): (descriptor: I$Slottable<B> | INodeEventDescriptor<B>) => Stream<INodeElementEventTypeMap<A, B>>
 }
 
 export const nodeEvent: INodeEventCurry = curry2((eventType, descriptor) => {

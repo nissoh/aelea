@@ -6,7 +6,7 @@ import { component } from '../../core/combinator/component.js'
 import { nodeEvent } from '../../core/combinator/event.js'
 import { style, stylePseudo } from '../../core/combinator/style.js'
 import { type IOps, O } from '../../core/common.js'
-import type { I$Node, I$Slot, ISlottable } from '../../core/source/node.js'
+import type { I$Node, I$Slottable, ISlottable } from '../../core/source/node.js'
 import { $node, $svg } from '../../core/source/node.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column, $row } from '../elements/$elements.js'
@@ -47,11 +47,11 @@ export interface TableOption<T, FilterState> {
 
   sortChange?: Stream<ISortBy<T>>
   filterChange?: Stream<FilterState>
-  $sortArrowDown?: I$Slot
+  $sortArrowDown?: I$Slottable
 }
 
 export interface TableColumn<T> {
-  $head: I$Slot
+  $head: I$Slottable
   $body: IOps<T, I$Node>
   sortBy?: keyof T
 

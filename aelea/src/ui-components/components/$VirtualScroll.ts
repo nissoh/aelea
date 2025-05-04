@@ -18,7 +18,7 @@ import type { IBehavior } from '../../core/combinator/behavior.js'
 import { component } from '../../core/combinator/component.js'
 import { style } from '../../core/combinator/style.js'
 import { type IOps, O } from '../../core/common.js'
-import type { I$Node, I$Slot, INode } from '../../core/source/node.js'
+import type { I$Node, I$Slottable, INode } from '../../core/source/node.js'
 import { $custom, $node } from '../../core/source/node.js'
 import { $text } from '../../core/source/text.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
@@ -39,7 +39,7 @@ export type ScrollResponse = I$Node[] | IScrollPagableReponse
 export interface QuantumScroll {
   dataSource: Stream<ScrollResponse>
 
-  $loader?: I$Slot
+  $loader?: I$Slottable
 
   containerOps?: IOps<INode, INode>
 }

@@ -6,6 +6,8 @@ import type { IOps } from '../common.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
 import { $custom, type ISlottable } from './node.js'
 
+export type I$Text = Stream<ISlottable<Text>>
+
 class TextSource implements Stream<ISlottable<Text>> {
   constructor(private textSourceList: (Stream<string> | string)[]) {}
 

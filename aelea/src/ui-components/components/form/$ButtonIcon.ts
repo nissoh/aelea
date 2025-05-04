@@ -2,13 +2,13 @@ import { map, mergeArray } from '@most/core'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
 import { O } from '../../../core/common.js'
 import { component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
-import type { I$Slot, ISlottable } from '../../../core/source/node.js'
+import type { I$Slottable, ISlottable } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $icon } from '../../elements/$icon.js'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'
 
-export const $ButtonIcon = ($content: I$Slot) =>
+export const $ButtonIcon = ($content: I$Slottable) =>
   component(
     (
       [focusStyle, interactionTether]: IBehavior<ISlottable, true>,

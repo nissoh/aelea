@@ -1,6 +1,6 @@
 import { type IOps, O } from '../../core/common.js'
 import { $svg, attr, style } from '../../core/index.js'
-import type { I$Slot, INode } from '../../core/source/node.js'
+import type { I$Slottable, INode } from '../../core/source/node.js'
 
 interface Icon {
   /**  in pixels */
@@ -9,7 +9,7 @@ interface Icon {
   viewBox?: string
   fill?: string
 
-  $content: I$Slot
+  $content: I$Slottable
   svgOps?: IOps<INode<SVGSVGElement>, INode<SVGSVGElement>>
 }
 
