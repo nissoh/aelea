@@ -38,8 +38,8 @@ export {
   stylePseudo
 } from './combinator/style.js'
 export { tether } from './combinator/tether.js'
-export { groupByMap, nullSink, O, xForver, isStream, isEmpty, maybeOps } from './common.js'
 export type { IOp, IOps } from './common.js'
+export { groupByMap, isEmpty, isStream, maybeOps, nullSink, O, xForver } from './common.js'
 export type { IRunEnvironment, IStyleEnvironment } from './run.js'
 export { runBrowser } from './run.js'
 export type {
