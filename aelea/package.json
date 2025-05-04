@@ -1,6 +1,6 @@
 {
   "name": "aelea",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "type": "module",
   "scripts": {
     "build": "bun run build:clean && bun run build:esm",
