@@ -2,7 +2,7 @@ import { map, mergeArray } from '@most/core'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
 import { O } from '../../../core/common.js'
 import { $element, $node, attr, attrBehavior, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
-import type { IBranch } from '../../../core/source/node.js'
+import type { INode } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 import { dismissOp, interactionOp } from './form.js'
@@ -13,9 +13,9 @@ export interface Checkbox extends Input<boolean> {}
 export const $Checkbox = ({ value }: Checkbox) =>
   component(
     (
-      [focusStyle, interactionTether]: IBehavior<IBranch, true>,
-      [dismissstyle, dismissTether]: IBehavior<IBranch, false>,
-      [check, checkTether]: IBehavior<IBranch<HTMLInputElement>, boolean>
+      [focusStyle, interactionTether]: IBehavior<INode, true>,
+      [dismissstyle, dismissTether]: IBehavior<INode, false>,
+      [check, checkTether]: IBehavior<INode<HTMLInputElement>, boolean>
     ) => {
       const $overlay = $node(
         layoutSheet.stretch,

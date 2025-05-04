@@ -5,7 +5,7 @@ import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
 import type { IAttributeProperties } from './combinator/attribute.js'
 import type { IStyleCSS } from './combinator/style.js'
 import { nullSink } from './common.js'
-import type { I$Branch, I$Node, IBranch, IBranchElement, INode, INodeElement } from './source/node.js'
+import type { I$Node, I$Slot, INode, INodeElement, ISlottable } from './source/node.js'
 import { SettableDisposable } from './utils/SettableDisposable.js'
 
 export interface IStyleEnvironment {
@@ -15,24 +15,24 @@ export interface IStyleEnvironment {
 }
 
 export interface IRunEnvironment {
-  rootNode: IBranchElement
+  rootNode: INodeElement
   style: IStyleEnvironment
   scheduler: Scheduler
 }
 
-class BranchEffectsSink implements Sink<IBranch | INode> {
+class BranchEffectsSink implements Sink<INode | ISlottable> {
   disposables: Disposable[] = []
 
-  segmentsSlotsMap: Map<IBranch | INode, Disposable>[] = []
+  segmentsSlotsMap: Map<INode | ISlottable, Disposable>[] = []
 
   constructor(
     private env: IRunEnvironment,
-    private parentNode: IBranch,
+    private parentNode: INode,
     private segmentPosition: number,
     private segmentsCount: number[]
   ) {}
 
-  event(_: Time, node: INode | IBranch) {
+  event(_: Time, node: INode) {
     try {
       node?.disposable.set(
         disposeWith((node) => {
@@ -125,12 +125,12 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
 }
 
 class BranchChildrenSinkList implements Disposable {
-  disposables = new Map<I$Node<INodeElement>, Disposable>()
+  disposables = new Map<I$Slot<INodeElement>, Disposable>()
 
   constructor(
-    $segments: I$Node<INodeElement>[],
+    $segments: I$Slot<INodeElement>[],
     private env: IRunEnvironment,
-    private node: IBranch
+    private node: INode
   ) {
     const l = $segments.length
     const segmentsCount = new Array(l).fill(0)
@@ -164,7 +164,7 @@ export function runBrowser(config: Partial<IRunEnvironment> = {}) {
 
   document.adoptedStyleSheets = [...document.adoptedStyleSheets, composedConfig.style.stylesheet]
 
-  const rootNode: IBranch = {
+  const rootNode: INode = {
     element: composedConfig.rootNode,
     $segments: [],
     disposable: new SettableDisposable(),
@@ -174,14 +174,14 @@ export function runBrowser(config: Partial<IRunEnvironment> = {}) {
     stylePseudo: []
   }
 
-  return ($root: I$Branch) => {
+  return ($root: I$Node) => {
     const s = new BranchEffectsSink(composedConfig, rootNode, 0, [0])
 
     map((node) => ({ ...node, segmentPosition: 0 }), $root).run(s, composedConfig.scheduler)
   }
 }
 
-function styleBehavior(styleBehavior: Stream<IStyleCSS | null>, node: IBranch, cacheService: IStyleEnvironment) {
+function styleBehavior(styleBehavior: Stream<IStyleCSS | null>, node: INode, cacheService: IStyleEnvironment) {
   let latestClass: string
 
   return scan(
@@ -259,7 +259,7 @@ export function useStylePseudoRule(cacheService: IStyleEnvironment, styleDefinit
   return `${cacheService.namespace + cachedRuleIdx}`
 }
 
-function applyAttributes(attrs: IAttributeProperties<unknown>, node: IBranchElement) {
+function applyAttributes(attrs: IAttributeProperties<unknown>, node: INodeElement) {
   if (attrs) {
     for (const [attrKey, value] of Object.entries(attrs)) {
       if (value === undefined || value === null) {
@@ -273,7 +273,7 @@ function applyAttributes(attrs: IAttributeProperties<unknown>, node: IBranchElem
   return node
 }
 
-function appendToSlot(parent: IBranchElement, child: INodeElement, insertAt: number) {
+function appendToSlot(parent: INodeElement, child: INodeElement, insertAt: number) {
   if (insertAt === 0) return parent.prepend(child)
 
   parent.insertBefore(child, parent.children[insertAt])

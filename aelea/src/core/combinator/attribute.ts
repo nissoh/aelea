@@ -1,31 +1,34 @@
 import { map } from '@most/core'
 import { curry2 } from '@most/prelude'
 import type { Stream } from '@most/types'
-import type { I$Branch, IBranchElement } from '../source/node.js'
+import type { I$Node, INode, INodeElement } from '../source/node.js'
 
 export type IAttributeProperties<T> = {
   [P in keyof T]: string | number | boolean | null | undefined
 }
 
 export interface IAttributeCurry {
-  <A, B, C extends IBranchElement>(attrs: IAttributeProperties<A>, ns: I$Branch<C, B>): I$Branch<C, A & B>
-  <A, B, C extends IBranchElement>(attrs: IAttributeProperties<A>): (ns: I$Branch<C, B>) => I$Branch<C, A & B>
+  <A, B extends INodeElement>(attrs: IAttributeProperties<A>, node: I$Node<B>): I$Node<B>
+  <A, B extends INodeElement>(attrs: IAttributeProperties<A>): (node: I$Node<B>) => I$Node<B>
 }
 
-export interface IAttributeBehaviorCurry {
-  <A, C extends IBranchElement, D>(
-    styleInput: Stream<IAttributeProperties<A> | null>,
-    node: I$Branch<C, D>
-  ): I$Branch<C, D>
-  <A, C extends IBranchElement, D>(
-    styleInput: Stream<IAttributeProperties<A> | null>
-  ): (node: I$Branch<C, D>) => I$Branch<C, D>
-}
+export const attr: IAttributeCurry = curry2((attrs, node) =>
+  map((node) => {
+    const attributes = { ...node.attributes, ...attrs }
 
-export const attr: IAttributeCurry = curry2((attrs, source) =>
-  map((ns) => ({ ...ns, attributes: { ...ns.attributes, ...attrs } }), source)
+    return { ...node, attributes } as INode
+  }, node)
 )
 
-export const attrBehavior: IAttributeBehaviorCurry = curry2((attrs, source) =>
-  map((ns) => ({ ...ns, attributesBehavior: [...ns.attributesBehavior, attrs] }), source)
+export interface IAttributeBehaviorCurry {
+  <A, C extends INodeElement, D>(styleInput: Stream<IAttributeProperties<A> | null>, node: I$Node<C>): I$Node<C>
+  <A, C extends INodeElement>(styleInput: Stream<IAttributeProperties<A> | null>): (node: I$Node<C>) => I$Node<C>
+}
+
+export const attrBehavior: IAttributeBehaviorCurry = curry2((attrs, node) =>
+  map((node) => {
+    const attributesBehavior = { ...node.attributesBehavior, ...attrs }
+
+    return { ...node, attributesBehavior } as INode
+  }, node)
 )

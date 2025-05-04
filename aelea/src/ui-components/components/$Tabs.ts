@@ -2,11 +2,11 @@ import { map, merge, switchLatest } from '@most/core'
 import type { Stream } from '@most/types'
 import type { IBehavior } from '../../core/combinator/behavior.js'
 import { $node, component, nodeEvent } from '../../core/index.js'
-import type { I$Node } from '../../core/source/node.js'
+import type { I$Slot } from '../../core/source/node.js'
 
 export interface Tab {
-  content: I$Node
-  head: I$Node
+  content: I$Slot
+  head: I$Slot
 }
 
 export interface Tabs {

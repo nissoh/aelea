@@ -25,7 +25,7 @@ import {
   component,
   fromCallback,
   type IBehavior,
-  type IBranch,
+  type INode,
   type IStyleCSS,
   O,
   style
@@ -269,7 +269,7 @@ export interface IMonacoEditor {
 }
 
 export const $MonacoEditor = ({ code, config, override, containerStyle = { flex: 1 } }: IMonacoEditor) =>
-  component(([change, changeTether]: IBehavior<IBranch<HTMLElement>, ModelChangeBehavior>) => {
+  component(([change, changeTether]: IBehavior<INode<HTMLElement>, ModelChangeBehavior>) => {
     const editorload = fromPromise(loadMonacoTSEditor())
 
     const $editor = map(({ monacoGlobal }) => {

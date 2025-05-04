@@ -4,7 +4,7 @@ import { combineState } from '../../../core/combinator/combine.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
 import { type IOps, O } from '../../../core/common.js'
 import { $element, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
-import type { IBranch } from '../../../core/source/node.js'
+import type { INode } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'
@@ -15,16 +15,16 @@ export interface Field extends Input<string | number> {
   name?: string
   fieldStyle?: IStyleCSS
 
-  inputOp?: IOps<IBranch, IBranch>
+  inputOp?: IOps<INode, INode>
 }
 
 export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, inputOp = O() }: Field) =>
   component(
     (
-      [focusStyle, interactionTether]: IBehavior<IBranch, true>,
-      [dismissstyle, dismissTether]: IBehavior<IBranch, false>,
-      [blur, blurTether]: IBehavior<IBranch, FocusEvent>,
-      [change, changeTether]: IBehavior<IBranch<HTMLInputElement>, string>
+      [focusStyle, interactionTether]: IBehavior<INode, true>,
+      [dismissstyle, dismissTether]: IBehavior<INode, false>,
+      [blur, blurTether]: IBehavior<INode, FocusEvent>,
+      [change, changeTether]: IBehavior<INode<HTMLInputElement>, string>
     ) => {
       const multicastValidation = O(validation, startWith(''), multicast)
 

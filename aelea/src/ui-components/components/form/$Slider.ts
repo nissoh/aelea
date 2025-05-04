@@ -3,7 +3,7 @@ import type { IBehavior } from '../../../core/combinator/behavior.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
 import { O } from '../../../core/common.js'
 import { $element, attr, component, nodeEvent, style, stylePseudo } from '../../../core/index.js'
-import type { IBranch } from '../../../core/source/node.js'
+import type { INode } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import type { Input } from './types.js'
 
@@ -12,7 +12,7 @@ export interface Slider extends Input<number> {
 }
 
 export const $Slider = ({ value, step = 0.01 }: Slider) =>
-  component(([change, changeTether]: IBehavior<IBranch<HTMLInputElement>, number>) => {
+  component(([change, changeTether]: IBehavior<INode<HTMLInputElement>, number>) => {
     const sliderThunmbStyle: IStyleCSS = {
       backgroundColor: pallete.primary,
       borderRadius: '50%',

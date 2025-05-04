@@ -1,6 +1,6 @@
 import { empty, map, mergeArray, snapshot } from '@most/core'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
-import { $element, attr, component, type IBranch, nodeEvent, styleBehavior } from '../../../core/index.js'
+import { $element, attr, component, type INode, nodeEvent, styleBehavior } from '../../../core/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'
@@ -15,9 +15,9 @@ export interface Autocomplete extends Input<string | number> {
 export const $Autocomplete = ({ type = InputType.TEXT, value = empty(), name, placeholder }: Autocomplete) =>
   component(
     (
-      [focus, focusTether]: IBehavior<IBranch, true>,
-      [dismissstyle, dismissTether]: IBehavior<IBranch, false>,
-      [change, changeTether]: IBehavior<IBranch<HTMLInputElement>, string>
+      [focus, focusTether]: IBehavior<INode, true>,
+      [dismissstyle, dismissTether]: IBehavior<INode, false>,
+      [change, changeTether]: IBehavior<INode<HTMLInputElement>, string>
     ) => {
       return [
         $element('input')(

@@ -5,18 +5,18 @@ import { component } from '../../core/combinator/component.js'
 import { nodeEvent } from '../../core/combinator/event.js'
 import { style } from '../../core/combinator/style.js'
 import { type IOps, O } from '../../core/common.js'
-import type { I$Branch, IBranch } from '../../core/source/node.js'
+import type { I$Node, INode } from '../../core/source/node.js'
 import type { Route } from '../types.js'
 
 export interface IAnchor {
   url: string
   route: Route
-  $anchor: I$Branch
-  anchorOp?: IOps<IBranch<HTMLAnchorElement>, IBranch<HTMLAnchorElement>>
+  $anchor: I$Node
+  anchorOp?: IOps<INode<HTMLAnchorElement>, INode<HTMLAnchorElement>>
 }
 
 export const $RouterAnchor = ({ url, route, $anchor, anchorOp = O() }: IAnchor) =>
-  component(([click, clickTether]: IBehavior<IBranch, string>, [focus, focusTether]: IBehavior<IBranch, boolean>) => {
+  component(([click, clickTether]: IBehavior<INode, string>, [focus, focusTether]: IBehavior<INode, boolean>) => {
     const trailingSlash = /\/$/
     const href = url.replace(trailingSlash, '')
 

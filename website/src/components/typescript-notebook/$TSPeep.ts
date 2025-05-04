@@ -4,7 +4,7 @@ import {
   $node,
   $text,
   component,
-  type I$Node,
+  type I$Slot,
   type IBehavior,
   motion,
   O,
@@ -74,7 +74,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                     worker,
                     semanticDiagnostics,
                     syntacticDiagnostics
-                  }: ModelChangeBehavior): Promise<I$Node> => {
+                  }: ModelChangeBehavior): Promise<I$Slot> => {
                     if (semanticDiagnostics.length || syntacticDiagnostics.length) {
                       return never()
                     }
@@ -86,7 +86,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                     const esModuleBlobUrl = URL.createObjectURL(new Blob([refImports], { type: 'text/javascript' }))
                     const esModule = await import(/* @vite-ignore */ esModuleBlobUrl)
 
-                    const value: I$Node = esModule.default ?? empty()
+                    const value: I$Slot = esModule.default ?? empty()
 
                     return value
                   }

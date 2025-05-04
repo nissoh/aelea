@@ -1,11 +1,11 @@
 import { snapshot, startWith } from '@most/core'
-import { $svg, attr, component, type IBehavior, type INode, nodeEvent, O, style, stylePseudo } from 'aelea/core'
+import { $svg, attr, component, type IBehavior, type ISlottable, nodeEvent, O, style, stylePseudo } from 'aelea/core'
 import { $icon } from 'aelea/ui-components'
 import { pallete, type Theme, theme } from 'aelea/ui-components-theme'
 import { setTheme } from 'aelea/ui-components-theme-browser'
 
 export const $Picker = (themeList: Theme[]) =>
-  component(([changeThemeEffect, changeThemeEffectTether]: IBehavior<INode, Theme>) => {
+  component(([changeThemeEffect, changeThemeEffectTether]: IBehavior<ISlottable, Theme>) => {
     const currentTheme = startWith(theme, changeThemeEffect)
 
     return [

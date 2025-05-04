@@ -23,21 +23,6 @@
     "enabled": true,
     "rules": {
       "recommended": true,
-      "a11y": {
-        "useButtonType": "off"
-      },
-      "complexity": {
-        "noBannedTypes": "off"
-      },
-      "correctness": {
-        "noUnusedVariables": "error"
-      },
-      "performance": {
-        "noBarrelFile": "error",
-        "noReExportAll": "error",
-        "noDelete": "off",
-        "noAccumulatingSpread": "off"
-      },
       "style": {
         "useEnumInitializers": "off",
         "noNonNullAssertion": "off",
@@ -74,6 +59,9 @@
         "noConfusingVoidType": "off",
         "noExplicitAny": "off",
         "noRedeclare": "off"
+      },
+      "performance": {
+        "noAccumulatingSpread": "off"
       }
     }
   },
@@ -85,10 +73,7 @@
     }
   },
   "assist": {
-    "actions": {
-      "source": {
-        "organizeImports": "on"
-      }
-    }
+    "enabled": true,
+    "actions": { "source": { "organizeImports": "on" } }
   }
 }

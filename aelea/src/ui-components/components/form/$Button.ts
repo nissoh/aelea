@@ -3,24 +3,24 @@ import type { IBehavior } from '../../../core/combinator/behavior.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
 import { type IOps, O } from '../../../core/common.js'
 import { $element, attrBehavior, component, nodeEvent, styleBehavior } from '../../../core/index.js'
-import type { I$Node, IBranch, INode } from '../../../core/source/node.js'
+import type { I$Slot, INode, ISlottable } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'
 import type { Control } from './types.js'
 
 export interface IButton extends Control {
-  $content: I$Node
+  $content: I$Slot
   buttonStyle?: IStyleCSS
-  buttonOp?: IOps<IBranch<HTMLButtonElement>, IBranch<HTMLButtonElement>>
+  buttonOp?: IOps<INode<HTMLButtonElement>, INode<HTMLButtonElement>>
 }
 
 export const $Button = ({ disabled = never(), $content, buttonOp = O() }: IButton) =>
   component(
     (
-      [focusStyle, interactionTether]: IBehavior<IBranch, true>,
-      [dismissstyle, dismissTether]: IBehavior<IBranch, false>,
-      [click, clickTether]: IBehavior<INode, PointerEvent>
+      [focusStyle, interactionTether]: IBehavior<INode, true>,
+      [dismissstyle, dismissTether]: IBehavior<INode, false>,
+      [click, clickTether]: IBehavior<ISlottable, PointerEvent>
     ) => {
       const $button = $element('button')(
         designSheet.btn,

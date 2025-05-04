@@ -2,19 +2,19 @@ import { chain } from '@most/core'
 import { curry2 } from '@most/prelude'
 import type { Stream } from '@most/types'
 import { isStream } from '../common.js'
-import type { I$Node, INodeElement } from '../source/node.js'
+import type { I$Slot, INodeElement } from '../source/node.js'
 
 type PickEvent<A, B> = A extends keyof B ? B[A] : Event
 
-type ElementEventList = DocumentEventMap &
+type INodeElementEventList = DocumentEventMap &
   SVGElementEventMap &
   HTMLElementEventMap &
   WindowEventMap &
   IDBOpenDBRequestEventMap
-type ElementEventNameList = keyof ElementEventList
-type GuessByName<A extends ElementEventNameList> = ElementEventList[A]
+type INodeElementEventNameList = keyof INodeElementEventList
+type GuessByName<A extends INodeElementEventNameList> = INodeElementEventList[A]
 
-type ElementEventTypeMap<A extends ElementEventNameList, B> = B extends Window
+type INodeElementEventTypeMap<A extends INodeElementEventNameList, B> = B extends Window
   ? PickEvent<A, WindowEventMap>
   : B extends HTMLElement
     ? PickEvent<A, DocumentEventMap>
@@ -22,11 +22,11 @@ type ElementEventTypeMap<A extends ElementEventNameList, B> = B extends Window
       ? PickEvent<A, SVGElementEventMap>
       : GuessByName<A>
 
-export function eventElementTarget<A extends ElementEventNameList, B extends EventTarget>(
+export function eventElementTarget<A extends INodeElementEventNameList, B extends EventTarget>(
   eventType: A,
   element: B,
   options: boolean | AddEventListenerOptions = false
-): Stream<ElementEventTypeMap<A, B>> {
+): Stream<INodeElementEventTypeMap<A, B>> {
   return {
     run(sink, scheduler) {
       const cb = (e: any) => sink.event(scheduler.currentTime(), e)
@@ -44,18 +44,18 @@ export function eventElementTarget<A extends ElementEventNameList, B extends Eve
 }
 
 type INodeEventDescriptor<B extends INodeElement> = {
-  $node: I$Node<B>
+  $node: I$Slot<B>
   options: boolean | AddEventListenerOptions
 }
 
 export interface INodeEventCurry {
-  <A extends ElementEventNameList, B extends INodeElement>(
+  <A extends INodeElementEventNameList, B extends INodeElement>(
     eventType: A,
-    descriptor: I$Node<B> | INodeEventDescriptor<B>
-  ): Stream<ElementEventTypeMap<A, B>>
-  <A extends ElementEventNameList, B extends INodeElement>(
+    descriptor: I$Slot<B> | INodeEventDescriptor<B>
+  ): Stream<INodeElementEventTypeMap<A, B>>
+  <A extends INodeElementEventNameList, B extends INodeElement>(
     eventType: A
-  ): (descriptor: I$Node<B> | INodeEventDescriptor<B>) => Stream<ElementEventTypeMap<A, B>>
+  ): (descriptor: I$Slot<B> | INodeEventDescriptor<B>) => Stream<INodeElementEventTypeMap<A, B>>
 }
 
 export const nodeEvent: INodeEventCurry = curry2((eventType, descriptor) => {

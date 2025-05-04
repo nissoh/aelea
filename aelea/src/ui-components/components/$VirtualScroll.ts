@@ -18,7 +18,7 @@ import type { IBehavior } from '../../core/combinator/behavior.js'
 import { component } from '../../core/combinator/component.js'
 import { style } from '../../core/combinator/style.js'
 import { type IOps, O } from '../../core/common.js'
-import type { I$Branch, I$Node, IBranch } from '../../core/source/node.js'
+import type { I$Node, I$Slot, INode } from '../../core/source/node.js'
 import { $custom, $node } from '../../core/source/node.js'
 import { $text } from '../../core/source/text.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
@@ -29,25 +29,25 @@ import { observer } from '../utils/elementObservers.js'
 export type ScrollRequest = number
 
 export type IScrollPagableReponse = {
-  $items: I$Branch[]
+  $items: I$Node[]
   pageSize: number
   offset: number
 }
 
-export type ScrollResponse = I$Branch[] | IScrollPagableReponse
+export type ScrollResponse = I$Node[] | IScrollPagableReponse
 
 export interface QuantumScroll {
   dataSource: Stream<ScrollResponse>
 
-  $loader?: I$Node
+  $loader?: I$Slot
 
-  containerOps?: IOps<IBranch, IBranch>
+  containerOps?: IOps<INode, INode>
 }
 
 const $defaultLoader = $node(style({ color: pallete.foreground, padding: '3px 10px' }))($text('Loading...'))
 
 export const $VirtualScroll = ({ dataSource, containerOps = O(), $loader = $defaultLoader }: QuantumScroll) =>
-  component(([intersecting, intersectingTether]: IBehavior<IBranch, IntersectionObserverEntry>) => {
+  component(([intersecting, intersectingTether]: IBehavior<INode, IntersectionObserverEntry>) => {
     const multicastDatasource = multicast(dataSource)
 
     const scrollReuqestWithInitial: Stream<ScrollRequest> = skip(

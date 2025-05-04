@@ -2,11 +2,11 @@ import { chain, constant, continueWith, filter, switchLatest, until } from '@mos
 import { disposeWith } from '@most/disposable'
 import type { Stream } from '@most/types'
 import { eventElementTarget } from '../../core/index.js'
-import type { IBranch, IBranchElement } from '../../core/source/node.js'
+import type { INode, INodeElement } from '../../core/source/node.js'
 
 export const intersection = (config: IntersectionObserverInit = {}) =>
   chain(
-    <A extends IBranchElement>(node: IBranch<A>): Stream<IntersectionObserverEntry[]> => ({
+    <A extends INodeElement>(node: INode<A>): Stream<IntersectionObserverEntry[]> => ({
       run(sink, scheduler) {
         const intersectionObserver = new IntersectionObserver((entries) => {
           sink.event(scheduler.currentTime(), entries)
@@ -21,7 +21,7 @@ export const intersection = (config: IntersectionObserverInit = {}) =>
 
 export const resize = (config: ResizeObserverOptions = {}) =>
   chain(
-    <A extends IBranchElement>(node: IBranch<A>): Stream<ResizeObserverEntry[]> => ({
+    <A extends INodeElement>(node: INode<A>): Stream<ResizeObserverEntry[]> => ({
       run(sink, scheduler) {
         const ro = new ResizeObserver((entries) => {
           sink.event(scheduler.currentTime(), entries)
@@ -42,7 +42,7 @@ export const mutation = (
   }
 ) =>
   chain(
-    <A extends IBranchElement>(node: IBranch<A>): Stream<MutationRecord[]> => ({
+    <A extends INodeElement>(node: INode<A>): Stream<MutationRecord[]> => ({
       run(sink, scheduler) {
         const ro = new MutationObserver((entries) => {
           sink.event(scheduler.currentTime(), entries)

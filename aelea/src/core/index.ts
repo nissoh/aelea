@@ -43,14 +43,13 @@ export { groupByMap, isEmpty, isStream, maybeOps, nullSink, O, xForver } from '.
 export type { IRunEnvironment, IStyleEnvironment } from './run.js'
 export { runBrowser } from './run.js'
 export type {
-  I$Branch,
   I$Node,
-  IBranch,
-  IBranchElement,
+  I$Slot,
   INode,
   INodeCompose,
   INodeElement,
-  IText
+  ISlottable,
+  ISlottableElement
 } from './source/node.js'
 export {
   $custom,

@@ -2,18 +2,18 @@ import { map, mergeArray } from '@most/core'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
 import { O } from '../../../core/common.js'
 import { component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
-import type { I$Node, INode } from '../../../core/source/node.js'
+import type { I$Slot, ISlottable } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $icon } from '../../elements/$icon.js'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'
 
-export const $ButtonIcon = ($content: I$Node) =>
+export const $ButtonIcon = ($content: I$Slot) =>
   component(
     (
-      [focusStyle, interactionTether]: IBehavior<INode, true>,
-      [dismissstyle, dismissTether]: IBehavior<INode, false>,
-      [click, clickTether]: IBehavior<INode, PointerEvent>
+      [focusStyle, interactionTether]: IBehavior<ISlottable, true>,
+      [dismissstyle, dismissTether]: IBehavior<ISlottable, false>,
+      [click, clickTether]: IBehavior<ISlottable, PointerEvent>
     ) => {
       const iconOp = O(
         designSheet.control,

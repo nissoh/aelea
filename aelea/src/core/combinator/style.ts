@@ -2,38 +2,38 @@ import { filter, map, tap } from '@most/core'
 import { curry2, curry3 } from '@most/prelude'
 import type { Stream } from '@most/types'
 import type * as CSS from 'csstype'
-import type { I$Branch, IBranchElement } from '../source/node.js'
+import type { I$Node, INodeElement } from '../source/node.js'
 
 export type IStyleCSS = CSS.Properties
 
 export interface IStyleCurry {
-  <C extends IBranchElement, D>(styleInput: IStyleCSS, node: I$Branch<C, D>): I$Branch<C, D>
-  <C extends IBranchElement, D>(styleInput: IStyleCSS): (node: I$Branch<C, D>) => I$Branch<C, D>
+  <T extends INodeElement>(styleInput: IStyleCSS, node: I$Node<T>): I$Node<T>
+  <T extends INodeElement>(styleInput: IStyleCSS): (node: I$Node<T>) => I$Node<T>
 }
 
 export interface IStylePseudoCurry {
-  <C extends IBranchElement, E extends string>(
+  <T extends INodeElement, E extends string>(
     pseudoClass: CSS.Pseudos | E,
     styleInput: IStyleCSS,
-    node: I$Branch<C>
-  ): I$Branch<C>
-  <C extends IBranchElement, E extends string>(
+    node: I$Node<T>
+  ): I$Node<T>
+  <T extends INodeElement, E extends string>(
     pseudoClass: CSS.Pseudos | E,
     styleInput: IStyleCSS
-  ): (node: I$Branch<C>) => I$Branch<C>
-  <C extends IBranchElement, E extends string>(
+  ): (node: I$Node<T>) => I$Node<T>
+  <T extends INodeElement, E extends string>(
     pseudoClass: CSS.Pseudos | E
-  ): (styleInput: IStyleCSS) => (node: I$Branch<C>) => I$Branch<C>
+  ): (styleInput: IStyleCSS) => (node: I$Node<T>) => I$Node<T>
 }
 
 export interface IStyleBehaviorCurry {
-  <C extends IBranchElement, D>(styleInput: Stream<IStyleCSS | null>, node: I$Branch<C, D>): I$Branch<C, D>
-  <C extends IBranchElement, D>(styleInput: Stream<IStyleCSS | null>): (node: I$Branch<C, D>) => I$Branch<C, D>
+  <T extends INodeElement>(styleInput: Stream<IStyleCSS | null>, node: I$Node<T>): I$Node<T>
+  <T extends INodeElement>(styleInput: Stream<IStyleCSS | null>): (node: I$Node<T>) => I$Node<T>
 }
 
 export const styleInline =
-  <A extends IBranchElement, B>(style: Stream<IStyleCSS>) =>
-  ($node: I$Branch<A, B>): I$Branch<A, B> => {
+  <A extends INodeElement>(style: Stream<IStyleCSS>) =>
+  ($node: I$Node<A>): I$Node<A> => {
     return map((node) => {
       const applyInlineStyleStream = tap((styleObj) => {
         const keys = Object.keys(styleObj)
@@ -59,17 +59,17 @@ export const styleInline =
   }
 
 export const style: IStyleCurry = curry2(
-  <C extends IBranchElement, D>(styleInput: IStyleCSS, source: I$Branch<C, D>): I$Branch<C, D> => {
+  <T extends INodeElement>(styleInput: IStyleCSS, source: I$Node<T>): I$Node<T> => {
     return map((node) => ({ ...node, style: { ...node.style, ...styleInput } }), source)
   }
 )
 
 export const stylePseudo: IStylePseudoCurry = curry3(
-  <C extends IBranchElement, E extends string>(
+  <T extends INodeElement, E extends string>(
     pseudoClass: CSS.Pseudos | E,
     styleInput: IStyleCSS,
-    source: I$Branch<C>
-  ): I$Branch<C> => {
+    source: I$Node<T>
+  ): I$Node<T> => {
     return map(
       (node) => ({
         ...node,
@@ -87,7 +87,7 @@ export const stylePseudo: IStylePseudoCurry = curry3(
 )
 
 export const styleBehavior: IStyleBehaviorCurry = curry2(
-  <C extends IBranchElement, D>(style: Stream<IStyleCSS | null>, $node: I$Branch<C, D>): I$Branch<C, D> => {
+  <T extends INodeElement>(style: Stream<IStyleCSS | null>, $node: I$Node<T>): I$Node<T> => {
     return map((node) => ({ ...node, styleBehavior: [...node.styleBehavior, style] }), $node)
   }
 )

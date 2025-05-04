@@ -20,7 +20,7 @@ import { eventElementTarget, nodeEvent } from '../../core/combinator/event.js'
 import { style, styleBehavior, styleInline } from '../../core/combinator/style.js'
 import { O } from '../../core/common.js'
 import { behavior } from '../../core/index.js'
-import type { I$Branch, INode } from '../../core/source/node.js'
+import type { I$Node, ISlottable } from '../../core/source/node.js'
 import { $column, $row } from '../elements/$elements.js'
 import { layoutSheet } from '../style/layoutSheet.js'
 
@@ -38,13 +38,13 @@ const swap = <T>(a: T, idx: number, arr: T[]) => {
 
 const $dragItem = $row(style({ cursor: 'grab', width: '100%', position: 'absolute' }))
 
-interface DraggableList<T extends I$Branch> {
+interface DraggableList<T extends I$Node> {
   $list: T[]
   itemHeight: number
   gap?: number
 }
 
-interface DraggingState<T extends I$Branch> {
+interface DraggingState<T extends I$Node> {
   $draggedItem: T
   list: T[]
   isDragging: boolean
@@ -52,7 +52,7 @@ interface DraggingState<T extends I$Branch> {
   delta: number
 }
 
-export const $Sortable = <T extends I$Branch>(config: DraggableList<T>) =>
+export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
   component(([orderChange, orderChangeTether]: IBehavior<DraggingState<T>, DraggingState<T>>) => {
     const gap = config.gap ?? 0
     const listLength = config.$list.length
@@ -77,7 +77,7 @@ export const $Sortable = <T extends I$Branch>(config: DraggableList<T>) =>
         })
       )(
         ...config.$list.map(($item, i) => {
-          const [dragY, dragYTether]: IBehavior<INode, DraggingState<T>> = behavior()
+          const [dragY, dragYTether]: IBehavior<ISlottable, DraggingState<T>> = behavior()
 
           const multicastedDrag = multicast(dragY)
           const isDraggingStream = skipRepeats(map((x) => x.isDragging, multicastedDrag))

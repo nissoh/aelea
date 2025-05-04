@@ -4,7 +4,7 @@ import { component } from '../../../core/combinator/component.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
 import { style } from '../../../core/combinator/style.js'
 import { type IOps, O } from '../../../core/common.js'
-import type { IBranch } from '../../../core/source/node.js'
+import type { INode } from '../../../core/source/node.js'
 import { $node, $p } from '../../../core/source/node.js'
 import { $text } from '../../../core/source/text.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
@@ -19,7 +19,7 @@ export interface TextField extends Field {
   hint?: string
   labelStyle?: IStyleCSS
 
-  containerOp?: IOps<IBranch<HTMLInputElement>, IBranch<HTMLInputElement>>
+  containerOp?: IOps<INode<HTMLInputElement>, INode<HTMLInputElement>>
 }
 
 export const $TextField = (config: TextField) =>

@@ -10,7 +10,7 @@ Functional Reactive Programming UI library based on [@most/core](https://github.
 - Highly performant since diffing became obsolete, state changes based on natural IBehaviors
 - CSS Declarations only exists when they are displayed, reducing paint time
 - Components are similar to a function, AS I/O, Outputs(Automatically Typed) outout(unlike any other libraries)
-- Typed. Less friction and more feedback. Style(csstype), Elements(either custom or specific(form, button etc)) and even Dom Events(based on element type)
+- Typed. Less friction and more feedback. Style(csstype), INodeElements(either custom or specific(form, button etc)) and even Dom Events(based on element type)
 - Animations. done using Spring physics <https://www.youtube.com/watch?v=1tavDv5hXpo>
 
 ### Increment number periodically

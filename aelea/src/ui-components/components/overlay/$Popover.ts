@@ -3,7 +3,7 @@ import type { Stream } from '@most/types'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
 import { O } from '../../../core/common.js'
 import { $node, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
-import type { I$Node, INode, INodeCompose } from '../../../core/source/node.js'
+import type { I$Slot, INodeCompose, ISlottable } from '../../../core/source/node.js'
 import { colorAlpha } from '../../../ui-components-theme/color.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $column } from '../../elements/$elements.js'
@@ -20,13 +20,13 @@ export const $defaultPopoverContentContainer = $column(
 )
 
 interface IPopover {
-  open: Stream<I$Node>
+  open: Stream<I$Slot>
   dismiss?: Stream<any>
 
-  $target: I$Node
+  $target: I$Slot
 
-  $contentContainer?: INodeCompose<I$Node>
-  $container?: INodeCompose<I$Node>
+  $contentContainer?: INodeCompose
+  $container?: INodeCompose
   spacing?: number
 }
 
@@ -40,9 +40,9 @@ export const $Popover = ({
 }: IPopover) =>
   component(
     (
-      [overlayClick, overlayClickTether]: IBehavior<INode, false>,
-      [targetIntersection, targetIntersectionTether]: IBehavior<INode, IntersectionObserverEntry[]>,
-      [popoverContentDimension, popoverContentDimensionTether]: IBehavior<INode, ResizeObserverEntry[]>
+      [overlayClick, overlayClickTether]: IBehavior<ISlottable, false>,
+      [targetIntersection, targetIntersectionTether]: IBehavior<ISlottable, IntersectionObserverEntry[]>,
+      [popoverContentDimension, popoverContentDimensionTether]: IBehavior<ISlottable, ResizeObserverEntry[]>
     ) => {
       const openMulticast = multicast(open)
 
@@ -117,7 +117,8 @@ export const $Popover = ({
 
       const $content = switchLatest(
         map((content) => {
-          return until(dismissEvent, mergeArray([style({ zIndex: 3456 })(contentOps(content)), $overlay()]))
+          const newLocal = $overlay()
+          return until(dismissEvent, mergeArray([style({ zIndex: 3456 })(contentOps(content)), newLocal]))
         }, openMulticast)
       )
 

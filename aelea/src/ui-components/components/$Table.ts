@@ -6,7 +6,7 @@ import { component } from '../../core/combinator/component.js'
 import { nodeEvent } from '../../core/combinator/event.js'
 import { style, stylePseudo } from '../../core/combinator/style.js'
 import { type IOps, O } from '../../core/common.js'
-import type { I$Branch, I$Node, INode } from '../../core/source/node.js'
+import type { I$Node, I$Slot, ISlottable } from '../../core/source/node.js'
 import { $node, $svg } from '../../core/source/node.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column, $row } from '../elements/$elements.js'
@@ -39,23 +39,23 @@ export interface TableOption<T, FilterState> {
   dataSource: Stream<TablePageResponse<T>>
   scrollConfig?: Omit<QuantumScroll, 'dataSource'>
 
-  bodyContainerOp?: IOps<INode, INode>
+  bodyContainerOp?: IOps<ISlottable, ISlottable>
 
-  cellOp?: IOps<INode, INode>
-  headerCellOp?: IOps<INode, INode>
-  bodyCellOp?: IOps<INode, INode>
+  cellOp?: IOps<ISlottable, ISlottable>
+  headerCellOp?: IOps<ISlottable, ISlottable>
+  bodyCellOp?: IOps<ISlottable, ISlottable>
 
   sortChange?: Stream<ISortBy<T>>
   filterChange?: Stream<FilterState>
-  $sortArrowDown?: I$Node
+  $sortArrowDown?: I$Slot
 }
 
 export interface TableColumn<T> {
-  $head: I$Node
-  $body: IOps<T, I$Branch>
+  $head: I$Slot
+  $body: IOps<T, I$Node>
   sortBy?: keyof T
 
-  columnOp?: IOps<INode, INode>
+  columnOp?: IOps<ISlottable, ISlottable>
 }
 
 export const $Table = <T, FilterState = never>({
@@ -73,7 +73,7 @@ export const $Table = <T, FilterState = never>({
   component(
     (
       [scrollIndex, scrollIndexTether]: IBehavior<ScrollRequest, ScrollRequest>,
-      [sortByChange, sortByChangeTether]: IBehavior<INode, keyof T>
+      [sortByChange, sortByChangeTether]: IBehavior<ISlottable, keyof T>
     ) => {
       const cellStyle = O(style({ padding: '3px 6px', overflowWrap: 'break-word' }), layoutSheet.flex)
 
