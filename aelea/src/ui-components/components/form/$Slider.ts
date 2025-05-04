@@ -1,8 +1,8 @@
 import { filter, map, merge, now, switchLatest, tap } from '@most/core'
-import { O } from '../../../core/common.js'
-import type { IBehavior } from "../../../core/combinator/behavior.js"
-import { $element, attr, component, nodeEvent, style, stylePseudo } from '../../../core/index.js'
+import type { IBehavior } from '../../../core/combinator/behavior.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
+import { O } from '../../../core/common.js'
+import { $element, attr, component, nodeEvent, style, stylePseudo } from '../../../core/index.js'
 import type { IBranch } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import type { Input } from './types.js'

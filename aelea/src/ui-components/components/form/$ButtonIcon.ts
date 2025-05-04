@@ -1,9 +1,9 @@
 import { map, mergeArray } from '@most/core'
+import type { IBehavior } from '../../../core/combinator/behavior.js'
 import { O } from '../../../core/common.js'
-import type { IBehavior } from "../../../core/combinator/behavior.js"
 import { component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
-import type { INode } from '../../../core/types.js'
 import type { I$Node } from '../../../core/source/node.js'
+import type { INode } from '../../../core/types.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $icon } from '../../elements/$icon.js'
 import { designSheet } from '../../style/designSheet.js'

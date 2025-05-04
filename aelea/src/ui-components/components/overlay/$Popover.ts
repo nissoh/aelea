@@ -1,15 +1,15 @@
 import { constant, empty, filter, map, merge, mergeArray, multicast, switchLatest, until, zip } from '@most/core'
 import type { Stream } from '@most/types'
+import type { IBehavior } from '../../../core/combinator/behavior.js'
 import { O } from '../../../core/common.js'
 import { $node, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
-import type { INode } from '../../../core/types.js'
 import type { INodeCompose } from '../../../core/source/node.js'
 import type { I$Node } from '../../../core/source/node.js'
+import type { INode } from '../../../core/types.js'
 import { colorAlpha } from '../../../ui-components-theme/color.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $column } from '../../elements/$elements.js'
 import { observer } from '../../index.js'
-import type { IBehavior } from '../../../core/combinator/behavior.js'
 
 export const $defaultPopoverContentContainer = $column(
   style({

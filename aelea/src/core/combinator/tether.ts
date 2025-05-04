@@ -53,8 +53,6 @@ class TetherSink<A> implements Sink<A> {
   }
 }
 
-
-
 class Tether<T> implements Stream<T> {
   sourceSinkList: SourceSink<T>[] = []
   tetherSinkList: TetherSink<T>[] = []

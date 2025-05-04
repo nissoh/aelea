@@ -12,9 +12,9 @@ import {
   switchLatest
 } from '@most/core'
 import type { Stream } from '@most/types'
+import type { IStyleCSS } from '../../core/combinator/style.js'
 import { O } from '../../core/common.js'
 import { $node, $text, style, styleBehavior } from '../../core/index.js'
-import type { IStyleCSS } from '../../core/combinator/style.js'
 
 export const sumFromZeroOp = scan((current: number, x: number) => current + x, 0)
 

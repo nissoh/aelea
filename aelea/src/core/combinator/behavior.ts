@@ -13,7 +13,13 @@ export interface IComposeBehavior<I, O> {
   <O1, O2>(o1: IOps<I, O1>, o2: IOps<O1, O2>, o3: IOps<O2, O>): IOps<I, I>
   <O1, O2, O3>(o1: IOps<I, O1>, o2: IOps<O1, O2>, o3: IOps<O2, O3>, o4: IOps<O3, O>): IOps<I, I>
   <B1, B2, B3, B4>(o1: IOps<I, B1>, o2: IOps<B1, B2>, o3: IOps<B2, B3>, o4: IOps<B3, B4>, o5: IOps<B4, O>): IOps<I, I>
-  <B1, B2, B3, B4, B5>(o1: IOps<I, B1>, o2: IOps<B1, B2>, o3: IOps<B2, B3>, o4: IOps<B3, B4>, o5: IOps<B5, O>): IOps<I, I>
+  <B1, B2, B3, B4, B5>(
+    o1: IOps<I, B1>,
+    o2: IOps<B1, B2>,
+    o3: IOps<B2, B3>,
+    o4: IOps<B3, B4>,
+    o5: IOps<B5, O>
+  ): IOps<I, I>
   <B1, B2, B3, B4, B5, B6>(
     o1: IOps<I, B1>,
     o2: IOps<B1, B2>,

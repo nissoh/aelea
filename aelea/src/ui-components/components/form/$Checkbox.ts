@@ -1,6 +1,6 @@
 import { map, mergeArray } from '@most/core'
+import type { IBehavior } from '../../../core/combinator/behavior.js'
 import { O } from '../../../core/common.js'
-import type { IBehavior } from "../../../core/combinator/behavior.js"
 import { $element, $node, attr, attrBehavior, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
 import type { IBranch } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'

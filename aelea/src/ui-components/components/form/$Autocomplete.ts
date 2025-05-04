@@ -1,10 +1,10 @@
 import { empty, map, mergeArray, snapshot } from '@most/core'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
-import { component, type IBranch, $element, attr, nodeEvent, styleBehavior } from '../../../core/index.js'
+import { $element, type IBranch, attr, component, nodeEvent, styleBehavior } from '../../../core/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
-import { interactionOp, dismissOp } from './form.js'
-import { InputType, type Input } from './types.js'
+import { dismissOp, interactionOp } from './form.js'
+import { type Input, InputType } from './types.js'
 
 export interface Autocomplete extends Input<string | number> {
   type?: InputType

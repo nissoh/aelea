@@ -13,17 +13,17 @@ import {
   switchLatest
 } from '@most/core'
 import { remove } from '@most/prelude'
-import { O } from '../../core/common.js'
-import { behavior } from '../../core/index.js'
 import { motion } from '../../core/combinator/animate.js'
+import type { IBehavior } from '../../core/combinator/behavior.js'
 import { component } from '../../core/combinator/component.js'
 import { eventElementTarget, nodeEvent } from '../../core/combinator/event.js'
 import { style, styleBehavior, styleInline } from '../../core/combinator/style.js'
-import type { INode } from '../../core/types.js'
+import { O } from '../../core/common.js'
+import { behavior } from '../../core/index.js'
 import type { I$Branch } from '../../core/source/node.js'
+import type { INode } from '../../core/types.js'
 import { $column, $row } from '../elements/$elements.js'
 import { layoutSheet } from '../style/layoutSheet.js'
-import type { IBehavior } from '../../core/combinator/behavior.js'
 
 const clamp = (val: number, min: number, max: number) => (val > max ? max : val < min ? min : val)
 

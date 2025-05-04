@@ -1,7 +1,7 @@
 import { combine } from '@most/core'
-import { $element, style, component, styleBehavior } from 'aelea/core'
+import { $element, component, style, styleBehavior } from 'aelea/core'
 import type { I$Node, IBehavior, IStyleCSS } from 'aelea/core'
-import { type IAnchor, $RouterAnchor } from 'aelea/router'
+import { $RouterAnchor, type IAnchor } from 'aelea/router'
 import { pallete } from 'aelea/ui-components-theme'
 
 export interface ILink extends Omit<IAnchor, '$anchor'> {

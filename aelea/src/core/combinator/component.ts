@@ -4,7 +4,7 @@ import type { Disposable, Stream } from '@most/types'
 import { nullSink } from '../../core/common.js'
 import type { INodeElement, IOps } from '../../core/types.js'
 import type { I$Node } from '../source/node.js'
-import { behavior, type IBehavior } from './behavior.js'
+import { type IBehavior, behavior } from './behavior.js'
 
 export type IOutputTethers<A> = { [P in keyof A]?: IOps<A[P], A[P]> }
 

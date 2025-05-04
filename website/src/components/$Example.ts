@@ -1,4 +1,4 @@
-import { component, type I$Branch, style } from 'aelea/core'
+import { type I$Branch, component, style } from 'aelea/core'
 import { $column, spacing } from 'aelea/ui-components'
 import { fadeIn } from './transitions/enter'
 

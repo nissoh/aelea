@@ -1,8 +1,8 @@
 import { O } from '../../core/common.js'
-import type { IOps } from '../../core/types.js'
 import { $svg, attr, style } from '../../core/index.js'
 import type { I$Node } from '../../core/source/node.js'
 import type { IBranch } from '../../core/source/node.js'
+import type { IOps } from '../../core/types.js'
 
 interface Icon {
   /**  in pixels */
