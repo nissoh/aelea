@@ -5,8 +5,7 @@ import { component } from '../../core/combinator/component.js'
 import { nodeEvent } from '../../core/combinator/event.js'
 import { style } from '../../core/combinator/style.js'
 import { type IOps, O } from '../../core/common.js'
-import type { I$Branch } from '../../core/source/node.js'
-import type { IBranch } from '../../core/source/node.js'
+import type { I$Branch, IBranch } from '../../core/source/node.js'
 import type { Route } from '../types.js'
 
 export interface IAnchor {

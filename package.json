@@ -8,10 +8,14 @@
     "sherif:fix": "sherif --fix",
     "biome:check": "biome check",
     "biome:check:fix": "biome check --fix",
+    "biome:check:fix:unsafe": "biome check --fix --unsafe",
     "changeset:publish": "changeset publish --access public",
     "changeset:version": "changeset version"
   },
-  "workspaces": ["aelea", "website"],
+  "workspaces": [
+    "aelea",
+    "website"
+  ],
   "devDependencies": {
     "@biomejs/biome": "2.0.0-beta.2",
     "@changesets/changelog-github": "^0.5.1",

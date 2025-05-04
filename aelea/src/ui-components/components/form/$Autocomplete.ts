@@ -1,6 +1,6 @@
 import { empty, map, mergeArray, snapshot } from '@most/core'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
-import { $element, type IBranch, attr, component, nodeEvent, styleBehavior } from '../../../core/index.js'
+import { $element, attr, component, type IBranch, nodeEvent, styleBehavior } from '../../../core/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'

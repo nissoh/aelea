@@ -2,7 +2,7 @@ import { constant } from '@most/core'
 import type { Stream } from '@most/types'
 import type { IBehavior } from 'aelea/core'
 import { $text, component, style } from 'aelea/core'
-import { $Button, $NumberTicker, $column, $row, spacing } from 'aelea/ui-components'
+import { $Button, $column, $NumberTicker, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 
 interface Counter {

@@ -1,7 +1,6 @@
 import { combine, empty, map, startWith } from '@most/core'
-import { type IBehavior, O } from 'aelea/core'
-import { $node, $text, attr, component, style } from 'aelea/core'
-import { $Field, $NumberTicker, $column, $row, spacing } from 'aelea/ui-components'
+import { $node, $text, attr, component, type IBehavior, O, style } from 'aelea/core'
+import { $column, $Field, $NumberTicker, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 
 const add = (x: number, y: number) => x + y

@@ -19,8 +19,17 @@ import {
   take
 } from '@most/core'
 import type { Stream } from '@most/types'
-import { type IBehavior, O, fromCallback } from 'aelea/core'
-import { $node, $wrapNativeElement, type IBranch, type IStyleCSS, component, style } from 'aelea/core'
+import {
+  $node,
+  $wrapNativeElement,
+  component,
+  fromCallback,
+  type IBehavior,
+  type IBranch,
+  type IStyleCSS,
+  O,
+  style
+} from 'aelea/core'
 import { fetchJson, observer, spacing } from 'aelea/ui-components'
 import type * as monaco from 'monaco-editor'
 

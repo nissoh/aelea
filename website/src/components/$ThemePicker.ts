@@ -1,8 +1,7 @@
 import { snapshot, startWith } from '@most/core'
-import { type IBehavior, type INode, O } from 'aelea/core'
-import { $svg, attr, component, nodeEvent, style, stylePseudo } from 'aelea/core'
+import { $svg, attr, component, type IBehavior, type INode, nodeEvent, O, style, stylePseudo } from 'aelea/core'
 import { $icon } from 'aelea/ui-components'
-import { type Theme, pallete, theme } from 'aelea/ui-components-theme'
+import { pallete, type Theme, theme } from 'aelea/ui-components-theme'
 import { setTheme } from 'aelea/ui-components-theme-browser'
 
 export const $Picker = (themeList: Theme[]) =>

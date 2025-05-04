@@ -1,5 +1,6 @@
-// biome-ignore lint/performance/noBarrelFile: <explanation>
+// biome-ignore lint/performance/noBarrelFile: entrypoint module
 export { colorAlpha, convertHexToRGBA } from './color.js'
+export { pallete, theme, themeList, writeTheme } from './globalState.js'
 export type {
   Action,
   Attention,
@@ -8,4 +9,3 @@ export type {
   Story,
   Theme
 } from './types.js'
-export { pallete, theme, writeTheme, themeList } from './globalState.js'

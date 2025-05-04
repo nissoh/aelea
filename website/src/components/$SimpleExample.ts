@@ -1,6 +1,6 @@
 import { map } from '@most/core'
 import type { IBehavior } from 'aelea/core'
-import { $element, $node, $text, type IBranch, component, nodeEvent } from 'aelea/core'
+import { $element, $node, $text, component, type IBranch, nodeEvent } from 'aelea/core'
 
 export default component(([input, inputTether]: IBehavior<IBranch<HTMLInputElement>, string>) => {
   const inputBehavior = inputTether(

@@ -1,7 +1,16 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
-    "includes": ["**", "!**/dist", "!**/node_modules", "!**/.vscode", "!**/bun.lockb", "!**/contracts", "!**/tsconfig.json", "!**/tsconfig.*.json"]
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/node_modules",
+      "!**/.vscode",
+      "!**/bun.lockb",
+      "!**/contracts",
+      "!**/tsconfig.json",
+      "!**/tsconfig.*.json"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -63,12 +72,6 @@
         "noArrayIndexKey": "off",
         "noAssignInExpressions": "off",
         "noConfusingVoidType": "off",
-        "noConsole": {
-          "level": "error",
-          "options": {
-            "allow": ["log"]
-          }
-        },
         "noExplicitAny": "off",
         "noRedeclare": "off"
       }

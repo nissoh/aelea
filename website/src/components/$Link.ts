@@ -1,6 +1,6 @@
 import { combine } from '@most/core'
-import { $element, component, style, styleBehavior } from 'aelea/core'
 import type { I$Node, IBehavior, IStyleCSS } from 'aelea/core'
+import { $element, component, style, styleBehavior } from 'aelea/core'
 import { $RouterAnchor, type IAnchor } from 'aelea/router'
 import { pallete } from 'aelea/ui-components-theme'
 

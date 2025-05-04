@@ -2,8 +2,8 @@ import { at, debounce, empty, join, map, merge, now, snapshot, startWith, switch
 import type { Stream } from '@most/types'
 import type { IBehavior } from 'aelea/core'
 import { $node, $p, $text, component, style } from 'aelea/core'
-import { $TextField, $VirtualScroll, $card, $column, $row, $seperator, spacing } from 'aelea/ui-components'
 import type { ScrollRequest, ScrollResponse } from 'aelea/ui-components'
+import { $card, $column, $row, $seperator, $TextField, $VirtualScroll, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 
 function filterArrayByText(array: string[], filter: string) {

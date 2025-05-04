@@ -1,7 +1,7 @@
 import { constant, map, merge, now, scan, switchLatest } from '@most/core'
 import type { IBehavior } from 'aelea/core'
 import { $text, component, style } from 'aelea/core'
-import { $Button, $Popover, $TextField, $column, $row, spacing } from 'aelea/ui-components'
+import { $Button, $column, $Popover, $row, $TextField, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 import $Counter from '../count-counters/$Counter'
 
