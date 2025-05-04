@@ -1,7 +1,6 @@
 import { disposeWith } from '@most/disposable'
 import type { Disposable, Scheduler, Sink, Stream } from '@most/types'
-import { O } from '../common.js'
-import type { IOps } from '../types.js'
+import { type IOps, O } from '../common.js'
 import { tether } from './tether.js'
 
 type SinkMap<T> = Map<Sink<T>, Map<Stream<T>, Disposable | null>>

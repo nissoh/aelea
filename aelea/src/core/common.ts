@@ -1,8 +1,10 @@
 import { empty, never, run, startWith } from '@most/core'
 import { disposeNone } from '@most/disposable'
 import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
-import type { I$Node } from './source/node.js'
-import type { Fn, INodeElement, IOps } from './types.js'
+
+export type Fn<T, R> = (a: T) => R
+
+export type IOps<I, O> = Fn<Stream<I>, Stream<O>>
 
 export const xForver = <T>(x: T) => startWith(x, never())
 

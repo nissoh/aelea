@@ -2,8 +2,7 @@ import { filter, map, tap } from '@most/core'
 import { curry2, curry3 } from '@most/prelude'
 import type { Stream } from '@most/types'
 import type * as CSS from 'csstype'
-import type { IBranchElement } from '../../core/types.js'
-import type { I$Branch } from '../source/node.js'
+import type { I$Branch, IBranchElement } from '../source/node.js'
 
 export type IStyleCSS = CSS.Properties
 

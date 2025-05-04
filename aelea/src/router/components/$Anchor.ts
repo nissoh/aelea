@@ -4,10 +4,9 @@ import type { IBehavior } from '../../core/combinator/behavior.js'
 import { component } from '../../core/combinator/component.js'
 import { nodeEvent } from '../../core/combinator/event.js'
 import { style } from '../../core/combinator/style.js'
-import { O } from '../../core/common.js'
+import { type IOps, O } from '../../core/common.js'
 import type { I$Branch } from '../../core/source/node.js'
 import type { IBranch } from '../../core/source/node.js'
-import type { IOps } from '../../core/types.js'
 import type { Route } from '../types.js'
 
 export interface IAnchor {

@@ -1,5 +1,5 @@
 import type { Stream } from '@most/types'
-import type { IOps } from '../../../core/types.js'
+import type { IOps } from '../../../core/common.js'
 
 export enum InputType {
   TEXT = 'text',

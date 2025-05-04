@@ -1,8 +1,7 @@
 import { map } from '@most/core'
 import { curry2 } from '@most/prelude'
 import type { Stream } from '@most/types'
-import type { IBranchElement } from '../../core/types.js'
-import type { I$Branch } from '../source/node.js'
+import type { I$Branch, IBranchElement } from '../source/node.js'
 
 export type IAttributeProperties<T> = {
   [P in keyof T]: string | number | boolean | null | undefined

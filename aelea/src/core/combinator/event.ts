@@ -1,9 +1,8 @@
 import { chain } from '@most/core'
 import { curry2 } from '@most/prelude'
 import type { Stream } from '@most/types'
-import type { INodeElement } from '../../core/types.js'
 import { isStream } from '../common.js'
-import type { I$Node } from '../source/node.js'
+import type { I$Node, INodeElement } from '../source/node.js'
 
 type PickEvent<A, B> = A extends keyof B ? B[A] : Event
 

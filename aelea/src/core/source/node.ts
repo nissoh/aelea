@@ -3,11 +3,19 @@ import { disposeBoth } from '@most/disposable'
 import { id } from '@most/prelude'
 import { asap } from '@most/scheduler'
 import type { Disposable, Scheduler, Sink, Stream } from '@most/types'
-import { O, isFunction } from '../../core/common.js'
-import type { IBranchElement, INode, INodeElement, IOps } from '../../core/types.js'
+import { type IOps, O, isFunction } from '../../core/common.js'
 import type { IAttributeProperties } from '../combinator/attribute.js'
 import type { IStyleCSS } from '../combinator/style.js'
-import { SettableDisposable } from '../utils/SettableDisposable.js'
+import { type ISettableDisposable, SettableDisposable } from '../utils/SettableDisposable.js'
+
+export type IText = Stream<Text>
+export type INodeElement = Node & ChildNode
+export type IBranchElement = HTMLElement | SVGElement
+
+export interface INode<A extends INodeElement = INodeElement> {
+  element: A
+  disposable: ISettableDisposable
+}
 
 export interface IBranch<A extends IBranchElement = IBranchElement, B = {}> extends INode<A> {
   $segments: I$Node[]

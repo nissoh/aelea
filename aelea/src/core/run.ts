@@ -5,10 +5,9 @@ import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
 import type { IAttributeProperties } from './combinator/attribute.js'
 import type { IStyleCSS } from './combinator/style.js'
 import { nullSink } from './common.js'
-import type { I$Branch } from './source/node.js'
+import type { I$Branch, IBranchElement, INode, INodeElement } from './source/node.js'
 import type { I$Node } from './source/node.js'
 import type { IBranch } from './source/node.js'
-import type { IBranchElement, INode, INodeElement } from './types.js'
 import { SettableDisposable } from './utils/SettableDisposable.js'
 
 export interface IStyleEnvironment {

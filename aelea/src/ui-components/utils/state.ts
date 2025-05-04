@@ -1,6 +1,6 @@
 import { filter, merge, multicast } from '@most/core'
 import type { Stream } from '@most/types'
-import type { IOps } from '../../core/types.js'
+import type { IOps } from '../../core/common.js'
 
 type StoreFn<STORE> = <Z>(stream: Stream<Z>, writePipe: IOps<Z, STORE>) => Stream<Z>
 

@@ -1,9 +1,8 @@
 import { disposeAll } from '@most/disposable'
 import { curry2 } from '@most/prelude'
 import type { Disposable, Stream } from '@most/types'
-import { nullSink } from '../../core/common.js'
-import type { INodeElement, IOps } from '../../core/types.js'
-import type { I$Node } from '../source/node.js'
+import { type IOps, nullSink } from '../../core/common.js'
+import type { I$Node, INodeElement } from '../source/node.js'
 import { type IBehavior, behavior } from './behavior.js'
 
 export type IOutputTethers<A> = { [P in keyof A]?: IOps<A[P], A[P]> }

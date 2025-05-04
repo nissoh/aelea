@@ -47,7 +47,11 @@ export type {
   I$Branch,
   I$Node,
   IBranch,
-  INodeCompose
+  INodeCompose,
+  INode,
+  INodeElement,
+  IBranchElement,
+  IText
 } from './source/node.js'
 export { $text } from './source/text.js'
 export { combineArray, combineState } from './combinator/combine.js'

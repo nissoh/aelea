@@ -1,7 +1,6 @@
 import { disposeNone, disposeWith } from '@most/disposable'
 import { remove } from '@most/prelude'
 import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
-import type { IOps } from '../types.js'
 
 class SourceSink<T> implements Sink<T> {
   hasValue = false

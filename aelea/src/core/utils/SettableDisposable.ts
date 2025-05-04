@@ -1,6 +1,9 @@
 import { disposeNone } from '@most/disposable'
 import type { Disposable } from '@most/types'
-import type { ISettableDisposable } from '../types.js'
+
+export interface ISettableDisposable extends Disposable {
+  set: (disposable: Disposable) => void
+}
 
 export class SettableDisposable implements ISettableDisposable {
   private disposable: Disposable | undefined

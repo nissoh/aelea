@@ -2,8 +2,8 @@ import { map, now } from '@most/core'
 import { disposeAll, disposeBoth } from '@most/disposable'
 import type { Disposable, Scheduler, Sink, Stream } from '@most/types'
 import { filterNull } from '../../utils/combinator.js'
-import type { INode } from '../types.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
+import type { INode } from './node.js'
 
 class TextSource implements Stream<INode<Text>> {
   constructor(private textSourceList: (Stream<string> | string)[]) {}
