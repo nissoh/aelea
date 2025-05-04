@@ -60,5 +60,5 @@ export {
   $wrapNativeElement,
   createNode
 } from './source/node.js'
-export { $text, $textNode } from './source/text.js'
 export type { I$Text } from './source/text.js'
+export { $text, $textNode } from './source/text.js'
