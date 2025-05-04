@@ -1,5 +1,5 @@
 import type { IBehavior } from 'aelea/core'
-import { type I$Branch, $text, type IBranchElement, component, style } from 'aelea/core'
+import { $text, type I$Branch, type IBranchElement, component, style } from 'aelea/core'
 import { $Sortable, $card, $row, designSheet, layoutSheet } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 
