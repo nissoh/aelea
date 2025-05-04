@@ -25,10 +25,10 @@ export interface IAttributeBehaviorCurry {
   <A, C extends INodeElement>(styleInput: Stream<IAttributeProperties<A> | null>): (node: I$Node<C>) => I$Node<C>
 }
 
-export const attrBehavior: IAttributeBehaviorCurry = curry2((attrs, node) =>
-  map((node) => {
-    const attributesBehavior = { ...node.attributesBehavior, ...attrs }
+export const attrBehavior: IAttributeBehaviorCurry = curry2((attrs, node) => {
+  return map((node) => {
+    const attributesBehavior = [...node.attributesBehavior, attrs]
 
-    return { ...node, attributesBehavior } as INode
+    return { ...node, attributesBehavior }
   }, node)
-)
+})
