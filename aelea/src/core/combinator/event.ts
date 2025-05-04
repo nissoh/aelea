@@ -1,8 +1,9 @@
-import { join, map } from '@most/core'
+import { chain } from '@most/core'
 import { curry2 } from '@most/prelude'
 import type { Stream } from '@most/types'
 import type { INodeElement } from '../../core/types.js'
-import type { $Node } from '../source/node.js'
+import { isStream } from '../common.js'
+import type { I$Node } from '../source/node.js'
 
 type PickEvent<A, B> = A extends keyof B ? B[A] : Event
 
@@ -43,16 +44,29 @@ export function eventElementTarget<A extends ElementEventNameList, B extends Eve
   }
 }
 
-interface NodeEvent {
+type INodeEventDescriptor<B extends INodeElement> = {
+  $node: I$Node<B>
+  options: boolean | AddEventListenerOptions
+}
+
+export interface INodeEventCurry {
   <A extends ElementEventNameList, B extends INodeElement>(
     eventType: A,
-    node: $Node<B>
+    descriptor: I$Node<B> | INodeEventDescriptor<B>
   ): Stream<ElementEventTypeMap<A, B>>
   <A extends ElementEventNameList, B extends INodeElement>(
     eventType: A
-  ): (node: $Node<B>) => Stream<ElementEventTypeMap<A, B>>
+  ): (descriptor: I$Node<B> | INodeEventDescriptor<B>) => Stream<ElementEventTypeMap<A, B>>
 }
 
-export const nodeEvent: NodeEvent = curry2((eventType, node) => {
-  return join(map((ns) => eventElementTarget(eventType, ns.element, { capture: true }), node))
+export const nodeEvent: INodeEventCurry = curry2((eventType, descriptor) => {
+  if (isStream(descriptor)) {
+    return chain((ns) => {
+      return eventElementTarget(eventType, ns.element, { capture: true })
+    }, descriptor)
+  }
+
+  return chain((ns) => {
+    return eventElementTarget(eventType, ns.element, descriptor.options)
+  }, descriptor.$node)
 })

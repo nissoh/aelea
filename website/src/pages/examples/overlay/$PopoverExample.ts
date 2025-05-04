@@ -1,5 +1,5 @@
 import { constant, map, merge, now, scan, switchLatest } from '@most/core'
-import type { Behavior } from 'aelea/core'
+import type { IBehavior } from 'aelea/core'
 import { $text, component, style } from 'aelea/core'
 import { $Button, $Popover, $TextField, $column, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
@@ -13,11 +13,11 @@ export function hexAlpha(color: string, opacity: number): string {
 
 export const $PopoverExample = component(
   (
-    [pop, popTether]: Behavior<any, any>,
-    [popCard, popCardTether]: Behavior<any, any>,
-    [popCardBottom, popCardBottomTether]: Behavior<any, any>,
-    [countUp, countUpTether]: Behavior<1, 1>,
-    [countDown, countDownTether]: Behavior<-1, -1>
+    [pop, popTether]: IBehavior<any, any>,
+    [popCard, popCardTether]: IBehavior<any, any>,
+    [popCardBottom, popCardBottomTether]: IBehavior<any, any>,
+    [countUp, countUpTether]: IBehavior<1, 1>,
+    [countDown, countDownTether]: IBehavior<-1, -1>
   ) => {
     const count = merge(countUp, countDown)
 

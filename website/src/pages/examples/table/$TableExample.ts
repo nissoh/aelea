@@ -1,6 +1,6 @@
 import { combine, map, merge, now } from '@most/core'
 import type { Stream } from '@most/types'
-import type { Behavior } from 'aelea/core-types'
+import type { IBehavior } from 'aelea/core'
 import { $node, $text, component, style } from 'aelea/core'
 import { $Table, $card, type ISortBy, type ScrollRequest, type TablePageResponse } from 'aelea/ui-components'
 
@@ -11,8 +11,8 @@ interface ITableRow {
 
 export const $TableExample = component(
   (
-    [requestList, requestListTether]: Behavior<ScrollRequest, ScrollRequest>,
-    [sortBy, sortByTether]: Behavior<ISortBy<ITableRow>, ISortBy<ITableRow>>
+    [requestList, requestListTether]: IBehavior<ScrollRequest, ScrollRequest>,
+    [sortBy, sortByTether]: IBehavior<ISortBy<ITableRow>, ISortBy<ITableRow>>
   ) => {
     const PAGE_SIZE = 25
     let i = 0

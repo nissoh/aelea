@@ -1,6 +1,6 @@
 import { at, debounce, empty, join, map, merge, now, snapshot, startWith, switchLatest } from '@most/core'
 import type { Stream } from '@most/types'
-import type { Behavior } from 'aelea/core'
+import type { IBehavior } from 'aelea/core'
 import { $node, $p, $text, component, style } from 'aelea/core'
 import { $TextField, $VirtualScroll, $card, $column, $row, $seperator, spacing } from 'aelea/ui-components'
 import type { ScrollRequest, ScrollResponse } from 'aelea/ui-components'
@@ -16,9 +16,9 @@ const $label = (label: string, value: Stream<string> | string) =>
 
 export const $VirtualScrollExample = component(
   (
-    [scrollRequest, scrollRequestTether]: Behavior<ScrollRequest, ScrollRequest>,
-    [delayResponse, delayResponseTether]: Behavior<string, number>,
-    [filter, filterTether]: Behavior<string, string>
+    [scrollRequest, scrollRequestTether]: IBehavior<ScrollRequest, ScrollRequest>,
+    [delayResponse, delayResponseTether]: IBehavior<string, number>,
+    [filter, filterTether]: IBehavior<string, string>
   ) => {
     const PAGE_SIZE = 25
     const TOTAL_ITEMS = 1000

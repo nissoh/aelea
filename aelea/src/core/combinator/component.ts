@@ -3,12 +3,12 @@ import { curry2 } from '@most/prelude'
 import type { Disposable, Stream } from '@most/types'
 import { nullSink } from '../../core/common.js'
 import type { INodeElement, IOps } from '../../core/types.js'
-import type { $Node } from '../source/node.js'
+import type { I$Node } from '../source/node.js'
 import { behavior, type IBehavior } from './behavior.js'
 
 export type IOutputTethers<A> = { [P in keyof A]?: IOps<A[P], A[P]> }
 
-export type IComponentFunction<A extends INodeElement, B extends $Node<A>, D> = (
+export type IComponentDefinitionCallback<A extends INodeElement, B extends I$Node<A>, D> = (
   ...args: IBehavior<unknown, unknown>[]
 ) => [B, IComponentOutputBehaviors<D>] | [B]
 
@@ -17,20 +17,20 @@ export type IComponentOutputBehaviors<T> = {
 }
 
 export interface IComponentCurry {
-  <A extends INodeElement, B extends $Node<A>, D>(
-    inputComp: IComponentFunction<A, B, D>,
+  <A extends INodeElement, B extends I$Node<A>, D>(
+    inputComp: IComponentDefinitionCallback<A, B, D>,
     projectBehaviors: IOutputTethers<D>
   ): B
-  <A extends INodeElement, B extends $Node<A>, D>(
-    inputComp: IComponentFunction<A, B, D>
+  <A extends INodeElement, B extends I$Node<A>, D>(
+    inputComp: IComponentDefinitionCallback<A, B, D>
   ): (projectBehaviors: IOutputTethers<D>) => B
 }
 
 export const component: IComponentCurry = curry2(
-  <A extends INodeElement, B extends $Node<A>, D>(
-    inputComp: IComponentFunction<A, B, D>,
+  <A extends INodeElement, B extends I$Node<A>, D>(
+    inputComp: IComponentDefinitionCallback<A, B, D>,
     outputTethers: IOutputTethers<D>
-  ): $Node<A> => {
+  ): I$Node<A> => {
     return {
       run(sink, scheduler) {
         // fill stubbed aguments as a behavior

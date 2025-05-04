@@ -1,4 +1,4 @@
-import type { Behavior } from 'aelea/core'
+import type { IBehavior } from 'aelea/core'
 import { $element, $node, $p, $text, attr, component, style, stylePseudo } from 'aelea/core'
 import type { Route } from 'aelea/router'
 import { $icon, $row, spacing } from 'aelea/ui-components'
@@ -11,7 +11,7 @@ interface MainMenu {
 }
 
 export default ({ parentRoute }: MainMenu) =>
-  component(([routeChange, routeChangeTether]: Behavior<string, string>) => {
+  component(([routeChange, routeChangeTether]: IBehavior<string, string>) => {
     const guideRoute = parentRoute.create({ fragment: 'guide', title: 'Guide' })
     const examplesRoute = parentRoute.create({
       fragment: 'examples',

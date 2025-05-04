@@ -6,8 +6,8 @@ Functional Reactive Programming UI library based on [@most/core](https://github.
 
 - Everything is programatic. bulit by applying First Principle
 - A lot is meant to compose well together. elements, style, behaviors are reusable and stateless. All Built to scale
-- State UI naturally by declaring Behaviors, state managers are obsolete
-- Highly performant since diffing became obsolete, state changes based on natural Behaviors
+- State UI naturally by declaring IBehaviors, state managers are obsolete
+- Highly performant since diffing became obsolete, state changes based on natural IBehaviors
 - CSS Declarations only exists when they are displayed, reducing paint time
 - Components are similar to a function, AS I/O, Outputs(Automatically Typed) outout(unlike any other libraries)
 - Typed. Less friction and more feedback. Style(csstype), Elements(either custom or specific(form, button etc)) and even Dom Events(based on element type)
@@ -39,7 +39,7 @@ const $pinkishCountUp =
 runBrowser({ rootNode: document.body })($pinkishCountUp )
 ```
 
-### Simple UI Counter - View, Style and Behavior
+### Simple UI Counter - View, Style and IBehavior
 
 This is a dumbed down version where everything is packed into a single file
 
@@ -47,7 +47,7 @@ Sanboxed version [https://codesandbox.io/s/ancient-hooks-909qq?file=/src/index.t
 
 ```typescript
 import { constant, map, merge, scan } from '@most/core'
-import { $custom, $element, $text, Behavior, component, style, event, INode, runBrowser } from '@aelea/core'
+import { $custom, $element, $text, IBehavior, component, style, event, INode, runBrowser } from '@aelea/core'
 
 // composable style
 const displayFlex = style({ display: 'flex' })
@@ -61,15 +61,15 @@ const sumFromZeroOp = scan((current: number, x: number) => current + x, 0)
 
 // Component that outputs state(optionally), this is currently not used anywhere, see next example to see it being consumed
 const $Counter = component((
-    [increment, incrementTether]: Behavior<INode, 1>,
-    [decrement, decrementTether]: Behavior<INode, -1>
+    [increment, incrementTether]: IBehavior<INode, 1>,
+    [decrement, decrementTether]: IBehavior<INode, -1>
   ) => {
     const incrementBehavior = incrementTether(event('click'), constant(1))
     const decrementBehavior = decrementTether(event('click'), constant(-1))
 
     const count = sumFromZeroOp(merge(increment, decrement))
 
-    return [ // Component has to return [$Node, Behavior(optionally)] in the next example we will use these outputted behaviors
+    return [ // Component has to return [$Node, IBehavior(optionally)] in the next example we will use these outputted behaviors
 
       $row(spacingStyle)(
         $column(
@@ -96,7 +96,7 @@ runBrowser({ rootNode: document.body })($Counter({}))
 
 ```
 
-### Using $Counter Typed Output Behaviors
+### Using $Counter Typed Output IBehaviors
 
 In previous example we didn't do much except creating a counter component and drawing it using `runBrowser` on `document.body`
 
@@ -104,12 +104,12 @@ this time, lets play with with the $Component output behaviors
 
 ```typescript
 import { constant, map, merge, scan } from '@most/core'
-import { $text, Behavior, component, style, INode, runBrowser } from '@aelea/core'
+import { $text, IBehavior, component, style, INode, runBrowser } from '@aelea/core'
 import $Counter, { $column, $row, spacingStyle } from './$Counter' // lets assume we default export $Counter and a few reusable $node's and style instead
 
 const $SumOfTwoCounters = component((
-  [increments, incrementsTether]: Behavior<INode, 1>,
-  [decrements, decrementsTether]: Behavior<INode, -1>
+  [increments, incrementsTether]: IBehavior<INode, 1>,
+  [decrements, decrementsTether]: IBehavior<INode, -1>
 ) => {
 
   const sumOfTwoCounters = scan((sum, count) =>  sum + count, 0 , merge(increments, decrements))

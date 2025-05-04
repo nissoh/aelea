@@ -1,5 +1,5 @@
 import { combine, empty, map, startWith } from '@most/core'
-import { type Behavior, O } from 'aelea/core'
+import { type IBehavior, O } from 'aelea/core'
 import { $node, $text, attr, component, style } from 'aelea/core'
 import { $Field, $NumberTicker, $column, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
@@ -22,7 +22,7 @@ const $plus = $node(
 )
 
 const placeholderZero = attr({ placeholder: '0' })
-export default component(([x, XTether]: Behavior<string, number>, [y, YTether]: Behavior<string, number>) => [
+export default component(([x, XTether]: IBehavior<string, number>, [y, YTether]: IBehavior<string, number>) => [
   $column(spacing.small)(
     $row(
       $plus($text('+')),

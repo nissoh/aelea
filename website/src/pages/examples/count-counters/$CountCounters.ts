@@ -1,5 +1,5 @@
 import { chain, constant, map, merge, mergeArray, multicast, now, scan, snapshot, until } from '@most/core'
-import { type Behavior, O, behavior, replayLatest } from 'aelea/core'
+import { type IBehavior, O, behavior, replayLatest } from 'aelea/core'
 import { $node, $p, $text, component, style } from 'aelea/core'
 import { $Button, $column, $row, $seperator, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
@@ -13,11 +13,11 @@ export const sumAdd = scan((current: number, x: number) => current + x)
 
 export default component(
   (
-    [addedCounter, addedCounterTether]: Behavior<PointerEvent, PointerEvent>,
-    [disposeCounter, disposeCounterTether]: Behavior<PointerEvent, PointerEvent>,
-    [counterIncrement, countersIncrementTether]: Behavior<1, 1>,
-    [counterDecrement, countersDecrementTether]: Behavior<-1, -1>,
-    [disposedCounterCount, disposedCounterCountTether]: Behavior<any, number>
+    [addedCounter, addedCounterTether]: IBehavior<PointerEvent, PointerEvent>,
+    [disposeCounter, disposeCounterTether]: IBehavior<PointerEvent, PointerEvent>,
+    [counterIncrement, countersIncrementTether]: IBehavior<1, 1>,
+    [counterDecrement, countersDecrementTether]: IBehavior<-1, -1>,
+    [disposedCounterCount, disposedCounterCountTether]: IBehavior<any, number>
   ) => {
     const INITAL_COUNT = 0
     const sumWithInitial = sumAdd(INITAL_COUNT)

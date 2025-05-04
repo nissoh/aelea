@@ -5,8 +5,8 @@ import { O, maybeOps } from '../../core/common.js'
 import type { IOps } from '../../core/types.js'
 import type { IBehavior } from "../../core/combinator/behavior.js"
 import type { INode } from '../../core/types.js'
-import type { $Branch } from '../../core/source/node.js'
-import type { $Node } from '../../core/source/node.js'
+import type { I$Branch } from '../../core/source/node.js'
+import type { I$Node } from '../../core/source/node.js'
 import { attr } from '../../core/combinator/attribute.js'
 import { nodeEvent } from '../../core/combinator/event.js'
 import { style, stylePseudo } from '../../core/combinator/style.js'
@@ -50,12 +50,12 @@ export interface TableOption<T, FilterState> {
 
   sortChange?: Stream<ISortBy<T>>
   filterChange?: Stream<FilterState>
-  $sortArrowDown?: $Node
+  $sortArrowDown?: I$Node
 }
 
 export interface TableColumn<T> {
-  $head: $Node
-  $body: IOps<T, $Branch>
+  $head: I$Node
+  $body: IOps<T, I$Branch>
   sortBy?: keyof T
 
   columnOp?: IOps<INode, INode>

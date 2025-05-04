@@ -24,7 +24,7 @@ export interface IComposeBehavior<I, O> {
   ): IOps<I, I>
 }
 
-class BehaviorSource<I, O> implements Stream<O> {
+class IBehaviorSource<I, O> implements Stream<O> {
   queuedBehaviors: Stream<O>[] = []
 
   sinksMap: SinkMap<O> = new Map()
@@ -78,7 +78,7 @@ class BehaviorSource<I, O> implements Stream<O> {
 }
 
 export function behavior<T, R>(): IBehavior<T, R> {
-  const ss = new BehaviorSource<T, R>()
+  const ss = new IBehaviorSource<T, R>()
 
   return [ss, ss.sample]
 }

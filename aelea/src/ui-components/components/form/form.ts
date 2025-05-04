@@ -1,17 +1,17 @@
 import { constant, filter, merge } from '@most/core'
 import { O } from '../../../core/common.js'
 import { $element, nodeEvent, style } from '../../../core/index.js'
-import type { $Node } from '../../../core/source/node.js'
+import type { I$Node } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 
 export const interactionOp = O(
-  (src: $Node) => merge(nodeEvent('focus', src), nodeEvent('pointerover', src)),
+  (src: I$Node) => merge(nodeEvent('focus')(src), nodeEvent('pointerover')(src)),
   constant(true)
 )
 
 export const dismissOp = O(
-  (src: $Node) => merge(nodeEvent('blur', src), nodeEvent('pointerout', src)),
+  (src: I$Node) => merge(nodeEvent('blur')(src), nodeEvent('pointerout')(src)),
   filter((x) => document.activeElement !== x.target), // focused elements cannot be dismissed
   constant(false)
 )

@@ -1,5 +1,5 @@
 import { constant, map, merge, now, snapshot, startWith } from '@most/core'
-import type { Behavior } from 'aelea/core'
+import type { IBehavior } from 'aelea/core'
 import { $text, component, style } from 'aelea/core'
 import { $Button, $Field, $row } from 'aelea/ui-components'
 
@@ -21,8 +21,8 @@ export function createTodo(text: string): Todo {
 
 export default component(
   (
-    [create, addTether]: Behavior<PointerEvent, PointerEvent>,
-    [inputChange, inputChangeTether]: Behavior<string, string>
+    [create, addTether]: IBehavior<PointerEvent, PointerEvent>,
+    [inputChange, inputChangeTether]: IBehavior<string, string>
   ) => {
     const inputState = startWith('', inputChange)
     const value = constant('', merge(create, now(null)))

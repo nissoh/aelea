@@ -1,7 +1,8 @@
 import { empty, never, run, startWith } from '@most/core'
 import { disposeNone } from '@most/disposable'
 import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
-import type { Fn, IOps } from './types.js'
+import type { Fn, INodeElement, IOps } from './types.js'
+import type { I$Node } from './source/node.js'
 
 export const xForver = <T>(x: T) => startWith(x, never())
 

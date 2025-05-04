@@ -18,8 +18,7 @@ import { O } from '../../core/common.js'
 import type { IOps } from '../../core/types.js'
 import type { IBehavior } from '../../core/combinator/behavior.js'
 import { $custom, $node } from '../../core/source/node.js'
-import type { $Branch } from '../../core/source/node.js'
-import type { $Node } from '../../core/source/node.js'
+import type { I$Branch, I$Node } from '../../core/source/node.js'
 import type { IBranch } from '../../core/source/node.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column } from '../elements/$elements.js'
@@ -32,17 +31,17 @@ import { component } from '../../core/combinator/component.js'
 export type ScrollRequest = number
 
 export type IScrollPagableReponse = {
-  $items: $Branch[]
+  $items: I$Branch[]
   pageSize: number
   offset: number
 }
 
-export type ScrollResponse = $Branch[] | IScrollPagableReponse
+export type ScrollResponse = I$Branch[] | IScrollPagableReponse
 
 export interface QuantumScroll {
   dataSource: Stream<ScrollResponse>
 
-  $loader?: $Node
+  $loader?: I$Node
 
   containerOps?: IOps<IBranch, IBranch>
 }

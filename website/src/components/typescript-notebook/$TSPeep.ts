@@ -1,8 +1,6 @@
 import { awaitPromises, debounce, empty, filter, map, never, now, startWith, switchLatest } from '@most/core'
-import { O } from 'aelea/core'
-import type { Behavior } from 'aelea/core-types'
+import { type I$Node, type IBehavior, O } from 'aelea/core'
 import { $custom, $node, $text, component, motion, style, styleInline } from 'aelea/core'
-import type { $Node } from 'aelea/core-types'
 import { $column, $row } from 'aelea/ui-components'
 import { pallete, theme } from 'aelea/ui-components-theme'
 import { $MonacoEditor, type ModelChangeBehavior } from '../$MonacoEditor'
@@ -13,7 +11,7 @@ interface IMonaco {
 }
 
 export default ({ code = '', readOnly = true }: IMonaco) =>
-  component(([change, changeTether]: Behavior<ModelChangeBehavior, ModelChangeBehavior>) => {
+  component(([change, changeTether]: IBehavior<ModelChangeBehavior, ModelChangeBehavior>) => {
     const $loader = $row(style({ width: '2px', backgroundColor: 'rgb(43 52 55)' }))(
       $row(
         styleInline(
@@ -66,7 +64,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                     worker,
                     semanticDiagnostics,
                     syntacticDiagnostics
-                  }: ModelChangeBehavior): Promise<$Node> => {
+                  }: ModelChangeBehavior): Promise<I$Node> => {
                     if (semanticDiagnostics.length || syntacticDiagnostics.length) {
                       return never()
                     }
@@ -78,7 +76,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                     const esModuleBlobUrl = URL.createObjectURL(new Blob([refImports], { type: 'text/javascript' }))
                     const esModule = await import(/* @vite-ignore */ esModuleBlobUrl)
 
-                    const value: $Node = esModule.default ?? empty()
+                    const value: I$Node = esModule.default ?? empty()
 
                     return value
                   }

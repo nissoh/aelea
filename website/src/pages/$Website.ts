@@ -1,5 +1,5 @@
 import { map, merge, multicast, now } from '@most/core'
-import type { Behavior } from 'aelea/core'
+import type { IBehavior } from 'aelea/core'
 import { $element, $node, $text, component, eventElementTarget, style } from 'aelea/core'
 import * as router from 'aelea/router'
 import { $RouterAnchor } from 'aelea/router'
@@ -24,7 +24,7 @@ interface Website {
 }
 
 export default ({ baseRoute }: Website) =>
-  component(([routeChanges, linkClickTether]: Behavior<string, string>) => {
+  component(([routeChanges, linkClickTether]: IBehavior<string, string>) => {
     const changes = merge(locationChange, multicast(routeChanges))
     const fragmentsChange = map(() => {
       const trailingSlash = /\/$/

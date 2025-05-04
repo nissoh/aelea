@@ -45,4 +45,5 @@ class TextSource implements Stream<INode<Text>> {
   }
 }
 
-export const $text = (...textSourceList: (Stream<string> | string)[]) => new TextSource(textSourceList)
+export const $text = (...textSourceList: (Stream<string> | string)[]): Stream<INode<Text>> =>
+  new TextSource(textSourceList)

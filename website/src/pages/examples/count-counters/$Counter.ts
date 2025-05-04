@@ -1,6 +1,6 @@
 import { constant } from '@most/core'
 import type { Stream } from '@most/types'
-import type { Behavior } from 'aelea/core'
+import type { IBehavior } from 'aelea/core'
 import { $text, component, style } from 'aelea/core'
 import { $Button, $NumberTicker, $column, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
@@ -12,8 +12,8 @@ interface Counter {
 export default ({ value }: Counter) =>
   component(
     (
-      [increment, incrementTether]: Behavior<PointerEvent, 1>,
-      [decrement, decrementTether]: Behavior<PointerEvent, -1>
+      [increment, incrementTether]: IBehavior<PointerEvent, 1>,
+      [decrement, decrementTether]: IBehavior<PointerEvent, -1>
     ) => {
       return [
         $row(style({ alignItems: 'center', placeContent: 'space-between' }), spacing.default)(

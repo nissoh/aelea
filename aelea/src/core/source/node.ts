@@ -5,58 +5,58 @@ import { asap } from '@most/scheduler'
 import type { Disposable, Scheduler, Sink, Stream } from '@most/types'
 import { O, isFunction } from '../../core/common.js'
 import type { IBranchElement, INode, INodeElement, IOps } from '../../core/types.js'
-import type { IAttrProperties } from '../combinator/attribute.js'
+import type { IAttributeProperties } from '../combinator/attribute.js'
 import type { IStyleCSS } from '../combinator/style.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
 
 export interface IBranch<A extends IBranchElement = IBranchElement, B = {}> extends INode<A> {
-  $segments: $Node[]
+  $segments: I$Node[]
   insertAscending: boolean
   style?: IStyleCSS
   stylePseudo: Array<{ style: IStyleCSS; class: string }>
   styleBehavior: Stream<IStyleCSS | null>[]
 
-  attributes?: IAttrProperties<B>
-  attributesBehavior: Stream<IAttrProperties<B>>[]
+  attributes?: IAttributeProperties<B>
+  attributesBehavior: Stream<IAttributeProperties<B>>[]
 }
 
-export type $Node<A extends INodeElement = INodeElement> = Stream<INode<A>>
+export type I$Node<A extends INodeElement = INodeElement> = Stream<INode<A>>
 
-export type $Branch<A extends IBranchElement = IBranchElement, B = {}> = Stream<IBranch<A, B>>
+export type I$Branch<A extends IBranchElement = IBranchElement, B = {}> = Stream<IBranch<A, B>>
 
-export interface IBranchCompose<TChildren, A extends IBranchElement = IBranchElement, B = {}, C = {}> {
-  <BB1, CC1>(o1: IOps<IBranch<A, B>, IBranch<A, BB1>>): IBranchCompose<TChildren, A, B & BB1, C & CC1>
+export interface INodeCompose<TChildren, A extends IBranchElement = IBranchElement, B = {}, C = {}> {
+  <BB1, CC1>(o1: IOps<IBranch<A, B>, IBranch<A, BB1>>): INodeCompose<TChildren, A, B & BB1, C & CC1>
   <BB1, CC1, BB2, CC2>(
     o1: IOps<IBranch<A, B>, IBranch<A, BB1>>,
     o2: IOps<IBranch<A, BB1>, IBranch<A, BB1>>
-  ): IBranchCompose<TChildren, A, B & BB1 & BB2, C & CC1 & CC2>
+  ): INodeCompose<TChildren, A, B & BB1 & BB2, C & CC1 & CC2>
   <BB1, CC1, BB2, CC2, BB3, CC3>(
     o1: IOps<IBranch<A, B>, IBranch<A, BB1>>,
     o2: IOps<IBranch<A, BB1>, IBranch<A, BB1>>,
     o3: IOps<IBranch<A, BB1>, IBranch<A, BB1>>
-  ): IBranchCompose<TChildren, A, B & BB1 & BB2 & BB3, C & CC1 & CC2 & CC3>
+  ): INodeCompose<TChildren, A, B & BB1 & BB2 & BB3, C & CC1 & CC2 & CC3>
   <BB1, CC1, BB2, CC2, BB3, BB4, CC3, CC4>(
     o1: IOps<IBranch<A, B>, IBranch<A, BB1>>,
     o2: IOps<IBranch<A, BB1>, IBranch<A, BB1>>,
     o3: IOps<IBranch<A, BB1>, IBranch<A, BB1>>,
     o4: IOps<IBranch<A, BB1>, IBranch<A, BB1>>
-  ): IBranchCompose<TChildren, A, B & BB1 & BB2 & BB3 & BB4, C & CC1 & CC2 & CC3 & CC4>
+  ): INodeCompose<TChildren, A, B & BB1 & BB2 & BB3 & BB4, C & CC1 & CC2 & CC3 & CC4>
   <BB1, CC1, BB2, CC2, BB3, BB4, CC3, CC4, BB5, CC5>(
     o1: IOps<IBranch<A, B>, IBranch<A, BB1>>,
     o2: IOps<IBranch<A, BB1>, IBranch<A, BB1>>,
     o3: IOps<IBranch<A, BB1>, IBranch<A, BB1>>,
     o4: IOps<IBranch<A, BB1>, IBranch<A, BB1>>,
     ...o5: IOps<IBranch<A, unknown>, IBranch<A, BB1>>[]
-  ): IBranchCompose<TChildren, A, B & BB1 & BB2 & BB3 & BB4 & BB5, C & CC1 & CC2 & CC3 & CC4 & CC5>
+  ): INodeCompose<TChildren, A, B & BB1 & BB2 & BB3 & BB4 & BB5, C & CC1 & CC2 & CC3 & CC4 & CC5>
 
-  (...$childrenSegment: TChildren[]): $Branch<A>
+  (...$childrenSegment: TChildren[]): I$Branch<A>
 }
 
-class BranchSource<A, B extends IBranchElement> implements Stream<IBranch<B>> {
+class NodeSource<A, B extends IBranchElement> implements Stream<IBranch<B>> {
   constructor(
     private sourceValue: A,
     private sourceOp: (a: A) => B,
-    private $segments: $Node[]
+    private $segments: I$Node[]
   ) {}
 
   run(sink: Sink<IBranch<B>>, scheduler: Scheduler): Disposable {
@@ -84,29 +84,32 @@ class BranchSource<A, B extends IBranchElement> implements Stream<IBranch<B>> {
   }
 }
 
-export function branch<A, B extends IBranchElement>(sourceOp: (a: A) => B, postOp: IOps<IBranch<B>, IBranch<B>> = id) {
-  return (composeOrSeed: A): IBranchCompose<$Node, B> => {
+export function createNode<A, B extends IBranchElement>(
+  sourceOp: (a: A) => B,
+  postOp: IOps<IBranch<B>, IBranch<B>> = id
+) {
+  return (seedValue: A): INodeCompose<I$Node, B> => {
     return function nodeComposeFn(...input: any[]): any {
       if (input.some(isFunction)) {
         const composedOps = O(postOp, ...input)
 
-        return branch(sourceOp, composedOps)(composeOrSeed)
+        return createNode(sourceOp, composedOps)(seedValue)
       }
 
-      const $segments = input.length ? (input as $Node<B>[]) : [never()]
-      const $branch = new BranchSource(composeOrSeed, sourceOp, $segments)
+      const $segments = input.length ? (input as I$Node<B>[]) : [never()]
+      const $branch = new NodeSource(seedValue, sourceOp, $segments)
 
       return postOp($branch)
     }
   }
 }
 
-export const $svg = branch(<K extends keyof SVGElementTagNameMap>(a: K) =>
+export const $svg = createNode(<K extends keyof SVGElementTagNameMap>(a: K) =>
   document.createElementNS('http://www.w3.org/2000/svg', a)
 )
-export const $element = branch(<K extends keyof HTMLElementTagNameMap>(a: K) => document.createElement(a))
-export const $custom = branch((a: string) => document.createElement(a))
+export const $element = createNode(<K extends keyof HTMLElementTagNameMap>(a: K) => document.createElement(a))
+export const $custom = createNode((a: string) => document.createElement(a))
 export const $node = $custom('node')
 export const $p = $element('p')
 
-export const $wrapNativeElement = branch(<A extends IBranchElement>(rootNode: A) => rootNode)
+export const $wrapNativeElement = createNode(<A extends IBranchElement>(rootNode: A) => rootNode)

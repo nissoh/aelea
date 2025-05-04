@@ -1,7 +1,7 @@
 import { O } from '../../core/common.js'
 import type { IOps } from '../../core/types.js'
 import { $svg, attr, style } from '../../core/index.js'
-import type { $Node } from '../../core/source/node.js'
+import type { I$Node } from '../../core/source/node.js'
 import type { IBranch } from '../../core/source/node.js'
 
 interface Icon {
@@ -11,7 +11,7 @@ interface Icon {
   viewBox?: string
   fill?: string
 
-  $content: $Node
+  $content: I$Node
   svgOps?: IOps<IBranch<SVGSVGElement>, IBranch<SVGSVGElement>>
 }
 

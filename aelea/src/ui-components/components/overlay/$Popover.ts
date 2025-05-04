@@ -3,8 +3,8 @@ import type { Stream } from '@most/types'
 import { O } from '../../../core/common.js'
 import { $node, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
 import type { INode } from '../../../core/types.js'
-import type { IBranchCompose } from '../../../core/source/node.js'
-import type { $Node } from '../../../core/source/node.js'
+import type { INodeCompose } from '../../../core/source/node.js'
+import type { I$Node } from '../../../core/source/node.js'
 import { colorAlpha } from '../../../ui-components-theme/color.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $column } from '../../elements/$elements.js'
@@ -22,13 +22,13 @@ export const $defaultPopoverContentContainer = $column(
 )
 
 interface IPopover {
-  open: Stream<$Node>
+  open: Stream<I$Node>
   dismiss?: Stream<any>
 
-  $target: $Node
+  $target: I$Node
 
-  $contentContainer?: IBranchCompose<$Node>
-  $container?: IBranchCompose<$Node>
+  $contentContainer?: INodeCompose<I$Node>
+  $container?: INodeCompose<I$Node>
   spacing?: number
 }
 

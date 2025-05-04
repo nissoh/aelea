@@ -1,6 +1,6 @@
 import { now } from '@most/core'
 import type { Stream } from '@most/types'
-import { type Behavior, O } from 'aelea/core'
+import { type IBehavior, O } from 'aelea/core'
 import { component, style } from 'aelea/core'
 import { $Checkbox, $Field, $row, spacing } from 'aelea/ui-components'
 import { $TrashBtn } from '../../../elements/$common'
@@ -16,9 +16,9 @@ interface TodoItem {
 export default ({ todo, completed }: TodoItem) =>
   component(
     (
-      [remove, removeTether]: Behavior<MouseEvent, MouseEvent>,
-      [complete, completeTether]: Behavior<boolean, boolean>,
-      [text, textTether]: Behavior<string, string>
+      [remove, removeTether]: IBehavior<MouseEvent, MouseEvent>,
+      [complete, completeTether]: IBehavior<boolean, boolean>,
+      [text, textTether]: IBehavior<string, string>
     ) => {
       return [
         $row(rowStyle)(

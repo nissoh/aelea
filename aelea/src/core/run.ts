@@ -3,53 +3,24 @@ import { disposeAll, disposeNone, disposeWith } from '@most/disposable'
 import { newDefaultScheduler } from '@most/scheduler'
 import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
 import { nullSink } from './common.js'
-import type {
-  IBranchElement,
-  INode,
-  INodeElement} from './types.js'
-import type { $Branch } from './source/node.js'
-import type { $Node } from './source/node.js'
-import type { IAttrProperties } from './combinator/attribute.js'
+import type { IBranchElement, INode, INodeElement } from './types.js'
+import type { I$Branch } from './source/node.js'
+import type { I$Node } from './source/node.js'
+import type { IAttributeProperties } from './combinator/attribute.js'
 import type { IStyleCSS } from './combinator/style.js'
 import type { IBranch } from './source/node.js'
 import { SettableDisposable } from './utils/SettableDisposable.js'
-import { useStylePseudoRule, useStyleRule } from './utils/styleUtils.js'
-import type { IStyleEnvironment } from './combinator/style.js'
+
+export interface IStyleEnvironment {
+  cache: string[]
+  namespace: string
+  stylesheet: CSSStyleSheet
+}
 
 export interface IRunEnvironment {
   rootNode: IBranchElement
   style: IStyleEnvironment
   scheduler: Scheduler
-}
-export function runBrowser(config: Partial<IRunEnvironment> = {}) {
-  const composedConfig: IRunEnvironment = {
-    style: {
-      namespace: '•',
-      stylesheet: new CSSStyleSheet(),
-      cache: []
-    },
-    rootNode: document.body,
-    scheduler: newDefaultScheduler(),
-    ...config
-  }
-
-  document.adoptedStyleSheets = [...document.adoptedStyleSheets, composedConfig.style.stylesheet]
-
-  const rootNode: IBranch = {
-    element: composedConfig.rootNode,
-    $segments: [],
-    disposable: new SettableDisposable(),
-    styleBehavior: [],
-    insertAscending: true,
-    attributesBehavior: [],
-    stylePseudo: []
-  }
-
-  return ($root: $Branch) => {
-    const s = new BranchEffectsSink(composedConfig, rootNode, 0, [0])
-
-    map((node) => ({ ...node, segmentPosition: 0 }), $root).run(s, composedConfig.scheduler)
-  }
 }
 
 class BranchEffectsSink implements Sink<IBranch | INode> {
@@ -107,7 +78,7 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
 
     if ('attributes' in node && node.attributes) {
       if (Object.keys(node.attributes).length !== 0) {
-        applyAttrFn(node.attributes, node.element)
+        applyAttributes(node.attributes, node.element)
       }
     }
 
@@ -124,7 +95,7 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
       const disposeStyle = mergeArray(
         node.attributesBehavior.map((attrs) => {
           return tap((attr) => {
-            applyAttrFn(attr, node.element)
+            applyAttributes(attr, node.element)
           }, attrs)
         })
       ).run(nullSink, this.env.scheduler)
@@ -157,10 +128,10 @@ class BranchEffectsSink implements Sink<IBranch | INode> {
 }
 
 class BranchChildrenSinkList implements Disposable {
-  disposables = new Map<$Node<INodeElement>, Disposable>()
+  disposables = new Map<I$Node<INodeElement>, Disposable>()
 
   constructor(
-    $segments: $Node<INodeElement>[],
+    $segments: I$Node<INodeElement>[],
     private env: IRunEnvironment,
     private node: IBranch
   ) {
@@ -179,6 +150,37 @@ class BranchChildrenSinkList implements Disposable {
     for (const d of this.disposables.values()) {
       d.dispose()
     }
+  }
+}
+
+export function runBrowser(config: Partial<IRunEnvironment> = {}) {
+  const composedConfig: IRunEnvironment = {
+    style: {
+      namespace: '•',
+      stylesheet: new CSSStyleSheet(),
+      cache: []
+    },
+    rootNode: document.body,
+    scheduler: newDefaultScheduler(),
+    ...config
+  }
+
+  document.adoptedStyleSheets = [...document.adoptedStyleSheets, composedConfig.style.stylesheet]
+
+  const rootNode: IBranch = {
+    element: composedConfig.rootNode,
+    $segments: [],
+    disposable: new SettableDisposable(),
+    styleBehavior: [],
+    insertAscending: true,
+    attributesBehavior: [],
+    stylePseudo: []
+  }
+
+  return ($root: I$Branch) => {
+    const s = new BranchEffectsSink(composedConfig, rootNode, 0, [0])
+
+    map((node) => ({ ...node, segmentPosition: 0 }), $root).run(s, composedConfig.scheduler)
   }
 }
 
@@ -220,7 +222,47 @@ function styleBehavior(styleBehavior: Stream<IStyleCSS | null>, node: IBranch, c
   )
 }
 
-function applyAttrFn(attrs: IAttrProperties<unknown>, node: IBranchElement) {
+function styleObjectAsString(styleObj: IStyleCSS) {
+  return Object.entries(styleObj)
+    .map(([key, val]) => {
+      const kebabCaseKey = key.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
+      return `${kebabCaseKey}:${val};`
+    })
+    .join('')
+}
+
+export function useStyleRule(cacheService: IStyleEnvironment, styleDefinition: IStyleCSS) {
+  const properties = styleObjectAsString(styleDefinition)
+  const cachedRuleIdx = cacheService.cache.indexOf(properties)
+
+  if (cachedRuleIdx === -1) {
+    const index = cacheService.stylesheet.cssRules.length
+    const namespace = cacheService.namespace + index
+
+    cacheService.cache.push(properties)
+    cacheService.stylesheet.insertRule(`.${namespace} {${properties}}`, index)
+    return `${cacheService.namespace + index}`
+  }
+
+  return `${cacheService.namespace + cachedRuleIdx}`
+}
+
+export function useStylePseudoRule(cacheService: IStyleEnvironment, styleDefinition: IStyleCSS, pseudo = '') {
+  const properties = styleObjectAsString(styleDefinition)
+  const index = cacheService.stylesheet.cssRules.length
+  const rule = `.${cacheService.namespace + index + pseudo} {${properties}}`
+  const cachedRuleIdx = cacheService.cache.indexOf(rule)
+
+  if (cachedRuleIdx === -1) {
+    cacheService.cache.push(rule)
+    cacheService.stylesheet.insertRule(rule, index)
+    return `${cacheService.namespace + index}`
+  }
+
+  return `${cacheService.namespace + cachedRuleIdx}`
+}
+
+function applyAttributes(attrs: IAttributeProperties<unknown>, node: IBranchElement) {
   if (attrs) {
     for (const [attrKey, value] of Object.entries(attrs)) {
       if (value === undefined || value === null) {

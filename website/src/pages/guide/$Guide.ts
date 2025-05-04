@@ -88,7 +88,7 @@ export default $node(
             readOnly: false,
             code: `import { constant, map, merge, scan } from '@most/core'
 import { $custom, $element, $text, component, style, INode, nodeEvent } from '@aelea/core'
-import { Behavior } from '@aelea/core'
+import { IBehavior } from '@aelea/core'
 
 // composable style
 const displayFlex = style({ display: 'flex' })
@@ -100,11 +100,11 @@ const $column = $custom('column')(displayFlex, style({ flexDirection: 'column' }
 
 // Component that outputs state(optionally), this is currently not used anywhere, see next example to see it being consumed
 export default component((
-    [increment, incrementTether]: Behavior<INode, 1>,
-    [decrement, decrementTether]: Behavior<INode, -1>
+    [increment, incrementTether]: IBehavior<INode, 1>,
+    [decrement, decrementTether]: IBehavior<INode, -1>
   ) => {
 
-    return [ // Component has to return [$Node, Behavior(optionally)] in the next example we will use these outputted behaviors
+    return [ // Component has to return [$Node, IBehavior(optionally)] in the next example we will use these outputted behaviors
 
       $row(spacingStyle)(
         $column(

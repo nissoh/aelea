@@ -2,7 +2,7 @@ import { constant, map, merge, startWith } from '@most/core'
 import { O } from '../../core/common.js'
 import type { IOps } from '../../core/types.js'
 import type { IBehavior } from '../../core/combinator/behavior.js'
-import type { $Branch } from '../../core/source/node.js'
+import type { I$Branch } from '../../core/source/node.js'
 import type { IBranch } from '../../core/source/node.js'
 import type { Route } from '../types.js'
 import { component } from '../../core/combinator/component.js'
@@ -13,7 +13,7 @@ import { nodeEvent } from '../../core/combinator/event.js'
 export interface IAnchor {
   url: string
   route: Route
-  $anchor: $Branch
+  $anchor: I$Branch
   anchorOp?: IOps<IBranch<HTMLAnchorElement>, IBranch<HTMLAnchorElement>>
 }
 

@@ -1,11 +1,11 @@
-import { combine } from "@most/core"
-import { $element, style, component, styleBehavior } from "aelea/core"
-import { $Node, Behavior, IStyleCSS } from "aelea/core-types"
-import { IAnchor, $RouterAnchor } from "aelea/router"
-import { pallete } from "aelea/ui-components-theme"
+import { combine } from '@most/core'
+import { $element, style, component, styleBehavior } from 'aelea/core'
+import type { I$Node, IBehavior, IStyleCSS } from 'aelea/core'
+import { type IAnchor, $RouterAnchor } from 'aelea/router'
+import { pallete } from 'aelea/ui-components-theme'
 
 export interface ILink extends Omit<IAnchor, '$anchor'> {
-  $content: $Node
+  $content: I$Node
 }
 
 const $anchor = $element('a')(
@@ -17,9 +17,9 @@ const $anchor = $element('a')(
 export const $Link = ({ url, route, $content, anchorOp }: ILink) =>
   component(
     (
-      [click, clickTether]: Behavior<string, string>,
-      [active, containsTether]: Behavior<boolean, boolean>,
-      [focus, focusTether]: Behavior<boolean, boolean>
+      [click, clickTether]: IBehavior<string, string>,
+      [active, containsTether]: IBehavior<boolean, boolean>,
+      [focus, focusTether]: IBehavior<boolean, boolean>
     ) => {
       const $anchorEl = $anchor(
         styleBehavior(

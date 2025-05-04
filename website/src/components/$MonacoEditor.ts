@@ -19,7 +19,7 @@ import {
   take
 } from '@most/core'
 import type { Stream } from '@most/types'
-import { type Behavior, O, fromCallback } from 'aelea/core'
+import { type IBehavior, O, fromCallback } from 'aelea/core'
 import { $node, $wrapNativeElement, type IBranch, type IStyleCSS, component, style } from 'aelea/core'
 import { fetchJson, observer, spacing } from 'aelea/ui-components'
 import type * as monaco from 'monaco-editor'
@@ -260,7 +260,7 @@ export interface IMonacoEditor {
 }
 
 export const $MonacoEditor = ({ code, config, override, containerStyle = { flex: 1 } }: IMonacoEditor) =>
-  component(([change, changeTether]: Behavior<IBranch<HTMLElement>, ModelChangeBehavior>) => {
+  component(([change, changeTether]: IBehavior<IBranch<HTMLElement>, ModelChangeBehavior>) => {
     const editorload = fromPromise(loadMonacoTSEditor())
 
     const $editor = map(({ monacoGlobal }) => {
