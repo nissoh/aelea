@@ -12,7 +12,7 @@ export interface IAnchor {
   url: string
   route: Route
   $anchor: I$Node
-  anchorOp?: IOps<INode<HTMLAnchorElement>, INode<HTMLAnchorElement>>
+  anchorOp?: IOps<INode<HTMLAnchorElement>>
 }
 
 export const $RouterAnchor = ({ url, route, $anchor, anchorOp = O() }: IAnchor) =>

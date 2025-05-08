@@ -1,5 +1,3 @@
-/** biome-ignore-all lint/performance/noBarrelFile: entrypoint module */
-
 export type { AnimationFrames } from './combinator/animate.js'
 export {
   animationFrames,
@@ -19,7 +17,6 @@ export {
 } from './combinator/attribute.js'
 export type { IBehavior, IComposeBehavior } from './combinator/behavior.js'
 export { behavior } from './combinator/behavior.js'
-export { combineArray, combineState } from './combinator/combine.js'
 export type {
   IComponentCurry,
   IComponentDefinitionCallback,
@@ -31,6 +28,8 @@ export type { INodeEventCurry } from './combinator/event.js'
 export { eventElementTarget, nodeEvent } from './combinator/event.js'
 export { fromCallback } from './combinator/fromCallback.js'
 export { ReplayLatest, replayLatest } from './combinator/replay.js'
+export type { InputArrayParams, InputStateParams } from './combinator/state.js'
+export { combineArray, combineState, zipState } from './combinator/state.js'
 export type { IStyleBehaviorCurry, IStyleCSS, IStyleCurry, IStylePseudoCurry } from './combinator/style.js'
 export {
   style,
@@ -38,9 +37,11 @@ export {
   styleInline,
   stylePseudo
 } from './combinator/style.js'
+export type { IStreamOrPromise, ISwitchMapCurry2 } from './combinator/switchMap.js'
+export { switchMap } from './combinator/switchMap.js'
 export { tether } from './combinator/tether.js'
 export type { Fn, IOp, IOps } from './common.js'
-export { groupByMap, isEmpty, isStream, maybeOps, nullSink, O, xForver } from './common.js'
+export { groupByMap, isEmpty, isStream, maybeOps, nullSink, O, toStream, xForver } from './common.js'
 export type { IRunEnvironment, IStyleEnvironment } from './run.js'
 export { runBrowser } from './run.js'
 export type {

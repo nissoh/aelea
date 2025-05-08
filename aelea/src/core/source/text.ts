@@ -7,7 +7,7 @@ import type { ISlottable } from './node.js'
 
 export type I$Text = Stream<ISlottable<Text>>
 
-class TextSource implements Stream<ISlottable<Text>> {
+class TextSource implements I$Text {
   constructor(private textSourceList: (Stream<string> | string)[]) {}
 
   run(sink: Sink<ISlottable<Text>>, scheduler: Scheduler): Disposable {
@@ -47,5 +47,4 @@ class TextSource implements Stream<ISlottable<Text>> {
   }
 }
 
-export const $text = (...textSourceList: (Stream<string> | string)[]): Stream<ISlottable<Text>> =>
-  new TextSource(textSourceList)
+export const $text = (...textSourceList: (Stream<string> | string)[]): I$Text => new TextSource(textSourceList)

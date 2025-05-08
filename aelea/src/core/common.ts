@@ -1,15 +1,19 @@
-import { empty, never, run, startWith } from '@most/core'
+import { empty, never, now, run, startWith } from '@most/core'
 import { disposeNone } from '@most/disposable'
 import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
 
 export type Fn<T, R> = (a: T) => R
 
-export type IOps<I, O> = Fn<Stream<I>, Stream<O>>
+export type IOps<I, O = I> = Fn<Stream<I>, Stream<O>>
 
 export const xForver = <T>(x: T) => startWith(x, never())
 
 export function maybeOps<A, B>(a?: IOps<A, B>) {
   return a ? a : O()
+}
+
+export function toStream<T>(maybeStream: T | Stream<T>): Stream<T> {
+  return isStream(maybeStream) ? maybeStream : now(maybeStream)
 }
 
 export function isStream(s: unknown): s is Stream<unknown> {

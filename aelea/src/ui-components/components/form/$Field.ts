@@ -1,6 +1,6 @@
 import { empty, filter, map, merge, multicast, never, now, startWith, switchLatest, tap } from '@most/core'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
-import { combineState } from '../../../core/combinator/combine.js'
+import { combineState } from '../../../core/combinator/state.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
 import { type IOps, O } from '../../../core/common.js'
 import { $element, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'

@@ -3,7 +3,7 @@ import { disposeBoth } from '@most/disposable'
 import { id } from '@most/prelude'
 import { asap } from '@most/scheduler'
 import type { Disposable, Scheduler, Sink, Stream } from '@most/types'
-import { type IOps, isFunction, O } from '../../core/common.js'
+import { type Fn, type IOps, isFunction, O } from '../../core/common.js'
 import type { IAttributeProperties } from '../combinator/attribute.js'
 import type { IStyleCSS } from '../combinator/style.js'
 import { type ISettableDisposable, SettableDisposable } from '../utils/SettableDisposable.js'
@@ -96,7 +96,7 @@ export interface INodeCompose<TElement extends INodeElement = INodeElement> {
   (...$leafs: I$Slottable[]): I$Node<TElement>
 }
 
-class NodeSource<A, B extends INodeElement> implements Stream<INode<B>> {
+class NodeSource<A, B extends INodeElement> implements I$Node<B> {
   constructor(
     private sourceValue: A,
     private sourceOp: (a: A) => B,
@@ -128,7 +128,7 @@ class NodeSource<A, B extends INodeElement> implements Stream<INode<B>> {
   }
 }
 
-export function createNode<A, B extends INodeElement>(sourceOp: (a: A) => B, postOp: IOps<INode<B>, INode<B>> = id) {
+export function createNode<A, B extends INodeElement>(sourceOp: (a: A) => B, postOp: Fn<I$Node<B>, I$Node<B>> = id) {
   return (seedValue: A): INodeCompose<B> => {
     return function nodeComposeFn(...input: any[]): any {
       if (input.some(isFunction)) {

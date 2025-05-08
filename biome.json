@@ -1,20 +1,11 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
-    "includes": [
-      "**",
-      "!**/dist",
-      "!**/node_modules",
-      "!**/.vscode",
-      "!**/bun.lockb",
-      "!**/contracts",
-      "!**/tsconfig.json",
-      "!**/tsconfig.*.json"
-    ]
+    "includes": ["**/src/**/*.ts", "!**/node_modules"]
   },
   "formatter": {
+    "attributePosition": "multiline",
     "enabled": true,
-    "formatWithErrors": false,
     "indentStyle": "space",
     "indentWidth": 2,
     "lineWidth": 120
@@ -32,7 +23,6 @@
             "syntax": "shorthand"
           }
         },
-        "useLiteralEnumMembers": "error",
         "noCommaOperator": "error",
         "useNodejsImportProtocol": "error",
         "useAsConstAssertion": "error",
@@ -45,7 +35,7 @@
         "noInferrableTypes": "error",
         "useExponentiationOperator": "error",
         "useTemplate": "error",
-        "noParameterAssign": "error",
+        "noParameterAssign": "off",
         "useDefaultParameterLast": "error",
         "noArguments": "error",
         "useImportType": "error",
@@ -54,6 +44,7 @@
         "useShorthandFunctionType": "error"
       },
       "suspicious": {
+        "noEmptyInterface": "off",
         "noArrayIndexKey": "off",
         "noAssignInExpressions": "off",
         "noConfusingVoidType": "off",
