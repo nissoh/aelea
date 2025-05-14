@@ -8,79 +8,66 @@ import { nullSink } from './common.js'
 import type { I$Node, I$Slottable, INode, INodeElement, ISlottable } from './source/node.js'
 import { SettableDisposable } from './utils/SettableDisposable.js'
 
-export interface IStyleEnvironment {
+export interface IRunEnvironment {}
+
+export interface IRunEnvironment {
+  $rootNode: I$Node
+  scheduler: Scheduler
+  rootAttachment?: INodeElement
   cache: string[]
   namespace: string
   stylesheet: CSSStyleSheet
 }
 
-export interface IRunEnvironment {
-  rootNode: INodeElement
-  style: IStyleEnvironment
-  scheduler: Scheduler
-}
-
 class BranchEffectsSink implements Sink<INode | ISlottable> {
   disposables: Disposable[] = []
 
-  segmentsSlotsMap: Map<INode | ISlottable, Disposable>[] = []
+  segmentsSlotList: Map<INode | ISlottable, Disposable>[] = []
 
   constructor(
-    private env: IRunEnvironment,
-    private parentNode: INode,
-    private segmentPosition: number,
-    private segmentsCount: number[]
+    private readonly env: IRunEnvironment,
+    private readonly branchNode: INode,
+    private readonly segmentPosition: number,
+    private readonly segmentsCount: number[]
   ) {}
 
-  event(_: Time, node: INode) {
+  event(_: Time, childNode: INode) {
     try {
-      node?.disposable.set(
-        disposeWith((node) => {
+      childNode.disposable.set(
+        disposeWith((nodeToRemove) => {
           this.segmentsCount[this.segmentPosition]--
-          node.element.remove()
-          const slot = this.segmentsSlotsMap[this.segmentPosition]
-          const disposableBranch = slot.get(node)
-          slot.delete(node)
+          nodeToRemove.element.remove()
+          const slot = this.segmentsSlotList[this.segmentPosition]
+          const disposableBranch = slot.get(nodeToRemove)
+          slot.delete(nodeToRemove)
           disposableBranch?.dispose()
-        }, node)
+        }, childNode)
       )
     } catch {
-      console.error(node.element.nodeName)
+      console.error(childNode.element.nodeName)
       throw new Error('Cannot append node that have already been rendered, check invalid node operations under ^')
     }
 
-    let slot = 0
-
-    for (let sIdx = 0; sIdx < this.segmentPosition; sIdx++) {
-      slot += this.segmentsCount[sIdx]
+    if (typeof childNode.style === 'object') {
+      const selector = useStyleRule(this.env, childNode.style)
+      childNode.element.classList.add(selector)
     }
 
-    const insertAt = this.parentNode.insertAscending ? slot : slot + this.segmentsCount[this.segmentPosition]
-
-    appendToSlot(this.parentNode.element, node.element, insertAt)
-
-    this.segmentsCount[this.segmentPosition]++
-
-    if ('style' in node && node.style && Object.keys(node.style).length) {
-      const selector = useStyleRule(this.env.style, node.style)
-      node.element.classList.add(selector)
-    }
-
-    if ('stylePseudo' in node) {
-      for (const styleDeclaration of node.stylePseudo) {
-        const selector = useStylePseudoRule(this.env.style, styleDeclaration.style, styleDeclaration.class)
-        node.element.classList.add(selector)
+    if (typeof childNode.stylePseudo === 'object') {
+      for (const styleDeclaration of childNode.stylePseudo) {
+        const selector = useStylePseudoRule(this.env, styleDeclaration.style, styleDeclaration.class)
+        childNode.element.classList.add(selector)
       }
     }
 
-    if ('attributes' in node && node.attributes) {
-      if (Object.keys(node.attributes).length !== 0) {
-        applyAttributes(node.attributes, node.element)
+    if (typeof childNode.attributes === 'object') {
+      if (Object.keys(childNode.attributes).length !== 0) {
+        applyAttributes(childNode.attributes, childNode.element)
       }
     }
 
-    if ('styleBehavior' in node && node.styleBehavior) {
-      const disposeStyle = mergeArray(node.styleBehavior.map((sb) => styleBehavior(sb, node, this.env.style))).run(
+    if (typeof childNode.styleBehavior === 'object') {
+      const disposeStyle = mergeArray(childNode.styleBehavior.map((sb) => styleBehavior(sb, childNode, this.env))).run(
         nullSink,
         this.env.scheduler
       )
@@ -88,11 +75,11 @@ class BranchEffectsSink implements Sink<INode | ISlottable> {
       this.disposables.push(disposeStyle)
     }
 
-    if ('attributesBehavior' in node && node.attributesBehavior) {
+    if (typeof childNode.attributesBehavior === 'object') {
       const disposeStyle = mergeArray(
-        node.attributesBehavior.map((attrs) => {
+        childNode.attributesBehavior.map((attrs) => {
           return tap((attr) => {
-            applyAttributes(attr, node.element)
+            applyAttributes(attr, childNode.element)
           }, attrs)
         })
       ).run(nullSink, this.env.scheduler)
@@ -100,17 +87,28 @@ class BranchEffectsSink implements Sink<INode | ISlottable> {
       this.disposables.push(disposeStyle)
     }
 
-    const newDisp = '$segments' in node ? new BranchChildrenSinkList(node.$segments, this.env, node) : disposeNone()
-
-    if (!this.segmentsSlotsMap[this.segmentPosition]) {
-      this.segmentsSlotsMap[this.segmentPosition] = new Map()
+    let slot = 0
+    for (let sIdx = 0; sIdx < this.segmentPosition; sIdx++) {
+      slot += this.segmentsCount[sIdx]
     }
 
-    this.segmentsSlotsMap[this.segmentPosition].set(node, disposeAll([...this.disposables, newDisp]))
+    const insertAt = this.branchNode.insertAscending ? slot : slot + this.segmentsCount[this.segmentPosition]
+
+    this.segmentsCount[this.segmentPosition]++
+
+    appendToSlot(this.branchNode.element, childNode.element, insertAt)
+
+    const newDisp = '$segments' in childNode ? new BranchChildrenSinkList(this.env, childNode) : disposeNone()
+
+    if (!this.segmentsSlotList[this.segmentPosition]) {
+      this.segmentsSlotList[this.segmentPosition] = new Map()
+    }
+
+    this.segmentsSlotList[this.segmentPosition].set(childNode, disposeAll([...this.disposables, newDisp]))
   }
 
   end(_t: Time) {
-    for (const s of this.segmentsSlotsMap) {
+    for (const s of this.segmentsSlotList) {
       if (s) {
         for (const d of s.values()) {
           d.dispose()
@@ -125,19 +123,18 @@ class BranchEffectsSink implements Sink<INode | ISlottable> {
 }
 
 class BranchChildrenSinkList implements Disposable {
-  disposables = new Map<I$Slottable<INodeElement>, Disposable>()
+  disposables = new Map<I$Slottable, Disposable>()
 
   constructor(
-    $segments: I$Slottable<INodeElement>[],
     private env: IRunEnvironment,
     private node: INode
   ) {
-    const l = $segments.length
+    const l = node.$segments.length
     const segmentsCount = new Array(l).fill(0)
 
     for (let i = 0; i < l; ++i) {
-      const $child = $segments[i]
-      const sink = new BranchEffectsSink(this.env, node, i, segmentsCount)
+      const $child = node.$segments[i]
+      const sink = new BranchEffectsSink(this.env, this.node, i, segmentsCount)
 
       this.disposables.set($child, $child.run(sink, this.env.scheduler))
     }
@@ -150,38 +147,38 @@ class BranchChildrenSinkList implements Disposable {
   }
 }
 
-export function runBrowser(config: Partial<IRunEnvironment> = {}) {
-  const composedConfig: IRunEnvironment = {
-    style: {
-      namespace: '•',
-      stylesheet: new CSSStyleSheet(),
-      cache: []
-    },
-    rootNode: document.body,
-    scheduler: newDefaultScheduler(),
-    ...config
+export function runBrowser(userConfig: Partial<IRunEnvironment> & { $rootNode: I$Node }): Disposable {
+  const defaultConfig: Omit<IRunEnvironment, '$rootNode'> = {
+    namespace: '•',
+    stylesheet: new CSSStyleSheet(),
+    cache: [],
+    rootAttachment: document.querySelector('html')!,
+    scheduler: newDefaultScheduler()
   }
 
-  document.adoptedStyleSheets = [...document.adoptedStyleSheets, composedConfig.style.stylesheet]
+  const config = { ...defaultConfig, ...userConfig }
 
-  const rootNode: INode = {
-    element: composedConfig.rootNode,
-    $segments: [],
-    disposable: new SettableDisposable(),
-    styleBehavior: [],
-    insertAscending: true,
-    attributesBehavior: [],
-    stylePseudo: []
-  }
+  document.adoptedStyleSheets = [...document.adoptedStyleSheets, config.stylesheet]
 
-  return ($root: I$Node) => {
-    const s = new BranchEffectsSink(composedConfig, rootNode, 0, [0])
+  const $rootNode = config.$rootNode
 
-    map((node) => ({ ...node, segmentPosition: 0 }), $root).run(s, composedConfig.scheduler)
-  }
+  return map((node) => {
+    const rootNode: INode = {
+      element: defaultConfig.rootAttachment!,
+      $segments: [],
+      disposable: new SettableDisposable(),
+      styleBehavior: [],
+      insertAscending: true,
+      attributesBehavior: [],
+      stylePseudo: []
+    }
+
+    // TODO(Fix) BranchEffectsSink will prepend the rootNode to the configred rootAttachment which is not always the desired use case
+    return new BranchEffectsSink(config, rootNode, 0, [0]).event(0, node)
+  }, $rootNode).run(nullSink as any, config.scheduler)
 }
 
-function styleBehavior(styleBehavior: Stream<IStyleCSS | null>, node: INode, cacheService: IStyleEnvironment) {
+function styleBehavior(styleBehavior: Stream<IStyleCSS | null>, node: INode, cacheService: IRunEnvironment) {
   let latestClass: string
 
   return scan(
@@ -228,7 +225,7 @@ function styleObjectAsString(styleObj: IStyleCSS) {
     .join('')
 }
 
-export function useStyleRule(cacheService: IStyleEnvironment, styleDefinition: IStyleCSS) {
+export function useStyleRule(cacheService: IRunEnvironment, styleDefinition: IStyleCSS) {
   const properties = styleObjectAsString(styleDefinition)
   const cachedRuleIdx = cacheService.cache.indexOf(properties)
 
@@ -244,7 +241,7 @@ export function useStyleRule(cacheService: IStyleEnvironment, styleDefinition: I
   return `${cacheService.namespace + cachedRuleIdx}`
 }
 
-export function useStylePseudoRule(cacheService: IStyleEnvironment, styleDefinition: IStyleCSS, pseudo = '') {
+export function useStylePseudoRule(cacheService: IRunEnvironment, styleDefinition: IStyleCSS, pseudo = '') {
   const properties = styleObjectAsString(styleDefinition)
   const index = cacheService.stylesheet.cssRules.length
   const rule = `.${cacheService.namespace + index + pseudo} {${properties}}`

@@ -17,6 +17,25 @@
             }
         }
 
+        @media (pointer: fine) {
+            ::-webkit-scrollbar-thumb {
+                background: content-box transparent;
+                border: 2px solid transparent;
+                border-radius: var(--gem-sys-shape--corner-full);
+                min-height: 48px;
+                min-width: 48px;
+            }
+        }
+
+        @media (pointer: fine) {
+            ::-webkit-scrollbar,
+            ::-webkit-scrollbar-corner {
+                background: transparent;
+                height: 12px;
+                width: 12px;
+            }
+        }
+
         * {
             box-sizing: border-box;
         }
@@ -53,7 +72,6 @@
             --negative: #de3434;
             --indeterminate: #dccb07;
         }
-    
     </style>
 </head>
 

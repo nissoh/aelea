@@ -23,7 +23,7 @@ export type AnimationFrames = {
 
 // copied & modified from https://github.com/mostjs/x-animation-frame/tree/master
 class AnimationFrameSource {
-  constructor(private afp: AnimationFrames) {}
+  constructor(private readonly afp: AnimationFrames) {}
 
   run(sink: Sink<AnimationFrame>, scheduler: Scheduler): Disposable {
     const requestTime = currentTime(scheduler)

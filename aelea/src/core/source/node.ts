@@ -3,12 +3,12 @@ import { disposeBoth } from '@most/disposable'
 import { id } from '@most/prelude'
 import { asap } from '@most/scheduler'
 import type { Disposable, Scheduler, Sink, Stream } from '@most/types'
-import { type Fn, type IOps, isFunction, O } from '../../core/common.js'
+import { type Fn, isFunction, O } from '../../core/common.js'
 import type { IAttributeProperties } from '../combinator/attribute.js'
 import type { IStyleCSS } from '../combinator/style.js'
 import { type ISettableDisposable, SettableDisposable } from '../utils/SettableDisposable.js'
 
-export type ISlottableElement = Slottable
+export type ISlottableElement = ChildNode
 export type INodeElement = HTMLElement | SVGElement
 
 export type I$Slottable<A extends ISlottableElement = ISlottableElement> = Stream<ISlottable<A>>
@@ -98,9 +98,9 @@ export interface INodeCompose<TElement extends INodeElement = INodeElement> {
 
 class NodeSource<A, B extends INodeElement> implements I$Node<B> {
   constructor(
-    private sourceValue: A,
-    private sourceOp: (a: A) => B,
-    private $segments: I$Slottable[]
+    private readonly sourceValue: A,
+    private readonly sourceOp: (a: A) => B,
+    private readonly $segments: I$Slottable[]
   ) {}
 
   run(sink: Sink<INode<B>>, scheduler: Scheduler): Disposable {
@@ -154,4 +154,3 @@ export const $node = $custom('node')
 export const $p = $element('p')
 
 export const $wrapNativeElement = createNode(<A extends INodeElement>(rootNode: A) => rootNode)
-const eee = $p(map((xxxxx) => xxxxx))

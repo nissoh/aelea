@@ -4,9 +4,9 @@ import { tryEvent } from '../common.js'
 
 class FromCallbackSource<T, Targs extends any[] = T[]> {
   constructor(
-    private callbackFunction: (cb: (...ev: Targs) => any) => any,
-    private mapFn: (...args: Targs) => T,
-    private context: any
+    private readonly callbackFunction: (cb: (...ev: Targs) => any) => any,
+    private readonly mapFn: (...args: Targs) => T,
+    private readonly context: any
   ) {}
 
   run(sink: Sink<T>, scheduler: Scheduler): Disposable {

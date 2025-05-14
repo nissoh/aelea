@@ -1,5 +1,4 @@
-import { map, now } from '@most/core'
-import { disposeAll, disposeBoth } from '@most/disposable'
+import { map, mergeArray, now } from '@most/core'
 import type { Disposable, Scheduler, Sink, Stream } from '@most/types'
 import { filterNull } from '../../utils/combinator.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
@@ -11,21 +10,19 @@ class TextSource implements I$Text {
   constructor(private textSourceList: (Stream<string> | string)[]) {}
 
   run(sink: Sink<ISlottable<Text>>, scheduler: Scheduler): Disposable {
-    const disposableList = this.textSourceList.map((textSource) => {
-      const sourceDisposable = new SettableDisposable()
+    if (this.textSourceList.length === 1) {
+      const textSource = this.textSourceList[0]
 
       if (typeof textSource === 'string') {
-        const runDisposable = now({
-          disposable: sourceDisposable,
+        return now({
+          disposable: new SettableDisposable(),
           element: document.createTextNode(textSource)
         }).run(sink, scheduler)
-
-        return disposeBoth(runDisposable, sourceDisposable)
       }
 
       let createdTextNode: Text
 
-      const runDisposable = filterNull(
+      return filterNull(
         map((nextValue) => {
           if (createdTextNode) {
             createdTextNode.nodeValue = nextValue
@@ -35,15 +32,41 @@ class TextSource implements I$Text {
           createdTextNode = document.createTextNode(nextValue)
 
           return {
-            disposable: sourceDisposable,
+            disposable: new SettableDisposable(),
             element: createdTextNode
           }
         }, textSource)
       ).run(sink, scheduler)
+    }
 
-      return disposeBoth(runDisposable, sourceDisposable)
+    const mappedSourceList = this.textSourceList.map((textSource) => {
+      if (typeof textSource === 'string') {
+        return now({
+          disposable: new SettableDisposable(),
+          element: document.createTextNode(textSource)
+        })
+      }
+
+      let createdTextNode: Text
+
+      return filterNull(
+        map((nextValue) => {
+          if (createdTextNode) {
+            createdTextNode.nodeValue = nextValue
+            return null
+          }
+
+          createdTextNode = document.createTextNode(nextValue)
+
+          return {
+            disposable: new SettableDisposable(),
+            element: createdTextNode
+          }
+        }, textSource)
+      )
     })
-    return disposeAll(disposableList)
+
+    return mergeArray(mappedSourceList).run(sink, scheduler)
   }
 }
 

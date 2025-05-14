@@ -1,6 +1,6 @@
 import { map, merge, multicast, now } from '@most/core'
 import type { IBehavior } from 'aelea/core'
-import { $element, $node, $text, component, eventElementTarget, style } from 'aelea/core'
+import { $element, $node, $text, $wrapNativeElement, component, eventElementTarget, style } from 'aelea/core'
 import * as router from 'aelea/router'
 import { $RouterAnchor } from 'aelea/router'
 import { $column, $icon, $row, designSheet, spacing } from 'aelea/ui-components'
@@ -47,9 +47,11 @@ export default ({ baseRoute }: Website) =>
     })
 
     return [
-      $node(
+      $wrapNativeElement(document.body)(
         designSheet.main,
+        designSheet.customScroll,
         style({
+          backgroundColor: pallete.background,
           fontFamily: `'Nunito', Fira Code`,
           backgroundImage: `radial-gradient(at center center, ${pallete.horizon} 50vh, ${pallete.background})`
         })

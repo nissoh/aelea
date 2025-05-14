@@ -1,6 +1,6 @@
 import { combineArray as combineArrayMost, now, zipArray } from '@most/core'
 import type { Stream } from '@most/types'
-import { isStream, toStream } from '../common.js'
+import { toStream } from '../common.js'
 
 export type InputStateParams<T> = {
   [P in keyof T]: Stream<T[P]> | T[P]
