@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
-    "includes": ["**/src/**/*.ts", "!**/node_modules"]
+    "includes": ["./**/*.ts", "!**/node_modules", "!**/dist"]
   },
   "formatter": {
     "attributePosition": "multiline",
@@ -23,10 +23,10 @@
             "syntax": "shorthand"
           }
         },
+        "useLiteralEnumMembers": "off",
         "noCommaOperator": "error",
-        "useNodejsImportProtocol": "error",
+        "useNodejsImportProtocol": "off",
         "useAsConstAssertion": "error",
-        "useNumericLiterals": "error",
         "useSelfClosingElements": "error",
         "useConst": "error",
         "useSingleVarDeclarator": "error",
@@ -38,7 +38,7 @@
         "noParameterAssign": "off",
         "useDefaultParameterLast": "error",
         "noArguments": "error",
-        "useImportType": "error",
+        "useImportType": "warn",
         "useExportType": "error",
         "noUselessElse": "error",
         "useShorthandFunctionType": "error"
@@ -53,6 +53,10 @@
       },
       "performance": {
         "noAccumulatingSpread": "off"
+      },
+      "correctness": {
+        "noUnusedFunctionParameters": "off",
+        "noUnusedVariables": "off"
       }
     }
   },
@@ -65,6 +69,10 @@
   },
   "assist": {
     "enabled": true,
-    "actions": { "source": { "organizeImports": "on" } }
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
   }
 }

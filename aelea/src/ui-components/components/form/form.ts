@@ -1,7 +1,7 @@
 import { constant, filter, merge } from '@most/core'
 import { O } from '../../../core/common.js'
 import { $element, nodeEvent, style } from '../../../core/index.js'
-import type { I$Node, I$Slottable } from '../../../core/source/node.js'
+import type { I$Node } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 

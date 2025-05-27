@@ -30,7 +30,7 @@ import {
   O,
   style
 } from 'aelea/core'
-import { fetchJson, observer, spacing } from 'aelea/ui-components'
+import { fetchJson, observer } from 'aelea/ui-components'
 import type * as monaco from 'monaco-editor'
 
 interface JSDelivrFlat {

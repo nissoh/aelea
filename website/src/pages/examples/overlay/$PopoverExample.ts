@@ -1,4 +1,4 @@
-import { constant, map, merge, now, scan, switchLatest } from '@most/core'
+import { constant, merge, now, scan } from '@most/core'
 import type { IBehavior } from 'aelea/core'
 import { $text, component, style } from 'aelea/core'
 import { $Button, $column, $Popover, $row, $TextField, spacing } from 'aelea/ui-components'

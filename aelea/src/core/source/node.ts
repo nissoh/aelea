@@ -1,4 +1,4 @@
-import { map, never, propagateTask } from '@most/core'
+import { never, propagateTask } from '@most/core'
 import { disposeBoth } from '@most/disposable'
 import { id } from '@most/prelude'
 import { asap } from '@most/scheduler'

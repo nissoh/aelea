@@ -225,35 +225,35 @@ function styleObjectAsString(styleObj: IStyleCSS) {
     .join('')
 }
 
-export function useStyleRule(cacheService: IRunEnvironment, styleDefinition: IStyleCSS) {
+export function useStyleRule(env: IRunEnvironment, styleDefinition: IStyleCSS) {
   const properties = styleObjectAsString(styleDefinition)
-  const cachedRuleIdx = cacheService.cache.indexOf(properties)
+  const cachedRuleIdx = env.cache.indexOf(properties)
 
   if (cachedRuleIdx === -1) {
-    const index = cacheService.stylesheet.cssRules.length
-    const namespace = cacheService.namespace + index
+    const index = env.stylesheet.cssRules.length
+    const namespace = env.namespace + index
 
-    cacheService.cache.push(properties)
-    cacheService.stylesheet.insertRule(`.${namespace} {${properties}}`, index)
-    return `${cacheService.namespace + index}`
+    env.cache.push(properties)
+    env.stylesheet.insertRule(`.${namespace} {${properties}}`, index)
+    return `${env.namespace + index}`
   }
 
-  return `${cacheService.namespace + cachedRuleIdx}`
+  return `${env.namespace + cachedRuleIdx}`
 }
 
-export function useStylePseudoRule(cacheService: IRunEnvironment, styleDefinition: IStyleCSS, pseudo = '') {
+export function useStylePseudoRule(env: IRunEnvironment, styleDefinition: IStyleCSS, pseudo = '') {
   const properties = styleObjectAsString(styleDefinition)
-  const index = cacheService.stylesheet.cssRules.length
-  const rule = `.${cacheService.namespace + index + pseudo} {${properties}}`
-  const cachedRuleIdx = cacheService.cache.indexOf(rule)
+  const index = env.stylesheet.cssRules.length
+  const rule = `.${env.namespace + index + pseudo} {${properties}}`
+  const cachedRuleIdx = env.cache.indexOf(rule)
 
   if (cachedRuleIdx === -1) {
-    cacheService.cache.push(rule)
-    cacheService.stylesheet.insertRule(rule, index)
-    return `${cacheService.namespace + index}`
+    env.cache.push(rule)
+    env.stylesheet.insertRule(rule, index)
+    return `${env.namespace + index}`
   }
 
-  return `${cacheService.namespace + cachedRuleIdx}`
+  return `${env.namespace + cachedRuleIdx}`
 }
 
 function applyAttributes(attrs: IAttributeProperties<unknown>, node: INodeElement) {
