@@ -6,27 +6,29 @@ function createFromCallbackSource<T, Targs extends any[] = T[]>(
   mapFn: (...args: Targs) => T,
   context: any
 ): IStream<T> {
-  return (_, sink) => {
-    // very common that callback functions returns a destructor, perhaps a Disposable in a "most" case
-    const maybeDisposable = callbackFunction.call(context, (...args: Targs) => {
-      const value = mapFn(...args)
+  return {
+    run(_, sink) {
+      // very common that callback functions returns a destructor, perhaps a Disposable in a "most" case
+      const maybeDisposable = callbackFunction.call(context, (...args: Targs) => {
+        const value = mapFn(...args)
 
-      try {
-        sink.event(value)
-      } catch (e) {
-        sink.error(e)
+        try {
+          sink.event(value)
+        } catch (e) {
+          sink.error(e)
+        }
+      })
+
+      if (maybeDisposable instanceof Function) {
+        return disposeWith(maybeDisposable, null)
       }
-    })
 
-    if (maybeDisposable instanceof Function) {
-      return disposeWith(maybeDisposable, null)
+      if (maybeDisposable && typeof maybeDisposable === 'object' && Symbol.dispose in maybeDisposable) {
+        return maybeDisposable
+      }
+
+      return disposeNone
     }
-
-    if (maybeDisposable && typeof maybeDisposable === 'object' && Symbol.dispose in maybeDisposable) {
-      return maybeDisposable
-    }
-
-    return disposeNone
   }
 }
 

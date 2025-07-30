@@ -1,12 +1,11 @@
-import { constant, map, merge, startWith } from '@most/core'
 import { attr } from '../../core/combinator/attribute.js'
 import type { IBehavior } from '../../core/combinator/behavior.js'
 import { component } from '../../core/combinator/component.js'
 import { nodeEvent } from '../../core/combinator/event.js'
 import { style } from '../../core/combinator/style.js'
-import { type IOps, O } from '../../core/common.js'
 import type { I$Node, INode } from '../../core/source/node.js'
-import type { Route } from '../types.js'
+import { type IOps, map, merge, op, startWith } from '../../stream/index.js'
+import type { PathEvent, Route } from '../types.js'
 
 export interface IAnchor {
   url: string
@@ -15,19 +14,29 @@ export interface IAnchor {
   anchorOp?: IOps<INode<HTMLAnchorElement>>
 }
 
-export const $RouterAnchor = ({ url, route, $anchor, anchorOp = O() }: IAnchor) =>
-  component(([click, clickTether]: IBehavior<INode, string>, [focus, focusTether]: IBehavior<INode, boolean>) => {
+export const $RouterAnchor = ({ url, route, $anchor, anchorOp = op }: IAnchor) =>
+  component(([click, clickTether]: IBehavior<any, string>, [focus, focusTether]: IBehavior<any, boolean>) => {
     const trailingSlash = /\/$/
     const href = url.replace(trailingSlash, '')
 
-    const contains = merge(constant(true, route.contains), constant(false, route.miss))
+    const contains = merge(
+      op(
+        route.contains,
+        map<PathEvent, boolean>(() => true)
+      ),
+      op(
+        route.miss,
+        map<PathEvent, boolean>(() => false)
+      )
+    )
 
-    const anchorOps = O(
+    const anchorWithOps = op(
+      $anchor,
       attr({ href }),
       style({ textDecoration: 'none' }),
       clickTether(
         nodeEvent('click'),
-        map((clickEv): string => {
+        map((clickEv: MouseEvent): string => {
           clickEv.preventDefault()
 
           const pathName = clickEv.currentTarget instanceof HTMLAnchorElement ? clickEv.currentTarget.pathname : null
@@ -44,18 +53,19 @@ export const $RouterAnchor = ({ url, route, $anchor, anchorOp = O() }: IAnchor) 
           return pathName
         })
       ),
-      focusTether(($anchor) => {
-        const focus = constant(true, merge(nodeEvent('focus', $anchor), nodeEvent('pointerenter', $anchor)))
-        const blur = constant(false, merge(nodeEvent('blur', $anchor), nodeEvent('pointerleave', $anchor)))
-
-        return startWith(false, merge(focus, blur))
+      focusTether(() => {
+        const focus = op(
+          merge(nodeEvent('focus')($anchor), nodeEvent('pointerenter')($anchor)),
+          map(() => true)
+        )
+        const blur = op(
+          merge(nodeEvent('blur')($anchor), nodeEvent('pointerleave')($anchor)),
+          map(() => false)
+        )
+        return startWith(false)(merge(focus, blur))
       }),
       anchorOp
     )
 
-    return [
-      anchorOps($anchor),
-
-      { click, match: route.match, contains, focus }
-    ]
+    return [anchorWithOps, { click, match: route.match, contains, focus }]
   })

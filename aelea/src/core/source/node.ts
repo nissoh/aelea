@@ -96,21 +96,23 @@ function createNodeSource<A, B extends INodeElement>(
   sourceOp: (a: A) => B,
   $segments: I$Slottable[]
 ): I$Node<B> {
-  return (scheduler, sink) => {
-    const element = sourceOp(sourceValue)
-    const disposable = new SettableDisposable()
+  return {
+    run(scheduler, sink) {
+      const element = sourceOp(sourceValue)
+      const disposable = new SettableDisposable()
 
-    const nodeState: INode<B> = {
-      $segments,
-      element,
-      disposable,
-      styleBehavior: [],
-      insertAscending: true,
-      attributesBehavior: [],
-      stylePseudo: []
+      const nodeState: INode<B> = {
+        $segments,
+        element,
+        disposable,
+        styleBehavior: [],
+        insertAscending: true,
+        attributesBehavior: [],
+        stylePseudo: []
+      }
+
+      return scheduler.schedule(() => sink.event(nodeState), 0)
     }
-
-    return scheduler.schedule(() => sink.event(nodeState), 0)
   }
 }
 

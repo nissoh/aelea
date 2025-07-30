@@ -12,33 +12,38 @@ export type IComponentOutputBehaviors<T> = {
   [P in keyof T]: IStream<T[P]>
 }
 
-export const component = <A extends INodeElement, B extends I$Slottable<A>, D>(
-  inputComp: IComponentDefinitionCallback<A, B, D>,
+export type I$Component<A extends INodeElement, B extends I$Slottable<A>, D> = (
   outputTethers: IOutputTethers<D>
-): I$Slottable<A> => {
-  return {
-    run(scheduler, sink) {
-      const behaviors = Array(inputComp.length).fill(null).map(behavior)
-      const [view, outputSources] = inputComp(...behaviors)
-      const behaviorDisposableList: Disposable[] = []
+) => I$Slottable<A>
 
-      if (outputTethers) {
-        for (const k in outputTethers) {
-          if (outputTethers[k] && outputSources) {
-            const consumerSampler = outputTethers[k]
+export const component =
+  <A extends INodeElement, B extends I$Slottable<A>, D>(
+    inputComp: IComponentDefinitionCallback<A, B, D>
+  ): I$Component<A, B, D> =>
+  (outputTethers: IOutputTethers<D>): I$Slottable<A> => {
+    return {
+      run(scheduler, sink) {
+        const behaviors = Array(inputComp.length).fill(null).map(behavior)
+        const [view, outputSources] = inputComp(...behaviors)
+        const behaviorDisposableList: Disposable[] = []
 
-            if (consumerSampler) {
-              const componentOutputTethers = outputSources[k]
-              const outputDisposable = consumerSampler(componentOutputTethers).run(scheduler, nullSink)
-              behaviorDisposableList.push(outputDisposable)
+        if (outputTethers) {
+          for (const k in outputTethers) {
+            if (outputTethers[k] && outputSources) {
+              const consumerSampler = outputTethers[k]
+
+              if (consumerSampler) {
+                const componentOutputTethers = outputSources[k]
+                const outputDisposable = consumerSampler(componentOutputTethers).run(scheduler, nullSink)
+                behaviorDisposableList.push(outputDisposable)
+              }
             }
           }
         }
+
+        const viewDisposable = view.run(scheduler, sink)
+
+        return disposeAll([viewDisposable, ...behaviorDisposableList])
       }
-
-      const viewDisposable = view.run(scheduler, sink)
-
-      return disposeAll([viewDisposable, ...behaviorDisposableList])
     }
   }
-}

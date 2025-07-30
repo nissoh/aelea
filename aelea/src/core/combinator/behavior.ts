@@ -1,5 +1,12 @@
-
-import { disposeWith, op, type IOps, type IStream, type Scheduler, type Sink } from '../../stream/index.js'
+import {
+  type Disposable,
+  disposeWith,
+  type IOps,
+  type IStream,
+  op,
+  type Scheduler,
+  type Sink
+} from '../../stream/index.js'
 import { tether } from './tether.js'
 
 type SinkMap<T> = Map<Sink<T>, Map<IStream<T>, Disposable | null>>
@@ -50,7 +57,7 @@ class IBehaviorSource<I, O> implements IStream<O> {
         const disposables = sinkMap.get(sinkSrc)
         if (disposables) {
           for (const disposable of disposables.values()) {
-            disposable?.dispose()
+            disposable?.[Symbol.dispose]()
           }
         }
         sinkMap.delete(sinkSrc)
@@ -69,6 +76,7 @@ class IBehaviorSource<I, O> implements IStream<O> {
     return (sb: IStream<I>): IStream<I> => {
       const [s0, s1] = tether(sb)
 
+      // @ts-expect-error - ops spread is handled correctly by op function
       const bops = op(s1, ...ops)
 
       this.queuedBehaviors.push(bops)

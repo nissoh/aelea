@@ -1,3 +1,5 @@
+import type { IStream } from '../stream/types.js'
+
 export type Path = string
 export type Fragment = string | RegExp
 export type PathEvent = Path[]

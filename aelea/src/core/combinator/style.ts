@@ -1,89 +1,52 @@
 import type * as CSS from 'csstype'
 import type { IStream } from '../../stream/index.js'
-import { curry2, curry3, filter, map, tap } from '../../stream/index.js'
-import type { I$Node, INodeElement } from '../source/node.js'
+import { filter, map, tap } from '../../stream/index.js'
+import type { I$Op, INodeElement } from '../source/node.js'
 
 export type IStyleCSS = CSS.Properties
 
-export interface IStyleCurry {
-  <T extends INodeElement>(styleInput: IStyleCSS, node: I$Node<T>): I$Node<T>
-  <T extends INodeElement>(styleInput: IStyleCSS): (node: I$Node<T>) => I$Node<T>
-}
+export const styleInline = <T extends INodeElement>(style: IStream<IStyleCSS>): I$Op<T> =>
+  map((node: any) => {
+    const applyInlineStyleStream = tap((styleObj: IStyleCSS) => {
+      const keys = Object.keys(styleObj)
 
-export interface IStylePseudoCurry {
-  <T extends INodeElement, E extends string>(
-    pseudoClass: CSS.Pseudos | E,
-    styleInput: IStyleCSS,
-    node: I$Node<T>
-  ): I$Node<T>
-  <T extends INodeElement, E extends string>(
-    pseudoClass: CSS.Pseudos | E,
-    styleInput: IStyleCSS
-  ): (node: I$Node<T>) => I$Node<T>
-  <T extends INodeElement, E extends string>(
-    pseudoClass: CSS.Pseudos | E
-  ): (styleInput: IStyleCSS) => (node: I$Node<T>) => I$Node<T>
-}
+      for (let i = 0; i < keys.length; i++) {
+        const prop = keys[i]
 
-export interface IStyleBehaviorCurry {
-  <T extends INodeElement>(styleInput: IStream<IStyleCSS | null>, node: I$Node<T>): I$Node<T>
-  <T extends INodeElement>(styleInput: IStream<IStyleCSS | null>): (node: I$Node<T>) => I$Node<T>
-}
+        if (Object.hasOwn(styleObj, prop)) {
+          const styleDec = node.element.style
+          const value = styleObj[prop as keyof IStyleCSS]
 
-export const styleInline =
-  <A extends INodeElement>(style: IStream<IStyleCSS>) =>
-  ($node: I$Node<A>): I$Node<A> => {
-    return map((node: any) => {
-      const applyInlineStyleStream = tap((styleObj: IStyleCSS) => {
-        const keys = Object.keys(styleObj)
-
-        for (let i = 0; i < keys.length; i++) {
-          const prop = keys[i]
-
-          if (Object.hasOwn(styleObj, prop)) {
-            const styleDec = node.element.style
-            const value = styleObj[prop as keyof IStyleCSS]
-
-            // Ensure value is a string or null for setProperty
-            styleDec.setProperty(prop, value === null || value === undefined ? null : String(value))
-          }
+          // Ensure value is a string or null for setProperty
+          styleDec.setProperty(prop, value === null || value === undefined ? null : String(value))
         }
-      })(style)
-
-      return {
-        ...node,
-        styleBehavior: [...node.styleBehavior, filter(() => false)(applyInlineStyleStream)]
       }
-    })($node)
-  }
+    })(style)
 
-export const style: IStyleCurry = curry2(
-  <T extends INodeElement>(styleInput: IStyleCSS, source: I$Node<T>): I$Node<T> => {
-    return map((node: any) => ({ ...node, style: { ...node.style, ...styleInput } }))(source)
-  }
-)
-
-export const stylePseudo: IStylePseudoCurry = curry3(
-  <T extends INodeElement, E extends string>(
-    pseudoClass: CSS.Pseudos | E,
-    styleInput: IStyleCSS,
-    source: I$Node<T>
-  ): I$Node<T> => {
-    return map((node: any) => ({
+    return {
       ...node,
-      stylePseudo: [
-        ...node.stylePseudo,
-        {
-          class: pseudoClass,
-          style: styleInput
-        }
-      ]
-    }))(source)
-  }
-)
+      styleBehavior: [...node.styleBehavior, filter(() => false)(applyInlineStyleStream)]
+    }
+  })
 
-export const styleBehavior: IStyleBehaviorCurry = curry2(
-  <T extends INodeElement>(style: IStream<IStyleCSS | null>, $node: I$Node<T>): I$Node<T> => {
-    return map((node) => ({ ...node, styleBehavior: [...node.styleBehavior, style] }), $node)
-  }
-)
+export const style = <T extends INodeElement>(styleInput: IStyleCSS): I$Op<T> =>
+  map((node) => ({ ...node, style: { ...node.style, ...styleInput } }))
+
+export const stylePseudo = <T extends INodeElement, E extends string>(
+  pseudoClass: CSS.Pseudos | E,
+  styleInput: IStyleCSS
+): I$Op<T> => {
+  return map((node) => ({
+    ...node,
+    stylePseudo: [
+      ...node.stylePseudo,
+      {
+        class: pseudoClass,
+        style: styleInput
+      }
+    ]
+  }))
+}
+
+export const styleBehavior = <T extends INodeElement>(style: IStream<IStyleCSS | null>): I$Op<T> =>
+  map((node) => ({ ...node, styleBehavior: [...node.styleBehavior, style] }))

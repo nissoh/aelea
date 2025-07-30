@@ -6,11 +6,7 @@ export {
   motionState,
   nextAnimationFrame
 } from './combinator/animate.js'
-export type {
-  IAttributeBehaviorCurry,
-  IAttributeCurry,
-  IAttributeProperties
-} from './combinator/attribute.js'
+export type { IAttributeProperties } from './combinator/attribute.js'
 export {
   attr,
   attrBehavior
@@ -18,7 +14,6 @@ export {
 export type { IBehavior, IComposeBehavior } from './combinator/behavior.js'
 export { behavior } from './combinator/behavior.js'
 export type {
-  IComponentCurry,
   IComponentDefinitionCallback,
   IComponentOutputBehaviors,
   IOutputTethers
@@ -29,18 +24,17 @@ export { eventElementTarget, nodeEvent } from './combinator/event.js'
 export { fromCallback } from './combinator/fromCallback.js'
 export { ReplayLatest, replayLatest } from './combinator/replay.js'
 export type { InputArrayParams, InputStateParams } from './combinator/state.js'
-export { combineArray, combineState, zipState } from './combinator/state.js'
-export type { IStyleBehaviorCurry, IStyleCSS, IStyleCurry, IStylePseudoCurry } from './combinator/style.js'
+export { combineArray, combineState } from './combinator/state.js'
+export type { IStyleCSS } from './combinator/style.js'
 export {
   style,
   styleBehavior,
   styleInline,
   stylePseudo
 } from './combinator/style.js'
-export type { IStreamOrPromise, ISwitchMapCurry2 } from './combinator/switchMap.js'
+export type { IStreamOrPromise } from './combinator/switchMap.js'
 export { switchMap } from './combinator/switchMap.js'
 export { tether } from './combinator/tether.js'
-export { isEmpty, isStream, maybeOps, O, toStream, xForver } from './common.js'
 export type { IRunEnvironment } from './run.js'
 export { runBrowser } from './run.js'
 export type {

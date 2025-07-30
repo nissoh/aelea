@@ -1,10 +1,19 @@
-import { map, mergeArray, scan, tap } from '@most/core'
-import { disposeAll, disposeNone, disposeWith } from '@most/disposable'
-import { newDefaultScheduler } from '@most/scheduler'
-import type { Scheduler, Sink, Time } from '@most/types'
+import {
+  disposeAll,
+  disposeNone,
+  disposeWith,
+  type IStream,
+  map,
+  merge,
+  nullSink,
+  op,
+  type Scheduler,
+  type Sink,
+  scan,
+  tap
+} from '../stream/index.js'
 import type { IAttributeProperties } from './combinator/attribute.js'
 import type { IStyleCSS } from './combinator/style.js'
-import { nullSink } from './common.js'
 import type { I$Node, I$Slottable, INode, INodeElement, ISlottable } from './source/node.js'
 import { SettableDisposable } from './utils/SettableDisposable.js'
 
@@ -31,7 +40,7 @@ class BranchEffectsSink implements Sink<INode | ISlottable> {
     private readonly segmentsCount: number[]
   ) {}
 
-  event(_: Time, childNode: INode) {
+  event(childNode: INode) {
     try {
       childNode.disposable.set(
         disposeWith((nodeToRemove) => {
@@ -40,7 +49,7 @@ class BranchEffectsSink implements Sink<INode | ISlottable> {
           const slot = this.segmentsSlotList[this.segmentPosition]
           const disposableBranch = slot.get(nodeToRemove)
           slot.delete(nodeToRemove)
-          disposableBranch?.dispose()
+          disposableBranch?.[Symbol.dispose]()
         }, childNode)
       )
     } catch {
@@ -67,22 +76,23 @@ class BranchEffectsSink implements Sink<INode | ISlottable> {
     }
 
     if (typeof childNode.styleBehavior === 'object') {
-      const disposeStyle = mergeArray(childNode.styleBehavior.map((sb) => styleBehavior(sb, childNode, this.env))).run(
-        nullSink,
-        this.env.scheduler
-      )
+      const newLocal = childNode.styleBehavior.map((sb) => styleBehavior(sb, childNode, this.env))
+      const disposeStyle = merge(...newLocal).run(this.env.scheduler, nullSink)
 
       this.disposables.push(disposeStyle)
     }
 
     if (typeof childNode.attributesBehavior === 'object') {
-      const disposeStyle = mergeArray(
-        childNode.attributesBehavior.map((attrs) => {
-          return tap((attr) => {
-            applyAttributes(attr, childNode.element)
-          }, attrs)
+      const disposeStyle = merge(
+        ...childNode.attributesBehavior.map((attrs) => {
+          return op(
+            attrs,
+            tap((attr) => {
+              applyAttributes(attr, childNode.element)
+            })
+          )
         })
-      ).run(nullSink, this.env.scheduler)
+      ).run(this.env.scheduler, nullSink)
 
       this.disposables.push(disposeStyle)
     }
@@ -98,7 +108,7 @@ class BranchEffectsSink implements Sink<INode | ISlottable> {
 
     appendToSlot(this.branchNode.element, childNode.element, insertAt)
 
-    const newDisp = '$segments' in childNode ? new BranchChildrenSinkList(this.env, childNode) : disposeNone()
+    const newDisp = '$segments' in childNode ? new BranchChildrenSinkList(this.env, childNode) : disposeNone
 
     if (!this.segmentsSlotList[this.segmentPosition]) {
       this.segmentsSlotList[this.segmentPosition] = new Map()
@@ -107,17 +117,17 @@ class BranchEffectsSink implements Sink<INode | ISlottable> {
     this.segmentsSlotList[this.segmentPosition].set(childNode, disposeAll([...this.disposables, newDisp]))
   }
 
-  end(_t: Time) {
+  end() {
     for (const s of this.segmentsSlotList) {
       if (s) {
         for (const d of s.values()) {
-          d.dispose()
+          d[Symbol.dispose]()
         }
       }
     }
   }
 
-  error(_: Time, err: Error) {
+  error(err: Error) {
     console.error(err)
   }
 }
@@ -136,24 +146,27 @@ class BranchChildrenSinkList implements Disposable {
       const $child = node.$segments[i]
       const sink = new BranchEffectsSink(this.env, this.node, i, segmentsCount)
 
-      this.disposables.set($child, $child.run(sink, this.env.scheduler))
+      this.disposables.set($child, $child.run(this.env.scheduler, sink))
     }
   }
 
-  dispose(): void {
+  [Symbol.dispose](): void {
     for (const d of this.disposables.values()) {
-      d.dispose()
+      d[Symbol.dispose]()
     }
   }
 }
 
-export function runBrowser(userConfig: Partial<IRunEnvironment> & { $rootNode: I$Node }): Disposable {
+export function runBrowser(
+  scheduler: Scheduler,
+  userConfig: Partial<IRunEnvironment> & { $rootNode: I$Node }
+): Disposable {
   const defaultConfig: Omit<IRunEnvironment, '$rootNode'> = {
     namespace: '•',
     stylesheet: new CSSStyleSheet(),
     cache: [],
     rootAttachment: document.querySelector('html')!,
-    scheduler: newDefaultScheduler()
+    scheduler
   }
 
   const config = { ...defaultConfig, ...userConfig }
@@ -162,27 +175,31 @@ export function runBrowser(userConfig: Partial<IRunEnvironment> & { $rootNode: I
 
   const $rootNode = config.$rootNode
 
-  return map((node) => {
-    const rootNode: INode = {
-      element: defaultConfig.rootAttachment!,
-      $segments: [],
-      disposable: new SettableDisposable(),
-      styleBehavior: [],
-      insertAscending: true,
-      attributesBehavior: [],
-      stylePseudo: []
-    }
+  return op(
+    $rootNode,
+    map((node) => {
+      const rootNode: INode = {
+        element: defaultConfig.rootAttachment!,
+        $segments: [],
+        disposable: new SettableDisposable(),
+        styleBehavior: [],
+        insertAscending: true,
+        attributesBehavior: [],
+        stylePseudo: []
+      }
 
-    // TODO(Fix) BranchEffectsSink will prepend the rootNode to the configred rootAttachment which is not always the desired use case
-    return new BranchEffectsSink(config, rootNode, 0, [0]).event(0, node)
-  }, $rootNode).run(nullSink as any, config.scheduler)
+      // TODO(Fix) BranchEffectsSink will prepend the rootNode to the configred rootAttachment which is not always the desired use case
+      return new BranchEffectsSink(config, rootNode, 0, [0]).event(node)
+    })
+  ).run(config.scheduler, nullSink)
 }
 
 function styleBehavior(styleBehavior: IStream<IStyleCSS | null>, node: INode, cacheService: IRunEnvironment) {
   let latestClass: string
 
-  return scan(
-    (previousCssRule: null | ReturnType<typeof useStyleRule>, styleObject) => {
+  return op(
+    styleBehavior,
+    scan((previousCssRule: null | ReturnType<typeof useStyleRule>, styleObject) => {
       if (previousCssRule) {
         if (styleObject === null) {
           node.element.classList.remove(previousCssRule)
@@ -210,9 +227,7 @@ function styleBehavior(styleBehavior: IStream<IStyleCSS | null>, node: INode, ca
       }
 
       return ''
-    },
-    null,
-    styleBehavior
+    }, null)
   )
 }
 

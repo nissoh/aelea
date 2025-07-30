@@ -21,7 +21,14 @@ import type { Disposable, IStream, Sink } from '../types.js'
  * expensive(env, sink1)
  * expensive(env, sink2)
  */
-export const multicast = <T>(source: IStream<T>): IStream<T> => new MulticastSource(source)
+export const multicast = <T>(source: IStream<T>): IStream<T> => {
+  const multicastSource = new MulticastSource(source)
+  return {
+    run(scheduler, sink) {
+      return multicastSource.run(scheduler, sink)
+    }
+  }
+}
 
 class MulticastSource<T> implements Sink<T> {
   private readonly source: IStream<T>

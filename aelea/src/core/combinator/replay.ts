@@ -38,9 +38,9 @@ export class ReplayLatest<A> implements IStream<A> {
     let stream = this.source
 
     if (this.hasValue) {
-      stream = startWith(this.latestvalue, stream)
+      stream = startWith(this.latestvalue)(stream)
     } else if (this.hasInitial && this.initialState !== undefined) {
-      stream = startWith(this.initialState, stream)
+      stream = startWith(this.initialState)(stream)
     }
 
     return stream.run(scheduler, new StateSink(this, sink))

@@ -1,5 +1,5 @@
 import { continueWith, disposeWith, map, op, startWith, switchLatest } from '../../stream/index.js'
-import type { IStream, Scheduler, Sink } from '../../stream/types.js'
+import type { IStream, Sink } from '../../stream/types.js'
 
 type RafHandlerId = number
 type RafHandler = (dts: RafHandlerId) => void
@@ -104,7 +104,7 @@ export const motionState = (
 
   return op(
     change,
-    map((target: number) => {
+    map((target) => {
       return op(
         animationFrames(),
         map(() => {
@@ -115,8 +115,8 @@ export const motionState = (
           return state
         }),
         // Continue until we reach the target position
-        (stream: IStream<MotionState>) => {
-          return (scheduler: Scheduler, sink: Sink<MotionState>) => {
+        (stream): IStream<MotionState> => ({
+          run(scheduler, sink) {
             let done = false
             const disposable = stream.run(scheduler, {
               event(value: MotionState) {
@@ -135,7 +135,7 @@ export const motionState = (
             })
             return disposable
           }
-        }
+        })
       )
     }),
     switchLatest,
