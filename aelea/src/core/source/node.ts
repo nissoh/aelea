@@ -1,5 +1,4 @@
-import { type Fn, isFunction, O } from '../../core/common.js'
-import type { IStream, Scheduler, Sink } from '../../stream/index.js'
+import { type Fn, type IStream, isFunction, never } from '../../stream/index.js'
 import type { IAttributeProperties } from '../combinator/attribute.js'
 import type { IStyleCSS } from '../combinator/style.js'
 import { type ISettableDisposable, SettableDisposable } from '../utils/SettableDisposable.js'
@@ -92,16 +91,13 @@ export interface INodeCompose<TElement extends INodeElement = INodeElement> {
   (...$leafs: I$Slottable[]): I$Node<TElement>
 }
 
-class NodeSource<A, B extends INodeElement> implements I$Node<B> {
-  constructor(
-    private readonly sourceValue: A,
-    private readonly sourceOp: (a: A) => B,
-    private readonly $segments: I$Slottable[]
-  ) {}
-
-  run(sink: Sink<INode<B>>, scheduler: Scheduler): Disposable {
-    const element = this.sourceOp(this.sourceValue)
-    const $segments = this.$segments
+function createNodeSource<A, B extends INodeElement>(
+  sourceValue: A,
+  sourceOp: (a: A) => B,
+  $segments: I$Slottable[]
+): I$Node<B> {
+  return (scheduler, sink) => {
+    const element = sourceOp(sourceValue)
     const disposable = new SettableDisposable()
 
     const nodeState: INode<B> = {
@@ -114,27 +110,25 @@ class NodeSource<A, B extends INodeElement> implements I$Node<B> {
       stylePseudo: []
     }
 
-    return disposeBoth(
-      asap(
-        propagateTask((t, x, sink) => sink.event(t, x), nodeState, sink),
-        scheduler
-      ),
-      disposable
-    )
+    return scheduler.schedule(() => sink.event(nodeState), 0)
   }
 }
+
+const id = <T>(x: T): T => x
 
 export function createNode<A, B extends INodeElement>(sourceOp: (a: A) => B, postOp: Fn<I$Node<B>, I$Node<B>> = id) {
   return (seedValue: A): INodeCompose<B> => {
     return function nodeComposeFn(...input: any[]): any {
       if (input.some(isFunction)) {
-        const composedOps = O(postOp, ...input)
+        // Compose the operations
+        const ops = [postOp, ...input] as Fn<I$Node<B>, I$Node<B>>[]
+        const composedOps = ops.reduce((acc, fn) => (x: I$Node<B>) => fn(acc(x)))
 
         return createNode(sourceOp, composedOps)(seedValue)
       }
 
-      const $segments = input.length ? (input as I$Slottable[]) : [never()]
-      const $branch = new NodeSource(seedValue, sourceOp, $segments)
+      const $segments = input.length ? (input as I$Slottable[]) : [never as unknown as I$Slottable]
+      const $branch = createNodeSource(seedValue, sourceOp, $segments)
 
       return postOp($branch)
     }

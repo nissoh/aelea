@@ -1,30 +1,29 @@
-import { chain, empty, tap } from '@most/core'
-import { disposeBoth, disposeWith } from '@most/disposable'
 import { eventElementTarget } from '../../core/combinator/event.js'
-import { nullSink } from '../../core/common.js'
+import type { IStream } from '../../stream/index.js'
+import { chain, disposeBoth, disposeWith, empty, nullSink, tap } from '../../stream/index.js'
 
 export function fromWebsocket<OUTPUT, INPUT>(
   url: string,
-  input: IStream<INPUT> = empty(),
+  input: IStream<INPUT> = empty as IStream<INPUT>,
   protocols: string | string[] | undefined = undefined
 ): IStream<OUTPUT> {
-  return {
-    run(sink, scheduler) {
-      const socket = new WebSocket(url, protocols)
+  return (scheduler, sink) => {
+    const socket = new WebSocket(url, protocols)
 
-      const inputTap = tap((inputEvent) => {
-        socket.send(JSON.stringify(inputEvent))
-      }, input)
-      const inputS = chain((_) => inputTap, eventElementTarget('open' as any, socket)).run(nullSink, scheduler)
+    const inputTap = tap<INPUT>((inputEvent) => {
+      socket.send(JSON.stringify(inputEvent))
+    })(input)
 
-      socket.addEventListener('message', (msg) => {
-        sink.event(scheduler.currentTime(), JSON.parse(msg.data))
-      })
+    const openStream = eventElementTarget('open' as any, socket) as IStream<Event>
+    const inputS = chain<Event, INPUT>((_) => inputTap)(openStream)(scheduler, nullSink)
 
-      const diposeSocket = disposeWith((s) => s.close(), socket)
+    socket.addEventListener('message', (msg) => {
+      sink.event(JSON.parse(msg.data))
+    })
 
-      return disposeBoth(diposeSocket, inputS)
-    }
+    const disposeSocket = disposeWith((s: WebSocket) => s.close(), socket)
+
+    return disposeBoth(disposeSocket, inputS)
   }
 }
 

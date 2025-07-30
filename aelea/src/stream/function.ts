@@ -417,14 +417,14 @@ export interface Curried2<A, B, C> {
 }
 
 export function curry2<A, B, C>(f: (a: A, b: B) => C): Curried2<A, B, C> {
-  function curried(a: A, b: B): any {
-    switch (arguments.length) {
+  function curried(...args: [] | [A] | [A, B]): any {
+    switch (args.length) {
       case 0:
         return curried
       case 1:
-        return (b: B) => f(a, b)
+        return (b: B) => f(args[0], b)
       default:
-        return f(a, b)
+        return f(args[0], args[1])
     }
   }
   return curried as any
@@ -438,16 +438,16 @@ export interface Curried3<A, B, C, D> {
 }
 
 export function curry3<A, B, C, D>(f: (a: A, b: B, c: C) => D): Curried3<A, B, C, D> {
-  function curried(a: A, b: B, c: C): any {
-    switch (arguments.length) {
+  function curried(...args: [] | [A] | [A, B] | [A, B, C]): any {
+    switch (args.length) {
       case 0:
         return curried
       case 1:
-        return curry2((b: B, c: C) => f(a, b, c))
+        return curry2((b: B, c: C) => f(args[0], b, c))
       case 2:
-        return (c: C) => f(a, b, c)
+        return (c: C) => f(args[0], args[1], c)
       default:
-        return f(a, b, c)
+        return f(args[0], args[1], args[2])
     }
   }
   return curried as any
@@ -462,18 +462,18 @@ export interface Curried4<A, B, C, D, E> {
 }
 
 export function curry4<A, B, C, D, E>(f: (a: A, b: B, c: C, d: D) => E): Curried4<A, B, C, D, E> {
-  function curried(a: A, b: B, c: C, d: D): any {
-    switch (arguments.length) {
+  function curried(...args: [] | [A] | [A, B] | [A, B, C] | [A, B, C, D]): any {
+    switch (args.length) {
       case 0:
         return curried
       case 1:
-        return curry3((b: B, c: C, d: D) => f(a, b, c, d))
+        return curry3((b: B, c: C, d: D) => f(args[0], b, c, d))
       case 2:
-        return curry2((c: C, d: D) => f(a, b, c, d))
+        return curry2((c: C, d: D) => f(args[0], args[1], c, d))
       case 3:
-        return (d: D) => f(a, b, c, d)
+        return (d: D) => f(args[0], args[1], args[2], d)
       default:
-        return f(a, b, c, d)
+        return f(args[0], args[1], args[2], args[3])
     }
   }
   return curried as any

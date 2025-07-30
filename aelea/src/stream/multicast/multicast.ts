@@ -21,22 +21,19 @@ import type { Disposable, IStream, Sink } from '../types.js'
  * expensive(env, sink1)
  * expensive(env, sink2)
  */
-export const multicast = <T, S>(source: IStream<T, S>): IStream<T, S> => {
-  const multicastSource = new MulticastSource(source)
-  return (scheduler, sink) => multicastSource.run(scheduler, sink)
-}
+export const multicast = <T>(source: IStream<T>): IStream<T> => new MulticastSource(source)
 
-class MulticastSource<T, S> implements Sink<T> {
-  private readonly source: IStream<T, S>
+class MulticastSource<T> implements Sink<T> {
+  private readonly source: IStream<T>
   private sinks: Sink<T>[] = []
   private disposable: Disposable = disposeNone
   private running = false
 
-  constructor(source: IStream<T, S>) {
+  constructor(source: IStream<T>) {
     this.source = source
   }
 
-  run(scheduler: S, sink: Sink<T>): Disposable {
+  run(scheduler: any, sink: Sink<T>): Disposable {
     if (this.running) {
       // Stream is already running, just add the sink
       this.add(sink)
@@ -44,7 +41,7 @@ class MulticastSource<T, S> implements Sink<T> {
       // First subscriber
       this.add(sink)
       this.running = true
-      this.disposable = this.source(scheduler, this)
+      this.disposable = this.source.run(scheduler, this)
     } else {
       // Should not happen in normal usage
       this.add(sink)
@@ -112,9 +109,9 @@ class MulticastSource<T, S> implements Sink<T> {
   }
 }
 
-class MulticastDisposable<T, S> implements Disposable {
+class MulticastDisposable<T> implements Disposable {
   constructor(
-    private source: MulticastSource<T, S>,
+    private source: MulticastSource<T>,
     private sink: Sink<T>
   ) {}
 

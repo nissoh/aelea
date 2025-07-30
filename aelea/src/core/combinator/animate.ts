@@ -1,6 +1,5 @@
-import type { Scheduler } from 'timers/promises'
-import { constant, continueWith, map, op, startWith, switchLatest } from '../../stream/index.js'
-import type { IStream, Sink } from '../../stream/types.js'
+import { continueWith, disposeWith, map, op, startWith, switchLatest } from '../../stream/index.js'
+import type { IStream, Scheduler, Sink } from '../../stream/types.js'
 
 type RafHandlerId = number
 type RafHandler = (dts: RafHandlerId) => void
@@ -19,14 +18,14 @@ export type AnimationFrames = {
 }
 
 // copied & modified from https://github.com/mostjs/x-animation-frame/tree/master
-class AnimationFrameSource {
-  constructor(private readonly afp: AnimationFrames) {}
-
-  run(sink: Sink<AnimationFrame>, scheduler: Scheduler): Disposable {
-    const requestTime = currentTime(scheduler)
-    const propagate: RafHandler = () => eventThenEnd(requestTime, currentTime(scheduler), sink)
-    const rafId = this.afp.requestAnimationFrame(propagate)
-    return disposeWith((fid) => this.afp.cancelAnimationFrame(fid), rafId)
+function createAnimationFrameSource(afp: AnimationFrames): IStream<AnimationFrame> {
+  return {
+    run(scheduler, sink) {
+      const requestTime = scheduler.currentTime()
+      const propagate: RafHandler = () => eventThenEnd(requestTime, scheduler.currentTime(), sink)
+      const rafId = afp.requestAnimationFrame(propagate)
+      return disposeWith((fid) => afp.cancelAnimationFrame(fid), rafId)
+    }
   }
 }
 
@@ -35,20 +34,22 @@ const eventThenEnd = (
   responseTime: AnimationFrameResponseTime,
   sink: Sink<AnimationFrame>
 ) => {
-  sink.event(requestTime, { requestTime, responseTime })
-  sink.end(requestTime)
+  sink.event({ requestTime, responseTime })
+  sink.end()
 }
 
 export const nextAnimationFrame = (afp: AnimationFrames = window): IStream<AnimationFrame> =>
-  new AnimationFrameSource(afp)
+  createAnimationFrameSource(afp)
 
 export const animationFrames = (afp: AnimationFrames = window): IStream<AnimationFrame> =>
-  continueWith(() => animationFrames(afp), nextAnimationFrame(afp))
+  continueWith(() => animationFrames(afp))(nextAnimationFrame(afp))
 
-export const drawLatest = O(
-  map((x) => constant(x, nextAnimationFrame(window))),
-  switchLatest
-) as <A>(x: IStream<A>) => Stream<A>
+export const drawLatest = <A>(x: IStream<A>): IStream<A> =>
+  op(
+    x,
+    map((value: A) => map(() => value)(nextAnimationFrame(window))),
+    switchLatest
+  )
 
 interface Motion {
   stiffness: number
@@ -88,8 +89,7 @@ export const motion = (
   change: IStream<number>
 ): IStream<number> => {
   const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
-  const ma = motionState(motionEnv, { position: initialState, velocity: 0 }, change)
-  return map((s) => s.position, ma)
+  return map((s: MotionState) => s.position)(motionState(motionEnv, { position: initialState, velocity: 0 }, change))
 }
 
 // used in cases where velocity feedback is needed(for renimation)
@@ -100,18 +100,47 @@ export const motionState = (
 ): IStream<MotionState> => {
   const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
 
+  const seed: MotionState = { ...initialState }
+
   return op(
     change,
-    loop((seed: MotionState, target: number) => {
-      const frames = O(
-        map(() => stepFrame(target, seed, motionEnv)),
-        skipAfter((n) => n.position === target)
+    map((target: number) => {
+      return op(
+        animationFrames(),
+        map(() => {
+          const state = stepFrame(target, seed, motionEnv)
+          // Copy state to seed for next iteration
+          seed.position = state.position
+          seed.velocity = state.velocity
+          return state
+        }),
+        // Continue until we reach the target position
+        (stream: IStream<MotionState>) => {
+          return (scheduler: Scheduler, sink: Sink<MotionState>) => {
+            let done = false
+            const disposable = stream.run(scheduler, {
+              event(value: MotionState) {
+                sink.event(value)
+                if (value.position === target) {
+                  done = true
+                  sink.end()
+                }
+              },
+              error(e: any) {
+                sink.error(e)
+              },
+              end() {
+                if (!done) sink.end()
+              }
+            })
+            return disposable
+          }
+        }
       )
-      return { seed, value: frames(animationFrames()) }
-    }, initialState),
+    }),
     switchLatest,
     startWith(initialState)
-  )(
+  )
 }
 
 function stepFrame(target: number, state: MotionState, motionEnv: Motion) {

@@ -1,19 +1,20 @@
+import type { IStyleCSS } from '../../core/combinator/style.js'
+import { $node, $text, style, styleBehavior } from '../../core/index.js'
 import {
   at,
   empty,
+  type IStream,
   map,
   merge,
   multicast,
   now,
+  op,
   scan,
   skip,
   skipRepeats,
   skipRepeatsWith,
   switchLatest
-} from '@most/core'
-import type { IStyleCSS } from '../../core/combinator/style.js'
-import { O } from '../../core/common.js'
-import { $node, $text, style, styleBehavior } from '../../core/index.js'
+} from '../../stream/index.js'
 
 export const sumFromZeroOp = scan((current: number, x: number) => current + x, 0)
 
@@ -38,7 +39,8 @@ interface NumberConfig {
 }
 export const $NumberTicker = ({ value$, incrementColor, decrementColor, textStyle = {}, slots = 10 }: NumberConfig) => {
   const uniqueValues$ = skipRepeats(value$)
-  const incrementMulticast = O(
+  const incrementMulticast = op(
+    uniqueValues$,
     scan((seed: CountState | null, change: number): CountState => {
       const changeStr = change.toLocaleString()
 
@@ -57,7 +59,7 @@ export const $NumberTicker = ({ value$, incrementColor, decrementColor, textStyl
     }, null),
     skip(1), // skips inital null that scans emit - preventing count from getting an inital color
     multicast
-  )(uniqueValues$)
+  )
 
   const dirStyleMap = {
     [Direction.INCREMENT]: { color: incrementColor },

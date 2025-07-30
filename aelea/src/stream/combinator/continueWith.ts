@@ -1,27 +1,28 @@
 import type { Disposable, IStream, Sink } from '../types.js'
 
 export const continueWith =
-  <T, E>(f: () => IStream<T, E>) =>
-  (s: IStream<T, E>): IStream<T, E> =>
-  (env, sink) => {
-    const continueWithSink = new ContinueWithSink(env, sink, f)
-    const d = s(env, continueWithSink)
-    continueWithSink.setDisposable(d)
+  <T>(f: () => IStream<T>) =>
+  (s: IStream<T>): IStream<T> => ({
+    run(scheduler, sink) {
+      const continueWithSink = new ContinueWithSink(scheduler, sink, f)
+      const d = s.run(scheduler, continueWithSink)
+      continueWithSink.setDisposable(d)
 
-    return {
-      [Symbol.dispose](): void {
-        continueWithSink.dispose()
+      return {
+        [Symbol.dispose](): void {
+          continueWithSink.dispose()
+        }
       }
     }
-  }
+  })
 
-class ContinueWithSink<T, E> implements Sink<T> {
+class ContinueWithSink<T> implements Sink<T> {
   private disposable: Disposable | null = null
 
   constructor(
-    private env: E,
+    private env: any,
     private sink: Sink<T>,
-    private f: () => IStream<T, E>
+    private f: () => IStream<T>
   ) {}
 
   event(value: T): void {
@@ -36,7 +37,7 @@ class ContinueWithSink<T, E> implements Sink<T> {
     if (this.disposable) {
       this.disposable[Symbol.dispose]()
     }
-    this.disposable = this.f()(this.env, this.sink)
+    this.disposable = this.f().run(this.env, this.sink)
   }
 
   setDisposable(d: Disposable): void {

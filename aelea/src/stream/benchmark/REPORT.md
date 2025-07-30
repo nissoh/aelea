@@ -64,7 +64,7 @@ runStream(scheduler, sink)(s)
 ```
 
 Key differences:
-- Simplified implementation: `IStream<T, S>` is just a function type with scheduler parameter
+- Simplified implementation: `IStream<T>` is just a function type with scheduler parameter
 - Direct function composition without wrapper abstractions
 - Environment-based scheduling with flexible scheduler interface
 - Exceptional switch performance (2.92x faster than @most/core)
@@ -73,7 +73,7 @@ Key differences:
 ## Recent Improvements
 
 ### Type System Enhancements
-- Added generic scheduler type parameter: `IStream<T, S = Scheduler>`
+- Added generic scheduler type parameter: `IStream<T = Scheduler>`
 - All combinators now properly propagate the scheduler type
 - Improved type safety across the entire stream pipeline
 

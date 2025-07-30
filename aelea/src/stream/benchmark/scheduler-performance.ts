@@ -1,5 +1,5 @@
 import { Bench } from 'tinybench'
-import { op, runPromise, scan, stream, tap } from '../index.js'
+import { op, runPromise, scan, tap } from '../index.js'
 
 const bench = new Bench({ time: 100 })
 

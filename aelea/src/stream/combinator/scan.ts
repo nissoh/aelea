@@ -2,10 +2,12 @@ import { TransformSink } from '../sink.js'
 import type { IStream, Sink } from '../types.js'
 
 export const scan =
-  <I, O, E>(f: (acc: O, value: I) => O, initial: O) =>
-  (s: IStream<I, E>): IStream<O, E> =>
-  (env, sink) =>
-    s(env, new ScanSink(f, initial, sink))
+  <I, O>(f: (acc: O, value: I) => O, initial: O) =>
+  (s: IStream<I>): IStream<O> => ({
+    run(env, sink) {
+      return s.run(env, new ScanSink(f, initial, sink))
+    }
+  })
 
 class ScanSink<In, Out> extends TransformSink<In, Out> {
   constructor(

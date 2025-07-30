@@ -1,10 +1,24 @@
 import { disposeNone } from '../core.js'
 import type { Disposable, IStream, Sink } from '../types.js'
 
-class InnerSink<T, E> implements Sink<T> {
+export const switchLatest = <T>(s: IStream<IStream<T>>): IStream<T> => ({
+  run(env, sink) {
+    const switchSink = new SwitchSink(env, sink)
+    const outerDisposable = s.run(env, switchSink)
+
+    return {
+      [Symbol.dispose](): void {
+        outerDisposable[Symbol.dispose]()
+        switchSink.dispose()
+      }
+    }
+  }
+})
+
+class InnerSink<T> implements Sink<T> {
   constructor(
     private sink: Sink<T>,
-    private parent: SwitchSink<T, E>
+    private parent: SwitchSink<T>
   ) {}
 
   event(value: T): void {
@@ -20,26 +34,26 @@ class InnerSink<T, E> implements Sink<T> {
   }
 }
 
-class SwitchSink<T, E> implements Sink<IStream<T, E>> {
+class SwitchSink<T> implements Sink<IStream<T>> {
   private currentDisposable: Disposable = disposeNone
   private outerEnded = false
   private innerEnded = false
-  public readonly innerSink: InnerSink<T, E>
+  public readonly innerSink: InnerSink<T>
 
   constructor(
-    private env: E,
+    private scheduler: any,
     private sink: Sink<T>
   ) {
     this.innerSink = new InnerSink(sink, this)
   }
 
-  event(stream: IStream<T, E>): void {
+  event(source: IStream<T>): void {
     // Dispose previous inner stream
     this.currentDisposable[Symbol.dispose]()
     this.innerEnded = false
 
     // Subscribe to new inner stream
-    this.currentDisposable = stream(this.env, this.innerSink)
+    this.currentDisposable = source.run(this.scheduler, this.innerSink)
   }
 
   error(error: any): void {
@@ -67,17 +81,3 @@ class SwitchSink<T, E> implements Sink<IStream<T, E>> {
     this.currentDisposable[Symbol.dispose]()
   }
 }
-
-export const lswitch =
-  <T, E>(s: IStream<IStream<T, E>, E>): IStream<T, E> =>
-  (env, sink) => {
-    const switchSink = new SwitchSink(env, sink)
-    const outerDisposable = s(env, switchSink)
-
-    return {
-      [Symbol.dispose](): void {
-        outerDisposable[Symbol.dispose]()
-        switchSink.dispose()
-      }
-    }
-  }

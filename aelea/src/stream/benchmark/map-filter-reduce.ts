@@ -1,7 +1,7 @@
 import * as MC from '@most/core'
 import * as MS from '@most/scheduler'
 import { Bench } from 'tinybench'
-import { defaultEnv, filter, fromArray, map, op, runPromise, scan, tap } from '../index.js'
+import { filter, fromArray, map, op, runPromise, scan, scheduler, tap } from '../index.js'
 
 const bench = new Bench({ time: 100 })
 
@@ -53,7 +53,7 @@ bench
         r = x
       })
     )
-    return runPromise(defaultEnv)(newLocal).then(() => r)
+    return runPromise(scheduler)(newLocal).then(() => r)
   })
 
 await bench.run()

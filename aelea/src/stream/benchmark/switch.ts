@@ -1,7 +1,7 @@
 import * as MC from '@most/core'
 import * as MS from '@most/scheduler'
 import { Bench } from 'tinybench'
-import { defaultEnv, type IStream, lswitch, map, op, runPromise, type Scheduler, scan, tap } from '../index.js'
+import { type IStream, lswitch, map, op, runPromise, scan, scheduler, tap } from '../index.js'
 
 const bench = new Bench({ time: 100 })
 
@@ -16,7 +16,7 @@ const sum = (x: number, y: number) => {
 }
 
 const fromArray =
-  <T>(arr: readonly T[]): IStream<T, Scheduler> =>
+  <T>(arr: readonly T[]): IStream<T> =>
   (scheduler, sink) =>
     setImmediate((sink) => {
       for (const a of arr) sink.event(a)
@@ -56,7 +56,7 @@ bench
       scan(sum, 0),
       tap((x) => (r = x))
     )
-    return runPromise(defaultEnv)(pipeline).then(() => r)
+    return runPromise(scheduler)(pipeline).then(() => r)
   })
 
 bench.addEventListener('error', console.error)

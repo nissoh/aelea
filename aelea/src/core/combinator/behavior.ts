@@ -1,9 +1,8 @@
-import { disposeWith } from '@most/disposable'
-import type { Scheduler, Sink, Stream } from '@most/types'
-import { type IOps, O } from '../common.js'
+
+import { disposeWith, op, type IOps, type IStream, type Scheduler, type Sink } from '../../stream/index.js'
 import { tether } from './tether.js'
 
-type SinkMap<T> = Map<Sink<T>, Map<Stream<T>, Disposable | null>>
+type SinkMap<T> = Map<Sink<T>, Map<IStream<T>, Disposable | null>>
 
 export interface IComposeBehavior<I, O> {
   (): IOps<I, I>
@@ -29,16 +28,16 @@ export interface IComposeBehavior<I, O> {
   ): IOps<I, I>
 }
 
-class IBehaviorSource<I, O> implements Stream<O> {
+class IBehaviorSource<I, O> implements IStream<O> {
   queuedBehaviors: IStream<O>[] = []
 
   sinksMap: SinkMap<O> = new Map()
   scheduler: Scheduler | undefined
 
-  run(sink: Sink<O>, scheduler: Scheduler): Disposable {
+  run(scheduler: Scheduler, sink: Sink<O>): Disposable {
     this.scheduler = scheduler
 
-    const sourcesMap = new Map<Stream<O>, Disposable | null>()
+    const sourcesMap = new Map<IStream<O>, Disposable | null>()
     this.sinksMap.set(sink, sourcesMap)
 
     for (const s of this.queuedBehaviors) {
@@ -47,7 +46,7 @@ class IBehaviorSource<I, O> implements Stream<O> {
 
     return disposeWith(
       ([sinkSrc, sinkMap]) => {
-        sinkSrc.end(scheduler.currentTime())
+        sinkSrc.end()
         const disposables = sinkMap.get(sinkSrc)
         if (disposables) {
           for (const disposable of disposables.values()) {
@@ -63,14 +62,14 @@ class IBehaviorSource<I, O> implements Stream<O> {
   protected runBehavior(sink: Sink<O>, x: IStream<O>) {
     if (!this.scheduler) throw 'BehaviorSource: scheduler is not defined'
 
-    return x.run(sink, this.scheduler)
+    return x.run(this.scheduler, sink)
   }
 
-  sample: IComposeBehavior<I, O> = (...ops: IOps<any, O>[]) => {
+  sample: IComposeBehavior<I, O> = (...ops: IOps<I, O>[]) => {
     return (sb: IStream<I>): IStream<I> => {
       const [s0, s1] = tether(sb)
 
-      const bops = O(...ops)(s1)
+      const bops = op(s1, ...ops)
 
       this.queuedBehaviors.push(bops)
       this.sinksMap.forEach((sourcesMap, sink) => {
@@ -87,4 +86,4 @@ export function behavior<T, R>(): IBehavior<T, R> {
 
   return [ss, ss.sample]
 }
-export type IBehavior<A, B = A> = [Stream<B>, IComposeBehavior<A, B>]
+export type IBehavior<A, B = A> = [IStream<B>, IComposeBehavior<A, B>]

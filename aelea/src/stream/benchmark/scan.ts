@@ -1,7 +1,7 @@
 import * as MC from '@most/core'
 import * as MS from '@most/scheduler'
 import { Bench } from 'tinybench'
-import { defaultEnv, fromArray, op, runPromise, scan, tap } from '../index.js'
+import { fromArray, op, runPromise, scan, scheduler, tap } from '../index.js'
 
 const bench = new Bench({ time: 100 })
 
@@ -42,7 +42,7 @@ bench
   })
   .add(`mc2 scan ${n}`, () => {
     let r = 0
-    return runPromise(defaultEnv)(
+    return runPromise(scheduler)(
       op(
         fromArray(arr),
         scan(sum, 0),

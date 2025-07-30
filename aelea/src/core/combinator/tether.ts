@@ -1,114 +1,113 @@
-import { disposeNone, disposeWith } from '@most/disposable'
-import { remove } from '@most/prelude'
-import type { Scheduler, Sink, Stream, Time } from '@most/types'
+import { disposeNone, disposeWith } from '../../stream/index.js'
+import type { Disposable, IStream, Scheduler, Sink } from '../../stream/types.js'
 
-interface TimedValue<T> {
-  time: Time
+interface StoredValue<T> {
   value: T
 }
 
 class SourceSink<T> implements Sink<T> {
   hasValue = false
-  latestValue?: TimedValue<T>
+  latestValue?: StoredValue<T>
 
   constructor(
     private readonly parent: Tether<T>,
     public readonly sink: Sink<T>
   ) {}
 
-  event(t: Time, x: T): void {
-    this.latestValue = { time: t, value: x }
+  event(x: T): void {
+    this.latestValue = { value: x }
     this.hasValue = true
 
-    this.sink.event(t, x)
+    this.sink.event(x)
     for (const s of this.parent.tetherSinkList) {
-      s.event(t, x)
+      s.event(x)
     }
   }
 
-  end(t: Time) {
-    this.sink.end(t)
+  end(): void {
+    this.sink.end()
   }
 
-  error(t: Time, e: Error): void {
-    this.sink.error(t, e)
+  error(e: any): void {
+    this.sink.error(e)
   }
 }
 
 class TetherSink<A> implements Sink<A> {
   constructor(public sink: Sink<A> | null) {}
 
-  event(time: Time, value: A): void {
+  event(value: A): void {
     if (this.sink) {
-      this.sink.event(time, value)
+      this.sink.event(value)
     }
   }
 
-  end(time: Time): void {
+  end(): void {
     if (this.sink) {
-      this.sink.end(time)
+      this.sink.end()
     }
     this.sink = null
   }
 
-  error(time: Time, err: Error): void {
+  error(err: any): void {
     if (this.sink) {
-      this.sink.error(time, err)
+      this.sink.error(err)
     }
     // Don't throw - just log the error to avoid crashing
     console.error('TetherSink error with no active sink:', err)
   }
 }
 
-class Tether<T> implements Stream<T> {
+class Tether<T> implements IStream<T> {
   private readonly sourceSinkList: SourceSink<T>[] = []
   readonly tetherSinkList: TetherSink<T>[] = []
 
-  private sourceDisposable: Disposable = disposeNone()
+  private sourceDisposable: Disposable = disposeNone
 
   constructor(private readonly source: IStream<T>) {}
 
-  run(sink: SourceSink<T> | TetherSink<T>, scheduler: Scheduler): Disposable {
+  run(scheduler: Scheduler, sink: Sink<T>): Disposable {
     if (sink instanceof SourceSink) {
-      this.sourceDisposable.dispose()
+      this.sourceDisposable[Symbol.dispose]()
       this.sourceSinkList.push(sink)
 
-      this.sourceDisposable = this.source.run(sink, scheduler)
+      this.sourceDisposable = this.source.run(scheduler, sink)
 
       return {
-        dispose: () => {
+        [Symbol.dispose]: () => {
           const srcIdx = this.sourceSinkList.indexOf(sink)
           if (srcIdx > -1) {
             this.sourceSinkList.splice(srcIdx, 1)
             // Only dispose the source if this was the last sink
             if (this.sourceSinkList.length === 0) {
-              this.sourceDisposable.dispose()
-              this.sourceDisposable = disposeNone()
+              this.sourceDisposable[Symbol.dispose]()
+              this.sourceDisposable = disposeNone
             }
           }
         }
       }
     }
 
-    this.tetherSinkList.push(sink)
+    const tetherSink = sink as TetherSink<T>
+
+    this.tetherSinkList.push(tetherSink)
 
     for (const s of this.sourceSinkList) {
       if (s.hasValue && s.latestValue) {
-        // Use the actual event time, not current time
-        sink.event(s.latestValue.time, s.latestValue.value)
+        tetherSink.event(s.latestValue.value)
       }
     }
 
     return disposeWith(
-      ([tetherSinkList, sourceTetherSink, scheduler]) => {
-        sourceTetherSink.end(scheduler.currentTime())
+      ([tetherSinkList, sourceTetherSink]: [TetherSink<T>[], TetherSink<T>]) => {
+        sourceTetherSink.end()
         const sinkIdx = tetherSinkList.indexOf(sourceTetherSink)
 
         if (sinkIdx > -1) {
-          remove(sinkIdx, tetherSinkList)
+          tetherSinkList.splice(sinkIdx, 1)
         }
       },
-      [this.tetherSinkList, sink, scheduler] as const
+      [this.tetherSinkList, tetherSink]
     )
   }
 }
@@ -126,18 +125,18 @@ class Tether<T> implements Stream<T> {
  * // push multicasts to all subscribers
  * // pull gets the latest value on subscription
  */
-export const tether = <T>(source: IStream<T>): [Stream<T>, Stream<T>] => {
+export const tether = <T>(source: IStream<T>): [IStream<T>, IStream<T>] => {
   const tetherSource = new Tether(source)
 
   return [
     {
-      run(sink, scheduler) {
-        return tetherSource.run(new SourceSink(tetherSource, sink), scheduler)
+      run(scheduler, sink) {
+        return tetherSource.run(scheduler, new SourceSink(tetherSource, sink))
       }
     },
     {
-      run(sink, scheduler) {
-        return tetherSource.run(new TetherSink(sink), scheduler)
+      run(scheduler, sink) {
+        return tetherSource.run(scheduler, new TetherSink(sink))
       }
     }
   ]

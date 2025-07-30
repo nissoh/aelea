@@ -1,27 +1,32 @@
-import { startWith } from '@most/core'
-import type { Scheduler, Sink, Stream } from '@most/types'
-import { Pipe } from '../common.js'
+import { startWith } from '../../stream/index.js'
+import type { Disposable, IStream, Scheduler, Sink } from '../../stream/types.js'
 
-class StateSink<A> extends Pipe<A, A> {
+class StateSink<A> implements Sink<A> {
   constructor(
     private readonly parent: ReplayLatest<A>,
-    public override sink: Sink<A>
-  ) {
-    super(sink)
-  }
+    public sink: Sink<A>
+  ) {}
 
-  event(t: number, x: A): void {
+  event(x: A): void {
     this.parent.latestvalue = x
     this.parent.hasValue = true
+    this.sink.event(x)
+  }
 
-    this.sink.event(t, x)
+  error(e: any): void {
+    this.sink.error(e)
+  }
+
+  end(): void {
+    this.sink.end()
   }
 }
 
-export class ReplayLatest<A> implements Stream<A> {
+export class ReplayLatest<A> implements IStream<A> {
   latestvalue!: A
   hasValue = false
-  hasInitial
+  hasInitial: boolean
+
   constructor(
     private readonly source: IStream<A>,
     private readonly initialState?: A
@@ -29,22 +34,19 @@ export class ReplayLatest<A> implements Stream<A> {
     this.hasInitial = initialState !== undefined
   }
 
-  run(sink: Sink<A>, scheduler: Scheduler): Disposable {
-    const startWithReplay = this.hasValue
-      ? startWith(this.latestvalue)
-      : this.hasInitial
-        ? startWith(this.initialState)
-        : null
+  run(scheduler: Scheduler, sink: Sink<A>): Disposable {
+    let stream = this.source
 
-    const withReplayedValue = startWithReplay ? startWithReplay(this.source) : this.source
+    if (this.hasValue) {
+      stream = startWith(this.latestvalue, stream)
+    } else if (this.hasInitial && this.initialState !== undefined) {
+      stream = startWith(this.initialState, stream)
+    }
 
-    return withReplayedValue.run(new StateSink(this, sink), scheduler)
+    return stream.run(scheduler, new StateSink(this, sink))
   }
 }
 
-export function replayLatest<A>(s: IStream<A>, initialState?: A): ReplayLatest<A> {
-  if (initialState === undefined) {
-    return new ReplayLatest(s)
-  }
+export function replayLatest<A>(s: IStream<A>, initialState?: A): IStream<A> {
   return new ReplayLatest(s, initialState)
 }

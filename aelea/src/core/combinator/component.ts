@@ -1,6 +1,4 @@
-import { disposeAll } from '@most/disposable'
-import { curry2 } from '@most/prelude'
-import { type IOps, nullSink } from '../../core/common.js'
+import { disposeAll, type IOps, type IStream, nullSink } from '../../stream/index.js'
 import type { I$Slottable, INodeElement } from '../source/node.js'
 import { behavior, type IBehavior } from './behavior.js'
 
@@ -14,44 +12,33 @@ export type IComponentOutputBehaviors<T> = {
   [P in keyof T]: IStream<T[P]>
 }
 
-export interface IComponentCurry {
-  <A extends INodeElement, B extends I$Slottable<A>, D>(
-    inputComp: IComponentDefinitionCallback<A, B, D>,
-    projectBehaviors: IOutputTethers<D>
-  ): B
-  <A extends INodeElement, B extends I$Slottable<A>, D>(
-    inputComp: IComponentDefinitionCallback<A, B, D>
-  ): (projectBehaviors: IOutputTethers<D>) => B
-}
+export const component = <A extends INodeElement, B extends I$Slottable<A>, D>(
+  inputComp: IComponentDefinitionCallback<A, B, D>,
+  outputTethers: IOutputTethers<D>
+): I$Slottable<A> => {
+  return {
+    run(scheduler, sink) {
+      const behaviors = Array(inputComp.length).fill(null).map(behavior)
+      const [view, outputSources] = inputComp(...behaviors)
+      const behaviorDisposableList: Disposable[] = []
 
-export const component: IComponentCurry = curry2(
-  <A extends INodeElement, B extends I$Slottable<A>, D>(
-    inputComp: IComponentDefinitionCallback<A, B, D>,
-    outputTethers: IOutputTethers<D>
-  ): I$Slottable<A> => {
-    return {
-      run(sink, scheduler) {
-        // fill stubbed aguments as a behavior
-        const behaviors = Array(inputComp.length).fill(null).map(behavior)
-        const [view, outputSources] = inputComp(...behaviors)
-        const outputDisposables: Disposable[] = []
+      if (outputTethers) {
+        for (const k in outputTethers) {
+          if (outputTethers[k] && outputSources) {
+            const consumerSampler = outputTethers[k]
 
-        if (outputTethers) {
-          for (const k in outputTethers) {
-            if (outputTethers[k] && outputSources) {
-              const consumerSampler = outputTethers[k]
-
-              if (consumerSampler) {
-                const componentOutputTethers = outputSources[k]
-                const outputDisposable = consumerSampler(componentOutputTethers).run(nullSink, scheduler)
-                outputDisposables.push(outputDisposable)
-              }
+            if (consumerSampler) {
+              const componentOutputTethers = outputSources[k]
+              const outputDisposable = consumerSampler(componentOutputTethers).run(scheduler, nullSink)
+              behaviorDisposableList.push(outputDisposable)
             }
           }
         }
-
-        return disposeAll([view.run(sink, scheduler), ...outputDisposables])
       }
+
+      const viewDisposable = view.run(scheduler, sink)
+
+      return disposeAll([viewDisposable, ...behaviorDisposableList])
     }
   }
-)
+}

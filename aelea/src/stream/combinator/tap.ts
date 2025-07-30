@@ -2,10 +2,12 @@ import { TransformSink } from '../sink.js'
 import type { IStream, Sink } from '../types.js'
 
 export const tap =
-  <T, E>(f: (value: T) => unknown) =>
-  (s: IStream<T, E>): IStream<T, E> =>
-  (env, sink) =>
-    s(env, new TapSink(f, sink))
+  <T>(f: (value: T) => unknown) =>
+  (source: IStream<T>): IStream<T> => ({
+    run(scheduler, sink) {
+      return source.run(scheduler, new TapSink(f, sink))
+    }
+  })
 
 class TapSink<T> extends TransformSink<T, T> {
   constructor(

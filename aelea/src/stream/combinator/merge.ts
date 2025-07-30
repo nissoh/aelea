@@ -1,16 +1,15 @@
 import { MergingSink } from '../sink.js'
 import type { Disposable, IStream, Sink } from '../types.js'
 
-export const merge =
-  <T, E>(...streams: IStream<T, E>[]): IStream<T, E> =>
-  (env, sink) => {
+export const merge = <T>(...streams: IStream<T>[]): IStream<T> => ({
+  run(scheduler, sink) {
     const state = { active: streams.length }
     // Pre-allocate array with known size to avoid growth
     const disposables = new Array<Disposable>(streams.length)
 
     // Use traditional for loop to avoid map/spread allocations
     for (let i = 0; i < streams.length; i++) {
-      disposables[i] = streams[i](env, new MergeSink(sink, state, disposables))
+      disposables[i] = streams[i].run(scheduler, new MergeSink(sink, state, disposables))
     }
 
     return {
@@ -22,6 +21,7 @@ export const merge =
       }
     }
   }
+})
 
 class MergeSink<T> extends MergingSink<T> {
   constructor(

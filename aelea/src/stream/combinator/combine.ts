@@ -1,9 +1,11 @@
 import { MergingSink } from '../sink.js'
 import type { Disposable, IStream, Sink } from '../types.js'
 
-export const combine =
-  <T extends readonly unknown[], E>(streams: { [K in keyof T]: IStream<T[K], E> }, initial: T): IStream<T, E> =>
-  (env, sink) => {
+export const combine = <T extends readonly unknown[]>(
+  streams: { [K in keyof T]: IStream<T[K]> },
+  initial: T
+): IStream<T> => ({
+  run(scheduler, sink) {
     const state = { active: streams.length }
     const streamCount = streams.length
 
@@ -18,7 +20,7 @@ export const combine =
 
     // Use traditional for loop to avoid allocations
     for (let i = 0; i < streamCount; i++) {
-      disposables[i] = streams[i](env, new CombineSink(sink, values as [...T], i, state, disposables))
+      disposables[i] = streams[i].run(scheduler, new CombineSink(sink, values as [...T], i, state, disposables))
     }
 
     return {
@@ -29,6 +31,7 @@ export const combine =
       }
     }
   }
+})
 
 class CombineSink<T extends readonly unknown[]> extends MergingSink<unknown> {
   constructor(

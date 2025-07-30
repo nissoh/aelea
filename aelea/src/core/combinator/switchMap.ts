@@ -1,13 +1,11 @@
-import { fromPromise, map, switchLatest } from '@most/core'
-import { curry2 } from '@most/prelude'
-import type { Stream } from '@most/types'
-import { isStream } from '../common.js'
+import { curry2, fromPromise, isStream, map, switchLatest } from '../../stream/index.js'
+import type { IStream } from '../../stream/types.js'
 
 export type IStreamOrPromise<T> = IStream<T> | Promise<T>
 
 export interface ISwitchMapCurry2 {
   <T, R>(cb: (t: T) => IStreamOrPromise<R>, s: IStream<T>): IStream<R>
-  <T, R>(cb: (t: T) => IStreamOrPromise<R>): (s: IStream<T>) => Stream<R>
+  <T, R>(cb: (t: T) => IStreamOrPromise<R>): (s: IStream<T>) => IStream<R>
 }
 
 function switchMapFn<T, R>(cb: (t: T) => IStreamOrPromise<R>, s: IStream<T>) {

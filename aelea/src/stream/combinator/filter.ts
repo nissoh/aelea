@@ -1,10 +1,14 @@
 import { TransformSink } from '../sink.js'
 import type { IStream, Sink } from '../types.js'
 
-export function filter<T, E, S extends T>(f: (value: T) => value is S): (s: IStream<T, E>) => IStream<S, E>
-export function filter<T, E>(f: (value: T) => boolean): (s: IStream<T, E>) => IStream<T, E>
-export function filter<T, E>(f: (value: T) => boolean) {
-  return (s: IStream<T, E>) => (env: E, sink: Sink<any>) => s(env, new FilterSink(f, sink))
+export function filter<T, S extends T>(f: (value: T) => value is S): (s: IStream<T>) => IStream<S>
+export function filter<T>(f: (value: T) => boolean): (s: IStream<T>) => IStream<T>
+export function filter<T>(f: (value: T) => boolean) {
+  return (s: IStream<T>): IStream<T> => ({
+    run(scheduler, sink) {
+      return s.run(scheduler, new FilterSink(f, sink))
+    }
+  })
 }
 
 class FilterSink<T> extends TransformSink<T, T> {
@@ -24,5 +28,4 @@ class FilterSink<T> extends TransformSink<T, T> {
   }
 }
 
-export const filterNull = <T, S>(prov: IStream<T | null, S>) =>
-  filter<T | null, S, T>((ev): ev is T => ev !== null)(prov)
+export const filterNull = <T>(prov: IStream<T | null>) => filter<T | null, T>((ev): ev is T => ev !== null)(prov)

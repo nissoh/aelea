@@ -7,9 +7,8 @@ import type { IStream } from '../types.js'
  * @param promise - The promise to convert to a stream
  * @returns A stream that emits the promise result
  */
-export const fromPromise =
-  <T>(promise: Promise<T>): IStream<T> =>
-  (_, sink) => {
+export const fromPromise = <T>(promise: Promise<T>): IStream<T> => ({
+  run(_, sink) {
     let cancelled = false
 
     promise
@@ -31,3 +30,4 @@ export const fromPromise =
       }
     }
   }
+})
