@@ -1,5 +1,4 @@
 import { map, merge, switchLatest } from '@most/core'
-import type { Stream } from '@most/types'
 import type { IBehavior } from '../../core/combinator/behavior.js'
 import { $node, component, nodeEvent } from '../../core/index.js'
 import type { I$Slottable } from '../../core/source/node.js'
@@ -10,7 +9,7 @@ export interface Tab {
 }
 
 export interface Tabs {
-  selected: Stream<Tab>
+  selected: IStream<Tab>
   tabs: Tab[]
 }
 

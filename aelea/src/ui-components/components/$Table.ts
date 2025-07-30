@@ -1,5 +1,4 @@
 import { chain, constant, map, merge, never, now, scan, startWith, switchLatest } from '@most/core'
-import type { Stream } from '@most/types'
 import { attr } from '../../core/combinator/attribute.js'
 import type { IBehavior } from '../../core/combinator/behavior.js'
 import { component } from '../../core/combinator/component.js'
@@ -36,7 +35,7 @@ export interface ISortBy<T> {
 export interface TableOption<T, FilterState> {
   columns: TableColumn<T>[]
 
-  dataSource: Stream<TablePageResponse<T>>
+  dataSource: IStream<TablePageResponse<T>>
   scrollConfig?: Omit<QuantumScroll, 'dataSource'>
 
   bodyContainerOp?: IOps<ISlottable, ISlottable>
@@ -45,8 +44,8 @@ export interface TableOption<T, FilterState> {
   headerCellOp?: IOps<ISlottable, ISlottable>
   bodyCellOp?: IOps<ISlottable, ISlottable>
 
-  sortChange?: Stream<ISortBy<T>>
-  filterChange?: Stream<FilterState>
+  sortChange?: IStream<ISortBy<T>>
+  filterChange?: IStream<FilterState>
   $sortArrowDown?: I$Slottable
 }
 

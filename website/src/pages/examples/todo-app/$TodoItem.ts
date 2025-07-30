@@ -1,5 +1,4 @@
 import { now } from '@most/core'
-import type { Stream } from '@most/types'
 import { component, type IBehavior, O, style } from 'aelea/core'
 import { $Checkbox, $Field, $row, spacing } from 'aelea/ui-components'
 import { $TrashBtn } from '../../../elements/$common'
@@ -9,7 +8,7 @@ const rowStyle = O(spacing.default, style({ alignItems: 'center' }))
 
 interface TodoItem {
   todo: Todo
-  completed: Stream<boolean>
+  completed: IStream<boolean>
 }
 
 export default ({ todo, completed }: TodoItem) =>

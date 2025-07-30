@@ -23,7 +23,7 @@ export class ReplayLatest<A> implements Stream<A> {
   hasValue = false
   hasInitial
   constructor(
-    private readonly source: Stream<A>,
+    private readonly source: IStream<A>,
     private readonly initialState?: A
   ) {
     this.hasInitial = initialState !== undefined
@@ -42,7 +42,7 @@ export class ReplayLatest<A> implements Stream<A> {
   }
 }
 
-export function replayLatest<A>(s: Stream<A>, initialState?: A): ReplayLatest<A> {
+export function replayLatest<A>(s: IStream<A>, initialState?: A): ReplayLatest<A> {
   if (initialState === undefined) {
     return new ReplayLatest(s)
   }

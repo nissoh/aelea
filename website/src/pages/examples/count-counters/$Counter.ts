@@ -1,12 +1,11 @@
 import { constant } from '@most/core'
-import type { Stream } from '@most/types'
 import type { IBehavior } from 'aelea/core'
 import { $text, component, style } from 'aelea/core'
 import { $Button, $column, $NumberTicker, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 
 interface Counter {
-  value: Stream<number>
+  value: IStream<number>
 }
 
 export default ({ value }: Counter) =>

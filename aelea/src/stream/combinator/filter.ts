@@ -23,3 +23,6 @@ class FilterSink<T> extends TransformSink<T, T> {
     })
   }
 }
+
+export const filterNull = <T, S>(prov: IStream<T | null, S>) =>
+  filter<T | null, S, T>((ev): ev is T => ev !== null)(prov)

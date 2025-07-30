@@ -11,7 +11,7 @@ for (const n of batchSizes) {
   if (typeof setImmediate !== 'undefined') {
     bench.add(`setImmediate (${n} events)`, async () => {
       let result = 0
-      const s = stream<number>(
+      const s = IStream<number>(
         (env, sink) =>
           setImmediate(() => {
             for (let i = 0; i < n; i++) sink.event(i)
@@ -33,7 +33,7 @@ for (const n of batchSizes) {
   if (typeof queueMicrotask !== 'undefined') {
     bench.add(`queueMicrotask (${n} events)`, async () => {
       let result = 0
-      const s = stream<number>((env, sink) => {
+      const s = IStream<number>((env, sink) => {
         queueMicrotask(() => {
           for (let i = 0; i < n; i++) sink.event(i)
           sink.end()
@@ -54,7 +54,7 @@ for (const n of batchSizes) {
   // Promise.resolve().then()
   bench.add(`Promise.then (${n} events)`, async () => {
     let result = 0
-    const s = stream<number>((env, sink) => {
+    const s = IStream<number>((env, sink) => {
       Promise.resolve().then(() => {
         for (let i = 0; i < n; i++) sink.event(i)
         sink.end()
@@ -74,7 +74,7 @@ for (const n of batchSizes) {
   // setTimeout(0)
   bench.add(`setTimeout(0) (${n} events)`, async () => {
     let result = 0
-    const s = stream<number>(
+    const s = IStream<number>(
       (env, sink) =>
         setTimeout(() => {
           for (let i = 0; i < n; i++) sink.event(i)
@@ -94,7 +94,7 @@ for (const n of batchSizes) {
   // Synchronous baseline
   bench.add(`sync baseline (${n} events)`, async () => {
     let result = 0
-    const s = stream<number>((env, sink) => {
+    const s = IStream<number>((env, sink) => {
       for (let i = 0; i < n; i++) sink.event(i)
       sink.end()
       return { [Symbol.dispose]: () => {} }

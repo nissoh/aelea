@@ -1,7 +1,7 @@
 import * as MC from '@most/core'
 import * as MS from '@most/scheduler'
 import { Bench } from 'tinybench'
-import { fromArray, op, runPromise, scan, tap, defaultEnv } from '../index.js'
+import { defaultEnv, fromArray, op, runPromise, scan, tap } from '../index.js'
 
 const bench = new Bench({ time: 100 })
 

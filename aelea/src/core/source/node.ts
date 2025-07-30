@@ -1,9 +1,5 @@
-import { never, propagateTask } from '@most/core'
-import { disposeBoth } from '@most/disposable'
-import { id } from '@most/prelude'
-import { asap } from '@most/scheduler'
-import type { Scheduler, Sink, Stream } from '@most/types'
 import { type Fn, isFunction, O } from '../../core/common.js'
+import type { IStream, Scheduler, Sink } from '../../stream/index.js'
 import type { IAttributeProperties } from '../combinator/attribute.js'
 import type { IStyleCSS } from '../combinator/style.js'
 import { type ISettableDisposable, SettableDisposable } from '../utils/SettableDisposable.js'
@@ -11,7 +7,7 @@ import { type ISettableDisposable, SettableDisposable } from '../utils/SettableD
 export type ISlottableElement = ChildNode
 export type INodeElement = HTMLElement | SVGElement
 
-export type I$Slottable<A extends ISlottableElement = ISlottableElement> = Stream<ISlottable<A>>
+export type I$Slottable<A extends ISlottableElement = ISlottableElement> = IStream<ISlottable<A>>
 
 export interface ISlottable<A extends ISlottableElement = ISlottableElement> {
   element: A
@@ -23,13 +19,13 @@ export interface INode<A extends INodeElement = INodeElement> extends ISlottable
   insertAscending: boolean
   style?: IStyleCSS
   stylePseudo: Array<{ style: IStyleCSS; class: string }>
-  styleBehavior: Stream<IStyleCSS | null>[]
+  styleBehavior: IStream<IStyleCSS | null>[]
 
   attributes?: IAttributeProperties<any>
-  attributesBehavior: Stream<IAttributeProperties<any>>[]
+  attributesBehavior: IStream<IAttributeProperties<any>>[]
 }
 
-export type I$Node<A extends INodeElement = INodeElement> = Stream<INode<A>>
+export type I$Node<A extends INodeElement = INodeElement> = IStream<INode<A>>
 
 export type I$Op<TElement extends INodeElement = INodeElement> = (x: I$Node<TElement>) => I$Node<TElement>
 

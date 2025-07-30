@@ -1,6 +1,5 @@
 import { filter, map, tap } from '@most/core'
 import { curry2, curry3 } from '@most/prelude'
-import type { Stream } from '@most/types'
 import type * as CSS from 'csstype'
 import type { I$Node, INodeElement } from '../source/node.js'
 
@@ -27,12 +26,12 @@ export interface IStylePseudoCurry {
 }
 
 export interface IStyleBehaviorCurry {
-  <T extends INodeElement>(styleInput: Stream<IStyleCSS | null>, node: I$Node<T>): I$Node<T>
-  <T extends INodeElement>(styleInput: Stream<IStyleCSS | null>): (node: I$Node<T>) => I$Node<T>
+  <T extends INodeElement>(styleInput: IStream<IStyleCSS | null>, node: I$Node<T>): I$Node<T>
+  <T extends INodeElement>(styleInput: IStream<IStyleCSS | null>): (node: I$Node<T>) => I$Node<T>
 }
 
 export const styleInline =
-  <A extends INodeElement>(style: Stream<IStyleCSS>) =>
+  <A extends INodeElement>(style: IStream<IStyleCSS>) =>
   ($node: I$Node<A>): I$Node<A> => {
     return map((node) => {
       const applyInlineStyleStream = tap((styleObj) => {
@@ -87,7 +86,7 @@ export const stylePseudo: IStylePseudoCurry = curry3(
 )
 
 export const styleBehavior: IStyleBehaviorCurry = curry2(
-  <T extends INodeElement>(style: Stream<IStyleCSS | null>, $node: I$Node<T>): I$Node<T> => {
+  <T extends INodeElement>(style: IStream<IStyleCSS | null>, $node: I$Node<T>): I$Node<T> => {
     return map((node) => ({ ...node, styleBehavior: [...node.styleBehavior, style] }), $node)
   }
 )

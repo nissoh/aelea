@@ -1,5 +1,4 @@
 import { at, debounce, empty, join, map, merge, now, snapshot, startWith, switchLatest } from '@most/core'
-import type { Stream } from '@most/types'
 import type { IBehavior } from 'aelea/core'
 import { $node, $p, $text, component, style } from 'aelea/core'
 import type { ScrollRequest, ScrollResponse } from 'aelea/ui-components'
@@ -11,7 +10,7 @@ function filterArrayByText(array: string[], filter: string) {
   return array.filter((id) => id.indexOf(filterLowercase) > -1)
 }
 
-const $label = (label: string, value: Stream<string> | string) =>
+const $label = (label: string, value: IStream<string> | string) =>
   $row(spacing.small)($node(style({ color: pallete.foreground }))($text(label)), $text(value))
 
 export const $VirtualScrollExample = component(
@@ -37,7 +36,7 @@ export const $VirtualScrollExample = component(
     const dataSourceFilter = (filter: string) =>
       join(
         snapshot(
-          (delay, requestNumber): Stream<ScrollResponse> => {
+          (delay, requestNumber): IStream<ScrollResponse> => {
             const pageStart = requestNumber * PAGE_SIZE
             const pageEnd = pageStart + PAGE_SIZE
             const filteredItems = filterArrayByText(stubbedData, filter)

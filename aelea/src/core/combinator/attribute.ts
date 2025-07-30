@@ -1,6 +1,4 @@
-import { map } from '@most/core'
-import { curry2 } from '@most/prelude'
-import type { Stream } from '@most/types'
+import { curry2, map, type IStream } from '../../stream/index.js'
 import type { I$Node, INode, INodeElement } from '../source/node.js'
 
 export type IAttributeProperties<T> = {
@@ -21,8 +19,8 @@ export const attr: IAttributeCurry = curry2((attrs, node) =>
 )
 
 export interface IAttributeBehaviorCurry {
-  <A, C extends INodeElement, D>(styleInput: Stream<IAttributeProperties<A> | null>, node: I$Node<C>): I$Node<C>
-  <A, C extends INodeElement>(styleInput: Stream<IAttributeProperties<A> | null>): (node: I$Node<C>) => I$Node<C>
+  <A, C extends INodeElement, D>(styleInput: IStream<IAttributeProperties<A> | null>, node: I$Node<C>): I$Node<C>
+  <A, C extends INodeElement>(styleInput: IStream<IAttributeProperties<A> | null>): (node: I$Node<C>) => I$Node<C>
 }
 
 export const attrBehavior: IAttributeBehaviorCurry = curry2((attrs, node) => {

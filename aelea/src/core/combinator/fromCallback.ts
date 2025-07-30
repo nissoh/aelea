@@ -1,5 +1,5 @@
 import { disposeNone, disposeWith } from '@most/disposable'
-import type { Scheduler, Sink, Stream } from '@most/types'
+import type { Scheduler, Sink } from '@most/types'
 import { tryEvent } from '../common.js'
 
 class FromCallbackSource<T, Targs extends any[] = T[]> {
@@ -34,4 +34,4 @@ export const fromCallback = <T, FnArgs extends any[] = T[]>(
   cbf: (cb: (...args: FnArgs) => any) => any,
   mapFn: (...args: FnArgs) => T = (...args) => args[0],
   context: any = null
-): Stream<T> => new FromCallbackSource(cbf, mapFn, context)
+): IStream<T> => new FromCallbackSource(cbf, mapFn, context)

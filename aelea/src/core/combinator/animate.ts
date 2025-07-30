@@ -1,9 +1,6 @@
-import { constant, continueWith, loop, map, skipAfter, startWith, switchLatest } from '@most/core'
-import { disposeWith } from '@most/disposable'
-import { curry3 } from '@most/prelude'
-import { currentTime } from '@most/scheduler'
-import type { Scheduler, Sink, Stream } from '@most/types'
-import { O } from '../../core/common.js'
+import type { Scheduler } from 'timers/promises'
+import { constant, continueWith, map, op, startWith, switchLatest } from '../../stream/index.js'
+import type { IStream, Sink } from '../../stream/types.js'
 
 type RafHandlerId = number
 type RafHandler = (dts: RafHandlerId) => void
@@ -42,16 +39,16 @@ const eventThenEnd = (
   sink.end(requestTime)
 }
 
-export const nextAnimationFrame = (afp: AnimationFrames = window): Stream<AnimationFrame> =>
+export const nextAnimationFrame = (afp: AnimationFrames = window): IStream<AnimationFrame> =>
   new AnimationFrameSource(afp)
 
-export const animationFrames = (afp: AnimationFrames = window): Stream<AnimationFrame> =>
+export const animationFrames = (afp: AnimationFrames = window): IStream<AnimationFrame> =>
   continueWith(() => animationFrames(afp), nextAnimationFrame(afp))
 
 export const drawLatest = O(
   map((x) => constant(x, nextAnimationFrame(window))),
   switchLatest
-) as <A>(x: Stream<A>) => Stream<A>
+) as <A>(x: IStream<A>) => Stream<A>
 
 interface Motion {
   stiffness: number
@@ -85,32 +82,37 @@ export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
  *
  *  @see  modified-from https://github.com/chenglou/react-motion/blob/master/src/stepper.js
  */
-export const motion = curry3(
-  (motionEnvironment: Partial<Motion>, initialState: number, change: Stream<number>): Stream<number> => {
-    const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
-    const ma = motionState(motionEnv, { position: initialState, velocity: 0 }, change)
-    return map((s) => s.position, ma)
-  }
-)
+export const motion = (
+  motionEnvironment: Partial<Motion>,
+  initialState: number,
+  change: IStream<number>
+): IStream<number> => {
+  const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
+  const ma = motionState(motionEnv, { position: initialState, velocity: 0 }, change)
+  return map((s) => s.position, ma)
+}
 
 // used in cases where velocity feedback is needed(for renimation)
-export const motionState = curry3(
-  (motionEnvironment: Partial<Motion>, initialState: MotionState, change: Stream<number>): Stream<MotionState> => {
-    const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
+export const motionState = (
+  motionEnvironment: Partial<Motion>,
+  initialState: MotionState,
+  change: IStream<number>
+): IStream<MotionState> => {
+  const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
 
-    return O(
-      loop((seed: MotionState, target: number) => {
-        const frames = O(
-          map(() => stepFrame(target, seed, motionEnv)),
-          skipAfter((n) => n.position === target)
-        )
-        return { seed, value: frames(animationFrames()) }
-      }, initialState),
-      switchLatest,
-      startWith(initialState)
-    )(change)
-  }
-)
+  return op(
+    change,
+    loop((seed: MotionState, target: number) => {
+      const frames = O(
+        map(() => stepFrame(target, seed, motionEnv)),
+        skipAfter((n) => n.position === target)
+      )
+      return { seed, value: frames(animationFrames()) }
+    }, initialState),
+    switchLatest,
+    startWith(initialState)
+  )(
+}
 
 function stepFrame(target: number, state: MotionState, motionEnv: Motion) {
   const fps = 1 / 60

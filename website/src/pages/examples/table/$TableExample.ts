@@ -1,5 +1,4 @@
 import { combine, map, merge, now } from '@most/core'
-import type { Stream } from '@most/types'
 import type { IBehavior } from 'aelea/core'
 import { $node, $text, component, style } from 'aelea/core'
 import { $card, $Table, type ISortBy, type ScrollRequest, type TablePageResponse } from 'aelea/ui-components'
@@ -23,7 +22,7 @@ export const $TableExample = component(
         return { id: `item-#${++i}`, random: Math.round(Math.random() * 100) }
       })
 
-    const initialSort: Stream<ISortBy<ITableRow>> = now({
+    const initialSort: IStream<ISortBy<ITableRow>> = now({
       direction: 'asc',
       name: 'id'
     })

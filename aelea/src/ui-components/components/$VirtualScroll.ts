@@ -13,7 +13,6 @@ import {
   startWith,
   switchLatest
 } from '@most/core'
-import type { Stream } from '@most/types'
 import type { IBehavior } from '../../core/combinator/behavior.js'
 import { component } from '../../core/combinator/component.js'
 import { style } from '../../core/combinator/style.js'
@@ -37,7 +36,7 @@ export type IScrollPagableReponse = {
 export type ScrollResponse = I$Node[] | IScrollPagableReponse
 
 export interface QuantumScroll {
-  dataSource: Stream<ScrollResponse>
+  dataSource: IStream<ScrollResponse>
 
   $loader?: I$Slottable
 
@@ -50,7 +49,7 @@ export const $VirtualScroll = ({ dataSource, containerOps = O(), $loader = $defa
   component(([intersecting, intersectingTether]: IBehavior<INode, IntersectionObserverEntry>) => {
     const multicastDatasource = multicast(dataSource)
 
-    const scrollReuqestWithInitial: Stream<ScrollRequest> = skip(
+    const scrollReuqestWithInitial: IStream<ScrollRequest> = skip(
       1,
       scan((seed) => seed + 1, -1, intersecting)
     )

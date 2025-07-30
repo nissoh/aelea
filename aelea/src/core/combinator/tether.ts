@@ -66,7 +66,7 @@ class Tether<T> implements Stream<T> {
 
   private sourceDisposable: Disposable = disposeNone()
 
-  constructor(private readonly source: Stream<T>) {}
+  constructor(private readonly source: IStream<T>) {}
 
   run(sink: SourceSink<T> | TetherSink<T>, scheduler: Scheduler): Disposable {
     if (sink instanceof SourceSink) {
@@ -126,7 +126,7 @@ class Tether<T> implements Stream<T> {
  * // push multicasts to all subscribers
  * // pull gets the latest value on subscription
  */
-export const tether = <T>(source: Stream<T>): [Stream<T>, Stream<T>] => {
+export const tether = <T>(source: IStream<T>): [Stream<T>, Stream<T>] => {
   const tetherSource = new Tether(source)
 
   return [

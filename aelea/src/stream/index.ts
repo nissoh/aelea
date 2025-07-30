@@ -10,9 +10,11 @@ export {
   scan,
   tap
 } from './combinator/index.js'
+export { constant, startWith, switchLatest } from './compat.js'
 export { disposeNone } from './core.js'
 export { defaultEnv } from './env.js'
-export { op } from './op.js'
+export type { Curried2, Curried3, Curried4 } from './function.js'
+export { curry2, curry3, curry4, op } from './function.js'
 export { runPromise, runStream } from './run.js'
 export { MergingSink, TransformSink } from './sink.js'
 export {

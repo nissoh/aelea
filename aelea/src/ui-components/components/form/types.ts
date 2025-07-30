@@ -1,4 +1,3 @@
-import type { Stream } from '@most/types'
 import type { IOps } from '../../../core/common.js'
 
 export enum InputType {
@@ -16,10 +15,10 @@ export enum InputType {
 }
 
 export interface Control {
-  disabled?: Stream<boolean>
+  disabled?: IStream<boolean>
 }
 
 export interface Input<T> extends Control {
-  value: Stream<T>
+  value: IStream<T>
   validation?: IOps<T, string | null>
 }

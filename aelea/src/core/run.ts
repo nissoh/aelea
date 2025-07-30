@@ -1,7 +1,7 @@
 import { map, mergeArray, scan, tap } from '@most/core'
 import { disposeAll, disposeNone, disposeWith } from '@most/disposable'
 import { newDefaultScheduler } from '@most/scheduler'
-import type { Scheduler, Sink, Stream, Time } from '@most/types'
+import type { Scheduler, Sink, Time } from '@most/types'
 import type { IAttributeProperties } from './combinator/attribute.js'
 import type { IStyleCSS } from './combinator/style.js'
 import { nullSink } from './common.js'
@@ -178,7 +178,7 @@ export function runBrowser(userConfig: Partial<IRunEnvironment> & { $rootNode: I
   }, $rootNode).run(nullSink as any, config.scheduler)
 }
 
-function styleBehavior(styleBehavior: Stream<IStyleCSS | null>, node: INode, cacheService: IRunEnvironment) {
+function styleBehavior(styleBehavior: IStream<IStyleCSS | null>, node: INode, cacheService: IRunEnvironment) {
   let latestClass: string
 
   return scan(

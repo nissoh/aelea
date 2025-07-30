@@ -1,6 +1,5 @@
 import { disposeAll } from '@most/disposable'
 import { curry2 } from '@most/prelude'
-import type { Stream } from '@most/types'
 import { type IOps, nullSink } from '../../core/common.js'
 import type { I$Slottable, INodeElement } from '../source/node.js'
 import { behavior, type IBehavior } from './behavior.js'
@@ -12,7 +11,7 @@ export type IComponentDefinitionCallback<A extends INodeElement, B extends I$Slo
 ) => [B, IComponentOutputBehaviors<D>] | [B]
 
 export type IComponentOutputBehaviors<T> = {
-  [P in keyof T]: Stream<T[P]>
+  [P in keyof T]: IStream<T[P]>
 }
 
 export interface IComponentCurry {

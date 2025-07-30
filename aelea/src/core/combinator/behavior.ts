@@ -30,7 +30,7 @@ export interface IComposeBehavior<I, O> {
 }
 
 class IBehaviorSource<I, O> implements Stream<O> {
-  queuedBehaviors: Stream<O>[] = []
+  queuedBehaviors: IStream<O>[] = []
 
   sinksMap: SinkMap<O> = new Map()
   scheduler: Scheduler | undefined
@@ -60,14 +60,14 @@ class IBehaviorSource<I, O> implements Stream<O> {
     )
   }
 
-  protected runBehavior(sink: Sink<O>, x: Stream<O>) {
+  protected runBehavior(sink: Sink<O>, x: IStream<O>) {
     if (!this.scheduler) throw 'BehaviorSource: scheduler is not defined'
 
     return x.run(sink, this.scheduler)
   }
 
   sample: IComposeBehavior<I, O> = (...ops: IOps<any, O>[]) => {
-    return (sb: Stream<I>): Stream<I> => {
+    return (sb: IStream<I>): IStream<I> => {
       const [s0, s1] = tether(sb)
 
       const bops = O(...ops)(s1)

@@ -11,7 +11,6 @@ import {
   skipRepeatsWith,
   switchLatest
 } from '@most/core'
-import type { Stream } from '@most/types'
 import type { IStyleCSS } from '../../core/combinator/style.js'
 import { O } from '../../core/common.js'
 import { $node, $text, style, styleBehavior } from '../../core/index.js'
@@ -31,7 +30,7 @@ type CountState = {
 }
 
 interface NumberConfig {
-  value$: Stream<number>
+  value$: IStream<number>
   incrementColor: string
   decrementColor: string
   textStyle?: IStyleCSS

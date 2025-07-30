@@ -18,7 +18,6 @@ import {
   switchLatest,
   take
 } from '@most/core'
-import type { Stream } from '@most/types'
 import {
   $node,
   $wrapNativeElement,
@@ -327,17 +326,18 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
 
       let attempDuration = 50
 
-      const getWorkerStream: Stream<Awaited<ReturnType<typeof monacoGlobal.languages.typescript.getTypeScriptWorker>>> =
-        O(
-          continueWith(() => {
-            return fromPromise(monacoGlobal.languages.typescript.getTypeScriptWorker())
-          }),
-          recoverWith((err) => {
-            console.error(err)
-            attempDuration += 100
-            return join(at(attempDuration, getWorkerStream))
-          })
-        )(empty())
+      const getWorkerStream: IStream<
+        Awaited<ReturnType<typeof monacoGlobal.languages.typescript.getTypeScriptWorker>>
+      > = O(
+        continueWith(() => {
+          return fromPromise(monacoGlobal.languages.typescript.getTypeScriptWorker())
+        }),
+        recoverWith((err) => {
+          console.error(err)
+          attempDuration += 100
+          return join(at(attempDuration, getWorkerStream))
+        })
+      )(empty())
 
       const $editor = $wrapNativeElement(editorElement)(
         O(
@@ -393,7 +393,7 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
         )
       )()
 
-      const disposeMonacoStub: Stream<never> = { run: () => instance }
+      const disposeMonacoStub: IStream<never> = { run: () => instance }
 
       return merge($editor, disposeMonacoStub)
     }, editorload)

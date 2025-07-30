@@ -3,14 +3,14 @@ import type { Stream } from '@most/types'
 import { toStream } from '../common.js'
 
 export type InputStateParams<T> = {
-  [P in keyof T]: Stream<T[P]> | T[P]
+  [P in keyof T]: IStream<T[P]> | T[P]
 }
 
 export type InputArrayParams<T extends any[]> = {
-  [P in keyof T]: Stream<T[P]>
+  [P in keyof T]: IStream<T[P]>
 }
 
-export function combineState<A, K extends keyof A = keyof A>(state: InputStateParams<A>): Stream<A> {
+export function combineState<A, K extends keyof A = keyof A>(state: InputStateParams<A>): IStream<A> {
   const entries = Object.entries(state) as [keyof A, Stream<A[K]> | A[K]][]
 
   if (entries.length === 0) {
@@ -34,7 +34,7 @@ export function combineState<A, K extends keyof A = keyof A>(state: InputStatePa
   return zipped
 }
 
-export function zipState<A, K extends keyof A = keyof A>(state: InputStateParams<A>): Stream<A> {
+export function zipState<A, K extends keyof A = keyof A>(state: InputStateParams<A>): IStream<A> {
   const entries = Object.entries(state) as [keyof A, Stream<A[K]>][]
   const streams = entries.map(([_, stream]) => stream)
 
@@ -51,6 +51,9 @@ export function zipState<A, K extends keyof A = keyof A>(state: InputStateParams
 }
 
 // temorary typings fix for this issue https://github.com/mostjs/core/pull/543
-export function combineArray<A extends any[], B>(cb: (...args: A) => B, ...streamList: InputArrayParams<A>): Stream<B> {
+export function combineArray<A extends any[], B>(
+  cb: (...args: A) => B,
+  ...streamList: InputArrayParams<A>
+): IStream<B> {
   return combineArrayMost(cb, streamList)
 }

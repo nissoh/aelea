@@ -40,8 +40,7 @@ export {
 export type { IStreamOrPromise, ISwitchMapCurry2 } from './combinator/switchMap.js'
 export { switchMap } from './combinator/switchMap.js'
 export { tether } from './combinator/tether.js'
-export type { Fn, IOp, IOps } from './common.js'
-export { groupByMap, isEmpty, isStream, maybeOps, nullSink, O, toStream, xForver } from './common.js'
+export { isEmpty, isStream, maybeOps, O, toStream, xForver } from './common.js'
 export type { IRunEnvironment } from './run.js'
 export { runBrowser } from './run.js'
 export type {

@@ -1,14 +1,13 @@
 import { chain, empty, tap } from '@most/core'
 import { disposeBoth, disposeWith } from '@most/disposable'
-import type { Stream } from '@most/types'
 import { eventElementTarget } from '../../core/combinator/event.js'
 import { nullSink } from '../../core/common.js'
 
 export function fromWebsocket<OUTPUT, INPUT>(
   url: string,
-  input: Stream<INPUT> = empty(),
+  input: IStream<INPUT> = empty(),
   protocols: string | string[] | undefined = undefined
-): Stream<OUTPUT> {
+): IStream<OUTPUT> {
   return {
     run(sink, scheduler) {
       const socket = new WebSocket(url, protocols)

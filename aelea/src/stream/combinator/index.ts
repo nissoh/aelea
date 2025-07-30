@@ -1,6 +1,6 @@
 export { combine } from './combine.js'
 export { continueWith } from './continueWith.js'
-export { filter } from './filter.js'
+export { filter, filterNull } from './filter.js'
 export { map } from './map.js'
 export { merge } from './merge.js'
 export { multicast } from './multicast.js'

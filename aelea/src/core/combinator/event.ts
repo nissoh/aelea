@@ -26,7 +26,7 @@ export function eventElementTarget<A extends INodeElementEventNameList, B extend
   eventType: A,
   element: B,
   options: boolean | AddEventListenerOptions = false
-): Stream<INodeElementEventTypeMap<A, B>> {
+): IStream<INodeElementEventTypeMap<A, B>> {
   return {
     run(sink, scheduler) {
       const cb = (e: any) => sink.event(scheduler.currentTime(), e)
@@ -52,7 +52,7 @@ export interface INodeEventCurry {
   <A extends INodeElementEventNameList, B extends INodeElement>(
     eventType: A,
     descriptor: I$Slottable<B> | INodeEventDescriptor<B>
-  ): Stream<INodeElementEventTypeMap<A, B>>
+  ): IStream<INodeElementEventTypeMap<A, B>>
   <A extends INodeElementEventNameList, B extends INodeElement>(
     eventType: A
   ): (descriptor: I$Slottable<B> | INodeEventDescriptor<B>) => Stream<INodeElementEventTypeMap<A, B>>

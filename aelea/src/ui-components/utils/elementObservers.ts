@@ -1,12 +1,11 @@
 import { chain, constant, continueWith, filter, switchLatest, until } from '@most/core'
 import { disposeWith } from '@most/disposable'
-import type { Stream } from '@most/types'
 import { eventElementTarget } from '../../core/index.js'
 import type { INode, INodeElement } from '../../core/source/node.js'
 
 export const intersection = (config: IntersectionObserverInit = {}) =>
   chain(
-    <A extends INodeElement>(node: INode<A>): Stream<IntersectionObserverEntry[]> => ({
+    <A extends INodeElement>(node: INode<A>): IStream<IntersectionObserverEntry[]> => ({
       run(sink, scheduler) {
         const intersectionObserver = new IntersectionObserver((entries) => {
           sink.event(scheduler.currentTime(), entries)
@@ -21,7 +20,7 @@ export const intersection = (config: IntersectionObserverInit = {}) =>
 
 export const resize = (config: ResizeObserverOptions = {}) =>
   chain(
-    <A extends INodeElement>(node: INode<A>): Stream<ResizeObserverEntry[]> => ({
+    <A extends INodeElement>(node: INode<A>): IStream<ResizeObserverEntry[]> => ({
       run(sink, scheduler) {
         const ro = new ResizeObserver((entries) => {
           sink.event(scheduler.currentTime(), entries)
@@ -42,7 +41,7 @@ export const mutation = (
   }
 ) =>
   chain(
-    <A extends INodeElement>(node: INode<A>): Stream<MutationRecord[]> => ({
+    <A extends INodeElement>(node: INode<A>): IStream<MutationRecord[]> => ({
       run(sink, scheduler) {
         const ro = new MutationObserver((entries) => {
           sink.event(scheduler.currentTime(), entries)
@@ -59,10 +58,10 @@ const documentVisibilityChange = eventElementTarget('visibilitychange', document
 const documentVisible = filter(() => document.visibilityState === 'visible', documentVisibilityChange)
 const documentHidden = filter(() => document.visibilityState === 'hidden', documentVisibilityChange)
 
-export const duringWindowActivity = <T>(source: Stream<T>) => {
+export const duringWindowActivity = <T>(source: IStream<T>) => {
   const sourceUntilInactivity = until(documentHidden, source)
   const activity = continueWith(
-    (): Stream<T> => switchLatest(constant(activity, documentVisible)),
+    (): IStream<T> => switchLatest(constant(activity, documentVisible)),
     sourceUntilInactivity
   )
   return activity

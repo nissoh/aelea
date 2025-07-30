@@ -4,7 +4,7 @@ import { filterNull } from '../../utils/combinator.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
 import type { ISlottable } from './node.js'
 
-export type I$Text = Stream<ISlottable<Text>>
+export type I$Text = IStream<ISlottable<Text>>
 
 class TextSource implements I$Text {
   constructor(private textSourceList: (Stream<string> | string)[]) {}

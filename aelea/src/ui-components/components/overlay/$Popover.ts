@@ -1,5 +1,4 @@
 import { constant, empty, filter, map, merge, mergeArray, multicast, switchLatest, until, zip } from '@most/core'
-import type { Stream } from '@most/types'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
 import { O } from '../../../core/common.js'
 import { $node, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
@@ -20,8 +19,8 @@ export const $defaultPopoverContentContainer = $column(
 )
 
 interface IPopover {
-  open: Stream<I$Slottable>
-  dismiss?: Stream<any>
+  open: IStream<I$Slottable>
+  dismiss?: IStream<any>
 
   $target: I$Slottable
 
