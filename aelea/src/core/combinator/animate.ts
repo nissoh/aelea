@@ -2,7 +2,7 @@ import { constant, continueWith, loop, map, skipAfter, startWith, switchLatest }
 import { disposeWith } from '@most/disposable'
 import { curry3 } from '@most/prelude'
 import { currentTime } from '@most/scheduler'
-import type { Disposable, Scheduler, Sink, Stream } from '@most/types'
+import type { Scheduler, Sink, Stream } from '@most/types'
 import { O } from '../../core/common.js'
 
 type RafHandlerId = number

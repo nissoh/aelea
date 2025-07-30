@@ -1,5 +1,5 @@
 import { disposeWith } from '@most/disposable'
-import type { Disposable, Scheduler, Sink, Stream } from '@most/types'
+import type { Scheduler, Sink, Stream } from '@most/types'
 import { type IOps, O } from '../common.js'
 import { tether } from './tether.js'
 

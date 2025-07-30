@@ -3,9 +3,10 @@
   "version": "1.9.0",
   "type": "module",
   "scripts": {
-    "build": "bun run build:clean && bun run build:esm",
+    "build": "bun run build:clean && bun run bunx tsc -b",
     "build:esm": "tsc -b",
-    "build:clean": "rm -rf dist"
+    "build:clean": "rm -rf dist",
+    "tsc:check": "bun run bunx tsc -p tsconfig.json --noEmit"
   },
   "license": "MIT",
   "author": "Nissan Hanina <nissanhanina@gmail.com>",
@@ -13,27 +14,10 @@
     "dist"
   ],
   "exports": {
-    "./core": {
-      "types": "./dist/types/core/index.d.ts",
-      "import": "./dist/esm/core/index.js"
-    },
-    "./router": {
-      "types": "./dist/types/router/index.d.ts",
-      "import": "./dist/esm/router/index.js"
-    },
-    "./ui-components": {
-      "types": "./dist/types/ui-components/index.d.ts",
-      "import": "./dist/esm/ui-components/index.js"
-    },
-    "./ui-components-theme": {
-      "types": "./dist/types/ui-components-theme/index.d.ts",
-      "import": "./dist/esm/ui-components-theme/index.js"
-    },
-    "./ui-components-theme-browser": {
-      "types": "./dist/types/ui-components-theme-browser/index.d.ts",
-      "import": "./dist/esm/ui-components-theme-browser/index.js"
-    },
-    "./package.json": "./package.json"
+    "./*": {
+      "types": "./dist/types/*/index.d.ts",
+      "import": "./dist/esm/*/index.js"
+    }
   },
   "dependencies": {
     "@most/core": "1.6.1",
@@ -42,6 +26,10 @@
     "@most/scheduler": "1.3.0",
     "@most/types": "1.1.0",
     "csstype": "3.1.3"
+  },
+  "devDependencies": {
+    "@types/bun": "1.2.19",
+    "tinybench": "4.0.1"
   },
   "publishConfig": {
     "access": "public"

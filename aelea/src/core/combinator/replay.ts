@@ -1,5 +1,5 @@
 import { startWith } from '@most/core'
-import type { Disposable, Scheduler, Sink, Stream } from '@most/types'
+import type { Scheduler, Sink, Stream } from '@most/types'
 import { Pipe } from '../common.js'
 
 class StateSink<A> extends Pipe<A, A> {

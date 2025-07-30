@@ -1,5 +1,5 @@
 import { map, mergeArray, now } from '@most/core'
-import type { Disposable, Scheduler, Sink, Stream } from '@most/types'
+import type { Scheduler, Sink, Stream } from '@most/types'
 import { filterNull } from '../../utils/combinator.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
 import type { ISlottable } from './node.js'

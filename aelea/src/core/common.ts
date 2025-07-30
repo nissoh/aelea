@@ -1,6 +1,6 @@
 import { empty, never, now, run, startWith } from '@most/core'
 import { disposeNone } from '@most/disposable'
-import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
+import type { Scheduler, Sink, Stream, Time } from '@most/types'
 
 export type Fn<T, R> = (a: T) => R
 

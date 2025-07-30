@@ -1,7 +1,7 @@
 import { map, mergeArray, scan, tap } from '@most/core'
 import { disposeAll, disposeNone, disposeWith } from '@most/disposable'
 import { newDefaultScheduler } from '@most/scheduler'
-import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
+import type { Scheduler, Sink, Stream, Time } from '@most/types'
 import type { IAttributeProperties } from './combinator/attribute.js'
 import type { IStyleCSS } from './combinator/style.js'
 import { nullSink } from './common.js'

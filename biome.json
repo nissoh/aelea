@@ -24,7 +24,6 @@
           }
         },
         "useLiteralEnumMembers": "off",
-        "noCommaOperator": "error",
         "useNodejsImportProtocol": "off",
         "useAsConstAssertion": "error",
         "useSelfClosingElements": "error",
@@ -37,7 +36,6 @@
         "useTemplate": "error",
         "noParameterAssign": "off",
         "useDefaultParameterLast": "error",
-        "noArguments": "error",
         "useImportType": "warn",
         "useExportType": "error",
         "noUselessElse": "error",

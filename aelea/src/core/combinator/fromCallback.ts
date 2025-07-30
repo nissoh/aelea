@@ -1,5 +1,5 @@
 import { disposeNone, disposeWith } from '@most/disposable'
-import type { Disposable, Scheduler, Sink, Stream } from '@most/types'
+import type { Scheduler, Sink, Stream } from '@most/types'
 import { tryEvent } from '../common.js'
 
 class FromCallbackSource<T, Targs extends any[] = T[]> {

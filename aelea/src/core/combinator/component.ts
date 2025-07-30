@@ -1,6 +1,6 @@
 import { disposeAll } from '@most/disposable'
 import { curry2 } from '@most/prelude'
-import type { Disposable, Stream } from '@most/types'
+import type { Stream } from '@most/types'
 import { type IOps, nullSink } from '../../core/common.js'
 import type { I$Slottable, INodeElement } from '../source/node.js'
 import { behavior, type IBehavior } from './behavior.js'

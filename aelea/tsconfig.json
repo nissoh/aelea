@@ -1,10 +1,14 @@
 {
   "extends": "../tsconfig.base.json",
   "include": [
-    "./src",
+    "src",
+    "src/**/*.d.ts"
   ],
   "compilerOptions": {
-    "composite": true,
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
     "outDir": "dist/esm",
     "rootDir": "./src",
     "declaration": true,

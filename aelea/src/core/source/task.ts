@@ -1,6 +1,6 @@
 import { propagateTask } from '@most/core'
 import { asap } from '@most/scheduler'
-import type { Disposable, Scheduler, Sink, Stream, Time } from '@most/types'
+import type { Scheduler, Sink, Stream, Time } from '@most/types'
 import type { Fn } from '../common.js'
 
 export const task = <T, R>(value: T, apply: Fn<T, R>): Stream<R> => new TaskSource(value, apply)
