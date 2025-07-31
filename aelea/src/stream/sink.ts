@@ -71,3 +71,44 @@ export function tryEvent<In, Out>(sink: Sink<Out>, f: (value: In) => Out, value:
     sink.error(error)
   }
 }
+
+export interface IndexedValue<A> {
+  readonly index: number
+  readonly value: A
+  readonly active: boolean
+}
+
+export class IndexSink<A> implements Sink<A> {
+  readonly index: number
+  active: boolean
+  value: A | undefined
+
+  constructor(
+    protected readonly sink: Sink<IndexedValue<A | undefined>>,
+    i: number
+  ) {
+    this.index = i
+    this.active = true
+    this.value = undefined
+  }
+
+  event(x: A): void {
+    if (!this.active) {
+      return
+    }
+    this.value = x
+    this.sink.event(this)
+  }
+
+  end(): void {
+    if (!this.active) {
+      return
+    }
+    this.active = false
+    this.sink.event(this)
+  }
+
+  error(error: any): void {
+    this.sink.error(error)
+  }
+}

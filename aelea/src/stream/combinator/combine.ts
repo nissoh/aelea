@@ -1,54 +1,127 @@
-import { curry2 } from '../function.js'
-import { MergingSink } from '../sink.js'
-import type { Disposable, IStream, Sink } from '../types.js'
+import { toStream } from '../common.js'
+import { disposeAll, tryDispose } from '../disposable.js'
+import { type IndexedValue, IndexSink, TransformSink } from '../sink.js'
+import { now } from '../source/now.js'
+import type { Disposable, IStream, Scheduler, Sink } from '../types.js'
 
-export interface ICombineCurry {
-  <T extends readonly unknown[]>(streams: { [K in keyof T]: IStream<T[K]> }, initial: T): IStream<T>
-  <T extends readonly unknown[]>(streams: { [K in keyof T]: IStream<T[K]> }): (initial: T) => IStream<T>
+export function combine<T extends readonly unknown[], R>(
+  f: (...args: T) => R,
+  sources: { [K in keyof T]: IStream<T[K]> }
+): IStream<R> {
+  return {
+    run(scheduler: Scheduler, sink: Sink<R>): Disposable {
+      const l = sources.length
+      const disposables = new Array(l)
+      const sinks = new Array(l)
+
+      const mergeSink = new CombineSink(disposables, sinks.length, sink, f)
+
+      for (let indexSink: IndexSink<any>, i = 0; i < l; ++i) {
+        indexSink = sinks[i] = new IndexSink(mergeSink, i)
+        disposables[i] = sources[i].run(scheduler, indexSink)
+      }
+
+      return disposeAll(disposables)
+    }
+  }
 }
 
-export const combine: ICombineCurry = curry2(
-  <T extends readonly unknown[]>(streams: { [K in keyof T]: IStream<T[K]> }, initial: T) => ({
-    run(scheduler, sink) {
-      const state = { active: streams.length }
-      const streamCount = streams.length
+export function combineState<A, K extends keyof A = keyof A>(
+  state: {
+    [P in keyof A]: IStream<A[P]> | A[P]
+  }
+): IStream<A> {
+  const entries = Object.entries(state) as [keyof A, IStream<A[K]> | A[K]][]
 
-      // Pre-allocate arrays with known size
-      const disposables = new Array<Disposable>(streamCount)
-      const values = new Array(streamCount)
-
-      // Copy initial values efficiently
-      for (let i = 0; i < streamCount; i++) {
-        values[i] = initial[i]
-      }
-
-      // Use traditional for loop to avoid allocations
-      for (let i = 0; i < streamCount; i++) {
-        disposables[i] = streams[i].run(scheduler, new CombineSink(sink, values as [...T], i, state, disposables))
-      }
-
-      return {
-        [Symbol.dispose]: () => {
-          for (const d of disposables) d[Symbol.dispose]()
-        }
-      }
-    }
-  })
-)
-
-class CombineSink<T extends readonly unknown[]> extends MergingSink<unknown> {
-  constructor(
-    public override readonly sink: Sink<T>,
-    public values: [...T],
-    public readonly index: number,
-    public override readonly state: { active: number },
-    public override readonly disposables: readonly Disposable[]
-  ) {
-    super(sink as Sink<unknown>, state, disposables)
+  if (entries.length === 0) {
+    return now({} as A)
   }
 
-  event(value: unknown) {
-    this.values[this.index] = value
-    this.sink.event(this.values as T)
+  const keys = entries.map(([key]) => key)
+  const streams = entries.map(([_, stream]) => toStream(stream))
+
+  return combine(
+    (values: A[K][]) => {
+      const result = values.reduce((seed, val, idx) => {
+        seed[keys[idx]] = val
+        return seed
+      }, {} as A)
+      return result
+    },
+    // @ts-ignore
+    ...streams
+  )
+}
+
+class CombineSink<A, B> extends TransformSink<IndexedValue<A>, B> implements Sink<IndexedValue<A>> {
+  private readonly disposables: Disposable[]
+  private readonly f: (...args: any[]) => B
+  private awaiting: number
+  private readonly hasValue: boolean[]
+  private readonly values: any[]
+
+  constructor(disposables: Disposable[], length: number, sink: Sink<B>, f: (...args: any[]) => B) {
+    super(sink)
+    this.disposables = disposables
+    this.f = f
+
+    this.awaiting = length
+    this.values = new Array(length)
+    this.hasValue = new Array(length).fill(false)
+    this.activeCount = length
+  }
+
+  event(indexedValue: IndexedValue<A>): void {
+    if (!indexedValue.active) {
+      this.dispose(indexedValue.index)
+      return
+    }
+
+    const i = indexedValue.index
+    const awaiting = this.updateReady(i)
+
+    this.values[i] = indexedValue.value
+    if (awaiting === 0) {
+      this.sink.event(invoke(this.f, this.values))
+    }
+  }
+
+  private updateReady(index: number): number {
+    if (this.awaiting > 0) {
+      if (!this.hasValue[index]) {
+        this.hasValue[index] = true
+        this.awaiting -= 1
+      }
+    }
+    return this.awaiting
+  }
+
+  private dispose(index: number): void {
+    tryDispose(this.disposables[index], this.sink)
+    if (--this.activeCount === 0) {
+      this.sink.end()
+    }
+  }
+}
+
+/**
+ * TODO: find a better way (without `any`)
+ */
+function invoke<F extends (...args: any[]) => any>(f: F, args: Parameters<F>): ReturnType<F> {
+  switch (args.length) {
+    case 0:
+      return f()
+    case 1:
+      return f(args[0])
+    case 2:
+      return f(args[0], args[1])
+    case 3:
+      return f(args[0], args[1], args[2])
+    case 4:
+      return f(args[0], args[1], args[2], args[3])
+    case 5:
+      return f(args[0], args[1], args[2], args[3], args[4])
+    default:
+      return f.apply(undefined, args)
   }
 }

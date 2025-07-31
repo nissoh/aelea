@@ -5,12 +5,12 @@ import { $element, component, nodeEvent, style, styleBehavior } from '../../../c
 import type { INode } from '../../../core/source/node.js'
 import type { IOps } from '../../../stream/index.js'
 import {
+  constant,
   empty,
   filter,
   map,
   merge,
   multicast,
-  never,
   now,
   o,
   startWith,
@@ -30,7 +30,7 @@ export interface Field extends Input<string | number> {
   inputOp?: IOps<INode>
 }
 
-export const $Field = ({ value = empty, fieldStyle = {}, validation = never, inputOp = o() }: Field) =>
+export const $Field = ({ value = empty, fieldStyle = {}, validation = constant(null), inputOp = o() }: Field) =>
   component(
     (
       [focusStyle, interactionTether]: IBehavior<INode, true>,

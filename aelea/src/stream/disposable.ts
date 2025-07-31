@@ -1,4 +1,5 @@
-import type { Disposable } from './types.js'
+import { curry2 } from './function.js'
+import type { Disposable, Sink } from './types.js'
 
 /**
  * Create a Disposable that disposes the provided value using a dispose function
@@ -59,3 +60,13 @@ class DisposeOnce implements Disposable {
     }
   }
 }
+
+// Try to dispose the disposable.  If it throws, send
+// the error to sink.error with the provided Time value
+export const tryDispose = curry2((disposable: Disposable, sink: Sink<unknown>): void => {
+  try {
+    disposable[Symbol.dispose]()
+  } catch (e) {
+    sink.error(e)
+  }
+})

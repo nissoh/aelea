@@ -1,5 +1,5 @@
 export { chain } from './chain.js'
-export { combine } from './combine.js'
+export { combine, combineState } from './combine.js'
 export { constant, startWith } from './constant.js'
 export { continueWith } from './continueWith.js'
 export { debounce } from './debounce.js'
