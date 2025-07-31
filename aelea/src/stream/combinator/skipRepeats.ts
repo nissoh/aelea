@@ -5,7 +5,10 @@ import type { IStream, Sink } from '../types.js'
 /**
  * Skip consecutive duplicate values using === equality
  */
-export const skipRepeats = <T>() => (stream: IStream<T>): IStream<T> => skipRepeatsWith<T>((a, b) => a === b)(stream)
+export const skipRepeats =
+  <T>() =>
+  (stream: IStream<T>): IStream<T> =>
+    skipRepeatsWith<T>((a, b) => a === b)(stream)
 
 export interface ISkipRepeatsWithCurry {
   <T>(equals: (a: T, b: T) => boolean, source: IStream<T>): IStream<T>

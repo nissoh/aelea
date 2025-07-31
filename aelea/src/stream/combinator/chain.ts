@@ -14,6 +14,4 @@ export interface IChainCurry {
  * @param stream
  * @returns new stream containing all events from each stream returned by f
  */
-export const chain: IChainCurry = curry2((f, source) =>
-  mergeMapConcurrently(f, Number.POSITIVE_INFINITY, source)
-)
+export const chain: IChainCurry = curry2((f, source) => mergeMapConcurrently(f, Number.POSITIVE_INFINITY, source))

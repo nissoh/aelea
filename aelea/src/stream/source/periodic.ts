@@ -1,6 +1,12 @@
+import { curry2 } from '../function.js'
 import type { IStream } from '../types.js'
 
-export const periodic = <T>(period: number, value: T): IStream<T> => ({
+export interface IPeriodicCurry {
+  <T>(period: number, value: T): IStream<T>
+  <T>(period: number): (value: T) => IStream<T>
+}
+
+export const periodic: IPeriodicCurry = curry2((period, value) => ({
   run(scheduler, sink) {
     let currentDisposable: Disposable | null = null
     let disposed = false
@@ -24,4 +30,4 @@ export const periodic = <T>(period: number, value: T): IStream<T> => ({
       }
     }
   }
-})
+}))

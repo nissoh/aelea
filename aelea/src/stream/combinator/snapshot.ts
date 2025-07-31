@@ -1,6 +1,6 @@
 import { disposeBoth } from '../disposable.js'
 import { curry2, curry3 } from '../function.js'
-import type { Disposable, IStream, Scheduler, Sink } from '../types.js'
+import type { IStream, Sink } from '../types.js'
 
 export interface ISampleCurry {
   <A, B>(values: IStream<A>, sampler: IStream<B>): IStream<A>
@@ -31,26 +31,14 @@ export interface ISnapshotCurry {
 export const snapshot: ISnapshotCurry = curry3(
   <A, B, C>(f: (a: A, b: B) => C, values: IStream<A>, sampler: IStream<B>) => ({
     run(scheduler, sink) {
-      return new Snapshot(f, values, sampler).run(scheduler, sink)
+      const sampleSink = new SnapshotSink(f, sink)
+      const valuesDisposable = values.run(scheduler, sampleSink.latest)
+      const samplerDisposable = sampler.run(scheduler, sampleSink)
+
+      return disposeBoth(samplerDisposable, valuesDisposable)
     }
   })
 )
-
-class Snapshot<A, B, C> {
-  constructor(
-    private readonly f: (a: A, b: B) => C,
-    private readonly values: IStream<A>,
-    private readonly sampler: IStream<B>
-  ) {}
-
-  run(scheduler: Scheduler, sink: Sink<C>): Disposable {
-    const sampleSink = new SnapshotSink(this.f, sink)
-    const valuesDisposable = this.values.run(scheduler, sampleSink.latest)
-    const samplerDisposable = this.sampler.run(scheduler, sampleSink)
-
-    return disposeBoth(samplerDisposable, valuesDisposable)
-  }
-}
 
 class SnapshotSink<A, B, C> implements Sink<B> {
   readonly latest: LatestValueSink<A>
