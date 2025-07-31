@@ -1,4 +1,3 @@
-import type { Disposable } from '../../stream/index.js'
 import { disposeNone } from '../../stream/index.js'
 
 export interface ISettableDisposable extends Disposable {

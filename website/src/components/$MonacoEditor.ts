@@ -1,24 +1,4 @@
 import {
-  at,
-  awaitPromises,
-  combine,
-  continueWith,
-  delay,
-  empty,
-  filter,
-  fromPromise,
-  join,
-  map,
-  merge,
-  multicast,
-  now,
-  recoverWith,
-  skipRepeatsWith,
-  startWith,
-  switchLatest,
-  take
-} from '@most/core'
-import {
   $node,
   $wrapNativeElement,
   component,
@@ -28,8 +8,29 @@ import {
   type IStyleCSS,
   style
 } from 'aelea/core'
+import {
+  at,
+  combine,
+  continueWith,
+  delay,
+  empty,
+  filter,
+  fromPromise,
+  type IStream,
+  join,
+  map,
+  merge,
+  multicast,
+  now,
+  o,
+  skipRepeatsWith,
+  startWith,
+  switchLatest,
+  take
+} from 'aelea/stream'
 import { fetchJson, observer } from 'aelea/ui-components'
 import type * as monaco from 'monaco-editor'
+import { awaitPromises, recoverWith } from '../common/stream-utils'
 
 interface JSDelivrFlat {
   files: JSDelivrMeta[]

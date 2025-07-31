@@ -1,5 +1,5 @@
 import { disposeNone, disposeWith } from '../disposable.js'
-import type { Disposable, IStream, Scheduler, Sink } from '../types.js'
+import type { IStream, Scheduler, Sink } from '../types.js'
 
 /**
  * Creates a pair of streams for multicasting with late subscriber support.

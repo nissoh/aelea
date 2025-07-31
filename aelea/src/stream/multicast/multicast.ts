@@ -1,5 +1,5 @@
 import { disposeNone } from '../disposable.js'
-import type { Disposable, IStream, Sink } from '../types.js'
+import type { IStream, Sink } from '../types.js'
 
 /**
  * Creates a multicast stream that shares a single subscription among multiple consumers.

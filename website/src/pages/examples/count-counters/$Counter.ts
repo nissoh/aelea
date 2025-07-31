@@ -1,6 +1,6 @@
-import { constant } from '@most/core'
 import type { IBehavior } from 'aelea/core'
 import { $text, component, style } from 'aelea/core'
+import { constant } from 'aelea/stream'
 import { $Button, $column, $NumberTicker, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 

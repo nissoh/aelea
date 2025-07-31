@@ -1,4 +1,4 @@
-// import { constant, map, merge, scan } from '@most/core'
+// import { constant, map, merge, scan } from 'aelea/stream'
 // import { $custom, $element, $text, component, style, INode, nodeEvent } from '@aelea/core'
 // import { IBehavior } from '@aelea/core'
 

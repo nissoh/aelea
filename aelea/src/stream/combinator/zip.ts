@@ -1,6 +1,6 @@
 import { disposeAll } from '../disposable.js'
 import { curry2, curry3 } from '../function.js'
-import type { Disposable, IStream, Scheduler, Sink } from '../types.js'
+import type { IStream, Scheduler, Sink } from '../types.js'
 import { map } from './map.js'
 
 export interface IZipCurry {

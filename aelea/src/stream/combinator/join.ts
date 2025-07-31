@@ -1,6 +1,6 @@
 import { disposeAll, disposeNone } from '../disposable.js'
 import { curry2, curry3 } from '../function.js'
-import type { Disposable, IStream, Scheduler, Sink } from '../types.js'
+import type { IStream, Scheduler, Sink } from '../types.js'
 
 /**
  * Monadic join. Flatten a Stream<Stream<X>> to Stream<X> by merging inner

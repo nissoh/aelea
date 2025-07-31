@@ -1,5 +1,5 @@
-import { chain, combine, empty, mergeArray, now, switchLatest, take, until } from '@most/core'
-import { $element, $text, behavior, component, type IBehavior, replayLatest, style } from 'aelea/core'
+import { $element, $text, behavior, component, type IBehavior, style } from 'aelea/core'
+import { chain, combine, empty, mergeArray, now, replayState, switchLatest, take, until } from 'aelea/stream'
 import { $Checkbox, $column, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 import type { Todo } from './$CreateTodo'
@@ -18,7 +18,7 @@ export default (todos: Todo[]) =>
       [showCompletedList, showCompletedListTether]: IBehavior<boolean, boolean>
     ) => {
       const INITIAL_SHOW_COMPLETED = false
-      const showCompleteState = replayLatest(showCompletedList, INITIAL_SHOW_COMPLETED)
+      const showCompleteState = replayState(showCompletedList, INITIAL_SHOW_COMPLETED)
 
       return [
         $column(spacing.big)(
@@ -40,7 +40,7 @@ export default (todos: Todo[]) =>
                 const [remove, removeTether] = behavior<MouseEvent, MouseEvent>()
                 const [completed, completedTether] = behavior<boolean, boolean>()
 
-                const todoCompleted = replayLatest(completed, todo.completed)
+                const todoCompleted = replayState(completed, todo.completed)
 
                 return until(remove)(
                   switchLatest(

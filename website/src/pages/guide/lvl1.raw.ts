@@ -1,5 +1,5 @@
-import { constant, map, periodic, scan } from '@most/core'
 import { $node, $text, runBrowser } from 'aelea/core'
+import { constant, map, periodic, scan } from 'aelea/stream'
 
 const eventEverySecond = periodic(1000)
 const mapTo1 = constant(1, eventEverySecond)

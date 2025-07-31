@@ -1,5 +1,3 @@
-import type { Disposable } from '../types.js'
-
 /**
  * A disposable that can have its underlying disposable set/changed.
  * Useful for cases where the disposable needs to be created after construction.

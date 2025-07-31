@@ -1,5 +1,5 @@
 import { MergingSink } from '../sink.js'
-import type { Disposable, IStream, Sink } from '../types.js'
+import type { IStream, Sink } from '../types.js'
 
 export function merge<T extends readonly unknown[]>(
   ...streams: [...{ [K in keyof T]: IStream<T[K]> }]

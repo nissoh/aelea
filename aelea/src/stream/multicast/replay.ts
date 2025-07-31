@@ -1,5 +1,5 @@
 import { startWith } from '../../stream/index.js'
-import type { Disposable, IStream, Scheduler, Sink } from '../../stream/types.js'
+import type { IStream, Scheduler, Sink } from '../../stream/types.js'
 
 class StateSink<A> implements Sink<A> {
   constructor(

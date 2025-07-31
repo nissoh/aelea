@@ -1,5 +1,5 @@
 import { curry2 } from './function.js'
-import type { Disposable, Sink } from './types.js'
+import type { Sink } from './types.js'
 
 /**
  * Create a Disposable that disposes the provided value using a dispose function

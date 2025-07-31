@@ -1,5 +1,5 @@
 import { curry2 } from '../function.js'
-import type { Disposable, IStream, Sink } from '../types.js'
+import type { IStream, Sink } from '../types.js'
 
 export interface IDebounceCurry {
   <T>(delay: number, source: IStream<T>): IStream<T>

@@ -1,6 +1,6 @@
 import { disposeBoth } from '../disposable.js'
 import { curry2 } from '../function.js'
-import type { Disposable, IStream, Scheduler, Sink } from '../types.js'
+import type { IStream, Scheduler, Sink } from '../types.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
 import { join } from './join.js'
 

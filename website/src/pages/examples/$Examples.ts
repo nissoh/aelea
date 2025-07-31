@@ -8,7 +8,7 @@ import { $Link } from '../../components/$Link'
 import { fadeIn } from '../../components/transitions/enter'
 import $Calculator from './calculator/$Calculator'
 import $CountCounters from './count-counters/$CountCounters'
-import $DragList from './dragList/$DragList'
+// import $DragList from './dragList/$DragList'
 import { $PopoverExample } from './overlay/$PopoverExample'
 import { $TableExample } from './table/$TableExample'
 import { $Theme } from './theme/$Theme'
@@ -133,7 +133,7 @@ export default ({ router }: Website) =>
         $column(style({ flex: 2 }))(
           match(themeRoute)($Example({ file: 'src/components/$Table.ts' })($column($Theme({})))({})),
 
-          match(dragAngDropRoute)($Example({ file: 'src/components/$DragSort.ts' })($DragList({}))({})),
+          // match(dragAngDropRoute)($Example({ file: 'src/components/$DragSort.ts' })($DragList({}))({})),
 
           // $container(
           //   match(autocompleteRoute)(

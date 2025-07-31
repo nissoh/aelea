@@ -1,7 +1,7 @@
 import { disposeBoth } from '../disposable.js'
 import { curry2 } from '../function.js'
 import { PipeSink } from '../sink.js'
-import type { Disposable, IStream, Scheduler, Sink } from '../types.js'
+import type { IStream, Scheduler, Sink } from '../types.js'
 
 export interface IDelayCurry {
   <T>(n: number, source: IStream<T>): IStream<T>

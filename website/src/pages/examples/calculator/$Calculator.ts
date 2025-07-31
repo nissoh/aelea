@@ -1,5 +1,5 @@
-import { combine, empty, map, startWith } from '@most/core'
 import { $node, $text, attr, component, type IBehavior, style } from 'aelea/core'
+import { combine, empty, map, o, startWith } from 'aelea/stream'
 import { $column, $Field, $NumberTicker, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 

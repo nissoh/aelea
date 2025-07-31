@@ -70,7 +70,7 @@ export default $container(style({alignSelf: 'center'}))(
           $TSPeep({
             readOnly: false,
             code: `import { $text, $node } from '@aelea/core'
-import { constant, map, periodic, scan } from '@most/core'
+import { constant, map, periodic, scan } from 'aelea/stream'
 
 const eventEverySecond = periodic(1000)       // stream of undefined every 1000 milliseconds
 const mapTo1 = constant(1, eventEverySecond)  // map that undefined into 1
@@ -86,7 +86,7 @@ export default $node(
 
           $TSPeep({
             readOnly: false,
-            code: `import { constant, map, merge, scan } from '@most/core'
+            code: `import { constant, map, merge, scan } from 'aelea/stream'
 import { $custom, $element, $text, component, style, INode, nodeEvent } from '@aelea/core'
 import { IBehavior } from '@aelea/core'
 

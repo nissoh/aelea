@@ -1,5 +1,5 @@
 import { disposeNone, disposeWith } from '../../stream/index.js'
-import type { Disposable, IStream, Scheduler, Sink } from '../../stream/types.js'
+import type { IStream, Scheduler, Sink } from '../../stream/types.js'
 
 interface StoredValue<T> {
   value: T

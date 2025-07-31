@@ -1,3 +1,5 @@
+/// <reference path="./global.d.ts" />
+
 export {
   chain,
   combine,
@@ -49,4 +51,4 @@ export {
   now,
   periodic
 } from './source/index.js'
-export type { Disposable, Fn, IOps, IStream, Scheduler, Sink } from './types.js'
+export type { Fn, IOps, IStream, Scheduler, Sink } from './types.js'

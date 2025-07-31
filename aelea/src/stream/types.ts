@@ -1,7 +1,3 @@
-export interface Disposable {
-  [Symbol.dispose](): void
-}
-
 export interface IStream<T> {
   run<S extends Scheduler>(scheduler: S, sink: Sink<T>): Disposable
 }

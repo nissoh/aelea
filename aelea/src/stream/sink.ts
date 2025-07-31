@@ -1,4 +1,4 @@
-import type { Disposable, Sink } from './types.js'
+import type { Sink } from './types.js'
 
 export abstract class PipeSink<T> implements Sink<T> {
   constructor(protected readonly sink: Sink<T>) {}

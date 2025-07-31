@@ -2,7 +2,7 @@ import { toStream } from '../common.js'
 import { disposeAll, tryDispose } from '../disposable.js'
 import { type IndexedValue, IndexSink } from '../sink.js'
 import { now } from '../source/now.js'
-import type { Disposable, IStream, Scheduler, Sink } from '../types.js'
+import type { IStream, Scheduler, Sink } from '../types.js'
 
 export function combine<T extends readonly unknown[], R>(
   f: (...args: T) => R,

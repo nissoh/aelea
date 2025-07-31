@@ -1,4 +1,4 @@
-import type { Disposable, IStream, Scheduler, Sink } from './types.js'
+import type { IStream, Scheduler, Sink } from './types.js'
 
 export const runStream =
   <T>(scheduler: Scheduler, sink: Sink<T>) =>

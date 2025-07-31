@@ -1,6 +1,6 @@
-import { constant, map, merge, now, snapshot, startWith } from '@most/core'
 import type { IBehavior } from 'aelea/core'
 import { $text, component, style } from 'aelea/core'
+import { constant, map, merge, now, snapshot, startWith } from 'aelea/stream'
 import { $Button, $Field, $row } from 'aelea/ui-components'
 
 let iid = 0

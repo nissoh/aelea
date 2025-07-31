@@ -1,4 +1,4 @@
-import type { Disposable, IStream, Scheduler, Sink } from '../../stream/types.js'
+import type { IStream, Scheduler, Sink } from '../../stream/types.js'
 import { startWith } from '../combinator/constant.js'
 import { multicast } from './multicast.js'
 

@@ -1,5 +1,5 @@
-import { snapshot, startWith } from '@most/core'
 import { $svg, attr, component, type IBehavior, type ISlottable, nodeEvent, style, stylePseudo } from 'aelea/core'
+import { snapshot, startWith } from 'aelea/stream'
 import { $icon } from 'aelea/ui-components'
 import { pallete, type Theme, theme } from 'aelea/ui-components-theme'
 import { setTheme } from 'aelea/ui-components-theme-browser'
