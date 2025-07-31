@@ -1,7 +1,8 @@
-import { map, mergeArray } from '@most/core'
+import { map, mergeArray } from '../../../stream/index.js'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
-import { $element, $node, attr, attrBehavior, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
+import { $element, $node, attr, attrBehavior, component, nodeEvent, o, style, styleBehavior } from '../../../core/index.js'
 import type { INode } from '../../../core/source/node.js'
+import { merge } from '../../../stream/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 import { dismissOp, interactionOp } from './form.js'
@@ -43,7 +44,7 @@ export const $Checkbox = ({ value }: Checkbox) =>
 
       const containerStyle = o(
         styleBehavior(
-          map((active) => (active ? { borderColor: pallete.primary } : null), mergeArray([focusStyle, dismissstyle]))
+          map((active) => (active ? { borderColor: pallete.primary } : null), merge(focusStyle, dismissstyle))
         ),
         style({
           position: 'relative',

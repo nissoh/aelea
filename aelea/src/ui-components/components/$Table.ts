@@ -1,4 +1,4 @@
-import { attr, component, type IBehavior, nodeEvent, style, stylePseudo } from '../../core/index.js'
+import { attr, component, type IBehavior, nodeEvent, o, style, stylePseudo } from '../../core/index.js'
 import type { I$Node, I$Slottable, ISlottable } from '../../core/source/node.js'
 import { $node, $svg } from '../../core/source/node.js'
 import {
@@ -19,6 +19,7 @@ import { $column, $row } from '../elements/$elements.js'
 import { $icon } from '../elements/$icon.js'
 import { layoutSheet } from '../style/layoutSheet.js'
 import { spacing } from '../style/spacing.js'
+import { pallete } from '../../ui-components-theme/globalState.js'
 import {
   $VirtualScroll,
   type IScrollPagableReponse,
@@ -72,8 +73,8 @@ export const $Table = <T, FilterState = never>({
   headerCellOp,
   bodyCellOp,
   bodyContainerOp = o(),
-  sortChange = never(),
-  filterChange = never(),
+  sortChange = never,
+  filterChange = never,
   $sortArrowDown = $caretDown
 }: TableOption<T, FilterState>) =>
   component(
@@ -91,11 +92,11 @@ export const $Table = <T, FilterState = never>({
           alignItems: 'center',
           color: pallete.foreground
         }),
-        cellOp || op,
-        headerCellOp || op
+        cellOp || o(),
+        headerCellOp || o()
       )
 
-      const cellBodyOp = op(cellStyle, cellOp || op, bodyCellOp || op)
+      const cellBodyOp = o(cellStyle, cellOp || o(), bodyCellOp || o())
 
       const $rowContainer = $row(spacing.default)
 

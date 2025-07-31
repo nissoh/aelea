@@ -2,10 +2,10 @@ import type { Disposable, IStream, Scheduler, Sink } from './types.js'
 
 export const runStream =
   <T>(scheduler: Scheduler, sink: Sink<T>) =>
-  (run: IStream<T>) => {
+  (stream: IStream<T>) => {
     const disposable = { current: null as Disposable | null }
 
-    const d = run(scheduler, {
+    const d = stream.run(scheduler, {
       event: (value) => sink.event(value),
       error(error) {
         disposable.current?.[Symbol.dispose]()
@@ -23,9 +23,9 @@ export const runStream =
 
 export const runPromise =
   (scheduler: Scheduler, signal?: AbortSignal) =>
-  <T>(run: IStream<T>) =>
+  <T>(stream: IStream<T>) =>
     new Promise<void>((end, error) => {
-      const d = run(scheduler, {
+      const d = stream.run(scheduler, {
         event() {},
         error,
         end

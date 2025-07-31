@@ -1,7 +1,5 @@
-/** biome-ignore-all lint/performance/noBarrelFile: entrypoint module */
-
 export { $NumberTicker } from './components/$NumberTicker.js'
-export { $Sortable } from './components/$Sortable.js'
+// export { $Sortable } from './components/$Sortable.js'
 export type { IPageRequest, ISortBy, TablePageResponse } from './components/$Table.js'
 export { $caretDown, $Table } from './components/$Table.js'
 export { $Tabs } from './components/$Tabs.js'
@@ -34,4 +32,4 @@ export { spacing } from './style/spacing.js'
 export { observer } from './utils/elementObservers.js'
 export { fetchJson, fromWebsocket } from './utils/http.js'
 export { isDesktopScreen, isMobileScreen } from './utils/screenUtils.js'
-export { createLocalStorageChain } from './utils/state.js'
+// export { createLocalStorageChain } from './utils/state.js'

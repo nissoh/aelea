@@ -1,8 +1,7 @@
-import { map, mergeArray, never } from '@most/core'
+import { map, merge, mergeArray, never, type IOps } from '../../../stream/index.js'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
-import type { IOps } from '../../../core/common.js'
-import { $element, attrBehavior, component, nodeEvent, styleBehavior } from '../../../core/index.js'
+import { $element, attrBehavior, component, nodeEvent, o, styleBehavior } from '../../../core/index.js'
 import type { I$Slottable, INode, ISlottable } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
@@ -30,7 +29,7 @@ export const $Button = ({ disabled = never(), $content, buttonOp = o() }: IButto
         attrBehavior(map((disabled) => ({ disabled }), disabled)),
 
         styleBehavior(
-          map((active) => (active ? { borderColor: pallete.primary } : null), mergeArray([focusStyle, dismissstyle]))
+          map((active) => (active ? { borderColor: pallete.primary } : null), merge(focusStyle, dismissstyle))
         ),
 
         interactionTether(interactionOp),

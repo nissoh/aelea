@@ -31,9 +31,10 @@ export {
   styleInline,
   stylePseudo
 } from './combinator/style.js'
-export type { IStreamOrPromise } from './combinator/switchMap.js'
-export { switchMap } from './combinator/switchMap.js'
-export { tether } from './combinator/tether.js'
+export type { IStreamOrPromise } from '../stream/combinator/switchMap.js'
+export { switchMap } from '../stream/combinator/switchMap.js'
+export { tether } from '../stream/multicast/tether.js'
+export { o } from '../stream/function.js'
 export type { IRunEnvironment } from './run.js'
 export { runBrowser } from './run.js'
 export type {

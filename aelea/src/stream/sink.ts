@@ -1,5 +1,19 @@
 import type { Disposable, Sink } from './types.js'
 
+export abstract class PipeSink<T> implements Sink<T> {
+  constructor(protected readonly sink: Sink<T>) {}
+
+  abstract event(value: T): void
+
+  error(e: any): void {
+    this.sink.error(e)
+  }
+
+  end(): void {
+    this.sink.end()
+  }
+}
+
 export abstract class TransformSink<In, Out> implements Sink<In> {
   constructor(protected readonly sink: Sink<Out>) {}
 
@@ -28,7 +42,7 @@ export abstract class TransformSink<In, Out> implements Sink<In> {
 
 export abstract class MergingSink<T> implements Sink<T> {
   constructor(
-    public readonly sink: Sink<T>,
+    protected readonly sink: Sink<T>,
     public readonly state: { active: number },
     public readonly disposables: readonly Disposable[]
   ) {}

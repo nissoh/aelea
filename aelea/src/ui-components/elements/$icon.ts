@@ -1,6 +1,6 @@
-import type { IOps } from '../../core/common.js'
 import { $svg, attr, style } from '../../core/index.js'
 import type { I$Slottable, INode } from '../../core/source/node.js'
+import { o, type IOps } from '../../stream/index.js'
 
 interface Icon {
   /**  in pixels */

@@ -15,7 +15,7 @@ export const map: IMapCurry = curry2((f, source) => ({
 
 class MapSink<In, Out> extends TransformSink<In, Out> {
   constructor(
-    public readonly f: (value: In) => Out,
+    readonly f: (value: In) => Out,
     sink: Sink<Out>
   ) {
     super(sink)

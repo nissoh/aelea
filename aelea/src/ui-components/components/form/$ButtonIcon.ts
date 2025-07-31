@@ -1,6 +1,6 @@
-import { map, mergeArray } from '@most/core'
+import { map, mergeArray } from '../../../stream/index.js'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
-import { component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
+import { component, nodeEvent, o, style, styleBehavior } from '../../../core/index.js'
 import type { I$Slottable, ISlottable } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $icon } from '../../elements/$icon.js'

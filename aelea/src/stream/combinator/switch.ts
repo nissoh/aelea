@@ -1,4 +1,4 @@
-import { disposeNone } from '../core.js'
+import { disposeNone } from '../disposable.js'
 import type { Disposable, IStream, Sink } from '../types.js'
 
 export const switchLatest = <T>(s: IStream<IStream<T>>): IStream<T> => ({

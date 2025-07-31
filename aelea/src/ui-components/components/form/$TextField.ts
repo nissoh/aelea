@@ -1,9 +1,9 @@
-import { empty, map, merge, multicast, never, now, sample, skipRepeats, switchLatest } from '@most/core'
+import { empty, map, merge, multicast, never, now, o, sample, skipRepeats, switchLatest } from '../../../stream/index.js'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
 import { component } from '../../../core/combinator/component.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
 import { style } from '../../../core/combinator/style.js'
-import type { IOps } from '../../../core/common.js'
+import type { IOps } from '../../../stream/index.js'
 import type { INode } from '../../../core/source/node.js'
 import { $node } from '../../../core/source/node.js'
 import { $text } from '../../../core/source/text.js'
@@ -30,10 +30,10 @@ export const $TextField = (config: TextField) =>
         ? o(config.validation, (src) => sample(src, blur), multicast)
         : undefined
       const fieldOp = config.containerOp ?? o()
-      const validation = multicastValidation ? skipRepeats(multicastValidation(change)) : never()
+      const validation = multicastValidation ? skipRepeats(multicastValidation(change)) : never
 
       const $messageLabel = $node(style({ fontSize: '75%', width: '100%' }))
-      const $hint = hint ? now($messageLabel($text(hint))) : never()
+      const $hint = hint ? now($messageLabel($text(hint))) : never
 
       const $alert = map((msg) => {
         if (msg) {

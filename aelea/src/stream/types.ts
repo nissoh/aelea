@@ -13,7 +13,7 @@ export interface Sink<T> {
 }
 
 export interface Scheduler {
-  schedule: (callback: () => void, delay: number) => Disposable
+  schedule: <TArgs extends any[]>(callback: (...args: TArgs) => void, delay: number, ...args: TArgs) => Disposable
   currentTime: () => number
 }
 

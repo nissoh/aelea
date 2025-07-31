@@ -1,25 +1,11 @@
-import {
-  chain,
-  delay,
-  empty,
-  filter,
-  loop,
-  map,
-  merge,
-  mergeArray,
-  multicast,
-  scan,
-  skip,
-  startWith,
-  switchLatest
-} from '@most/core'
+
 import type { IBehavior } from '../../core/combinator/behavior.js'
 import { component } from '../../core/combinator/component.js'
 import { style } from '../../core/combinator/style.js'
-import type { IOps } from '../../core/common.js'
 import type { I$Node, I$Slottable, INode } from '../../core/source/node.js'
 import { $custom, $node } from '../../core/source/node.js'
 import { $text } from '../../core/source/text.js'
+import { chain, delay, empty, filter, map, merge, multicast, o, scan, skip, startWith, switchLatest, type IOps, type IStream } from '../../stream/index.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column } from '../elements/$elements.js'
 import { designSheet } from '../style/designSheet.js'
@@ -77,22 +63,21 @@ export const $VirtualScroll = ({ dataSource, containerOps = o(), $loader = $defa
       map(() => ({ $intermediate: $loader }), scrollReuqestWithInitial)
     )
 
-    const $itemLoader = loop(
-      (seed, state) => {
+    const $itemLoader = map(
+      (state) => {
         if ('data' in state && state.data) {
           if (Array.isArray(state.data)) {
-            return { seed, value: empty() }
+            return empty
           }
 
           const hasMoreItems = state.data.pageSize === state.data.$items.length
-          const value = hasMoreItems ? state.$intermediate : empty()
+          const value = hasMoreItems ? state.$intermediate : empty
 
-          return { seed, value }
+          return value
         }
 
-        return { seed, value: state.$intermediate }
+        return state.$intermediate
       },
-      {},
       loadState
     )
 
@@ -100,7 +85,7 @@ export const $VirtualScroll = ({ dataSource, containerOps = o(), $loader = $defa
       $container(
         chain(($list) => {
           const $items = Array.isArray($list) ? $list : $list.$items
-          return mergeArray($items)
+          return merge(...$items)
         }, multicastDatasource),
         switchLatest(startWith($observer, $itemLoader))
       ),
