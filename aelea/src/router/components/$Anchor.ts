@@ -20,14 +20,8 @@ export const $RouterAnchor = ({ url, route, $anchor, anchorOp = op }: IAnchor) =
     const href = url.replace(trailingSlash, '')
 
     const contains = merge(
-      op(
-        route.contains,
-        map<PathEvent, boolean>(() => true)
-      ),
-      op(
-        route.miss,
-        map<PathEvent, boolean>(() => false)
-      )
+      map<PathEvent, boolean>(() => true, route.contains),
+      map<PathEvent, boolean>(() => false, route.miss)
     )
 
     const anchorWithOps = op(

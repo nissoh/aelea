@@ -1,6 +1,7 @@
 export {
   chain,
   combine,
+  combineState,
   constant,
   continueWith,
   debounce,

@@ -26,8 +26,6 @@ export { component } from './combinator/component.js'
 export type { INodeEventCurry } from './combinator/event.js'
 export { eventElementTarget, nodeEvent } from './combinator/event.js'
 export { fromCallback } from './combinator/fromCallback.js'
-export type { InputArrayParams, InputStateParams } from './combinator/state.js'
-export { combineArray, combineState } from './combinator/state.js'
 export type { IStyleCSS } from './combinator/style.js'
 export {
   style,
