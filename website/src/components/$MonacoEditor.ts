@@ -26,7 +26,6 @@ import {
   type IBehavior,
   type INode,
   type IStyleCSS,
-  O,
   style
 } from 'aelea/core'
 import { fetchJson, observer } from 'aelea/ui-components'
@@ -190,7 +189,7 @@ export function definePackageTree(pkg: PackageTree, monacoGlobal: typeof monaco)
 
 const whitespaceRegexp = /[\n\r\s\t]+/g
 
-const elementBecameVisibleEvent = O(
+const elementBecameVisibleEvent = o(
   observer.intersection(),
   filter((intersectionEvent) => intersectionEvent[0].intersectionRatio > 0),
   take(1)
@@ -328,7 +327,7 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
 
       const getWorkerStream: IStream<
         Awaited<ReturnType<typeof monacoGlobal.languages.typescript.getTypeScriptWorker>>
-      > = O(
+      > = o(
         continueWith(() => {
           return fromPromise(monacoGlobal.languages.typescript.getTypeScriptWorker())
         }),
@@ -340,7 +339,7 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
       )(empty())
 
       const $editor = $wrapNativeElement(editorElement)(
-        O(
+        o(
           style({ flexDirection: 'column', ...containerStyle }),
           changeTether(
             // ensure we load editor only when it's visible on the screen

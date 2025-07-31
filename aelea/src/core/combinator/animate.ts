@@ -22,7 +22,7 @@ function createAnimationFrameSource(afp: AnimationFrames): IStream<AnimationFram
   return {
     run(scheduler, sink) {
       const requestTime = scheduler.currentTime()
-      const propagate: RafHandler = () => eventThenEnd(requestTime, scheduler.currentTime(), sink)
+      const propagate: RafHandler = () => eventThenEnd(requestTime, sink)
       const rafId = afp.requestAnimationFrame(propagate)
       return disposeWith((fid) => afp.cancelAnimationFrame(fid), rafId)
     }

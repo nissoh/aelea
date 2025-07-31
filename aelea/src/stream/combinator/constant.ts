@@ -11,4 +11,9 @@ export interface IStartWithCurry {
 
 export const startWith: IStartWithCurry = curry2((value, stream) => merge(now(value), stream))
 
-export const constant = <T, In>(value: T) => map<In, T>(() => value)
+export interface IConstantCurry {
+  <T>(value: T, stream: IStream<any>): IStream<T>
+  <T>(value: T): (stream: IStream<any>) => IStream<T>
+}
+
+export const constant: IConstantCurry = curry2((value, stream) => map(() => value, stream))

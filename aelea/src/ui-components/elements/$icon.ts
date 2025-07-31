@@ -1,4 +1,4 @@
-import { type IOps, O } from '../../core/common.js'
+import type { IOps } from '../../core/common.js'
 import { $svg, attr, style } from '../../core/index.js'
 import type { I$Slottable, INode } from '../../core/source/node.js'
 
@@ -19,5 +19,5 @@ export const $icon = ({
   height = width,
   viewBox = `0 0 ${Number.parseInt(width)} ${Number.parseInt(height)}`,
   fill = 'inherit',
-  svgOps = O()
+  svgOps = o()
 }: Icon) => $svg('svg')(attr({ viewBox, fill }), style({ width, height }), svgOps)($content)

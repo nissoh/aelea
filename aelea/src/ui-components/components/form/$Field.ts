@@ -2,7 +2,7 @@ import { empty, filter, map, merge, multicast, never, now, startWith, switchLate
 import type { IBehavior } from '../../../core/combinator/behavior.js'
 import { combineState } from '../../../core/combinator/state.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
-import { type IOps, O } from '../../../core/common.js'
+import type { IOps } from '../../../core/common.js'
 import { $element, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
 import type { INode } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
@@ -18,7 +18,7 @@ export interface Field extends Input<string | number> {
   inputOp?: IOps<INode, INode>
 }
 
-export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, inputOp = O() }: Field) =>
+export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, inputOp = o() }: Field) =>
   component(
     (
       [focusStyle, interactionTether]: IBehavior<INode, true>,
@@ -26,7 +26,7 @@ export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, i
       [blur, blurTether]: IBehavior<INode, FocusEvent>,
       [change, changeTether]: IBehavior<INode<HTMLInputElement>, string>
     ) => {
-      const multicastValidation = O(validation, startWith(''), multicast)
+      const multicastValidation = o(validation, startWith(''), multicast)
 
       const alert = multicastValidation(change)
 
@@ -65,7 +65,7 @@ export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, i
           dismissTether(dismissOp),
           blurTether(nodeEvent('blur')),
 
-          O(
+          o(
             map((node) =>
               merge(
                 now(node),

@@ -1,5 +1,4 @@
 import { style } from '../../core/combinator/style.js'
-import { O } from '../../core/common.js'
 
 const stretch = style({
   position: 'absolute',
@@ -10,10 +9,10 @@ const stretch = style({
 })
 const flex = style({ flex: 1 })
 const displayFlex = style({ display: 'flex' })
-const row = O(displayFlex, style({ flexDirection: 'row' }))
-const column = O(displayFlex, style({ flexDirection: 'column' }))
-const rowFlex = O(row, flex)
-const columnFlex = O(column, flex)
+const row = o(displayFlex, style({ flexDirection: 'row' }))
+const column = o(displayFlex, style({ flexDirection: 'column' }))
+const rowFlex = o(row, flex)
+const columnFlex = o(column, flex)
 
 export const layoutSheet = {
   stretch,

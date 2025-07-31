@@ -1,5 +1,20 @@
+import { attr, component, type IBehavior, nodeEvent, style, stylePseudo } from '../../core/index.js'
 import type { I$Node, I$Slottable, ISlottable } from '../../core/source/node.js'
 import { $node, $svg } from '../../core/source/node.js'
+import {
+  chain,
+  constant,
+  type IOps,
+  type IStream,
+  map,
+  merge,
+  never,
+  now,
+  op,
+  scan,
+  startWith,
+  switchLatest
+} from '../../stream/index.js'
 import { $column, $row } from '../elements/$elements.js'
 import { $icon } from '../elements/$icon.js'
 import { layoutSheet } from '../style/layoutSheet.js'
@@ -56,7 +71,7 @@ export const $Table = <T, FilterState = never>({
   cellOp,
   headerCellOp,
   bodyCellOp,
-  bodyContainerOp = O(),
+  bodyContainerOp = o(),
   sortChange = never(),
   filterChange = never(),
   $sortArrowDown = $caretDown
@@ -66,7 +81,7 @@ export const $Table = <T, FilterState = never>({
       [scrollIndex, scrollIndexTether]: IBehavior<ScrollRequest, ScrollRequest>,
       [sortByChange, sortByChangeTether]: IBehavior<ISlottable, keyof T>
     ) => {
-      const cellStyle = O(style({ padding: '3px 6px', overflowWrap: 'break-word' }), layoutSheet.flex)
+      const cellStyle = o(style({ padding: '3px 6px', overflowWrap: 'break-word' }), layoutSheet.flex)
 
       const $cellHeader = $row(
         cellStyle,
@@ -76,11 +91,11 @@ export const $Table = <T, FilterState = never>({
           alignItems: 'center',
           color: pallete.foreground
         }),
-        cellOp || O(),
-        headerCellOp || O()
+        cellOp || op,
+        headerCellOp || op
       )
 
-      const cellBodyOp = O(cellStyle, cellOp || O(), bodyCellOp || O())
+      const cellBodyOp = op(cellStyle, cellOp || op, bodyCellOp || op)
 
       const $rowContainer = $row(spacing.default)
 
@@ -113,7 +128,7 @@ export const $Table = <T, FilterState = never>({
 
             // const newLocal_1 = col.columnOp ? $cellHeader(behavior, col.columnOp) : $cellHeader(behavior)
 
-            return $cellHeader(behavior, col.columnOp || O())(
+            return $cellHeader(behavior, col.columnOp || o())(
               $node(style({ cursor: 'pointer' }))(col.$head),
               switchLatest(
                 map((s) => {
@@ -139,7 +154,7 @@ export const $Table = <T, FilterState = never>({
             )
           }
 
-          const $headCell = $cellHeader(col.columnOp || O())(col.$head)
+          const $headCell = $cellHeader(col.columnOp || o())(col.$head)
 
           return $headCell
         })
@@ -156,7 +171,7 @@ export const $Table = <T, FilterState = never>({
                 const $items = (Array.isArray(res) ? res : res.data).map((rowData) =>
                   $rowContainer(
                     ...columns.map((col) => {
-                      const cellOps = O(cellBodyOp, col.columnOp || O())
+                      const cellOps = o(cellBodyOp, col.columnOp || o())
                       return cellOps(switchLatest(col.$body(now(rowData))))
                     })
                   )

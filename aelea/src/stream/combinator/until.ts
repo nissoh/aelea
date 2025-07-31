@@ -1,37 +1,45 @@
 import { disposeBoth } from '../disposable.js'
+import { curry2 } from '../function.js'
 import type { Disposable, IStream, Scheduler, Sink } from '../types.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
 import { join } from './join.js'
+
+export interface IUntilCurry {
+  <A>(signal: IStream<unknown>, stream: IStream<A>): IStream<A>
+  <A>(signal: IStream<unknown>): (stream: IStream<A>) => IStream<A>
+}
+
+export interface ISinceCurry {
+  <A>(signal: IStream<unknown>, stream: IStream<A>): IStream<A>
+  <A>(signal: IStream<unknown>): (stream: IStream<A>) => IStream<A>
+}
+
+export interface IDuringCurry {
+  <A>(timeWindow: IStream<IStream<unknown>>, stream: IStream<A>): IStream<A>
+  <A>(timeWindow: IStream<IStream<unknown>>): (stream: IStream<A>) => IStream<A>
+}
 
 /**
  * End a stream when another stream emits a value.
  * The stream ends when the signal emits, keeping all events before that.
  */
-export const until =
-  <A>(signal: IStream<unknown>) =>
-  (stream: IStream<A>): IStream<A> =>
-    new Until(signal, stream)
+export const until: IUntilCurry = curry2((signal, stream) => new Until(signal, stream))
 
 /**
  * Begin a stream when another stream emits a value.
  * The stream begins when the signal emits, ignoring all events before that.
  */
-export const since =
-  <A>(signal: IStream<unknown>) =>
-  (stream: IStream<A>): IStream<A> =>
-    new Since(signal, stream)
+export const since: ISinceCurry = curry2((signal, stream) => new Since(signal, stream))
 
 /**
  * Emit events only during a time window.
  * The time window is defined by a stream of streams - events are emitted
  * after the outer stream emits and until the inner stream emits.
  */
-export const during =
-  <A>(timeWindow: IStream<IStream<unknown>>) =>
-  (stream: IStream<A>): IStream<A> => {
-    const untilJoined = until(join(timeWindow))(stream)
-    return since(timeWindow)(untilJoined)
-  }
+export const during: IDuringCurry = curry2((timeWindow, stream) => {
+  const untilJoined = until(join(timeWindow), stream)
+  return since(timeWindow, untilJoined)
+})
 
 class Until<A> implements IStream<A> {
   constructor(

@@ -1,5 +1,5 @@
 import { snapshot, startWith } from '@most/core'
-import { $svg, attr, component, type IBehavior, type ISlottable, nodeEvent, O, style, stylePseudo } from 'aelea/core'
+import { $svg, attr, component, type IBehavior, type ISlottable, nodeEvent, style, stylePseudo } from 'aelea/core'
 import { $icon } from 'aelea/ui-components'
 import { pallete, type Theme, theme } from 'aelea/ui-components-theme'
 import { setTheme } from 'aelea/ui-components-theme-browser'
@@ -9,7 +9,7 @@ export const $Picker = (themeList: Theme[]) =>
     const currentTheme = startWith(theme, changeThemeEffect)
 
     return [
-      O(
+      o(
         style({
           position: 'absolute',
           left: '15px',

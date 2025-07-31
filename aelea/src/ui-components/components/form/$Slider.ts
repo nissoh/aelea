@@ -1,7 +1,6 @@
 import { filter, map, merge, now, switchLatest, tap } from '@most/core'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
-import { O } from '../../../core/common.js'
 import { $element, attr, component, nodeEvent, style, stylePseudo } from '../../../core/index.js'
 import type { INode } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
@@ -44,7 +43,7 @@ export const $Slider = ({ value, step = 0.01 }: Slider) =>
         ),
         attr({ type: 'range', min: 0, max: 1, step }),
 
-        O(
+        o(
           map((node) =>
             merge(
               now(node),

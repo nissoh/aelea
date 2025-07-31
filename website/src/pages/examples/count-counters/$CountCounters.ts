@@ -1,5 +1,5 @@
 import { chain, constant, map, merge, mergeArray, multicast, now, scan, snapshot, until } from '@most/core'
-import { $node, $text, behavior, component, type IBehavior, O, replayLatest, style } from 'aelea/core'
+import { $node, $text, behavior, component, type IBehavior, replayLatest, style } from 'aelea/core'
 import { $Button, $column, $row, $seperator, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 import { $TrashBtn } from '../../../elements/$common'
@@ -52,18 +52,18 @@ export default component(
               $seperator,
               $row(style({ alignItems: 'center' }), spacing.big)(
                 $TrashBtn({
-                  click: O(
+                  click: o(
                     removeTether(),
                     disposeCounterTether(),
                     disposedCounterCountTether(snapshot((val) => -val, value))
                   )
                 }),
                 $Counter({ value })({
-                  increment: O(
+                  increment: o(
                     countersIncrementTether(),
                     valueChangeTether(snapshot((val, increment) => val + increment, value))
                   ),
-                  decrement: O(
+                  decrement: o(
                     countersDecrementTether(),
                     valueChangeTether(snapshot((val, increment) => val + increment, value))
                   )

@@ -3,7 +3,7 @@ import type { IBehavior } from '../../../core/combinator/behavior.js'
 import { component } from '../../../core/combinator/component.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
 import { style } from '../../../core/combinator/style.js'
-import { type IOps, O } from '../../../core/common.js'
+import type { IOps } from '../../../core/common.js'
 import type { INode } from '../../../core/source/node.js'
 import { $node } from '../../../core/source/node.js'
 import { $text } from '../../../core/source/text.js'
@@ -27,9 +27,9 @@ export const $TextField = (config: TextField) =>
     ([change, valueTether]: IBehavior<string, string>, [blur, blurTether]: IBehavior<FocusEvent, FocusEvent>) => {
       const { hint } = config
       const multicastValidation = config.validation
-        ? O(config.validation, (src) => sample(src, blur), multicast)
+        ? o(config.validation, (src) => sample(src, blur), multicast)
         : undefined
-      const fieldOp = config.containerOp ?? O()
+      const fieldOp = config.containerOp ?? o()
       const validation = multicastValidation ? skipRepeats(multicastValidation(change)) : never()
 
       const $messageLabel = $node(style({ fontSize: '75%', width: '100%' }))

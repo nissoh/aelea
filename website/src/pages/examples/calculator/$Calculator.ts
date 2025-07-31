@@ -1,11 +1,11 @@
 import { combine, empty, map, startWith } from '@most/core'
-import { $node, $text, attr, component, type IBehavior, O, style } from 'aelea/core'
+import { $node, $text, attr, component, type IBehavior, style } from 'aelea/core'
 import { $column, $Field, $NumberTicker, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 
 const add = (x: number, y: number) => x + y
 
-const extractValue = O(
+const extractValue = o(
   map((str: string) => Number(str)),
   startWith(0)
 )

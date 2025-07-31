@@ -7,7 +7,6 @@ import {
   type I$Slottable,
   type IBehavior,
   motion,
-  O,
   style,
   styleInline
 } from 'aelea/core'
@@ -66,7 +65,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
 
           $custom('render-here')(style({ padding: '10px 15px' }))(
             switchLatest(
-              O(
+              o(
                 debounce(500),
                 map(
                   async ({

@@ -1,6 +1,5 @@
 import { map, mergeArray } from '@most/core'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
-import { O } from '../../../core/common.js'
 import { $element, $node, attr, attrBehavior, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
 import type { INode } from '../../../core/source/node.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
@@ -42,7 +41,7 @@ export const $Checkbox = ({ value }: Checkbox) =>
         dismissTether(dismissOp)
       )
 
-      const containerStyle = O(
+      const containerStyle = o(
         styleBehavior(
           map((active) => (active ? { borderColor: pallete.primary } : null), mergeArray([focusStyle, dismissstyle]))
         ),

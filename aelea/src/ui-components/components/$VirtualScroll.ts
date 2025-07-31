@@ -16,7 +16,7 @@ import {
 import type { IBehavior } from '../../core/combinator/behavior.js'
 import { component } from '../../core/combinator/component.js'
 import { style } from '../../core/combinator/style.js'
-import { type IOps, O } from '../../core/common.js'
+import type { IOps } from '../../core/common.js'
 import type { I$Node, I$Slottable, INode } from '../../core/source/node.js'
 import { $custom, $node } from '../../core/source/node.js'
 import { $text } from '../../core/source/text.js'
@@ -45,7 +45,7 @@ export interface QuantumScroll {
 
 const $defaultLoader = $node(style({ color: pallete.foreground, padding: '3px 10px' }))($text('Loading...'))
 
-export const $VirtualScroll = ({ dataSource, containerOps = O(), $loader = $defaultLoader }: QuantumScroll) =>
+export const $VirtualScroll = ({ dataSource, containerOps = o(), $loader = $defaultLoader }: QuantumScroll) =>
   component(([intersecting, intersectingTether]: IBehavior<INode, IntersectionObserverEntry>) => {
     const multicastDatasource = multicast(dataSource)
 

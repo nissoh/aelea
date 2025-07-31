@@ -1,10 +1,10 @@
 import { now } from '@most/core'
-import { component, type IBehavior, O, style } from 'aelea/core'
+import { component, type IBehavior, style } from 'aelea/core'
 import { $Checkbox, $Field, $row, spacing } from 'aelea/ui-components'
 import { $TrashBtn } from '../../../elements/$common'
 import type { Todo } from './$CreateTodo'
 
-const rowStyle = O(spacing.default, style({ alignItems: 'center' }))
+const rowStyle = o(spacing.default, style({ alignItems: 'center' }))
 
 interface TodoItem {
   todo: Todo

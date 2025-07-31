@@ -21,8 +21,8 @@ import { constant, map, periodic, scan } from '@most/core'
 
 const add = (n1: number, n2: number) => n1 + n2
 
-// O(AKA Pipe) compose operations for later consumption
-const accumulate = O(
+// o(AKA Pipe) compose operations for later consumption
+const accumulate = o(
   periodic,     //  event of undefined
   constant(1),  //  map undefined to 1
   scan(add, 0), //  add up numbers starting with 0

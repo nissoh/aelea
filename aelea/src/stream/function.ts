@@ -135,17 +135,6 @@ export interface Op {
   ): M
 }
 
-/** @license MIT License (c) copyright 2010-2016 original author or authors */
-
-export const id = <A>(x: A): A => x
-
-export const compose =
-  <A, B, C>(f: (b: B) => C, g: (a: A) => B) =>
-  (x: A): C =>
-    f(g(x))
-
-export const apply = <A, B>(f: (a: A) => B, x: A): B => f(x)
-
 export interface Curried2<A, B, C> {
   (): Curried2<A, B, C>
   (a: A, b: B): C
@@ -213,4 +202,133 @@ export function curry4<A, B, C, D, E>(f: (a: A, b: B, c: C, d: D) => E): Curried
     }
   }
   return curried as any
+}
+
+/**
+ * Function composition operator.
+ * Composes functions from left to right for later application.
+ * o(f, g, h)(x) === h(g(f(x)))
+ */
+export const o: O = (...fns: readonly any[]) => {
+  switch (fns.length) {
+    case 0:
+      return (x: any) => x
+    case 1:
+      return fns[0]
+    case 2:
+      return (x: any) => fns[1](fns[0](x))
+    case 3:
+      return (x: any) => fns[2](fns[1](fns[0](x)))
+    case 4:
+      return (x: any) => fns[3](fns[2](fns[1](fns[0](x))))
+    case 5:
+      return (x: any) => fns[4](fns[3](fns[2](fns[1](fns[0](x)))))
+    case 6:
+      return (x: any) => fns[5](fns[4](fns[3](fns[2](fns[1](fns[0](x))))))
+    case 7:
+      return (x: any) => fns[6](fns[5](fns[4](fns[3](fns[2](fns[1](fns[0](x)))))))
+    case 8:
+      return (x: any) => fns[7](fns[6](fns[5](fns[4](fns[3](fns[2](fns[1](fns[0](x))))))))
+    case 9:
+      return (x: any) => fns[8](fns[7](fns[6](fns[5](fns[4](fns[3](fns[2](fns[1](fns[0](x)))))))))
+    case 10:
+      return (x: any) => fns[9](fns[8](fns[7](fns[6](fns[5](fns[4](fns[3](fns[2](fns[1](fns[0](x))))))))))
+    case 11:
+      return (x: any) => fns[10](fns[9](fns[8](fns[7](fns[6](fns[5](fns[4](fns[3](fns[2](fns[1](fns[0](x)))))))))))
+    case 12:
+      return (x: any) =>
+        fns[11](fns[10](fns[9](fns[8](fns[7](fns[6](fns[5](fns[4](fns[3](fns[2](fns[1](fns[0](x))))))))))))
+    default:
+      return (x: any) => {
+        let ret = x
+        for (let i = 0; i < fns.length; i++) ret = fns[i](ret)
+        return ret
+      }
+  }
+}
+
+export interface O {
+  (): <A>(a: A) => A
+  <A, B>(ab: (_: A) => B): (_: A) => B
+  <A, B, C>(ab: (_: A) => B, bc: (_: B) => C): (_: A) => C
+  <A, B, C, D>(ab: (_: A) => B, bc: (_: B) => C, cd: (_: C) => D): (_: A) => D
+  <A, B, C, D, E>(ab: (_: A) => B, bc: (_: B) => C, cd: (_: C) => D, de: (_: D) => E): (_: A) => E
+  <A, B, C, D, E, F>(ab: (_: A) => B, bc: (_: B) => C, cd: (_: C) => D, de: (_: D) => E, ef: (_: E) => F): (_: A) => F
+  <A, B, C, D, E, F, G>(
+    ab: (_: A) => B,
+    bc: (_: B) => C,
+    cd: (_: C) => D,
+    de: (_: D) => E,
+    ef: (_: E) => F,
+    fg: (_: F) => G
+  ): (_: A) => G
+  <A, B, C, D, E, F, G, H>(
+    ab: (_: A) => B,
+    bc: (_: B) => C,
+    cd: (_: C) => D,
+    de: (_: D) => E,
+    ef: (_: E) => F,
+    fg: (_: F) => G,
+    gh: (_: G) => H
+  ): (_: A) => H
+  <A, B, C, D, E, F, G, H, I>(
+    ab: (_: A) => B,
+    bc: (_: B) => C,
+    cd: (_: C) => D,
+    de: (_: D) => E,
+    ef: (_: E) => F,
+    fg: (_: F) => G,
+    gh: (_: G) => H,
+    hi: (_: H) => I
+  ): (_: A) => I
+  <A, B, C, D, E, F, G, H, I, J>(
+    ab: (_: A) => B,
+    bc: (_: B) => C,
+    cd: (_: C) => D,
+    de: (_: D) => E,
+    ef: (_: E) => F,
+    fg: (_: F) => G,
+    gh: (_: G) => H,
+    hi: (_: H) => I,
+    ij: (_: I) => J
+  ): (_: A) => J
+  <A, B, C, D, E, F, G, H, I, J, K>(
+    ab: (_: A) => B,
+    bc: (_: B) => C,
+    cd: (_: C) => D,
+    de: (_: D) => E,
+    ef: (_: E) => F,
+    fg: (_: F) => G,
+    gh: (_: G) => H,
+    hi: (_: H) => I,
+    ij: (_: I) => J,
+    jk: (_: J) => K
+  ): (_: A) => K
+  <A, B, C, D, E, F, G, H, I, J, K, L>(
+    ab: (_: A) => B,
+    bc: (_: B) => C,
+    cd: (_: C) => D,
+    de: (_: D) => E,
+    ef: (_: E) => F,
+    fg: (_: F) => G,
+    gh: (_: G) => H,
+    hi: (_: H) => I,
+    ij: (_: I) => J,
+    jk: (_: J) => K,
+    kl: (_: K) => L
+  ): (_: A) => L
+  <A, B, C, D, E, F, G, H, I, J, K, L, M>(
+    ab: (_: A) => B,
+    bc: (_: B) => C,
+    cd: (_: C) => D,
+    de: (_: D) => E,
+    ef: (_: E) => F,
+    fg: (_: F) => G,
+    gh: (_: G) => H,
+    hi: (_: H) => I,
+    ij: (_: I) => J,
+    jk: (_: J) => K,
+    kl: (_: K) => L,
+    lm: (_: L) => M
+  ): (_: A) => M
 }
