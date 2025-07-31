@@ -1,37 +1,42 @@
+import { curry2 } from '../function.js'
 import { MergingSink } from '../sink.js'
 import type { Disposable, IStream, Sink } from '../types.js'
 
-export const combine = <T extends readonly unknown[]>(
-  streams: { [K in keyof T]: IStream<T[K]> },
-  initial: T
-): IStream<T> => ({
-  run(scheduler, sink) {
-    const state = { active: streams.length }
-    const streamCount = streams.length
+export interface ICombineCurry {
+  <T extends readonly unknown[]>(streams: { [K in keyof T]: IStream<T[K]> }, initial: T): IStream<T>
+  <T extends readonly unknown[]>(streams: { [K in keyof T]: IStream<T[K]> }): (initial: T) => IStream<T>
+}
 
-    // Pre-allocate arrays with known size
-    const disposables = new Array<Disposable>(streamCount)
-    const values = new Array(streamCount)
+export const combine: ICombineCurry = curry2(
+  <T extends readonly unknown[]>(streams: { [K in keyof T]: IStream<T[K]> }, initial: T) => ({
+    run(scheduler, sink) {
+      const state = { active: streams.length }
+      const streamCount = streams.length
 
-    // Copy initial values efficiently
-    for (let i = 0; i < streamCount; i++) {
-      values[i] = initial[i]
-    }
+      // Pre-allocate arrays with known size
+      const disposables = new Array<Disposable>(streamCount)
+      const values = new Array(streamCount)
 
-    // Use traditional for loop to avoid allocations
-    for (let i = 0; i < streamCount; i++) {
-      disposables[i] = streams[i].run(scheduler, new CombineSink(sink, values as [...T], i, state, disposables))
-    }
+      // Copy initial values efficiently
+      for (let i = 0; i < streamCount; i++) {
+        values[i] = initial[i]
+      }
 
-    return {
-      [Symbol.dispose]: () => {
-        for (let i = 0; i < disposables.length; i++) {
-          disposables[i][Symbol.dispose]()
+      // Use traditional for loop to avoid allocations
+      for (let i = 0; i < streamCount; i++) {
+        disposables[i] = streams[i].run(scheduler, new CombineSink(sink, values as [...T], i, state, disposables))
+      }
+
+      return {
+        [Symbol.dispose]: () => {
+          for (let i = 0; i < disposables.length; i++) {
+            disposables[i][Symbol.dispose]()
+          }
         }
       }
     }
-  }
-})
+  })
+)
 
 class CombineSink<T extends readonly unknown[]> extends MergingSink<unknown> {
   constructor(

@@ -1,5 +1,5 @@
-import { O } from '../../core/common.js'
 import { style, stylePseudo } from '../../core/index.js'
+import { op } from '../../stream/index.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 
 export const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
@@ -11,7 +11,7 @@ const text = style({
 })
 const customScroll = isFirefox
   ? style({ scrollbarColor: `${pallete.foreground} transparent` })
-  : O(
+  : op(
       stylePseudo('::-webkit-scrollbar-thumb:hover', {
         backgroundColor: pallete.primary
       }),

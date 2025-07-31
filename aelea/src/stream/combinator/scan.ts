@@ -1,13 +1,18 @@
+import { curry3 } from '../function.js'
 import { TransformSink } from '../sink.js'
 import type { IStream, Sink } from '../types.js'
 
-export const scan =
-  <I, O>(f: (acc: O, value: I) => O, initial: O) =>
-  (s: IStream<I>): IStream<O> => ({
-    run(env, sink) {
-      return s.run(env, new ScanSink(f, initial, sink))
-    }
-  })
+export interface IScanCurry {
+  <I, O>(f: (acc: O, value: I) => O, initial: O, s: IStream<I>): IStream<O>
+  <I, O>(f: (acc: O, value: I) => O, initial: O): (s: IStream<I>) => IStream<O>
+  <I, O>(f: (acc: O, value: I) => O): (initial: O) => (s: IStream<I>) => IStream<O>
+}
+
+export const scan: IScanCurry = curry3(<I, O>(f: (acc: O, value: I) => O, initial: O, s: IStream<I>) => ({
+  run(env, sink) {
+    return s.run(env, new ScanSink(f, initial, sink))
+  }
+}))
 
 class ScanSink<In, Out> extends TransformSink<In, Out> {
   constructor(

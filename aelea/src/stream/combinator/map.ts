@@ -1,13 +1,17 @@
+import { curry2 } from '../function.js'
 import { TransformSink } from '../sink.js'
 import type { IStream, Sink } from '../types.js'
 
-export const map =
-  <I, O>(f: (value: I) => O) =>
-  (source: IStream<I>): IStream<O> => ({
-    run(scheduler, sink) {
-      return source.run(scheduler, new MapSink(f, sink))
-    }
-  })
+export interface IMapCurry {
+  <T, R>(f: (value: T) => R, source: IStream<T>): IStream<R>
+  <T, R>(f: (value: T) => R): <R>(source: IStream<T>) => IStream<R>
+}
+
+export const map: IMapCurry = curry2((f, source) => ({
+  run(scheduler, sink) {
+    return source.run(scheduler, new MapSink(f, sink))
+  }
+}))
 
 class MapSink<In, Out> extends TransformSink<In, Out> {
   constructor(

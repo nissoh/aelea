@@ -1,51 +1,136 @@
-import type { Disposable, IStream, Sink } from '../types.js'
+import { disposeBoth } from '../disposable.js'
+import type { Disposable, IStream, Scheduler, Sink } from '../types.js'
+import { SettableDisposable } from '../utils/SettableDisposable.js'
+import { join } from './join.js'
 
 /**
- * End a stream when another stream emits a value
+ * End a stream when another stream emits a value.
+ * The stream ends when the signal emits, keeping all events before that.
  */
 export const until =
-  <A, B>(endSignal: IStream<B>) =>
-  (source: IStream<A>): IStream<A> => ({
-    run(scheduler, sink) {
-      let ended = false
-      let disposables: Disposable[] = []
+  <A>(signal: IStream<unknown>) =>
+  (stream: IStream<A>): IStream<A> =>
+    new Until(signal, stream)
 
-      const endSink: Sink<B> = {
-        event: () => {
-          if (!ended) {
-            ended = true
-            sink.end()
-            // Dispose all
-            disposables.forEach((d) => d[Symbol.dispose]())
-          }
-        },
-        error: (e) => sink.error(e),
-        end: () => {} // Don't end main stream if endSignal ends
-      }
+/**
+ * Begin a stream when another stream emits a value.
+ * The stream begins when the signal emits, ignoring all events before that.
+ */
+export const since =
+  <A>(signal: IStream<unknown>) =>
+  (stream: IStream<A>): IStream<A> =>
+    new Since(signal, stream)
 
-      const mainSink: Sink<A> = {
-        event: (value) => {
-          if (!ended) {
-            sink.event(value)
-          }
-        },
-        error: (e) => sink.error(e),
-        end: () => {
-          if (!ended) {
-            ended = true
-            sink.end()
-            disposables.forEach((d) => d[Symbol.dispose]())
-          }
-        }
-      }
+/**
+ * Emit events only during a time window.
+ * The time window is defined by a stream of streams - events are emitted
+ * after the outer stream emits and until the inner stream emits.
+ */
+export const during =
+  <A>(timeWindow: IStream<IStream<unknown>>) =>
+  (stream: IStream<A>): IStream<A> => {
+    const untilJoined = until(join(timeWindow))(stream)
+    return since(timeWindow)(untilJoined)
+  }
 
-      disposables = [endSignal.run(scheduler, endSink), source.run(scheduler, mainSink)]
+class Until<A> implements IStream<A> {
+  constructor(
+    private readonly maxSignal: IStream<unknown>,
+    private readonly source: IStream<A>
+  ) {}
 
-      return {
-        [Symbol.dispose]: () => {
-          ended = true
-          disposables.forEach((d) => d[Symbol.dispose]())
-        }
-      }
+  run(scheduler: Scheduler, sink: Sink<A>): Disposable {
+    const disposable = new SettableDisposable()
+
+    const d1 = this.source.run(scheduler, sink)
+    const d2 = this.maxSignal.run(scheduler, new UntilSink(sink, disposable))
+    disposable.setDisposable(disposeBoth(d1, d2))
+
+    return disposable
+  }
+}
+
+class Since<A> implements IStream<A> {
+  constructor(
+    private readonly minSignal: IStream<unknown>,
+    private readonly source: IStream<A>
+  ) {}
+
+  run(scheduler: Scheduler, sink: Sink<A>): Disposable {
+    const min = new LowerBoundSink(this.minSignal, sink, scheduler)
+    const d = this.source.run(scheduler, new SinceSink(min, sink))
+
+    return disposeBoth(min, d)
+  }
+}
+
+class SinceSink<A> implements Sink<A> {
+  constructor(
+    private readonly min: LowerBoundSink<A>,
+    private readonly sink: Sink<A>
+  ) {}
+
+  event(x: A): void {
+    if (this.min.allow) {
+      this.sink.event(x)
     }
-  })
+  }
+
+  error(e: any): void {
+    this.sink.error(e)
+  }
+
+  end(): void {
+    this.sink.end()
+  }
+}
+
+class LowerBoundSink<A> implements Sink<unknown>, Disposable {
+  allow = false
+  private disposable: Disposable
+
+  constructor(
+    signal: IStream<unknown>,
+    private readonly sink: Sink<A>,
+    scheduler: Scheduler
+  ) {
+    this.disposable = signal.run(scheduler, this)
+  }
+
+  event(): void {
+    this.allow = true
+    this[Symbol.dispose]()
+  }
+
+  error(e: any): void {
+    this.sink.error(e)
+  }
+
+  end(): void {
+    // Don't propagate end from signal
+  }
+
+  [Symbol.dispose](): void {
+    this.disposable[Symbol.dispose]()
+  }
+}
+
+class UntilSink implements Sink<unknown> {
+  constructor(
+    private readonly sink: Sink<any>,
+    private readonly disposable: Disposable
+  ) {}
+
+  event(): void {
+    this.disposable[Symbol.dispose]()
+    this.sink.end()
+  }
+
+  error(e: any): void {
+    this.sink.error(e)
+  }
+
+  end(): void {
+    // Don't end main stream if signal ends
+  }
+}

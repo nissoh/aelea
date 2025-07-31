@@ -1,58 +1,79 @@
-import type { IStream, Sink } from '../types.js'
+import { curry2 } from '../function.js'
+import type { Disposable, IStream, Sink } from '../types.js'
+
+export interface IDebounceCurry {
+  <T>(delay: number, source: IStream<T>): IStream<T>
+  <T>(delay: number): (source: IStream<T>) => IStream<T>
+}
 
 /**
- * Debounce stream events, only emitting after a period of inactivity
+ * Wait for a burst of events to subside and emit only the last event in the burst
+ * @param period events occuring more frequently than this will be suppressed
+ * @param stream stream to debounce
+ * @returns new debounced stream
  */
-export const debounce =
-  <T>(delay: number) =>
-  (source: IStream<T>): IStream<T> => ({
-    run(scheduler, sink) {
-      let handle: any = null
-      let latestValue: T
-      let hasValue = false
+export const debounce: IDebounceCurry = curry2((period, source) => ({
+  run(scheduler, sink) {
+    return new DebounceSink(period, source, sink, scheduler)
+  }
+}))
 
-      const clearTimer = () => {
-        if (handle !== null) {
-          clearTimeout(handle)
-          handle = null
-        }
-      }
+class DebounceSink<T> implements Sink<T>, Disposable {
+  private value: T | undefined
+  private timer: any = null
+  private readonly disposable: Disposable
 
-      const debounceSink: Sink<T> = {
-        event: (value) => {
-          latestValue = value
-          hasValue = true
+  constructor(
+    private readonly dt: number,
+    source: IStream<T>,
+    private readonly sink: Sink<T>,
+    private readonly scheduler: any
+  ) {
+    this.disposable = source.run(scheduler, this)
+  }
 
-          clearTimer()
+  event(value: T): void {
+    this.clearTimer()
+    this.value = value
+    this.timer = this.scheduler.schedule(() => {
+      this.handleTask()
+    }, this.dt)
+  }
 
-          handle = scheduler.schedule(() => {
-            if (hasValue) {
-              sink.event(latestValue)
-              hasValue = false
-            }
-          }, delay)
-        },
-        error: (e) => {
-          clearTimer()
-          sink.error(e)
-        },
-        end: () => {
-          // Emit any pending value before ending
-          if (hasValue && handle !== null) {
-            clearTimer()
-            sink.event(latestValue)
-          }
-          sink.end()
-        }
-      }
+  error(e: Error): void {
+    this.clearTimer()
+    this.sink.error(e)
+  }
 
-      const disposable = source.run(scheduler, debounceSink)
-
-      return {
-        [Symbol.dispose]: () => {
-          clearTimer()
-          disposable[Symbol.dispose]()
-        }
-      }
+  end(): void {
+    if (this.clearTimer()) {
+      // Emit pending value if timer was active
+      this.sink.event(this.value!)
+      this.value = undefined
     }
-  })
+    this.sink.end()
+  }
+
+  [Symbol.dispose](): void {
+    this.clearTimer()
+    this.disposable[Symbol.dispose]()
+  }
+
+  private handleTask(): void {
+    this.clearTimer()
+    this.sink.event(this.value!)
+  }
+
+  private clearTimer(): boolean {
+    if (this.timer === null) {
+      return false
+    }
+    if (this.timer.cancel) {
+      this.timer.cancel()
+    } else {
+      clearTimeout(this.timer)
+    }
+    this.timer = null
+    return true
+  }
+}

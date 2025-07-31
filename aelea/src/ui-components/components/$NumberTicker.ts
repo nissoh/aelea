@@ -38,9 +38,8 @@ interface NumberConfig {
   slots?: number // can be deprecated
 }
 export const $NumberTicker = ({ value$, incrementColor, decrementColor, textStyle = {}, slots = 10 }: NumberConfig) => {
-  const uniqueValues$ = skipRepeats(value$)
   const incrementMulticast = op(
-    uniqueValues$,
+    skipRepeats(value$),
     scan((seed: CountState | null, change: number): CountState => {
       const changeStr = change.toLocaleString()
 
@@ -71,28 +70,35 @@ export const $NumberTicker = ({ value$, incrementColor, decrementColor, textStyl
   return $node(
     ...Array(slots)
       .fill(undefined)
-      .map((_, slot) =>
-        $node(
+      .map((_, slot) => {
+        const $label = op(
+          incrementMulticast,
+          map(({ changeStr }: CountState) => changeStr[slot] ?? ''),
+          skipRepeats,
+          $text
+        )
+
+        return $node(
           styledTextTransition,
           styleBehavior(
-            switchLatest(
-              O(
-                skipRepeatsWith(
-                  (x: CountState, y: CountState) => x.changeStr[slot] === y.changeStr[slot] && slot < y.pos
-                ),
-                map(({ pos, dir }: CountState) => {
-                  const decayColor = at(1000, {})
-                  if (slot < pos) {
-                    return decayColor
-                  }
+            op(
+              incrementMulticast,
+              skipRepeatsWith(
+                (x: CountState, y: CountState) => x.changeStr[slot] === y.changeStr[slot] && slot < y.pos
+              ),
+              map(({ pos, dir }: CountState) => {
+                const decayColor = at(1000, {})
+                if (slot < pos) {
+                  return decayColor
+                }
 
-                  return merge(dir ? now(dirStyleMap[dir]) : empty(), decayColor)
-                })
-              )(incrementMulticast)
+                return merge(dir ? now(dirStyleMap[dir]) : empty, decayColor)
+              }),
+              switchLatest
             )
           )
-        )($text(skipRepeats(map(({ changeStr }: CountState) => changeStr[slot] ?? '', incrementMulticast))))
-      )
+        )($label)
+      })
   )
 }
 

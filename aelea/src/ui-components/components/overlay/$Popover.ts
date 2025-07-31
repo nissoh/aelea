@@ -1,46 +1,67 @@
-import type { IBehavior } from '../../../core/combinator/behavior.js'
-import { $node, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
-import type { I$Slottable, INodeCompose, ISlottable } from '../../../core/source/node.js'
-import { empty, type IStream, multicast } from '../../../stream/index.js'
+import {
+  $node,
+  component,
+  type I$Node,
+  type IBehavior,
+  type INode,
+  type INodeCompose,
+  type IStyleCSS,
+  nodeEvent,
+  style,
+  styleBehavior
+} from '../../../core/index.js'
+import {
+  constant,
+  empty,
+  filter,
+  type IStream,
+  map,
+  merge,
+  multicast,
+  op,
+  switchLatest,
+  until,
+  zip
+} from '../../../stream/index.js'
 import { colorAlpha } from '../../../ui-components-theme/color.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $column } from '../../elements/$elements.js'
-import { observer } from '../../index.js'
+import { observer } from '../../utils/elementObservers.js'
+import { isDesktopScreen } from '../../utils/screenUtils.js'
 
 export const $defaultPopoverContentContainer = $column(
   style({
     backgroundColor: pallete.middleground,
-    padding: '36px',
+    padding: isDesktopScreen ? '36px' : '16px',
     borderRadius: '24px',
-    border: `1px solid ${pallete.background}`,
+    border: `1px solid ${colorAlpha(pallete.foreground, 0.15)}`,
     boxShadow: `0 0 10px 0 ${colorAlpha(pallete.background, 0.5)}`
   })
 )
 
-interface IPopover {
-  open: IStream<I$Slottable>
+interface IPocus {
+  $open: IStream<I$Node>
+  $target: I$Node
+
   dismiss?: IStream<any>
-
-  $target: I$Slottable
-
+  spacing?: number
   $contentContainer?: INodeCompose
   $container?: INodeCompose
-  spacing?: number
 }
 
 export const $Popover = ({
-  open,
-  dismiss = empty,
-  spacing = 10,
+  $open: open,
+  $target,
   $contentContainer = $defaultPopoverContentContainer,
   $container = $node,
-  $target
-}: IPopover) =>
+  dismiss = empty,
+  spacing = 10
+}: IPocus) =>
   component(
     (
-      [overlayClick, overlayClickTether]: IBehavior<ISlottable, false>,
-      [targetIntersection, targetIntersectionTether]: IBehavior<ISlottable, IntersectionObserverEntry[]>,
-      [popoverContentDimension, popoverContentDimensionTether]: IBehavior<ISlottable, ResizeObserverEntry[]>
+      [overlayClick, overlayClickTether]: IBehavior<INode, false>,
+      [targetIntersection, targetIntersectionTether]: IBehavior<INode, IntersectionObserverEntry[]>,
+      [popoverContentDimension, popoverContentDimensionTether]: IBehavior<INode, ResizeObserverEntry[]>
     ) => {
       const openMulticast = multicast(open)
 
@@ -89,7 +110,7 @@ export const $Popover = ({
         style({
           position: 'fixed',
           zIndex: 2321,
-          backgroundColor: colorAlpha(pallete.background, 0.8),
+          backgroundColor: colorAlpha(pallete.horizon, 0.85),
           top: 0,
           left: 0,
           right: 0,
@@ -114,13 +135,16 @@ export const $Popover = ({
       const dismissEvent = merge(overlayClick, dismiss)
 
       const $content = switchLatest(
-        map((content) => {
-          const newLocal = $overlay()
-          return until(dismissEvent, mergeArray([style({ zIndex: 3456 })(contentOps(content)), newLocal]))
-        }, openMulticast)
+        op(
+          openMulticast,
+          map((content) => {
+            return until(dismissEvent)(merge(style({ zIndex: 3456, left: 0 })(contentOps(content)), $overlay()))
+          })
+        )
       )
 
-      const targetOp = O(
+      const targetOp = op(
+        $target,
         targetIntersectionTether(
           observer.intersection()
           // map(node => {
@@ -130,12 +154,15 @@ export const $Popover = ({
           // switchLatest
         ),
         styleBehavior(
-          merge(constant({ zIndex: 2345, position: 'relative' }, openMulticast), constant(null, dismissEvent))
+          merge(
+            constant({ zIndex: 2345, position: 'relative' } as IStyleCSS)(openMulticast), //
+            constant(null)(dismissEvent)
+          )
         )
       )
 
       return [
-        $container(targetOp($target), $content),
+        $container(targetOp, $content),
 
         {
           overlayClick

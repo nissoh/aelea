@@ -46,11 +46,15 @@ export const $Autocomplete = ({ type = InputType.TEXT, value = empty, name, plac
           dismissTether(dismissOp),
 
           changeTether((inputNode) =>
-            snapshot((node, text) => {
-              // applying by setting `HTMLInputElement.value` imperatively(only way known to me)
-              node.element.value = String(text)
-              return text
-            }, inputNode)(value)
+            snapshot(
+              (node, text) => {
+                // applying by setting `HTMLInputElement.value` imperatively(only way known to me)
+                node.element.value = String(text)
+                return text
+              },
+              inputNode,
+              value
+            )
           )
         )(),
 

@@ -1,7 +1,7 @@
-import { map, merge, switchLatest } from '@most/core'
 import type { IBehavior } from '../../core/combinator/behavior.js'
 import { $node, component, nodeEvent } from '../../core/index.js'
 import type { I$Slottable } from '../../core/source/node.js'
+import { type IStream, map, merge, switchLatest } from '../../stream/index.js'
 
 export interface Tab {
   content: I$Slottable
@@ -27,7 +27,7 @@ export const $Tabs = (config: Tabs) => {
             )(t.head)
           })
         ),
-        switchLatest(map((tab) => tab.content, config.selected))
+        switchLatest(map((tab: Tab) => tab.content)(config.selected))
       ),
 
       { clickTab }

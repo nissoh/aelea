@@ -1,14 +1,25 @@
 import { disposeBoth } from '../disposable.js'
+import { curry2, curry3 } from '../function.js'
 import type { Disposable, IStream, Scheduler, Sink } from '../types.js'
+
+export interface ISampleCurry {
+  <A, B>(values: IStream<A>, sampler: IStream<B>): IStream<A>
+  <A>(values: IStream<A>): <B>(sampler: IStream<B>) => IStream<A>
+}
 
 /**
  * Sample values from a stream whenever a sampler stream emits.
  * Returns the latest value from the values stream each time the sampler emits.
  */
-export const sample =
-  <A, B>(values: IStream<A>) =>
-  (sampler: IStream<B>): IStream<A> =>
-    snapshot((x) => x, values)(sampler)
+export const sample: ISampleCurry = curry2(<A, B>(values: IStream<A>, sampler: IStream<B>) =>
+  snapshot((x: A) => x, values, sampler)
+)
+
+export interface ISnapshotCurry {
+  <A, B, C>(f: (a: A, b: B) => C, values: IStream<A>, sampler: IStream<B>): IStream<C>
+  <A, B, C>(f: (a: A, b: B) => C, values: IStream<A>): (sampler: IStream<B>) => IStream<C>
+  <A, B, C>(f: (a: A, b: B) => C): (values: IStream<A>) => (sampler: IStream<B>) => IStream<C>
+}
 
 /**
  * Combine the latest values from two streams whenever the sampler stream emits.
@@ -17,13 +28,13 @@ export const sample =
  * @param sampler Stream that triggers sampling
  * @returns Stream of combined values
  */
-export const snapshot =
-  <A, B, C>(f: (a: A, b: B) => C, values: IStream<A>) =>
-  (sampler: IStream<B>): IStream<C> => ({
+export const snapshot: ISnapshotCurry = curry3(
+  <A, B, C>(f: (a: A, b: B) => C, values: IStream<A>, sampler: IStream<B>) => ({
     run(scheduler, sink) {
       return new Snapshot(f, values, sampler).run(scheduler, sink)
     }
   })
+)
 
 class Snapshot<A, B, C> {
   constructor(

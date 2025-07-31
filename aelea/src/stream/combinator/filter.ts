@@ -1,15 +1,19 @@
+import { curry2 } from '../function.js'
 import { TransformSink } from '../sink.js'
 import type { IStream, Sink } from '../types.js'
 
-export function filter<T, S extends T>(f: (value: T) => value is S): (s: IStream<T>) => IStream<S>
-export function filter<T>(f: (value: T) => boolean): (s: IStream<T>) => IStream<T>
-export function filter<T>(f: (value: T) => boolean) {
-  return (s: IStream<T>): IStream<T> => ({
-    run(scheduler, sink) {
-      return s.run(scheduler, new FilterSink(f, sink))
-    }
-  })
+export interface IFilterCurry {
+  // <T, S extends T>(f: (value: T) => value is S, s: IStream<T>): IStream<S>
+  <T>(f: (value: T) => boolean, s: IStream<T>): IStream<T>
+  // <T, S extends T>(f: (value: T) => value is S): (s: IStream<T>) => IStream<S>
+  <T>(f: (value: T) => boolean): (s: IStream<T>) => IStream<T>
 }
+
+export const filter: IFilterCurry = curry2((f, s) => ({
+  run(scheduler, sink) {
+    return s.run(scheduler, new FilterSink(f, sink))
+  }
+}))
 
 class FilterSink<T> extends TransformSink<T, T> {
   constructor(
@@ -28,4 +32,4 @@ class FilterSink<T> extends TransformSink<T, T> {
   }
 }
 
-export const filterNull = <T>(prov: IStream<T | null>) => filter<T | null, T>((ev): ev is T => ev !== null)(prov)
+export const filterNull = <T>(prov: IStream<T | null>) => filter((ev): ev is T => ev !== null, prov)

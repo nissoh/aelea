@@ -1,20 +1,24 @@
+import { curry2 } from '../function.js'
 import type { Disposable, IStream, Sink } from '../types.js'
 
-export const continueWith =
-  <T>(f: () => IStream<T>) =>
-  (s: IStream<T>): IStream<T> => ({
-    run(scheduler, sink) {
-      const continueWithSink = new ContinueWithSink(scheduler, sink, f)
-      const d = s.run(scheduler, continueWithSink)
-      continueWithSink.setDisposable(d)
+export interface IContinueWithCurry {
+  <T>(f: () => IStream<T>, s: IStream<T>): IStream<T>
+  <T>(f: () => IStream<T>): (s: IStream<T>) => IStream<T>
+}
 
-      return {
-        [Symbol.dispose](): void {
-          continueWithSink.dispose()
-        }
+export const continueWith: IContinueWithCurry = curry2((f, s) => ({
+  run(scheduler, sink) {
+    const continueWithSink = new ContinueWithSink(scheduler, sink, f)
+    const d = s.run(scheduler, continueWithSink)
+    continueWithSink.setDisposable(d)
+
+    return {
+      [Symbol.dispose](): void {
+        continueWithSink[Symbol.dispose]()
       }
     }
-  })
+  }
+}))
 
 class ContinueWithSink<T> implements Sink<T> {
   private disposable: Disposable | null = null
@@ -44,7 +48,7 @@ class ContinueWithSink<T> implements Sink<T> {
     this.disposable = d
   }
 
-  dispose(): void {
+  [Symbol.dispose](): void {
     if (this.disposable) {
       this.disposable[Symbol.dispose]()
     }

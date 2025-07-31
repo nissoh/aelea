@@ -4,6 +4,7 @@ export {
   combine,
   continueWith,
   debounce,
+  during,
   filter,
   filterNull,
   join,
@@ -13,13 +14,18 @@ export {
   mergeMapConcurrently,
   sample,
   scan,
+  since,
+  skip,
   skipRepeats,
   skipRepeatsWith,
+  slice,
   snapshot,
   switchLatest,
   take,
   tap,
-  until
+  until,
+  zip,
+  zipArray
 } from './combinator/index.js'
 export { isEmpty, isFunction, isStream, maybeOps, nullSink, toStream, tryRunning } from './common.js'
 export { disposeNone } from './core.js'

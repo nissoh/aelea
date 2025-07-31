@@ -3,15 +3,7 @@ import type { Disposable, IStream, Sink } from '../types.js'
 
 export const switchLatest = <T>(s: IStream<IStream<T>>): IStream<T> => ({
   run(env, sink) {
-    const switchSink = new SwitchSink(env, sink)
-    const outerDisposable = s.run(env, switchSink)
-
-    return {
-      [Symbol.dispose](): void {
-        outerDisposable[Symbol.dispose]()
-        switchSink.dispose()
-      }
-    }
+    return s.run(env, new SwitchSink(env, sink))
   }
 })
 
