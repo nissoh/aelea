@@ -15,7 +15,7 @@ export const attr: IAttributeCurry = curry2((attrs, ns) =>
     const attributes = { ...node.attributes, ...attrs }
 
     return { ...node, attributes } as INode
-  })(ns)
+  }, ns)
 )
 
 export interface IAttributeBehaviorCurry {
@@ -28,5 +28,5 @@ export const attrBehavior: IAttributeBehaviorCurry = curry2((attrs, node) => {
     const attributesBehavior = [...node.attributesBehavior, attrs]
 
     return { ...node, attributesBehavior }
-  })(node)
+  }, node)
 })

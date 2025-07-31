@@ -25,26 +25,6 @@ export function isEmpty(s: IStream<unknown>): boolean {
   return s === empty
 }
 
-export const disposeNone = { [Symbol.dispose]: () => {} }
-
-export const disposeAll = (disposables: readonly { [Symbol.dispose]: () => void }[]) => {
-  for (let i = 0; i < disposables.length; i++) {
-    disposables[i][Symbol.dispose]()
-  }
-}
-
-export const disposeBoth = <T extends { [Symbol.dispose]: () => void }>(
-  a: T,
-  b: T
-): { [Symbol.dispose]: () => void } => {
-  return {
-    [Symbol.dispose]: () => {
-      a[Symbol.dispose]()
-      b[Symbol.dispose]()
-    }
-  }
-}
-
 export const nullSink: Sink<any> = {
   event: () => {},
   error: () => {},
