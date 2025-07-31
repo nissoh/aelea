@@ -52,9 +52,13 @@ class SnapshotSink<A, B, C> implements Sink<B> {
 
   event(x: B): void {
     if (this.latest.hasValue) {
-      const f = this.f
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.sink.event(f(this.latest.value!, x))
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const result = this.f(this.latest.value!, x)
+        this.sink.event(result)
+      } catch (error) {
+        this.sink.error(error)
+      }
     }
   }
 

@@ -1,5 +1,5 @@
 import { curry2 } from '../function.js'
-import { PipeSink, TransformSink } from '../sink.js'
+import { PipeSink } from '../sink.js'
 import type { IStream, Sink } from '../types.js'
 
 export interface ITapCurry {

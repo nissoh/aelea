@@ -11,21 +11,23 @@ export const fromPromise = <T>(promise: Promise<T>): IStream<T> => ({
   run(_, sink) {
     let cancelled = false
 
-    promise
-      .then((value) => {
-        if (!cancelled) {
-          sink.event(value)
-          sink.end()
-        }
-      })
-      .catch((error) => {
-        if (!cancelled) {
-          sink.error(error)
-        }
-      })
+    function handleResolve(value: T): void {
+      if (!cancelled) {
+        sink.event(value)
+        sink.end()
+      }
+    }
+
+    function handleReject(error: any): void {
+      if (!cancelled) {
+        sink.error(error)
+      }
+    }
+
+    promise.then(handleResolve, handleReject)
 
     return {
-      [Symbol.dispose]: () => {
+      [Symbol.dispose]() {
         cancelled = true
       }
     }

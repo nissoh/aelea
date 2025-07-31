@@ -75,7 +75,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                     syntacticDiagnostics
                   }: ModelChangeBehavior): Promise<I$Slottable> => {
                     if (semanticDiagnostics.length || syntacticDiagnostics.length) {
-                      return never()
+                      return never
                     }
 
                     const emittedFiles = await worker.getEmitOutput(model.uri.toString())
@@ -85,13 +85,13 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                     const esModuleBlobUrl = URL.createObjectURL(new Blob([refImports], { type: 'text/javascript' }))
                     const esModule = await import(/* @vite-ignore */ esModuleBlobUrl)
 
-                    const value: I$Slottable = esModule.default ?? empty()
+                    const value: I$Slottable = esModule.default ?? empty
 
                     return value
                   }
                 ),
                 awaitPromises,
-                filter((node) => node !== never()),
+                filter((node) => node !== never),
                 startWith(
                   $node(style({ color: pallete.foreground, fontSize: '75%' }))($text('Loading Typescript Service...'))
                 )

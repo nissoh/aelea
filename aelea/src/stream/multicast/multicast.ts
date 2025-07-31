@@ -21,14 +21,7 @@ import type { Disposable, IStream, Sink } from '../types.js'
  * expensive(env, sink1)
  * expensive(env, sink2)
  */
-export const multicast = <T>(source: IStream<T>): IStream<T> => {
-  const multicastSource = new MulticastSource(source)
-  return {
-    run(scheduler, sink) {
-      return multicastSource.run(scheduler, sink)
-    }
-  }
-}
+export const multicast = <T>(source: IStream<T>): IStream<T> => new MulticastSource(source)
 
 class MulticastSource<T> implements Sink<T> {
   private readonly source: IStream<T>
@@ -41,18 +34,13 @@ class MulticastSource<T> implements Sink<T> {
   }
 
   run(scheduler: any, sink: Sink<T>): Disposable {
-    if (this.running) {
-      // Stream is already running, just add the sink
-      this.add(sink)
-    } else if (this.sinks.length === 0) {
-      // First subscriber
-      this.add(sink)
+    this.add(sink)
+
+    if (!this.running && this.sinks.length === 1) {
       this.running = true
       this.disposable = this.source.run(scheduler, this)
-    } else {
-      // Should not happen in normal usage
-      this.add(sink)
     }
+
     return new MulticastDisposable(this, sink)
   }
 
@@ -79,38 +67,42 @@ class MulticastSource<T> implements Sink<T> {
   // Sink implementation - forwards to all subscribed sinks
   event(value: T): void {
     const sinks = this.sinks
-    if (sinks.length === 1) {
+    const len = sinks.length
+
+    if (len === 1) {
       sinks[0].event(value)
       return
     }
 
     // Use a copy to handle synchronous unsubscription during event
     const sinksCopy = sinks.slice()
-    for (let i = 0; i < sinksCopy.length; i++) {
+    for (let i = 0; i < len; i++) {
       try {
         sinksCopy[i].event(value)
       } catch (e) {
-        // If one sink errors, continue with others
-        sinksCopy[i].error(e)
+        // Report error but continue with others
+        try {
+          sinksCopy[i].error(e)
+        } catch {} // Ignore errors in error handlers
       }
     }
   }
 
   error(error: any): void {
     const sinks = this.sinks.slice()
-    this.sinks = []
-    for (let i = 0; i < sinks.length; i++) {
-      sinks[i].error(error)
+    this.sinks.length = 0
+    for (const sink of sinks) {
+      sink.error(error)
     }
     this.dispose()
   }
 
   end(): void {
     const sinks = this.sinks.slice()
-    this.sinks = []
+    this.sinks.length = 0
     this.running = false
-    for (let i = 0; i < sinks.length; i++) {
-      sinks[i].end()
+    for (const sink of sinks) {
+      sink.end()
     }
     this.dispose()
   }

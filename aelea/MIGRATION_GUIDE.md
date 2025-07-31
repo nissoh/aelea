@@ -20,13 +20,13 @@
 | `constant(value, stream)` | `constant(value)(stream)` | In compat.ts |
 | `continueWith(f, stream)` | `continueWith(f)(stream)` | Curried |
 | `debounce(delay, stream)` | `debounce(delay)(stream)` | Curried |
-| `empty()` | `empty` | |
+| `empty` | `empty` | |
 | `filter(pred, stream)` | `filter(pred)(stream)` | Curried |
 | `fromPromise(promise)` | `fromPromise(promise)` | |
 | `map(f, stream)` | `map(f)(stream)` | Curried |
 | `merge(...streams)` | `merge(...streams)` | |
 | `multicast(stream)` | `multicast(stream)` | |
-| `never()` | `never` | |
+| `never` | `never` | |
 | `now(value)` | `now(value)` | |
 | `periodic(period, value)` | `periodic(period, value)` | |
 | `run(sink, scheduler, stream)` | `stream(scheduler, sink)` | Direct call |

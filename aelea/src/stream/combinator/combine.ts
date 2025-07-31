@@ -29,9 +29,7 @@ export const combine: ICombineCurry = curry2(
 
       return {
         [Symbol.dispose]: () => {
-          for (let i = 0; i < disposables.length; i++) {
-            disposables[i][Symbol.dispose]()
-          }
+          for (const d of disposables) d[Symbol.dispose]()
         }
       }
     }

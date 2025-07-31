@@ -14,7 +14,7 @@ export interface IButton extends Control {
   buttonOp?: IOps<INode<HTMLButtonElement>, INode<HTMLButtonElement>>
 }
 
-export const $Button = ({ disabled = never(), $content, buttonOp = o() }: IButton) =>
+export const $Button = ({ disabled = never, $content, buttonOp = o() }: IButton) =>
   component(
     (
       [focusStyle, interactionTether]: IBehavior<INode, true>,

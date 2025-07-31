@@ -51,7 +51,7 @@ export const $TextField = (config: TextField) =>
           const negativeStyle = style({ color: pallete.negative })
           return negativeStyle($messageLabel($text(msg)) as any)
         }
-        return hint ? $messageLabel($text(hint)) : empty()
+        return hint ? $messageLabel($text(hint)) : empty
       }, validation)
 
       const $message = switchLatest(merge($hint, $alert))

@@ -14,19 +14,19 @@ export const scan: IScanCurry = curry3(<I, O>(f: (acc: O, value: I) => O, initia
   }
 }))
 
-class ScanSink<In, Out> extends TransformSink<In, Out> {
+class ScanSink<I, O> extends TransformSink<I, O> {
   constructor(
-    public readonly f: (acc: Out, value: In) => Out,
-    private accumulator: Out,
-    sink: Sink<Out>
+    public readonly f: (acc: O, value: I) => O,
+    private accumulator: O,
+    sink: Sink<O>
   ) {
     super(sink)
   }
 
-  event(value: In) {
+  event(value: I) {
     try {
-      const transformed = this.f(this.accumulator, value)
-      this.sink.event(transformed)
+      this.accumulator = this.f(this.accumulator, value)
+      this.sink.event(this.accumulator)
     } catch (error) {
       this.sink.error(error)
     }

@@ -151,9 +151,7 @@ class BranchChildrenSinkList implements Disposable {
   }
 
   [Symbol.dispose](): void {
-    for (const d of this.disposables.values()) {
-      d[Symbol.dispose]()
-    }
+    for (const d of this.disposables.values()) d[Symbol.dispose]()
   }
 }
 

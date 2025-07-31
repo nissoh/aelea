@@ -41,7 +41,6 @@ export { scheduler } from './scheduler.js'
 export { MergingSink, TransformSink } from './sink.js'
 export {
   at,
-  delay,
   empty,
   fromArray,
   fromPromise,

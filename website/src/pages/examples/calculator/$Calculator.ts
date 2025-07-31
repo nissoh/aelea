@@ -26,10 +26,10 @@ export default component(([x, XTether]: IBehavior<string, number>, [y, YTether]:
     $row(
       $plus($text('+')),
       $column(spacing.tiny)(
-        $Field({ value: empty(), inputOp: placeholderZero })({
+        $Field({ value: empty, inputOp: placeholderZero })({
           change: XTether(extractValue)
         }),
-        $Field({ value: empty(), inputOp: placeholderZero })({
+        $Field({ value: empty, inputOp: placeholderZero })({
           change: YTether(extractValue)
         })
       )

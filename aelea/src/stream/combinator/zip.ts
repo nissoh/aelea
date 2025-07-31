@@ -174,7 +174,12 @@ class ZipSink<A, R> implements Sink<IndexedValue<A>> {
     for (let i = 0; i < this.buffers.length; i++) {
       values.push(this.buffers[i].shift()!)
     }
-    this.sink.event(this.f(...values))
+    try {
+      const result = this.f(...values)
+      this.sink.event(result)
+    } catch (error) {
+      this.sink.error(error)
+    }
   }
 
   private ended(): boolean {

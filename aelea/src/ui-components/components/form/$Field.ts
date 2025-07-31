@@ -27,10 +27,10 @@ export interface Field extends Input<string | number> {
   name?: string
   fieldStyle?: IStyleCSS
 
-  inputOp?: IOps<INode, INode>
+  inputOp?: IOps<INode>
 }
 
-export const $Field = ({ value = empty(), fieldStyle = {}, validation = never, inputOp = o() }: Field) =>
+export const $Field = ({ value = empty, fieldStyle = {}, validation = never, inputOp = o() }: Field) =>
   component(
     (
       [focusStyle, interactionTether]: IBehavior<INode, true>,

@@ -3,35 +3,39 @@ import type { Disposable, IStream, Scheduler, Sink } from './types.js'
 export const runStream =
   <T>(scheduler: Scheduler, sink: Sink<T>) =>
   (stream: IStream<T>) => {
-    const disposable = { current: null as Disposable | null }
+    let disposable: Disposable | null = null
 
-    const d = stream.run(scheduler, {
-      event: (value) => sink.event(value),
+    const wrappedSink: Sink<T> = {
+      event: sink.event.bind(sink),
       error(error) {
-        disposable.current?.[Symbol.dispose]()
+        disposable?.[Symbol.dispose]()
         sink.error(error)
       },
       end() {
-        disposable.current?.[Symbol.dispose]()
+        disposable?.[Symbol.dispose]()
         sink.end()
       }
-    })
+    }
 
-    disposable.current = d
-    return d
+    disposable = stream.run(scheduler, wrappedSink)
+    return disposable
   }
 
 export const runPromise =
   (scheduler: Scheduler, signal?: AbortSignal) =>
   <T>(stream: IStream<T>) =>
-    new Promise<void>((end, error) => {
-      const d = stream.run(scheduler, {
+    new Promise<void>((resolve, reject) => {
+      const disposable = stream.run(scheduler, {
         event() {},
-        error,
-        end
+        error: reject,
+        end: resolve
       })
-      signal?.addEventListener('abort', () => {
-        d[Symbol.dispose]()
-        error(new Error('Aborted'))
-      })
+
+      if (signal) {
+        const abort = () => {
+          disposable[Symbol.dispose]()
+          reject(new Error('Aborted'))
+        }
+        signal.addEventListener('abort', abort, { once: true })
+      }
     })

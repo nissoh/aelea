@@ -71,7 +71,7 @@ export const $VirtualScrollExample = component(
         $row(spacing.big)(
           $TextField({
             label: 'Filter',
-            value: empty(),
+            value: empty,
             hint: 'Remove any items that does not match filter and debounce changes by 300ms to prevert spamming',
             containerOp: style({ flex: 1 })
           })({

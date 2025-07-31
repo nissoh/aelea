@@ -13,5 +13,5 @@ export const mergeArray = <T>(streams: IStream<T>[]): IStream<T> => {
   if (streams.length === 1) {
     return streams[0]
   }
-  return streams.reduce((acc, stream) => merge(acc, stream))
+  return merge(...streams)
 }

@@ -336,7 +336,7 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
           attempDuration += 100
           return join(at(attempDuration, getWorkerStream))
         })
-      )(empty())
+      )(empty)
 
       const $editor = $wrapNativeElement(editorElement)(
         o(

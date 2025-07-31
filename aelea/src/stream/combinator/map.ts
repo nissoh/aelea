@@ -13,15 +13,15 @@ export const map: IMapCurry = curry2((f, source) => ({
   }
 }))
 
-class MapSink<In, Out> extends TransformSink<In, Out> {
+class MapSink<I, O> extends TransformSink<I, O> {
   constructor(
-    readonly f: (value: In) => Out,
-    sink: Sink<Out>
+    readonly f: (value: I) => O,
+    sink: Sink<O>
   ) {
     super(sink)
   }
 
-  event(value: In) {
+  event(value: I) {
     tryEvent(this.sink, this.f, value)
   }
 }

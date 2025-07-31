@@ -14,10 +14,10 @@ export abstract class PipeSink<T> implements Sink<T> {
   }
 }
 
-export abstract class TransformSink<In, Out> implements Sink<In> {
-  constructor(protected readonly sink: Sink<Out>) {}
+export abstract class TransformSink<I, O> implements Sink<I> {
+  constructor(protected readonly sink: Sink<O>) {}
 
-  abstract event(value: In): void
+  abstract event(value: I): void
 
   error(error: any) {
     this.sink.error(error)

@@ -54,7 +54,7 @@ export default (todos: Todo[]) =>
                               remove: removeTether(),
                               complete: completedTether()
                             })
-                          : empty(),
+                          : empty,
                       showCompleteState,
                       todoCompleted
                     )

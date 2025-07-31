@@ -34,3 +34,28 @@ export const disposeAll = (disposables: Disposable[]): Disposable => ({
 export const disposeNone: Disposable = {
   [Symbol.dispose]: () => {}
 }
+
+/**
+ * Wrap an existing disposable (which may not already have been once()d)
+ * so that it will only dispose its underlying resource at most once.
+ */
+export const disposeOnce = (disposable: Disposable): Disposable => new DisposeOnce(disposable)
+
+class DisposeOnce implements Disposable {
+  private disposed = false
+  private disposable?: Disposable
+
+  constructor(disposable: Disposable) {
+    this.disposable = disposable
+  }
+
+  [Symbol.dispose](): void {
+    if (!this.disposed) {
+      this.disposed = true
+      if (this.disposable) {
+        this.disposable[Symbol.dispose]()
+        this.disposable = undefined
+      }
+    }
+  }
+}

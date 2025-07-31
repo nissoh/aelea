@@ -11,13 +11,15 @@ export const periodic: IPeriodicCurry = curry2((period, value) => ({
     let currentDisposable: Disposable | null = null
     let disposed = false
 
-    const scheduleNext = () => {
+    function scheduleNext() {
       if (disposed) return
-      sink.event(value)
 
-      currentDisposable = scheduler.schedule(() => {
-        scheduleNext() // Schedule the next emission
-      }, period)
+      try {
+        sink.event(value)
+        currentDisposable = scheduler.schedule(scheduleNext, period)
+      } catch (error) {
+        sink.error(error)
+      }
     }
 
     // Start the periodic emissions
@@ -26,7 +28,9 @@ export const periodic: IPeriodicCurry = curry2((period, value) => ({
     return {
       [Symbol.dispose]() {
         disposed = true
-        currentDisposable?.[Symbol.dispose]()
+        if (currentDisposable) {
+          currentDisposable[Symbol.dispose]()
+        }
       }
     }
   }

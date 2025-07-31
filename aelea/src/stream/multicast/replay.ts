@@ -4,7 +4,7 @@ import type { Disposable, IStream, Scheduler, Sink } from '../../stream/types.js
 class StateSink<A> implements Sink<A> {
   constructor(
     private readonly parent: ReplayLatest<A>,
-    public sink: Sink<A>
+    private readonly sink: Sink<A>
   ) {}
 
   event(x: A): void {
@@ -13,40 +13,28 @@ class StateSink<A> implements Sink<A> {
     this.sink.event(x)
   }
 
-  error(e: any): void {
-    this.sink.error(e)
-  }
-
-  end(): void {
-    this.sink.end()
-  }
+  error = this.sink.error.bind(this.sink)
+  end = this.sink.end.bind(this.sink)
 }
 
 export class ReplayLatest<A> implements IStream<A> {
   latestvalue!: A
   hasValue = false
-  hasInitial: boolean
 
   constructor(
     private readonly source: IStream<A>,
     private readonly initialState?: A
-  ) {
-    this.hasInitial = initialState !== undefined
-  }
+  ) {}
 
   run(scheduler: Scheduler, sink: Sink<A>): Disposable {
-    let stream = this.source
-
-    if (this.hasValue) {
-      stream = startWith(this.latestvalue)(stream)
-    } else if (this.hasInitial && this.initialState !== undefined) {
-      stream = startWith(this.initialState)(stream)
-    }
+    const stream = this.hasValue
+      ? startWith(this.latestvalue)(this.source)
+      : this.initialState !== undefined
+        ? startWith(this.initialState)(this.source)
+        : this.source
 
     return stream.run(scheduler, new StateSink(this, sink))
   }
 }
 
-export function replayLatest<A>(s: IStream<A>, initialState?: A): IStream<A> {
-  return new ReplayLatest(s, initialState)
-}
+export const replayLatest = <A>(s: IStream<A>, initialState?: A): IStream<A> => new ReplayLatest(s, initialState)
