@@ -1,6 +1,6 @@
-import { constant, filter, merge } from '../../../stream/index.js'
 import { $element, nodeEvent, o, style } from '../../../core/index.js'
 import type { I$Node } from '../../../core/source/node.js'
+import { constant, filter, merge } from '../../../stream/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 

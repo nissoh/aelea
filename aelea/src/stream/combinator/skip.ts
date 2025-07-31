@@ -1,4 +1,5 @@
 import { curry2 } from '../function.js'
+import { PipeSink } from '../sink.js'
 import type { IStream, Sink } from '../types.js'
 
 export interface ISkipCurry {
@@ -15,13 +16,15 @@ export const skip: ISkipCurry = curry2((n, source) => ({
   }
 }))
 
-class SkipSink<T> implements Sink<T> {
+class SkipSink<T> extends PipeSink<T> {
   private skipped = 0
 
   constructor(
     private readonly n: number,
-    private readonly sink: Sink<T>
-  ) {}
+    sink: Sink<T>
+  ) {
+    super(sink)
+  }
 
   event(value: T): void {
     if (this.skipped < this.n) {
@@ -29,13 +32,5 @@ class SkipSink<T> implements Sink<T> {
     } else {
       this.sink.event(value)
     }
-  }
-
-  error(e: any): void {
-    this.sink.error(e)
-  }
-
-  end(): void {
-    this.sink.end()
   }
 }

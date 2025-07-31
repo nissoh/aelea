@@ -24,9 +24,11 @@ class ScanSink<In, Out> extends TransformSink<In, Out> {
   }
 
   event(value: In) {
-    this.tryEvent(() => {
-      this.accumulator = this.f(this.accumulator, value)
-      this.sink.event(this.accumulator)
-    })
+    try {
+      const transformed = this.f(this.accumulator, value)
+      this.sink.event(transformed)
+    } catch (error) {
+      this.sink.error(error)
+    }
   }
 }

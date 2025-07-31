@@ -26,18 +26,6 @@ export abstract class TransformSink<In, Out> implements Sink<In> {
   end(): void {
     this.sink.end()
   }
-
-  /**
-   * Helper method to execute a function and handle errors.
-   * If the function throws, the error is forwarded to the sink.
-   */
-  protected tryEvent(fn: () => void): void {
-    try {
-      fn()
-    } catch (error) {
-      this.sink.error(error)
-    }
-  }
 }
 
 export abstract class MergingSink<T> implements Sink<T> {
@@ -68,5 +56,18 @@ export abstract class MergingSink<T> implements Sink<T> {
     for (let i = 0; i < disposables.length; i++) {
       disposables[i][Symbol.dispose]()
     }
+  }
+}
+
+/**
+ * Helper method to execute a function and handle errors.
+ * If the function throws, the error is forwarded to the sink.
+ */
+export function tryEvent<In, Out>(sink: Sink<Out>, f: (value: In) => Out, value: In): void {
+  try {
+    const transformed = f(value)
+    sink.event(transformed)
+  } catch (error) {
+    sink.error(error)
   }
 }

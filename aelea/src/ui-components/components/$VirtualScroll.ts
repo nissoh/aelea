@@ -1,11 +1,25 @@
-
 import type { IBehavior } from '../../core/combinator/behavior.js'
 import { component } from '../../core/combinator/component.js'
 import { style } from '../../core/combinator/style.js'
 import type { I$Node, I$Slottable, INode } from '../../core/source/node.js'
 import { $custom, $node } from '../../core/source/node.js'
 import { $text } from '../../core/source/text.js'
-import { chain, delay, empty, filter, map, merge, multicast, o, scan, skip, startWith, switchLatest, type IOps, type IStream } from '../../stream/index.js'
+import {
+  chain,
+  delay,
+  empty,
+  filter,
+  type IOps,
+  type IStream,
+  map,
+  merge,
+  multicast,
+  o,
+  scan,
+  skip,
+  startWith,
+  switchLatest
+} from '../../stream/index.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column } from '../elements/$elements.js'
 import { designSheet } from '../style/designSheet.js'
@@ -63,23 +77,20 @@ export const $VirtualScroll = ({ dataSource, containerOps = o(), $loader = $defa
       map(() => ({ $intermediate: $loader }), scrollReuqestWithInitial)
     )
 
-    const $itemLoader = map(
-      (state) => {
-        if ('data' in state && state.data) {
-          if (Array.isArray(state.data)) {
-            return empty
-          }
-
-          const hasMoreItems = state.data.pageSize === state.data.$items.length
-          const value = hasMoreItems ? state.$intermediate : empty
-
-          return value
+    const $itemLoader = map((state) => {
+      if ('data' in state && state.data) {
+        if (Array.isArray(state.data)) {
+          return empty
         }
 
-        return state.$intermediate
-      },
-      loadState
-    )
+        const hasMoreItems = state.data.pageSize === state.data.$items.length
+        const value = hasMoreItems ? state.$intermediate : empty
+
+        return value
+      }
+
+      return state.$intermediate
+    }, loadState)
 
     return [
       $container(

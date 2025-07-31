@@ -1,5 +1,5 @@
 import { curry2 } from '../function.js'
-import { TransformSink } from '../sink.js'
+import { TransformSink, tryEvent } from '../sink.js'
 import type { IStream, Sink } from '../types.js'
 
 export interface IMapCurry {
@@ -22,10 +22,6 @@ class MapSink<In, Out> extends TransformSink<In, Out> {
   }
 
   event(value: In) {
-    try {
-      this.sink.event(this.f(value))
-    } catch (error) {
-      this.sink.error(error)
-    }
+    tryEvent(this.sink, this.f, value)
   }
 }

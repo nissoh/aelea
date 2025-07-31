@@ -1,5 +1,5 @@
 import { curry2 } from '../function.js'
-import { TransformSink } from '../sink.js'
+import { PipeSink } from '../sink.js'
 import type { IStream, Sink } from '../types.js'
 
 export interface ITakeCurry {
@@ -13,7 +13,7 @@ export const take: ITakeCurry = curry2((n, source) => ({
   }
 }))
 
-class TakeSink<T> extends TransformSink<T, T> {
+class TakeSink<T> extends PipeSink<T> {
   private taken = 0
 
   constructor(
@@ -26,7 +26,7 @@ class TakeSink<T> extends TransformSink<T, T> {
   event(value: T) {
     if (this.taken < this.n) {
       this.taken++
-      this.tryEvent(() => this.sink.event(value))
+      this.sink.event(value)
 
       if (this.taken === this.n) {
         this.end()

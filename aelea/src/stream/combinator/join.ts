@@ -1,4 +1,4 @@
-import { disposeNone, disposeAll } from '../disposable.js'
+import { disposeAll, disposeNone } from '../disposable.js'
 import { curry2, curry3 } from '../function.js'
 import type { Disposable, IStream, Scheduler, Sink } from '../types.js'
 

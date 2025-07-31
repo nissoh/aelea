@@ -24,11 +24,13 @@ class FilterSink<T> extends TransformSink<T, T> {
   }
 
   event(value: T) {
-    this.tryEvent(() => {
+    try {
       if (this.predicateFn(value)) {
         this.sink.event(value)
       }
-    })
+    } catch (error) {
+      this.sink.error(error)
+    }
   }
 }
 

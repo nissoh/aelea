@@ -1,12 +1,23 @@
-import { empty, map, merge, multicast, never, now, o, sample, skipRepeats, switchLatest } from '../../../stream/index.js'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
 import { component } from '../../../core/combinator/component.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
 import { style } from '../../../core/combinator/style.js'
-import type { IOps } from '../../../stream/index.js'
 import type { INode } from '../../../core/source/node.js'
 import { $node } from '../../../core/source/node.js'
 import { $text } from '../../../core/source/text.js'
+import type { IOps } from '../../../stream/index.js'
+import {
+  empty,
+  map,
+  merge,
+  multicast,
+  never,
+  now,
+  o,
+  sample,
+  skipRepeats,
+  switchLatest
+} from '../../../stream/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $row } from '../../elements/$elements.js'
 import { layoutSheet } from '../../style/layoutSheet.js'

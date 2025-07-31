@@ -1,8 +1,8 @@
-import { filter, map, merge, now, switchLatest, tap } from '../../../stream/index.js'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
 import { $element, attr, component, nodeEvent, o, style, stylePseudo } from '../../../core/index.js'
 import type { INode } from '../../../core/source/node.js'
+import { filter, map, merge, now, switchLatest, tap } from '../../../stream/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import type { Input } from './types.js'
 

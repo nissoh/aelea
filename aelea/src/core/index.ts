@@ -1,3 +1,7 @@
+export type { IStreamOrPromise } from '../stream/combinator/switchMap.js'
+export { switchMap } from '../stream/combinator/switchMap.js'
+export { o } from '../stream/function.js'
+export { tether } from '../stream/multicast/tether.js'
 export type { AnimationFrames } from './combinator/animate.js'
 export {
   animationFrames,
@@ -31,10 +35,6 @@ export {
   styleInline,
   stylePseudo
 } from './combinator/style.js'
-export type { IStreamOrPromise } from '../stream/combinator/switchMap.js'
-export { switchMap } from '../stream/combinator/switchMap.js'
-export { tether } from '../stream/multicast/tether.js'
-export { o } from '../stream/function.js'
 export type { IRunEnvironment } from './run.js'
 export { runBrowser } from './run.js'
 export type {

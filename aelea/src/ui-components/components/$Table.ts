@@ -10,16 +10,15 @@ import {
   merge,
   never,
   now,
-  op,
   scan,
   startWith,
   switchLatest
 } from '../../stream/index.js'
+import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column, $row } from '../elements/$elements.js'
 import { $icon } from '../elements/$icon.js'
 import { layoutSheet } from '../style/layoutSheet.js'
 import { spacing } from '../style/spacing.js'
-import { pallete } from '../../ui-components-theme/globalState.js'
 import {
   $VirtualScroll,
   type IScrollPagableReponse,

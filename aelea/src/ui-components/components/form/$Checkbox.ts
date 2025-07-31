@@ -1,8 +1,17 @@
-import { map, mergeArray } from '../../../stream/index.js'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
-import { $element, $node, attr, attrBehavior, component, nodeEvent, o, style, styleBehavior } from '../../../core/index.js'
+import {
+  $element,
+  $node,
+  attr,
+  attrBehavior,
+  component,
+  nodeEvent,
+  o,
+  style,
+  styleBehavior
+} from '../../../core/index.js'
 import type { INode } from '../../../core/source/node.js'
-import { merge } from '../../../stream/index.js'
+import { map, merge } from '../../../stream/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 import { dismissOp, interactionOp } from './form.js'

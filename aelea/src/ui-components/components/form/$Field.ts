@@ -1,10 +1,22 @@
-import { empty, filter, map, merge, multicast, never, now, o, startWith, switchLatest, tap } from '../../../stream/index.js'
 import type { IBehavior } from '../../../core/combinator/behavior.js'
 import { combineState } from '../../../core/combinator/state.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
-import type { IOps } from '../../../stream/index.js'
 import { $element, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
 import type { INode } from '../../../core/source/node.js'
+import type { IOps } from '../../../stream/index.js'
+import {
+  empty,
+  filter,
+  map,
+  merge,
+  multicast,
+  never,
+  now,
+  o,
+  startWith,
+  switchLatest,
+  tap
+} from '../../../stream/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'

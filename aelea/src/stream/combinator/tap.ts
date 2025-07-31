@@ -1,5 +1,5 @@
 import { curry2 } from '../function.js'
-import { TransformSink } from '../sink.js'
+import { PipeSink, TransformSink } from '../sink.js'
 import type { IStream, Sink } from '../types.js'
 
 export interface ITapCurry {
@@ -13,7 +13,7 @@ export const tap: ITapCurry = curry2((f, source) => ({
   }
 }))
 
-class TapSink<T> extends TransformSink<T, T> {
+class TapSink<T> extends PipeSink<T> {
   constructor(
     public readonly f: (value: T) => unknown,
     sink: Sink<T>
@@ -22,9 +22,6 @@ class TapSink<T> extends TransformSink<T, T> {
   }
 
   event(value: T) {
-    this.tryEvent(() => {
-      this.f(value)
-      this.sink.event(value)
-    })
+    this.f(value)
   }
 }

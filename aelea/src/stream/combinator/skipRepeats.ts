@@ -1,5 +1,5 @@
 import { curry2 } from '../function.js'
-import { TransformSink } from '../sink.js'
+import { PipeSink } from '../sink.js'
 import type { IStream, Sink } from '../types.js'
 
 /**
@@ -21,7 +21,7 @@ export const skipRepeatsWith: ISkipRepeatsWithCurry = curry2((equals, source) =>
   }
 }))
 
-class SkipRepeatsSink<T> extends TransformSink<T, T> {
+class SkipRepeatsSink<T> extends PipeSink<T> {
   private hasValue = false
   private previousValue!: T
 
@@ -36,7 +36,7 @@ class SkipRepeatsSink<T> extends TransformSink<T, T> {
     if (!this.hasValue || !this.equals(this.previousValue, value)) {
       this.hasValue = true
       this.previousValue = value
-      this.tryEvent(() => this.sink.event(value))
+      this.sink.event(value)
     }
   }
 }
