@@ -1,6 +1,6 @@
-import { $element, nodeEvent, o, style } from '../../../core/index.js'
+import { $element, nodeEvent, style } from '../../../core/index.js'
 import type { I$Node } from '../../../core/source/node.js'
-import { constant, filter, merge } from '../../../stream/index.js'
+import { constant, filter, merge, o } from '../../../stream/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 
@@ -10,7 +10,10 @@ export const interactionOp = o(
 )
 
 export const dismissOp = o(
-  (src: I$Node) => merge(nodeEvent('blur')(src), nodeEvent('pointerout')(src)),
+  (src: I$Node) => {
+    const newLocal = merge(nodeEvent('blur', src), nodeEvent('pointerout', src))
+    return newLocal
+  },
   filter((x) => document.activeElement !== x.target), // focused elements cannot be dismissed
   constant(false)
 )

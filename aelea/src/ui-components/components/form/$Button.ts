@@ -1,8 +1,7 @@
-import type { IBehavior } from '../../../core/combinator/behavior.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
-import { $element, attrBehavior, component, nodeEvent, o, styleBehavior } from '../../../core/index.js'
+import { $element, attrBehavior, component, nodeEvent, styleBehavior } from '../../../core/index.js'
 import type { I$Slottable, INode, ISlottable } from '../../../core/source/node.js'
-import { type IOps, map, merge, never } from '../../../stream/index.js'
+import { type IBehavior, type IOps, map, merge, never, op } from '../../../stream/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'
@@ -14,7 +13,7 @@ export interface IButton extends Control {
   buttonOp?: IOps<INode<HTMLButtonElement>, INode<HTMLButtonElement>>
 }
 
-export const $Button = ({ disabled = never, $content, buttonOp = o() }: IButton) =>
+export const $Button = ({ disabled = never, $content, buttonOp = op }: IButton) =>
   component(
     (
       [focusStyle, interactionTether]: IBehavior<INode, true>,

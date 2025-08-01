@@ -1,5 +1,4 @@
-import { map, switchLatest } from '../../stream/index.js'
-import type { IStream, Scheduler, Sink } from '../../stream/types.js'
+import { type IStream, map, type Scheduler, type Sink, switchLatest } from '../../stream/index.js'
 
 /**
  * Creates a stream that emits on every animation frame using the scheduler

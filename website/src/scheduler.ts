@@ -19,6 +19,19 @@ export const browserScheduler: Scheduler = {
     }
   },
 
+  // asap<TArgs extends readonly unknown[], T>(sink: any, callback: (sink: any, ...args: TArgs) => void, ...args: TArgs) {
+  //   let disposed = false
+
+  //   queueMicrotask(() => {
+  //     if (!disposed) {
+  //       callback(sink, ...args)
+  //     }
+  //   })
+
+  //   return disposeWith(() => {
+  //     disposed = true
+  //   })
+  // },
   asap<T, TArgs extends any[]>(
     sink: Sink<T>,
     callback: (sink: Sink<T>, ...args: TArgs) => void,

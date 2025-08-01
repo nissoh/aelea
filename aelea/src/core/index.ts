@@ -1,14 +1,8 @@
-export type { IStreamOrPromise } from '../stream/combinator/switchMap.js'
-export { switchMap } from '../stream/combinator/switchMap.js'
-export { o } from '../stream/function.js'
-export { tether } from '../stream/multicast/tether.js'
 export type { IAttributeProperties } from './combinator/attribute.js'
 export {
   attr,
   attrBehavior
 } from './combinator/attribute.js'
-export type { IBehavior, IComposeBehavior } from './combinator/behavior.js'
-export { behavior } from './combinator/behavior.js'
 export type {
   IComponentDefinitionCallback,
   IComponentOutputBehaviors,

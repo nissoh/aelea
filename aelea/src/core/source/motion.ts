@@ -16,37 +16,6 @@ export const MOTION_GENTLE = { stiffness: 120, damping: 14, precision: 0.01 }
 export const MOTION_WOBBLY = { stiffness: 180, damping: 12, precision: 0.01 }
 export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
 
-// Animation step function - mutates state for performance
-function animate(motionEnv: MotionConfig, state: MotionState, target: number): boolean {
-  const delta = target - state.position
-
-  // Spring force: F_spring = -k * x
-  const spring = motionEnv.stiffness * delta
-  // Damping force: F_damper = -b * v
-  const damper = motionEnv.damping * state.velocity
-
-  // Total force = F_spring + F_damper
-  // Acceleration = F / m (mass = 1)
-  const acceleration = spring - damper
-
-  // Update velocity and position
-  const newVelocity = state.velocity + acceleration * (1 / 60)
-  const newPosition = state.position + newVelocity * (1 / 60)
-
-  // Check if animation has settled
-  const settled = Math.abs(newVelocity) < motionEnv.precision && Math.abs(delta) < motionEnv.precision
-
-  if (settled) {
-    state.position = target
-    state.velocity = 0
-  } else {
-    state.velocity = newVelocity
-    state.position = newPosition
-  }
-
-  return settled
-}
-
 /**
  * Adapting to motion changes using "spring physics"
  *
@@ -124,4 +93,34 @@ class MotionTask implements Disposable {
     this.disposed = true
     this.animationDisposable?.[Symbol.dispose]()
   }
+}
+
+function animate(motionEnv: MotionConfig, state: MotionState, target: number): boolean {
+  const delta = target - state.position
+
+  // Spring force: F_spring = -k * x
+  const spring = motionEnv.stiffness * delta
+  // Damping force: F_damper = -b * v
+  const damper = motionEnv.damping * state.velocity
+
+  // Total force = F_spring + F_damper
+  // Acceleration = F / m (mass = 1)
+  const acceleration = spring - damper
+
+  // Update velocity and position
+  const newVelocity = state.velocity + acceleration * (1 / 60)
+  const newPosition = state.position + newVelocity * (1 / 60)
+
+  // Check if animation has settled
+  const settled = Math.abs(newVelocity) < motionEnv.precision && Math.abs(delta) < motionEnv.precision
+
+  if (settled) {
+    state.position = target
+    state.velocity = 0
+  } else {
+    state.velocity = newVelocity
+    state.position = newPosition
+  }
+
+  return settled
 }

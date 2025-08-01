@@ -25,7 +25,7 @@ class FilterSink<T> extends PipeSink<T> {
 
   event(value: T) {
     try {
-      if (!this.predicateFn(value)) {
+      if (this.predicateFn(value)) {
         this.sink.event(value)
       }
     } catch (error) {

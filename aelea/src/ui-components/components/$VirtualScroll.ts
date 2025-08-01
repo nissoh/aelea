@@ -1,4 +1,3 @@
-import type { IBehavior } from '../../core/combinator/behavior.js'
 import { component } from '../../core/combinator/component.js'
 import { style } from '../../core/combinator/style.js'
 import type { I$Node, I$Slottable, INode } from '../../core/source/node.js'
@@ -9,6 +8,7 @@ import {
   delay,
   empty,
   filter,
+  type IBehavior,
   type IOps,
   type IStream,
   map,

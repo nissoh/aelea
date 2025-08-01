@@ -1,5 +1,19 @@
-import { $node, $text, behavior, component, type IBehavior, style } from 'aelea/core'
-import { chain, constant, map, merge, mergeArray, now, replayState, scan, snapshot, until } from 'aelea/stream'
+import { $node, $text, component, style } from 'aelea/core'
+import {
+  behavior,
+  chain,
+  constant,
+  type IBehavior,
+  map,
+  merge,
+  mergeArray,
+  now,
+  o,
+  replayState,
+  scan,
+  snapshot,
+  until
+} from 'aelea/stream'
 import { $Button, $column, $row, $seperator, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 import { $TrashBtn } from '../../../elements/$common'

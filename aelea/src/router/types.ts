@@ -1,4 +1,4 @@
-import type { IStream } from '../stream/types.js'
+import type { IStream } from '../stream/index.js'
 
 export type Path = string
 export type Fragment = string | RegExp

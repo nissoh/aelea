@@ -1,6 +1,5 @@
-import type { IBehavior } from '../../../core/combinator/behavior.js'
 import { $element, attr, component, type INode, nodeEvent, styleBehavior } from '../../../core/index.js'
-import { empty, map, merge, op, snapshot } from '../../../stream/index.js'
+import { empty, type IBehavior, map, merge, op, snapshot } from '../../../stream/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'

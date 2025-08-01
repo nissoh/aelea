@@ -1,5 +1,17 @@
-import { $element, $text, behavior, component, type IBehavior, style } from 'aelea/core'
-import { chain, combine, empty, mergeArray, now, replayState, switchLatest, take, until } from 'aelea/stream'
+import { $element, $text, component, style } from 'aelea/core'
+import {
+  behavior,
+  chain,
+  combine,
+  empty,
+  type IBehavior,
+  mergeArray,
+  now,
+  replayState,
+  switchLatest,
+  take,
+  until
+} from 'aelea/stream'
 import { $Checkbox, $column, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 import type { Todo } from './$CreateTodo'

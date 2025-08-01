@@ -1,9 +1,5 @@
-import { nullSink } from '../../stream/common.js'
-import { disposeAll } from '../../stream/disposable.js'
-import { curry2 } from '../../stream/function.js'
-import type { IOps, IStream } from '../../stream/types.js'
+import { behavior, curry2, disposeAll, type IBehavior, type IOps, type IStream, nullSink } from '../../stream/index.js'
 import type { I$Slottable, INodeElement } from '../source/node.js'
-import { behavior, type IBehavior } from './behavior.js'
 
 export type IOutputTethers<A> = { [P in keyof A]?: IOps<A[P], A[P]> }
 

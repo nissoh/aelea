@@ -1,8 +1,7 @@
-import type { IBehavior } from 'aelea/core'
 import { $element, $text, $wrapNativeElement, component, eventElementTarget, style } from 'aelea/core'
 import * as router from 'aelea/router'
 import { $RouterAnchor } from 'aelea/router'
-import { empty, map, merge, multicast, now } from 'aelea/stream'
+import { chain, type IBehavior, map, merge, multicast, now } from 'aelea/stream'
 import { $column, $icon, $row, designSheet, spacing } from 'aelea/ui-components'
 import { pallete, themeList } from 'aelea/ui-components-theme'
 import { $Picker } from '../components/$ThemePicker'
@@ -56,6 +55,9 @@ export default ({ baseRoute }: Website) =>
           backgroundImage: `radial-gradient(at center center, ${pallete.horizon} 50vh, ${pallete.background})`
         })
       )(
+        chain((isMatched) => {
+          return $text('ff')
+        }, rootRoute.match),
         router.match(rootRoute)(
           $row(
             style({
@@ -99,44 +101,44 @@ export default ({ baseRoute }: Website) =>
           )
         ),
 
-        // router.contains(pagesRoute)(
-        //   $column(
-        //     spacing.big,
-        //     style({
-        //       maxWidth: '870px',
-        //       width: '100%',
-        //       margin: '0 auto',
-        //       paddingBottom: '45px'
-        //     })
-        //   )(
-        //     $row(style({ placeContent: 'space-between', padding: '0 15px' }))(
-        //       $RouterAnchor({
-        //         $anchor: $element('a')(
-        //           $icon({
-        //             $content: $aeleaLogo,
-        //             fill: pallete.message,
-        //             width: '137px',
-        //             height: '115px',
-        //             viewBox: '0 0 147 90'
-        //           })
-        //         ),
-        //         url: '/',
-        //         route: rootRoute
-        //       })({
-        //         click: linkClickTether()
-        //       }),
-        //       $MainMenu({ parentRoute: pagesRoute })({
-        //         routeChange: linkClickTether()
-        //       })
-        //     ),
-        //     router.match(guideRoute)($Guide()({})),
-        //     router.contains(examplesRoute)(
-        //       $Examples({ router: examplesRoute })({
-        //         routeChanges: linkClickTether()
-        //       })
-        //     )
-        //   )
-        // ),
+        router.contains(pagesRoute)(
+          $column(
+            spacing.big,
+            style({
+              maxWidth: '870px',
+              width: '100%',
+              margin: '0 auto',
+              paddingBottom: '45px'
+            })
+          )(
+            $row(style({ placeContent: 'space-between', padding: '0 15px' }))(
+              $RouterAnchor({
+                $anchor: $element('a')(
+                  $icon({
+                    $content: $aeleaLogo,
+                    fill: pallete.message,
+                    width: '137px',
+                    height: '115px',
+                    viewBox: '0 0 147 90'
+                  })
+                ),
+                url: '/',
+                route: rootRoute
+              })({
+                click: linkClickTether()
+              }),
+              $MainMenu({ parentRoute: pagesRoute })({
+                routeChange: linkClickTether()
+              })
+            ),
+            router.match(guideRoute)($Guide()({})),
+            router.contains(examplesRoute)(
+              $Examples({ router: examplesRoute })({
+                routeChanges: linkClickTether()
+              })
+            )
+          )
+        ),
 
         $Picker(themeList)({})
       )

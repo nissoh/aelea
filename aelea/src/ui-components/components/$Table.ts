@@ -1,15 +1,17 @@
-import { attr, component, type IBehavior, nodeEvent, o, style, stylePseudo } from '../../core/index.js'
+import { attr, component, nodeEvent, style, stylePseudo } from '../../core/index.js'
 import type { I$Node, I$Slottable, ISlottable } from '../../core/source/node.js'
 import { $node, $svg } from '../../core/source/node.js'
 import {
   chain,
   constant,
+  type IBehavior,
   type IOps,
   type IStream,
   map,
   merge,
   never,
   now,
+  o,
   scan,
   startWith,
   switchLatest

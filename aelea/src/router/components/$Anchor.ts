@@ -1,10 +1,9 @@
 import { attr } from '../../core/combinator/attribute.js'
-import type { IBehavior } from '../../core/combinator/behavior.js'
 import { component } from '../../core/combinator/component.js'
 import { nodeEvent } from '../../core/combinator/event.js'
 import { style } from '../../core/combinator/style.js'
 import type { I$Node, INode } from '../../core/source/node.js'
-import { type IOps, map, merge, op, startWith } from '../../stream/index.js'
+import { type IBehavior, type IOps, map, merge, op, startWith } from '../../stream/index.js'
 import type { PathEvent, Route } from '../types.js'
 
 export interface IAnchor {

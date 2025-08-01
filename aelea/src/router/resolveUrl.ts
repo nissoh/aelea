@@ -1,15 +1,4 @@
-import {
-  constant,
-  filter,
-  filterNull,
-  type IStream,
-  map,
-  op,
-  skipRepeatsWith,
-  switchLatest,
-  tap,
-  until
-} from '../stream/index.js'
+import { filter, type IStream, map, op, skipRepeatsWith, switchLatest, tap } from '../stream/index.js'
 import type { Fragment, Path, PathEvent, Route, RouteConfig } from './types.js'
 
 type RootRouteConfig = RouteConfig & {
@@ -85,9 +74,11 @@ export function isMatched(frag: Fragment, path: Path) {
 export const contains =
   <T>(route: Route) =>
   (ns: IStream<T>) => {
-    const miss = until(route.miss, ns)
-    const contains = constant(miss, route.contains)
-    return op(contains, switchLatest)
+    return switchLatest(
+      map((isMatch) => {
+        return isMatch ? ns : null
+      }, route.contains)
+    )
   }
 
 export const match =

@@ -1,8 +1,7 @@
-import type { IBehavior } from '../../../core/combinator/behavior.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
 import { $element, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
 import type { INode } from '../../../core/source/node.js'
-import type { IOps } from '../../../stream/index.js'
+import type { IBehavior, IOps } from '../../../stream/index.js'
 import {
   combineState,
   constant,

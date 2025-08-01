@@ -1,5 +1,5 @@
-import { $svg, attr, component, type IBehavior, type ISlottable, nodeEvent, style, stylePseudo } from 'aelea/core'
-import { o, snapshot, startWith } from 'aelea/stream'
+import { $svg, attr, component, type ISlottable, nodeEvent, style, stylePseudo } from 'aelea/core'
+import { type IBehavior, o, snapshot, startWith } from 'aelea/stream'
 import { $icon } from 'aelea/ui-components'
 import { pallete, type Theme, theme } from 'aelea/ui-components-theme'
 import { setTheme } from 'aelea/ui-components-theme-browser'

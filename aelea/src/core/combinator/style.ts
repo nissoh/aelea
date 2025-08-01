@@ -1,9 +1,5 @@
 import type * as CSS from 'csstype'
-import { filter } from '../../stream/combinator/filter.js'
-import { map } from '../../stream/combinator/map.js'
-import { tap } from '../../stream/combinator/tap.js'
-import { curry2, curry3 } from '../../stream/function.js'
-import type { IStream } from '../../stream/types.js'
+import { curry2, curry3, filter, type IStream, map, tap } from '../../stream/index.js'
 import type { I$Node, INodeElement } from '../source/node.js'
 
 export type IStyleCSS = CSS.Properties

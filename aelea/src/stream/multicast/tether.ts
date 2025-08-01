@@ -1,19 +1,6 @@
 import { disposeNone, disposeWith } from '../disposable.js'
 import type { IStream, Scheduler, Sink } from '../types.js'
 
-/**
- * Creates a pair of streams for multicasting with late subscriber support.
- *
- * @param source - The source stream to tether
- * @returns A tuple of [pushStream, pullStream] where:
- *   - pushStream: Multicasts values from source to all subscribers
- *   - pullStream: Receives the latest value when subscribed
- *
- * @example
- * const [push, pull] = tether(stream)
- * // push multicasts to all subscribers
- * // pull gets the latest value on subscription
- */
 export const tether = <T>(source: IStream<T>): [IStream<T>, IStream<T>] => {
   const tetherSource = new Tether(source)
 
@@ -31,21 +18,17 @@ export const tether = <T>(source: IStream<T>): [IStream<T>, IStream<T>] => {
   ]
 }
 
-interface StoredValue<T> {
-  value: T
-}
-
 class SourceSink<T> implements Sink<T> {
   hasValue = false
-  latestValue?: StoredValue<T>
+  latestValue!: T
 
   constructor(
-    private readonly parent: Tether<T>,
-    public readonly sink: Sink<T>
+    private parent: Tether<T>,
+    public sink: Sink<T>
   ) {}
 
   event(x: T): void {
-    this.latestValue = { value: x }
+    this.latestValue = x
     this.hasValue = true
 
     this.sink.event(x)
@@ -54,11 +37,11 @@ class SourceSink<T> implements Sink<T> {
     }
   }
 
-  end(): void {
+  end() {
     this.sink.end()
   }
 
-  error(e: any): void {
+  error(e: Error): void {
     this.sink.error(e)
   }
 }
@@ -73,66 +56,61 @@ class TetherSink<A> implements Sink<A> {
   }
 
   end(): void {
-    if (this.sink) {
-      this.sink.end()
-    }
     this.sink = null
   }
 
-  error(err: any): void {
+  error(err: Error): void {
     if (this.sink) {
       this.sink.error(err)
+    } else {
+      throw new Error(err.message)
     }
-    // Don't throw - just log the error to avoid crashing
-    console.error('TetherSink error with no active sink:', err)
   }
 }
 
 class Tether<T> implements IStream<T> {
-  private readonly sourceSinkList: SourceSink<T>[] = []
-  readonly tetherSinkList: TetherSink<T>[] = []
+  sourceSinkList: SourceSink<T>[] = []
+  tetherSinkList: TetherSink<T>[] = []
 
-  private sourceDisposable: Disposable = disposeNone
+  sourceDisposable: Disposable = disposeNone
 
-  constructor(private readonly source: IStream<T>) {}
+  constructor(private source: IStream<T>) {}
 
-  run(scheduler: Scheduler, sink: Sink<T>): Disposable {
+  run(scheduler: Scheduler, sink: SourceSink<T> | TetherSink<T>): Disposable {
     if (sink instanceof SourceSink) {
       this.sourceDisposable[Symbol.dispose]()
       this.sourceSinkList.push(sink)
 
       this.sourceDisposable = this.source.run(scheduler, sink)
 
-      return disposeWith(() => {
-        const srcIdx = this.sourceSinkList.indexOf(sink)
-        if (srcIdx > -1) {
+      return {
+        [Symbol.dispose]: () => {
+          const srcIdx = this.sourceSinkList.indexOf(sink)
           this.sourceSinkList.splice(srcIdx, 1)
-          // Only dispose the source if this was the last sink
-          if (this.sourceSinkList.length === 0) {
-            this.sourceDisposable[Symbol.dispose]()
-            this.sourceDisposable = disposeNone
-          }
+          this.sourceDisposable[Symbol.dispose]()
         }
-      })
+      }
     }
 
-    const tetherSink = sink as TetherSink<T>
-
-    this.tetherSinkList.push(tetherSink)
+    this.tetherSinkList.push(sink)
 
     for (const s of this.sourceSinkList) {
-      if (s.hasValue && s.latestValue) {
-        tetherSink.event(s.latestValue.value)
+      if (s.hasValue) {
+        sink.event(s.latestValue)
       }
     }
 
-    return disposeWith(() => {
-      tetherSink.end()
-      const sinkIdx = this.tetherSinkList.indexOf(tetherSink)
+    return disposeWith(
+      ([tetherSinkList, sourceTetherSink]) => {
+        sourceTetherSink.end()
+        const sinkIdx = tetherSinkList.indexOf(sourceTetherSink)
 
-      if (sinkIdx > -1) {
-        this.tetherSinkList.splice(sinkIdx, 1)
-      }
-    })
+        if (sinkIdx > -1) {
+          // remove(sinkIdx, tetherSinkList)
+          tetherSinkList.splice(sinkIdx, 1)
+        }
+      },
+      [this.tetherSinkList, sink] as const
+    )
   }
 }

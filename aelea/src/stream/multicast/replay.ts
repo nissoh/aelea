@@ -1,5 +1,6 @@
-import { startWith } from '../../stream/index.js'
-import type { IStream, Scheduler, Sink } from '../../stream/types.js'
+import { startWith } from '../combinator/constant.js'
+import type { IStream, Scheduler, Sink } from '../types.js'
+import { multicast } from './multicast.js'
 
 class StateSink<A> implements Sink<A> {
   constructor(
@@ -38,3 +39,7 @@ export class ReplayLatest<A> implements IStream<A> {
 }
 
 export const replayLatest = <A>(s: IStream<A>, initialState?: A): IStream<A> => new ReplayLatest(s, initialState)
+
+export function replayState<T>(s: IStream<T>, initialState?: T): IStream<T> {
+  return replayLatest(multicast(s), initialState)
+}
