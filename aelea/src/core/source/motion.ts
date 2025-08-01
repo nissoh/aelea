@@ -107,10 +107,10 @@ class MotionTask implements Disposable {
     if (this.disposed) return
 
     const settled = animate(this.motionEnv, this.state, this.target)
-    
+
     // Emit current state
     sink.event(this.state)
-    
+
     if (settled) {
       // Animation complete
       sink.end()
@@ -118,7 +118,7 @@ class MotionTask implements Disposable {
       // Continue animation
       this.animationDisposable = this.scheduler.asap(sink, this.scheduleNext)
     }
-  }
+  };
 
   [Symbol.dispose](): void {
     this.disposed = true

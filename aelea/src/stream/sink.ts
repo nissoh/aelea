@@ -59,15 +59,6 @@ export abstract class MergingSink<T> implements Sink<T> {
   }
 }
 
-export function tryEvent<In, Out>(sink: Sink<Out>, f: (value: In) => Out, value: In): void {
-  try {
-    const transformed = f(value)
-    sink.event(transformed)
-  } catch (error) {
-    sink.error(error)
-  }
-}
-
 export interface IndexedValue<A> {
   readonly index: number
   readonly value: A

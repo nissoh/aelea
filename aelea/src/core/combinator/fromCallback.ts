@@ -1,35 +1,42 @@
-import { disposeNone, disposeWith } from '../../stream/index.js'
+import { disposeAll, disposeBoth, disposeNone, disposeWith } from '../../stream/index.js'
 import type { IStream } from '../../stream/types.js'
 
-function createFromCallbackSource<T, Targs extends any[] = T[]>(
-  callbackFunction: (cb: (...ev: Targs) => any) => any,
-  mapFn: (...args: Targs) => T,
-  context: any
-): IStream<T> {
-  return {
-    run(_, sink) {
-      // very common that callback functions returns a destructor, perhaps a Disposable in a "most" case
-      const maybeDisposable = callbackFunction.call(context, (...args: Targs) => {
-        const value = mapFn(...args)
-
-        sink.event(value)
-      })
-
-      if (maybeDisposable instanceof Function) {
-        return disposeWith(maybeDisposable, null)
-      }
-
-      if (maybeDisposable && typeof maybeDisposable === 'object' && Symbol.dispose in maybeDisposable) {
-        return maybeDisposable
-      }
-
-      return disposeNone
-    }
-  }
-}
+const defaultMapFn = <T>(...args: T[]): T => args[0]
 
 export const fromCallback = <T, FnArgs extends any[] = T[]>(
-  cbf: (cb: (...args: FnArgs) => any) => any,
-  mapFn: (...args: FnArgs) => T = (...args) => args[0],
+  callbackFunction: (cb: (...args: FnArgs) => any) => any,
+  mapFn: (...args: FnArgs) => T = defaultMapFn as any,
   context: any = null
-): IStream<T> => createFromCallbackSource(cbf, mapFn, context)
+): IStream<T> => ({
+  run(scheduler, sink) {
+    try {
+      const scheduledTasks: Disposable[] = []
+
+      // very common that callback functions returns a destructor, perhaps a Disposable in a "most" case
+      const maybeDisposable = callbackFunction.call(context, (...args: FnArgs) => {
+        const task = scheduler.asap(sink, (sink) => {
+          try {
+            const value = mapFn(...args)
+            sink.event(value)
+          } catch (error) {
+            sink.error(error)
+          }
+        })
+        scheduledTasks.push(task)
+      })
+
+      // Create composite disposable
+      const callbackDisposable =
+        maybeDisposable instanceof Function
+          ? disposeWith(maybeDisposable, null)
+          : maybeDisposable && typeof maybeDisposable === 'object' && Symbol.dispose in maybeDisposable
+            ? maybeDisposable
+            : disposeNone
+
+      return disposeBoth(disposeAll(scheduledTasks), callbackDisposable)
+    } catch (error) {
+      const errorTask = scheduler.asap(sink, (sink) => sink.error(error))
+      return errorTask
+    }
+  }
+})
