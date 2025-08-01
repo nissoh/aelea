@@ -1,42 +1,21 @@
-import type { Scheduler } from 'aelea/stream'
-
 export { setTheme } from 'aelea/ui-components-theme-browser'
 
-import { type IRunEnvironment, run } from 'aelea/core'
+import { $createRoot, type IRunEnvironment } from 'aelea/core'
 import $Website from './pages/$Website'
-
-export const scheduler: Scheduler = {
-  schedule(callback: (...args: any[]) => void, delay: number, ...args: any[]): Disposable {
-    const timeoutId = setTimeout(callback, delay, ...args)
-    return {
-      [Symbol.dispose]() {
-        clearTimeout(timeoutId)
-      }
-    }
-  },
-  immediate(callback: (...args: any[]) => void, ...args: any[]): Disposable {
-    const timeoutId = setImmediate(callback, ...args)
-    return {
-      [Symbol.dispose]() {
-        clearImmediate(timeoutId)
-      }
-    }
-  },
-  currentTime: () => performance.now()
-}
+import { browserScheduler } from './scheduler'
 
 const config: IRunEnvironment = {
   namespace: '•',
   stylesheet: new CSSStyleSheet(),
   cache: [],
   rootAttachment: document.querySelector('html')!,
-  scheduler,
+  scheduler: browserScheduler,
   $rootNode: $Website({ baseRoute: '' })({})
 }
 
 document.adoptedStyleSheets = [...document.adoptedStyleSheets, config.stylesheet]
 
-run(config).run(scheduler, {
+$createRoot(config).run(browserScheduler, {
   end() {
     console.log('Application has ended.')
   },

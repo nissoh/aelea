@@ -111,7 +111,7 @@ function createNodeSource<A, B extends INodeElement>(
         stylePseudo: []
       }
 
-      return scheduler.schedule(() => sink.event(nodeState), 0)
+      return scheduler.immediate(() => sink.event(nodeState))
     }
   }
 }

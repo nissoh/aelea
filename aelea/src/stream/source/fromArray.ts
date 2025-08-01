@@ -13,6 +13,6 @@ export const fromArray = <A>(arr: readonly A[]): IStream<A> => ({
       }
     }
 
-    return scheduler.schedule(emitArray, 0)
+    return scheduler.immediate(emitArray)
   }
 })

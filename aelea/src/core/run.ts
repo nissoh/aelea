@@ -252,7 +252,7 @@ function appendToSlot(parent: INodeElement, child: INodeElement, insertAt: numbe
   parent.insertBefore(child, parent.children[insertAt])
 }
 
-export function run(config: IRunEnvironment & { $rootNode: I$Node }) {
+export function $createRoot(config: IRunEnvironment & { $rootNode: I$Node }) {
   return map((node) => {
     const rootNode: INode = {
       element: config.rootAttachment!,
