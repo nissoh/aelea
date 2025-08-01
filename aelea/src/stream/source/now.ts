@@ -1,10 +1,12 @@
-import type { IStream } from '../types.js'
+import type { IStream, Sink } from '../types.js'
 
-export const now = <A>(a: A): IStream<A> => ({
+export const now = <A>(value: A): IStream<A> => ({
   run(scheduler, sink) {
-    return scheduler.immediate(() => {
-      sink.event(a)
-      sink.end()
-    })
+    return scheduler.asap(sink, eventNow, value)
   }
 })
+
+function eventNow<T>(sink: Sink<T>, value: T) {
+  sink.event(value)
+  sink.end()
+}

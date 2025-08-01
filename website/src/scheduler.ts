@@ -1,12 +1,17 @@
-import type { Scheduler } from 'aelea/stream'
+import type { Scheduler, Sink } from 'aelea/stream'
 
 /**
  * Browser scheduler implementation using requestAnimationFrame for immediate scheduling
  * and setTimeout for delayed scheduling
  */
 export const browserScheduler: Scheduler = {
-  schedule<TArgs extends any[]>(callback: (...args: TArgs) => void, delay: number, ...args: TArgs): Disposable {
-    const timeoutId = setTimeout(callback, delay, ...args)
+  delay<T, TArgs extends any[]>(
+    sink: Sink<T>,
+    callback: (sink: Sink<T>, ...args: TArgs) => void,
+    delay: number,
+    ...args: TArgs
+  ): Disposable {
+    const timeoutId = setTimeout(callback, delay, sink, ...args)
     return {
       [Symbol.dispose]() {
         clearTimeout(timeoutId)
@@ -14,11 +19,15 @@ export const browserScheduler: Scheduler = {
     }
   },
 
-  immediate<TArgs extends any[]>(callback: (...args: TArgs) => void, ...args: TArgs): Disposable {
+  asap<T, TArgs extends any[]>(
+    sink: Sink<T>,
+    callback: (sink: Sink<T>, ...args: TArgs) => void,
+    ...args: TArgs
+  ): Disposable {
     let cancelled = false
     const frameId = requestAnimationFrame(() => {
       if (!cancelled) {
-        callback(...args)
+        callback(sink, ...args)
       }
     })
     return {
@@ -29,7 +38,7 @@ export const browserScheduler: Scheduler = {
     }
   },
 
-  currentTime(): number {
+  time(): number {
     return performance.now()
   }
 }

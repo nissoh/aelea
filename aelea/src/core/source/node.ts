@@ -1,4 +1,4 @@
-import { type Fn, type IStream, isFunction, never } from '../../stream/index.js'
+import { type Fn, type IStream, isFunction, never, type Sink } from '../../stream/index.js'
 import type { IAttributeProperties } from '../combinator/attribute.js'
 import type { IStyleCSS } from '../combinator/style.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
@@ -111,9 +111,13 @@ function createNodeSource<A, B extends INodeElement>(
         stylePseudo: []
       }
 
-      return scheduler.immediate(() => sink.event(nodeState))
+      return scheduler.asap(sink, eventJust, nodeState)
     }
   }
+}
+
+export function eventJust<T>(sink: Sink<T>, value: T): void {
+  sink.event(value)
 }
 
 const id = <T>(x: T): T => x

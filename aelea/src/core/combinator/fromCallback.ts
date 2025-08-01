@@ -12,11 +12,7 @@ function createFromCallbackSource<T, Targs extends any[] = T[]>(
       const maybeDisposable = callbackFunction.call(context, (...args: Targs) => {
         const value = mapFn(...args)
 
-        try {
-          sink.event(value)
-        } catch (e) {
-          sink.error(e)
-        }
+        sink.event(value)
       })
 
       if (maybeDisposable instanceof Function) {

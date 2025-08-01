@@ -59,10 +59,6 @@ export abstract class MergingSink<T> implements Sink<T> {
   }
 }
 
-/**
- * Helper method to execute a function and handle errors.
- * If the function throws, the error is forwarded to the sink.
- */
 export function tryEvent<In, Out>(sink: Sink<Out>, f: (value: In) => Out, value: In): void {
   try {
     const transformed = f(value)

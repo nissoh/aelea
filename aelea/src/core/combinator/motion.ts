@@ -7,13 +7,15 @@ import type { IStream, Scheduler, Sink } from '../../stream/types.js'
 function animationFrame<T>(value: T): IStream<T> {
   return {
     run(scheduler: Scheduler, sink: Sink<T>) {
-      const disposable = scheduler.immediate(() => {
-        sink.event(value)
-        sink.end()
-      })
+      const disposable = scheduler.asap(sink, eventOnce, value)
       return disposable
     }
   }
+}
+
+function eventOnce<T>(sink: Sink<T>, value: T): void {
+  sink.event(value)
+  sink.end()
 }
 
 /**

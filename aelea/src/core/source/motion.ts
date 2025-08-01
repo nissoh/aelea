@@ -1,4 +1,4 @@
-import { disposeBoth, type IStream, map, type Scheduler, type Sink } from '../../stream/index.js'
+import { type IStream, map, type Scheduler, type Sink } from '../../stream/index.js'
 
 interface MotionConfig {
   stiffness: number
@@ -16,6 +16,37 @@ export const MOTION_GENTLE = { stiffness: 120, damping: 14, precision: 0.01 }
 export const MOTION_WOBBLY = { stiffness: 180, damping: 12, precision: 0.01 }
 export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
 
+// Animation step function - mutates state for performance
+function animate(motionEnv: MotionConfig, state: MotionState, target: number): boolean {
+  const delta = target - state.position
+
+  // Spring force: F_spring = -k * x
+  const spring = motionEnv.stiffness * delta
+  // Damping force: F_damper = -b * v
+  const damper = motionEnv.damping * state.velocity
+
+  // Total force = F_spring + F_damper
+  // Acceleration = F / m (mass = 1)
+  const acceleration = spring - damper
+
+  // Update velocity and position
+  const newVelocity = state.velocity + acceleration * (1 / 60)
+  const newPosition = state.position + newVelocity * (1 / 60)
+
+  // Check if animation has settled
+  const settled = Math.abs(newVelocity) < motionEnv.precision && Math.abs(delta) < motionEnv.precision
+
+  if (settled) {
+    state.position = target
+    state.velocity = 0
+  } else {
+    state.velocity = newVelocity
+    state.position = newPosition
+  }
+
+  return settled
+}
+
 /**
  * Adapting to motion changes using "spring physics"
  *
@@ -25,18 +56,14 @@ export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
  *  wobbly =    stiffness 180 damping 12
  *  stiff =     stiffness 210 damping 20
  *
- * @param initial - animation starting position to animate from
- * @param change - stream of target positions
+ * @param from - animation starting position
+ * @param to - target position to animate to
  *
  * @see modified-from https://github.com/chenglou/react-motion/blob/master/src/stepper.js
  */
-export const motion = (
-  motionEnvironment: Partial<MotionConfig>,
-  initial: number,
-  change: IStream<number>
-): IStream<number> => {
+export const motion = (motionEnvironment: Partial<MotionConfig>, from: number, to: number): IStream<number> => {
   const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
-  const state = motionState(motionEnv, { position: initial, velocity: 0 }, change)
+  const state = motionState(motionEnv, { position: from, velocity: 0 }, to)
   return map((s) => s.position, state)
 }
 
@@ -46,97 +73,55 @@ export const motion = (
 export const motionState = (
   motionEnvironment: Partial<MotionConfig>,
   initialState: MotionState,
-  change: IStream<number>
+  target: number
 ): IStream<MotionState> => {
   const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
 
   return {
     run(scheduler: Scheduler, sink: Sink<MotionState>) {
-      const motionSink = new MotionSink(scheduler, sink, motionEnv, initialState)
-      const currentDisposable = change.run(scheduler, motionSink)
-
-      return disposeBoth(motionSink, currentDisposable)
+      return new MotionTask(scheduler, sink, motionEnv, initialState, target)
     }
   }
 }
 
-class MotionSink implements Sink<number>, Disposable {
-  static readonly FPS = 1 / 60
-
+class MotionTask implements Disposable {
   private animationDisposable: Disposable | null = null
-  private currentTarget: number | null = null
   private readonly state: MotionState
+  private disposed = false
 
   constructor(
     private readonly scheduler: Scheduler,
     private readonly sink: Sink<MotionState>,
     private readonly motionEnv: MotionConfig,
-    initialState: MotionState
+    initialState: MotionState,
+    private readonly target: number
   ) {
     this.state = { ...initialState }
     // Emit initial state
     this.sink.event(this.state)
+    // Start animation
+    this.scheduleNext(this.sink)
   }
 
-  event(target: number): void {
-    this.currentTarget = target
-    // Cancel any ongoing animation
-    this.animationDisposable?.[Symbol.dispose]()
-    // Start new animation
-    this.animationDisposable = this.scheduler.immediate(() => this.animate())
-  }
+  private scheduleNext = (sink: Sink<MotionState>): void => {
+    if (this.disposed) return
 
-  error(e: any): void {
-    this.sink.error(e)
-  }
-
-  end(): void {
-    this[Symbol.dispose]()
-    this.sink.end()
-  }
-
-  private animate(): void {
-    if (this.currentTarget === null) return
-
-    const delta = this.currentTarget - this.state.position
-
-    // Spring force: F_spring = -k * x
-    const spring = this.motionEnv.stiffness * delta
-    // Damping force: F_damper = -b * v
-    const damper = this.motionEnv.damping * this.state.velocity
-
-    // Total force = F_spring + F_damper
-    // Acceleration = F / m (mass = 1)
-    const acceleration = spring - damper
-
-    // Update velocity and position
-    const newVelocity = this.state.velocity + acceleration * MotionSink.FPS
-    const newPosition = this.state.position + newVelocity * MotionSink.FPS
-
-    // Check if animation has settled
-    const settled = Math.abs(newVelocity) < this.motionEnv.precision && Math.abs(delta) < this.motionEnv.precision
-
+    const settled = animate(this.motionEnv, this.state, this.target)
+    
+    // Emit current state
+    sink.event(this.state)
+    
     if (settled) {
-      this.state.position = this.currentTarget
-      this.state.velocity = 0
+      // Animation complete
+      sink.end()
     } else {
-      this.state.velocity = newVelocity
-      this.state.position = newPosition
-    }
-
-    // state.velocity = newVelocity
-    // state.position = settled ? target : newPosition
-
-    // Emit the current state
-    this.sink.event(this.state)
-
-    // Continue animation if not settled
-    if (!settled) {
-      this.animationDisposable = this.scheduler.immediate(() => this.animate())
+      // Continue animation
+      this.animationDisposable = this.scheduler.asap(sink, this.scheduleNext)
     }
   }
 
   [Symbol.dispose](): void {
+    this.disposed = true
     this.animationDisposable?.[Symbol.dispose]()
   }
 }

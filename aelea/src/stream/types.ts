@@ -9,9 +9,18 @@ export interface Sink<T> {
 }
 
 export interface Scheduler {
-  schedule: <TArgs extends any[]>(callback: (...args: TArgs) => void, delay: number, ...args: TArgs) => Disposable
-  immediate: <TArgs extends any[]>(callback: (...args: TArgs) => void, ...args: TArgs) => Disposable
-  currentTime: () => number
+  delay: <TArgs extends any[], T>(
+    sink: Sink<T>,
+    callback: (sink: Sink<T>, ...args: TArgs) => void,
+    delay: number,
+    ...args: TArgs
+  ) => Disposable
+  asap: <TArgs extends any[], T>(
+    sink: Sink<T>,
+    callback: (sink: Sink<T>, ...args: TArgs) => void,
+    ...args: TArgs
+  ) => Disposable
+  time: () => number
 }
 
 export type Fn<T, R> = (a: T) => R

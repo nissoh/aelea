@@ -35,7 +35,7 @@ class DebounceSink<T> implements Sink<T>, Disposable {
   event(value: T): void {
     this.clearTimer()
     this.value = value
-    this.timer = this.scheduler.schedule(this.handleTask.bind(this), this.dt)
+    this.timer = this.scheduler.schedule(this.handleTask, this.dt)
   }
 
   error(e: Error): void {
@@ -57,7 +57,7 @@ class DebounceSink<T> implements Sink<T>, Disposable {
     this.disposable[Symbol.dispose]()
   }
 
-  private handleTask(): void {
+  handleTask = () => {
     this.clearTimer()
     this.sink.event(this.value!)
   }
