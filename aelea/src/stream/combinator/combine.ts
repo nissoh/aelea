@@ -1,4 +1,3 @@
-import { toStream } from '../common.js'
 import { disposeAll, tryDispose } from '../disposable.js'
 import { type IndexedValue, IndexSink } from '../sink.js'
 import { now } from '../source/now.js'
@@ -26,30 +25,33 @@ export function combine<T extends readonly unknown[], R>(
   }
 }
 
-export function combineState<A, K extends keyof A = keyof A>(
+export function combineState<A>(
   state: {
-    [P in keyof A]: IStream<A[P]> | A[P]
+    [P in keyof A]: IStream<A[P]>
   }
-): IStream<A> {
-  const entries = Object.entries(state) as [keyof A, IStream<A[K]> | A[K]][]
+): IStream<Readonly<A>> {
+  const keys = Object.keys(state) as (keyof A)[]
+  const sources = Object.values(state) as IStream<any>[]
 
-  if (entries.length === 0) {
+  if (sources.length === 0) {
     return now({} as A)
   }
 
-  const keys = entries.map(([key]) => key)
-  const streams = entries.map(([_, stream]) => toStream(stream))
+  return {
+    run(scheduler, sink) {
+      const result = {} as A
 
-  return combine(
-    (...values: A[K][]) => {
-      const result = values.reduce((seed, val, idx) => {
-        seed[keys[idx]] = val
-        return seed
-      }, {} as A)
-      return result
-    },
-    ...(streams as any)
-  )
+      return combine(
+        (...values) => {
+          for (let i = 0; i < keys.length; i++) {
+            result[keys[i]] = values[i]
+          }
+          return result as Readonly<A>
+        },
+        ...sources
+      ).run(scheduler, sink)
+    }
+  }
 }
 
 class CombineSink<A, B> implements Sink<IndexedValue<A>> {

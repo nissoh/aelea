@@ -1,5 +1,5 @@
 import { disposeNone } from '../disposable.js'
-import type { IStream, Sink } from '../types.js'
+import type { IStream, Scheduler, Sink } from '../types.js'
 
 /**
  * Creates a multicast stream that shares a single subscription among multiple consumers.
@@ -33,7 +33,7 @@ class MulticastSource<T> implements Sink<T> {
     this.source = source
   }
 
-  run(scheduler: any, sink: Sink<T>): Disposable {
+  run(scheduler: Scheduler, sink: Sink<T>): Disposable {
     this.add(sink)
 
     if (!this.running && this.sinks.length === 1) {

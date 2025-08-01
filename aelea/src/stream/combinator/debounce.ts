@@ -1,5 +1,5 @@
 import { curry2 } from '../function.js'
-import type { IStream, Sink } from '../types.js'
+import type { IStream, Scheduler, Sink } from '../types.js'
 
 export interface IDebounceCurry {
   <T>(delay: number, source: IStream<T>): IStream<T>
@@ -27,7 +27,7 @@ class DebounceSink<T> implements Sink<T>, Disposable {
     private readonly dt: number,
     source: IStream<T>,
     private readonly sink: Sink<T>,
-    private readonly scheduler: any
+    private readonly scheduler: Scheduler
   ) {
     this.disposable = source.run(scheduler, this)
   }
@@ -35,7 +35,7 @@ class DebounceSink<T> implements Sink<T>, Disposable {
   event(value: T): void {
     this.clearTimer()
     this.value = value
-    this.timer = this.scheduler.schedule(this.handleTask, this.dt)
+    this.timer = this.scheduler.delay(this.sink, this.handleTask, this.dt)
   }
 
   error(e: Error): void {

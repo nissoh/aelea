@@ -9,13 +9,13 @@ export interface Sink<T> {
 }
 
 export interface Scheduler {
-  delay: <TArgs extends any[], T>(
+  delay: <TArgs extends readonly unknown[], T>(
     sink: Sink<T>,
     callback: (sink: Sink<T>, ...args: TArgs) => void,
     delay: number,
     ...args: TArgs
   ) => Disposable
-  asap: <TArgs extends any[], T>(
+  asap: <TArgs extends readonly unknown[], T>(
     sink: Sink<T>,
     callback: (sink: Sink<T>, ...args: TArgs) => void,
     ...args: TArgs

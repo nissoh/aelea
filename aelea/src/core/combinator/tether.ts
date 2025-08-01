@@ -98,17 +98,14 @@ class Tether<T> implements IStream<T> {
       }
     }
 
-    return disposeWith(
-      ([tetherSinkList, sourceTetherSink]: [TetherSink<T>[], TetherSink<T>]) => {
-        sourceTetherSink.end()
-        const sinkIdx = tetherSinkList.indexOf(sourceTetherSink)
+    return disposeWith(() => {
+      tetherSink.end()
+      const sinkIdx = this.tetherSinkList.indexOf(tetherSink)
 
-        if (sinkIdx > -1) {
-          tetherSinkList.splice(sinkIdx, 1)
-        }
-      },
-      [this.tetherSinkList, tetherSink]
-    )
+      if (sinkIdx > -1) {
+        this.tetherSinkList.splice(sinkIdx, 1)
+      }
+    })
   }
 }
 

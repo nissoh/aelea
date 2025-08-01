@@ -1,3 +1,4 @@
+import { disposeAll } from '../disposable.js'
 import { MergingSink } from '../sink.js'
 import type { IStream, Sink } from '../types.js'
 
@@ -15,14 +16,7 @@ export function merge<T extends readonly unknown[]>(
         disposables[i] = streams[i].run(scheduler, new MergeSink(sink, state, disposables))
       }
 
-      return {
-        [Symbol.dispose]: () => {
-          // Traditional for loop is faster than forEach
-          for (let i = 0; i < disposables.length; i++) {
-            disposables[i][Symbol.dispose]()
-          }
-        }
-      }
+      return disposeAll(disposables)
     }
   }
 }

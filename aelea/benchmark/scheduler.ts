@@ -1,27 +1,31 @@
+import { disposeWith } from '../src/stream/disposable.js'
 import type { Scheduler } from '../src/stream/types.js'
 
-// Simple synchronous scheduler for benchmarking
+// Performant scheduler using queueMicrotask for benchmarking
 export const benchmarkScheduler: Scheduler = {
-  asap<TArgs extends any[], T>(
-    sink: any,
-    callback: (sink: any, ...args: TArgs) => void,
-    ...args: TArgs
-  ) {
-    callback(sink, ...args)
-    return { [Symbol.dispose]: () => {} }
+  asap<TArgs extends readonly unknown[], T>(sink: any, callback: (sink: any, ...args: TArgs) => void, ...args: TArgs) {
+    let disposed = false
+
+    queueMicrotask(() => {
+      if (!disposed) {
+        callback(sink, ...args)
+      }
+    })
+
+    return disposeWith(() => {
+      disposed = true
+    })
   },
-  
-  delay<TArgs extends any[], T>(
+
+  delay<TArgs extends readonly unknown[], T>(
     sink: any,
     callback: (sink: any, ...args: TArgs) => void,
     delay: number,
     ...args: TArgs
   ) {
     const id = setTimeout(() => callback(sink, ...args), delay)
-    return {
-      [Symbol.dispose]: () => clearTimeout(id)
-    }
+    return disposeWith(clearTimeout, id)
   },
-  
+
   time: () => Date.now()
 }

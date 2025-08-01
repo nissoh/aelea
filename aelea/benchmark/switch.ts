@@ -1,8 +1,8 @@
 import * as MC from '@most/core'
 import * as MS from '@most/scheduler'
 import { Bench } from 'tinybench'
-import { type IStream, switchLatest, map, op, runStream, scan, tap, fromArray } from '../src/stream/index.js'
-import { benchmarkScheduler } from './scheduler.js'
+import { fromArray, map, op, runStream, scan, switchLatest, tap } from '../src/stream/index.js'
+import { batchedScheduler, syncScheduler } from './scheduler-batched.js'
 
 const bench = new Bench({ time: 100 })
 
@@ -36,13 +36,13 @@ const fromArrayM = <A>(arr: readonly A[]) =>
   )
 
 bench
-  .add(`mc1 switch ${n} x ${m}`, () => {
+  .add(`@most/core switch ${n} x ${m}`, () => {
     let r = 0
     const s0 = MC.scan(sum, 0, MC.switchLatest(MC.map(fromArrayM, fromArrayM(arr))))
     const s = MC.tap((x) => (r = x), s0)
     return MC.runEffects(s, MS.newDefaultScheduler()).then(() => r)
   })
-  .add(`mc2 switch ${n} x ${m}`, () => {
+  .add(`@aelea (sync) switch ${n} x ${m}`, () => {
     let r = 0
     const pipeline = op(
       fromArray(arr),
@@ -52,9 +52,30 @@ bench
       tap((x) => (r = x))
     )
     return new Promise((resolve) => {
-      runStream(benchmarkScheduler, {
+      runStream(syncScheduler, {
         event: () => {},
-        error: (e) => { throw e },
+        error: (e) => {
+          throw e
+        },
+        end: () => resolve(r)
+      })(pipeline)
+    })
+  })
+  .add(`@aelea (batched) switch ${n} x ${m}`, () => {
+    let r = 0
+    const pipeline = op(
+      fromArray(arr),
+      map((arr: readonly number[]) => fromArray(arr)),
+      switchLatest,
+      scan(sum, 0),
+      tap((x) => (r = x))
+    )
+    return new Promise((resolve) => {
+      runStream(batchedScheduler, {
+        event: () => {},
+        error: (e) => {
+          throw e
+        },
         end: () => resolve(r)
       })(pipeline)
     })

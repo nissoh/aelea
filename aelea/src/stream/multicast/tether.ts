@@ -103,19 +103,17 @@ class Tether<T> implements IStream<T> {
 
       this.sourceDisposable = this.source.run(scheduler, sink)
 
-      return {
-        [Symbol.dispose]: () => {
-          const srcIdx = this.sourceSinkList.indexOf(sink)
-          if (srcIdx > -1) {
-            this.sourceSinkList.splice(srcIdx, 1)
-            // Only dispose the source if this was the last sink
-            if (this.sourceSinkList.length === 0) {
-              this.sourceDisposable[Symbol.dispose]()
-              this.sourceDisposable = disposeNone
-            }
+      return disposeWith(() => {
+        const srcIdx = this.sourceSinkList.indexOf(sink)
+        if (srcIdx > -1) {
+          this.sourceSinkList.splice(srcIdx, 1)
+          // Only dispose the source if this was the last sink
+          if (this.sourceSinkList.length === 0) {
+            this.sourceDisposable[Symbol.dispose]()
+            this.sourceDisposable = disposeNone
           }
         }
-      }
+      })
     }
 
     const tetherSink = sink as TetherSink<T>
@@ -128,16 +126,13 @@ class Tether<T> implements IStream<T> {
       }
     }
 
-    return disposeWith(
-      ([tetherSinkList, sourceTetherSink]: [TetherSink<T>[], TetherSink<T>]) => {
-        sourceTetherSink.end()
-        const sinkIdx = tetherSinkList.indexOf(sourceTetherSink)
+    return disposeWith(() => {
+      tetherSink.end()
+      const sinkIdx = this.tetherSinkList.indexOf(tetherSink)
 
-        if (sinkIdx > -1) {
-          tetherSinkList.splice(sinkIdx, 1)
-        }
-      },
-      [this.tetherSinkList, tetherSink]
-    )
+      if (sinkIdx > -1) {
+        this.tetherSinkList.splice(sinkIdx, 1)
+      }
+    })
   }
 }

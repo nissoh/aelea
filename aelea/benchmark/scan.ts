@@ -46,7 +46,9 @@ bench
     return new Promise((resolve) => {
       runStream(benchmarkScheduler, {
         event: () => {},
-        error: (e) => { throw e },
+        error: (e) => {
+          throw e
+        },
         end: () => resolve(r)
       })(
         op(

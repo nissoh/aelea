@@ -43,19 +43,16 @@ class IBehaviorSource<I, O> implements IStream<O> {
       sourcesMap.set(s, this.runBehavior(sink, s))
     }
 
-    return disposeWith(
-      ([sinkSrc, sinkMap]) => {
-        sinkSrc.end()
-        const disposables = sinkMap.get(sinkSrc)
-        if (disposables) {
-          for (const disposable of disposables.values()) {
-            disposable?.[Symbol.dispose]()
-          }
+    return disposeWith(() => {
+      sink.end()
+      const disposables = this.sinksMap.get(sink)
+      if (disposables) {
+        for (const disposable of disposables.values()) {
+          disposable?.[Symbol.dispose]()
         }
-        sinkMap.delete(sinkSrc)
-      },
-      [sink, this.sinksMap] as [Sink<O>, SinkMap<O>]
-    )
+      }
+      this.sinksMap.delete(sink)
+    })
   }
 
   protected runBehavior(sink: Sink<O>, x: IStream<O>) {

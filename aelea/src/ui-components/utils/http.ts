@@ -89,7 +89,7 @@ export function fromWebsocket<OUTPUT, INPUT>(
         if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
           socket.close()
         }
-      }, {})
+      })
 
       return disposeBoth(disposeSocket, sendInputEffect)
     }

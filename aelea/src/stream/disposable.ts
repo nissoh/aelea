@@ -4,8 +4,8 @@ import type { Sink } from './types.js'
 /**
  * Create a Disposable that disposes the provided value using a dispose function
  */
-export const disposeWith = <T>(dispose: (value: T) => void, value: T): Disposable => ({
-  [Symbol.dispose]: () => dispose(value)
+export const disposeWith = <TArgs extends readonly unknown[]>(dispose: (...args: TArgs) => void, ...args: TArgs): Disposable => ({
+  [Symbol.dispose]: () => dispose(...args)
 })
 
 /**

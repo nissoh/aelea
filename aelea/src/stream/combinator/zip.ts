@@ -1,4 +1,4 @@
-import { disposeAll } from '../disposable.js'
+import { disposeAll, disposeNone } from '../disposable.js'
 import { curry2, curry3 } from '../function.js'
 import type { IStream, Scheduler, Sink } from '../types.js'
 import { map } from './map.js'
@@ -33,7 +33,7 @@ export const zipArray: IZipArrayCurry = curry2(
       return {
         run(scheduler, sink) {
           sink.end()
-          return { [Symbol.dispose]() {} }
+          return disposeNone
         }
       }
     }
