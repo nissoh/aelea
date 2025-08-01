@@ -1,7 +1,7 @@
 import { $element, $text, $wrapNativeElement, component, eventElementTarget, style } from 'aelea/core'
 import * as router from 'aelea/router'
 import { $RouterAnchor } from 'aelea/router'
-import { chain, type IBehavior, map, merge, multicast, now } from 'aelea/stream'
+import { chain, type IBehavior, map, merge, multicast, now, switchLatest } from 'aelea/stream'
 import { $column, $icon, $row, designSheet, spacing } from 'aelea/ui-components'
 import { pallete, themeList } from 'aelea/ui-components-theme'
 import { $Picker } from '../components/$ThemePicker'
@@ -55,9 +55,6 @@ export default ({ baseRoute }: Website) =>
           backgroundImage: `radial-gradient(at center center, ${pallete.horizon} 50vh, ${pallete.background})`
         })
       )(
-        chain((isMatched) => {
-          return $text('ff')
-        }, rootRoute.match),
         router.match(rootRoute)(
           $row(
             style({

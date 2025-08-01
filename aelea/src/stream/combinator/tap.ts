@@ -23,5 +23,6 @@ class TapSink<T> extends PipeSink<T> {
 
   event(value: T) {
     this.f(value)
+    this.sink.event(value)
   }
 }

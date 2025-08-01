@@ -1,4 +1,4 @@
-import { filter, type IStream, map, op, skipRepeatsWith, switchLatest, tap } from '../stream/index.js'
+import { filter, filterNull, type IStream, map, op, skipRepeatsWith, switchLatest, tap } from '../stream/index.js'
 import type { Fragment, Path, PathEvent, Route, RouteConfig } from './types.js'
 
 type RootRouteConfig = RouteConfig & {
@@ -41,7 +41,7 @@ function resolveRoute(pathChange: IStream<PathEvent>, parentFragments: Fragment[
 
         return everyMatched
       }),
-      tap((isMatched: boolean) => {
+      tap((isMatched) => {
         if (isMatched) {
           document.title = title || ''
         }
@@ -75,9 +75,11 @@ export const contains =
   <T>(route: Route) =>
   (ns: IStream<T>) => {
     return switchLatest(
-      map((isMatch) => {
-        return isMatch ? ns : null
-      }, route.contains)
+      filterNull(
+        map((isMatch) => {
+          return isMatch ? ns : null
+        }, route.contains)
+      )
     )
   }
 
@@ -85,8 +87,10 @@ export const match =
   <T>(route: Route) =>
   (ns: IStream<T>) => {
     return switchLatest(
-      map((isMatch) => {
-        return isMatch ? ns : null
-      }, route.match)
+      filterNull(
+        map((isMatch) => {
+          return isMatch ? ns : null
+        }, route.match)
+      )
     )
   }
