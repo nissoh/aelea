@@ -1,5 +1,5 @@
 import { fromArray, map, op, runStream } from '../src/stream/index.js'
-import { benchmarkScheduler } from './scheduler.js'
+import { scheduller } from './scheduler.js'
 
 // Test fusion is working
 const testStream = op(
@@ -19,7 +19,7 @@ console.log('Has map marker:', Object.getOwnPropertySymbols(testStream).length >
 // Run the actual value through to verify correctness
 const testResult: number[] = []
 await new Promise<void>((resolve) => {
-  runStream(benchmarkScheduler, {
+  runStream(scheduller, {
     event: (x) => testResult.push(x),
     error: console.error,
     end: resolve
@@ -62,7 +62,7 @@ const fusedStream = op(
 const start2 = performance.now()
 let lastValue = 0
 await new Promise<void>((resolve) => {
-  runStream(benchmarkScheduler, {
+  runStream(scheduller, {
     event: (x) => {
       lastValue = x
     },

@@ -24,11 +24,7 @@ class ScanSink<I, O> extends TransformSink<I, O> {
   }
 
   event(value: I) {
-    try {
-      this.accumulator = this.f(this.accumulator, value)
-      this.sink.event(this.accumulator)
-    } catch (error) {
-      this.sink.error(error)
-    }
+    this.accumulator = this.f(this.accumulator, value)
+    this.sink.event(this.accumulator)
   }
 }

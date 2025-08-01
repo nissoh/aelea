@@ -2,7 +2,7 @@ import * as MC from '@most/core'
 import * as MS from '@most/scheduler'
 import { Bench } from 'tinybench'
 import { fromArray, op, runStream, scan, tap } from '../src/stream/index.js'
-import { benchmarkScheduler } from './scheduler.js'
+import { scheduller } from './scheduler.js'
 
 const bench = new Bench({ time: 100 })
 
@@ -44,7 +44,7 @@ bench
   .add(`mc2 scan ${n}`, () => {
     let r = 0
     return new Promise((resolve) => {
-      runStream(benchmarkScheduler, {
+      runStream(scheduller, {
         event: () => {},
         error: (e) => {
           throw e

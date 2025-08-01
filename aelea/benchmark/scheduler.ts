@@ -2,7 +2,7 @@ import { disposeWith } from '../src/stream/disposable.js'
 import type { Scheduler } from '../src/stream/types.js'
 
 // Performant scheduler using queueMicrotask for benchmarking
-export const benchmarkScheduler: Scheduler = {
+export const scheduller: Scheduler = {
   asap<TArgs extends readonly unknown[], T>(sink: any, callback: (sink: any, ...args: TArgs) => void, ...args: TArgs) {
     let disposed = false
 

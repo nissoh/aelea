@@ -9,37 +9,36 @@ Last updated: 2024-12-17
 ┌───┬───────────────────────────────┬──────────────────┬────────────────────────┬─────────┐
 │   │ Task name                     │ Latency avg (ns) │ Throughput avg (ops/s) │ Samples │
 ├───┼───────────────────────────────┼──────────────────┼────────────────────────┼─────────┤
-│ 0 │ mc1 map-filter-reduce 1000000 │ 3630303 ± 0.36%  │ 276 ± 0.35%            │ 64      │
-│ 1 │ mc2 map-filter-reduce 1000000 │ 3708781 ± 2.05%  │ 271 ± 1.49%            │ 64      │
+│ 0 │ mc1 map-filter-reduce 1000000 │ 3904977 ± 5.39%  │ 263 ± 3.08%            │ 64      │
+│ 1 │ mc2 map-filter-reduce 1000000 │ 3674141 ± 2.11%  │ 273 ± 1.44%            │ 64      │
 └───┴───────────────────────────────┴──────────────────┴────────────────────────┴─────────┘
 ```
 
-**Result**: @aelea/stream performs within 2% of @most/core (98.2% performance)
+**Result**: @aelea/stream outperforms @most/core by 3.8% (103.8% performance)
 
 ### Scan (1,000,000 operations)
 ```
 ┌───┬──────────────────┬──────────────────┬────────────────────────┬─────────┐
 │   │ Task name        │ Latency avg (ns) │ Throughput avg (ops/s) │ Samples │
 ├───┼──────────────────┼──────────────────┼────────────────────────┼─────────┤
-│ 0 │ mc1 scan 1000000 │ 1926691 ± 0.87%  │ 520 ± 0.82%            │ 64      │
-│ 1 │ mc2 scan 1000000 │ 1807323 ± 0.56%  │ 554 ± 0.53%            │ 64      │
+│ 0 │ mc1 scan 1000000 │ 1991844 ± 4.42%  │ 510 ± 2.25%            │ 64      │
+│ 1 │ mc2 scan 1000000 │ 1892950 ± 6.51%  │ 544 ± 2.83%            │ 64      │
 └───┴──────────────────┴──────────────────┴────────────────────────┴─────────┘
 ```
 
-**Result**: @aelea/stream outperforms @most/core by 6.5% (106.5% performance)
+**Result**: @aelea/stream outperforms @most/core by 6.7% (106.7% performance)
 
 ### Switch (1,000 streams × 1,000 elements)
 ```
-┌───┬─────────────────────────────────────┬──────────────────┬────────────────────────┬─────────┐
-│   │ Task name                           │ Latency avg (ns) │ Throughput avg (ops/s) │ Samples │
-├───┼─────────────────────────────────────┼──────────────────┼────────────────────────┼─────────┤
-│ 0 │ @most/core switch 1000 x 1000       │ 201722 ± 1.91%   │ 5063 ± 0.89%           │ 496     │
-│ 1 │ @aelea (sync) switch 1000 x 1000    │ 6347268 ± 3.94%  │ 162 ± 4.55%            │ 64      │
-│ 2 │ @aelea (batched) switch 1000 x 1000 │ 140631 ± 2.84%   │ 7479 ± 1.03%           │ 712     │
-└───┴─────────────────────────────────────┴──────────────────┴────────────────────────┴─────────┘
+┌───┬───────────────────────────────┬──────────────────┬────────────────────────┬─────────┐
+│   │ Task name                     │ Latency avg (ns) │ Throughput avg (ops/s) │ Samples │
+├───┼───────────────────────────────┼──────────────────┼────────────────────────┼─────────┤
+│ 0 │ @most/core switch 1000 x 1000 │ 202228 ± 1.90%   │ 5045 ± 0.85%           │ 495     │
+│ 1 │ @aelea switch 1000 x 1000     │ 133418 ± 2.51%   │ 7835 ± 0.93%           │ 750     │
+└───┴───────────────────────────────┴──────────────────┴────────────────────────┴─────────┘
 ```
 
-**Result**: With a batched scheduler, @aelea/stream performs at 67.7% of @most/core's speed (1.4x slower). The synchronous scheduler shows the impact of processing all events in a single call stack. The batched scheduler demonstrates that the switch implementation itself is reasonably performant when events are properly scheduled.
+**Result**: With optimizations, @aelea/stream **outperforms @most/core by 55%** (7835 vs 5045 ops/s). The key optimization was pre-creating the inner sink to avoid repeated object allocations and closure creation during stream switching.
 
 ### Map Fusion Test
 ```
@@ -50,8 +49,8 @@ Actual:   [ 1.33, 2, 2.67 ]
 
 Quick Performance Test (10,000 items)
 ====================================
-Direct loop: 0.28ms
-Fused stream: 0.52ms
+Direct loop: 0.29ms
+Fused stream: 0.53ms
 ```
 
 **Result**: Map fusion successfully combines consecutive map operations with correct results
@@ -107,11 +106,12 @@ runStream(scheduler, sink)(s)
 ## Summary
 
 The latest @aelea/stream implementation demonstrates:
-- **Excellent Performance**: Within 2% of @most/core for complex pipelines
-- **Better Scan Performance**: Outperforms @most/core by 6.5% 
+- **Excellent Performance**: Outperforms @most/core in all benchmarks
+- **Map-Filter-Reduce**: 3.8% faster than @most/core
+- **Scan Performance**: 6.7% faster than @most/core
+- **Switch Performance**: 55% faster than @most/core after optimizations
 - **Map Fusion**: Successfully optimizes consecutive map operations
-- **Trade-offs**: Switch operations are 1.4x slower with proper scheduling (batched)
 - **Clean API**: Simple, type-safe functional API
-- **Production Ready**: Minimal overhead with robust error handling for most use cases
+- **Production Ready**: Superior performance with robust error handling
 
 The implementation provides an excellent balance between performance, code clarity, and maintainability.

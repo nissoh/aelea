@@ -6,7 +6,7 @@ export const runStream =
     let disposable: Disposable | null = null
 
     const wrappedSink: Sink<T> = {
-      event: sink.event.bind(sink),
+      event: (e) => sink.event(e),
       error(error) {
         disposable?.[Symbol.dispose]()
         sink.error(error)
