@@ -1,7 +1,8 @@
 import * as MC from '@most/core'
 import * as MS from '@most/scheduler'
 import { Bench } from 'tinybench'
-import { type IStream, lswitch, map, op, runPromise, scan, scheduler, tap } from '../index.js'
+import { type IStream, switchLatest, map, op, runStream, scan, tap, fromArray } from '../src/stream/index.js'
+import { benchmarkScheduler } from './scheduler.js'
 
 const bench = new Bench({ time: 100 })
 
@@ -15,13 +16,7 @@ const sum = (x: number, y: number) => {
   return x + y
 }
 
-const fromArray =
-  <T>(arr: readonly T[]): IStream<T> =>
-  (scheduler, sink) =>
-    setImmediate((sink) => {
-      for (const a of arr) sink.event(a)
-      sink.end()
-    }, sink) as unknown as Disposable
+// Removed custom fromArray - using the imported one
 
 const fromArrayM = <A>(arr: readonly A[]) =>
   MC.newStream<A>((sink, s) =>
@@ -52,11 +47,17 @@ bench
     const pipeline = op(
       fromArray(arr),
       map((arr: readonly number[]) => fromArray(arr)),
-      lswitch,
+      switchLatest,
       scan(sum, 0),
       tap((x) => (r = x))
     )
-    return runPromise(scheduler)(pipeline).then(() => r)
+    return new Promise((resolve) => {
+      runStream(benchmarkScheduler, {
+        event: () => {},
+        error: (e) => { throw e },
+        end: () => resolve(r)
+      })(pipeline)
+    })
   })
 
 bench.addEventListener('error', console.error)

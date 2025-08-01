@@ -4,13 +4,9 @@
     "src",
     "src/**/*.d.ts"
   ],
-  "exclude": [
-    "src/stream/benchmark/**/*"
-  ],
   "compilerOptions": {
     "lib": [
-      "ESNext",
-      "DOM"
+      "ESNext"
     ],
     "outDir": "dist/esm",
     "rootDir": "./src",

@@ -1,9 +1,12 @@
+export function compose<A, B, C>(f: (a: A) => B, g: (b: B) => C) {
+  return (x: A): C => g(f(x))
+}
+
 /**
  * Pipe operator for functional composition.
  * Manually unrolled for performance optimization up to 12 arguments.
  * Falls back to loop for more than 12 arguments.
  */
-
 export const op: Op = (a: any, ...args: readonly any[]) => {
   switch (args.length) {
     case 0:

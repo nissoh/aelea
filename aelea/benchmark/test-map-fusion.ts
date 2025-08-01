@@ -1,4 +1,5 @@
-import { fromArray, map, op, runPromise, scheduler } from '../index.js'
+import { fromArray, map, op, runStream } from '../src/stream/index.js'
+import { benchmarkScheduler } from './scheduler.js'
 
 // Test fusion is working
 const testStream = op(
@@ -17,13 +18,13 @@ console.log('Has map marker:', Object.getOwnPropertySymbols(testStream).length >
 
 // Run the actual value through to verify correctness
 const testResult: number[] = []
-await runPromise(scheduler)((scheduler, sink) =>
-  testStream(scheduler, {
+await new Promise<void>((resolve) => {
+  runStream(benchmarkScheduler, {
     event: (x) => testResult.push(x),
     error: console.error,
-    end: () => {}
-  })
-)
+    end: resolve
+  })(testStream)
+})
 
 console.log('\nExpected: [(1+1)*2/3, (2+1)*2/3, (3+1)*2/3] = [1.33, 2, 2.67]')
 console.log(
@@ -60,15 +61,15 @@ const fusedStream = op(
 
 const start2 = performance.now()
 let lastValue = 0
-await runPromise(scheduler)((scheduler, sink) =>
-  fusedStream(scheduler, {
+await new Promise<void>((resolve) => {
+  runStream(benchmarkScheduler, {
     event: (x) => {
       lastValue = x
     },
     error: console.error,
-    end: () => {}
-  })
-)
+    end: resolve
+  })(fusedStream)
+})
 const time2 = performance.now() - start2
 
 console.log(`Direct loop: ${time1.toFixed(2)}ms`)
