@@ -28,7 +28,7 @@ export const fromCallback = <T, FnArgs extends any[] = T[]>(
       // Create composite disposable
       const callbackDisposable =
         maybeDisposable instanceof Function
-          ? disposeWith(maybeDisposable, null)
+          ? disposeWith(maybeDisposable)
           : maybeDisposable && typeof maybeDisposable === 'object' && Symbol.dispose in maybeDisposable
             ? maybeDisposable
             : disposeNone

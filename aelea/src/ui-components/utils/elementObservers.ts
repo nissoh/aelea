@@ -1,32 +1,37 @@
 import { eventElementTarget } from '../../core/combinator/event.js'
 import { fromCallback } from '../../core/combinator/fromCallback.js'
-import type { INode, INodeElement } from '../../core/source/node.js'
-import {
-  chain,
-  constant,
-  continueWith,
-  filter,
-  type IStream,
-  switchLatest,
-  until
-} from '../../stream/index.js'
+import type { INode } from '../../core/source/node.js'
+import { constant, continueWith, filter, type IStream, map, o, switchLatest, until } from '../../stream/index.js'
 
-export const intersection = (config: IntersectionObserverInit = {}) =>
-  chain(<A extends INodeElement>(node: INode<A>): IStream<IntersectionObserverEntry[]> =>
-    fromCallback((cb) => {
+export const intersection = (config: IntersectionObserverInit = {}) => {
+  const newLocal = map((node: INode) => fromCallback(
+    (cb) => {
       const intersectionObserver = new IntersectionObserver(cb, config)
       intersectionObserver.observe(node.element)
       return () => intersectionObserver.unobserve(node.element)
-    })
+    },
+    (entries: IntersectionObserverEntry[]) => entries
   )
+  )
+  return o(
+    newLocal,
+    switchLatest
+  )
+}
 
 export const resize = (config: ResizeObserverOptions = {}) =>
-  chain(<A extends INodeElement>(node: INode<A>): IStream<ResizeObserverEntry[]> =>
-    fromCallback((cb) => {
-      const ro = new ResizeObserver(cb)
-      ro.observe(node.element, config)
-      return () => ro.unobserve(node.element)
-    })
+  o(
+    map((node: INode) =>
+      fromCallback(
+        (cb) => {
+          const ro = new ResizeObserver(cb)
+          ro.observe(node.element, config)
+          return () => ro.unobserve(node.element)
+        },
+        (entries: ResizeObserverEntry[]) => entries
+      )
+    ),
+    switchLatest
   )
 
 export const mutation = (
@@ -36,12 +41,18 @@ export const mutation = (
     subtree: false
   }
 ) =>
-  chain(<A extends INodeElement>(node: INode<A>): IStream<MutationRecord[]> =>
-    fromCallback((cb) => {
-      const mo = new MutationObserver(cb)
-      mo.observe(node.element, config)
-      return () => mo.disconnect()
-    })
+  o(
+    map((node: INode) =>
+      fromCallback(
+        (cb) => {
+          const mo = new MutationObserver(cb)
+          mo.observe(node.element, config)
+          return () => mo.disconnect()
+        },
+        (mutations: MutationRecord[]) => mutations
+      )
+    ),
+    switchLatest
   )
 
 const documentVisibilityChange = eventElementTarget('visibilitychange', document)

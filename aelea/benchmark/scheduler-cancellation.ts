@@ -7,43 +7,43 @@ bench
   .add('queueMicrotask + cancel flag', () => {
     let disposed = false
     let completed = 0
-    
+
     for (let i = 0; i < 1000; i++) {
       queueMicrotask(() => {
         if (!disposed) completed++
       })
     }
-    
+
     // Cancel half way
     if (Math.random() > 0.5) disposed = true
-    
-    return new Promise(resolve => setTimeout(() => resolve(completed), 10))
+
+    return new Promise((resolve) => setTimeout(() => resolve(completed), 10))
   })
   .add('Promise.then (no cancellation)', () => {
     let completed = 0
-    
+
     for (let i = 0; i < 1000; i++) {
       Promise.resolve().then(() => {
         completed++
       })
     }
-    
-    return new Promise(resolve => setTimeout(() => resolve(completed), 10))
+
+    return new Promise((resolve) => setTimeout(() => resolve(completed), 10))
   })
   .add('AbortController + fetch pattern', () => {
     let completed = 0
     const controller = new AbortController()
-    
+
     for (let i = 0; i < 1000; i++) {
       Promise.resolve().then(() => {
         if (!controller.signal.aborted) completed++
       })
     }
-    
+
     // Cancel half way
     if (Math.random() > 0.5) controller.abort()
-    
-    return new Promise(resolve => setTimeout(() => resolve(completed), 10))
+
+    return new Promise((resolve) => setTimeout(() => resolve(completed), 10))
   })
 
 console.log('Scheduler Cancellation Test')
@@ -64,7 +64,9 @@ const disposables: Array<{ [Symbol.dispose]: () => void }> = []
 for (let i = 0; i < 100000; i++) {
   let disposed = false
   disposables.push({
-    [Symbol.dispose]: () => { disposed = true }
+    [Symbol.dispose]: () => {
+      disposed = true
+    }
   })
 }
 

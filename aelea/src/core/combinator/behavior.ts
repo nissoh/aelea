@@ -1,5 +1,4 @@
-import { disposeWith, type IOps, type IStream, op, type Scheduler, type Sink } from '../../stream/index.js'
-import { tether } from './tether.js'
+import { disposeWith, type IOps, type IStream, op, type Scheduler, type Sink, tether } from '../../stream/index.js'
 
 type SinkMap<T> = Map<Sink<T>, Map<IStream<T>, Disposable | null>>
 

@@ -1,14 +1,14 @@
 import { disposeBoth, disposeWith, empty, type IStream, nullSink, tap } from '../../stream/index.js'
 
-export function fromWebsocket<OUTPUT, INPUT>(
+export function fromWebsocket<I, O>(
   url: string,
-  input: IStream<INPUT> = empty,
+  input: IStream<O> = empty,
   protocols: string | string[] | undefined = undefined
-): IStream<OUTPUT> {
+): IStream<I> {
   return {
     run(scheduler, sink) {
       let socket: WebSocket | null = new WebSocket(url, protocols)
-      const messageBuffer: INPUT[] = []
+      const messageBuffer: O[] = []
 
       const onError = (error: Event) => {
         const errorMsg = error instanceof ErrorEvent ? error.message : 'WebSocket connection error'
@@ -24,7 +24,7 @@ export function fromWebsocket<OUTPUT, INPUT>(
         }
       }
 
-      const sendMessage = (value: INPUT) => {
+      const sendMessage = (value: O) => {
         try {
           if (socket) {
             socket.send(JSON.stringify(value))
@@ -76,7 +76,7 @@ export function fromWebsocket<OUTPUT, INPUT>(
       socket.addEventListener('close', onClose)
 
       // Handle input stream
-      const sendInputEffect = tap((value: INPUT) => {
+      const sendInputEffect = tap((value: O) => {
         if (socket && socket.readyState === WebSocket.OPEN) {
           sendMessage(value)
         } else if (socket && socket.readyState === WebSocket.CONNECTING) {
