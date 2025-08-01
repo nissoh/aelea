@@ -12,7 +12,7 @@ export const join = <A>(stream: IStream<IStream<A>>): IStream<A> => mergeConcurr
 
 export interface IMergeConcurrentlyCurry {
   <A>(concurrency: number, stream: IStream<IStream<A>>): IStream<A>
-  (concurrency: number): <A>(stream: IStream<IStream<A>>) => IStream<A>
+  <A>(concurrency: number): (stream: IStream<IStream<A>>) => IStream<A>
 }
 
 /**

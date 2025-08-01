@@ -4,7 +4,7 @@ import type { IStream, Sink } from '../types.js'
 
 export interface ISampleCurry {
   <A, B>(values: IStream<A>, sampler: IStream<B>): IStream<A>
-  <A>(values: IStream<A>): <B>(sampler: IStream<B>) => IStream<A>
+  <A, B>(values: IStream<A>): (sampler: IStream<B>) => IStream<A>
 }
 
 /**

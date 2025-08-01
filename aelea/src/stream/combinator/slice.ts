@@ -18,8 +18,8 @@ import { take } from './take.js'
  */
 export interface ISliceCurry {
   <T>(start: number, end: number, source: IStream<T>): IStream<T>
-  (start: number, end: number): <T>(source: IStream<T>) => IStream<T>
-  (start: number): (end: number) => <T>(source: IStream<T>) => IStream<T>
+  <T>(start: number, end: number): (source: IStream<T>) => IStream<T>
+  <T>(start: number): (end: number) => (source: IStream<T>) => IStream<T>
 }
 
 export const slice: ISliceCurry = curry3((start, end, source) => {

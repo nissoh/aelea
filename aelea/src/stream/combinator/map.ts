@@ -4,7 +4,7 @@ import type { IStream, Scheduler, Sink } from '../types.js'
 
 export interface IMapCurry {
   <T, R>(f: (value: T) => R, source: IStream<T>): IStream<R>
-  <T, R>(f: (value: T) => R): <R>(source: IStream<T>) => IStream<R>
+  <T, R>(f: (value: T) => R): (source: IStream<T>) => IStream<R>
 }
 
 class MapSource<T, R> implements IStream<R> {

@@ -4,17 +4,17 @@ import type { INode } from '../../core/source/node.js'
 import { constant, continueWith, filter, type IStream, map, o, switchLatest, until } from '../../stream/index.js'
 
 export const intersection = (config: IntersectionObserverInit = {}) => {
-  const newLocal = map((node: INode) => fromCallback(
-    (cb) => {
-      const intersectionObserver = new IntersectionObserver(cb, config)
-      intersectionObserver.observe(node.element)
-      return () => intersectionObserver.unobserve(node.element)
-    },
-    (entries: IntersectionObserverEntry[]) => entries
-  )
-  )
   return o(
-    newLocal,
+    map((node: INode) =>
+      fromCallback(
+        (cb) => {
+          const intersectionObserver = new IntersectionObserver(cb, config)
+          intersectionObserver.observe(node.element)
+          return () => intersectionObserver.unobserve(node.element)
+        },
+        (entries: IntersectionObserverEntry[]) => entries
+      )
+    ),
     switchLatest
   )
 }
