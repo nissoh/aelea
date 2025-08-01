@@ -40,7 +40,6 @@ export type { Curried2, Curried3, Curried4 } from './function.js'
 export { curry2, curry3, curry4, o, op } from './function.js'
 export { multicast, replayState, tether } from './multicast/index.js'
 export { runPromise, runStream } from './run.js'
-export { scheduler } from './scheduler.js'
 export { MergingSink, TransformSink } from './sink.js'
 export {
   at,

@@ -1,18 +1,14 @@
-import { disposeNone } from '../../stream/index.js'
-
-export interface ISettableDisposable extends Disposable {
-  set: (disposable: Disposable) => void
-}
-
-export class SettableDisposable implements ISettableDisposable {
-  private disposable: Disposable | undefined
+/**
+ * A disposable that can have its underlying disposable set/changed.
+ * Useful for cases where the disposable needs to be created after construction.
+ */
+export class SettableDisposable implements Disposable {
+  private disposable: Disposable | null = null
   private disposed = false
 
-  constructor(private initialDiposable = disposeNone) {}
-
   set(disposable: Disposable): void {
-    if (this.disposable !== undefined) {
-      throw new Error('set() called more than once')
+    if (this.disposable !== null) {
+      throw new Error('Disposable already set')
     }
 
     this.disposable = disposable
@@ -23,15 +19,13 @@ export class SettableDisposable implements ISettableDisposable {
   }
 
   [Symbol.dispose](): void {
-    if (this.disposed) {
-      return
-    }
+    if (this.disposed) return
 
     this.disposed = true
 
-    if (this.disposable !== undefined) {
-      this.initialDiposable[Symbol.dispose]()
+    if (this.disposable !== null) {
       this.disposable[Symbol.dispose]()
+      this.disposable = null
     }
   }
 }

@@ -34,7 +34,7 @@ export {
   stylePseudo
 } from './combinator/style.js'
 export type { IRunEnvironment } from './run.js'
-export { runBrowser } from './run.js'
+export { run } from './run.js'
 export type {
   I$Node,
   I$Op,

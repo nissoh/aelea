@@ -52,7 +52,7 @@ class Until<A> implements IStream<A> {
 
     const d1 = this.source.run(scheduler, sink)
     const d2 = this.maxSignal.run(scheduler, new UntilSink(sink, disposable))
-    disposable.setDisposable(disposeBoth(d1, d2))
+    disposable.set(disposeBoth(d1, d2))
 
     return disposable
   }

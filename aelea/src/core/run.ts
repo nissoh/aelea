@@ -155,43 +155,6 @@ class BranchChildrenSinkList implements Disposable {
   }
 }
 
-export function runBrowser(
-  scheduler: Scheduler,
-  userConfig: Partial<IRunEnvironment> & { $rootNode: I$Node }
-): Disposable {
-  const defaultConfig: Omit<IRunEnvironment, '$rootNode'> = {
-    namespace: '•',
-    stylesheet: new CSSStyleSheet(),
-    cache: [],
-    rootAttachment: document.querySelector('html')!,
-    scheduler
-  }
-
-  const config = { ...defaultConfig, ...userConfig }
-
-  document.adoptedStyleSheets = [...document.adoptedStyleSheets, config.stylesheet]
-
-  const $rootNode = config.$rootNode
-
-  return op(
-    $rootNode,
-    map((node) => {
-      const rootNode: INode = {
-        element: defaultConfig.rootAttachment!,
-        $segments: [],
-        disposable: new SettableDisposable(),
-        styleBehavior: [],
-        insertAscending: true,
-        attributesBehavior: [],
-        stylePseudo: []
-      }
-
-      // TODO(Fix) BranchEffectsSink will prepend the rootNode to the configred rootAttachment which is not always the desired use case
-      return new BranchEffectsSink(config, rootNode, 0, [0]).event(node)
-    })
-  ).run(config.scheduler, nullSink)
-}
-
 function styleBehavior(styleBehavior: IStream<IStyleCSS | null>, node: INode, cacheService: IRunEnvironment) {
   let latestClass: string
 
@@ -287,4 +250,21 @@ function appendToSlot(parent: INodeElement, child: INodeElement, insertAt: numbe
   if (insertAt === 0) return parent.prepend(child)
 
   parent.insertBefore(child, parent.children[insertAt])
+}
+
+export function run(config: IRunEnvironment & { $rootNode: I$Node }) {
+  return map((node) => {
+    const rootNode: INode = {
+      element: config.rootAttachment!,
+      $segments: [],
+      disposable: new SettableDisposable(),
+      styleBehavior: [],
+      insertAscending: true,
+      attributesBehavior: [],
+      stylePseudo: []
+    }
+
+    // TODO(Fix) BranchEffectsSink will prepend the rootNode to the configred rootAttachment which is not always the desired use case
+    return new BranchEffectsSink(config, rootNode, 0, [0]).event(node)
+  }, config.$rootNode)
 }

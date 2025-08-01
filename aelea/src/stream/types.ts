@@ -10,6 +10,7 @@ export interface Sink<T> {
 
 export interface Scheduler {
   schedule: <TArgs extends any[]>(callback: (...args: TArgs) => void, delay: number, ...args: TArgs) => Disposable
+  immediate: <TArgs extends any[]>(callback: (...args: TArgs) => void, ...args: TArgs) => Disposable
   currentTime: () => number
 }
 

@@ -3,21 +3,29 @@
  * Useful for cases where the disposable needs to be created after construction.
  */
 export class SettableDisposable implements Disposable {
+  private disposable: Disposable | null = null
   private disposed = false
-  private disposable?: Disposable
 
-  setDisposable(disposable: Disposable): void {
+  set(disposable: Disposable): void {
+    if (this.disposable !== null) {
+      throw new Error('Disposable already set')
+    }
+
+    this.disposable = disposable
+
     if (this.disposed) {
       disposable[Symbol.dispose]()
-    } else {
-      this.disposable = disposable
     }
   }
 
   [Symbol.dispose](): void {
-    if (!this.disposed) {
-      this.disposed = true
-      this.disposable?.[Symbol.dispose]()
+    if (this.disposed) return
+
+    this.disposed = true
+
+    if (this.disposable !== null) {
+      this.disposable[Symbol.dispose]()
+      this.disposable = null
     }
   }
 }
