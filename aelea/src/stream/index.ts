@@ -11,6 +11,7 @@ export {
   during,
   filter,
   filterNull,
+  fromCallback,
   fromPromise,
   join,
   map,

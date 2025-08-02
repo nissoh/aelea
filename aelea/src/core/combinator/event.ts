@@ -1,7 +1,6 @@
 import type { IStream } from '../../stream/index.js'
-import { chain, curry2, isStream } from '../../stream/index.js'
+import { chain, curry2, fromCallback, isStream } from '../../stream/index.js'
 import type { I$Slottable, INodeElement } from '../types.js'
-import { fromCallback } from './fromCallback.js'
 
 type PickEvent<A, B> = A extends keyof B ? B[A] : Event
 

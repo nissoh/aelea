@@ -1,7 +1,16 @@
 import { eventElementTarget } from '../../core/combinator/event.js'
-import { fromCallback } from '../../core/combinator/fromCallback.js'
 import type { INode } from '../../core/types.js'
-import { constant, continueWith, filter, type IStream, map, o, switchLatest, until } from '../../stream/index.js'
+import {
+  constant,
+  continueWith,
+  filter,
+  fromCallback,
+  type IStream,
+  map,
+  o,
+  switchLatest,
+  until
+} from '../../stream/index.js'
 
 export const intersection = (config: IntersectionObserverInit = {}) => {
   return o(

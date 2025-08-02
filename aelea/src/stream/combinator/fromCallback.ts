@@ -1,4 +1,3 @@
-import { disposeAll, disposeBoth } from '../../stream/index.js'
 import type { ISink, IStream } from '../../stream/types.js'
 import { toDisposable } from '../../stream/utils/disposable.js'
 import { stream } from '../stream.js'
@@ -12,18 +11,15 @@ export const fromCallback = <T, FnArgs extends any[] = T[]>(
 ): IStream<T> =>
   stream((scheduler, sink) => {
     try {
-      const scheduledTasks: Disposable[] = []
+      const sd = scheduler.asap(sink, () => {
+        const maybeDisposable = callbackFunction.call(context, (...args: FnArgs) => {
+          eventTryMap(sink, mapFn, ...args)
+        })
 
-      // very common that callback functions returns a destructor, perhaps a Disposable in a "most" case
-      const maybeDisposable = callbackFunction.call(context, (...args: FnArgs) => {
-        const task = scheduler.asap(sink, eventTryMap, mapFn, ...args)
-        scheduledTasks.push(task)
+        return toDisposable(maybeDisposable)
       })
 
-      return disposeBoth(
-        disposeAll(scheduledTasks), //
-        toDisposable(maybeDisposable)
-      )
+      return sd
     } catch (error) {
       return scheduler.asap(sink, eventError, error)
     }

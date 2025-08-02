@@ -1,13 +1,6 @@
 import { type Args, disposeWith, type ISink, type ITask } from '../stream/index.js'
 import type { I$Scheduler } from './types.js'
 
-interface Task<T = any> {
-  sink: ISink<T>
-  task: ITask<T, any>
-  args: readonly unknown[]
-  cancelled?: boolean
-}
-
 /**
  * Optimized browser scheduler for DOM operations
  *
@@ -22,16 +15,19 @@ interface Task<T = any> {
  *   - Effect: Post-paint operations (focus, scroll, animations)
  */
 class DomScheduler implements I$Scheduler {
-  private computeQueue: Task[] = []
-  private renderQueue: Task[] = []
+  private computeQueue: Array<() => void> = []
+  private renderQueue: Array<() => void> = []
   private computeScheduled = false
   private rafId: number | null = null
 
   // Standard IScheduler methods
   delay<T, TArgs extends Args>(sink: ISink<T>, task: ITask<T, TArgs>, delay: number, ...args: TArgs): Disposable {
     let cancelled = false
+
     const timeoutId = setTimeout(() => {
-      if (!cancelled) task(sink, ...args)
+      if (!cancelled) {
+        this.executeTask(task, sink, args)
+      }
     }, delay)
 
     return disposeWith(() => {
@@ -41,34 +37,38 @@ class DomScheduler implements I$Scheduler {
   }
 
   asap<T, TArgs extends Args>(sink: ISink<T>, task: ITask<T, TArgs>, ...args: TArgs): Disposable {
-    const taskItem: Task = {
-      sink,
-      task,
-      args,
-      cancelled: false
+    let cancelled = false
+
+    // Create closure that captures all needed values
+    const fn = () => {
+      if (!cancelled) {
+        this.executeTask(task, sink, args)
+      }
     }
 
-    this.computeQueue.push(taskItem)
+    this.computeQueue.push(fn)
     this.scheduleCompute()
 
     return disposeWith(() => {
-      taskItem.cancelled = true
+      cancelled = true
     })
   }
 
   paint<T, TArgs extends readonly unknown[]>(sink: ISink<T>, task: ITask<T, TArgs>, ...args: TArgs): Disposable {
-    const taskItem: Task = {
-      sink,
-      task,
-      args,
-      cancelled: false
+    let cancelled = false
+
+    // Create closure that captures all needed values
+    const fn = () => {
+      if (!cancelled) {
+        this.executeTask(task, sink, args)
+      }
     }
 
-    this.renderQueue.push(taskItem)
+    this.renderQueue.push(fn)
     this.scheduleRender()
 
     return disposeWith(() => {
-      taskItem.cancelled = true
+      cancelled = true
     })
   }
 
@@ -92,12 +92,9 @@ class DomScheduler implements I$Scheduler {
     const len = queue.length
     this.computeQueue = []
 
-    // Use for loop for better performance
+    // Direct function calls - no object access needed
     for (let i = 0; i < len; i++) {
-      const task = queue[i]
-      if (!task.cancelled) {
-        this.executeTask(task.task, task.sink, task.args)
-      }
+      queue[i]()
     }
   }
 
@@ -116,12 +113,9 @@ class DomScheduler implements I$Scheduler {
     const len = queue.length
     this.renderQueue = []
 
-    // Use for loop for better performance
+    // Direct function calls - no object access needed
     for (let i = 0; i < len; i++) {
-      const task = queue[i]
-      if (!task.cancelled) {
-        this.executeTask(task.task, task.sink, task.args)
-      }
+      queue[i]()
     }
   }
 
