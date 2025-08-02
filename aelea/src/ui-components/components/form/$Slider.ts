@@ -1,6 +1,6 @@
 import type { IStyleCSS } from '../../../core/combinator/style.js'
 import { $element, attr, component, nodeEvent, style, stylePseudo } from '../../../core/index.js'
-import type { INode } from '../../../core/source/node.js'
+import type { INode } from '../../../core/types.js'
 import { filter, type IBehavior, map, merge, now, o, switchLatest, tap } from '../../../stream/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import type { Input } from './types.js'

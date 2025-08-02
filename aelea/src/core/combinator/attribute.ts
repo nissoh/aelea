@@ -1,5 +1,5 @@
 import { curry2, type IStream, map } from '../../stream/index.js'
-import type { I$Node, INode, INodeElement } from '../source/node.js'
+import type { I$Node, INode, INodeElement } from '../types.js'
 
 export type IAttributeProperties<T> = {
   [P in keyof T]: string | number | boolean | null | undefined

@@ -1,8 +1,8 @@
 import { component } from '../../core/combinator/component.js'
 import { style } from '../../core/combinator/style.js'
-import type { I$Node, I$Slottable, INode } from '../../core/source/node.js'
 import { $custom, $node } from '../../core/source/node.js'
 import { $text } from '../../core/source/text.js'
+import type { I$Node, I$Slottable, INode } from '../../core/types.js'
 import {
   chain,
   delay,
@@ -40,7 +40,7 @@ export interface QuantumScroll {
 
   $loader?: I$Slottable
 
-  containerOps?: IOps<INode, INode>
+  containerOps?: IOps<INode>
 }
 
 const $defaultLoader = $node(style({ color: pallete.foreground, padding: '3px 10px' }))($text('Loading...'))

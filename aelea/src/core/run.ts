@@ -14,7 +14,7 @@ import {
 } from '../stream/index.js'
 import type { IAttributeProperties } from './combinator/attribute.js'
 import type { IStyleCSS } from './combinator/style.js'
-import type { I$Node, I$Slottable, INode, INodeElement, ISlottable } from './source/node.js'
+import type { I$Node, I$Slottable, INode, INodeElement, ISlottable } from './types.js'
 import { SettableDisposable } from './utils/SettableDisposable.js'
 
 export interface IRunEnvironment {

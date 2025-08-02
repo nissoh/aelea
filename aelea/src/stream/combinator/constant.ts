@@ -1,6 +1,6 @@
-import { curry2 } from '../function.js'
-import { now } from '../source/now.js'
+import { now } from '../source/stream.js'
 import type { IStream } from '../types.js'
+import { curry2 } from '../utils/function.js'
 import { map } from './map.js'
 import { merge } from './merge.js'
 

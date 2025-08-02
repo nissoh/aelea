@@ -1,5 +1,6 @@
 import type { IComposeBehavior, IOps, IStream, Scheduler, Sink } from '../types.js'
 import { disposeWith } from '../utils/disposable.js'
+import { op } from '../utils/function.js'
 import { tether } from './tether.js'
 
 type SinkMap<T> = Map<Sink<T>, Map<IStream<T>, Disposable | null>>
@@ -46,7 +47,7 @@ class IBehaviorSource<I, O> implements IStream<O> {
       const [s0, s1] = tether(sb)
 
       // @ts-ignore
-      const bops = o(...ops)(s1)
+      const bops = op(s1, ...ops)
 
       this.queuedBehaviors.push(bops)
       this.sinksMap.forEach((sourcesMap, sink) => {

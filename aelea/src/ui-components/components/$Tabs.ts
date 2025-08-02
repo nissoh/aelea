@@ -1,5 +1,5 @@
 import { $node, component, nodeEvent } from '../../core/index.js'
-import type { I$Slottable } from '../../core/source/node.js'
+import type { I$Slottable } from '../../core/types.js'
 import { type IBehavior, type IStream, map, merge, switchLatest } from '../../stream/index.js'
 
 export interface Tab {

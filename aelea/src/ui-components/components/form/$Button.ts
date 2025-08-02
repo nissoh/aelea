@@ -1,6 +1,6 @@
 import type { IStyleCSS } from '../../../core/combinator/style.js'
 import { $element, attrBehavior, component, nodeEvent, styleBehavior } from '../../../core/index.js'
-import type { I$Slottable, INode, ISlottable } from '../../../core/source/node.js'
+import type { I$Slottable, INode, ISlottable } from '../../../core/types.js'
 import { type IBehavior, type IOps, map, merge, never, op } from '../../../stream/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'

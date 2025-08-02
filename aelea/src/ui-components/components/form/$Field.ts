@@ -1,6 +1,6 @@
 import type { IStyleCSS } from '../../../core/combinator/style.js'
 import { $element, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
-import type { INode } from '../../../core/source/node.js'
+import type { INode } from '../../../core/types.js'
 import type { IBehavior, IOps } from '../../../stream/index.js'
 import {
   combineState,

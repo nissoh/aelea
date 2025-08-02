@@ -1,7 +1,7 @@
 import type { IStream } from '../../stream/index.js'
 import { filterNull, map, merge, now, op } from '../../stream/index.js'
+import type { ISlottable } from '../types.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
-import type { ISlottable } from './node.js'
 
 export type I$Text = IStream<ISlottable<Text>>
 
@@ -27,36 +27,30 @@ function createDynamicTextStream(textSource: IStream<string>): IStream<ISlottabl
   )
 }
 
-function createTextSource(textSourceList: (IStream<string> | string)[]): I$Text {
-  return {
-    run(scheduler, sink) {
-      if (textSourceList.length === 1) {
-        const textSource = textSourceList[0]
+export const $text = (...textSourceList: (IStream<string> | string)[]): I$Text => {
+  if (textSourceList.length === 1) {
+    const textSource = textSourceList[0]
 
-        if (typeof textSource === 'string') {
-          return now({
-            disposable: new SettableDisposable(),
-            element: document.createTextNode(textSource)
-          } as ISlottable<Text>).run(scheduler, sink)
-        }
-
-        return createDynamicTextStream(textSource).run(scheduler, sink)
-      }
-
-      const mappedSourceList = textSourceList.map((textSource) => {
-        if (typeof textSource === 'string') {
-          return now({
-            disposable: new SettableDisposable(),
-            element: document.createTextNode(textSource)
-          } as ISlottable<Text>)
-        }
-
-        return createDynamicTextStream(textSource)
-      })
-
-      return merge(...mappedSourceList).run(scheduler, sink)
+    if (typeof textSource === 'string') {
+      return now({
+        disposable: new SettableDisposable(),
+        element: document.createTextNode(textSource)
+      } as ISlottable<Text>)
     }
-  }
-}
 
-export const $text = (...textSourceList: (IStream<string> | string)[]): I$Text => createTextSource(textSourceList)
+    return createDynamicTextStream(textSource)
+  }
+
+  const mappedSourceList = textSourceList.map((textSource) => {
+    if (typeof textSource === 'string') {
+      return now({
+        disposable: new SettableDisposable(),
+        element: document.createTextNode(textSource)
+      } as ISlottable<Text>)
+    }
+
+    return createDynamicTextStream(textSource)
+  })
+
+  return merge(...mappedSourceList)
+}

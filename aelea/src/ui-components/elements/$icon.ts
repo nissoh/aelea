@@ -1,5 +1,5 @@
 import { $svg, attr, style } from '../../core/index.js'
-import type { I$Slottable, INode } from '../../core/source/node.js'
+import type { I$Node, INode } from '../../core/types.js'
 import { type IOps, o } from '../../stream/index.js'
 
 interface Icon {
@@ -9,8 +9,8 @@ interface Icon {
   viewBox?: string
   fill?: string
 
-  $content: I$Slottable
-  svgOps?: IOps<INode<SVGSVGElement>, INode<SVGSVGElement>>
+  $content: I$Node
+  svgOps?: IOps<INode<SVGSVGElement>>
 }
 
 export const $icon = ({

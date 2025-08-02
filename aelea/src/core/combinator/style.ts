@@ -1,6 +1,6 @@
 import type * as CSS from 'csstype'
 import { curry2, curry3, filter, type IStream, map, tap } from '../../stream/index.js'
-import type { I$Node, INodeElement } from '../source/node.js'
+import type { I$Node, INodeElement } from '../types.js'
 
 export type IStyleCSS = CSS.Properties
 

@@ -39,7 +39,7 @@ export type {
   INodeElement,
   ISlottable,
   ISlottableElement
-} from './source/node.js'
+} from './types.js'
 export {
   $custom,
   $element,

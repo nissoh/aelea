@@ -1,9 +1,9 @@
 import { component } from '../../../core/combinator/component.js'
 import type { IStyleCSS } from '../../../core/combinator/style.js'
 import { style } from '../../../core/combinator/style.js'
-import type { INode } from '../../../core/source/node.js'
 import { $node } from '../../../core/source/node.js'
 import { $text } from '../../../core/source/text.js'
+import type { INode } from '../../../core/types.js'
 import type { IBehavior, IOps } from '../../../stream/index.js'
 import {
   empty,
