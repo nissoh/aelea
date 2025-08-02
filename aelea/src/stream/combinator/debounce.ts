@@ -1,17 +1,11 @@
-import { curry2 } from '../function.js'
 import type { IStream, Scheduler, Sink } from '../types.js'
+import { curry2 } from '../utils/function.js'
 
 export interface IDebounceCurry {
   <T>(delay: number, source: IStream<T>): IStream<T>
   <T>(delay: number): (source: IStream<T>) => IStream<T>
 }
 
-/**
- * Wait for a burst of events to subside and emit only the last event in the burst
- * @param period events occuring more frequently than this will be suppressed
- * @param stream stream to debounce
- * @returns new debounced stream
- */
 export const debounce: IDebounceCurry = curry2((period, source) => ({
   run(scheduler, sink) {
     return new DebounceSink(period, source, sink, scheduler)

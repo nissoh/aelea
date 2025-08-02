@@ -1,6 +1,7 @@
-import { curry2 } from '../function.js'
-import { PipeSink } from '../sink.js'
+import { stream } from '../stream.js'
 import type { IStream, Sink } from '../types.js'
+import { curry2 } from '../utils/function.js'
+import { PipeSink } from '../utils/sink.js'
 
 export interface IFilterCurry {
   // <T, S extends T>(f: (value: T) => value is S, s: IStream<T>): IStream<S>
@@ -9,11 +10,9 @@ export interface IFilterCurry {
   <T>(f: (value: T) => boolean): (s: IStream<T>) => IStream<T>
 }
 
-export const filter: IFilterCurry = curry2((f, s) => ({
-  run(scheduler, sink) {
-    return s.run(scheduler, new FilterSink(f, sink))
-  }
-}))
+export const filter: IFilterCurry = curry2((f, s) =>
+  stream((scheduler, sink) => s.run(scheduler, new FilterSink(f, sink)))
+)
 
 class FilterSink<T> extends PipeSink<T> {
   constructor(

@@ -1,20 +1,13 @@
-import { disposeNone, disposeWith } from '../disposable.js'
+import { stream } from '../stream.js'
 import type { IStream, Scheduler, Sink } from '../types.js'
+import { disposeNone, disposeWith } from '../utils/disposable.js'
 
 export const tether = <T>(source: IStream<T>): [IStream<T>, IStream<T>] => {
   const tetherSource = new Tether(source)
 
   return [
-    {
-      run(scheduler, sink) {
-        return tetherSource.run(scheduler, new SourceSink(tetherSource, sink))
-      }
-    },
-    {
-      run(scheduler, sink) {
-        return tetherSource.run(scheduler, new TetherSink(sink))
-      }
-    }
+    stream((scheduler, sink) => tetherSource.run(scheduler, new SourceSink(tetherSource, sink))),
+    stream((scheduler, sink) => tetherSource.run(scheduler, new TetherSink(sink)))
   ]
 }
 
@@ -100,17 +93,14 @@ class Tether<T> implements IStream<T> {
       }
     }
 
-    return disposeWith(
-      ([tetherSinkList, sourceTetherSink]) => {
-        sourceTetherSink.end()
-        const sinkIdx = tetherSinkList.indexOf(sourceTetherSink)
+    return disposeWith(() => {
+      sink.end()
+      const sinkIdx = this.tetherSinkList.indexOf(sink)
 
-        if (sinkIdx > -1) {
-          // remove(sinkIdx, tetherSinkList)
-          tetherSinkList.splice(sinkIdx, 1)
-        }
-      },
-      [this.tetherSinkList, sink] as const
-    )
+      if (sinkIdx > -1) {
+        // remove(sinkIdx, tetherSinkList)
+        this.tetherSinkList.splice(sinkIdx, 1)
+      }
+    })
   }
 }

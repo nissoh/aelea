@@ -1,4 +1,4 @@
-import type { Scheduler, Sink } from 'aelea/stream'
+import { disposeWith, type Scheduler, type Sink } from 'aelea/stream'
 
 /**
  * Browser scheduler implementation using requestAnimationFrame for immediate scheduling
@@ -12,11 +12,7 @@ export const browserScheduler: Scheduler = {
     ...args: TArgs
   ): Disposable {
     const timeoutId = setTimeout(callback, delay, sink, ...args)
-    return {
-      [Symbol.dispose]() {
-        clearTimeout(timeoutId)
-      }
-    }
+    return disposeWith(() => clearTimeout(timeoutId))
   },
 
   // asap<TArgs extends readonly unknown[], T>(sink: any, callback: (sink: any, ...args: TArgs) => void, ...args: TArgs) {
@@ -39,16 +35,12 @@ export const browserScheduler: Scheduler = {
   ): Disposable {
     let cancelled = false
     const frameId = requestAnimationFrame(() => {
-      if (!cancelled) {
-        callback(sink, ...args)
-      }
+      if (!cancelled) callback(sink, ...args)
     })
-    return {
-      [Symbol.dispose]() {
-        cancelled = true
-        cancelAnimationFrame(frameId)
-      }
-    }
+    return disposeWith(() => {
+      cancelled = true
+      cancelAnimationFrame(frameId)
+    })
   },
 
   time(): number {

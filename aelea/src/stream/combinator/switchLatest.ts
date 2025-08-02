@@ -1,33 +1,9 @@
-import { disposeNone } from '../disposable.js'
+import { stream } from '../stream.js'
 import type { IStream, Scheduler, Sink } from '../types.js'
+import { disposeNone } from '../utils/disposable.js'
 
-export const switchLatest = <T>(souce: IStream<IStream<T>>): IStream<T> => ({
-  run(scheduler, sink) {
-    return souce.run(scheduler, new SwitchSink(scheduler, sink))
-  }
-})
-
-class InnerSink<T> implements Sink<T> {
-  constructor(
-    private parent: SwitchSink<T>,
-    private sink: Sink<T>
-  ) {}
-
-  event(value: T): void {
-    this.sink.event(value)
-  }
-
-  error(error: any): void {
-    this.sink.error(error)
-  }
-
-  end(): void {
-    this.parent.innerEnded = true
-    if (this.parent.outerEnded) {
-      this.sink.end()
-    }
-  }
-}
+export const switchLatest = <T>(souce: IStream<IStream<T>>): IStream<T> =>
+  stream((scheduler, sink) => souce.run(scheduler, new SwitchSink(scheduler, sink)))
 
 class SwitchSink<T> implements Sink<IStream<T>> {
   currentDisposable: Disposable = disposeNone
@@ -57,6 +33,28 @@ class SwitchSink<T> implements Sink<IStream<T>> {
   end(): void {
     this.outerEnded = true
     if (this.innerEnded || this.currentDisposable === disposeNone) {
+      this.sink.end()
+    }
+  }
+}
+
+class InnerSink<T> implements Sink<T> {
+  constructor(
+    private parent: SwitchSink<T>,
+    private sink: Sink<T>
+  ) {}
+
+  event(value: T): void {
+    this.sink.event(value)
+  }
+
+  error(error: any): void {
+    this.sink.error(error)
+  }
+
+  end(): void {
+    this.parent.innerEnded = true
+    if (this.parent.outerEnded) {
       this.sink.end()
     }
   }

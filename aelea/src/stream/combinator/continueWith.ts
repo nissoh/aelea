@@ -1,6 +1,6 @@
-import { disposeBoth } from '../disposable.js'
-import { curry2 } from '../function.js'
 import type { IStream, Sink } from '../types.js'
+import { disposeBoth } from '../utils/disposable.js'
+import { curry2 } from '../utils/function.js'
 
 export interface IContinueWithCurry {
   <A, B>(f: () => IStream<B>, s: IStream<A>): IStream<A | B>

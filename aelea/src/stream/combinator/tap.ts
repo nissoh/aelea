@@ -1,17 +1,15 @@
-import { curry2 } from '../function.js'
-import { PipeSink } from '../sink.js'
+import { stream } from '../stream.js'
 import type { IStream, Sink } from '../types.js'
+import { curry2 } from '../utils/function.js'
+import { PipeSink } from '../utils/sink.js'
 
+export const tap: ITapCurry = curry2((f, source) =>
+  stream((scheduler, sink) => source.run(scheduler, new TapSink(f, sink)))
+)
 export interface ITapCurry {
   <T>(f: (value: T) => unknown, source: IStream<T>): IStream<T>
   <T>(f: (value: T) => unknown): (source: IStream<T>) => IStream<T>
 }
-
-export const tap: ITapCurry = curry2((f, source) => ({
-  run(scheduler, sink) {
-    return source.run(scheduler, new TapSink(f, sink))
-  }
-}))
 
 class TapSink<T> extends PipeSink<T> {
   constructor(

@@ -1,4 +1,4 @@
-/// <reference path="./global.d.ts" />
+/// <reference path="./utils/global.d.ts" />
 
 export {
   chain,
@@ -11,6 +11,7 @@ export {
   during,
   filter,
   filterNull,
+  fromPromise,
   join,
   map,
   merge,
@@ -34,20 +35,29 @@ export {
   zip,
   zipArray
 } from './combinator/index.js'
-export { isEmpty, isFunction, isStream, maybeOps, nullSink, toStream } from './common.js'
-export { disposeAll, disposeBoth, disposeNone, disposeWith } from './disposable.js'
-export type { Curried2, Curried3, Curried4 } from './function.js'
-export { curry2, curry3, curry4, o, op } from './function.js'
 export { behavior, multicast, replayLatest, replayState, tether } from './multicast/index.js'
 export { runPromise, runStream } from './run.js'
-export { MergingSink, TransformSink } from './sink.js'
 export {
   at,
   empty,
   fromArray,
-  fromPromise,
   never,
   now,
   periodic
 } from './source/index.js'
+export { stream } from './stream.js'
 export type { Fn, IBehavior, IComposeBehavior, IOps, IStream, Scheduler, Sink } from './types.js'
+export { isEmpty, isFunction, isStream, maybeOps, nullSink, toStream } from './utils/common.js'
+export {
+  disposeAll,
+  disposeBoth,
+  disposeNone,
+  disposeOnce,
+  disposeWith,
+  isDisposable,
+  toDisposable,
+  tryDispose
+} from './utils/disposable.js'
+export type { Curried2, Curried3, Curried4 } from './utils/function.js'
+export { curry2, curry3, curry4, o, op } from './utils/function.js'
+export { MergingSink, PipeSink, TransformSink } from './utils/sink.js'

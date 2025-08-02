@@ -1,26 +1,6 @@
-import { disposeNone } from '../disposable.js'
 import type { IStream, Scheduler, Sink } from '../types.js'
+import { disposeNone } from '../utils/disposable.js'
 
-/**
- * Creates a multicast stream that shares a single subscription among multiple consumers.
- * This is useful for expensive streams that shouldn't be run multiple times.
- *
- * Note: Multicast is most useful for hot/async streams. For cold/synchronous streams,
- * the stream may complete before additional subscribers can attach.
- *
- * @example
- * const expensive = multicast(
- *   op(
- *     periodic(1000, 1),
- *     scan((acc, x) => acc + x, 0),
- *     tap(x => console.log('Computing:', x))
- *   )
- * )
- *
- * // Both subscribers share the same computation
- * expensive(env, sink1)
- * expensive(env, sink2)
- */
 export const multicast = <T>(source: IStream<T>): IStream<T> => new MulticastSource(source)
 
 class MulticastSource<T> implements Sink<T> {

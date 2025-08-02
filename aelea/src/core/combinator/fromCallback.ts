@@ -1,6 +1,6 @@
-import { toDisposable } from '../../stream/disposable.js'
 import { disposeAll, disposeBoth } from '../../stream/index.js'
 import type { IStream, Sink } from '../../stream/types.js'
+import { toDisposable } from '../../stream/utils/disposable.js'
 
 const defaultMapFn = <T>(...args: T[]): T => args[0]
 

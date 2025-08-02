@@ -1,7 +1,3 @@
 export { at } from './at.js'
-export { empty } from './empty.js'
-export { fromArray } from './fromArray.js'
-export { fromPromise } from './fromPromise.js'
-export { never } from './never.js'
-export { now } from './now.js'
 export { periodic } from './periodic.js'
+export { empty, fromArray, never, now } from './stream.js'

@@ -16,20 +16,6 @@ export const MOTION_GENTLE = { stiffness: 120, damping: 14, precision: 0.01 }
 export const MOTION_WOBBLY = { stiffness: 180, damping: 12, precision: 0.01 }
 export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
 
-/**
- * Adapting to motion changes using "spring physics"
- *
- * @param motionEnvironment - config spring metrics.
- *  noWobble =  stiffness 170 damping 26
- *  gentle =    stiffness 120 damping 14
- *  wobbly =    stiffness 180 damping 12
- *  stiff =     stiffness 210 damping 20
- *
- * @param from - animation starting position
- * @param to - target position to animate to
- *
- * @see modified-from https://github.com/chenglou/react-motion/blob/master/src/stepper.js
- */
 export const motion = (motionEnvironment: Partial<MotionConfig>, from: number, to: number): IStream<number> => {
   const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
   const state = motionState(motionEnv, { position: from, velocity: 0 }, to)

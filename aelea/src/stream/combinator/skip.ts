@@ -1,20 +1,16 @@
-import { curry2 } from '../function.js'
-import { PipeSink } from '../sink.js'
+import { stream } from '../stream.js'
 import type { IStream, Sink } from '../types.js'
+import { curry2 } from '../utils/function.js'
+import { PipeSink } from '../utils/sink.js'
+
+export const skip: ISkipCurry = curry2((n, source) =>
+  stream((scheduler, sink) => source.run(scheduler, new SkipSink(n, sink)))
+)
 
 export interface ISkipCurry {
   <T>(n: number, source: IStream<T>): IStream<T>
   <T>(n: number): (source: IStream<T>) => IStream<T>
 }
-
-/**
- * Skip the first n items from a stream
- */
-export const skip: ISkipCurry = curry2((n, source) => ({
-  run(scheduler, sink) {
-    return source.run(scheduler, new SkipSink(n, sink))
-  }
-}))
 
 class SkipSink<T> extends PipeSink<T> {
   private skipped = 0

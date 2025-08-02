@@ -1,44 +1,30 @@
-import { disposeBoth } from '../disposable.js'
-import { curry2, curry3 } from '../function.js'
+import { stream } from '../stream.js'
 import type { IStream, Sink } from '../types.js'
+import { disposeBoth } from '../utils/disposable.js'
+import { curry2, curry3 } from '../utils/function.js'
+
+export const sample: ISampleCurry = curry2((values, sampler) => snapshot((x) => x, values, sampler))
+
+export const snapshot: ISnapshotCurry = curry3((f, values, sampler) =>
+  stream((scheduler, sink) => {
+    const sampleSink = new SnapshotSink(f, sink)
+    const valuesDisposable = values.run(scheduler, sampleSink.latest)
+    const samplerDisposable = sampler.run(scheduler, sampleSink)
+
+    return disposeBoth(samplerDisposable, valuesDisposable)
+  })
+)
 
 export interface ISampleCurry {
   <A, B>(values: IStream<A>, sampler: IStream<B>): IStream<A>
   <A, B>(values: IStream<A>): (sampler: IStream<B>) => IStream<A>
 }
 
-/**
- * Sample values from a stream whenever a sampler stream emits.
- * Returns the latest value from the values stream each time the sampler emits.
- */
-export const sample: ISampleCurry = curry2(<A, B>(values: IStream<A>, sampler: IStream<B>) =>
-  snapshot((x: A) => x, values, sampler)
-)
-
 export interface ISnapshotCurry {
   <A, B, C>(f: (a: A, b: B) => C, values: IStream<A>, sampler: IStream<B>): IStream<C>
   <A, B, C>(f: (a: A, b: B) => C, values: IStream<A>): (sampler: IStream<B>) => IStream<C>
   <A, B, C>(f: (a: A, b: B) => C): (values: IStream<A>) => (sampler: IStream<B>) => IStream<C>
 }
-
-/**
- * Combine the latest values from two streams whenever the sampler stream emits.
- * @param f Function to combine values
- * @param values Stream of values to sample from
- * @param sampler Stream that triggers sampling
- * @returns Stream of combined values
- */
-export const snapshot: ISnapshotCurry = curry3(
-  <A, B, C>(f: (a: A, b: B) => C, values: IStream<A>, sampler: IStream<B>) => ({
-    run(scheduler, sink) {
-      const sampleSink = new SnapshotSink(f, sink)
-      const valuesDisposable = values.run(scheduler, sampleSink.latest)
-      const samplerDisposable = sampler.run(scheduler, sampleSink)
-
-      return disposeBoth(samplerDisposable, valuesDisposable)
-    }
-  })
-)
 
 class SnapshotSink<A, B, C> implements Sink<B> {
   readonly latest: LatestValueSink<A>

@@ -1,26 +1,16 @@
-import { disposeBoth } from '../disposable.js'
-import { curry2 } from '../function.js'
-import { PipeSink } from '../sink.js'
+import { stream } from '../stream.js'
 import type { IStream, Scheduler, Sink } from '../types.js'
+import { disposeBoth } from '../utils/disposable.js'
+import { curry2 } from '../utils/function.js'
+import { PipeSink } from '../utils/sink.js'
 
-export interface IDelayCurry {
-  <T>(n: number, source: IStream<T>): IStream<T>
-  <T>(n: number): (source: IStream<T>) => IStream<T>
-}
-
-/**
- * Delay each event by a fixed time period
- * @param n delay in milliseconds
- * @param source source stream
- * @returns stream with delayed events
- */
-export const delay: IDelayCurry = curry2((n, source) => ({
-  run(scheduler, sink) {
+export const delay: IDelayCurry = curry2((n, source) =>
+  stream((scheduler, sink) => {
     const disposableSink = new DelaySink(n, scheduler, sink)
 
     return disposeBoth(source.run(scheduler, disposableSink), disposableSink)
-  }
-}))
+  })
+)
 
 class DelaySink<T> extends PipeSink<T> implements Disposable {
   private readonly disposableList: Disposable[] = []
@@ -52,4 +42,9 @@ function emitDelay<T>(sink: Sink<T>, value: T): void {
 
 function emitEnd<T>(sink: Sink<T>): void {
   sink.end()
+}
+
+export interface IDelayCurry {
+  <T>(n: number, source: IStream<T>): IStream<T>
+  <T>(n: number): (source: IStream<T>) => IStream<T>
 }

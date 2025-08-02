@@ -1,6 +1,6 @@
-import { compose, curry2 } from '../function.js'
-import { TransformSink } from '../sink.js'
 import type { IStream, Scheduler, Sink } from '../types.js'
+import { compose, curry2 } from '../utils/function.js'
+import { TransformSink } from '../utils/sink.js'
 
 export interface IMapCurry {
   <T, R>(f: (value: T) => R, source: IStream<T>): IStream<R>

@@ -1,5 +1,5 @@
+import type { Sink } from '../types.js'
 import { curry2 } from './function.js'
-import type { Sink } from './types.js'
 
 /**
  * Create a Disposable that disposes the provided value using a dispose function
@@ -25,11 +25,6 @@ export function isDisposable(value: any): value is Disposable {
   return value && typeof value[Symbol.dispose] === 'function'
 }
 
-/**
- * Convert various disposable-like values to a standard Disposable
- * @param value - A Disposable, object with dispose method, function, or null/undefined
- * @returns A Disposable that can be safely disposed
- */
 export function toDisposable(value: any): Disposable {
   if (!value) {
     return disposeNone
@@ -50,9 +45,6 @@ export function toDisposable(value: any): Disposable {
   return disposeNone
 }
 
-/**
- * Create a Disposable that disposes all provided disposables
- */
 export const disposeAll = (disposables: Disposable[]): Disposable => ({
   [Symbol.dispose]: () => {
     for (const d of disposables) {
@@ -61,17 +53,10 @@ export const disposeAll = (disposables: Disposable[]): Disposable => ({
   }
 })
 
-/**
- * A disposable that does nothing when disposed
- */
 export const disposeNone: Disposable = {
   [Symbol.dispose]: () => {}
 }
 
-/**
- * Wrap an existing disposable (which may not already have been once()d)
- * so that it will only dispose its underlying resource at most once.
- */
 export const disposeOnce = (disposable: Disposable): Disposable => new DisposeOnce(disposable)
 
 class DisposeOnce implements Disposable {

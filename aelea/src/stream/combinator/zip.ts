@@ -1,7 +1,19 @@
-import { disposeAll, disposeNone } from '../disposable.js'
-import { curry2, curry3 } from '../function.js'
+import { empty } from '../source/stream.js'
 import type { IStream, Scheduler, Sink } from '../types.js'
+import { disposeAll } from '../utils/disposable.js'
+import { curry2, curry3 } from '../utils/function.js'
 import { map } from './map.js'
+
+export const zip: IZipCurry = curry3(<A, B, R>(f: (a: A, b: B) => R, stream1: IStream<A>, stream2: IStream<B>) =>
+  zipArray(f, [stream1, stream2])
+)
+
+export const zipArray: IZipArrayCurry = curry2((f, streams) => {
+  if (streams.length === 0) return empty
+  if (streams.length === 1) return map(f, streams[0])
+
+  return new Zip(f, streams)
+})
 
 export interface IZipCurry {
   <A, B, R>(f: (a: A, b: B) => R, stream1: IStream<A>, stream2: IStream<B>): IStream<R>
@@ -9,42 +21,10 @@ export interface IZipCurry {
   <A, B, R>(f: (a: A, b: B) => R): (stream1: IStream<A>) => (stream2: IStream<B>) => IStream<R>
 }
 
-/**
- * Combine two streams pairwise by index by applying f to values at corresponding
- * indices. The returned stream ends when either of the input streams ends.
- */
-export const zip: IZipCurry = curry3(<A, B, R>(f: (a: A, b: B) => R, stream1: IStream<A>, stream2: IStream<B>) =>
-  zipArray(f, [stream1, stream2])
-)
-
 export interface IZipArrayCurry {
   <Args extends unknown[], R>(f: (...args: Args) => R, streams: { [K in keyof Args]: IStream<Args[K]> }): IStream<R>
   <Args extends unknown[], R>(f: (...args: Args) => R): (streams: { [K in keyof Args]: IStream<Args[K]> }) => IStream<R>
 }
-
-/**
- * Combine streams pairwise (or tuple-wise) by index by applying f to values
- * at corresponding indices. The returned stream ends when any of the input
- * streams ends.
- */
-export const zipArray: IZipArrayCurry = curry2(
-  <Args extends unknown[], R>(f: (...args: Args) => R, streams: { [K in keyof Args]: IStream<Args[K]> }) => {
-    if (streams.length === 0) {
-      return {
-        run(scheduler, sink) {
-          sink.end()
-          return disposeNone
-        }
-      }
-    }
-
-    if (streams.length === 1) {
-      return map(f as any)(streams[0])
-    }
-
-    return new Zip(f as any, streams)
-  }
-)
 
 class Queue<T> {
   private items: T[] = []

@@ -1,6 +1,6 @@
-import { disposeAll } from '../disposable.js'
-import { MergingSink } from '../sink.js'
 import type { IStream, Sink } from '../types.js'
+import { disposeAll } from '../utils/disposable.js'
+import { MergingSink } from '../utils/sink.js'
 
 export function merge<T extends readonly unknown[]>(
   ...streams: [...{ [K in keyof T]: IStream<T[K]> }]
@@ -19,6 +19,16 @@ export function merge<T extends readonly unknown[]>(
       return disposeAll(disposables)
     }
   }
+}
+
+export const mergeArray = <T>(streams: IStream<T>[]): IStream<T> => {
+  if (streams.length === 0) {
+    throw new Error('mergeArray requires at least one stream')
+  }
+  if (streams.length === 1) {
+    return streams[0]
+  }
+  return merge(...streams)
 }
 
 class MergeSink<T> extends MergingSink<T> {

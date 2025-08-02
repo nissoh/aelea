@@ -1,6 +1,5 @@
-import { disposeWith } from '../disposable.js'
-import { o } from '../function.js'
 import type { IComposeBehavior, IOps, IStream, Scheduler, Sink } from '../types.js'
+import { disposeWith } from '../utils/disposable.js'
 import { tether } from './tether.js'
 
 type SinkMap<T> = Map<Sink<T>, Map<IStream<T>, Disposable | null>>

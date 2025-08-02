@@ -1,9 +1,6 @@
+import { empty, now } from '../source/stream.js'
+import type { IOps, IStream, Sink } from '../types.js'
 import { op } from './function.js'
-import { empty } from './source/empty.js'
-import { now } from './source/now.js'
-import type { Fn, IOps, IStream, Sink } from './types.js'
-
-export type { Fn }
 
 export function maybeOps<A, B>(a?: IOps<A, B>) {
   return a ? a : op

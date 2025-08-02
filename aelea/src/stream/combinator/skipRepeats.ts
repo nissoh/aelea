@@ -1,25 +1,18 @@
-import { curry2 } from '../function.js'
-import { PipeSink } from '../sink.js'
+import { stream } from '../stream.js'
 import type { IStream, Sink } from '../types.js'
+import { curry2 } from '../utils/function.js'
+import { PipeSink } from '../utils/sink.js'
 
-/**
- * Skip consecutive duplicate values using === equality
- */
 export const skipRepeats = <T>(stream: IStream<T>): IStream<T> => skipRepeatsWith<T>((a, b) => a === b)(stream)
+
+export const skipRepeatsWith: ISkipRepeatsWithCurry = curry2((equals, source) =>
+  stream((scheduler, sink) => source.run(scheduler, new SkipRepeatsSink(equals, sink)))
+)
 
 export interface ISkipRepeatsWithCurry {
   <T>(equals: (a: T, b: T) => boolean, source: IStream<T>): IStream<T>
   <T>(equals: (a: T, b: T) => boolean): (source: IStream<T>) => IStream<T>
 }
-
-/**
- * Skip consecutive duplicate values using custom equality function
- */
-export const skipRepeatsWith: ISkipRepeatsWithCurry = curry2((equals, source) => ({
-  run(scheduler, sink) {
-    return source.run(scheduler, new SkipRepeatsSink(equals, sink))
-  }
-}))
 
 class SkipRepeatsSink<T> extends PipeSink<T> {
   private hasValue = false
