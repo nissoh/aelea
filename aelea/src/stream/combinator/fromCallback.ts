@@ -2,8 +2,6 @@ import type { ISink, IStream } from '../../stream/types.js'
 import { toDisposable } from '../../stream/utils/disposable.js'
 import { stream } from '../stream.js'
 
-const defaultMapFn = <T>(...args: T[]): T => args[0]
-
 export const fromCallback = <T, FnArgs extends any[] = T[]>(
   callbackFunction: (cb: (...args: FnArgs) => any) => any,
   mapFn: (...args: FnArgs) => T = defaultMapFn as any,
@@ -13,7 +11,12 @@ export const fromCallback = <T, FnArgs extends any[] = T[]>(
     try {
       const sd = scheduler.asap(sink, () => {
         const maybeDisposable = callbackFunction.call(context, (...args: FnArgs) => {
-          eventTryMap(sink, mapFn, ...args)
+          try {
+            const value = mapFn(...args)
+            sink.event(value)
+          } catch (error) {
+            sink.error(error)
+          }
         })
 
         return toDisposable(maybeDisposable)
@@ -25,13 +28,8 @@ export const fromCallback = <T, FnArgs extends any[] = T[]>(
     }
   })
 
-function eventTryMap<T, FnArgs extends any[]>(sink: ISink<T>, mapFn: (...args: FnArgs) => T, ...args: FnArgs): void {
-  try {
-    const value = mapFn(...args)
-    sink.event(value)
-  } catch (error) {
-    sink.error(error)
-  }
+function defaultMapFn<T>(...args: T[]): T {
+  return args[0]
 }
 
 function eventError<T>(sink: ISink<T>, error: any): void {
