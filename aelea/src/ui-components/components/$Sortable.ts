@@ -1,146 +1,164 @@
-// import { motion } from '../../core/combinator/animate.js'
-// import type { IBehavior } from '../../core/combinator/behavior.js'
-// import { component } from '../../core/combinator/component.js'
-// import { eventElementTarget, nodeEvent } from '../../core/combinator/event.js'
-// import { style, styleBehavior, styleInline } from '../../core/combinator/style.js'
-// import { behavior } from '../../core/index.js'
-// import type { I$Node, ISlottable } from '../../core/source/node.js'
-// import { chain, combine, filter, map, merge, multicast, now, skipRepeats, snapshot, startWith, switchLatest } from '../../stream/index.js'
-// import { $column, $row } from '../elements/$elements.js'
-// import { layoutSheet } from '../style/layoutSheet.js'
+import {
+  style,
+  styleBehavior,
+  styleInline,
+  eventElementTarget,
+  nodeEvent,
+  component,
+  motion
+} from '../../core/index.js'
+import type { I$Node, ISlottable } from '../../core/types.js'
+import {
+  behavior,
+  chain,
+  combine,
+  filter,
+  map,
+  merge,
+  multicast,
+  now,
+  o,
+  skipRepeats,
+  snapshot,
+  startWith,
+  switchLatest,
+  type IBehavior
+} from '../../stream/index.js'
+import { $column, $row } from '../elements/$elements.js'
+import { layoutSheet } from '../style/layoutSheet.js'
 
-// const clamp = (val: number, min: number, max: number) => (val > max ? max : val < min ? min : val)
+const clamp = (val: number, min: number, max: number) => (val > max ? max : val < min ? min : val)
 
-// const swap = <T>(a: T, idx: number, arr: T[]) => {
-//   const currentIdx = arr.indexOf(a)
-//   if (currentIdx === -1) throw new Error('unable to find element within the array')
+const swap = <T>(a: T, idx: number, arr: T[]) => {
+  const currentIdx = arr.indexOf(a)
+  if (currentIdx === -1) throw new Error('unable to find element within the array')
 
-//   const newArr = remove(currentIdx, arr)
-//   newArr.splice(idx, 0, a)
+  const newArr = remove(currentIdx, arr)
+  newArr.splice(idx, 0, a)
 
-//   return newArr
-// }
+  return newArr
+}
 
-// const $dragItem = $row(style({ cursor: 'grab', width: '100%', position: 'absolute' }))
+const $dragItem = $row(style({ cursor: 'grab', width: '100%', position: 'absolute' }))
 
-// interface DraggableList<T extends I$Node> {
-//   $list: T[]
-//   itemHeight: number
-//   gap?: number
-// }
+interface DraggableList<T extends I$Node> {
+  $list: T[]
+  itemHeight: number
+  gap?: number
+}
 
-// interface DraggingState<T extends I$Node> {
-//   $draggedItem: T
-//   list: T[]
-//   isDragging: boolean
-//   to: number
-//   delta: number
-// }
+interface DraggingState<T extends I$Node> {
+  $draggedItem: T
+  list: T[]
+  isDragging: boolean
+  to: number
+  delta: number
+}
 
-// export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
-//   component(([orderChange, orderChangeTether]: IBehavior<DraggingState<T>, DraggingState<T>>) => {
-//     const gap = config.gap ?? 0
-//     const listLength = config.$list.length
-//     const itemHeight = gap + config.itemHeight
-//     const containerHeight = listLength > 1 ? itemHeight * listLength : config.itemHeight
+export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
+  component(([orderChange, orderChangeTether]: IBehavior<DraggingState<T>, DraggingState<T>>) => {
+    const gap = config.gap ?? 0
+    const listLength = config.$list.length
+    const itemHeight = gap + config.itemHeight
+    const containerHeight = listLength > 1 ? itemHeight * listLength : config.itemHeight
 
-//     const orderMulticat = multicast(orderChange)
-//     const $listChangesWithInitial = startWith(
-//       config.$list,
-//       map((s) => s.list, orderMulticat)
-//     )
-//     const draggingMotion = motion({ stiffness: 150, damping: 20 })
+    const orderMulticat = multicast(orderChange)
+    const $listChangesWithInitial = startWith(
+      config.$list,
+      map((s) => s.list, orderMulticat)
+    )
+    const draggingMotion = motion({ stiffness: 150, damping: 20 })
 
-//     return [
-//       $column(
-//         layoutSheet.flex,
-//         style({
-//           flex: 1,
-//           userSelect: 'none',
-//           position: 'relative',
-//           height: `${containerHeight}px`
-//         })
-//       )(
-//         ...config.$list.map(($item, i) => {
-//           const [dragY, dragYTether]: IBehavior<ISlottable, DraggingState<T>> = behavior()
+    return [
+      $column(
+        layoutSheet.flex,
+        style({
+          flex: 1,
+          userSelect: 'none',
+          position: 'relative',
+          height: `${containerHeight}px`
+        })
+      )(
+        ...config.$list.map(($item, i) => {
+          const [dragY, dragYTether]: IBehavior<ISlottable, DraggingState<T>> = behavior()
 
-//           const multicastedDrag = multicast(dragY)
-//           const isDraggingStream = skipRepeats(map((x) => x.isDragging, multicastedDrag))
-//           const iHeight = config.itemHeight + (config.gap ?? 0)
+          const multicastedDrag = multicast(dragY)
+          const isDraggingStream = skipRepeats(map((x) => x.isDragging, multicastedDrag))
+          const iHeight = config.itemHeight + (config.gap ?? 0)
 
-//           const yMotion = o(
-//             filter(({ $draggedItem }: DraggingState<T>) => $draggedItem !== $item),
-//             map(({ list }) => list.indexOf($item) * iHeight)
-//           )(orderMulticat)
+          const yMotion = o(
+            filter(({ $draggedItem }: DraggingState<T>) => $draggedItem !== $item),
+            map(({ list }) => list.indexOf($item) * iHeight)
+          )(orderMulticat)
 
-//           const yDragPosition = merge(
-//             chain((s) => {
-//               if (s.isDragging) {
-//                 return now(s.delta)
-//               }
+          const yDragPosition = merge(
+            chain((s) => {
+              if (s.isDragging) {
+                return now(s.delta)
+              }
 
-//               return draggingMotion(s.delta, now(s.list.indexOf($item) * iHeight))
-//             }, multicastedDrag),
-//             draggingMotion(i * iHeight, yMotion)
-//           )
+              return draggingMotion(s.delta, now(s.list.indexOf($item) * iHeight))
+            }, multicastedDrag),
+            draggingMotion(i * iHeight, yMotion)
+          )
 
-//           const applyTransformStyle = combine(
-//             (ypos, scale) => ({
-//               transform: `translateY(${ypos}px) scale(${scale})`
-//             }),
-//             yDragPosition,
-//             draggingMotion(
-//               1,
-//               map((id) => (id ? 1.1 : 1), isDraggingStream)
-//             )
-//           )
+          const applyTransformStyle = combine(
+            (ypos, scale) => ({
+              transform: `translateY(${ypos}px) scale(${scale})`
+            }),
+            yDragPosition,
+            draggingMotion(
+              1,
+              map((id) => (id ? 1.1 : 1), isDraggingStream)
+            )
+          )
 
-//           const applyBoxShadowStyle = map(
-//             (shadow) => ({
-//               boxShadow: `0px ${shadow}px ${shadow * 3}px 0px rgba(0, 0, 0, 0.25`
-//             }),
-//             draggingMotion(
-//               0,
-//               map((id) => (id ? 5 : 0), isDraggingStream)
-//             )
-//           )
+          const applyBoxShadowStyle = map(
+            (shadow) => ({
+              boxShadow: `0px ${shadow}px ${shadow * 3}px 0px rgba(0, 0, 0, 0.25`
+            }),
+            draggingMotion(
+              0,
+              map((id) => (id ? 5 : 0), isDraggingStream)
+            )
+          )
 
-//           return $dragItem(
-//             dragYTether(
-//               nodeEvent('pointerdown'),
-//               // list order continously changing, snapshot is used to get a(snapshot) of the latest list
-//               snapshot((list, startEv) => {
-//                 const drag = merge(eventElementTarget('pointerup', window), eventElementTarget('pointermove', window))
-//                 const move = skipAfter((ev) => ev.type === 'pointerup', drag)
+          return $dragItem(
+            dragYTether(
+              nodeEvent('pointerdown'),
+              // list order continously changing, snapshot is used to get a(snapshot) of the latest list
+              snapshot((list, startEv) => {
+                const drag = merge(eventElementTarget('pointerup', window), eventElementTarget('pointermove', window))
+                const move = skipAfter((ev) => ev.type === 'pointerup', drag)
 
-//                 return map((pointerEvent: PointerEvent) => {
-//                   const from = list.indexOf($item)
-//                   const delta = pointerEvent.clientY - (startEv.clientY - from * iHeight)
-//                   const to = clamp(Math.round(delta / iHeight), 0, list.length - 1)
-//                   const isPositionChange = to !== from
-//                   const isDragging = pointerEvent.type === 'pointermove'
+                return map((pointerEvent: PointerEvent) => {
+                  const from = list.indexOf($item)
+                  const delta = pointerEvent.clientY - (startEv.clientY - from * iHeight)
+                  const to = clamp(Math.round(delta / iHeight), 0, list.length - 1)
+                  const isPositionChange = to !== from
+                  const isDragging = pointerEvent.type === 'pointermove'
 
-//                   return {
-//                     delta,
-//                     isDragging,
-//                     to,
+                  return {
+                    delta,
+                    isDragging,
+                    to,
 
-//                     $draggedItem: isDragging ? $item : null,
-//                     list: isPositionChange ? swap($item, to, list) : list
-//                   }
-//                 }, move)
-//               }, $listChangesWithInitial),
-//               switchLatest,
-//               orderChangeTether()
-//             ),
+                    $draggedItem: isDragging ? $item : null,
+                    list: isPositionChange ? swap($item, to, list) : list
+                  }
+                }, move)
+              }, $listChangesWithInitial),
+              switchLatest,
+              orderChangeTether()
+            ),
 
-//             styleInline(merge(applyTransformStyle, applyBoxShadowStyle)),
+            styleInline(merge(applyTransformStyle, applyBoxShadowStyle)),
 
-//             styleBehavior(map((x) => ({ zIndex: x ? 1000 : 0 }), isDraggingStream))
-//           )($item)
-//         })
-//       ),
+            styleBehavior(map((x) => ({ zIndex: x ? 1000 : 0 }), isDraggingStream))
+          )($item)
+        })
+      ),
 
-//       { orderChange: $listChangesWithInitial }
-//     ]
-//   })
+      { orderChange: $listChangesWithInitial }
+    ]
+  })

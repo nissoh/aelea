@@ -1,6 +1,5 @@
-import type { IBehavior } from 'aelea/core'
 import { $node, $text, component, style } from 'aelea/core'
-import { combine, map, merge, now } from 'aelea/stream'
+import { combine, IBehavior, IStream, map, merge, now } from 'aelea/stream'
 import { $card, $Table, type ISortBy, type ScrollRequest, type TablePageResponse } from 'aelea/ui-components'
 
 interface ITableRow {

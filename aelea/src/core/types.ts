@@ -1,7 +1,7 @@
-import type { IStream } from "../stream/types.js"
-import type { IAttributeProperties } from "./combinator/attribute.js"
-import type { IStyleCSS } from "./combinator/style.js"
-import type { SettableDisposable } from "./utils/SettableDisposable.js"
+import type { IStream } from '../stream/types.js'
+import type { IAttributeProperties } from './combinator/attribute.js'
+import type { IStyleCSS } from './combinator/style.js'
+import type { SettableDisposable } from './utils/SettableDisposable.js'
 
 export type ISlottableElement = ChildNode
 export type INodeElement = HTMLElement | SVGElement

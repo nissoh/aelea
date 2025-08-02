@@ -10,7 +10,7 @@ import type { Control } from './types.js'
 export interface IButton extends Control {
   $content: I$Slottable
   buttonStyle?: IStyleCSS
-  buttonOp?: IOps<INode<HTMLButtonElement>, INode<HTMLButtonElement>>
+  buttonOp?: IOps<INode<HTMLButtonElement>>
 }
 
 export const $Button = ({ disabled = never, $content, buttonOp = op }: IButton) =>

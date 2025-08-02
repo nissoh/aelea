@@ -9,6 +9,7 @@ interface MotionConfig {
 type MotionState = {
   velocity: number
   position: number
+  target: number
 }
 
 export const MOTION_NO_WOBBLE = { stiffness: 170, damping: 26, precision: 0.01 }
@@ -25,16 +26,12 @@ export const motion = (motionEnvironment: Partial<MotionConfig>, from: number, t
 /**
  * Motion with velocity feedback (for reanimation)
  */
-export const motionState = (
-  motionEnvironment: Partial<MotionConfig>,
-  initialState: MotionState,
-  target: number
-): IStream<MotionState> => {
+export const motionState = (motionEnvironment: Partial<MotionConfig>, state: MotionState): IStream<MotionState> => {
   const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
 
   return {
     run(scheduler: Scheduler, sink: Sink<MotionState>) {
-      return new MotionTask(scheduler, sink, motionEnv, initialState, target)
+      return new MotionTask(scheduler, sink, motionEnv, state, target)
     }
   }
 }

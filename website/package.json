@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "bun vite",
     "build": "bun vite build",
+    "tsc:check": "bun run bunx tsc -p tsconfig.json --noEmit",
     "preview": "bun vite preview",
     "clean": "bun run clean:rimraf && tsc -build --clean",
     "clean:rimraf": "rimraf dist && tsc -build --clean"

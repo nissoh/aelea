@@ -30,16 +30,6 @@ export {
   motion,
   motionState
 } from './source/motion.js'
-export type {
-  I$Node,
-  I$Op,
-  I$Slottable,
-  INode,
-  INodeCompose,
-  INodeElement,
-  ISlottable,
-  ISlottableElement
-} from './types.js'
 export {
   $custom,
   $element,
@@ -51,3 +41,13 @@ export {
 } from './source/node.js'
 export type { I$Text } from './source/text.js'
 export { $text } from './source/text.js'
+export type {
+  I$Node,
+  I$Op,
+  I$Slottable,
+  INode,
+  INodeCompose,
+  INodeElement,
+  ISlottable,
+  ISlottableElement
+} from './types.js'
