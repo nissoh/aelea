@@ -1,6 +1,6 @@
 # Stream Benchmark Results
 
-Last updated: 2024-12-17
+Last updated: 2025-01-02
 
 ## Performance Comparison
 
@@ -9,36 +9,36 @@ Last updated: 2024-12-17
 ┌───┬───────────────────────────────┬──────────────────┬────────────────────────┬─────────┐
 │   │ Task name                     │ Latency avg (ns) │ Throughput avg (ops/s) │ Samples │
 ├───┼───────────────────────────────┼──────────────────┼────────────────────────┼─────────┤
-│ 0 │ mc1 map-filter-reduce 1000000 │ 3904977 ± 5.39%  │ 263 ± 3.08%            │ 64      │
-│ 1 │ mc2 map-filter-reduce 1000000 │ 3674141 ± 2.11%  │ 273 ± 1.44%            │ 64      │
+│ 0 │ mc1 map-filter-reduce 1000000 │ 3848029 ± 5.20%  │ 266 ± 3.01%            │ 64      │
+│ 1 │ mc2 map-filter-reduce 1000000 │ 4236142 ± 1.54%  │ 237 ± 1.07%            │ 64      │
 └───┴───────────────────────────────┴──────────────────┴────────────────────────┴─────────┘
 ```
 
-**Result**: @aelea/stream outperforms @most/core by 3.8% (103.8% performance)
+**Result**: @most/core currently outperforms @aelea/stream by 12.2% in this benchmark
 
 ### Scan (1,000,000 operations)
 ```
 ┌───┬──────────────────┬──────────────────┬────────────────────────┬─────────┐
 │   │ Task name        │ Latency avg (ns) │ Throughput avg (ops/s) │ Samples │
 ├───┼──────────────────┼──────────────────┼────────────────────────┼─────────┤
-│ 0 │ mc1 scan 1000000 │ 1991844 ± 4.42%  │ 510 ± 2.25%            │ 64      │
-│ 1 │ mc2 scan 1000000 │ 1892950 ± 6.51%  │ 544 ± 2.83%            │ 64      │
+│ 0 │ mc1 scan 1000000 │ 2087992 ± 1.42%  │ 480 ± 1.35%            │ 64      │
+│ 1 │ mc2 scan 1000000 │ 1822591 ± 1.94%  │ 551 ± 1.59%            │ 64      │
 └───┴──────────────────┴──────────────────┴────────────────────────┴─────────┘
 ```
 
-**Result**: @aelea/stream outperforms @most/core by 6.7% (106.7% performance)
+**Result**: @aelea/stream outperforms @most/core by 14.8% (114.8% performance)
 
 ### Switch (1,000 streams × 1,000 elements)
 ```
 ┌───┬───────────────────────────────┬──────────────────┬────────────────────────┬─────────┐
 │   │ Task name                     │ Latency avg (ns) │ Throughput avg (ops/s) │ Samples │
 ├───┼───────────────────────────────┼──────────────────┼────────────────────────┼─────────┤
-│ 0 │ @most/core switch 1000 x 1000 │ 202228 ± 1.90%   │ 5045 ± 0.85%           │ 495     │
-│ 1 │ @aelea switch 1000 x 1000     │ 133418 ± 2.51%   │ 7835 ± 0.93%           │ 750     │
+│ 0 │ @most/core switch 1000 x 1000 │ 196392 ± 1.76%   │ 5187 ± 0.82%           │ 510     │
+│ 1 │ @aelea switch 1000 x 1000     │ 111514 ± 5.16%   │ 10587 ± 1.57%          │ 897     │
 └───┴───────────────────────────────┴──────────────────┴────────────────────────┴─────────┘
 ```
 
-**Result**: With optimizations, @aelea/stream **outperforms @most/core by 55%** (7835 vs 5045 ops/s). The key optimization was pre-creating the inner sink to avoid repeated object allocations and closure creation during stream switching.
+**Result**: With optimizations, @aelea/stream **outperforms @most/core by 104.2%** (10587 vs 5187 ops/s). The key optimizations include pre-creating the inner sink and using an optimized scheduler with simplified closure-based tasks and ring buffer batching.
 
 ### Map Fusion Test
 ```
@@ -92,13 +92,21 @@ runStream(scheduler, sink)(s)
 - **Map Fusion**: Consecutive `map` operations are automatically fused using `compose`
 - **Sink Optimizations**: Simplified sink implementations for better performance
 - **Scheduler Updates**: Renamed `immediate` to `asap`, removed `currentTime` in favor of `time`
+- **Optimized Scheduler**: New high-performance scheduler using closure-based tasks with ring buffer batching
 
-### 2. Code Quality Improvements
+### 2. Scheduler Optimizations (2025-01-02)
+- **Closure-based Tasks**: Leverages V8's optimized closure handling instead of struct-of-arrays
+- **Ring Buffer**: Pre-allocated 8192-slot ring buffer with power-of-2 size for fast modulo operations
+- **Switch Statement Optimization**: Fast paths for 0-3 arguments (covers 99% of use cases)
+- **Minimal Allocations**: Reuses task slots and minimizes object creation in hot paths
+- **Batch Processing**: Processes all queued tasks in tight loops for better CPU cache utilization
+
+### 3. Code Quality Improvements
 - **Pure Functions**: Animation logic extracted to pure functions where possible
 - **Memory Efficiency**: Reuse of state objects in motion animations
 - **Cleaner Abstractions**: Removed unnecessary abstractions and simplified implementations
 
-### 3. Stream Sources
+### 4. Stream Sources
 - **Motion Source**: Refactored to be a pure source (from/to) instead of reactive
 - **Periodic Source**: Simplified with cleaner task management
 - **FromCallback**: Now properly schedules events and handles disposal
@@ -106,12 +114,12 @@ runStream(scheduler, sink)(s)
 ## Summary
 
 The latest @aelea/stream implementation demonstrates:
-- **Excellent Performance**: Outperforms @most/core in all benchmarks
-- **Map-Filter-Reduce**: 3.8% faster than @most/core
-- **Scan Performance**: 6.7% faster than @most/core
-- **Switch Performance**: 55% faster than @most/core after optimizations
+- **Mixed Performance Results**: Competitive with @most/core across different operations
+- **Map-Filter-Reduce**: @most/core currently leads by 12.2%
+- **Scan Performance**: 14.8% faster than @most/core
+- **Switch Performance**: 104.2% faster than @most/core after optimizations
 - **Map Fusion**: Successfully optimizes consecutive map operations
 - **Clean API**: Simple, type-safe functional API
-- **Production Ready**: Superior performance with robust error handling
+- **Production Ready**: Excellent performance with robust error handling
 
-The implementation provides an excellent balance between performance, code clarity, and maintainability.
+The implementation excels in switch operations and scan performance, while map-filter-reduce operations remain an area for future optimization. The optimized scheduler with closure-based tasks and ring buffer batching provides significant performance benefits, particularly for operations involving many asynchronous task switches.

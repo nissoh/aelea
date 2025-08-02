@@ -1,10 +1,11 @@
-import { $node, $wrapNativeElement, component, fromCallback, type INode, type IStyleCSS, style } from 'aelea/core'
+import { $node, $wrapNativeElement, component, type INode, type IStyleCSS, style } from 'aelea/core'
 import {
   combineState,
   continueWith,
   delay,
   empty,
   filter,
+  fromCallback,
   fromPromise,
   type IBehavior,
   type IStream,
