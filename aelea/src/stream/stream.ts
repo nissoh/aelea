@@ -1,7 +1,8 @@
-import type { IStream, RunStream } from './types.js'
+import type { IStream, Scheduler, Sink } from './types.js'
 
-export const stream = <A>(run: RunStream<A>): IStream<A> => new Stream(run)
+export const stream = <A>(run: <S extends Scheduler>(scheduler: S, sink: Sink<A>) => Disposable): IStream<A> =>
+  new Stream(run)
 
 class Stream<A> {
-  constructor(public readonly run: RunStream<A>) {}
+  constructor(public readonly run: <S extends Scheduler>(scheduler: S, sink: Sink<A>) => Disposable) {}
 }

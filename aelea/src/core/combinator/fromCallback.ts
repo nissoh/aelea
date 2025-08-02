@@ -1,4 +1,4 @@
-import { disposeAll, disposeBoth } from '../../stream/index.js'
+import { disposeAll, disposeBoth, stream } from '../../stream/index.js'
 import type { IStream, Sink } from '../../stream/types.js'
 import { toDisposable } from '../../stream/utils/disposable.js'
 
@@ -8,8 +8,8 @@ export const fromCallback = <T, FnArgs extends any[] = T[]>(
   callbackFunction: (cb: (...args: FnArgs) => any) => any,
   mapFn: (...args: FnArgs) => T = defaultMapFn as any,
   context: any = null
-): IStream<T> => ({
-  run(scheduler, sink) {
+): IStream<T> =>
+  stream((scheduler, sink) => {
     try {
       const scheduledTasks: Disposable[] = []
 
@@ -26,8 +26,7 @@ export const fromCallback = <T, FnArgs extends any[] = T[]>(
     } catch (error) {
       return scheduler.asap(sink, eventError, error)
     }
-  }
-})
+  })
 
 function eventTryMap<T, FnArgs extends any[]>(sink: Sink<T>, mapFn: (...args: FnArgs) => T, ...args: FnArgs): void {
   try {

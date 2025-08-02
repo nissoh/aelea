@@ -1,4 +1,4 @@
-import { type IStream, map, type Scheduler, type Sink } from '../../stream/index.js'
+import { curry2, type IStream, type Scheduler, type Sink, stream } from '../../stream/index.js'
 
 interface MotionConfig {
   stiffness: number
@@ -7,9 +7,15 @@ interface MotionConfig {
 }
 
 type MotionState = {
-  velocity: number
   position: number
   target: number
+  velocity: number
+}
+
+type MotionStateInput = {
+  position: number
+  target: number
+  velocity?: number
 }
 
 export const MOTION_NO_WOBBLE = { stiffness: 170, damping: 26, precision: 0.01 }
@@ -17,24 +23,29 @@ export const MOTION_GENTLE = { stiffness: 120, damping: 14, precision: 0.01 }
 export const MOTION_WOBBLY = { stiffness: 180, damping: 12, precision: 0.01 }
 export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
 
-export const motion = (motionEnvironment: Partial<MotionConfig>, from: number, to: number): IStream<number> => {
-  const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
-  const state = motionState(motionEnv, { position: from, velocity: 0 }, to)
-  return map((s) => s.position, state)
+// export const motion = (motionEnvironment: Partial<MotionConfig>, from: number, to: number): IStream<number> => {
+//   const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
+//   const state = motion(motionEnv, { position: from, velocity: 0, target: to })
+//   return map((s) => s.position, state)
+// }
+
+export interface IMotionCurry {
+  (motionEnvironment: Partial<MotionConfig>, state: MotionStateInput): IStream<Readonly<MotionState>>
+  (motionEnvironment: Partial<MotionConfig>): (state: MotionStateInput) => IStream<Readonly<MotionState>>
 }
 
 /**
  * Motion with velocity feedback (for reanimation)
  */
-export const motionState = (motionEnvironment: Partial<MotionConfig>, state: MotionState): IStream<MotionState> => {
+export const motion: IMotionCurry = curry2((motionEnvironment: Partial<MotionConfig>, state: MotionStateInput) => {
   const motionEnv = { ...MOTION_STIFF, ...motionEnvironment }
-
-  return {
-    run(scheduler: Scheduler, sink: Sink<MotionState>) {
-      return new MotionTask(scheduler, sink, motionEnv, state, target)
-    }
+  const initialState: MotionState = {
+    position: state.position,
+    target: state.target,
+    velocity: state.velocity ?? 0
   }
-}
+  return stream((scheduler, sink) => new MotionTask(scheduler, sink, motionEnv, initialState))
+})
 
 class MotionTask implements Disposable {
   private animationDisposable: Disposable | null = null
@@ -45,10 +56,9 @@ class MotionTask implements Disposable {
     private readonly scheduler: Scheduler,
     private readonly sink: Sink<MotionState>,
     private readonly motionEnv: MotionConfig,
-    initialState: MotionState,
-    private readonly target: number
+    initialState: MotionState
   ) {
-    this.state = { ...initialState }
+    this.state = initialState
     // Emit initial state
     this.sink.event(this.state)
     // Start animation
@@ -58,7 +68,7 @@ class MotionTask implements Disposable {
   private scheduleNext = (sink: Sink<MotionState>): void => {
     if (this.disposed) return
 
-    const settled = animate(this.motionEnv, this.state, this.target)
+    const settled = animate(this.motionEnv, this.state)
 
     // Emit current state
     sink.event(this.state)
@@ -78,8 +88,8 @@ class MotionTask implements Disposable {
   }
 }
 
-function animate(motionEnv: MotionConfig, state: MotionState, target: number): boolean {
-  const delta = target - state.position
+function animate(motionEnv: MotionConfig, state: MotionState): boolean {
+  const delta = state.target - state.position
 
   // Spring force: F_spring = -k * x
   const spring = motionEnv.stiffness * delta
@@ -98,7 +108,7 @@ function animate(motionEnv: MotionConfig, state: MotionState, target: number): b
   const settled = Math.abs(newVelocity) < motionEnv.precision && Math.abs(delta) < motionEnv.precision
 
   if (settled) {
-    state.position = target
+    state.position = state.target
     state.velocity = 0
   } else {
     state.velocity = newVelocity

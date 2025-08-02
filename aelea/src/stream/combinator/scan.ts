@@ -1,7 +1,7 @@
 import { stream } from '../stream.js'
 import type { IStream, Sink } from '../types.js'
 import { curry3 } from '../utils/function.js'
-import { TransformSink } from '../utils/sink.js'
+import { PipeSink } from '../utils/sink.js'
 
 export interface IScanCurry {
   <I, O>(f: (acc: O, value: I) => O, initial: O, s: IStream<I>): IStream<O>
@@ -13,7 +13,7 @@ export const scan: IScanCurry = curry3((f, initial, s) =>
   stream((scheduler, sink) => s.run(scheduler, new ScanSink(f, initial, sink)))
 )
 
-class ScanSink<I, O> extends TransformSink<I, O> {
+class ScanSink<I, O> extends PipeSink<I, O> {
   constructor(
     public readonly f: (acc: O, value: I) => O,
     private accumulator: O,

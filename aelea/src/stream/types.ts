@@ -1,7 +1,6 @@
 export interface IStream<T> {
   run<S extends Scheduler>(scheduler: S, sink: Sink<T>): Disposable
 }
-export type RunStream<A> = (scheduler: Scheduler, sink: Sink<A>) => Disposable
 
 export interface Sink<T> {
   event(value: T): void

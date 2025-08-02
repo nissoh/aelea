@@ -1,5 +1,5 @@
 import { $text, component, style } from 'aelea/core'
-import { constant, IBehavior, IStream } from 'aelea/stream'
+import { constant, type IBehavior, type IStream } from 'aelea/stream'
 import { $Button, $column, $NumberTicker, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 

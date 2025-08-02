@@ -1,3 +1,4 @@
+import { stream } from '../stream.js'
 import type { IStream, Sink } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
@@ -7,13 +8,13 @@ export interface IContinueWithCurry {
   <A, B>(f: () => IStream<B>): (s: IStream<A>) => IStream<A | B>
 }
 
-export const continueWith: IContinueWithCurry = curry2((f, s) => ({
-  run(scheduler, sink) {
+export const continueWith: IContinueWithCurry = curry2((f, s) =>
+  stream((scheduler, sink) => {
     const dsink = new ContinueWithSink(scheduler, sink, f)
 
     return disposeBoth(s.run(scheduler, dsink), dsink)
-  }
-}))
+  })
+)
 
 class ContinueWithSink<A, B> implements Sink<A> {
   private disposable: Disposable | null = null

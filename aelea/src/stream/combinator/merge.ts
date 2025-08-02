@@ -1,3 +1,4 @@
+import { stream } from '../stream.js'
 import type { IStream, Sink } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { MergingSink } from '../utils/sink.js'
@@ -5,20 +6,18 @@ import { MergingSink } from '../utils/sink.js'
 export function merge<T extends readonly unknown[]>(
   ...streams: [...{ [K in keyof T]: IStream<T[K]> }]
 ): IStream<T[number]> {
-  return {
-    run(scheduler, sink) {
-      const state = { active: streams.length }
-      // Pre-allocate array with known size to avoid growth
-      const disposables = new Array<Disposable>(streams.length)
+  return stream((scheduler, sink) => {
+    const state = { active: streams.length }
+    // Pre-allocate array with known size to avoid growth
+    const disposables = new Array<Disposable>(streams.length)
 
-      // Use traditional for loop to avoid map/spread allocations
-      for (let i = 0; i < streams.length; i++) {
-        disposables[i] = streams[i].run(scheduler, new MergeSink(sink, state, disposables))
-      }
-
-      return disposeAll(disposables)
+    // Use traditional for loop to avoid map/spread allocations
+    for (let i = 0; i < streams.length; i++) {
+      disposables[i] = streams[i].run(scheduler, new MergeSink(sink, state, disposables))
     }
-  }
+
+    return disposeAll(disposables)
+  })
 }
 
 export const mergeArray = <T>(streams: IStream<T>[]): IStream<T> => {

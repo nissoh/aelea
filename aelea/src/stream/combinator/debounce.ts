@@ -1,3 +1,4 @@
+import { stream } from '../stream.js'
 import type { IStream, Scheduler, Sink } from '../types.js'
 import { curry2 } from '../utils/function.js'
 
@@ -6,15 +7,13 @@ export interface IDebounceCurry {
   <T>(delay: number): (source: IStream<T>) => IStream<T>
 }
 
-export const debounce: IDebounceCurry = curry2((period, source) => ({
-  run(scheduler, sink) {
-    return new DebounceSink(period, source, sink, scheduler)
-  }
-}))
+export const debounce: IDebounceCurry = curry2((period, source) =>
+  stream((scheduler, sink) => new DebounceSink(period, source, sink, scheduler))
+)
 
 class DebounceSink<T> implements Sink<T>, Disposable {
-  private value: T | undefined
-  private timer: any = null
+  pendingValue: { value: T } | null = null
+  timer: Disposable | null = null
   private readonly disposable: Disposable
 
   constructor(
@@ -28,8 +27,8 @@ class DebounceSink<T> implements Sink<T>, Disposable {
 
   event(value: T): void {
     this.clearTimer()
-    this.value = value
-    this.timer = this.scheduler.delay(this.sink, this.handleTask, this.dt)
+    this.pendingValue = { value }
+    this.timer = this.scheduler.delay(this.sink, emitDebounced, this.dt, this)
   }
 
   error(e: Error): void {
@@ -38,10 +37,11 @@ class DebounceSink<T> implements Sink<T>, Disposable {
   }
 
   end(): void {
-    if (this.clearTimer()) {
-      // Emit pending value if timer was active
-      this.sink.event(this.value!)
-      this.value = undefined
+    // Emit pending value if any
+    if (this.timer !== null && this.pendingValue !== null) {
+      this.clearTimer()
+      this.sink.event(this.pendingValue.value)
+      this.pendingValue = null
     }
     this.sink.end()
   }
@@ -51,21 +51,18 @@ class DebounceSink<T> implements Sink<T>, Disposable {
     this.disposable[Symbol.dispose]()
   }
 
-  handleTask = () => {
-    this.clearTimer()
-    this.sink.event(this.value!)
+  private clearTimer(): void {
+    if (this.timer !== null) {
+      this.timer[Symbol.dispose]()
+      this.timer = null
+    }
   }
+}
 
-  private clearTimer(): boolean {
-    if (this.timer === null) {
-      return false
-    }
-    if (this.timer.cancel) {
-      this.timer.cancel()
-    } else {
-      clearTimeout(this.timer)
-    }
-    this.timer = null
-    return true
+function emitDebounced<T>(sink: Sink<T>, debounceSink: DebounceSink<T>): void {
+  if (debounceSink.pendingValue !== null) {
+    sink.event(debounceSink.pendingValue.value)
+    debounceSink.pendingValue = null
   }
+  debounceSink.timer = null
 }

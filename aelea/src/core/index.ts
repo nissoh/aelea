@@ -27,8 +27,7 @@ export {
   MOTION_NO_WOBBLE,
   MOTION_STIFF,
   MOTION_WOBBLY,
-  motion,
-  motionState
+  motion
 } from './source/motion.js'
 export {
   $custom,

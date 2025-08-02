@@ -1,4 +1,4 @@
-import { type Fn, isFunction, never, type Sink } from '../../stream/index.js'
+import { type Fn, isFunction, never, type Sink, stream } from '../../stream/index.js'
 import type { I$Node, I$Op, I$Slottable, INode, INodeCompose, INodeElement } from '../types.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
 
@@ -7,24 +7,22 @@ function createNodeSource<A, B extends INodeElement>(
   sourceOp: (a: A) => B,
   $segments: I$Slottable[]
 ): I$Node<B> {
-  return {
-    run(scheduler, sink) {
-      const element = sourceOp(sourceValue)
-      const disposable = new SettableDisposable()
+  return stream((scheduler, sink) => {
+    const element = sourceOp(sourceValue)
+    const disposable = new SettableDisposable()
 
-      const nodeState: INode<B> = {
-        $segments,
-        element,
-        disposable,
-        styleBehavior: [],
-        insertAscending: true,
-        attributesBehavior: [],
-        stylePseudo: []
-      }
-
-      return scheduler.asap(sink, eventNode, nodeState)
+    const nodeState: INode<B> = {
+      $segments,
+      element,
+      disposable,
+      styleBehavior: [],
+      insertAscending: true,
+      attributesBehavior: [],
+      stylePseudo: []
     }
-  }
+
+    return scheduler.asap(sink, eventNode, nodeState)
+  })
 }
 
 export function eventNode<T>(sink: Sink<T>, value: T): void {

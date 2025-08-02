@@ -94,11 +94,12 @@ class CombineSink<A, B> implements Sink<IndexedValue<A>> {
     }
   }
 
-  error(error: any): void {
-    this.sink.error(error)
+  error(e: any): void {
+    this.sink.error(e)
   }
 
   end(): void {
-    this.sink.end()
+    // This should not be called directly as combine manages its own lifecycle
+    // through activeCount tracking
   }
 }

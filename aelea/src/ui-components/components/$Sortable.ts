@@ -1,11 +1,11 @@
 import {
+  component,
+  eventElementTarget,
+  motion,
+  nodeEvent,
   style,
   styleBehavior,
-  styleInline,
-  eventElementTarget,
-  nodeEvent,
-  component,
-  motion
+  styleInline
 } from '../../core/index.js'
 import type { I$Node, ISlottable } from '../../core/types.js'
 import {
@@ -13,6 +13,7 @@ import {
   chain,
   combine,
   filter,
+  type IBehavior,
   map,
   merge,
   multicast,
@@ -22,10 +23,17 @@ import {
   snapshot,
   startWith,
   switchLatest,
-  type IBehavior
+  until
 } from '../../stream/index.js'
 import { $column, $row } from '../elements/$elements.js'
 import { layoutSheet } from '../style/layoutSheet.js'
+
+const remove = (idx: number, arr: any[]) => {
+  if (idx < 0 || idx >= arr.length) {
+    throw new Error('Index out of bounds')
+  }
+  return arr.slice(0, idx).concat(arr.slice(idx + 1))
+}
 
 const clamp = (val: number, min: number, max: number) => (val > max ? max : val < min ? min : val)
 
@@ -97,9 +105,10 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
                 return now(s.delta)
               }
 
-              return draggingMotion(s.delta, now(s.list.indexOf($item) * iHeight))
+              const newLocal = s.list.indexOf($item) * iHeight
+              return map((pos) => pos.position, draggingMotion({ position: s.delta, target: newLocal }))
             }, multicastedDrag),
-            draggingMotion(i * iHeight, yMotion)
+            chain((target) => map((s) => s.position, draggingMotion({ position: i * iHeight, target })), yMotion)
           )
 
           const applyTransformStyle = combine(
@@ -107,20 +116,17 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
               transform: `translateY(${ypos}px) scale(${scale})`
             }),
             yDragPosition,
-            draggingMotion(
-              1,
-              map((id) => (id ? 1.1 : 1), isDraggingStream)
+            chain(
+              (id) => map((s) => s.position, draggingMotion({ position: 1, target: id ? 1.1 : 1 })),
+              isDraggingStream
             )
           )
 
           const applyBoxShadowStyle = map(
-            (shadow) => ({
-              boxShadow: `0px ${shadow}px ${shadow * 3}px 0px rgba(0, 0, 0, 0.25`
+            (shadow: number) => ({
+              boxShadow: `0px ${shadow}px ${shadow * 3}px 0px rgba(0, 0, 0, 0.25)`
             }),
-            draggingMotion(
-              0,
-              map((id) => (id ? 5 : 0), isDraggingStream)
-            )
+            chain((id) => map((s) => s.position, draggingMotion({ position: 0, target: id ? 5 : 0 })), isDraggingStream)
           )
 
           return $dragItem(
@@ -129,7 +135,10 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
               // list order continously changing, snapshot is used to get a(snapshot) of the latest list
               snapshot((list, startEv) => {
                 const drag = merge(eventElementTarget('pointerup', window), eventElementTarget('pointermove', window))
-                const move = skipAfter((ev) => ev.type === 'pointerup', drag)
+                const move = until(
+                  filter((ev: PointerEvent) => ev.type === 'pointerup', drag),
+                  drag
+                )
 
                 return map((pointerEvent: PointerEvent) => {
                   const from = list.indexOf($item)

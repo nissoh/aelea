@@ -31,6 +31,7 @@ export {
   switchMap,
   take,
   tap,
+  throttle,
   until,
   zip,
   zipArray
@@ -60,4 +61,4 @@ export {
 } from './utils/disposable.js'
 export type { Curried2, Curried3, Curried4 } from './utils/function.js'
 export { curry2, curry3, curry4, o, op } from './utils/function.js'
-export { MergingSink, PipeSink, TransformSink } from './utils/sink.js'
+export { MergingSink, PipeSink } from './utils/sink.js'

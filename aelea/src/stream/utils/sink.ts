@@ -1,26 +1,12 @@
 import type { Sink } from '../types.js'
 
-export abstract class PipeSink<T> implements Sink<T> {
-  constructor(protected readonly sink: Sink<T>) {}
-
-  abstract event(value: T): void
-
-  error(e: any): void {
-    this.sink.error(e)
-  }
-
-  end(): void {
-    this.sink.end()
-  }
-}
-
-export abstract class TransformSink<I, O> implements Sink<I> {
+export abstract class PipeSink<I, O = I> implements Sink<I> {
   constructor(protected readonly sink: Sink<O>) {}
 
   abstract event(value: I): void
 
-  error(error: any) {
-    this.sink.error(error)
+  error(e: any): void {
+    this.sink.error(e)
   }
 
   end(): void {

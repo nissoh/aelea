@@ -2,6 +2,7 @@ import type { IStream, Scheduler, Sink } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
+import { PipeSink } from '../utils/sink.js'
 import { join } from './join.js'
 
 export const until: IUntilCurry = curry2((signal, stream) => new Until(signal, stream))
@@ -79,24 +80,18 @@ class Since<A> implements IStream<A> {
   }
 }
 
-class SinceSink<A> implements Sink<A> {
+class SinceSink<A> extends PipeSink<A> {
   constructor(
     private readonly min: LowerBoundSink<A>,
-    private readonly sink: Sink<A>
-  ) {}
+    sink: Sink<A>
+  ) {
+    super(sink)
+  }
 
   event(x: A): void {
     if (this.min.allow) {
       this.sink.event(x)
     }
-  }
-
-  error(e: any): void {
-    this.sink.error(e)
-  }
-
-  end(): void {
-    this.sink.end()
   }
 }
 

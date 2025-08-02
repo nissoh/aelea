@@ -1,4 +1,13 @@
-import { behavior, curry2, disposeAll, type IBehavior, type IOps, type IStream, nullSink } from '../../stream/index.js'
+import {
+  behavior,
+  curry2,
+  disposeAll,
+  type IBehavior,
+  type IOps,
+  type IStream,
+  nullSink,
+  stream
+} from '../../stream/index.js'
 import type { I$Slottable, INodeElement } from '../types.js'
 
 export type IOutputTethers<A> = { [P in keyof A]?: IOps<A[P], A[P]> }
@@ -26,29 +35,27 @@ export const component: IComponentCurry = curry2(
     inputComp: IComponentDefinitionCallback<A, B, D>,
     outputTethers: IOutputTethers<D>
   ): I$Slottable<A> => {
-    return {
-      run(scheduler, sink) {
-        // fill stubbed aguments as a behavior
-        const behaviors = Array(inputComp.length).fill(null).map(behavior)
-        const [view, outputSources] = inputComp(...behaviors)
-        const outputDisposables: Disposable[] = []
+    return stream((scheduler, sink) => {
+      // fill stubbed aguments as a behavior
+      const behaviors = Array(inputComp.length).fill(null).map(behavior)
+      const [view, outputSources] = inputComp(...behaviors)
+      const outputDisposables: Disposable[] = []
 
-        if (outputTethers) {
-          for (const k in outputTethers) {
-            if (outputTethers[k] && outputSources) {
-              const consumerSampler = outputTethers[k]
+      if (outputTethers) {
+        for (const k in outputTethers) {
+          if (outputTethers[k] && outputSources) {
+            const consumerSampler = outputTethers[k]
 
-              if (consumerSampler) {
-                const componentOutputTethers = outputSources[k]
-                const outputDisposable = consumerSampler(componentOutputTethers).run(scheduler, nullSink)
-                outputDisposables.push(outputDisposable)
-              }
+            if (consumerSampler) {
+              const componentOutputTethers = outputSources[k]
+              const outputDisposable = consumerSampler(componentOutputTethers).run(scheduler, nullSink)
+              outputDisposables.push(outputDisposable)
             }
           }
         }
-
-        return disposeAll([view.run(scheduler, sink), ...outputDisposables])
       }
-    }
+
+      return disposeAll([view.run(scheduler, sink), ...outputDisposables])
+    })
   }
 )

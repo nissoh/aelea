@@ -1,5 +1,5 @@
-import { disposeWith } from '../src/stream/disposable.js'
 import type { Scheduler } from '../src/stream/types.js'
+import { disposeWith } from '../src/stream/utils/disposable.js'
 
 // Performant scheduler using queueMicrotask for benchmarking
 export const scheduller: Scheduler = {
