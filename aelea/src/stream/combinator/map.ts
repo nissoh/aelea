@@ -1,4 +1,4 @@
-import type { IStream, Scheduler, Sink } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { compose, curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
@@ -13,7 +13,7 @@ class MapSource<T, R> implements IStream<R> {
     readonly source: IStream<T>
   ) {}
 
-  run(scheduler: Scheduler, sink: Sink<R>) {
+  run(scheduler: IScheduler, sink: ISink<R>) {
     return this.source.run(scheduler, new MapSink(this.f, sink))
   }
 }
@@ -29,7 +29,7 @@ export const map: IMapCurry = curry2((f, source) => {
 class MapSink<I, O> extends PipeSink<I, O> {
   constructor(
     readonly f: (value: I) => O,
-    sink: Sink<O>
+    sink: ISink<O>
   ) {
     super(sink)
   }
@@ -39,7 +39,7 @@ class MapSink<I, O> extends PipeSink<I, O> {
   }
 }
 
-export function eventTryMap<In, Out>(sink: Sink<Out>, f: (value: In) => Out, value: In): void {
+export function eventTryMap<In, Out>(sink: ISink<Out>, f: (value: In) => Out, value: In): void {
   try {
     const transformed = f(value)
     sink.event(transformed)

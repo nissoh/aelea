@@ -1,4 +1,4 @@
-import type { IStream, Scheduler, Sink } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
@@ -35,7 +35,7 @@ class Until<A> implements IStream<A> {
     private readonly source: IStream<A>
   ) {}
 
-  run(scheduler: Scheduler, sink: Sink<A>): Disposable {
+  run(scheduler: IScheduler, sink: ISink<A>): Disposable {
     const disposable = new SettableDisposable()
 
     const d1 = this.source.run(scheduler, sink)
@@ -46,9 +46,9 @@ class Until<A> implements IStream<A> {
   }
 }
 
-class UntilSink implements Sink<unknown> {
+class UntilSink implements ISink<unknown> {
   constructor(
-    private readonly sink: Sink<any>,
+    private readonly sink: ISink<any>,
     private readonly disposable: Disposable
   ) {}
 
@@ -72,7 +72,7 @@ class Since<A> implements IStream<A> {
     private readonly source: IStream<A>
   ) {}
 
-  run(scheduler: Scheduler, sink: Sink<A>): Disposable {
+  run(scheduler: IScheduler, sink: ISink<A>): Disposable {
     const min = new LowerBoundSink(this.minSignal, sink, scheduler)
     const d = this.source.run(scheduler, new SinceSink(min, sink))
 
@@ -83,7 +83,7 @@ class Since<A> implements IStream<A> {
 class SinceSink<A> extends PipeSink<A> {
   constructor(
     private readonly min: LowerBoundSink<A>,
-    sink: Sink<A>
+    sink: ISink<A>
   ) {
     super(sink)
   }
@@ -95,14 +95,14 @@ class SinceSink<A> extends PipeSink<A> {
   }
 }
 
-class LowerBoundSink<A> implements Sink<unknown>, Disposable {
+class LowerBoundSink<A> implements ISink<unknown>, Disposable {
   allow = false
   private disposable: Disposable
 
   constructor(
     signal: IStream<unknown>,
-    private readonly sink: Sink<A>,
-    scheduler: Scheduler
+    private readonly sink: ISink<A>,
+    scheduler: IScheduler
   ) {
     this.disposable = signal.run(scheduler, this)
   }

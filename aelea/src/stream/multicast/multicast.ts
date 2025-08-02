@@ -1,11 +1,11 @@
-import type { IStream, Scheduler, Sink } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeNone } from '../utils/disposable.js'
 
 export const multicast = <T>(source: IStream<T>): IStream<T> => new MulticastSource(source)
 
-class MulticastSource<T> implements Sink<T> {
+class MulticastSource<T> implements ISink<T> {
   private readonly source: IStream<T>
-  private sinks: Sink<T>[] = []
+  private sinks: ISink<T>[] = []
   private disposable: Disposable = disposeNone
   private running = false
 
@@ -13,7 +13,7 @@ class MulticastSource<T> implements Sink<T> {
     this.source = source
   }
 
-  run(scheduler: Scheduler, sink: Sink<T>): Disposable {
+  run(scheduler: IScheduler, sink: ISink<T>): Disposable {
     this.add(sink)
 
     if (!this.running && this.sinks.length === 1) {
@@ -24,12 +24,12 @@ class MulticastSource<T> implements Sink<T> {
     return new MulticastDisposable(this, sink)
   }
 
-  add(sink: Sink<T>): number {
+  add(sink: ISink<T>): number {
     this.sinks.push(sink)
     return this.sinks.length
   }
 
-  remove(sink: Sink<T>): number {
+  remove(sink: ISink<T>): number {
     const index = this.sinks.indexOf(sink)
     if (index >= 0) {
       this.sinks.splice(index, 1)
@@ -91,7 +91,7 @@ class MulticastSource<T> implements Sink<T> {
 class MulticastDisposable<T> implements Disposable {
   constructor(
     private source: MulticastSource<T>,
-    private sink: Sink<T>
+    private sink: ISink<T>
   ) {}
 
   [Symbol.dispose](): void {

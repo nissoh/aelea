@@ -1,5 +1,5 @@
 import { stream } from '../stream.js'
-import type { IStream, Sink } from '../types.js'
+import type { ISink, IStream } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 
@@ -16,12 +16,12 @@ export const continueWith: IContinueWithCurry = curry2((f, s) =>
   })
 )
 
-class ContinueWithSink<A, B> implements Sink<A> {
+class ContinueWithSink<A, B> implements ISink<A> {
   private disposable: Disposable | null = null
 
   constructor(
     private env: any,
-    private sink: Sink<A | B>,
+    private sink: ISink<A | B>,
     private f: () => IStream<B>
   ) {}
 

@@ -1,5 +1,5 @@
 import { stream } from '../stream.js'
-import type { IStream, Sink } from '../types.js'
+import type { ISink, IStream } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { MergingSink } from '../utils/sink.js'
 
@@ -32,7 +32,7 @@ export const mergeArray = <T>(streams: IStream<T>[]): IStream<T> => {
 
 class MergeSink<T> extends MergingSink<T> {
   constructor(
-    public override readonly sink: Sink<T>,
+    public override readonly sink: ISink<T>,
     public override readonly state: { active: number },
     public override readonly disposables: readonly Disposable[]
   ) {

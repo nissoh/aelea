@@ -1,4 +1,4 @@
-import { type Fn, isFunction, never, type Sink, stream } from '../../stream/index.js'
+import { type Fn, type ISink, isFunction, never, stream } from '../../stream/index.js'
 import type { I$Node, I$Op, I$Slottable, INode, INodeCompose, INodeElement } from '../types.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
 
@@ -25,7 +25,7 @@ function createNodeSource<A, B extends INodeElement>(
   })
 }
 
-export function eventNode<T>(sink: Sink<T>, value: T): void {
+export function eventNode<T>(sink: ISink<T>, value: T): void {
   sink.event(value)
 }
 

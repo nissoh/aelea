@@ -1,5 +1,5 @@
 import { empty, now } from '../source/stream.js'
-import type { IOps, IStream, Sink } from '../types.js'
+import type { IOps, ISink, IStream } from '../types.js'
 import { op } from './function.js'
 
 export function maybeOps<A, B>(a?: IOps<A, B>) {
@@ -22,7 +22,7 @@ export function isEmpty(s: IStream<unknown>): boolean {
   return s === empty
 }
 
-export const nullSink: Sink<any> = {
+export const nullSink: ISink<any> = {
   event: () => {},
   error: () => {},
   end: () => {}

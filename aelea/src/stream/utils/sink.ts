@@ -1,7 +1,7 @@
-import type { Sink } from '../types.js'
+import type { ISink } from '../types.js'
 
-export abstract class PipeSink<I, O = I> implements Sink<I> {
-  constructor(protected readonly sink: Sink<O>) {}
+export abstract class PipeSink<I, O = I> implements ISink<I> {
+  constructor(protected readonly sink: ISink<O>) {}
 
   abstract event(value: I): void
 
@@ -14,9 +14,9 @@ export abstract class PipeSink<I, O = I> implements Sink<I> {
   }
 }
 
-export abstract class MergingSink<T> implements Sink<T> {
+export abstract class MergingSink<T> implements ISink<T> {
   constructor(
-    protected readonly sink: Sink<T>,
+    protected readonly sink: ISink<T>,
     public readonly state: { active: number },
     public readonly disposables: readonly Disposable[]
   ) {}
@@ -51,13 +51,13 @@ export interface IndexedValue<A> {
   readonly active: boolean
 }
 
-export class IndexSink<A> implements Sink<A> {
+export class IndexSink<A> implements ISink<A> {
   readonly index: number
   active: boolean
   value: A | undefined
 
   constructor(
-    protected readonly sink: Sink<IndexedValue<A | undefined>>,
+    protected readonly sink: ISink<IndexedValue<A | undefined>>,
     i: number
   ) {
     this.index = i

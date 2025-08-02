@@ -2,13 +2,13 @@ import {
   disposeAll,
   disposeNone,
   disposeWith,
+  type IScheduler,
+  type ISink,
   type IStream,
   map,
   merge,
   nullSink,
   op,
-  type Scheduler,
-  type Sink,
   scan,
   tap
 } from '../stream/index.js'
@@ -19,14 +19,14 @@ import { SettableDisposable } from './utils/SettableDisposable.js'
 
 export interface IRunEnvironment {
   $rootNode: I$Node
-  scheduler: Scheduler
+  scheduler: IScheduler
   rootAttachment?: INodeElement
   cache: string[]
   namespace: string
   stylesheet: CSSStyleSheet
 }
 
-class BranchEffectsSink implements Sink<INode | ISlottable> {
+class BranchEffectsSink implements ISink<INode | ISlottable> {
   disposables: Disposable[] = []
 
   segmentsSlotList: Map<INode | ISlottable, Disposable>[] = []

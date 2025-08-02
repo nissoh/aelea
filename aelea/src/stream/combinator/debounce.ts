@@ -1,5 +1,5 @@
 import { stream } from '../stream.js'
-import type { IStream, Scheduler, Sink } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 
 export interface IDebounceCurry {
@@ -11,7 +11,7 @@ export const debounce: IDebounceCurry = curry2((period, source) =>
   stream((scheduler, sink) => new DebounceSink(period, source, sink, scheduler))
 )
 
-class DebounceSink<T> implements Sink<T>, Disposable {
+class DebounceSink<T> implements ISink<T>, Disposable {
   pendingValue: { value: T } | null = null
   timer: Disposable | null = null
   private readonly disposable: Disposable
@@ -19,8 +19,8 @@ class DebounceSink<T> implements Sink<T>, Disposable {
   constructor(
     private readonly dt: number,
     source: IStream<T>,
-    private readonly sink: Sink<T>,
-    private readonly scheduler: Scheduler
+    private readonly sink: ISink<T>,
+    private readonly scheduler: IScheduler
   ) {
     this.disposable = source.run(scheduler, this)
   }
@@ -59,7 +59,7 @@ class DebounceSink<T> implements Sink<T>, Disposable {
   }
 }
 
-function emitDebounced<T>(sink: Sink<T>, debounceSink: DebounceSink<T>): void {
+function emitDebounced<T>(sink: ISink<T>, debounceSink: DebounceSink<T>): void {
   if (debounceSink.pendingValue !== null) {
     sink.event(debounceSink.pendingValue.value)
     debounceSink.pendingValue = null

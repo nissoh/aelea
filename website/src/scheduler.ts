@@ -1,21 +1,16 @@
-import { disposeWith, type Scheduler, type Sink } from 'aelea/stream'
+import { type Args, disposeWith, type IScheduler, type ISink, type ITask } from 'aelea/stream'
 
 /**
  * Browser scheduler implementation using requestAnimationFrame for immediate scheduling
  * and setTimeout for delayed scheduling
  */
-export const browserScheduler: Scheduler = {
-  delay<T, TArgs extends any[]>(
-    sink: Sink<T>,
-    callback: (sink: Sink<T>, ...args: TArgs) => void,
-    delay: number,
-    ...args: TArgs
-  ): Disposable {
-    const timeoutId = setTimeout(callback, delay, sink, ...args)
+export const browserScheduler: IScheduler = {
+  delay<T, TArgs extends Args>(sink: ISink<T>, task: ITask<T, TArgs>, delay: number, ...args: TArgs): Disposable {
+    const timeoutId = setTimeout(task, delay, sink, ...args)
     return disposeWith(() => clearTimeout(timeoutId))
   },
 
-  // asap<TArgs extends readonly unknown[], T>(sink: any, callback: (sink: any, ...args: TArgs) => void, ...args: TArgs) {
+  // asap<TArgs extends Args, T>(sink: any, callback: (sink: any, ...args: TArgs) => void, ...args: TArgs) {
   //   let disposed = false
 
   //   queueMicrotask(() => {
@@ -28,11 +23,7 @@ export const browserScheduler: Scheduler = {
   //     disposed = true
   //   })
   // },
-  asap<T, TArgs extends any[]>(
-    sink: Sink<T>,
-    callback: (sink: Sink<T>, ...args: TArgs) => void,
-    ...args: TArgs
-  ): Disposable {
+  asap<T, TArgs extends Args>(sink: ISink<T>, callback: ITask<T, TArgs>, ...args: TArgs): Disposable {
     let cancelled = false
     const frameId = requestAnimationFrame(() => {
       if (!cancelled) callback(sink, ...args)

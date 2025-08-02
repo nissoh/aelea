@@ -1,5 +1,5 @@
 import { empty } from '../source/stream.js'
-import type { IStream, Scheduler, Sink } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { curry2, curry3 } from '../utils/function.js'
 import { map } from './map.js'
@@ -52,12 +52,12 @@ interface IndexedValue<T> {
   active: boolean
 }
 
-class IndexSink<T> implements Sink<T> {
+class IndexSink<T> implements ISink<T> {
   active = true
 
   constructor(
     private readonly index: number,
-    private readonly sink: Sink<IndexedValue<T>>
+    private readonly sink: ISink<IndexedValue<T>>
   ) {}
 
   event(value: T): void {
@@ -84,7 +84,7 @@ class Zip<A, R> implements IStream<R> {
     private readonly sources: ArrayLike<IStream<A>>
   ) {}
 
-  run(scheduler: Scheduler, sink: Sink<R>): Disposable {
+  run(scheduler: IScheduler, sink: ISink<R>): Disposable {
     const l = this.sources.length
     const disposables = new Array(l)
     const sinks = new Array(l)
@@ -102,12 +102,12 @@ class Zip<A, R> implements IStream<R> {
   }
 }
 
-class ZipSink<A, R> implements Sink<IndexedValue<A>> {
+class ZipSink<A, R> implements ISink<IndexedValue<A>> {
   constructor(
     private readonly f: (...args: A[]) => R,
     private readonly buffers: ArrayLike<Queue<A>>,
     private readonly sinks: ArrayLike<IndexSink<A>>,
-    private readonly sink: Sink<R>
+    private readonly sink: ISink<R>
   ) {}
 
   event(indexedValue: IndexedValue<A>): void {

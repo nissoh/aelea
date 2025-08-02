@@ -1,5 +1,5 @@
 import { stream } from '../stream.js'
-import type { IStream, Scheduler, Sink } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
@@ -24,8 +24,8 @@ class ThrottleSink<T> extends PipeSink<T> {
 
   constructor(
     private readonly period: number,
-    sink: Sink<T>,
-    private readonly scheduler: Scheduler
+    sink: ISink<T>,
+    private readonly scheduler: IScheduler
   ) {
     super(sink)
   }

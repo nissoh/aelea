@@ -1,5 +1,5 @@
 import { stream } from '../stream.js'
-import type { IStream, Sink } from '../types.js'
+import type { ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
@@ -17,7 +17,7 @@ export const filter: IFilterCurry = curry2((f, s) =>
 class FilterSink<T> extends PipeSink<T> {
   constructor(
     public readonly predicateFn: (value: T) => boolean,
-    sink: Sink<T>
+    sink: ISink<T>
   ) {
     super(sink)
   }

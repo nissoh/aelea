@@ -1,5 +1,5 @@
 import { stream } from '../stream.js'
-import type { IStream, Sink } from '../types.js'
+import type { ISink, IStream } from '../types.js'
 import { curry3 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
@@ -17,7 +17,7 @@ class ScanSink<I, O> extends PipeSink<I, O> {
   constructor(
     public readonly f: (acc: O, value: I) => O,
     private accumulator: O,
-    sink: Sink<O>
+    sink: ISink<O>
   ) {
     super(sink)
   }

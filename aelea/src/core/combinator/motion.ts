@@ -1,18 +1,18 @@
-import { type IStream, map, type Scheduler, type Sink, switchLatest } from '../../stream/index.js'
+import { type IScheduler, type ISink, type IStream, map, switchLatest } from '../../stream/index.js'
 
 /**
  * Creates a stream that emits on every animation frame using the scheduler
  */
 function animationFrame<T>(value: T): IStream<T> {
   return {
-    run(scheduler: Scheduler, sink: Sink<T>) {
+    run(scheduler: IScheduler, sink: ISink<T>) {
       const disposable = scheduler.asap(sink, eventOnce, value)
       return disposable
     }
   }
 }
 
-function eventOnce<T>(sink: Sink<T>, value: T): void {
+function eventOnce<T>(sink: ISink<T>, value: T): void {
   sink.event(value)
   sink.end()
 }

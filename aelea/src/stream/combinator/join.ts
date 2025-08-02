@@ -1,5 +1,5 @@
 import { stream } from '../stream.js'
-import type { IStream, Scheduler, Sink } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeAll, disposeNone } from '../utils/disposable.js'
 import { curry2, curry3 } from '../utils/function.js'
 
@@ -24,17 +24,17 @@ export interface IMergeMapConcurrentlyCurry {
   <A, B>(f: (a: A) => IStream<B>): (concurrency: number) => (stream: IStream<A>) => IStream<B>
 }
 
-class Outer<A, B> implements Sink<A>, Disposable {
-  private readonly scheduler: Scheduler
+class Outer<A, B> implements ISink<A>, Disposable {
+  private readonly scheduler: IScheduler
   private readonly disposable: Disposable
   private active: boolean
   private readonly concurrency: number
   private readonly f: (a: A) => IStream<B>
-  private readonly sink: Sink<B>
+  private readonly sink: ISink<B>
   private readonly current: Inner<B>[]
   private readonly pending: A[]
 
-  constructor(f: (a: A) => IStream<B>, concurrency: number, source: IStream<A>, sink: Sink<B>, scheduler: Scheduler) {
+  constructor(f: (a: A) => IStream<B>, concurrency: number, source: IStream<A>, sink: ISink<B>, scheduler: IScheduler) {
     this.f = f
     this.concurrency = concurrency
     this.sink = sink
@@ -110,12 +110,12 @@ class Outer<A, B> implements Sink<A>, Disposable {
   }
 }
 
-class Inner<A> implements Sink<A>, Disposable {
+class Inner<A> implements ISink<A>, Disposable {
   private readonly outer: Outer<any, A>
   disposable: Disposable
-  private readonly sink: Sink<A>
+  private readonly sink: ISink<A>
 
-  constructor(outer: Outer<any, A>, sink: Sink<A>) {
+  constructor(outer: Outer<any, A>, sink: ISink<A>) {
     this.outer = outer
     this.sink = sink
     this.disposable = disposeNone

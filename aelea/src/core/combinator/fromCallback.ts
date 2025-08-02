@@ -1,5 +1,5 @@
 import { disposeAll, disposeBoth, stream } from '../../stream/index.js'
-import type { IStream, Sink } from '../../stream/types.js'
+import type { ISink, IStream } from '../../stream/types.js'
 import { toDisposable } from '../../stream/utils/disposable.js'
 
 const defaultMapFn = <T>(...args: T[]): T => args[0]
@@ -28,7 +28,7 @@ export const fromCallback = <T, FnArgs extends any[] = T[]>(
     }
   })
 
-function eventTryMap<T, FnArgs extends any[]>(sink: Sink<T>, mapFn: (...args: FnArgs) => T, ...args: FnArgs): void {
+function eventTryMap<T, FnArgs extends any[]>(sink: ISink<T>, mapFn: (...args: FnArgs) => T, ...args: FnArgs): void {
   try {
     const value = mapFn(...args)
     sink.event(value)
@@ -37,6 +37,6 @@ function eventTryMap<T, FnArgs extends any[]>(sink: Sink<T>, mapFn: (...args: Fn
   }
 }
 
-function eventError<T>(sink: Sink<T>, error: any): void {
+function eventError<T>(sink: ISink<T>, error: any): void {
   sink.error(error)
 }

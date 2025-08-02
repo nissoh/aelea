@@ -1,5 +1,5 @@
 import { stream } from '../stream.js'
-import type { IStream, Sink } from '../types.js'
+import type { ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
@@ -20,7 +20,7 @@ class SkipRepeatsSink<T> extends PipeSink<T> {
 
   constructor(
     private readonly equals: (a: T, b: T) => boolean,
-    sink: Sink<T>
+    sink: ISink<T>
   ) {
     super(sink)
   }

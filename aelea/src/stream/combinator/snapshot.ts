@@ -1,5 +1,5 @@
 import { stream } from '../stream.js'
-import type { IStream, Sink } from '../types.js'
+import type { ISink, IStream } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2, curry3 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
@@ -32,7 +32,7 @@ class SnapshotSink<A, B, C> extends PipeSink<B, C> {
 
   constructor(
     private readonly f: (a: A, b: B) => C,
-    sink: Sink<C>
+    sink: ISink<C>
   ) {
     super(sink)
     this.latest = new LatestValueSink(this)
@@ -50,11 +50,11 @@ class SnapshotSink<A, B, C> extends PipeSink<B, C> {
   }
 }
 
-class LatestValueSink<A> implements Sink<A> {
+class LatestValueSink<A> implements ISink<A> {
   hasValue = false
   value?: A
 
-  constructor(private readonly parent: Sink<unknown>) {}
+  constructor(private readonly parent: ISink<unknown>) {}
 
   event(x: A): void {
     this.value = x

@@ -47,7 +47,18 @@ export {
   periodic
 } from './source/index.js'
 export { stream } from './stream.js'
-export type { Fn, IBehavior, IComposeBehavior, IOps, IStream, Scheduler, Sink } from './types.js'
+export type {
+  Args,
+  Fn,
+  IBehavior,
+  IComposeBehavior,
+  ICreateStream,
+  IOps,
+  IScheduler,
+  ISink,
+  IStream,
+  ITask
+} from './types.js'
 export { isEmpty, isFunction, isStream, maybeOps, nullSink, toStream } from './utils/common.js'
 export {
   disposeAll,

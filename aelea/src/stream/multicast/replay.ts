@@ -1,5 +1,5 @@
 import { startWith } from '../combinator/constant.js'
-import type { IStream, Scheduler, Sink } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { multicast } from './multicast.js'
 
 export const replayLatest = <A>(s: IStream<A>, initialState?: A): IStream<A> => new ReplayLatest(s, initialState)
@@ -8,10 +8,10 @@ export function replayState<T>(s: IStream<T>, initialState?: T): IStream<T> {
   return replayLatest(multicast(s), initialState)
 }
 
-class StateSink<A> implements Sink<A> {
+class StateSink<A> implements ISink<A> {
   constructor(
     private readonly parent: ReplayLatest<A>,
-    private readonly sink: Sink<A>
+    private readonly sink: ISink<A>
   ) {}
 
   event(x: A): void {
@@ -33,7 +33,7 @@ export class ReplayLatest<A> implements IStream<A> {
     private readonly initialState?: A
   ) {}
 
-  run(scheduler: Scheduler, sink: Sink<A>): Disposable {
+  run(scheduler: IScheduler, sink: ISink<A>): Disposable {
     const stream = this.hasValue
       ? startWith(this.latestvalue)(this.source)
       : this.initialState !== undefined

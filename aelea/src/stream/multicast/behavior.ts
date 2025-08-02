@@ -1,17 +1,17 @@
-import type { IComposeBehavior, IOps, IStream, Scheduler, Sink } from '../types.js'
+import type { IComposeBehavior, IOps, IScheduler, ISink, IStream } from '../types.js'
 import { disposeWith } from '../utils/disposable.js'
 import { op } from '../utils/function.js'
 import { tether } from './tether.js'
 
-type SinkMap<T> = Map<Sink<T>, Map<IStream<T>, Disposable | null>>
+type SinkMap<T> = Map<ISink<T>, Map<IStream<T>, Disposable | null>>
 
 class IBehaviorSource<I, O> implements IStream<O> {
   queuedBehaviors: IStream<O>[] = []
 
   sinksMap: SinkMap<O> = new Map()
-  scheduler: Scheduler | undefined
+  scheduler: IScheduler | undefined
 
-  run(scheduler: Scheduler, sink: Sink<O>): Disposable {
+  run(scheduler: IScheduler, sink: ISink<O>): Disposable {
     this.scheduler = scheduler
 
     const sourcesMap = new Map<IStream<O>, Disposable | null>()
@@ -32,11 +32,11 @@ class IBehaviorSource<I, O> implements IStream<O> {
         }
         sinkMap.delete(sinkSrc)
       },
-      [sink, this.sinksMap] as [Sink<O>, SinkMap<O>]
+      [sink, this.sinksMap] as [ISink<O>, SinkMap<O>]
     )
   }
 
-  protected runBehavior(sink: Sink<O>, x: IStream<O>) {
+  protected runBehavior(sink: ISink<O>, x: IStream<O>) {
     if (!this.scheduler) throw 'BehaviorSource: scheduler is not defined'
 
     return x.run(this.scheduler, sink)

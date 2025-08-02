@@ -1,5 +1,5 @@
 import { stream } from '../stream.js'
-import type { IStream, Scheduler, Sink } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
@@ -17,8 +17,8 @@ class DelaySink<T> extends PipeSink<T> implements Disposable {
 
   constructor(
     readonly n: number,
-    readonly scheduler: Scheduler,
-    override readonly sink: Sink<T>
+    readonly scheduler: IScheduler,
+    override readonly sink: ISink<T>
   ) {
     super(sink)
   }
@@ -36,11 +36,11 @@ class DelaySink<T> extends PipeSink<T> implements Disposable {
   }
 }
 
-function emitDelay<T>(sink: Sink<T>, value: T): void {
+function emitDelay<T>(sink: ISink<T>, value: T): void {
   sink.event(value)
 }
 
-function emitEnd<T>(sink: Sink<T>): void {
+function emitEnd<T>(sink: ISink<T>): void {
   sink.end()
 }
 

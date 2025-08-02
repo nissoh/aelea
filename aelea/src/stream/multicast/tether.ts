@@ -1,5 +1,5 @@
 import { stream } from '../stream.js'
-import type { IStream, Scheduler, Sink } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeNone, disposeWith } from '../utils/disposable.js'
 
 export const tether = <T>(source: IStream<T>): [IStream<T>, IStream<T>] => {
@@ -11,13 +11,13 @@ export const tether = <T>(source: IStream<T>): [IStream<T>, IStream<T>] => {
   ]
 }
 
-class SourceSink<T> implements Sink<T> {
+class SourceSink<T> implements ISink<T> {
   hasValue = false
   latestValue!: T
 
   constructor(
     private parent: Tether<T>,
-    public sink: Sink<T>
+    public sink: ISink<T>
   ) {}
 
   event(x: T): void {
@@ -39,8 +39,8 @@ class SourceSink<T> implements Sink<T> {
   }
 }
 
-class TetherSink<A> implements Sink<A> {
-  constructor(public sink: Sink<A> | null) {}
+class TetherSink<A> implements ISink<A> {
+  constructor(public sink: ISink<A> | null) {}
 
   event(value: A): void {
     if (this.sink) {
@@ -69,7 +69,7 @@ class Tether<T> implements IStream<T> {
 
   constructor(private source: IStream<T>) {}
 
-  run(scheduler: Scheduler, sink: SourceSink<T> | TetherSink<T>): Disposable {
+  run(scheduler: IScheduler, sink: SourceSink<T> | TetherSink<T>): Disposable {
     if (sink instanceof SourceSink) {
       this.sourceDisposable[Symbol.dispose]()
       this.sourceSinkList.push(sink)

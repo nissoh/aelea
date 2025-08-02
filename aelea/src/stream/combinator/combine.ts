@@ -1,6 +1,6 @@
 import { now } from '../source/stream.js'
 import { stream } from '../stream.js'
-import type { IStream, Scheduler, Sink } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeAll, tryDispose } from '../utils/disposable.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
 
@@ -8,7 +8,7 @@ export function combine<T extends readonly unknown[], R>(
   f: (...args: T) => R,
   ...sources: [...{ [K in keyof T]: IStream<T[K]> }]
 ): IStream<R> {
-  return stream((scheduler: Scheduler, sink: Sink<R>) => {
+  return stream((scheduler: IScheduler, sink: ISink<R>) => {
     const l = sources.length
     const disposables = new Array(l)
     const sinks = new Array(l)
@@ -51,7 +51,7 @@ export function combineState<A>(
   })
 }
 
-class CombineSink<A, B> implements Sink<IndexedValue<A>> {
+class CombineSink<A, B> implements ISink<IndexedValue<A>> {
   awaiting: number
   readonly values: any[]
   readonly hasValue: boolean[]
@@ -60,7 +60,7 @@ class CombineSink<A, B> implements Sink<IndexedValue<A>> {
   constructor(
     readonly disposables: Disposable[],
     readonly sinkCount: number,
-    protected readonly sink: Sink<B>,
+    protected readonly sink: ISink<B>,
     readonly f: (...args: any[]) => B
   ) {
     this.awaiting = this.activeCount = sinkCount
