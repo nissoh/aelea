@@ -1,6 +1,7 @@
 import type { IStream } from '../../stream/index.js'
 import { chain, curry2, isStream } from '../../stream/index.js'
 import type { I$Slottable, INodeElement } from '../source/node.js'
+import { fromCallback } from './fromCallback.js'
 
 type PickEvent<A, B> = A extends keyof B ? B[A] : Event
 
@@ -25,20 +26,13 @@ export function eventElementTarget<A extends INodeElementEventNameList, B extend
   element: B,
   options: boolean | AddEventListenerOptions = false
 ): IStream<INodeElementEventTypeMap<A, B>> {
-  return {
-    run(scheduler, sink) {
-      const cb = (e: any) => sink.event(e)
-      const removeListener = () => element.removeEventListener(eventType, cb, options)
+  return fromCallback((cb) => {
+    element.addEventListener(eventType, cb as EventListener, options)
 
-      element.addEventListener(eventType, cb, options)
-
-      return {
-        [Symbol.dispose]() {
-          removeListener()
-        }
-      }
+    return () => {
+      element.removeEventListener(eventType, cb as EventListener, options)
     }
-  }
+  })
 }
 
 type INodeEventDescriptor<B extends INodeElement> = {
@@ -58,12 +52,12 @@ export interface INodeEventCurry {
 
 export const nodeEvent: INodeEventCurry = curry2((eventType, descriptor) => {
   if (isStream(descriptor)) {
-    return chain((ns: any) => {
+    return chain((ns) => {
       return eventElementTarget(eventType, ns.element, { capture: true })
-    })(descriptor)
+    }, descriptor)
   }
 
-  return chain((ns: any) => {
+  return chain((ns) => {
     return eventElementTarget(eventType, ns.element, descriptor.options)
-  })(descriptor.$node)
+  }, descriptor.$node)
 })

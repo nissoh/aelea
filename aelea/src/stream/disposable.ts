@@ -21,6 +21,35 @@ export const disposeBoth = (d1: Disposable, d2: Disposable): Disposable => ({
   }
 })
 
+export function isDisposable(value: any): value is Disposable {
+  return value && typeof value[Symbol.dispose] === 'function'
+}
+
+/**
+ * Convert various disposable-like values to a standard Disposable
+ * @param value - A Disposable, object with dispose method, function, or null/undefined
+ * @returns A Disposable that can be safely disposed
+ */
+export function toDisposable(value: any): Disposable {
+  if (!value) {
+    return disposeNone
+  }
+
+  if (isDisposable(value)) {
+    return value
+  }
+
+  if (typeof value === 'object' && typeof value.dispose === 'function') {
+    return disposeWith(() => value.dispose())
+  }
+
+  if (typeof value === 'function') {
+    return disposeWith(value)
+  }
+
+  return disposeNone
+}
+
 /**
  * Create a Disposable that disposes all provided disposables
  */

@@ -17,8 +17,6 @@ import type { IStyleCSS } from './combinator/style.js'
 import type { I$Node, I$Slottable, INode, INodeElement, ISlottable } from './source/node.js'
 import { SettableDisposable } from './utils/SettableDisposable.js'
 
-export interface IRunEnvironment {}
-
 export interface IRunEnvironment {
   $rootNode: I$Node
   scheduler: Scheduler
@@ -52,9 +50,9 @@ class BranchEffectsSink implements Sink<INode | ISlottable> {
           disposableBranch?.[Symbol.dispose]()
         }, childNode)
       )
-    } catch {
-      console.error(childNode.element.nodeName)
-      throw new Error('Cannot append node that have already been rendered, check invalid node operations under ^')
+    } catch (error) {
+      console.error('Failed to set disposable for node:', childNode.element.nodeName, error)
+      throw new Error('Cannot append node that have already been rendered, check invalid node operations')
     }
 
     if (typeof childNode.style === 'object') {
@@ -119,10 +117,8 @@ class BranchEffectsSink implements Sink<INode | ISlottable> {
 
   end() {
     for (const s of this.segmentsSlotList) {
-      if (s) {
-        for (const d of s.values()) {
-          d[Symbol.dispose]()
-        }
+      for (const d of s.values()) {
+        d[Symbol.dispose]()
       }
     }
   }
@@ -156,7 +152,7 @@ class BranchChildrenSinkList implements Disposable {
 }
 
 function styleBehavior(styleBehavior: IStream<IStyleCSS | null>, node: INode, cacheService: IRunEnvironment) {
-  let latestClass: string
+  let latestClass = ''
 
   return op(
     styleBehavior,
@@ -164,14 +160,14 @@ function styleBehavior(styleBehavior: IStream<IStyleCSS | null>, node: INode, ca
       if (previousCssRule) {
         if (styleObject === null) {
           node.element.classList.remove(previousCssRule)
-
+          latestClass = ''
           return ''
         }
 
         const cashedCssClas = useStyleRule(cacheService, styleObject)
 
         if (previousCssRule !== cashedCssClas) {
-          node.element.classList.replace(latestClass, cashedCssClas)
+          node.element.classList.replace(previousCssRule, cashedCssClas)
           latestClass = cashedCssClas
 
           return cashedCssClas
@@ -254,8 +250,12 @@ function appendToSlot(parent: INodeElement, child: INodeElement, insertAt: numbe
 
 export function $createRoot(config: IRunEnvironment & { $rootNode: I$Node }) {
   return map((node) => {
+    if (!config.rootAttachment) {
+      throw new Error('rootAttachment is required for $createRoot')
+    }
+
     const rootNode: INode = {
-      element: config.rootAttachment!,
+      element: config.rootAttachment,
       $segments: [],
       disposable: new SettableDisposable(),
       styleBehavior: [],
@@ -264,7 +264,7 @@ export function $createRoot(config: IRunEnvironment & { $rootNode: I$Node }) {
       stylePseudo: []
     }
 
-    // TODO(Fix) BranchEffectsSink will prepend the rootNode to the configred rootAttachment which is not always the desired use case
+    // TODO(Fix) BranchEffectsSink will prepend the rootNode to the configured rootAttachment which is not always the desired use case
     return new BranchEffectsSink(config, rootNode, 0, [0]).event(node)
   }, config.$rootNode)
 }

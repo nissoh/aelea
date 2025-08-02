@@ -1,8 +1,18 @@
 import { $custom, $node, $text, component, type I$Slottable, motion, style, styleInline } from 'aelea/core'
-import { debounce, empty, filter, type IBehavior, map, never, o, startWith, switchLatest } from 'aelea/stream'
+import {
+  debounce,
+  empty,
+  filter,
+  type IBehavior,
+  map,
+  never,
+  o,
+  startWith,
+  switchLatest,
+  switchMap
+} from 'aelea/stream'
 import { $column, $row } from 'aelea/ui-components'
 import { pallete, theme } from 'aelea/ui-components-theme'
-import { awaitPromises } from '../../common/stream-utils'
 import { $MonacoEditor, type ModelChangeBehavior } from '../$MonacoEditor'
 
 interface IMonaco {
@@ -58,7 +68,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
             switchLatest(
               o(
                 debounce(500),
-                map(
+                switchMap(
                   async ({
                     model,
                     worker,
@@ -81,7 +91,6 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                     return value
                   }
                 ),
-                awaitPromises,
                 filter((node) => node !== never),
                 startWith(
                   $node(style({ color: pallete.foreground, fontSize: '75%' }))($text('Loading Typescript Service...'))

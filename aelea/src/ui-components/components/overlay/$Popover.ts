@@ -134,13 +134,12 @@ export const $Popover = ({
 
       const dismissEvent = merge(overlayClick, dismiss)
 
-      const $content = switchLatest(
-        op(
-          openMulticast,
-          map((content) => {
-            return until(dismissEvent)(merge(style({ zIndex: 3456, left: 0 })(contentOps(content)), $overlay()))
-          })
-        )
+      const $content = op(
+        openMulticast,
+        map((content) => {
+          return until(dismissEvent, merge(style({ zIndex: 3456, left: 0 })(contentOps(content)), $overlay()))
+        }),
+        switchLatest
       )
 
       const targetOp = op(

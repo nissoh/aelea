@@ -1,5 +1,6 @@
-import { disposeAll, disposeBoth, disposeNone, disposeWith } from '../../stream/index.js'
-import type { IStream } from '../../stream/types.js'
+import { toDisposable } from '../../stream/disposable.js'
+import { disposeAll, disposeBoth } from '../../stream/index.js'
+import type { IStream, Sink } from '../../stream/types.js'
 
 const defaultMapFn = <T>(...args: T[]): T => args[0]
 
@@ -14,29 +15,29 @@ export const fromCallback = <T, FnArgs extends any[] = T[]>(
 
       // very common that callback functions returns a destructor, perhaps a Disposable in a "most" case
       const maybeDisposable = callbackFunction.call(context, (...args: FnArgs) => {
-        const task = scheduler.asap(sink, (sink) => {
-          try {
-            const value = mapFn(...args)
-            sink.event(value)
-          } catch (error) {
-            sink.error(error)
-          }
-        })
+        const task = scheduler.asap(sink, eventTryMap, mapFn, ...args)
         scheduledTasks.push(task)
       })
 
-      // Create composite disposable
-      const callbackDisposable =
-        maybeDisposable instanceof Function
-          ? disposeWith(maybeDisposable)
-          : maybeDisposable && typeof maybeDisposable === 'object' && Symbol.dispose in maybeDisposable
-            ? maybeDisposable
-            : disposeNone
-
-      return disposeBoth(disposeAll(scheduledTasks), callbackDisposable)
+      return disposeBoth(
+        disposeAll(scheduledTasks), //
+        toDisposable(maybeDisposable)
+      )
     } catch (error) {
-      const errorTask = scheduler.asap(sink, (sink) => sink.error(error))
-      return errorTask
+      return scheduler.asap(sink, eventError, error)
     }
   }
 })
+
+function eventTryMap<T, FnArgs extends any[]>(sink: Sink<T>, mapFn: (...args: FnArgs) => T, ...args: FnArgs): void {
+  try {
+    const value = mapFn(...args)
+    sink.event(value)
+  } catch (error) {
+    sink.error(error)
+  }
+}
+
+function eventError<T>(sink: Sink<T>, error: any): void {
+  sink.error(error)
+}

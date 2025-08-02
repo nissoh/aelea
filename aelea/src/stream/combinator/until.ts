@@ -58,6 +58,26 @@ class Until<A> implements IStream<A> {
   }
 }
 
+class UntilSink implements Sink<unknown> {
+  constructor(
+    private readonly sink: Sink<any>,
+    private readonly disposable: Disposable
+  ) {}
+
+  event(): void {
+    this.disposable[Symbol.dispose]()
+    this.sink.end()
+  }
+
+  error(e: any): void {
+    this.sink.error(e)
+  }
+
+  end(): void {
+    // Don't end main stream if signal ends
+  }
+}
+
 class Since<A> implements IStream<A> {
   constructor(
     private readonly minSignal: IStream<unknown>,
@@ -120,25 +140,5 @@ class LowerBoundSink<A> implements Sink<unknown>, Disposable {
 
   [Symbol.dispose](): void {
     this.disposable[Symbol.dispose]()
-  }
-}
-
-class UntilSink implements Sink<unknown> {
-  constructor(
-    private readonly sink: Sink<any>,
-    private readonly disposable: Disposable
-  ) {}
-
-  event(): void {
-    this.disposable[Symbol.dispose]()
-    this.sink.end()
-  }
-
-  error(e: any): void {
-    this.sink.error(e)
-  }
-
-  end(): void {
-    // Don't end main stream if signal ends
   }
 }

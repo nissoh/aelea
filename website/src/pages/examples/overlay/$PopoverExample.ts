@@ -1,6 +1,5 @@
-import type { IBehavior } from 'aelea/core'
 import { $text, component, style } from 'aelea/core'
-import { constant, merge, now, scan } from 'aelea/stream'
+import { constant, type IBehavior, merge, now, scan } from 'aelea/stream'
 import { $Button, $column, $Popover, $row, $TextField, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 import $Counter from '../count-counters/$Counter'
@@ -42,12 +41,12 @@ export const $PopoverExample = component(
             $target: $Button({ $content: $text('Pop!') })({
               click: popTether()
             }),
-            open: $$popContent
+            $open: $$popContent
           })({})
         ),
 
         $Popover({
-          open: $$popContentCard,
+          $open: $$popContentCard,
           $target: $column(
             style({
               backgroundColor: pallete.background,
@@ -83,7 +82,7 @@ export const $PopoverExample = component(
               })
             )
           ),
-          open: constant($popContent, popCardBottom)
+          $open: constant($popContent, popCardBottom)
         })({}),
 
         $column(style({ height: '100vh' }))($text('scroll down'))

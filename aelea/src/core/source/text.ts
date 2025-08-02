@@ -5,6 +5,28 @@ import type { ISlottable } from './node.js'
 
 export type I$Text = IStream<ISlottable<Text>>
 
+function createDynamicTextStream(textSource: IStream<string>): IStream<ISlottable<Text>> {
+  let createdTextNode: Text
+
+  return op(
+    textSource,
+    map<string, ISlottable<Text> | null>((nextValue) => {
+      if (createdTextNode) {
+        createdTextNode.nodeValue = nextValue
+        return null
+      }
+
+      createdTextNode = document.createTextNode(nextValue)
+
+      return {
+        disposable: new SettableDisposable(),
+        element: createdTextNode
+      }
+    }),
+    filterNull
+  )
+}
+
 function createTextSource(textSourceList: (IStream<string> | string)[]): I$Text {
   return {
     run(scheduler, sink) {
@@ -18,25 +40,7 @@ function createTextSource(textSourceList: (IStream<string> | string)[]): I$Text 
           } as ISlottable<Text>).run(scheduler, sink)
         }
 
-        let createdTextNode: Text
-
-        return op(
-          textSource,
-          map<string, ISlottable<Text> | null>((nextValue) => {
-            if (createdTextNode) {
-              createdTextNode.nodeValue = nextValue
-              return null
-            }
-
-            createdTextNode = document.createTextNode(nextValue)
-
-            return {
-              disposable: new SettableDisposable(),
-              element: createdTextNode
-            }
-          }),
-          filterNull
-        ).run(scheduler, sink)
+        return createDynamicTextStream(textSource).run(scheduler, sink)
       }
 
       const mappedSourceList = textSourceList.map((textSource) => {
@@ -47,23 +51,7 @@ function createTextSource(textSourceList: (IStream<string> | string)[]): I$Text 
           } as ISlottable<Text>)
         }
 
-        let createdTextNode: Text
-
-        return filterNull(
-          map<string, ISlottable<Text> | null>((nextValue) => {
-            if (createdTextNode) {
-              createdTextNode.nodeValue = nextValue
-              return null
-            }
-
-            createdTextNode = document.createTextNode(nextValue)
-
-            return {
-              disposable: new SettableDisposable(),
-              element: createdTextNode
-            }
-          })(textSource as IStream<string>)
-        )
+        return createDynamicTextStream(textSource)
       })
 
       return merge(...mappedSourceList).run(scheduler, sink)

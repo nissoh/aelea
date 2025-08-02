@@ -1,21 +1,12 @@
+import { $node, $wrapNativeElement, component, fromCallback, type INode, type IStyleCSS, style } from 'aelea/core'
 import {
-  $node,
-  $wrapNativeElement,
-  component,
-  fromCallback,
-  type IBehavior,
-  type INode,
-  type IStyleCSS,
-  style
-} from 'aelea/core'
-import {
-  at,
-  combine,
+  combineState,
   continueWith,
   delay,
   empty,
   filter,
   fromPromise,
+  type IBehavior,
   type IStream,
   join,
   map,
@@ -26,11 +17,11 @@ import {
   skipRepeatsWith,
   startWith,
   switchLatest,
+  switchMap,
   take
 } from 'aelea/stream'
 import { fetchJson, observer } from 'aelea/ui-components'
 import type * as monaco from 'monaco-editor'
-import { awaitPromises, recoverWith } from '../common/stream-utils'
 
 interface JSDelivrFlat {
   files: JSDelivrMeta[]
@@ -324,20 +315,19 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
 
       type Awaited<T> = T extends PromiseLike<infer U> ? Awaited<U> : T
 
-      let attempDuration = 50
+      const attempDuration = 50
 
-      const getWorkerStream: IStream<
-        Awaited<ReturnType<typeof monacoGlobal.languages.typescript.getTypeScriptWorker>>
-      > = o(
-        continueWith(() => {
-          return fromPromise(monacoGlobal.languages.typescript.getTypeScriptWorker())
-        }),
-        recoverWith((err) => {
-          console.error(err)
-          attempDuration += 100
-          return join(at(attempDuration, getWorkerStream))
-        })
-      )(empty)
+      const worketStream: IStream<Awaited<ReturnType<typeof monacoGlobal.languages.typescript.getTypeScriptWorker>>> =
+        o(
+          continueWith(() => {
+            return fromPromise(monacoGlobal.languages.typescript.getTypeScriptWorker())
+          })
+          // recoverWith((err) => {
+          //   console.error(err)
+          //   attempDuration += 100
+          //   return join(at(attempDuration, getWorkerStream))
+          // })
+        )(empty)
 
       const $editor = $wrapNativeElement(editorElement)(
         o(
@@ -345,7 +335,7 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
           changeTether(
             // ensure we load editor only when it's visible on the screen
             elementBecameVisibleEvent,
-            map(async (elEvents) => {
+            switchMap(async (elEvents) => {
               const node = elEvents[0].target as HTMLElement
 
               const modelChangeWithDelay = delay(
@@ -359,34 +349,33 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
                 changesWithInitial
               )
 
-              const tsModelChanges = awaitPromises(
-                combine(
-                  async (modelChange, getWorker): Promise<ModelChangeBehavior> => {
-                    const worker = await getWorker(model.uri)
-                    const semanticDiagnosticsQuery = worker.getSemanticDiagnostics(model.uri.toString())
-                    const syntacticDiagnosticsQuery = worker.getSyntacticDiagnostics(model.uri.toString())
-                    const semanticDiagnostics = await semanticDiagnosticsQuery
-                    const syntacticDiagnostics = await syntacticDiagnosticsQuery
+              const tsModelChanges = switchMap(
+                async (params): Promise<ModelChangeBehavior> => {
+                  const worker = await params.worketStream(model.uri)
+                  const semanticDiagnosticsQuery = worker.getSemanticDiagnostics(model.uri.toString())
+                  const syntacticDiagnosticsQuery = worker.getSyntacticDiagnostics(model.uri.toString())
+                  const semanticDiagnostics = await semanticDiagnosticsQuery
+                  const syntacticDiagnostics = await syntacticDiagnosticsQuery
 
-                    return {
-                      node,
-                      instance,
-                      monacoGlobal,
-                      worker,
-                      model,
-                      modelChange,
-                      semanticDiagnostics,
-                      syntacticDiagnostics
-                    }
-                  },
+                  return {
+                    node,
+                    instance,
+                    monacoGlobal,
+                    worker,
+                    model,
+                    modelChange: params.ignoreWhitespaceChanges,
+                    semanticDiagnostics,
+                    syntacticDiagnostics
+                  }
+                },
+                combineState({
                   ignoreWhitespaceChanges,
-                  getWorkerStream
-                )
+                  worketStream
+                })
               )
 
               return tsModelChanges
             }),
-            awaitPromises,
             join,
             multicast
           )

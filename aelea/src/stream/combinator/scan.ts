@@ -8,7 +8,7 @@ export interface IScanCurry {
   <I, O>(f: (acc: O, value: I) => O): (initial: O) => (s: IStream<I>) => IStream<O>
 }
 
-export const scan: IScanCurry = curry3(<I, O>(f: (acc: O, value: I) => O, initial: O, s: IStream<I>) => ({
+export const scan: IScanCurry = curry3((f, initial, s) => ({
   run(env, sink) {
     return s.run(env, new ScanSink(f, initial, sink))
   }
