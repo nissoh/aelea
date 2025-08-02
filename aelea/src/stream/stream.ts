@@ -1,7 +1,7 @@
 import type { ICreateStream, IScheduler, IStream } from './types.js'
 
-export const stream = <A>(run: ICreateStream<A, IScheduler>): IStream<A> => new Stream(run)
+export const stream = <T, S extends IScheduler>(run: ICreateStream<T, S>): IStream<T, S> => new Stream<T, S>(run)
 
-class Stream<A> {
-  constructor(public readonly run: ICreateStream<A, IScheduler>) {}
+class Stream<T, S extends IScheduler> implements IStream<T, S> {
+  constructor(public readonly run: ICreateStream<T, S>) {}
 }

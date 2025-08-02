@@ -1,9 +1,9 @@
 export { setTheme } from 'aelea/ui-components-theme-browser'
 
-import { $createRoot, type IRunEnvironment } from 'aelea/core'
+import { $createRoot, createDomScheduler, type IRunEnvironment } from 'aelea/core'
 import $Website from './pages/$Website'
-import { browserScheduler } from './scheduler'
 
+const browserScheduler = createDomScheduler()
 const config: IRunEnvironment = {
   namespace: '•',
   stylesheet: new CSSStyleSheet(),

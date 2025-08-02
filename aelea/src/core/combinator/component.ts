@@ -1,13 +1,5 @@
-import {
-  behavior,
-  curry2,
-  disposeAll,
-  type IBehavior,
-  type IOps,
-  type IStream,
-  nullSink,
-  stream
-} from '../../stream/index.js'
+import { behavior, curry2, disposeAll, type IBehavior, type IOps, type IStream, nullSink } from '../../stream/index.js'
+import { stream } from '../stream.js'
 import type { I$Slottable, INodeElement } from '../types.js'
 
 export type IOutputTethers<A> = { [P in keyof A]?: IOps<A[P], A[P]> }

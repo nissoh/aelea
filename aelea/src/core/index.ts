@@ -20,8 +20,9 @@ export {
   styleInline,
   stylePseudo
 } from './combinator/style.js'
-export type { IRunEnvironment } from './run.js'
-export { $createRoot } from './run.js'
+export type { IRunEnvironment } from './render.js'
+export { $createRoot } from './render.js'
+export { createDomScheduler } from './scheduler.js'
 export {
   MOTION_GENTLE,
   MOTION_NO_WOBBLE,

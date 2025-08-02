@@ -1,4 +1,6 @@
-import { curry2, type IScheduler, type ISink, type IStream, stream } from '../../stream/index.js'
+import { curry2, type ISink, type IStream } from '../../stream/index.js'
+import { stream } from '../stream.js'
+import type { I$Scheduler } from '../types.js'
 
 interface MotionConfig {
   stiffness: number
@@ -53,7 +55,7 @@ class MotionTask implements Disposable {
   private disposed = false
 
   constructor(
-    private readonly scheduler: IScheduler,
+    private readonly scheduler: I$Scheduler,
     private readonly sink: ISink<MotionState>,
     private readonly motionEnv: MotionConfig,
     initialState: MotionState
@@ -78,7 +80,7 @@ class MotionTask implements Disposable {
       sink.end()
     } else {
       // Continue animation
-      this.animationDisposable = this.scheduler.asap(sink, this.scheduleNext)
+      this.animationDisposable = this.scheduler.paint(sink, this.scheduleNext)
     }
   };
 
