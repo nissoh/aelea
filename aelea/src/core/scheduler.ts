@@ -58,7 +58,6 @@ class DomScheduler implements I$Scheduler {
     })
   }
 
-
   paint<T, TArgs extends readonly unknown[]>(sink: ISink<T>, task: ITask<T, TArgs>, ...args: TArgs): Disposable {
     let cancelled = false
 

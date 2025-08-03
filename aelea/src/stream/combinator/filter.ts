@@ -1,9 +1,7 @@
-import { fromArray } from '../source/stream.js'
 import { stream } from '../stream.js'
 import type { ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
-import { map } from './map.js'
 
 export interface IFilterCurry {
   <T, S extends T>(f: (value: T) => value is S, s: IStream<T>): IStream<S>
