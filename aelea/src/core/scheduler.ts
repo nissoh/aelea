@@ -68,47 +68,17 @@ class DomScheduler implements I$Scheduler {
     }
     this.computeTail = nextTail
 
-    this.scheduleCompute()
+    if (!this.computeScheduled) {
+      this.computeScheduled = true
+
+      queueMicrotask(() => {
+        this.computeScheduled = false
+        this.flushCompute()
+      })
+    }
 
     return disposeWith(() => {
       cancelled = true
-    })
-  }
-
-  paint<T, TArgs extends readonly unknown[]>(sink: ISink<T>, task: ITask<T, TArgs>, ...args: TArgs): Disposable {
-    let cancelled = false
-
-    // Fast ring buffer enqueue
-    const nextTail = (this.renderTail + 1) & DomScheduler.RENDER_MASK
-    if (nextTail === this.renderHead) {
-      throw new Error('DomScheduler render buffer overflow - too many pending paint tasks')
-    }
-
-    this.renderTasks[this.renderTail] = () => {
-      if (!cancelled) {
-        task(sink, ...args)
-      }
-    }
-    this.renderTail = nextTail
-
-    this.scheduleRender()
-
-    return disposeWith(() => {
-      cancelled = true
-    })
-  }
-
-  time(): number {
-    return performance.now()
-  }
-
-  private scheduleCompute(): void {
-    if (this.computeScheduled) return
-    this.computeScheduled = true
-
-    queueMicrotask(() => {
-      this.computeScheduled = false
-      this.flushCompute()
     })
   }
 
@@ -130,12 +100,31 @@ class DomScheduler implements I$Scheduler {
     this.computeHead = head
   }
 
-  private scheduleRender(): void {
-    if (this.rafId !== null) return
+  paint<T, TArgs extends readonly unknown[]>(sink: ISink<T>, task: ITask<T, TArgs>, ...args: TArgs): Disposable {
+    let cancelled = false
 
-    this.rafId = requestAnimationFrame(() => {
-      this.rafId = null
-      this.flushRender()
+    // Fast ring buffer enqueue
+    const nextTail = (this.renderTail + 1) & DomScheduler.RENDER_MASK
+    if (nextTail === this.renderHead) {
+      throw new Error('DomScheduler render buffer overflow - too many pending paint tasks')
+    }
+
+    this.renderTasks[this.renderTail] = () => {
+      if (!cancelled) {
+        task(sink, ...args)
+      }
+    }
+    this.renderTail = nextTail
+
+    if (this.rafId === null) {
+      this.rafId = requestAnimationFrame(() => {
+        this.rafId = null
+        this.flushRender()
+      })
+    }
+
+    return disposeWith(() => {
+      cancelled = true
     })
   }
 
@@ -150,11 +139,20 @@ class DomScheduler implements I$Scheduler {
     while (head !== tail) {
       const task = tasks[head]
       tasks[head] = null // Clear reference to allow GC
-      task!() // Non-null assertion - we know task exists here
+      try {
+        task!() // Non-null assertion - we know task exists here
+      } catch (error) {
+        // Log but don't stop processing other tasks
+        console.error('Error in render task:', error)
+      }
       head = (head + 1) & mask
     }
 
     this.renderHead = head
+  }
+
+  time(): number {
+    return performance.now()
   }
 }
 
