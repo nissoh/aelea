@@ -1,5 +1,6 @@
-import type { IScheduler, ISink, IStream } from '../../stream/index.js'
+import { curry2, type ISink, type IStream } from '../../stream/index.js'
 import { stream } from '../stream.js'
+import type { I$Scheduler } from '../types.js'
 
 interface MotionConfig {
   stiffness: number
@@ -7,16 +8,15 @@ interface MotionConfig {
   precision: number
 }
 
-interface MotionState {
-  position: number
-  target: number
-  velocity: number
-}
-
 export const MOTION_NO_WOBBLE = { stiffness: 170, damping: 26, precision: 0.01 }
 export const MOTION_GENTLE = { stiffness: 120, damping: 14, precision: 0.01 }
 export const MOTION_WOBBLY = { stiffness: 180, damping: 12, precision: 0.01 }
 export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
+
+export interface IMotionCurry {
+  (config: Partial<MotionConfig>, position: IStream<number>): IStream<number>
+  (config: Partial<MotionConfig>): (position: IStream<number>) => IStream<number>
+}
 
 /**
  * Motion combinator that animates position changes from an input stream
@@ -26,144 +26,125 @@ export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
  * @returns Stream of animated positions
  *
  * @example
- * const targetPositions$ = stream(sink => {
- *   sink.event(0)    // Start at 0
- *   setTimeout(() => sink.event(100), 1000)  // Animate to 100
- *   setTimeout(() => sink.event(50), 2000)   // Animate to 50
- * })
+ * const clicks = fromEvent(button, 'click')
+ * const position = scan((x) => x + 100, 0, clicks)
+ * const animated = motion(MOTION_GENTLE, position)
  *
- * const animated$ = motion(MOTION_GENTLE)(targetPositions$)
- * // Emits smooth transitions: 0 -> 1 -> 2 -> ... -> 100 -> 99 -> ... -> 50
+ * // Or curried:
+ * const gentleMotion = motion(MOTION_GENTLE)
+ * const animated = gentleMotion(position)
  */
-export function motion(position: IStream<number>, config?: Partial<MotionConfig>): IStream<number> {
-  const motionConfig = { ...MOTION_NO_WOBBLE, ...config }
-
-  return stream((scheduler, sink) => new MotionSink(scheduler, sink, motionConfig, position))
-}
+export const motion: IMotionCurry = curry2(
+  (config: Partial<MotionConfig>, position: IStream<number>): IStream<number> => {
+    const cfg = { ...MOTION_NO_WOBBLE, ...config }
+    return stream((scheduler, sink) => new MotionSink(scheduler, sink, cfg, position))
+  }
+)
 
 class MotionSink implements ISink<number>, Disposable {
-  private state: MotionState | null = null
-  
-  private animationDisposable: Disposable | null = null
-  private sourceDisposable: Disposable | null = null
+  private position = 0
+  private target = 0
+  private velocity = 0
+  private animating = false
   private disposed = false
-  private isAnimating = false
+  private initialized = false
+  private rafDisposable: Disposable | null = null
+  private sourceDisposable: Disposable
+  private sourceEnded = false
 
   constructor(
-    private scheduler: IScheduler,
+    private scheduler: I$Scheduler,
     private sink: ISink<number>,
     private config: MotionConfig,
-    positions$: IStream<number>
+    position: IStream<number>
   ) {
-    // Subscribe to position changes
-    this.sourceDisposable = positions$.run(scheduler, this)
+    this.sourceDisposable = position.run(scheduler, this)
   }
 
-  event(targetPosition: number): void {
+  event(newTarget: number): void {
     if (this.disposed) return
 
-    if (this.state === null) {
-      // First position - initialize state
-      this.state = {
-        position: targetPosition,
-        target: targetPosition,
-        velocity: 0
-      }
-      // Emit initial position immediately
-      this.sink.event(targetPosition)
+    if (!this.initialized) {
+      // First event - set both position and target to this value
+      this.initialized = true
+      this.position = newTarget
+      this.target = newTarget
+      this.sink.event(newTarget)
     } else {
-      // Update target and start/continue animation
-      this.state.target = targetPosition
-      if (!this.isAnimating) {
-        this.startAnimation()
+      // Subsequent events - animate to new target
+      this.target = newTarget
+      if (!this.animating) {
+        this.animating = true
+        this.scheduleFrame()
       }
     }
   }
 
   error(err: any): void {
     if (!this.disposed) {
+      this.disposed = true
+      this.cleanup()
       this.sink.error(err)
-      this.dispose()
     }
   }
 
   end(): void {
-    // Let current animation finish before ending
-    if (!this.disposed && !this.isAnimating) {
+    this.sourceEnded = true
+    if (!this.disposed && !this.animating) {
+      this.disposed = true
       this.sink.end()
-      this.dispose()
     }
   }
 
-  private startAnimation(): void {
-    if (this.disposed || !this.state) return
-
-    this.isAnimating = true
-    this.scheduleNextFrame()
+  private scheduleFrame(): void {
+    this.rafDisposable = this.scheduler.paint(this.sink, this.animate)
   }
 
-  private scheduleNextFrame = (): void => {
-    if (this.disposed || !this.state) return
+  private animate = (): void => {
+    if (this.disposed) return
 
-    const settled = this.animateFrame()
-
-    // Emit current position
-    this.sink.event(this.state.position)
+    const delta = this.target - this.position
+    const settled = Math.abs(this.velocity) < this.config.precision && Math.abs(delta) < this.config.precision
 
     if (settled) {
-      this.isAnimating = false
-      this.animationDisposable = null
+      this.position = this.target
+      this.velocity = 0
+      this.animating = false
+      this.rafDisposable = null
+      this.sink.event(this.target)
 
-      // If source has ended and animation is complete, end the stream
-      if (this.sourceDisposable === null) {
+      // Check if we can end the stream now
+      if (this.sourceEnded) {
+        this.disposed = true
         this.sink.end()
-        this.dispose()
       }
-    } else {
-      // Continue animation using delay for next frame (16ms ~ 60fps)
-      this.animationDisposable = this.scheduler.delay(this.sink as any, this.scheduleNextFrame, 16)
+      return
     }
-  }
-
-  private animateFrame(): boolean {
-    if (!this.state) return true
-
-    const delta = this.state.target - this.state.position
 
     // Spring physics
     const spring = this.config.stiffness * delta
-    const damper = this.config.damping * this.state.velocity
+    const damper = this.config.damping * this.velocity
     const acceleration = spring - damper
 
-    // Update velocity and position (assuming 60fps)
-    const dt = 1 / 60
-    this.state.velocity += acceleration * dt
-    this.state.position += this.state.velocity * dt
+    // Update state (dt = 1/60 for 60fps)
+    this.velocity += acceleration / 60
+    this.position += this.velocity / 60
 
-    // Check if animation has settled
-    const settled = Math.abs(this.state.velocity) < this.config.precision && Math.abs(delta) < this.config.precision
+    this.sink.event(this.position)
 
-    if (settled) {
-      this.state.position = this.state.target
-      this.state.velocity = 0
-    }
-
-    return settled
+    // Schedule next frame
+    this.scheduleFrame()
   }
 
-  dispose(): void {
-    if (this.disposed) return
-    this.disposed = true
-
-    this.animationDisposable?.[Symbol.dispose]?.()
-    this.sourceDisposable?.[Symbol.dispose]?.()
-
-    this.state = null
-    this.animationDisposable = null
-    this.sourceDisposable = null
+  private cleanup(): void {
+    this.rafDisposable?.[Symbol.dispose]()
+    this.sourceDisposable?.[Symbol.dispose]()
   }
 
   [Symbol.dispose](): void {
-    this.dispose()
+    if (!this.disposed) {
+      this.disposed = true
+      this.cleanup()
+    }
   }
 }

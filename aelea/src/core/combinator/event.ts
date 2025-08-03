@@ -1,5 +1,5 @@
 import type { IStream } from '../../stream/index.js'
-import { chain, curry2, fromCallback, isStream } from '../../stream/index.js'
+import { chain, curry2, disposeWith, fromCallback, isStream } from '../../stream/index.js'
 import type { I$Slottable, INodeElement } from '../types.js'
 
 type PickEvent<A, B> = A extends keyof B ? B[A] : Event
@@ -28,9 +28,9 @@ export function eventElementTarget<A extends INodeElementEventNameList, B extend
   return fromCallback((cb) => {
     element.addEventListener(eventType, cb as EventListener, options)
 
-    return () => {
+    return disposeWith(() => {
       element.removeEventListener(eventType, cb as EventListener, options)
-    }
+    })
   })
 }
 

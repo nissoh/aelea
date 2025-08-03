@@ -1,3 +1,4 @@
+import { stream } from '../stream.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
@@ -5,9 +6,26 @@ import { SettableDisposable } from '../utils/SettableDisposable.js'
 import { PipeSink } from '../utils/sink.js'
 import { join } from './join.js'
 
-export const until: IUntilCurry = curry2((signal, stream) => new Until(signal, stream))
+export const until: IUntilCurry = curry2((signal, source) =>
+  stream((scheduler, sink) => {
+    const disposable = new SettableDisposable()
 
-export const since: ISinceCurry = curry2((signal, stream) => new Since(signal, stream))
+    const d1 = source.run(scheduler, sink)
+    const d2 = signal.run(scheduler, new UntilSink(sink, disposable))
+    disposable.set(disposeBoth(d1, d2))
+
+    return disposable
+  })
+)
+
+export const since: ISinceCurry = curry2((signal, source) =>
+  stream((scheduler, sink) => {
+    const min = new LowerBoundSink(signal, sink, scheduler)
+    const sourceDisposable = source.run(scheduler, new SinceSink(min, sink))
+
+    return disposeBoth(min, sourceDisposable)
+  })
+)
 
 export const during: IDuringCurry = curry2((timeWindow, stream) => {
   const untilJoined = until(join(timeWindow), stream)
@@ -29,23 +47,6 @@ export interface IDuringCurry {
   <A>(timeWindow: IStream<IStream<unknown>>): (stream: IStream<A>) => IStream<A>
 }
 
-class Until<A> implements IStream<A> {
-  constructor(
-    private readonly maxSignal: IStream<unknown>,
-    private readonly source: IStream<A>
-  ) {}
-
-  run(scheduler: IScheduler, sink: ISink<A>): Disposable {
-    const disposable = new SettableDisposable()
-
-    const d1 = this.source.run(scheduler, sink)
-    const d2 = this.maxSignal.run(scheduler, new UntilSink(sink, disposable))
-    disposable.set(disposeBoth(d1, d2))
-
-    return disposable
-  }
-}
-
 class UntilSink implements ISink<unknown> {
   constructor(
     private readonly sink: ISink<any>,
@@ -63,20 +64,6 @@ class UntilSink implements ISink<unknown> {
 
   end(): void {
     // Don't end main stream if signal ends
-  }
-}
-
-class Since<A> implements IStream<A> {
-  constructor(
-    private readonly minSignal: IStream<unknown>,
-    private readonly source: IStream<A>
-  ) {}
-
-  run(scheduler: IScheduler, sink: ISink<A>): Disposable {
-    const min = new LowerBoundSink(this.minSignal, sink, scheduler)
-    const d = this.source.run(scheduler, new SinceSink(min, sink))
-
-    return disposeBoth(min, d)
   }
 }
 
