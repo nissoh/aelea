@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run:*)",
+      "Bash(bun run:*)",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(bunx tsx:*)",
+      "Bash(bun:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(npx tsc:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(tail:*)",
+      "Bash(test:*)",
+      "Bash(rm:*)",
+      "Bash(mv:*)",
+      "Bash(true)",
+      "Bash(npx tsx:*)"
+    ],
+    "deny": []
+  }
+}
