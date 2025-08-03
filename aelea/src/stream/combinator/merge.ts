@@ -1,6 +1,6 @@
 import { stream } from '../stream.js'
 import type { ISink, IStream } from '../types.js'
-import { disposeAll, disposeWith } from '../utils/disposable.js'
+import { disposeAll } from '../utils/disposable.js'
 import { MergingSink } from '../utils/sink.js'
 
 export function merge<T extends readonly unknown[]>(

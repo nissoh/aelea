@@ -9,20 +9,16 @@ export const fromCallback = <T, FnArgs extends any[] = T[]>(
 ): IStream<T> =>
   stream((scheduler, sink) => {
     try {
-      const sd = scheduler.asap(sink, () => {
-        const maybeDisposable = callbackFunction.call(context, (...args: FnArgs) => {
-          try {
-            const value = mapFn(...args)
-            sink.event(value)
-          } catch (error) {
-            sink.error(error)
-          }
-        })
-
-        return toDisposable(maybeDisposable)
+      const maybeDisposable = callbackFunction.call(context, (...args: FnArgs) => {
+        try {
+          const value = mapFn(...args)
+          sink.event(value)
+        } catch (error) {
+          sink.error(error)
+        }
       })
 
-      return sd
+      return toDisposable(maybeDisposable)
     } catch (error) {
       return scheduler.asap(sink, eventError, error)
     }

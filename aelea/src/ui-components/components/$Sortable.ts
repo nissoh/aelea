@@ -134,11 +134,8 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
               // list order continously changing, snapshot is used to get a(snapshot) of the latest list
               snapshot((list, startEv) => {
                 const drag = merge(eventElementTarget('pointerup', window), eventElementTarget('pointermove', window))
-                // const move = skipAfter((ev) => ev.type === 'pointerup', drag)
-                const move = until(
-                  filter((ev) => {
-                    return ev.type === 'pointerup'
-                  }, drag),
+                const moveUntilUp = until(
+                  filter((ev) => ev.type === 'pointerup', drag),
                   drag
                 )
 
@@ -157,7 +154,7 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
                     $draggedItem: isDragging ? $item : null,
                     list: isPositionChange ? swap($item, to, list) : list
                   }
-                }, move)
+                }, moveUntilUp)
               }, $listChangesWithInitial),
               switchLatest,
               orderChangeTether()

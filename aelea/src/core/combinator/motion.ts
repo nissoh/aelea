@@ -63,7 +63,7 @@ class MotionSink implements ISink<number>, Disposable {
 
   event(newTarget: number): void {
     if (this.disposed) return
-
+    
     if (!this.initialized) {
       // First event - set both position and target to this value
       this.initialized = true
@@ -100,20 +100,20 @@ class MotionSink implements ISink<number>, Disposable {
     this.rafDisposable = this.scheduler.paint(this.sink, this.animate)
   }
 
+  // Optimized animation loop
   private animate = (): void => {
-    if (this.disposed) return
-
     const delta = this.target - this.position
-    const settled = Math.abs(this.velocity) < this.config.precision && Math.abs(delta) < this.config.precision
-
-    if (settled) {
+    const absDelta = delta < 0 ? -delta : delta
+    const absVelocity = this.velocity < 0 ? -this.velocity : this.velocity
+    
+    // Check if settled
+    if (absVelocity < this.config.precision && absDelta < this.config.precision) {
       this.position = this.target
       this.velocity = 0
       this.animating = false
       this.rafDisposable = null
       this.sink.event(this.target)
-
-      // Check if we can end the stream now
+      
       if (this.sourceEnded) {
         this.disposed = true
         this.sink.end()
@@ -121,18 +121,14 @@ class MotionSink implements ISink<number>, Disposable {
       return
     }
 
-    // Spring physics
-    const spring = this.config.stiffness * delta
-    const damper = this.config.damping * this.velocity
-    const acceleration = spring - damper
-
+    // Spring physics calculation
+    const acceleration = this.config.stiffness * delta - this.config.damping * this.velocity
+    
     // Update state (dt = 1/60 for 60fps)
-    this.velocity += acceleration / 60
-    this.position += this.velocity / 60
-
+    this.velocity += acceleration * 0.01666666666666666 // 1/60
+    this.position += this.velocity * 0.01666666666666666
+    
     this.sink.event(this.position)
-
-    // Schedule next frame
     this.scheduleFrame()
   }
 
