@@ -63,7 +63,7 @@ class MotionSink implements ISink<number>, Disposable {
 
   event(newTarget: number): void {
     if (this.disposed) return
-    
+
     if (!this.initialized) {
       // First event - set both position and target to this value
       this.initialized = true
@@ -105,7 +105,7 @@ class MotionSink implements ISink<number>, Disposable {
     const delta = this.target - this.position
     const absDelta = delta < 0 ? -delta : delta
     const absVelocity = this.velocity < 0 ? -this.velocity : this.velocity
-    
+
     // Check if settled
     if (absVelocity < this.config.precision && absDelta < this.config.precision) {
       this.position = this.target
@@ -113,7 +113,7 @@ class MotionSink implements ISink<number>, Disposable {
       this.animating = false
       this.rafDisposable = null
       this.sink.event(this.target)
-      
+
       if (this.sourceEnded) {
         this.disposed = true
         this.sink.end()
@@ -123,11 +123,11 @@ class MotionSink implements ISink<number>, Disposable {
 
     // Spring physics calculation
     const acceleration = this.config.stiffness * delta - this.config.damping * this.velocity
-    
+
     // Update state (dt = 1/60 for 60fps)
     this.velocity += acceleration * 0.01666666666666666 // 1/60
     this.position += this.velocity * 0.01666666666666666
-    
+
     this.sink.event(this.position)
     this.scheduleFrame()
   }
