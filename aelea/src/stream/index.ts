@@ -34,7 +34,7 @@ export {
   throttle,
   until,
   zip,
-  zipArray
+  zipState
 } from './combinator/index.js'
 export { behavior, multicast, replayLatest, replayState, tether } from './multicast/index.js'
 export { createDefaultScheduler } from './scheduler.js'

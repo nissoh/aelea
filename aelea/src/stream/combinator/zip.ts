@@ -1,29 +1,59 @@
-import { empty } from '../source/stream.js'
-import type { IScheduler, ISink, IStream } from '../types.js'
+import { empty, now } from '../source/stream.js'
+import { stream } from '../stream.js'
+import type { ISink, IStream } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
-import { curry2, curry3 } from '../utils/function.js'
 import { map } from './map.js'
 
-export const zip: IZipCurry = curry3(<A, B, R>(f: (a: A, b: B) => R, stream1: IStream<A>, stream2: IStream<B>) =>
-  zipArray(f, [stream1, stream2])
-)
+export function zip<T extends readonly unknown[], R>(
+  f: (...args: T) => R,
+  ...sources: [...{ [K in keyof T]: IStream<T[K]> }]
+): IStream<R> {
+  if (sources.length === 0) return empty
+  if (sources.length === 1) return map(f as any, sources[0])
 
-export const zipArray: IZipArrayCurry = curry2((f, streams) => {
-  if (streams.length === 0) return empty
-  if (streams.length === 1) return map(f, streams[0])
+  return stream((scheduler, sink) => {
+    const l = sources.length
+    const disposables = new Array(l)
+    const sinks = new Array(l)
+    const buffers = new Array(l)
 
-  return new Zip(f, streams)
-})
+    const zipSink = new ZipSink(f, buffers, sinks, sink)
 
-export interface IZipCurry {
-  <A, B, R>(f: (a: A, b: B) => R, stream1: IStream<A>, stream2: IStream<B>): IStream<R>
-  <A, B, R>(f: (a: A, b: B) => R, stream1: IStream<A>): (stream2: IStream<B>) => IStream<R>
-  <A, B, R>(f: (a: A, b: B) => R): (stream1: IStream<A>) => (stream2: IStream<B>) => IStream<R>
+    for (let i = 0; i < l; ++i) {
+      buffers[i] = new Queue()
+      const indexSink = (sinks[i] = new IndexSink(i, zipSink))
+      disposables[i] = sources[i].run(scheduler, indexSink)
+    }
+
+    return disposeAll(disposables)
+  })
 }
 
-export interface IZipArrayCurry {
-  <Args extends unknown[], R>(f: (...args: Args) => R, streams: { [K in keyof Args]: IStream<Args[K]> }): IStream<R>
-  <Args extends unknown[], R>(f: (...args: Args) => R): (streams: { [K in keyof Args]: IStream<Args[K]> }) => IStream<R>
+export function zipState<A>(
+  state: {
+    [P in keyof A]: IStream<A[P]>
+  }
+): IStream<Readonly<A>> {
+  const keys = Object.keys(state) as (keyof A)[]
+  const sources = Object.values(state) as IStream<any>[]
+
+  if (sources.length === 0) {
+    return now({} as A)
+  }
+
+  return stream((scheduler, sink) => {
+    const result = {} as A
+
+    return zip(
+      (...values) => {
+        for (let i = 0; i < keys.length; i++) {
+          result[keys[i]] = values[i]
+        }
+        return result as Readonly<A>
+      },
+      ...sources
+    ).run(scheduler, sink)
+  })
 }
 
 class Queue<T> {
@@ -78,33 +108,9 @@ class IndexSink<T> implements ISink<T> {
   }
 }
 
-class Zip<A, R> implements IStream<R> {
-  constructor(
-    private readonly f: (...args: A[]) => R,
-    private readonly sources: ArrayLike<IStream<A>>
-  ) {}
-
-  run(scheduler: IScheduler, sink: ISink<R>): Disposable {
-    const l = this.sources.length
-    const disposables = new Array(l)
-    const sinks = new Array(l)
-    const buffers = new Array(l)
-
-    const zipSink = new ZipSink(this.f, buffers, sinks, sink)
-
-    for (let i = 0; i < l; ++i) {
-      buffers[i] = new Queue<A>()
-      const indexSink = (sinks[i] = new IndexSink(i, zipSink))
-      disposables[i] = this.sources[i].run(scheduler, indexSink)
-    }
-
-    return disposeAll(disposables)
-  }
-}
-
 class ZipSink<A, R> implements ISink<IndexedValue<A>> {
   constructor(
-    private readonly f: (...args: A[]) => R,
+    private readonly f: (...args: any[]) => R,
     private readonly buffers: ArrayLike<Queue<A>>,
     private readonly sinks: ArrayLike<IndexSink<A>>,
     private readonly sink: ISink<R>

@@ -3,6 +3,7 @@ import {
   debounce,
   empty,
   filter,
+  fromArray,
   type IBehavior,
   map,
   never,
@@ -37,13 +38,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
             (s) => ({ height: `${s}%` }),
             switchLatest(
               map((_) => {
-                return motion(
-                  { stiffness: 160, damping: 36, precision: 0.1 },
-                  {
-                    position: 0,
-                    target: 100
-                  }
-                )
+                return motion({ stiffness: 160, damping: 36, precision: 0.1 }, fromArray([0, 100]))
               }, change)
             )
           )
