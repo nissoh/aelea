@@ -1,157 +1,302 @@
-# aelea - Tiny Composable UI Framework
+# Aelea - Reactive UI Framework
 
-Functional Reactive Programming UI library based on [@most/core](https://github.com/mostjs/core) paradigm and [architecture](https://github.com/cujojs/most/wiki/Architecture)
+A lightweight, functional reactive UI framework that embraces simplicity and composability. Built on reactive streams, Aelea provides a declarative way to build dynamic user interfaces without virtual DOM or complex state management.
 
-# Why?
+## Why Aelea?
 
-- Everything is programatic. bulit by applying First Principle
-- A lot is meant to compose well together. elements, style, behaviors are reusable and stateless. All Built to scale
-- State UI naturally by declaring IBehaviors, state managers are obsolete
-- Highly performant since diffing became obsolete, state changes based on natural IBehaviors
-- CSS Declarations only exists when they are displayed, reducing paint time
-- Components are similar to a function, AS I/O, Outputs(Automatically Typed) outout(unlike any other libraries)
-- Typed. Less friction and more feedback. Style(csstype), INodeElements(either custom or specific(form, button etc)) and even Dom Events(based on element type)
-- Animations. done using Spring physics <https://www.youtube.com/watch?v=1tavDv5hXpo>
+- **Pure Reactive Streams**: UI updates flow naturally from data streams - no diffing, no reconciliation
+- **True Composability**: Components, styles, and behaviors compose like functions
+- **Zero Magic**: No hidden state, no lifecycle hooks, no context - just functions and streams
+- **Type-Safe**: Full TypeScript support with automatic type inference
+- **Lightweight**: Minimal runtime with tree-shakeable modules
+- **Performance**: Direct DOM updates triggered by stream events
 
-### Increment number periodically
+## Installation
 
-```typescript
-import { $node, $text, O, runBrowser } from '@aelea/core'
-import { constant, map, periodic, scan } from '@most/core'
-
-const add = (n1: number, n2: number) => n1 + n2
-
-// o(AKA Pipe) compose operations for later consumption
-const accumulate = o(
-  periodic,     //  event of undefined
-  constant(1),  //  map undefined to 1
-  scan(add, 0), //  add up numbers starting with 0
-  map(String)   //  map number into string
-)
-
-const oneEverySecond = accumulate(1000)
-
-const $pinkishCountUp =
-  $node(style({ padding: '10px', background: 'hotpink' }))(
-    $text(oneEverySecond)
-  )
-
-runBrowser({ rootNode: document.body })($pinkishCountUp )
+```bash
+npm install aelea
+# or
+bun add aelea
 ```
 
-### Simple UI Counter - View, Style and IBehavior
+## Core Concepts
 
-This is a dumbed down version where everything is packed into a single file
+### 1. Streams Drive Everything
 
-Sanboxed version [https://codesandbox.io/s/ancient-hooks-909qq?file=/src/index.ts](https://codesandbox.io/s/ancient-hooks-909qq?file=/src/index.ts)
+In Aelea, UI updates are driven by streams of data:
 
 ```typescript
-import { constant, map, merge, scan } from '@most/core'
-import { $custom, $element, $text, IBehavior, component, style, event, INode, runBrowser } from '@aelea/core'
+import { $text, stream } from 'aelea/core'
+import { map, periodic, scan } from 'aelea/stream'
 
-// composable style
-const displayFlex = style({ display: 'flex' })
-const spacingStyle = style({ gap: '16px' })
+// Create a stream that emits incremented numbers every second
+const counter = scan((count, _) => count + 1, 0, periodic(1000))
 
-// composable elements
-const $row = $custom('row')(displayFlex)
-const $column = $custom('column')(displayFlex, style({ flexDirection: 'column' }))
+// Text node that updates with stream values
+const $counter = $text(map(String, counter))
+```
 
-const sumFromZeroOp = scan((current: number, x: number) => current + x, 0)
+### 2. Elements are Functions
 
-// Component that outputs state(optionally), this is currently not used anywhere, see next example to see it being consumed
+DOM elements are created through element factories:
+
+```typescript
+import { $element, $custom, style } from 'aelea/core'
+
+// Create standard HTML elements
+const $div = $element('div')
+const $button = $element('button')
+const $input = $element('input')
+
+// Create custom elements
+const $card = $custom('app-card')
+
+// Compose elements with styles
+const $styledCard = $div(
+  style({ padding: '20px', border: '1px solid #ccc' })
+)(
+  $element('span')()('Hello, World!')
+)
+
+// Create reusable element factories
+const $h1 = $element('h1')
+const $p = $element('p')
+const $form = $element('form')
+const $label = $element('label')
+```
+
+### 3. Components are I/O Functions
+
+Components receive behavior streams and output both UI and new streams:
+
+```typescript
+import { component, behavior, eventElementTarget, $text, $element } from 'aelea/core'
+import { map, merge, scan, constant } from 'aelea/stream'
+import type { IBehavior } from 'aelea/stream'
+
+// Create reusable element factories
+const $div = $element('div')
+const $button = $element('button')
+
 const $Counter = component((
-    [increment, incrementTether]: IBehavior<INode, 1>,
-    [decrement, decrementTether]: IBehavior<INode, -1>
-  ) => {
-    const incrementBehavior = incrementTether(event('click'), constant(1))
-    const decrementBehavior = decrementTether(event('click'), constant(-1))
-
-    const count = sumFromZeroOp(merge(increment, decrement))
-
-    return [ // Component has to return [$Node, IBehavior(optionally)] in the next example we will use these outputted behaviors
-
-      $row(spacingStyle)(
-        $column(
-          $element('button')(incrementBehavior)(
-            $text('+')
-          ),
-          $element('button')(decrementBehavior)(
-            $text('-')
-          )
-        ),
-
-        $text(style({ fontSize: '64px' }))(
-          map(String, count)
-        )
-      ),
-
-      { increment, decrement }
-    ]
-  }
-)
-
-runBrowser({ rootNode: document.body })($Counter({}))
-
-
+  [increment, incrementTether]: IBehavior<MouseEvent, 1>,
+  [decrement, decrementTether]: IBehavior<MouseEvent, -1>
+) => {
+  // Wire up click events to behaviors
+  const inc = incrementTether(
+    eventElementTarget('click'), 
+    constant(1)
+  )
+  const dec = decrementTether(
+    eventElementTarget('click'), 
+    constant(-1)
+  )
+  
+  // Combine streams to create counter state
+  const count = scan((sum, n) => sum + n, 0, merge(increment, decrement))
+  
+  return [
+    $div()(
+      $button(inc)('+'),
+      $text(map(String, count)),
+      $button(dec)('-')
+    ),
+    { count } // Output the count stream for parent components
+  ]
+})
 ```
 
-### Using $Counter Typed Output IBehaviors
+## Getting Started
 
-In previous example we didn't do much except creating a counter component and drawing it using `runBrowser` on `document.body`
-
-this time, lets play with with the $Component output behaviors
+### Hello World
 
 ```typescript
-import { constant, map, merge, scan } from '@most/core'
-import { $text, IBehavior, component, style, INode, runBrowser } from '@aelea/core'
-import $Counter, { $column, $row, spacingStyle } from './$Counter' // lets assume we default export $Counter and a few reusable $node's and style instead
+import { runBrowser, $text } from 'aelea/core'
+import { now } from 'aelea/stream'
 
-const $SumOfTwoCounters = component((
-  [increments, incrementsTether]: IBehavior<INode, 1>,
-  [decrements, decrementsTether]: IBehavior<INode, -1>
-) => {
+runBrowser({ 
+  rootNode: document.body 
+})(
+  $text(now('Hello, Aelea!'))
+)
+```
 
-  const sumOfTwoCounters = scan((sum, count) =>  sum + count, 0 , merge(increments, decrements))
+### Interactive Counter
 
+```typescript
+import { runBrowser, component, style, eventElementTarget, $text, $element } from 'aelea/core'
+import { behavior, map, scan, startWith } from 'aelea/stream'
+
+const $App = component(() => {
+  const [clicks, clicksTether] = behavior<MouseEvent>()
+  
+  const count = startWith(
+    0,
+    scan((sum, _) => sum + 1, 0, clicks)
+  )
+  
   return [
-
-    $column(spacingStyle)(
-
-      $row(spacingStyle)(
-        $Counter({
-          increment: incrementsTether(),
-          decrement: decrementsTether(),
-        }),
-
-        $Counter({
-          increment: incrementsTether(),
-          decrement: decrementsTether(),
-        }),
-      )
-
-      $text(style({ border: 'solid 1px blue', }))(
-        map(sum => `Total sum of two counters: ${sum}`, sumOfTwoCounters)
+    $element('div')(
+      style({ 
+        padding: '40px', 
+        textAlign: 'center',
+        fontFamily: 'system-ui'
+      })
+    )(
+      $element('h1')()($text('Reactive Counter')),
+      $element('button')(
+        clicksTether(eventElementTarget('click')),
+        style({ 
+          padding: '10px 20px',
+          fontSize: '18px',
+          cursor: 'pointer'
+        })
+      )(
+        $text(map(n => `Clicked ${n} times`, count))
       )
     )
-
   ]
 })
 
-runBrowser({ rootNode: document.body })(
-  $SumOfTwoCounters({})
-)
-
+runBrowser({ rootNode: document.body })($App())
 ```
 
-This is all nice and dandy, grasping everything will require some practice
-There are various examples and whole lot of different tools avaible at the examples folder
+### Fetching Data
 
-### to see it running
+```typescript
+import { fromPromise, switchLatest, map } from 'aelea/stream'
+import { $text, $element } from 'aelea/core'
 
-- install NodeJS, <https://nodejs.org/en/>
-- `npm install -g yarn` cmd to install yarn package and project manager
-- `cd ./examples`
-- `yarn run showcase`
+const fetchUsers = () => 
+  fetch('https://jsonplaceholder.typicode.com/users')
+    .then(res => res.json())
 
-`cd ./examples` and `yarn run`
+const users$ = fromPromise(fetchUsers())
+
+const $UserList = switchLatest(
+  map(users => 
+    $element('div')()(
+      $element('ul')()(
+        ...users.map(user => 
+          $element('li')()($text(user.name))
+        )
+      )
+    )
+  , users$)
+)
+```
+
+### Animated Transitions
+
+```typescript
+import { motion, component, styleBehavior, $element } from 'aelea/core'
+import { behavior, map, startWith } from 'aelea/stream'
+
+const $AnimatedBox = component(() => {
+  const [position, positionTether] = behavior<number>()
+  
+  // Smooth spring animation between position changes
+  const animatedPosition = motion({ 
+    stiffness: 170, 
+    damping: 26 
+  }, startWith(0, position))
+  
+  return [
+    $element('div')(
+      styleBehavior(
+        map(x => ({ 
+          transform: `translateX(${x}px)`
+        }), animatedPosition)
+      )
+    )('Smooth!')
+  ]
+})
+```
+
+## UI Components Library
+
+Aelea provides a separate `ui-components` module with pre-built components and utilities:
+
+```typescript
+import { $row, $column, $card } from 'aelea/ui-components'
+import { $Button, $TextField, $Checkbox } from 'aelea/ui-components'
+import { layoutSheet, designSheet } from 'aelea/ui-components'
+
+// Layout helpers
+const $header = $row(
+  layoutSheet.spaceBetween,
+  style({ padding: '20px' })
+)
+
+// Form components
+const $loginForm = $column()(
+  $TextField({ 
+    label: 'Username',
+    value: username$,
+    validation: /* validation stream */
+  }),
+  $Button({
+    $content: $text('Login'),
+    click: loginClick$
+  })
+)
+```
+
+## Advanced Features
+
+### Routing
+
+```typescript
+import { create, match } from 'aelea/router'
+import { now } from 'aelea/stream'
+
+const router = create({
+  fragmentsChange: /* url change stream */,
+  fragment: ''
+})
+
+const home = router.create({ fragment: 'home' })
+const about = router.create({ fragment: 'about' })
+
+const $App = $element('div')()(
+  match(home)(now($HomePage())),
+  match(about)(now($AboutPage()))
+)
+```
+
+### Custom Schedulers
+
+Aelea uses a DOM-optimized scheduler that batches updates efficiently:
+
+```typescript
+import { createDomScheduler } from 'aelea/core'
+
+const scheduler = createDomScheduler()
+// Microtasks for computations
+scheduler.asap(sink, task, ...args)
+// Animation frame for renders  
+scheduler.paint(sink, task, ...args)
+```
+
+## Philosophy
+
+Aelea embraces functional reactive programming principles:
+
+1. **Data flows in one direction** - from streams to UI
+2. **Side effects are explicit** - wrapped in streams
+3. **Composition over configuration** - build complex UIs from simple parts
+4. **No hidden magic** - you can trace every update
+
+## Examples
+
+Check out the examples directory for more complex applications:
+
+- Todo MVC implementation
+- Real-time data dashboards
+- Drag-and-drop interfaces
+- Form validation
+- Animation showcases
+
+## License
+
+MIT
