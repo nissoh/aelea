@@ -3,13 +3,25 @@ import { motion, styleInline } from 'aelea/core'
 import { combine, continueWith, now } from 'aelea/stream'
 
 export function fadeIn($content: I$Slottable) {
-  const fadeIn = motion({ stiffness: 70, damping: 26, precision: 3 }, 0, 100)
-  const slideIn = motion({ stiffness: 370, damping: 46, precision: 3 }, 15, 0)
+  const fadeIn = motion(
+    { stiffness: 70, damping: 26, precision: 3 },
+    {
+      position: 0,
+      target: 100
+    }
+  )
+  const slideIn = motion(
+    { stiffness: 370, damping: 46, precision: 3 },
+    {
+      position: 15,
+      target: 0
+    }
+  )
 
   const newLocal = combine(
-    (opacity, slide) => ({
-      opacity: `${opacity}%`,
-      transform: `translate(0, ${slide}px)`
+    (state, slide) => ({
+      opacity: `${state.position}%`,
+      transform: `translate(0, ${slide.position}px)`
     }),
     fadeIn,
     slideIn

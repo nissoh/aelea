@@ -13,11 +13,27 @@ import type { I$Scheduler } from './types.js'
  * - paint() for render phase (requestAnimationFrame)
  *   - Mutate: DOM writes (style changes, attributes)
  *   - Effect: Post-paint operations (focus, scroll, animations)
+ *
+ * IMPORTANT: Tasks are NOT synchronized between phases. Paint tasks may execute
+ * before pending compute tasks if scheduled in different event loop cycles.
+ * Design your code to handle this async behavior or ensure dependent tasks
+ * are scheduled in the correct phase.
  */
 class DomScheduler implements I$Scheduler {
-  private computeQueue: Array<() => void> = []
-  private renderQueue: Array<() => void> = []
+  // Ring buffer for compute tasks - power of 2 for fast modulo
+  private static readonly COMPUTE_BUFFER_SIZE = 4096
+  private static readonly COMPUTE_MASK = 4095
+  private computeTasks: Array<(() => void) | null> = new Array(DomScheduler.COMPUTE_BUFFER_SIZE)
+  private computeHead = 0
+  private computeTail = 0
   private computeScheduled = false
+
+  // Ring buffer for render tasks
+  private static readonly RENDER_BUFFER_SIZE = 1024
+  private static readonly RENDER_MASK = 1023
+  private renderTasks: Array<(() => void) | null> = new Array(DomScheduler.RENDER_BUFFER_SIZE)
+  private renderHead = 0
+  private renderTail = 0
   private rafId: number | null = null
 
   // Standard IScheduler methods
@@ -26,7 +42,7 @@ class DomScheduler implements I$Scheduler {
 
     const timeoutId = setTimeout(() => {
       if (!cancelled) {
-        this.executeTask(task, sink, args)
+        task(sink, ...args)
       }
     }, delay)
 
@@ -39,14 +55,19 @@ class DomScheduler implements I$Scheduler {
   asap<T, TArgs extends Args>(sink: ISink<T>, task: ITask<T, TArgs>, ...args: TArgs): Disposable {
     let cancelled = false
 
-    // Create closure that captures all needed values
-    const fn = () => {
-      if (!cancelled) {
-        this.executeTask(task, sink, args)
-      }
+    // Fast ring buffer enqueue
+    const nextTail = (this.computeTail + 1) & DomScheduler.COMPUTE_MASK
+    if (nextTail === this.computeHead) {
+      throw new Error('DomScheduler compute buffer overflow - too many pending tasks')
     }
 
-    this.computeQueue.push(fn)
+    this.computeTasks[this.computeTail] = () => {
+      if (!cancelled) {
+        task(sink, ...args)
+      }
+    }
+    this.computeTail = nextTail
+
     this.scheduleCompute()
 
     return disposeWith(() => {
@@ -57,14 +78,19 @@ class DomScheduler implements I$Scheduler {
   paint<T, TArgs extends readonly unknown[]>(sink: ISink<T>, task: ITask<T, TArgs>, ...args: TArgs): Disposable {
     let cancelled = false
 
-    // Create closure that captures all needed values
-    const fn = () => {
-      if (!cancelled) {
-        this.executeTask(task, sink, args)
-      }
+    // Fast ring buffer enqueue
+    const nextTail = (this.renderTail + 1) & DomScheduler.RENDER_MASK
+    if (nextTail === this.renderHead) {
+      throw new Error('DomScheduler render buffer overflow - too many pending paint tasks')
     }
 
-    this.renderQueue.push(fn)
+    this.renderTasks[this.renderTail] = () => {
+      if (!cancelled) {
+        task(sink, ...args)
+      }
+    }
+    this.renderTail = nextTail
+
     this.scheduleRender()
 
     return disposeWith(() => {
@@ -87,15 +113,21 @@ class DomScheduler implements I$Scheduler {
   }
 
   private flushCompute(): void {
-    // Process all compute tasks
-    const queue = this.computeQueue
-    const len = queue.length
-    this.computeQueue = []
+    // Cache for faster access
+    const tasks = this.computeTasks
+    const mask = DomScheduler.COMPUTE_MASK
+    let head = this.computeHead
+    const tail = this.computeTail
 
-    // Direct function calls - no object access needed
-    for (let i = 0; i < len; i++) {
-      queue[i]()
+    // Tight execution loop
+    while (head !== tail) {
+      const task = tasks[head]
+      tasks[head] = null // Clear reference to allow GC
+      task!() // Non-null assertion - we know task exists here
+      head = (head + 1) & mask
     }
+
+    this.computeHead = head
   }
 
   private scheduleRender(): void {
@@ -108,34 +140,21 @@ class DomScheduler implements I$Scheduler {
   }
 
   private flushRender(): void {
-    // Process all render tasks
-    const queue = this.renderQueue
-    const len = queue.length
-    this.renderQueue = []
+    // Cache for faster access
+    const tasks = this.renderTasks
+    const mask = DomScheduler.RENDER_MASK
+    let head = this.renderHead
+    const tail = this.renderTail
 
-    // Direct function calls - no object access needed
-    for (let i = 0; i < len; i++) {
-      queue[i]()
+    // Tight execution loop
+    while (head !== tail) {
+      const task = tasks[head]
+      tasks[head] = null // Clear reference to allow GC
+      task!() // Non-null assertion - we know task exists here
+      head = (head + 1) & mask
     }
-  }
 
-  private executeTask(task: ITask<any, any>, sink: ISink<any>, args: readonly unknown[]): void {
-    try {
-      const len = args.length
-      if (len === 0) {
-        task(sink)
-      } else if (len === 1) {
-        task(sink, args[0])
-      } else if (len === 2) {
-        task(sink, args[0], args[1])
-      } else if (len === 3) {
-        task(sink, args[0], args[1], args[2])
-      } else {
-        task(sink, ...args)
-      }
-    } catch (error) {
-      sink.error(error)
-    }
+    this.renderHead = head
   }
 }
 

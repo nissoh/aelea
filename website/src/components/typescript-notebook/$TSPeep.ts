@@ -37,7 +37,13 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
             (s) => ({ height: `${s}%` }),
             switchLatest(
               map((_) => {
-                return motion({ stiffness: 160, damping: 36, precision: 0.1 }, 0, 100)
+                return motion(
+                  { stiffness: 160, damping: 36, precision: 0.1 },
+                  {
+                    position: 0,
+                    target: 100
+                  }
+                )
               }, change)
             )
           )

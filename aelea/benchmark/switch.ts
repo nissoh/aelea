@@ -1,8 +1,8 @@
 import * as MC from '@most/core'
 import * as MS from '@most/scheduler'
 import { Bench } from 'tinybench'
-import { fromArray, map, op, runStream, scan, switchLatest, tap } from '../src/stream/index.js'
-import { scheduller } from './scheduler.js'
+import { fromArray, map, op, runPromise, scan, switchLatest, tap } from '../src/stream/index.js'
+import { scheduler } from './scheduler.js'
 
 const bench = new Bench({ time: 100 })
 
@@ -44,22 +44,14 @@ bench
   })
   .add(`@aelea switch ${n} x ${m}`, () => {
     let r = 0
-    const pipeline = op(
+    return op(
       fromArray(arr),
       map((arr: readonly number[]) => fromArray(arr)),
       switchLatest,
       scan(sum, 0),
-      tap((x) => (r = x))
-    )
-    return new Promise((resolve) => {
-      runStream(scheduller, {
-        event: () => {},
-        error: (e) => {
-          throw e
-        },
-        end: () => resolve(r)
-      })(pipeline)
-    })
+      tap((x) => (r = x)),
+      runPromise(scheduler)
+    ).then(() => r)
   })
 
 bench.addEventListener('error', console.error)

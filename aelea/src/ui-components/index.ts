@@ -1,5 +1,5 @@
 export { $NumberTicker } from './components/$NumberTicker.js'
-// export { $Sortable } from './components/$Sortable.js'
+export { $Sortable } from './components/$Sortable.js'
 export type { IPageRequest, ISortBy, TablePageResponse } from './components/$Table.js'
 export { $caretDown, $Table } from './components/$Table.js'
 export { $Tabs } from './components/$Tabs.js'

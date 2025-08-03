@@ -7,16 +7,16 @@ class BatchScheduler implements IScheduler {
   private static readonly BUFFER_SIZE = 8192
   private static readonly MASK = 8191
 
-  private tasks: Array<() => void> = new Array(BatchScheduler.BUFFER_SIZE)
+  private tasks: Array<(() => void) | null> = new Array(BatchScheduler.BUFFER_SIZE)
   private head = 0
   private tail = 0
   private scheduled = false
 
-  asap(sink: any, callback: any, ...args: any[]) {
+  asap(sink, task, ...args) {
     let cancelled = false
 
     // Fast ring buffer enqueue
-    this.tasks[this.tail] = () => cancelled || callback(sink, ...args)
+    this.tasks[this.tail] = () => cancelled || task(sink, ...args)
     this.tail = (this.tail + 1) & BatchScheduler.MASK
 
     if (!this.scheduled) {
@@ -40,20 +40,17 @@ class BatchScheduler implements IScheduler {
 
     // Tight execution loop
     while (head !== tail) {
-      tasks[head]()
+      const task = tasks[head]
+      tasks[head] = null // Clear reference to allow GC
+      task!() // Non-null assertion - we know task exists here
       head = (head + 1) & mask
     }
 
     this.head = head
   }
 
-  delay<TArgs extends readonly unknown[]>(
-    sink: any,
-    callback: (sink: any, ...args: TArgs) => void,
-    delay: number,
-    ...args: TArgs
-  ) {
-    const id = setTimeout(() => callback(sink, ...args), delay)
+  delay(sink, task, delay, ...args) {
+    const id = setTimeout(task, delay, sink, ...args)
     return disposeWith(clearTimeout, id)
   }
 
@@ -63,4 +60,4 @@ class BatchScheduler implements IScheduler {
 }
 
 // Export singleton instance for benchmarking
-export const scheduller: IScheduler = new BatchScheduler()
+export const scheduler: IScheduler = new BatchScheduler()

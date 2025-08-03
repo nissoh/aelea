@@ -11,6 +11,7 @@ export type {
 export { component } from './combinator/component.js'
 export type { INodeEventCurry } from './combinator/event.js'
 export { eventElementTarget, nodeEvent } from './combinator/event.js'
+export { MOTION_GENTLE, MOTION_NO_WOBBLE, MOTION_STIFF, MOTION_WOBBLY, motion } from './combinator/motion.js'
 export type { IStyleCSS } from './combinator/style.js'
 export {
   style,
@@ -21,13 +22,6 @@ export {
 export type { IRunEnvironment } from './render.js'
 export { $createRoot } from './render.js'
 export { createDomScheduler } from './scheduler.js'
-export {
-  MOTION_GENTLE,
-  MOTION_NO_WOBBLE,
-  MOTION_STIFF,
-  MOTION_WOBBLY,
-  motion
-} from './source/motion.js'
 export {
   $custom,
   $element,

@@ -3,7 +3,7 @@ import type { IBehavior } from 'aelea/stream'
 import { $card, $row, $Sortable, designSheet, layoutSheet } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 
-export default component(([_, orderTether]: IBehavior<I$Node<Element>[], I$Node<Element>[]>) => {
+export default component(([_, orderTether]: IBehavior<I$Node[]>) => {
   const $list = Array(4)
     .fill(null)
     .map((_, i) =>
