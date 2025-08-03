@@ -97,7 +97,7 @@ class MotionSink implements ISink<number>, Disposable {
   }
 
   private scheduleFrame(): void {
-    this.rafDisposable = this.scheduler.paint(this.sink, this.animate)
+    this.rafDisposable = this.scheduler.paint(this.animate)
   }
 
   // Optimized animation loop

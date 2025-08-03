@@ -28,7 +28,7 @@ class DebounceSink<T> implements ISink<T>, Disposable {
   event(value: T): void {
     this.clearTimer()
     this.pendingValue = { value }
-    this.timer = this.scheduler.delay(this.sink, emitDebounced, this.dt, this)
+    this.timer = this.scheduler.delay(emitDebounced, this.dt, this.sink, this)
   }
 
   error(e: Error): void {

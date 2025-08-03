@@ -1,35 +1,61 @@
 import { stream } from '../stream.js'
 import type { ISink, IStream } from '../types.js'
-import { disposeAll } from '../utils/disposable.js'
-import { MergingSink } from '../utils/sink.js'
+import { disposeAll, disposeNone } from '../utils/disposable.js'
+import { type IndexedValue, IndexSink } from '../utils/sink.js'
 
 export function merge<T extends readonly unknown[]>(
-  ...sourceList: [...{ [K in keyof T]: IStream<T[K]> }]
+  ...sourceList: readonly [...{ [K in keyof T]: IStream<T[K]> }]
 ): IStream<T[number]> {
   return stream((scheduler, sink) => {
-    const state = { active: sourceList.length }
-    // Pre-allocate array with known size to avoid growth
-    const disposables = new Array<Disposable>(sourceList.length)
+    const l = sourceList.length
 
-    // Use traditional for loop to avoid map/spread allocations
-    for (let i = 0; i < sourceList.length; i++) {
-      disposables[i] = sourceList[i].run(scheduler, new MergeSink(sink, state, disposables))
+    if (l === 0) return disposeNone
+    if (l === 1) return sourceList[0].run(scheduler, sink)
+
+    const disposables = new Array<Disposable>(l)
+    const sinks: ISink<unknown>[] = new Array(l)
+
+    const mergeSink = new MergeSink(sink, disposables, l)
+
+    for (let indexSink: IndexSink<any>, i = 0; i < l; ++i) {
+      indexSink = sinks[i] = new IndexSink(mergeSink, i)
+      disposables[i] = sourceList[i].run(scheduler, indexSink)
     }
 
     return disposeAll(disposables)
   })
 }
 
-class MergeSink<T> extends MergingSink<T> {
+class MergeSink<A> implements ISink<IndexedValue<A | undefined>> {
   constructor(
-    public override readonly sink: ISink<T>,
-    public override readonly state: { active: number },
-    public override readonly disposables: readonly Disposable[]
-  ) {
-    super(sink, state, disposables)
+    readonly sink: ISink<A | undefined>,
+    public disposables: Disposable[],
+    public activeCount: number
+  ) {}
+
+  event(indexValue: IndexedValue<A | undefined>): void {
+    if (indexValue.active) {
+      this.sink.event(indexValue.value)
+    } else {
+      this.dispose(indexValue.index)
+    }
   }
 
-  event(value: T) {
-    this.sink.event(value)
+  private dispose(index: number): void {
+    this.disposables[index][Symbol.dispose]()
+    if (--this.activeCount === 0) {
+      this.sink.end()
+    }
+  }
+
+  error(err: any): void {
+    this.sink.error(err)
+  }
+
+  end(): void {
+    // This should not be called directly as merge manages its own lifecycle
+    // through activeCount tracking
+    // If we reach here, it means all sources ended without errors
+    this.sink.end()
   }
 }

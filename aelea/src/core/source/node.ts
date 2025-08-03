@@ -23,7 +23,7 @@ function createNodeSource<A, B extends INodeElement>(
     }
 
     // DOM tree creation happens in asap phase
-    scheduler.asap(sink, eventNode, nodeState)
+    scheduler.asap(eventNode, sink, nodeState)
 
     return disposable
   })

@@ -1,4 +1,4 @@
-import { empty, type ISink, type IStream, merge } from '../../stream/index.js'
+import { empty, type ISink, type IStream, merge, PipeSink } from '../../stream/index.js'
 import { stream } from '../stream.js'
 import type { I$Scheduler, ISlottable } from '../types.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
@@ -12,15 +12,17 @@ function createDynamicTextStream(textSource: IStream<string>): I$Text {
   })
 }
 
-class DynamicTextSink implements ISink<string> {
+class DynamicTextSink extends PipeSink<string, ISlottable<Text>> {
   private textNode: Text | null = null
   private emitted = false
 
   constructor(
-    private readonly sink: ISink<ISlottable<Text>>,
+    sink: ISink<ISlottable<Text>>,
     private readonly disposable: SettableDisposable,
     private readonly scheduler: I$Scheduler
-  ) {}
+  ) {
+    super(sink)
+  }
 
   event(value: string): void {
     if (!this.emitted) {
@@ -28,7 +30,7 @@ class DynamicTextSink implements ISink<string> {
       this.textNode = document.createTextNode(value)
       this.emitted = true
       // DOM tree creation happens in asap phase
-      this.scheduler.asap(this.sink, eventText, {
+      this.scheduler.asap(eventText, this.sink, {
         element: this.textNode,
         disposable: this.disposable
       })
@@ -36,14 +38,6 @@ class DynamicTextSink implements ISink<string> {
       // Subsequent emissions - just update the text content
       this.textNode.nodeValue = value
     }
-  }
-
-  error(error: unknown): void {
-    this.sink.error(error)
-  }
-
-  end(): void {
-    this.sink.end()
   }
 }
 
@@ -66,7 +60,7 @@ function createStaticTextStream(text: string): I$Text {
   return stream((scheduler, sink) => {
     const disposable = new SettableDisposable()
     // DOM tree creation happens in asap phase
-    scheduler.asap(sink, eventText, {
+    scheduler.asap(eventText, sink, {
       element: document.createTextNode(text),
       disposable
     })

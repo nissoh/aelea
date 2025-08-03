@@ -1,4 +1,4 @@
-import { type Args, disposeWith, type ISink, type ITask } from '../stream/index.js'
+import { disposeWith, type ITask } from '../stream/index.js'
 import type { I$Scheduler } from './types.js'
 
 /**
@@ -29,12 +29,12 @@ class DomScheduler implements I$Scheduler {
   private rafId: number | null = null
 
   // Standard IScheduler methods
-  delay<T, TArgs extends Args>(sink: ISink<T>, task: ITask<T, TArgs>, delay: number, ...args: TArgs): Disposable {
+  delay<TArgs extends readonly unknown[]>(task: ITask<TArgs>, delay: number, ...args: TArgs): Disposable {
     let cancelled = false
 
     const timeoutId = setTimeout(() => {
       if (!cancelled) {
-        task(sink, ...args)
+        task(...args)
       }
     }, delay)
 
@@ -44,12 +44,12 @@ class DomScheduler implements I$Scheduler {
     })
   }
 
-  asap<T, TArgs extends Args>(sink: ISink<T>, task: ITask<T, TArgs>, ...args: TArgs): Disposable {
+  asap<TArgs extends readonly unknown[]>(task: ITask<TArgs>, ...args: TArgs): Disposable {
     let cancelled = false
 
     queueMicrotask(() => {
       if (!cancelled) {
-        task(sink, ...args)
+        task(...args)
       }
     })
 
@@ -58,7 +58,7 @@ class DomScheduler implements I$Scheduler {
     })
   }
 
-  paint<T, TArgs extends readonly unknown[]>(sink: ISink<T>, task: ITask<T, TArgs>, ...args: TArgs): Disposable {
+  paint<TArgs extends readonly unknown[]>(task: ITask<TArgs>, ...args: TArgs): Disposable {
     let cancelled = false
 
     // Fast ring buffer enqueue
@@ -69,7 +69,7 @@ class DomScheduler implements I$Scheduler {
 
     this.renderTasks[this.renderTail] = () => {
       if (!cancelled) {
-        task(sink, ...args)
+        task(...args)
       }
     }
     this.renderTail = nextTail

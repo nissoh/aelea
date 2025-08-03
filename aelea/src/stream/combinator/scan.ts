@@ -23,7 +23,12 @@ class ScanSink<I, O> extends PipeSink<I, O> {
   }
 
   event(value: I) {
-    this.accumulator = this.f(this.accumulator, value)
+    try {
+      this.accumulator = this.f(this.accumulator, value)
+    } catch (error) {
+      this.sink.error(error)
+      return
+    }
     this.sink.event(this.accumulator)
   }
 }

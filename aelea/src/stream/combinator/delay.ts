@@ -24,11 +24,11 @@ class DelaySink<T> extends PipeSink<T> implements Disposable {
   }
 
   event(value: T): void {
-    this.disposableList.push(this.scheduler.delay(this.sink, emitDelay, this.n, value))
+    this.disposableList.push(this.scheduler.delay(emitDelay, this.n, this.sink, value))
   }
 
   override end(): void {
-    this.disposableList.push(this.scheduler.delay(this.sink, emitEnd, this.n))
+    this.disposableList.push(this.scheduler.delay(emitEnd, this.n, this.sink))
   }
 
   [Symbol.dispose](): void {

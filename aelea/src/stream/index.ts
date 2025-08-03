@@ -48,7 +48,6 @@ export {
 } from './source/index.js'
 export { stream } from './stream.js'
 export type {
-  Args,
   Fn,
   IBehavior,
   IComposeBehavior,
@@ -72,4 +71,4 @@ export {
 } from './utils/disposable.js'
 export type { Curried2, Curried3, Curried4 } from './utils/function.js'
 export { curry2, curry3, curry4, o, op } from './utils/function.js'
-export { MergingSink, PipeSink } from './utils/sink.js'
+export { PipeSink } from './utils/sink.js'

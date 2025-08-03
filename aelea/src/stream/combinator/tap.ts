@@ -20,7 +20,12 @@ class TapSink<T> extends PipeSink<T> {
   }
 
   event(value: T) {
-    this.f(value)
+    try {
+      this.f(value)
+    } catch (error) {
+      this.sink.error(error)
+      return
+    }
     this.sink.event(value)
   }
 }

@@ -3,7 +3,7 @@ import type { ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 
 export const at: IAtCurry = curry2((delay, value) =>
-  stream((scheduler, sink) => scheduler.delay(sink, atOnce, delay, value))
+  stream((scheduler, sink) => scheduler.delay(atOnce, delay, sink, value))
 )
 
 function atOnce<T>(sink: ISink<T>, value: T) {

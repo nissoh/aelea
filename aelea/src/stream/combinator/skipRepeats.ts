@@ -26,7 +26,20 @@ class SkipRepeatsSink<T> extends PipeSink<T> {
   }
 
   event(value: T) {
-    if (!this.hasValue || !this.equals(this.previousValue, value)) {
+    let shouldEmit = false
+
+    if (!this.hasValue) {
+      shouldEmit = true
+    } else {
+      try {
+        shouldEmit = !this.equals(this.previousValue, value)
+      } catch (error) {
+        this.sink.error(error)
+        return
+      }
+    }
+
+    if (shouldEmit) {
       this.hasValue = true
       this.previousValue = value
       this.sink.event(value)

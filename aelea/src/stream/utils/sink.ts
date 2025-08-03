@@ -1,7 +1,7 @@
 import type { ISink } from '../types.js'
 
 export abstract class PipeSink<I, O = I> implements ISink<I> {
-  constructor(protected readonly sink: ISink<O>) {}
+  constructor(readonly sink: ISink<O>) {}
 
   abstract event(value: I): void
 
@@ -14,37 +14,6 @@ export abstract class PipeSink<I, O = I> implements ISink<I> {
   }
 }
 
-export abstract class MergingSink<T> implements ISink<T> {
-  constructor(
-    protected readonly sink: ISink<T>,
-    public readonly state: { active: number },
-    public readonly disposables: readonly Disposable[]
-  ) {}
-
-  abstract event(value: T): void
-
-  error(error: any) {
-    if (--this.state.active === 0) {
-      this.disposeAll()
-      this.sink.error(error)
-    }
-  }
-
-  end() {
-    if (--this.state.active === 0) {
-      this.disposeAll()
-      this.sink.end()
-    }
-  }
-
-  private disposeAll() {
-    const disposables = this.disposables
-    for (let i = 0; i < disposables.length; i++) {
-      disposables[i][Symbol.dispose]()
-    }
-  }
-}
-
 export interface IndexedValue<A> {
   readonly index: number
   readonly value: A
@@ -52,25 +21,19 @@ export interface IndexedValue<A> {
 }
 
 export class IndexSink<A> implements ISink<A> {
-  readonly index: number
-  active: boolean
-  value: A | undefined
+  public active = true
+  public value: A | undefined
 
   constructor(
-    protected readonly sink: ISink<IndexedValue<A | undefined>>,
-    i: number
-  ) {
-    this.index = i
-    this.active = true
-    this.value = undefined
-  }
+    readonly sink: ISink<IndexedValue<A | undefined>>,
+    public index: number
+  ) {}
 
   event(x: A): void {
-    if (!this.active) {
-      return
+    if (this.active) {
+      this.value = x
+      this.sink.event(this)
     }
-    this.value = x
-    this.sink.event(this)
   }
 
   end(): void {
@@ -81,7 +44,7 @@ export class IndexSink<A> implements ISink<A> {
     this.sink.event(this)
   }
 
-  error(error: any): void {
+  error(error: unknown): void {
     this.sink.error(error)
   }
 }

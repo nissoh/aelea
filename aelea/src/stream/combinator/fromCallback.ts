@@ -20,7 +20,7 @@ export const fromCallback = <T, FnArgs extends any[] = T[]>(
 
       return toDisposable(maybeDisposable)
     } catch (error) {
-      return scheduler.asap(sink, eventError, error)
+      return scheduler.asap(eventError, sink, error)
     }
   })
 

@@ -8,13 +8,56 @@ export const sample: ISampleCurry = curry2((values, sampler) => snapshot((x) => 
 
 export const snapshot: ISnapshotCurry = curry3((f, values, sampler) =>
   stream((scheduler, sink) => {
-    const sampleSink = new SnapshotSink(f, sink)
-    const valuesDisposable = values.run(scheduler, sampleSink.latest)
-    const samplerDisposable = sampler.run(scheduler, sampleSink)
+    const seedSink = new SnapshotSink(f, sink)
+    const valuesDisposable = values.run(scheduler, seedSink.seedSink)
+    const samplerDisposable = sampler.run(scheduler, seedSink)
 
     return disposeBoth(samplerDisposable, valuesDisposable)
   })
 )
+
+class SnapshotSink<A, B, C> extends PipeSink<B, C> {
+  readonly seedSink: SeedSink<A>
+
+  constructor(
+    private readonly f: (a: A, b: B) => C,
+    sink: ISink<C>
+  ) {
+    super(sink)
+    this.seedSink = new SeedSink(this)
+  }
+
+  event(x: B): void {
+    if (this.seedSink.hasValue) {
+      try {
+        const result = this.f(this.seedSink.value!, x)
+        this.sink.event(result)
+      } catch (error) {
+        this.sink.error(error)
+      }
+    }
+  }
+}
+
+class SeedSink<A> implements ISink<A> {
+  hasValue = false
+  value?: A
+
+  constructor(private readonly sink: ISink<unknown>) {}
+
+  event(x: A): void {
+    this.value = x
+    this.hasValue = true
+  }
+
+  error(e: any): void {
+    this.sink.error(e)
+  }
+
+  end(): void {
+    // Don't propagate end from values stream
+  }
+}
 
 export interface ISampleCurry {
   <A, B>(values: IStream<A>, sampler: IStream<B>): IStream<A>
@@ -25,47 +68,4 @@ export interface ISnapshotCurry {
   <A, B, C>(f: (a: A, b: B) => C, values: IStream<A>, sampler: IStream<B>): IStream<C>
   <A, B, C>(f: (a: A, b: B) => C, values: IStream<A>): (sampler: IStream<B>) => IStream<C>
   <A, B, C>(f: (a: A, b: B) => C): (values: IStream<A>) => (sampler: IStream<B>) => IStream<C>
-}
-
-class SnapshotSink<A, B, C> extends PipeSink<B, C> {
-  readonly latest: LatestValueSink<A>
-
-  constructor(
-    private readonly f: (a: A, b: B) => C,
-    sink: ISink<C>
-  ) {
-    super(sink)
-    this.latest = new LatestValueSink(this)
-  }
-
-  event(x: B): void {
-    if (this.latest.hasValue) {
-      try {
-        const result = this.f(this.latest.value!, x)
-        this.sink.event(result)
-      } catch (error) {
-        this.sink.error(error)
-      }
-    }
-  }
-}
-
-class LatestValueSink<A> implements ISink<A> {
-  hasValue = false
-  value?: A
-
-  constructor(private readonly parent: ISink<unknown>) {}
-
-  event(x: A): void {
-    this.value = x
-    this.hasValue = true
-  }
-
-  error(e: any): void {
-    this.parent.error(e)
-  }
-
-  end(): void {
-    // Don't propagate end from values stream
-  }
 }

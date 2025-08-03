@@ -20,14 +20,9 @@ export interface ISink<T> {
 }
 
 /**
- * Common type constraint for function arguments
- */
-export type Args = readonly unknown[]
-
-/**
  * A scheduled task callback that receives a sink and optional arguments
  */
-export type ITask<T, TArgs extends Args> = (sink: ISink<T>, ...args: TArgs) => void
+export type ITask<TArgs extends readonly unknown[]> = (...args: TArgs) => void
 
 /**
  * Scheduler interface for controlling the timing and execution of stream events.
@@ -45,20 +40,18 @@ export type ITask<T, TArgs extends Args> = (sink: ISink<T>, ...args: TArgs) => v
 export interface IScheduler {
   /**
    * Schedule a task to run after a specified delay
-   * @param sink - The sink to pass to the callback
    * @param task - Function to execute with (sink, ...args)
    * @param delay - Delay in milliseconds
    * @param args - Additional arguments to pass to callback
    */
-  delay<T, TArgs extends Args>(sink: ISink<T>, task: ITask<T, TArgs>, delay: number, ...args: TArgs): Disposable
+  delay<TArgs extends readonly unknown[]>(task: ITask<TArgs>, delay: number, ...args: TArgs): Disposable
 
   /**
    * Schedule a task to run as soon as possible (next microtask)
-   * @param sink - The sink to pass to the callback
    * @param task - Function to execute with (sink, ...args)
    * @param args - Additional arguments to pass to task
    */
-  asap<T, TArgs extends Args>(sink: ISink<T>, task: ITask<T, TArgs>, ...args: TArgs): Disposable
+  asap<TArgs extends readonly unknown[]>(task: ITask<TArgs>, ...args: TArgs): Disposable
 
   /**
    * Get the current scheduler time in milliseconds

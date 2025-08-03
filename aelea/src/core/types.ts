@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, IStream, ITask } from '../stream/index.js'
+import type { IScheduler, IStream, ITask } from '../stream/index.js'
 import type { IAttributeProperties } from './combinator/attribute.js'
 import type { IStyleCSS } from './combinator/style.js'
 import type { SettableDisposable } from './utils/SettableDisposable.js'
@@ -38,6 +38,5 @@ export interface INodeCompose<TElement extends INodeElement = INodeElement> {
 }
 
 export interface I$Scheduler extends IScheduler {
-  // DOM mutation (batched in rAF)
-  paint<T, TArgs extends readonly unknown[]>(sink: ISink<T>, task: ITask<T, TArgs>, ...args: TArgs): Disposable
+  paint<TArgs extends readonly unknown[]>(task: ITask<TArgs>, ...args: TArgs): Disposable
 }

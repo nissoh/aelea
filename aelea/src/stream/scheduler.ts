@@ -1,4 +1,4 @@
-import type { Args, IScheduler, ISink, ITask } from './types.js'
+import type { IScheduler, ITask } from './types.js'
 import { disposeWith } from './utils/disposable.js'
 
 /**
@@ -16,13 +16,11 @@ import { disposeWith } from './utils/disposable.js'
  * while allowing full control over task scheduling.
  */
 export class DefaultScheduler implements IScheduler {
-  asap<T, TArgs extends Args>(sink: ISink<T>, task: ITask<T, TArgs>, ...args: TArgs): Disposable {
+  asap<TArgs extends readonly unknown[]>(task: ITask<TArgs>, ...args: TArgs): Disposable {
     let cancelled = false
 
     queueMicrotask(() => {
-      if (!cancelled) {
-        task(sink, ...args)
-      }
+      if (!cancelled) task(...args)
     })
 
     return disposeWith(() => {
@@ -30,13 +28,11 @@ export class DefaultScheduler implements IScheduler {
     })
   }
 
-  delay<T, TArgs extends Args>(sink: ISink<T>, task: ITask<T, TArgs>, delay: number, ...args: TArgs): Disposable {
+  delay<TArgs extends readonly unknown[]>(task: ITask<TArgs>, delay: number, ...args: TArgs): Disposable {
     let cancelled = false
 
     const timeoutId = setTimeout(() => {
-      if (!cancelled) {
-        task(sink, ...args)
-      }
+      if (!cancelled) task(...args)
     }, delay)
 
     return disposeWith(() => {

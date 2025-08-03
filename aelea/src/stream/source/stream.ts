@@ -3,13 +3,13 @@ import type { ISink, IStream } from '../types.js'
 import { disposeNone } from '../utils/disposable.js'
 
 export const fromArray = <T>(arr: readonly T[]): IStream<T> =>
-  stream((scheduler, sink) => scheduler.asap(sink, emitArray, arr))
+  stream((scheduler, sink) => scheduler.asap(emitArray, sink, arr))
 
-export const now = <A>(value: A): IStream<A> => stream((scheduler, sink) => scheduler.asap(sink, eventNow, value))
+export const now = <A>(value: A): IStream<A> => stream((scheduler, sink) => scheduler.asap(eventNow, sink, value))
 
 export const never: IStream<never> = stream(() => disposeNone)
 
-export const empty: IStream<never> = stream((scheduler, sink) => scheduler.asap(sink, emitEmpty))
+export const empty: IStream<never> = stream((scheduler, sink) => scheduler.asap(emitEmpty, sink))
 
 function eventNow<T>(sink: ISink<T>, value: T) {
   sink.event(value)

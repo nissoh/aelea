@@ -1,7 +1,7 @@
 import { now } from '../source/stream.js'
 import { stream } from '../stream.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
-import { disposeAll, tryDispose } from '../utils/disposable.js'
+import { disposeAll } from '../utils/disposable.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
 
 export function combine<T extends readonly unknown[], R>(
@@ -59,7 +59,7 @@ class CombineSink<A, B> implements ISink<IndexedValue<A>> {
 
   constructor(
     readonly disposables: Disposable[],
-    readonly sinkCount: number,
+    sinkCount: number,
     protected readonly sink: ISink<B>,
     readonly f: (...args: any[]) => B
   ) {
@@ -69,28 +69,26 @@ class CombineSink<A, B> implements ISink<IndexedValue<A>> {
   }
 
   event(indexedValue: IndexedValue<A>): void {
+    const i = indexedValue.index
+
     if (!indexedValue.active) {
-      tryDispose(this.disposables[indexedValue.index], this.sink)
+      this.disposables[i][Symbol.dispose]()
       if (--this.activeCount === 0) {
         this.sink.end()
       }
       return
     }
 
-    const i = indexedValue.index
-    this.values[i] = indexedValue.value
-
-    if (!this.hasValue[i]) {
-      this.hasValue[i] = true
-      this.awaiting--
+    if (this.awaiting > 0) {
+      if (!this.hasValue[i]) {
+        this.hasValue[i] = true
+        this.awaiting -= 1
+      }
     }
 
+    this.values[i] = indexedValue.value
     if (this.awaiting === 0) {
-      try {
-        this.sink.event(this.f(...this.values))
-      } catch (error) {
-        this.sink.error(error)
-      }
+      this.sink.event(this.f(...this.values))
     }
   }
 
@@ -101,5 +99,7 @@ class CombineSink<A, B> implements ISink<IndexedValue<A>> {
   end(): void {
     // This should not be called directly as combine manages its own lifecycle
     // through activeCount tracking
+    // If we reach here, it means all sources ended without errors
+    this.sink.end()
   }
 }
