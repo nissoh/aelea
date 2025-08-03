@@ -19,7 +19,9 @@
       "Bash(rm:*)",
       "Bash(mv:*)",
       "Bash(true)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }

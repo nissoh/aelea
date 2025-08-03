@@ -20,14 +20,6 @@ import type { I$Scheduler } from './types.js'
  * are scheduled in the correct phase.
  */
 class DomScheduler implements I$Scheduler {
-  // Ring buffer for compute tasks - power of 2 for fast modulo
-  private static readonly COMPUTE_BUFFER_SIZE = 4096
-  private static readonly COMPUTE_MASK = 4095
-  private computeTasks: Array<(() => void) | null> = new Array(DomScheduler.COMPUTE_BUFFER_SIZE)
-  private computeHead = 0
-  private computeTail = 0
-  private computeScheduled = false
-
   // Ring buffer for render tasks
   private static readonly RENDER_BUFFER_SIZE = 1024
   private static readonly RENDER_MASK = 1023
@@ -55,50 +47,17 @@ class DomScheduler implements I$Scheduler {
   asap<T, TArgs extends Args>(sink: ISink<T>, task: ITask<T, TArgs>, ...args: TArgs): Disposable {
     let cancelled = false
 
-    // Fast ring buffer enqueue
-    const nextTail = (this.computeTail + 1) & DomScheduler.COMPUTE_MASK
-    if (nextTail === this.computeHead) {
-      throw new Error('DomScheduler compute buffer overflow - too many pending tasks')
-    }
-
-    this.computeTasks[this.computeTail] = () => {
+    queueMicrotask(() => {
       if (!cancelled) {
         task(sink, ...args)
       }
-    }
-    this.computeTail = nextTail
-
-    if (!this.computeScheduled) {
-      this.computeScheduled = true
-
-      queueMicrotask(() => {
-        this.computeScheduled = false
-        this.flushCompute()
-      })
-    }
+    })
 
     return disposeWith(() => {
       cancelled = true
     })
   }
 
-  private flushCompute(): void {
-    // Cache for faster access
-    const tasks = this.computeTasks
-    const mask = DomScheduler.COMPUTE_MASK
-    let head = this.computeHead
-    const tail = this.computeTail
-
-    // Tight execution loop
-    while (head !== tail) {
-      const task = tasks[head]
-      tasks[head] = null // Clear reference to allow GC
-      task!() // Non-null assertion - we know task exists here
-      head = (head + 1) & mask
-    }
-
-    this.computeHead = head
-  }
 
   paint<T, TArgs extends readonly unknown[]>(sink: ISink<T>, task: ITask<T, TArgs>, ...args: TArgs): Disposable {
     let cancelled = false
