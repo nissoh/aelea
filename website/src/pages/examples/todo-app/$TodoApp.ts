@@ -5,7 +5,7 @@ import {
   combine,
   empty,
   type IBehavior,
-  mergeArray,
+  merge,
   now,
   replayState,
   switchLatest,
@@ -73,7 +73,7 @@ export default (todos: Todo[]) =>
                   )
                 )
               },
-              mergeArray([newTodo, ...todos.map(now)])
+              merge(newTodo, ...todos.map(now))
             )
           )
         )

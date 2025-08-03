@@ -16,7 +16,6 @@ export {
   join,
   map,
   merge,
-  mergeArray,
   mergeConcurrently,
   mergeMapConcurrently,
   sample,
@@ -38,7 +37,7 @@ export {
   zipArray
 } from './combinator/index.js'
 export { behavior, multicast, replayLatest, replayState, tether } from './multicast/index.js'
-export { runPromise, runStream } from './run.js'
+export { createDefaultScheduler } from './scheduler.js'
 export {
   at,
   empty,

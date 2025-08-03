@@ -6,7 +6,6 @@ import {
   type IBehavior,
   map,
   merge,
-  mergeArray,
   now,
   o,
   replayState,
@@ -35,7 +34,7 @@ export default component(
     const INITAL_COUNT = 0
     const sumWithInitial = sumAdd(INITAL_COUNT)
 
-    const counting = mergeArray([disposedCounterCount, counterIncrement, counterDecrement])
+    const counting = merge(disposedCounterCount, counterIncrement, counterDecrement)
     const totalCount = sumWithInitial(counting)
 
     const addCounter = merge(addedCounter, now(null))

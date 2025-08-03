@@ -1,15 +1,15 @@
-# Aelea - Reactive UI Framework
+# Aelea - Composable Reactive UI Framework
 
-A lightweight, functional reactive UI framework that embraces simplicity and composability. Built on reactive streams, Aelea provides a declarative way to build dynamic user interfaces without virtual DOM or complex state management.
+A functional reactive UI framework built on composable streams. Aelea combines reactive programming with DOM composition to create dynamic user interfaces without virtual DOM or state management layers.
 
-## Why Aelea?
+## Key Features
 
-- **Pure Reactive Streams**: UI updates flow naturally from data streams - no diffing, no reconciliation
-- **True Composability**: Components, styles, and behaviors compose like functions
-- **Zero Magic**: No hidden state, no lifecycle hooks, no context - just functions and streams
-- **Type-Safe**: Full TypeScript support with automatic type inference
-- **Lightweight**: Minimal runtime with tree-shakeable modules
-- **Performance**: Direct DOM updates triggered by stream events
+- **Composable Streams**: Build complex behaviors by composing simple stream operators
+- **Composable DOM**: Elements, styles, and attributes compose through function application
+- **Direct Reactivity**: Stream events directly update DOM without intermediate layers
+- **Type Safety**: Full TypeScript support with inference
+- **Modular Design**: Tree-shakeable modules for minimal bundle size
+- **Pluggable Architecture**: Compose custom schedulers, renderers, and stream operators
 
 ## Installation
 
@@ -244,6 +244,45 @@ const $loginForm = $column()(
 
 ## Advanced Features
 
+### Custom Schedulers
+
+Schedulers are composable components that control task execution timing. The default implementation uses `queueMicrotask`. Custom schedulers can be composed with streams:
+
+```typescript
+import type { IScheduler } from 'aelea/stream'
+
+// Example: Synchronous scheduler for testing
+class SyncScheduler implements IScheduler {
+  asap<T>(sink, task, ...args) {
+    task(sink, ...args)
+    return { [Symbol.dispose]: () => {} }
+  }
+  
+  delay<T>(sink, task, delay, ...args) {
+    const id = setTimeout(() => task(sink, ...args), delay)
+    return { [Symbol.dispose]: () => clearTimeout(id) }
+  }
+  
+  time() {
+    return performance.now()
+  }
+}
+
+// Use custom scheduler
+const scheduler = new SyncScheduler()
+stream.run(scheduler, sink)
+```
+
+Scheduler implementations can provide:
+
+- Synchronous execution for testing
+- Task execution logging
+- Batching for high-throughput scenarios
+- Priority queue scheduling
+- Rate-limited execution
+
+The IScheduler interface enables composition of different execution strategies with any stream.
+
 ### Routing
 
 ```typescript
@@ -278,14 +317,12 @@ scheduler.asap(sink, task, ...args)
 scheduler.paint(sink, task, ...args)
 ```
 
-## Philosophy
+## Design Principles
 
-Aelea embraces functional reactive programming principles:
-
-1. **Data flows in one direction** - from streams to UI
-2. **Side effects are explicit** - wrapped in streams
-3. **Composition over configuration** - build complex UIs from simple parts
-4. **No hidden magic** - you can trace every update
+1. **Composition**: Complex systems built from simple, composable parts
+2. **Unidirectional Flow**: Data flows from streams to UI
+3. **Explicit Effects**: Side effects are contained in streams
+4. **Transparency**: All updates are traceable through the stream graph
 
 ## Examples
 

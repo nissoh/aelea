@@ -1,8 +1,7 @@
 import * as MC from '@most/core'
 import * as MS from '@most/scheduler'
 import { Bench } from 'tinybench'
-import { fromArray, op, runStream, scan, tap } from '../src/stream/index.js'
-import { scheduller } from './scheduler.js'
+import { createDefaultScheduler, fromArray, op, scan, tap } from '../src/stream/index.js'
 
 const bench = new Bench({ time: 100 })
 
@@ -44,19 +43,18 @@ bench
   .add(`mc2 scan ${n}`, () => {
     let r = 0
     return new Promise((resolve) => {
-      runStream(scheduller, {
+      const stream = op(
+        fromArray(arr),
+        scan(sum, 0),
+        tap((x) => (r = x))
+      )
+      stream.run(createDefaultScheduler(), {
         event: () => {},
         error: (e) => {
           throw e
         },
         end: () => resolve(r)
-      })(
-        op(
-          fromArray(arr),
-          scan(sum, 0),
-          tap((x) => (r = x))
-        )
-      )
+      })
     })
   })
 

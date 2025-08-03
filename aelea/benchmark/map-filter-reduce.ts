@@ -1,8 +1,7 @@
 import * as MC from '@most/core'
 import * as MS from '@most/scheduler'
 import { Bench } from 'tinybench'
-import { filter, fromArray, map, op, runStream, scan, tap } from '../src/stream/index.js'
-import { scheduller } from './scheduler.js'
+import { createDefaultScheduler, filter, fromArray, map, op, scan, tap } from '../src/stream/index.js'
 
 const bench = new Bench({ time: 100 })
 
@@ -55,13 +54,13 @@ bench
       })
     )
     return new Promise((resolve) => {
-      runStream(scheduller, {
+      newLocal.run(createDefaultScheduler(), {
         event: () => {},
         error: (e) => {
           throw e
         },
         end: () => resolve(r)
-      })(newLocal)
+      })
     })
   })
 

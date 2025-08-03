@@ -1,6 +1,6 @@
 import { component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
 import type { I$Slottable, ISlottable } from '../../../core/types.js'
-import { type IBehavior, map, mergeArray, o } from '../../../stream/index.js'
+import { type IBehavior, map, merge, o } from '../../../stream/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $icon } from '../../elements/$icon.js'
 import { designSheet } from '../../style/designSheet.js'
@@ -27,7 +27,7 @@ export const $ButtonIcon = ($content: I$Slottable) =>
         clickTether(nodeEvent('pointerup')),
 
         styleBehavior(
-          map((active) => (active ? { borderColor: pallete.primary } : null), mergeArray([focusStyle, dismissstyle]))
+          map((active) => (active ? { borderColor: pallete.primary } : null), merge(focusStyle, dismissstyle))
         )
       )
 

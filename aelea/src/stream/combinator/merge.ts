@@ -20,16 +20,6 @@ export function merge<T extends readonly unknown[]>(
   })
 }
 
-export const mergeArray = <T>(streamList: IStream<T>[]): IStream<T> => {
-  if (streamList.length === 0) {
-    throw new Error('mergeArray requires at least one stream')
-  }
-  if (streamList.length === 1) {
-    return streamList[0]
-  }
-  return merge(...streamList)
-}
-
 class MergeSink<T> extends MergingSink<T> {
   constructor(
     public override readonly sink: ISink<T>,
