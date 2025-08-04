@@ -20,7 +20,6 @@ import $Counter from './$Counter'
 const $AddBtn = $Button({
   $content: $text('Add One')
 })
-export const sumAdd = aggregate((current: number, x: number) => current + x)
 
 export default component(
   (
@@ -31,11 +30,10 @@ export default component(
     [disposedCounterCount, disposedCounterCountTether]: IBehavior<any, number>
   ) => {
     const INITAL_COUNT = 0
-    const sumWithInitial = sumAdd(INITAL_COUNT)
+    const sumWithInitial = aggregate((current: number, x: number) => current + x, INITAL_COUNT)
 
     const counting = merge(disposedCounterCount, counterIncrement, counterDecrement)
     const totalCount = sumWithInitial(counting)
-
     const addCounter = merge(addedCounter, now(null))
 
     return [

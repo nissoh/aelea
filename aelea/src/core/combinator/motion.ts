@@ -22,7 +22,7 @@ export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
  *
  * @example
  * const clicks = fromEvent(button, 'click')
- * const position = scan((x) => x + 100, 0, clicks)
+ * const position = aggregate((x) => x + 100, 0, clicks)
  * const animated = motion(MOTION_GENTLE, position)
  *
  * // Or curried:

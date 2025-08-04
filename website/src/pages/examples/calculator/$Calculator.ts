@@ -38,7 +38,7 @@ export default component(([x, XTether]: IBehavior<string, number>, [y, YTether]:
     $row(
       $node(style({ width: '36px' }))(),
       $NumberTicker({
-        value$: combineMap(add, x, y),
+        value: combineMap(add, x, y),
         decrementColor: pallete.negative,
         incrementColor: pallete.positive,
         slots: 30

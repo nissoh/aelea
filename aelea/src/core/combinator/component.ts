@@ -1,24 +1,6 @@
-import {
-  behavior,
-  disposeAll,
-  disposeBoth,
-  type IBehavior,
-  type IOps,
-  type IStream,
-  nullSink
-} from '../../stream/index.js'
+import { behavior, disposeAll, disposeBoth, nullSink } from '../../stream/index.js'
 import { stream } from '../stream.js'
-import type { I$Slottable, INodeElement } from '../types.js'
-
-export type IOutputTethers<A> = { [P in keyof A]?: IOps<A[P], A[P]> }
-
-export type ICreateComponent<A extends INodeElement, B extends I$Slottable<A>, D> = (
-  ...args: IBehavior<unknown, unknown>[]
-) => [B, IComponentBehavior<D>] | [B]
-
-export type IComponentBehavior<T> = {
-  [P in keyof T]: IStream<T[P]>
-}
+import type { I$Slottable, ICreateComponent, INodeElement, IOutputTethers } from '../types.js'
 
 export const component =
   <A extends INodeElement, B extends I$Slottable<A>, D>(bevahiorDefinition: ICreateComponent<A, B, D>) =>

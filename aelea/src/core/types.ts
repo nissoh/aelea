@@ -1,7 +1,10 @@
-import type { IScheduler, IStream, ITask } from '../stream/index.js'
+import type { IBehavior, IOps, IScheduler, IStream, ITask } from '../stream/index.js'
 import type { IAttributeProperties } from './combinator/attribute.js'
 import type { IStyleCSS } from './combinator/style.js'
 import type { SettableDisposable } from './utils/SettableDisposable.js'
+
+// Re-export combinator types
+export type { IAttributeProperties, IStyleCSS }
 
 export type ISlottableElement = ChildNode
 export type INodeElement = HTMLElement | SVGElement
@@ -39,4 +42,15 @@ export interface INodeCompose<TElement extends INodeElement = INodeElement> {
 
 export interface I$Scheduler extends IScheduler {
   paint<TArgs extends readonly unknown[]>(task: ITask<TArgs>, ...args: TArgs): Disposable
+}
+
+// Component types
+export type IOutputTethers<A> = { [P in keyof A]?: IOps<A[P], A[P]> }
+
+export type ICreateComponent<A extends INodeElement, B extends I$Slottable<A>, D> = (
+  ...args: IBehavior<unknown, unknown>[]
+) => [B, IComponentBehavior<D>] | [B]
+
+export type IComponentBehavior<T> = {
+  [P in keyof T]: IStream<T[P]>
 }

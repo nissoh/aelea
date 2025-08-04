@@ -25,7 +25,7 @@ export default ({ value }: Counter) =>
           ),
 
           $NumberTicker({
-            value$: value,
+            value: value,
             textStyle: {
               fontSize: '30px'
             },

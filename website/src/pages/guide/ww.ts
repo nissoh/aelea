@@ -28,7 +28,7 @@
 //           )
 //         ),
 //         $text(style({ fontSize: '64px' }))(
-//           map(String, scan((current: number, x: number) => current + x, 0, merge(increment, decrement)))
+//           map(String, aggregate((current: number, x: number) => current + x, 0, merge(increment, decrement)))
 //         )
 //       ),
 

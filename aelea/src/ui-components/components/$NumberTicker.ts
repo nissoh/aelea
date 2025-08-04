@@ -10,10 +10,10 @@ import {
   multicast,
   now,
   op,
-  skip,
   skipRepeats,
   skipRepeatsWith,
-  switchLatest
+  switchLatest,
+  tap
 } from '../../stream/index.js'
 
 export const sumFromZeroOp = aggregate((current: number, x: number) => current + x, 0)
@@ -30,16 +30,17 @@ type CountState = {
   changeStr: string
 }
 
-interface NumberConfig {
-  value$: IStream<number>
+export interface NumberConfig {
+  value: IStream<number>
   incrementColor: string
   decrementColor: string
   textStyle?: IStyleCSS
   slots?: number // can be deprecated
 }
-export const $NumberTicker = ({ value$, incrementColor, decrementColor, textStyle = {}, slots = 10 }: NumberConfig) => {
+export const $NumberTicker = ({ value, incrementColor, decrementColor, textStyle = {}, slots = 10 }: NumberConfig) => {
   const incrementMulticast = op(
-    skipRepeats(value$),
+    value,
+    tap(console.log),
     aggregate((seed: CountState | null, change: number): CountState => {
       const changeStr = change.toLocaleString()
 
@@ -56,7 +57,7 @@ export const $NumberTicker = ({ value$, incrementColor, decrementColor, textStyl
 
       return { change, dir, pos, changeStr }
     }, null),
-    skip(1), // skips initial null that aggregate emits - preventing count from getting an initial color
+    // skipRepeats,
     multicast
   )
 

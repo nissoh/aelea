@@ -75,7 +75,7 @@ import { constant, map, periodic, scan } from 'aelea/stream'
 const eventEverySecond = periodic(1000)       // stream of undefined every 1000 milliseconds
 const mapTo1 = constant(1, eventEverySecond)  // map that undefined into 1
 
-const accumulate = scan((acc, one) => acc + one, 0, mapTo1)
+const accumulate = aggregate((acc, one) => acc + one, 0, mapTo1)
 const toString = map(String, accumulate)
 
 
@@ -116,7 +116,7 @@ export default component((
           )
         ),
         $text(style({ fontSize: '64px' }))(
-          map(String, scan((current: number, x: number) => current + x, 0, merge(increment, decrement)))
+          map(String, aggregate((current: number, x: number) => current + x, 0, merge(increment, decrement)))
         )
       ),
 

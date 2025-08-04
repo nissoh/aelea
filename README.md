@@ -27,10 +27,10 @@ In Aelea, UI updates are driven by streams of data:
 
 ```typescript
 import { $text, stream } from 'aelea/core'
-import { map, periodic, scan } from 'aelea/stream'
+import { map, periodic, aggregate } from 'aelea/stream'
 
 // Create a stream that emits incremented numbers every second
-const counter = scan((count, _) => count + 1, 0, periodic(1000))
+const counter = aggregate((count, _) => count + 1, 0, periodic(1000))
 
 // Text node that updates with stream values
 const $counter = $text(map(String, counter))
@@ -71,7 +71,7 @@ Components receive behavior streams and output both UI and new streams:
 
 ```typescript
 import { component, behavior, eventElementTarget, $text, $element } from 'aelea/core'
-import { map, merge, scan, constant } from 'aelea/stream'
+import { map, merge, aggregate, constant } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream'
 
 // Create reusable element factories
@@ -93,7 +93,7 @@ const $Counter = component((
   )
   
   // Combine streams to create counter state
-  const count = scan((sum, n) => sum + n, 0, merge(increment, decrement))
+  const count = aggregate((sum, n) => sum + n, 0, merge(increment, decrement))
   
   return [
     $div()(
@@ -125,14 +125,14 @@ runBrowser({
 
 ```typescript
 import { runBrowser, component, style, eventElementTarget, $text, $element } from 'aelea/core'
-import { behavior, map, scan, startWith } from 'aelea/stream'
+import { behavior, map, aggregate, startWith } from 'aelea/stream'
 
 const $App = component(() => {
   const [clicks, clicksTether] = behavior<MouseEvent>()
   
   const count = startWith(
     0,
-    scan((sum, _) => sum + 1, 0, clicks)
+    aggregate((sum, _) => sum + 1, 0, clicks)
   )
   
   return [

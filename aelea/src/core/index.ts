@@ -1,23 +1,15 @@
-export type { IAttributeProperties } from './combinator/attribute.js'
-export {
-  attr,
-  attrBehavior
-} from './combinator/attribute.js'
-export type { IComponentBehavior, ICreateComponent, IOutputTethers } from './combinator/component.js'
-export { component } from './combinator/component.js'
-export type { INodeEventCurry } from './combinator/event.js'
-export { eventElementTarget, nodeEvent } from './combinator/event.js'
-export { MOTION_GENTLE, MOTION_NO_WOBBLE, MOTION_STIFF, MOTION_WOBBLY, motion } from './combinator/motion.js'
-export type { IStyleCSS } from './combinator/style.js'
-export {
-  style,
-  styleBehavior,
-  styleInline,
-  stylePseudo
-} from './combinator/style.js'
+// Re-export all combinators
+export * from './combinator/index.js'
+
+// Fetch utilities
+export { fetchJson } from './fetch.js'
+
+// Render and scheduler
 export type { IRunEnvironment } from './render.js'
 export { $createRoot } from './render.js'
 export { createDomScheduler } from './scheduler.js'
+
+// Node creation
 export {
   $custom,
   $element,
@@ -27,15 +19,24 @@ export {
   $wrapNativeElement,
   createNode
 } from './source/node.js'
+
+// Text nodes
 export type { I$Text } from './source/text.js'
 export { $text } from './source/text.js'
+
+// Core types
 export type {
   I$Node,
   I$Op,
   I$Slottable,
+  IAttributeProperties,
+  IComponentBehavior,
+  ICreateComponent,
   INode,
   INodeCompose,
   INodeElement,
+  IOutputTethers,
   ISlottable,
-  ISlottableElement
+  ISlottableElement,
+  IStyleCSS
 } from './types.js'
