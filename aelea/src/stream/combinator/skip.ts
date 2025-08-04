@@ -5,7 +5,7 @@ import { PipeSink } from '../utils/sink.js'
 
 /**
  * Skip the first n values from a stream
- * 
+ *
  * stream:   -1-2-3-4-5-6->
  * skip(3):  -------4-5-6->
  */

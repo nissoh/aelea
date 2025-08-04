@@ -16,7 +16,7 @@ export interface IReplayStateCurry {
 
 /**
  * Remember the latest value from a stream
- * 
+ *
  * stream:        -1-2-3--->
  * subscriber1:   ^1-2-3--->
  * subscriber2:     ^2-3--->
@@ -26,7 +26,7 @@ export const replayLatest: IReplayLatestCurry = curry2((source, initialState) =>
 
 /**
  * Create a multicast stream that remembers its latest value
- * 
+ *
  * stream:        -1-2-3--->
  * replayState:   -1-2-3--->
  * subscriber1:   ^1-2-3--->

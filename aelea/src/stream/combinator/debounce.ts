@@ -4,7 +4,7 @@ import { curry2 } from '../utils/function.js'
 
 /**
  * Wait for a pause in values before emitting the latest one
- * 
+ *
  * stream:        -1-2-3-------4-5-------6->
  * debounce(3):   -------3---------5-------6->
  */

@@ -6,7 +6,7 @@ import { type IndexedValue, IndexSink } from '../utils/sink.js'
 
 /**
  * Merge multiple streams into one, emitting values as they arrive
- * 
+ *
  * streamA: -1---3---5->
  * streamB: --2---4---6->
  * merge:   -1-2-3-4-5-6->

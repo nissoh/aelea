@@ -5,7 +5,7 @@ import { PipeSink } from '../utils/sink.js'
 
 /**
  * Perform side effects without changing stream values
- * 
+ *
  * stream:           -1-2-3->
  * tap(console.log): -1-2-3->  (logs: 1, 2, 3)
  */

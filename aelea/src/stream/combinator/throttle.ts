@@ -5,7 +5,7 @@ import { PipeSink } from '../utils/sink.js'
 
 /**
  * Limit the rate of events to at most one per period milliseconds
- * 
+ *
  * stream:        -1-2-3-4-5-6-7-8->
  * throttle(2):   -1---3---5---7--->
  */

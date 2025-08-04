@@ -4,7 +4,7 @@ import { disposeNone } from '../utils/disposable.js'
 
 /**
  * Switch to the latest inner stream, cancelling the previous one
- * 
+ *
  * stream of streams: -s1----s2----s3->
  *           s1:      -a-b-c-|
  *           s2:            -d-e-f-|

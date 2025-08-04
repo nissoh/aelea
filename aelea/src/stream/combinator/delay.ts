@@ -6,7 +6,7 @@ import { PipeSink } from '../utils/sink.js'
 
 /**
  * Delay each value by the specified time units
- * 
+ *
  * stream:     -1-2-3->
  * delay(2):   ---1-2-3->
  */

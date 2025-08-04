@@ -34,7 +34,7 @@ export function zipState<A>(
 
 /**
  * Combine values from multiple streams in lockstep
- * 
+ *
  * streamA: -1---2---3------->
  * streamB: ---a---b---c----->
  * zip:     ---[1,a]-[2,b]-[3,c]->

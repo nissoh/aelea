@@ -12,7 +12,7 @@ export interface IFilterCurry {
 
 /**
  * Keep only values that pass a predicate test
- * 
+ *
  * stream:            -1-2-3-4-5-6->
  * filter(x => x%2):  ---2---4---6->
  */

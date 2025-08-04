@@ -5,7 +5,7 @@ import { curry2 } from '../utils/function.js'
 
 /**
  * When stream ends, continue with values from another stream
- * 
+ *
  * streamA:         -1-2-3-|
  * streamB:                 -4-5-6->
  * continueWith(f): -1-2-3-4-5-6->

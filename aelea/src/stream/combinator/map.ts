@@ -15,7 +15,7 @@ class MapSource<T, R> implements IStream<R> {
 
 /**
  * Transform each value in a stream with a function
- * 
+ *
  * stream:        -1-2-3-4->
  * map(x => x*2): -2-4-6-8->
  */

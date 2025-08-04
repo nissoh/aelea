@@ -4,7 +4,7 @@ import { mergeMapConcurrently } from './join.js'
 
 /**
  * Map each value to a stream and flatten all resulting streams (flatMap)
- * 
+ *
  * stream:              -1----2----3->
  * chain(x => [x,x+1]): -1-2--2-3--3-4->
  */

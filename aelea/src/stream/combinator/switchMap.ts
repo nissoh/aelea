@@ -7,7 +7,7 @@ import { switchLatest } from './switchLatest.js'
 
 /**
  * Map each value to a stream and switch to the latest one
- * 
+ *
  * stream:                -a----b----c->
  * switchMap(x => x$):    -aa---bbb--ccc->
  *   where a$ = -a-a-|

@@ -8,7 +8,7 @@ import { join } from './join.js'
 
 /**
  * Take values until a signal stream emits
- * 
+ *
  * stream: -1-2-3-4-5-6->
  * signal: -------x------>
  * until:  -1-2-3-|
@@ -27,7 +27,7 @@ export const until: IUntilCurry = curry2((signal, source) =>
 
 /**
  * Take values starting when a signal stream emits
- * 
+ *
  * stream: -1-2-3-4-5-6->
  * signal: -------x------>
  * since:  -------4-5-6->
@@ -43,7 +43,7 @@ export const since: ISinceCurry = curry2((signal, source) =>
 
 /**
  * Take values only during time windows
- * 
+ *
  * stream:     -1-2-3-4-5-6-7-8->
  * timeWindow: ---[---]---[---]->
  * during:     ---2-3-----6-7--->

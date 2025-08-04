@@ -6,7 +6,7 @@ import { PipeSink } from '../utils/sink.js'
 
 /**
  * Sample values from one stream at the times of events in another
- * 
+ *
  * values:  -1-2-3-4-5-6-7-8->
  * sampler: ---x---x---x----->
  * sample:  ---2---4---6----->
@@ -15,7 +15,7 @@ export const sample: ISampleCurry = curry2((values, sampler) => snapshot((x) => 
 
 /**
  * Combine values from two streams at sample times
- * 
+ *
  * values:   -1-2-3-4-5-6->
  * sampler:  ---a---b---c->
  * snapshot: ---[2,a]-[4,b]-[6,c]->

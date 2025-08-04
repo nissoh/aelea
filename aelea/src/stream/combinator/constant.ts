@@ -11,7 +11,7 @@ export interface IStartWithCurry {
 
 /**
  * Prepend a value to the beginning of a stream
- * 
+ *
  * stream:       ---1-2-3->
  * startWith(0): -0-1-2-3->
  */
@@ -24,7 +24,7 @@ export interface IConstantCurry {
 
 /**
  * Replace all values in a stream with a constant
- * 
+ *
  * stream:      -a-b-c-d->
  * constant(x): -x-x-x-x->
  */

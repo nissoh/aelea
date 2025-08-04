@@ -5,7 +5,7 @@ import { PipeSink } from '../utils/sink.js'
 
 /**
  * Accumulate values from a stream
- * 
+ *
  * stream:      -1-2-3-4->
  * scan(+, 0):  -1-3-6-10->
  */
