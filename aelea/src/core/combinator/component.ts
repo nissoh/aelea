@@ -1,4 +1,12 @@
-import { behavior, disposeAll, type IBehavior, type IOps, type IStream, nullSink } from '../../stream/index.js'
+import {
+  behavior,
+  disposeAll,
+  disposeBoth,
+  type IBehavior,
+  type IOps,
+  type IStream,
+  nullSink
+} from '../../stream/index.js'
 import { stream } from '../stream.js'
 import type { I$Slottable, INodeElement } from '../types.js'
 
@@ -23,9 +31,6 @@ export const component =
     return stream((sink, scheduler) => {
       const outputDisposables: Disposable[] = []
 
-      // Run all behavior streams to activate them
-      const behaviorDisposables = behaviors.map(([behaviorStream]) => behaviorStream.run(nullSink, scheduler))
-
       for (const k in outputTethers) {
         if (outputTethers[k] && outputSources) {
           const consumerSampler = outputTethers[k]
@@ -38,6 +43,6 @@ export const component =
         }
       }
 
-      return disposeAll([view.run(sink, scheduler), ...behaviorDisposables, ...outputDisposables])
+      return disposeBoth(view.run(sink, scheduler), disposeAll(outputDisposables))
     })
   }

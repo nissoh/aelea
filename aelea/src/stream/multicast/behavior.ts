@@ -1,4 +1,4 @@
-import type { IComposeBehavior, IOps, IScheduler, ISink, IStream } from '../types.js'
+import type { IBehavior, IComposeBehavior, IOps, IScheduler, ISink, IStream } from '../types.js'
 import { disposeWith } from '../utils/disposable.js'
 import { op } from '../utils/function.js'
 import { tether } from './tether.js'
@@ -79,7 +79,7 @@ class IBehaviorSource<I, O> implements IStream<O> {
    * 4. Adds the transformed stream to this behavior's output
    * 5. Returns the passthrough stream for further composition
    */
-  sample: IComposeBehavior<I, O> = (...ops: IOps<any, O>[]) => {
+  sample: IComposeBehavior<I, O> = (...ops: IOps<any, any>[]) => {
     return (sb: IStream<I>): IStream<I> => {
       // Split the input: s0 passes through, s1 is for transformation
       const [s0, s1] = tether(sb)
@@ -120,5 +120,3 @@ export function behavior<T, R>(): IBehavior<T, R> {
 
   return [ss, ss.sample]
 }
-
-export type IBehavior<A, B = A> = [IStream<B>, IComposeBehavior<A, B>]
