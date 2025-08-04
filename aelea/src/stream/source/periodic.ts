@@ -2,10 +2,6 @@ import { stream } from '../stream.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 
-export interface IPeriodicCurry {
-  <T>(period: number, value: T): IStream<T>
-  <T>(period: number): (value: T) => IStream<T>
-}
 export const periodic: IPeriodicCurry = curry2((period, value) =>
   stream((scheduler, sink) => new PeriodicTask(scheduler, sink, period, value))
 )
@@ -38,4 +34,9 @@ class PeriodicTask<T> implements Disposable {
 
 function eventPeriodic<T>(task: PeriodicTask<T>): void {
   task.emit()
+}
+
+export interface IPeriodicCurry {
+  <T>(period: number, value: T): IStream<T>
+  <T>(period: number): (value: T) => IStream<T>
 }

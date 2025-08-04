@@ -13,11 +13,6 @@ export const MOTION_GENTLE = { stiffness: 120, damping: 14, precision: 0.01 }
 export const MOTION_WOBBLY = { stiffness: 180, damping: 12, precision: 0.01 }
 export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
 
-export interface IMotionCurry {
-  (config: Partial<MotionConfig>, position: IStream<number>): IStream<number>
-  (config: Partial<MotionConfig>): (position: IStream<number>) => IStream<number>
-}
-
 /**
  * Motion combinator that animates position changes from an input stream
  *
@@ -143,4 +138,9 @@ class MotionSink implements ISink<number>, Disposable {
       this.cleanup()
     }
   }
+}
+
+export interface IMotionCurry {
+  (config: Partial<MotionConfig>, position: IStream<number>): IStream<number>
+  (config: Partial<MotionConfig>): (position: IStream<number>) => IStream<number>
 }

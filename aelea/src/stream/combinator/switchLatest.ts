@@ -2,6 +2,15 @@ import { stream } from '../stream.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeNone } from '../utils/disposable.js'
 
+/**
+ * Switch to the latest inner stream, cancelling the previous one
+ * 
+ * stream of streams: -s1----s2----s3->
+ *           s1:      -a-b-c-|
+ *           s2:            -d-e-f-|
+ *           s3:                  -g-h->
+ * switchLatest:      -a-b-c-d-e-f-g-h->
+ */
 export const switchLatest = <T>(souce: IStream<IStream<T>>): IStream<T> =>
   stream((scheduler, sink) => souce.run(scheduler, new SwitchSink(scheduler, sink)))
 

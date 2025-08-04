@@ -3,8 +3,20 @@ import type { ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
+/**
+ * Skip consecutive duplicate values, a === b strict equality
+ *
+ * stream:      -1-1-2-2-2-3-1-1->
+ * skipRepeats: -1---2-----3-1--->
+ */
 export const skipRepeats = <T>(stream: IStream<T>): IStream<T> => skipRepeatsWith<T>((a, b) => a === b)(stream)
 
+/**
+ * Skip consecutive values that are equal according to provided function
+ *
+ * stream:             -{a:1}-{a:1}-{a:2}-{a:2}-{a:3}->
+ * skipRepeatsWith(f): -{a:1}-------{a:2}-------{a:3}->
+ */
 export const skipRepeatsWith: ISkipRepeatsWithCurry = curry2((equals, source) =>
   stream((scheduler, sink) => source.run(scheduler, new SkipRepeatsSink(equals, sink)))
 )

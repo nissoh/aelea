@@ -5,6 +5,15 @@ import { fromPromise } from './fromPromise.js'
 import { map } from './map.js'
 import { switchLatest } from './switchLatest.js'
 
+/**
+ * Map each value to a stream and switch to the latest one
+ * 
+ * stream:                -a----b----c->
+ * switchMap(x => x$):    -aa---bbb--ccc->
+ *   where a$ = -a-a-|
+ *         b$ = -b-b-b-|
+ *         c$ = -c-c-c->
+ */
 export const switchMap: ISwitchMapCurry = curry2((cb, s) => {
   return switchLatest(
     map((cbParam) => {

@@ -4,14 +4,11 @@ import { disposeNone } from '../utils/disposable.js'
 export const multicast = <T>(source: IStream<T>): IStream<T> => new MulticastSource(source)
 
 class MulticastSource<T> implements ISink<T> {
-  private readonly source: IStream<T>
   private sinks: ISink<T>[] = []
   private disposable: Disposable = disposeNone
   private running = false
 
-  constructor(source: IStream<T>) {
-    this.source = source
-  }
+  constructor(readonly source: IStream<T>) {}
 
   run(scheduler: IScheduler, sink: ISink<T>): Disposable {
     this.add(sink)

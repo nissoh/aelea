@@ -5,11 +5,6 @@ export type IAttributeProperties<T> = {
   [P in keyof T]: string | number | boolean | null | undefined
 }
 
-export interface IAttributeCurry {
-  <A, B extends INodeElement>(attrs: IAttributeProperties<A>, node: I$Node<B>): I$Node<B>
-  <A, B extends INodeElement>(attrs: IAttributeProperties<A>): (node: I$Node<B>) => I$Node<B>
-}
-
 export const attr: IAttributeCurry = curry2((attrs, ns) =>
   map((node) => {
     const attributes = { ...node.attributes, ...attrs }
@@ -18,11 +13,6 @@ export const attr: IAttributeCurry = curry2((attrs, ns) =>
   }, ns)
 )
 
-export interface IAttributeBehaviorCurry {
-  <A, C extends INodeElement, D>(styleInput: IStream<IAttributeProperties<A> | null>, node: I$Node<C>): I$Node<C>
-  <A, C extends INodeElement>(styleInput: IStream<IAttributeProperties<A> | null>): (node: I$Node<C>) => I$Node<C>
-}
-
 export const attrBehavior: IAttributeBehaviorCurry = curry2((attrs, node) => {
   return map((node) => {
     const attributesBehavior = [...node.attributesBehavior, attrs]
@@ -30,3 +20,13 @@ export const attrBehavior: IAttributeBehaviorCurry = curry2((attrs, node) => {
     return { ...node, attributesBehavior }
   }, node)
 })
+
+export interface IAttributeBehaviorCurry {
+  <A, C extends INodeElement, D>(styleInput: IStream<IAttributeProperties<A> | null>, node: I$Node<C>): I$Node<C>
+  <A, C extends INodeElement>(styleInput: IStream<IAttributeProperties<A> | null>): (node: I$Node<C>) => I$Node<C>
+}
+
+export interface IAttributeCurry {
+  <A, B extends INodeElement>(attrs: IAttributeProperties<A>, node: I$Node<B>): I$Node<B>
+  <A, B extends INodeElement>(attrs: IAttributeProperties<A>): (node: I$Node<B>) => I$Node<B>
+}

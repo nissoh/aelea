@@ -3,17 +3,11 @@ import type { IScheduler, ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
-export interface IThrottleCurry {
-  <T>(period: number, source: IStream<T>): IStream<T>
-  <T>(period: number): (source: IStream<T>) => IStream<T>
-}
-
 /**
- * Limit the rate of events to at most one per period milliseconds.
- *
- * @example
- * stream:               abcd----abcd---->
- * throttle(2, stream):  a-c-----a-c----->
+ * Limit the rate of events to at most one per period milliseconds
+ * 
+ * stream:        -1-2-3-4-5-6-7-8->
+ * throttle(2):   -1---3---5---7--->
  */
 export const throttle: IThrottleCurry = curry2((period, source) =>
   stream((scheduler, sink) => source.run(scheduler, new ThrottleSink(period, sink, scheduler)))
@@ -38,4 +32,9 @@ class ThrottleSink<T> extends PipeSink<T> {
       this.sink.event(value)
     }
   }
+}
+
+export interface IThrottleCurry {
+  <T>(period: number, source: IStream<T>): IStream<T>
+  <T>(period: number): (source: IStream<T>) => IStream<T>
 }

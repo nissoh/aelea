@@ -5,6 +5,13 @@ import { disposeAll } from '../utils/disposable.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
 import { map } from './map.js'
 
+/**
+ * Combine latest values from multiple streams whenever any stream emits
+ * 
+ * streamA: -1---2-------3->
+ * streamB: ---a---b-c------>
+ * combine: ---[1,a]-[2,a]-[2,b]-[2,c]-[3,c]->
+ */
 export function combine<T extends readonly unknown[], R>(
   f: (...args: T) => R,
   ...sources: [...{ [K in keyof T]: IStream<T[K]> }]

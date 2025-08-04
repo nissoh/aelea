@@ -3,6 +3,12 @@ import type { ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
+/**
+ * Take only the first n values from a stream
+ * 
+ * stream:   -1-2-3-4-5-6->
+ * take(3):  -1-2-3-|
+ */
 export const take: ITakeCurry = curry2((n, source) =>
   stream((scheduler, sink) => source.run(scheduler, new TakeSink(n, sink)))
 )

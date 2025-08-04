@@ -13,17 +13,6 @@ export const mergeMapConcurrently: IMergeMapConcurrentlyCurry = curry3((f, concu
   stream((scheduler, sink) => new Outer(f, concurrency, source, sink, scheduler))
 )
 
-export interface IMergeConcurrentlyCurry {
-  <A>(concurrency: number, stream: IStream<IStream<A>>): IStream<A>
-  <A>(concurrency: number): (stream: IStream<IStream<A>>) => IStream<A>
-}
-
-export interface IMergeMapConcurrentlyCurry {
-  <A, B>(f: (a: A) => IStream<B>, concurrency: number, stream: IStream<A>): IStream<B>
-  <A, B>(f: (a: A) => IStream<B>, concurrency: number): (stream: IStream<A>) => IStream<B>
-  <A, B>(f: (a: A) => IStream<B>): (concurrency: number) => (stream: IStream<A>) => IStream<B>
-}
-
 class Outer<A, B> implements ISink<A>, Disposable {
   private readonly scheduler: IScheduler
   private readonly disposable: Disposable
@@ -136,4 +125,15 @@ class Inner<A> implements ISink<A>, Disposable {
   [Symbol.dispose](): void {
     this.disposable[Symbol.dispose]()
   }
+}
+
+export interface IMergeConcurrentlyCurry {
+  <A>(concurrency: number, stream: IStream<IStream<A>>): IStream<A>
+  <A>(concurrency: number): (stream: IStream<IStream<A>>) => IStream<A>
+}
+
+export interface IMergeMapConcurrentlyCurry {
+  <A, B>(f: (a: A) => IStream<B>, concurrency: number, stream: IStream<A>): IStream<B>
+  <A, B>(f: (a: A) => IStream<B>, concurrency: number): (stream: IStream<A>) => IStream<B>
+  <A, B>(f: (a: A) => IStream<B>): (concurrency: number) => (stream: IStream<A>) => IStream<B>
 }

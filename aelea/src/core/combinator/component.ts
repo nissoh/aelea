@@ -12,16 +12,6 @@ export type IComponentOutputBehaviors<T> = {
   [P in keyof T]: IStream<T[P]>
 }
 
-export interface IComponentCurry {
-  <A extends INodeElement, B extends I$Slottable<A>, D>(
-    inputComp: IComponentDefinitionCallback<A, B, D>,
-    projectBehaviors: IOutputTethers<D>
-  ): B
-  <A extends INodeElement, B extends I$Slottable<A>, D>(
-    inputComp: IComponentDefinitionCallback<A, B, D>
-  ): (projectBehaviors: IOutputTethers<D>) => B
-}
-
 export const component: IComponentCurry = curry2(
   <A extends INodeElement, B extends I$Slottable<A>, D>(
     inputComp: IComponentDefinitionCallback<A, B, D>,
@@ -51,3 +41,13 @@ export const component: IComponentCurry = curry2(
     })
   }
 )
+
+export interface IComponentCurry {
+  <A extends INodeElement, B extends I$Slottable<A>, D>(
+    inputComp: IComponentDefinitionCallback<A, B, D>,
+    projectBehaviors: IOutputTethers<D>
+  ): B
+  <A extends INodeElement, B extends I$Slottable<A>, D>(
+    inputComp: IComponentDefinitionCallback<A, B, D>
+  ): (projectBehaviors: IOutputTethers<D>) => B
+}

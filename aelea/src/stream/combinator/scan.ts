@@ -3,12 +3,12 @@ import type { ISink, IStream } from '../types.js'
 import { curry3 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
-export interface IScanCurry {
-  <I, O>(f: (acc: O, value: I) => O, initial: O, s: IStream<I>): IStream<O>
-  <I, O>(f: (acc: O, value: I) => O, initial: O): (s: IStream<I>) => IStream<O>
-  <I, O>(f: (acc: O, value: I) => O): (initial: O) => (s: IStream<I>) => IStream<O>
-}
-
+/**
+ * Accumulate values from a stream
+ * 
+ * stream:      -1-2-3-4->
+ * scan(+, 0):  -1-3-6-10->
+ */
 export const scan: IScanCurry = curry3((f, initial, s) =>
   stream((scheduler, sink) => s.run(scheduler, new ScanSink(f, initial, sink)))
 )
@@ -31,4 +31,10 @@ class ScanSink<I, O> extends PipeSink<I, O> {
     }
     this.sink.event(this.accumulator)
   }
+}
+
+export interface IScanCurry {
+  <I, O>(f: (acc: O, value: I) => O, initial: O, s: IStream<I>): IStream<O>
+  <I, O>(f: (acc: O, value: I) => O, initial: O): (s: IStream<I>) => IStream<O>
+  <I, O>(f: (acc: O, value: I) => O): (initial: O) => (s: IStream<I>) => IStream<O>
 }

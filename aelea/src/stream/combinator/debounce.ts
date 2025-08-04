@@ -2,11 +2,12 @@ import { stream } from '../stream.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 
-export interface IDebounceCurry {
-  <T>(delay: number, source: IStream<T>): IStream<T>
-  <T>(delay: number): (source: IStream<T>) => IStream<T>
-}
-
+/**
+ * Wait for a pause in values before emitting the latest one
+ * 
+ * stream:        -1-2-3-------4-5-------6->
+ * debounce(3):   -------3---------5-------6->
+ */
 export const debounce: IDebounceCurry = curry2((period, source) =>
   stream((scheduler, sink) => new DebounceSink(period, source, sink, scheduler))
 )
@@ -65,4 +66,9 @@ function emitDebounced<T>(sink: ISink<T>, debounceSink: DebounceSink<T>): void {
     debounceSink.pendingValue = null
   }
   debounceSink.timer = null
+}
+
+export interface IDebounceCurry {
+  <T>(delay: number, source: IStream<T>): IStream<T>
+  <T>(delay: number): (source: IStream<T>) => IStream<T>
 }

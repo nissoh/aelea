@@ -4,6 +4,13 @@ import type { ISink, IStream } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
 
+/**
+ * Merge multiple streams into one, emitting values as they arrive
+ * 
+ * streamA: -1---3---5->
+ * streamB: --2---4---6->
+ * merge:   -1-2-3-4-5-6->
+ */
 export function merge<T extends readonly unknown[]>(
   ...sourceList: readonly [...{ [K in keyof T]: IStream<T[K]> }]
 ): IStream<T[number]> {

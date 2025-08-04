@@ -10,6 +10,12 @@ export interface IFilterCurry {
   <T>(f: (value: T) => boolean): (s: IStream<T>) => IStream<T>
 }
 
+/**
+ * Keep only values that pass a predicate test
+ * 
+ * stream:            -1-2-3-4-5-6->
+ * filter(x => x%2):  ---2---4---6->
+ */
 export const filter: IFilterCurry = curry2((f: (value: any) => boolean, s: IStream<any>) =>
   stream((scheduler, sink) => s.run(scheduler, new FilterSink(f, sink)))
 ) as IFilterCurry

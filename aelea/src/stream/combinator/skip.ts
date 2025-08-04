@@ -3,6 +3,12 @@ import type { ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
+/**
+ * Skip the first n values from a stream
+ * 
+ * stream:   -1-2-3-4-5-6->
+ * skip(3):  -------4-5-6->
+ */
 export const skip: ISkipCurry = curry2((n, source) =>
   stream((scheduler, sink) => source.run(scheduler, new SkipSink(n, sink)))
 )

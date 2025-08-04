@@ -6,6 +6,13 @@ import { SettableDisposable } from '../utils/SettableDisposable.js'
 import { PipeSink } from '../utils/sink.js'
 import { join } from './join.js'
 
+/**
+ * Take values until a signal stream emits
+ * 
+ * stream: -1-2-3-4-5-6->
+ * signal: -------x------>
+ * until:  -1-2-3-|
+ */
 export const until: IUntilCurry = curry2((signal, source) =>
   stream((scheduler, sink) => {
     const disposable = new SettableDisposable()
@@ -18,6 +25,13 @@ export const until: IUntilCurry = curry2((signal, source) =>
   })
 )
 
+/**
+ * Take values starting when a signal stream emits
+ * 
+ * stream: -1-2-3-4-5-6->
+ * signal: -------x------>
+ * since:  -------4-5-6->
+ */
 export const since: ISinceCurry = curry2((signal, source) =>
   stream((scheduler, sink) => {
     const min = new LowerBoundSink(signal, sink, scheduler)
@@ -27,25 +41,17 @@ export const since: ISinceCurry = curry2((signal, source) =>
   })
 )
 
+/**
+ * Take values only during time windows
+ * 
+ * stream:     -1-2-3-4-5-6-7-8->
+ * timeWindow: ---[---]---[---]->
+ * during:     ---2-3-----6-7--->
+ */
 export const during: IDuringCurry = curry2((timeWindow, stream) => {
   const untilJoined = until(join(timeWindow), stream)
   return since(timeWindow, untilJoined)
 })
-
-export interface IUntilCurry {
-  <A>(signal: IStream<unknown>, stream: IStream<A>): IStream<A>
-  <A>(signal: IStream<unknown>): (stream: IStream<A>) => IStream<A>
-}
-
-export interface ISinceCurry {
-  <A>(signal: IStream<unknown>, stream: IStream<A>): IStream<A>
-  <A>(signal: IStream<unknown>): (stream: IStream<A>) => IStream<A>
-}
-
-export interface IDuringCurry {
-  <A>(timeWindow: IStream<IStream<unknown>>, stream: IStream<A>): IStream<A>
-  <A>(timeWindow: IStream<IStream<unknown>>): (stream: IStream<A>) => IStream<A>
-}
 
 class UntilSink implements ISink<unknown> {
   constructor(
@@ -110,4 +116,19 @@ class LowerBoundSink<A> implements ISink<unknown>, Disposable {
   [Symbol.dispose](): void {
     this.disposable[Symbol.dispose]()
   }
+}
+
+export interface IUntilCurry {
+  <A>(signal: IStream<unknown>, stream: IStream<A>): IStream<A>
+  <A>(signal: IStream<unknown>): (stream: IStream<A>) => IStream<A>
+}
+
+export interface ISinceCurry {
+  <A>(signal: IStream<unknown>, stream: IStream<A>): IStream<A>
+  <A>(signal: IStream<unknown>): (stream: IStream<A>) => IStream<A>
+}
+
+export interface IDuringCurry {
+  <A>(timeWindow: IStream<IStream<unknown>>, stream: IStream<A>): IStream<A>
+  <A>(timeWindow: IStream<IStream<unknown>>): (stream: IStream<A>) => IStream<A>
 }

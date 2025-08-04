@@ -3,11 +3,13 @@ import type { ISink, IStream } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 
-export interface IContinueWithCurry {
-  <A, B>(f: () => IStream<B>, s: IStream<A>): IStream<A | B>
-  <A, B>(f: () => IStream<B>): (s: IStream<A>) => IStream<A | B>
-}
-
+/**
+ * When stream ends, continue with values from another stream
+ * 
+ * streamA:         -1-2-3-|
+ * streamB:                 -4-5-6->
+ * continueWith(f): -1-2-3-4-5-6->
+ */
 export const continueWith: IContinueWithCurry = curry2((f, s) =>
   stream((scheduler, sink) => {
     const dsink = new ContinueWithSink(scheduler, sink, f)
@@ -50,4 +52,9 @@ class ContinueWithSink<A, B> implements ISink<A> {
       this.disposable[Symbol.dispose]()
     }
   }
+}
+
+export interface IContinueWithCurry {
+  <A, B>(f: () => IStream<B>, s: IStream<A>): IStream<A | B>
+  <A, B>(f: () => IStream<B>): (s: IStream<A>) => IStream<A | B>
 }
