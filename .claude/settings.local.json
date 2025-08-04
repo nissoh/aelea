@@ -22,7 +22,8 @@
       "Bash(npx tsx:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(git rm:*)"
     ],
     "deny": []
   }
