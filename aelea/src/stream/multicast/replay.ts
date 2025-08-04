@@ -1,6 +1,5 @@
 import { startWith } from '../combinator/constant.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
-import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 import { multicast } from './multicast.js'
 
@@ -22,7 +21,7 @@ export interface IReplayStateCurry {
  * subscriber2:     ^2-3--->
  * subscriber3:       ^3--->
  */
-export const replayLatest: IReplayLatestCurry = curry2((source, initialState) => new ReplayLatest(source, initialState))
+export const replayLatest = <A>(s: IStream<A>, initialState?: A): IStream<A> => new ReplayLatest(s, initialState)
 
 /**
  * Create a multicast stream that remembers its latest value
@@ -32,9 +31,8 @@ export const replayLatest: IReplayLatestCurry = curry2((source, initialState) =>
  * subscriber1:   ^1-2-3--->
  * subscriber2:     ^2-3--->
  */
-export const replayState: IReplayStateCurry = curry2((source, initialState) => {
-  return replayLatest(multicast(source), initialState)
-})
+export const replayState = <T>(s: IStream<T>, initialState?: T): IStream<T> =>
+  multicast(new ReplayLatest(s, initialState))
 
 class StateSink<A> extends PipeSink<A> {
   constructor(

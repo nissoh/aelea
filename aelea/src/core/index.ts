@@ -3,11 +3,7 @@ export {
   attr,
   attrBehavior
 } from './combinator/attribute.js'
-export type {
-  IComponentDefinitionCallback,
-  IComponentOutputBehaviors,
-  IOutputTethers
-} from './combinator/component.js'
+export type { IComponentBehavior, ICreateComponent, IOutputTethers } from './combinator/component.js'
 export { component } from './combinator/component.js'
 export type { INodeEventCurry } from './combinator/event.js'
 export { eventElementTarget, nodeEvent } from './combinator/event.js'

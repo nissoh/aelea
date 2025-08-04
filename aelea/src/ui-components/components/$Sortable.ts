@@ -7,6 +7,7 @@ import {
   behavior,
   chain,
   combine,
+  delay,
   filter,
   type IBehavior,
   map,
@@ -64,9 +65,14 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
     const containerHeight = listLength > 1 ? itemHeight * listLength : config.itemHeight
 
     const orderMulticat = multicast(orderChange)
+    // Add delay(0) to break the synchronous circular dependency
+    // This prevents stack overflow when drag events update the list
     const $listChangesWithInitial = startWith(
       config.$list,
-      map((s) => s.list, orderMulticat)
+      delay(
+        0,
+        map((s) => s.list, orderMulticat)
+      )
     )
     const draggingMotion = motion({ stiffness: 150, damping: 20 })
 

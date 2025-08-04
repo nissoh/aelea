@@ -2,6 +2,28 @@ import { stream } from '../stream.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeNone, disposeWith } from '../utils/disposable.js'
 
+/**
+ * Creates a "tethered" pair of streams from a single source.
+ *
+ * The pattern creates a multicast topology:
+ * ```
+ *   source
+ *     |
+ *     v
+ *   [s0] <-- Primary: controls source lifecycle
+ *     |
+ *     v
+ *   [s1] <-- Tethered: receives all values from s0
+ * ```
+ *
+ * Key behaviors:
+ * - Only one primary sink (SourceSink) can be active at a time
+ * - Multiple tethered sinks can listen simultaneously
+ * - Tethered sinks receive the latest value immediately upon connection
+ * - When primary ends, source is disposed
+ *
+ * @returns [primary, tethered] stream tuple
+ */
 export const tether = <T>(source: IStream<T>): [IStream<T>, IStream<T>] => {
   const tetherSource = new Tether(source)
 
@@ -36,6 +58,10 @@ class SourceSink<T> implements ISink<T> {
 
   error(e: Error): void {
     this.sink.error(e)
+    // Also propagate errors to tethered sinks
+    for (const s of this.parent.tetherSinkList) {
+      s.error(e)
+    }
   }
 }
 
@@ -55,9 +81,8 @@ class TetherSink<A> implements ISink<A> {
   error(err: Error): void {
     if (this.sink) {
       this.sink.error(err)
-    } else {
-      throw new Error(err.message)
     }
+    // Don't throw if sink is disposed - error is lost but won't crash
   }
 }
 
@@ -71,18 +96,21 @@ class Tether<T> implements IStream<T> {
 
   run(sink: SourceSink<T> | TetherSink<T>, scheduler: IScheduler): Disposable {
     if (sink instanceof SourceSink) {
+      // Only one primary sink allowed - dispose previous
       this.sourceDisposable[Symbol.dispose]()
-      this.sourceSinkList.push(sink)
+      // Clear previous sinks to prevent memory leak
+      this.sourceSinkList = [sink]
 
       this.sourceDisposable = this.source.run(sink, scheduler)
 
-      return {
-        [Symbol.dispose]: () => {
-          const srcIdx = this.sourceSinkList.indexOf(sink)
+      return disposeWith(() => {
+        const srcIdx = this.sourceSinkList.indexOf(sink)
+        if (srcIdx !== -1) {
           this.sourceSinkList.splice(srcIdx, 1)
-          this.sourceDisposable[Symbol.dispose]()
         }
-      }
+        this.sourceDisposable[Symbol.dispose]()
+        this.sourceDisposable = disposeNone
+      })
     }
 
     this.tetherSinkList.push(sink)
@@ -94,13 +122,11 @@ class Tether<T> implements IStream<T> {
     }
 
     return disposeWith(() => {
-      sink.end()
       const sinkIdx = this.tetherSinkList.indexOf(sink)
-
-      if (sinkIdx > -1) {
-        // remove(sinkIdx, tetherSinkList)
+      if (sinkIdx !== -1) {
         this.tetherSinkList.splice(sinkIdx, 1)
       }
+      // Don't call sink.end() here - let the source control that
     })
   }
 }
