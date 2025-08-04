@@ -67,17 +67,9 @@ class Outer<A, B> implements ISink<A>, Disposable {
   }
 
   error(e: any): void {
-    this.active = false
+    // Don't set active = false - allow stream to continue after error
     this.sink.error(e)
   }
-
-  [Symbol.dispose](): void {
-    this.active = false
-    this.pending.length = 0
-    this.disposable[Symbol.dispose]()
-    disposeAll(this.current)[Symbol.dispose]()
-  }
-
   endInner(inner: Inner<B>): void {
     const i = this.current.indexOf(inner)
     if (i >= 0) {
@@ -96,6 +88,13 @@ class Outer<A, B> implements ISink<A>, Disposable {
     if (!this.active && this.current.length === 0) {
       this.sink.end()
     }
+  }
+
+  [Symbol.dispose](): void {
+    this.active = false
+    this.pending.length = 0
+    this.disposable[Symbol.dispose]()
+    disposeAll(this.current)[Symbol.dispose]()
   }
 }
 

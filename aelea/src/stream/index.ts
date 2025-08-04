@@ -1,5 +1,3 @@
-/// <reference path="./utils/global.d.ts" />
-
 export {
   chain,
   combine,

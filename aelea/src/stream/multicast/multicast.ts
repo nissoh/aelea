@@ -1,9 +1,17 @@
 import type { IScheduler, ISink, IStream } from '../types.js'
-import { disposeNone } from '../utils/disposable.js'
+import { disposeNone, disposeWith } from '../utils/disposable.js'
 
+/**
+ * Creates a multicast stream that shares a single source subscription among multiple subscribers.
+ *
+ * Error handling behavior:
+ * - Sink errors (subscriber throws): Isolated to that subscriber, others continue receiving events
+ * - Source errors (upstream failure): Propagated to all subscribers, stream continues running
+ * - Only end() is a terminal signal that disposes the stream
+ */
 export const multicast = <T>(source: IStream<T>): IStream<T> => new MulticastSource(source)
 
-class MulticastSource<T> implements ISink<T> {
+class MulticastSource<T> implements IStream<T>, ISink<T>, Disposable {
   private sinks: ISink<T>[] = []
   private disposable: Disposable = disposeNone
   private running = false
@@ -11,37 +19,33 @@ class MulticastSource<T> implements ISink<T> {
   constructor(readonly source: IStream<T>) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    this.add(sink)
+    this.sinks.push(sink)
 
     if (!this.running && this.sinks.length === 1) {
       this.running = true
       this.disposable = this.source.run(this, scheduler)
     }
 
-    return new MulticastDisposable(this, sink)
+    return disposeWith(() => {
+      const index = this.sinks.indexOf(sink)
+      if (index >= 0) {
+        this.sinks.splice(index, 1)
+      }
+
+      if (this.sinks.length === 0) {
+        this[Symbol.dispose]()
+      }
+    })
   }
 
-  add(sink: ISink<T>): number {
-    this.sinks.push(sink)
-    return this.sinks.length
-  }
-
-  remove(sink: ISink<T>): number {
-    const index = this.sinks.indexOf(sink)
-    if (index >= 0) {
-      this.sinks.splice(index, 1)
-    }
-    return this.sinks.length
-  }
-
-  dispose(): void {
+  [Symbol.dispose](): void {
     const d = this.disposable
     this.disposable = disposeNone
     this.running = false
     d[Symbol.dispose]()
   }
 
-  // Sink implementation - forwards to all subscribed sinks
+  // ISink implementation - receives events from source stream
   event(value: T): void {
     const sinks = this.sinks
     const len = sinks.length
@@ -57,7 +61,8 @@ class MulticastSource<T> implements ISink<T> {
       try {
         sinksCopy[i].event(value)
       } catch (e) {
-        // Report error but continue with others
+        // Sink error: isolate to that subscriber, others continue
+        // This handles errors thrown by subscribers during event processing
         try {
           sinksCopy[i].error(e)
         } catch {} // Ignore errors in error handlers
@@ -66,34 +71,17 @@ class MulticastSource<T> implements ISink<T> {
   }
 
   error(error: any): void {
+    // Propagate error to all sinks
+    // Don't dispose - allow the stream to potentially recover
     const sinks = this.sinks.slice()
-    this.sinks.length = 0
-    for (const sink of sinks) {
-      sink.error(error)
-    }
-    this.dispose()
+    for (const sink of sinks) sink.error(error)
   }
 
   end(): void {
     const sinks = this.sinks.slice()
     this.sinks.length = 0
     this.running = false
-    for (const sink of sinks) {
-      sink.end()
-    }
-    this.dispose()
-  }
-}
-
-class MulticastDisposable<T> implements Disposable {
-  constructor(
-    private source: MulticastSource<T>,
-    private sink: ISink<T>
-  ) {}
-
-  [Symbol.dispose](): void {
-    if (this.source.remove(this.sink) === 0) {
-      this.source.dispose()
-    }
+    for (const sink of sinks) sink.end()
+    this[Symbol.dispose]()
   }
 }
