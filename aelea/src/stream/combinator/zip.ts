@@ -17,7 +17,7 @@ export function zipState<A>(
     return now({} as A)
   }
 
-  return stream((scheduler, sink) => {
+  return stream((sink, scheduler) => {
     const result = {} as A
 
     return zip(
@@ -28,7 +28,7 @@ export function zipState<A>(
         return result as Readonly<A>
       },
       ...sources
-    ).run(scheduler, sink)
+    ).run(sink, scheduler)
   })
 }
 
@@ -48,7 +48,7 @@ export function zip<T extends readonly unknown[], R>(
   if (l === 0) return empty
   if (l === 1) return map(f as any, sourceList[0])
 
-  return stream((scheduler, sink) => {
+  return stream((sink, scheduler) => {
     const disposables = new Array(l)
     const sinks = new Array(l)
     const buffers = new Array(l)
@@ -58,7 +58,7 @@ export function zip<T extends readonly unknown[], R>(
     for (let i = 0; i < l; ++i) {
       buffers[i] = new Queue()
       const indexSink = (sinks[i] = new IndexSink(zipSink, i))
-      disposables[i] = sourceList[i].run(scheduler, indexSink)
+      disposables[i] = sourceList[i].run(indexSink, scheduler)
     }
 
     return disposeAll(disposables)

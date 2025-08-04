@@ -32,7 +32,7 @@ export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
 export const motion: IMotionCurry = curry2(
   (config: Partial<MotionConfig>, position: IStream<number>): IStream<number> => {
     const cfg = { ...MOTION_NO_WOBBLE, ...config }
-    return stream((scheduler, sink) => new MotionSink(scheduler, sink, cfg, position))
+    return stream((sink, scheduler) => new MotionSink(sink, scheduler, cfg, position))
   }
 )
 
@@ -48,12 +48,12 @@ class MotionSink implements ISink<number>, Disposable {
   private sourceEnded = false
 
   constructor(
-    private scheduler: I$Scheduler,
     private sink: ISink<number>,
+    private scheduler: I$Scheduler,
     private config: MotionConfig,
     position: IStream<number>
   ) {
-    this.sourceDisposable = position.run(scheduler, this)
+    this.sourceDisposable = position.run(this, scheduler)
   }
 
   event(newTarget: number): void {

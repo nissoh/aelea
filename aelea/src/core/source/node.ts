@@ -8,7 +8,7 @@ function createNodeSource<A, B extends INodeElement>(
   sourceOp: (a: A) => B,
   $segments: I$Slottable[]
 ): I$Node<B> {
-  return stream((scheduler, sink) => {
+  return stream((sink, scheduler) => {
     const element = sourceOp(sourceValue)
     const disposable = new SettableDisposable()
 
@@ -23,13 +23,13 @@ function createNodeSource<A, B extends INodeElement>(
     }
 
     // DOM tree creation happens in asap phase
-    scheduler.asap(eventNode, sink, nodeState)
+    scheduler.asap(eventNode, nodeState, sink)
 
     return disposable
   })
 }
 
-export function eventNode<T>(sink: ISink<T>, value: T): void {
+export function eventNode<T>(value: T, sink: ISink<T>): void {
   sink.event(value)
 }
 

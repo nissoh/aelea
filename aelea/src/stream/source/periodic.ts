@@ -3,7 +3,7 @@ import type { IScheduler, ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 
 export const periodic: IPeriodicCurry = curry2((period, value) =>
-  stream((scheduler, sink) => new PeriodicTask(scheduler, sink, period, value))
+  stream((sink, scheduler) => new PeriodicTask(scheduler, sink, period, value))
 )
 
 class PeriodicTask<T> implements Disposable {

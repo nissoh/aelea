@@ -7,7 +7,7 @@ export const fromCallback = <T, FnArgs extends any[] = T[]>(
   mapFn: (...args: FnArgs) => T = defaultMapFn as any,
   context: any = null
 ): IStream<T> =>
-  stream((scheduler, sink) => {
+  stream((sink, scheduler) => {
     try {
       const maybeDisposable = callbackFunction.call(context, (...args: FnArgs) => {
         try {
@@ -20,7 +20,7 @@ export const fromCallback = <T, FnArgs extends any[] = T[]>(
 
       return toDisposable(maybeDisposable)
     } catch (error) {
-      return scheduler.asap(eventError, sink, error)
+      return scheduler.asap(eventError, error, sink)
     }
   })
 
@@ -28,6 +28,6 @@ function defaultMapFn<T>(...args: T[]): T {
   return args[0]
 }
 
-function eventError<T>(sink: ISink<T>, error: any): void {
+function eventError<T>(error: any, sink: ISink<T>): void {
   sink.error(error)
 }

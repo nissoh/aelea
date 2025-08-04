@@ -3,7 +3,7 @@ import { combine, createDefaultScheduler, type IStream, merge, stream, zip } fro
 
 // Create a stream that emits values with controlled timing
 function createControlledStream(values: number[], delayMs = 0): IStream<number> {
-  return stream((scheduler, sink) => {
+  return stream((sink, scheduler) => {
     let index = 0
     let disposed = false
 
@@ -43,7 +43,7 @@ async function measureStreamTime<T>(stream: IStream<T>): Promise<{ time: number;
 
   return new Promise((resolve) => {
     const scheduler = createDefaultScheduler()
-    stream.run(scheduler, {
+    stream.run({
       event: () => {
         count++
       },
@@ -54,7 +54,7 @@ async function measureStreamTime<T>(stream: IStream<T>): Promise<{ time: number;
         const time = performance.now() - start
         resolve({ time, count })
       }
-    })
+    }, scheduler)
   })
 }
 
@@ -79,7 +79,7 @@ const mergeOrderTest = async () => {
   const scheduler = createDefaultScheduler()
 
   return new Promise<void>((resolve) => {
-    merged.run(scheduler, {
+    merged.run({
       event: (v) => events.push(v),
       error: (e) => {
         throw e
@@ -88,7 +88,7 @@ const mergeOrderTest = async () => {
         console.log('Merge order:', events) // Should interleave
         resolve()
       }
-    })
+    }, scheduler)
   })
 }
 
@@ -102,7 +102,7 @@ const combineOrderTest = async () => {
   const scheduler = createDefaultScheduler()
 
   return new Promise<void>((resolve) => {
-    combined.run(scheduler, {
+    combined.run({
       event: (v) => events.push(v),
       error: (e) => {
         throw e
@@ -111,7 +111,7 @@ const combineOrderTest = async () => {
         console.log('Combine order:', events) // Should be [[1,10], [2,20], [3,30]]
         resolve()
       }
-    })
+    }, scheduler)
   })
 }
 
@@ -125,7 +125,7 @@ const zipOrderTest = async () => {
   const scheduler = createDefaultScheduler()
 
   return new Promise<void>((resolve) => {
-    zipped.run(scheduler, {
+    zipped.run({
       event: (v) => events.push(v),
       error: (e) => {
         throw e
@@ -134,7 +134,7 @@ const zipOrderTest = async () => {
         console.log('Zip order:', events) // Should be [[1,10], [2,20], [3,30]] then end
         resolve()
       }
-    })
+    }, scheduler)
   })
 }
 

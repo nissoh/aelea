@@ -17,7 +17,7 @@ export const component: IComponentCurry = curry2(
     inputComp: IComponentDefinitionCallback<A, B, D>,
     outputTethers: IOutputTethers<D>
   ): I$Slottable<A> => {
-    return stream((scheduler, sink) => {
+    return stream((sink, scheduler) => {
       // fill stubbed aguments as a behavior
       const behaviors = Array(inputComp.length).fill(null).map(behavior)
       const [view, outputSources] = inputComp(...behaviors)
@@ -30,14 +30,14 @@ export const component: IComponentCurry = curry2(
 
             if (consumerSampler) {
               const componentOutputTethers = outputSources[k]
-              const outputDisposable = consumerSampler(componentOutputTethers).run(scheduler, nullSink)
+              const outputDisposable = consumerSampler(componentOutputTethers).run(nullSink, scheduler)
               outputDisposables.push(outputDisposable)
             }
           }
         }
       }
 
-      return disposeAll([view.run(scheduler, sink), ...outputDisposables])
+      return disposeAll([view.run(sink, scheduler), ...outputDisposables])
     })
   }
 )

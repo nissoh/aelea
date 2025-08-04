@@ -10,12 +10,12 @@ class MulticastSource<T> implements ISink<T> {
 
   constructor(readonly source: IStream<T>) {}
 
-  run(scheduler: IScheduler, sink: ISink<T>): Disposable {
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
     this.add(sink)
 
     if (!this.running && this.sinks.length === 1) {
       this.running = true
-      this.disposable = this.source.run(scheduler, this)
+      this.disposable = this.source.run(this, scheduler)
     }
 
     return new MulticastDisposable(this, sink)

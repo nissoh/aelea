@@ -10,7 +10,7 @@ import { PipeSink } from '../utils/sink.js'
  * tap(console.log): -1-2-3->  (logs: 1, 2, 3)
  */
 export const tap: ITapCurry = curry2((f, source) =>
-  stream((scheduler, sink) => source.run(scheduler, new TapSink(f, sink)))
+  stream((sink, scheduler) => source.run(new TapSink(f, sink), scheduler))
 )
 export interface ITapCurry {
   <T>(f: (value: T) => unknown, source: IStream<T>): IStream<T>

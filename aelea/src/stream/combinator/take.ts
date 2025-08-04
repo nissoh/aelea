@@ -10,7 +10,7 @@ import { PipeSink } from '../utils/sink.js'
  * take(3):  -1-2-3-|
  */
 export const take: ITakeCurry = curry2((n, source) =>
-  stream((scheduler, sink) => source.run(scheduler, new TakeSink(n, sink)))
+  stream((sink, scheduler) => source.run(new TakeSink(n, sink), scheduler))
 )
 
 export interface ITakeCurry {

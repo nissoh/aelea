@@ -9,7 +9,7 @@ import { curry2 } from '../utils/function.js'
  * debounce(3):   -------3---------5-------6->
  */
 export const debounce: IDebounceCurry = curry2((period, source) =>
-  stream((scheduler, sink) => new DebounceSink(period, source, sink, scheduler))
+  stream((sink, scheduler) => new DebounceSink(period, source, sink, scheduler))
 )
 
 class DebounceSink<T> implements ISink<T>, Disposable {
@@ -23,7 +23,7 @@ class DebounceSink<T> implements ISink<T>, Disposable {
     private readonly sink: ISink<T>,
     private readonly scheduler: IScheduler
   ) {
-    this.disposable = source.run(scheduler, this)
+    this.disposable = source.run(this, scheduler)
   }
 
   event(value: T): void {

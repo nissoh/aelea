@@ -8,8 +8,8 @@ class MapSource<T, R> implements IStream<R> {
     readonly source: IStream<T>
   ) {}
 
-  run(scheduler: IScheduler, sink: ISink<R>) {
-    return this.source.run(scheduler, new MapSink(this.f, sink))
+  run(sink: ISink<R>, scheduler: IScheduler) {
+    return this.source.run(new MapSink(this.f, sink), scheduler)
   }
 }
 

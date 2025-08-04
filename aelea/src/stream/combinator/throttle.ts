@@ -10,7 +10,7 @@ import { PipeSink } from '../utils/sink.js'
  * throttle(2):   -1---3---5---7--->
  */
 export const throttle: IThrottleCurry = curry2((period, source) =>
-  stream((scheduler, sink) => source.run(scheduler, new ThrottleSink(period, sink, scheduler)))
+  stream((sink, scheduler) => source.run(new ThrottleSink(period, sink, scheduler), scheduler))
 )
 
 class ThrottleSink<T> extends PipeSink<T> {

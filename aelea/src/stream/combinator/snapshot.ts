@@ -21,10 +21,10 @@ export const sample: ISampleCurry = curry2((values, sampler) => snapshot((x) => 
  * snapshot: ---[2,a]-[4,b]-[6,c]->
  */
 export const snapshot: ISnapshotCurry = curry3((f, values, sampler) =>
-  stream((scheduler, sink) => {
+  stream((sink, scheduler) => {
     const seedSink = new SnapshotSink(f, sink)
-    const valuesDisposable = values.run(scheduler, seedSink.seedSink)
-    const samplerDisposable = sampler.run(scheduler, seedSink)
+    const valuesDisposable = values.run(seedSink.seedSink, scheduler)
+    const samplerDisposable = sampler.run(seedSink, scheduler)
 
     return disposeBoth(samplerDisposable, valuesDisposable)
   })

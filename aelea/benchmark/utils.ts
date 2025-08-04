@@ -28,13 +28,13 @@ export const fromArrayM = <A>(arr: readonly A[]) =>
 export const runStream = <T>(stream: IStream<T>): Promise<T> => {
   let result: T
   return new Promise((resolve, reject) => {
-    stream.run(createDefaultScheduler(), {
+    stream.run({
       event: (value) => {
         result = value
       },
       error: reject,
       end: () => resolve(result!)
-    })
+    }, createDefaultScheduler())
   })
 }
 

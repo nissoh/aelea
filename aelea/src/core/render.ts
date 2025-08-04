@@ -75,7 +75,7 @@ class BranchEffectsSink implements ISink<INode | ISlottable> {
 
     if (typeof childNode.styleBehavior === 'object') {
       const newLocal = childNode.styleBehavior.map((sb) => styleBehavior(sb, childNode, this.env))
-      const disposeStyle = merge(...newLocal).run(this.env.scheduler, nullSink)
+      const disposeStyle = merge(...newLocal).run(nullSink, this.env.scheduler)
 
       this.disposables.push(disposeStyle)
     }
@@ -90,7 +90,7 @@ class BranchEffectsSink implements ISink<INode | ISlottable> {
             })
           )
         })
-      ).run(this.env.scheduler, nullSink)
+      ).run(nullSink, this.env.scheduler)
 
       this.disposables.push(disposeStyle)
     }
@@ -142,7 +142,7 @@ class BranchChildrenSinkList implements Disposable {
       const $child = node.$segments[i]
       const sink = new BranchEffectsSink(this.env, this.node, i, segmentsCount)
 
-      this.disposables.set($child, $child.run(this.env.scheduler, sink))
+      this.disposables.set($child, $child.run(sink, this.env.scheduler))
     }
   }
 

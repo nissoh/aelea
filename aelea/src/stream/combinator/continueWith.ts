@@ -1,5 +1,5 @@
 import { stream } from '../stream.js'
-import type { ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 
@@ -11,10 +11,10 @@ import { curry2 } from '../utils/function.js'
  * continueWith(f): -1-2-3-4-5-6->
  */
 export const continueWith: IContinueWithCurry = curry2((f, s) =>
-  stream((scheduler, sink) => {
-    const dsink = new ContinueWithSink(scheduler, sink, f)
+  stream((sink, scheduler) => {
+    const dsink = new ContinueWithSink(sink, scheduler, f)
 
-    return disposeBoth(s.run(scheduler, dsink), dsink)
+    return disposeBoth(s.run(dsink, scheduler), dsink)
   })
 )
 
@@ -22,8 +22,8 @@ class ContinueWithSink<A, B> implements ISink<A> {
   private disposable: Disposable | null = null
 
   constructor(
-    private env: any,
     private sink: ISink<A | B>,
+    private scheduler: IScheduler,
     private f: () => IStream<B>
   ) {}
 
@@ -41,7 +41,7 @@ class ContinueWithSink<A, B> implements ISink<A> {
     }
     try {
       const nextStream = this.f()
-      this.disposable = nextStream.run(this.env, this.sink)
+      this.disposable = nextStream.run(this.sink, this.scheduler)
     } catch (error) {
       this.sink.error(error)
     }

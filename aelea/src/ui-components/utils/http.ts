@@ -5,7 +5,7 @@ export function fromWebsocket<I, O>(
   input: IStream<O> = empty,
   protocols: string | string[] | undefined = undefined
 ): IStream<I> {
-  return stream((scheduler, sink) => {
+  return stream((sink, scheduler) => {
     let socket: WebSocket | null = new WebSocket(url, protocols)
     const messageBuffer: O[] = []
 
@@ -81,7 +81,7 @@ export function fromWebsocket<I, O>(
       } else if (socket && socket.readyState === WebSocket.CONNECTING) {
         messageBuffer.push(value)
       }
-    }, input).run(scheduler, nullSink)
+    }, input).run(nullSink, scheduler)
 
     const disposeSocket = disposeWith(() => {
       cleanup()

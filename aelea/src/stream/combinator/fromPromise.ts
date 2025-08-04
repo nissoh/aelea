@@ -3,7 +3,7 @@ import type { IStream } from '../types.js'
 import { disposeWith } from '../utils/disposable.js'
 
 export const fromPromise = <T>(promise: Promise<T>): IStream<T> =>
-  stream((_, sink) => {
+  stream((sink, _) => {
     let cancelled = false
 
     promise.then(

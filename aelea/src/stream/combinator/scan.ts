@@ -10,7 +10,7 @@ import { PipeSink } from '../utils/sink.js'
  * scan(+, 0):  -1-3-6-10->
  */
 export const scan: IScanCurry = curry3((f, initial, s) =>
-  stream((scheduler, sink) => s.run(scheduler, new ScanSink(f, initial, sink)))
+  stream((sink, scheduler) => s.run(new ScanSink(f, initial, sink), scheduler))
 )
 
 class ScanSink<I, O> extends PipeSink<I, O> {

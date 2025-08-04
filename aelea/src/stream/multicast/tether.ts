@@ -6,8 +6,8 @@ export const tether = <T>(source: IStream<T>): [IStream<T>, IStream<T>] => {
   const tetherSource = new Tether(source)
 
   return [
-    stream((scheduler, sink) => tetherSource.run(scheduler, new SourceSink(tetherSource, sink))),
-    stream((scheduler, sink) => tetherSource.run(scheduler, new TetherSink(sink)))
+    stream((sink, scheduler) => tetherSource.run(new SourceSink(tetherSource, sink), scheduler)),
+    stream((sink, scheduler) => tetherSource.run(new TetherSink(sink), scheduler))
   ]
 }
 
@@ -69,12 +69,12 @@ class Tether<T> implements IStream<T> {
 
   constructor(private source: IStream<T>) {}
 
-  run(scheduler: IScheduler, sink: SourceSink<T> | TetherSink<T>): Disposable {
+  run(sink: SourceSink<T> | TetherSink<T>, scheduler: IScheduler): Disposable {
     if (sink instanceof SourceSink) {
       this.sourceDisposable[Symbol.dispose]()
       this.sourceSinkList.push(sink)
 
-      this.sourceDisposable = this.source.run(scheduler, sink)
+      this.sourceDisposable = this.source.run(sink, scheduler)
 
       return {
         [Symbol.dispose]: () => {

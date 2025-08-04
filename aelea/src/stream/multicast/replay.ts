@@ -60,13 +60,13 @@ export class ReplayLatest<A> implements IStream<A> {
     private readonly initialState?: A
   ) {}
 
-  run(scheduler: IScheduler, sink: ISink<A>): Disposable {
+  run(sink: ISink<A>, scheduler: IScheduler): Disposable {
     const stream = this.hasValue
       ? startWith(this.latestvalue)(this.source)
       : this.initialState !== undefined
         ? startWith(this.initialState)(this.source)
         : this.source
 
-    return stream.run(scheduler, new StateSink(this, sink))
+    return stream.run(new StateSink(this, sink), scheduler)
   }
 }

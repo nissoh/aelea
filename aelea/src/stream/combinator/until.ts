@@ -14,11 +14,11 @@ import { join } from './join.js'
  * until:  -1-2-3-|
  */
 export const until: IUntilCurry = curry2((signal, source) =>
-  stream((scheduler, sink) => {
+  stream((sink, scheduler) => {
     const disposable = new SettableDisposable()
 
-    const d1 = source.run(scheduler, sink)
-    const d2 = signal.run(scheduler, new UntilSink(sink, disposable))
+    const d1 = source.run(sink, scheduler)
+    const d2 = signal.run(new UntilSink(sink, disposable), scheduler)
     disposable.set(disposeBoth(d1, d2))
 
     return disposable
@@ -33,9 +33,9 @@ export const until: IUntilCurry = curry2((signal, source) =>
  * since:  -------4-5-6->
  */
 export const since: ISinceCurry = curry2((signal, source) =>
-  stream((scheduler, sink) => {
+  stream((sink, scheduler) => {
     const min = new LowerBoundSink(signal, sink, scheduler)
-    const sourceDisposable = source.run(scheduler, new SinceSink(min, sink))
+    const sourceDisposable = source.run(new SinceSink(min, sink), scheduler)
 
     return disposeBoth(min, sourceDisposable)
   })
@@ -97,7 +97,7 @@ class LowerBoundSink<A> implements ISink<unknown>, Disposable {
     private readonly sink: ISink<A>,
     scheduler: IScheduler
   ) {
-    this.disposable = signal.run(scheduler, this)
+    this.disposable = signal.run(this, scheduler)
   }
 
   event(): void {

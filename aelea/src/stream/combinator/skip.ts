@@ -10,7 +10,7 @@ import { PipeSink } from '../utils/sink.js'
  * skip(3):  -------4-5-6->
  */
 export const skip: ISkipCurry = curry2((n, source) =>
-  stream((scheduler, sink) => source.run(scheduler, new SkipSink(n, sink)))
+  stream((sink, scheduler) => source.run(new SkipSink(n, sink), scheduler))
 )
 
 export interface ISkipCurry {

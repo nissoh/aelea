@@ -19,14 +19,14 @@ export function merge<T extends readonly unknown[]>(
   if (l === 0) return empty
   if (l === 1) return sourceList[0]
 
-  return stream((scheduler, sink) => {
+  return stream((sink, scheduler) => {
     const disposables = new Array<Disposable>(l)
     const sinks: ISink<unknown>[] = new Array(l)
     const mergeSink = new MergeSink(sink, disposables, l)
 
     for (let indexSink: IndexSink<any>, i = 0; i < l; ++i) {
       indexSink = sinks[i] = new IndexSink(mergeSink, i)
-      disposables[i] = sourceList[i].run(scheduler, indexSink)
+      disposables[i] = sourceList[i].run(indexSink, scheduler)
     }
 
     return disposeAll(disposables)

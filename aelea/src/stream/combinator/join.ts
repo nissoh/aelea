@@ -10,7 +10,7 @@ export const mergeConcurrently: IMergeConcurrentlyCurry = curry2((concurrency, s
 )
 
 export const mergeMapConcurrently: IMergeMapConcurrentlyCurry = curry3((f, concurrency, source) =>
-  stream((scheduler, sink) => new Outer(f, concurrency, source, sink, scheduler))
+  stream((sink, scheduler) => new Outer(f, concurrency, source, sink, scheduler))
 )
 
 class Outer<A, B> implements ISink<A>, Disposable {
@@ -31,7 +31,7 @@ class Outer<A, B> implements ISink<A>, Disposable {
     this.pending = []
     this.current = []
     this.active = true
-    this.disposable = source.run(scheduler, this)
+    this.disposable = source.run(this, scheduler)
   }
 
   event(x: A): void {
@@ -57,7 +57,7 @@ class Outer<A, B> implements ISink<A>, Disposable {
   private initInner(x: A): void {
     const innerSink = new Inner(this, this.sink)
     const innerStream = this.f(x)
-    innerSink.disposable = innerStream.run(this.scheduler, innerSink)
+    innerSink.disposable = innerStream.run(innerSink, this.scheduler)
     this.current.push(innerSink)
   }
 

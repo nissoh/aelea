@@ -12,7 +12,7 @@ import { disposeNone } from '../utils/disposable.js'
  * switchLatest:      -a-b-c-d-e-f-g-h->
  */
 export const switchLatest = <T>(souce: IStream<IStream<T>>): IStream<T> =>
-  stream((scheduler, sink) => souce.run(scheduler, new SwitchSink(scheduler, sink)))
+  stream((sink, scheduler) => souce.run(new SwitchSink(scheduler, sink), scheduler))
 
 class SwitchSink<T> implements ISink<IStream<T>> {
   currentDisposable: Disposable = disposeNone
@@ -31,7 +31,7 @@ class SwitchSink<T> implements ISink<IStream<T>> {
   event(source: IStream<T>): void {
     this.currentDisposable[Symbol.dispose]()
     this.innerEnded = false
-    this.currentDisposable = source.run(this.scheduler, this.innerSink)
+    this.currentDisposable = source.run(this.innerSink, this.scheduler)
   }
 
   error(error: any): void {

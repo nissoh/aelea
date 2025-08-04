@@ -21,14 +21,14 @@ export function combine<T extends readonly unknown[], R>(
   if (l === 0) return empty
   if (l === 1) return map(f as any, sources[0])
 
-  return stream((scheduler: IScheduler, sink: ISink<R>) => {
+  return stream((sink: ISink<R>, scheduler: IScheduler) => {
     const disposables = new Array(l)
     const sinks = new Array(l)
     const mergeSink = new CombineSink(disposables, sinks.length, sink, f)
 
     for (let indexSink: IndexSink<any>, i = 0; i < l; ++i) {
       indexSink = sinks[i] = new IndexSink(mergeSink, i)
-      disposables[i] = sources[i].run(scheduler, indexSink)
+      disposables[i] = sources[i].run(indexSink, scheduler)
     }
 
     return disposeAll(disposables)
@@ -46,7 +46,7 @@ export function combineState<A>(
 
   if (l === 0) return now({} as A)
 
-  return stream((scheduler, sink) => {
+  return stream((sink, scheduler) => {
     const result = {} as A
 
     return combine(
@@ -57,7 +57,7 @@ export function combineState<A>(
         return result as Readonly<A>
       },
       ...sources
-    ).run(scheduler, sink)
+    ).run(sink, scheduler)
   })
 }
 

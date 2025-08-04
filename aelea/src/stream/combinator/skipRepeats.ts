@@ -18,7 +18,7 @@ export const skipRepeats = <T>(stream: IStream<T>): IStream<T> => skipRepeatsWit
  * skipRepeatsWith(f): -{a:1}-------{a:2}-------{a:3}->
  */
 export const skipRepeatsWith: ISkipRepeatsWithCurry = curry2((equals, source) =>
-  stream((scheduler, sink) => source.run(scheduler, new SkipRepeatsSink(equals, sink)))
+  stream((sink, scheduler) => source.run(new SkipRepeatsSink(equals, sink), scheduler))
 )
 
 export interface ISkipRepeatsWithCurry {

@@ -270,7 +270,7 @@ class SyncScheduler implements IScheduler {
 
 // Use custom scheduler
 const scheduler = new SyncScheduler()
-stream.run(scheduler, sink)
+stream.run(sink, scheduler)
 ```
 
 Scheduler implementations can provide:

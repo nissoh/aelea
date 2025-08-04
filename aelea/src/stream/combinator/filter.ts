@@ -17,7 +17,7 @@ export interface IFilterCurry {
  * filter(x => x%2):  ---2---4---6->
  */
 export const filter: IFilterCurry = curry2((f: (value: any) => boolean, s: IStream<any>) =>
-  stream((scheduler, sink) => s.run(scheduler, new FilterSink(f, sink)))
+  stream((sink, scheduler) => s.run(new FilterSink(f, sink), scheduler))
 ) as IFilterCurry
 
 class FilterSink<T> extends PipeSink<T> {

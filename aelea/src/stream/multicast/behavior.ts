@@ -11,7 +11,7 @@ class IBehaviorSource<I, O> implements IStream<O> {
   sinksMap: SinkMap<O> = new Map()
   scheduler: IScheduler | undefined
 
-  run(scheduler: IScheduler, sink: ISink<O>): Disposable {
+  run(sink: ISink<O>, scheduler: IScheduler): Disposable {
     this.scheduler = scheduler
 
     const sourcesMap = new Map<IStream<O>, Disposable | null>()
@@ -39,7 +39,7 @@ class IBehaviorSource<I, O> implements IStream<O> {
   protected runBehavior(sink: ISink<O>, x: IStream<O>) {
     if (!this.scheduler) throw 'BehaviorSource: scheduler is not defined'
 
-    return x.run(this.scheduler, sink)
+    return x.run(sink, this.scheduler)
   }
 
   sample: IComposeBehavior<I, O> = (...ops: IOps<any, O>[]) => {

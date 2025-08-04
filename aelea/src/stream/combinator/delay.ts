@@ -11,10 +11,10 @@ import { PipeSink } from '../utils/sink.js'
  * delay(2):   ---1-2-3->
  */
 export const delay: IDelayCurry = curry2((n, source) =>
-  stream((scheduler, sink) => {
-    const disposableSink = new DelaySink(n, scheduler, sink)
+  stream((sink, scheduler) => {
+    const disposableSink = new DelaySink(n, sink, scheduler)
 
-    return disposeBoth(source.run(scheduler, disposableSink), disposableSink)
+    return disposeBoth(source.run(disposableSink, scheduler), disposableSink)
   })
 )
 
@@ -23,8 +23,8 @@ class DelaySink<T> extends PipeSink<T> implements Disposable {
 
   constructor(
     readonly n: number,
-    readonly scheduler: IScheduler,
-    override readonly sink: ISink<T>
+    override readonly sink: ISink<T>,
+    readonly scheduler: IScheduler
   ) {
     super(sink)
   }
