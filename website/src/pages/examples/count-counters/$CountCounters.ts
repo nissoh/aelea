@@ -1,5 +1,6 @@
 import { $node, $text, component, style } from 'aelea/core'
 import {
+  aggregate,
   behavior,
   chain,
   constant,
@@ -7,9 +8,7 @@ import {
   map,
   merge,
   now,
-  o,
   replayState,
-  scan,
   snapshot,
   until
 } from 'aelea/stream'
@@ -21,7 +20,7 @@ import $Counter from './$Counter'
 const $AddBtn = $Button({
   $content: $text('Add One')
 })
-export const sumAdd = scan((current: number, x: number) => current + x)
+export const sumAdd = aggregate((current: number, x: number) => current + x)
 
 export default component(
   (
@@ -60,24 +59,22 @@ export default component(
 
           const value = replayState(valueChange, 0)
 
-          return until(remove)(
+          return until(
+            remove,
             $column(spacing.default)(
               $seperator,
               $row(style({ alignItems: 'center' }), spacing.big)(
                 $TrashBtn({
-                  click: o(
-                    removeTether(),
+                  click: removeTether(
                     disposeCounterTether(),
                     disposedCounterCountTether(snapshot((val) => -val, value))
                   )
                 }),
                 $Counter({ value })({
-                  increment: o(
-                    countersIncrementTether(),
+                  increment: countersIncrementTether(
                     valueChangeTether(snapshot((val, increment) => val + increment, value))
                   ),
-                  decrement: o(
-                    countersDecrementTether(),
+                  decrement: countersDecrementTether(
                     valueChangeTether(snapshot((val, increment) => val + increment, value))
                   )
                 })

@@ -1,4 +1,5 @@
 export {
+  aggregate,
   chain,
   combine,
   combineState,
@@ -17,7 +18,6 @@ export {
   mergeConcurrently,
   mergeMapConcurrently,
   sample,
-  scan,
   since,
   skip,
   skipRepeats,

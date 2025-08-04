@@ -2,6 +2,7 @@ import { attr, component, nodeEvent, style, stylePseudo } from '../../core/index
 import { $node, $svg } from '../../core/source/node.js'
 import type { I$Node, I$Slottable, ISlottable } from '../../core/types.js'
 import {
+  aggregate,
   chain,
   constant,
   type IBehavior,
@@ -12,7 +13,6 @@ import {
   never,
   now,
   o,
-  scan,
   startWith,
   switchLatest
 } from '../../stream/index.js'
@@ -110,7 +110,7 @@ export const $Table = <T, FilterState = never>({
       )
 
       const sortBy = chain((state) => {
-        const changeState = scan(
+        const changeState = aggregate(
           (seed, change): ISortBy<T> => {
             const direction = seed.name === change ? (seed.direction === 'asc' ? 'desc' : 'asc') : 'desc'
 

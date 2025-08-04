@@ -1,4 +1,5 @@
 import {
+  aggregate,
   disposeAll,
   disposeNone,
   disposeWith,
@@ -9,7 +10,6 @@ import {
   merge,
   nullSink,
   op,
-  scan,
   tap
 } from '../stream/index.js'
 import type { IAttributeProperties } from './combinator/attribute.js'
@@ -156,7 +156,7 @@ function styleBehavior(styleBehavior: IStream<IStyleCSS | null>, node: INode, ca
 
   return op(
     styleBehavior,
-    scan((previousCssRule: null | ReturnType<typeof useStyleRule>, styleObject) => {
+    aggregate((previousCssRule: null | ReturnType<typeof useStyleRule>, styleObject) => {
       if (previousCssRule) {
         if (styleObject === null) {
           node.element.classList.remove(previousCssRule)

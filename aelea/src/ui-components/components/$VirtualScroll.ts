@@ -4,6 +4,7 @@ import { $custom, $node } from '../../core/source/node.js'
 import { $text } from '../../core/source/text.js'
 import type { I$Node, I$Slottable, INode } from '../../core/types.js'
 import {
+  aggregate,
   chain,
   delay,
   empty,
@@ -15,7 +16,6 @@ import {
   merge,
   multicast,
   o,
-  scan,
   skip,
   startWith,
   switchLatest
@@ -51,7 +51,7 @@ export const $VirtualScroll = ({ dataSource, containerOps = o(), $loader = $defa
 
     const scrollReuqestWithInitial: IStream<ScrollRequest> = skip(
       1,
-      scan((seed) => seed + 1, -1, intersecting)
+      aggregate((seed) => seed + 1, -1, intersecting)
     )
 
     const $container = $column(

@@ -1,5 +1,5 @@
 import { $text, component, style } from 'aelea/core'
-import { constant, type IBehavior, merge, now, scan } from 'aelea/stream'
+import { aggregate, constant, type IBehavior, merge, now } from 'aelea/stream'
 import { $Button, $column, $Popover, $row, $TextField, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 import $Counter from '../count-counters/$Counter'
@@ -23,7 +23,7 @@ export const $PopoverExample = component(
     const $popContent = $column(spacing.default)(
       $text('Well, hello $Counter component!'),
       $row(style({ placeContent: 'center' }))(
-        $Counter({ value: scan((s, n) => s + n, 0, count) })({
+        $Counter({ value: aggregate((s, n) => s + n, 0, count) })({
           decrement: countDownTether(),
           increment: countUpTether()
         })

@@ -1,6 +1,7 @@
 import type { IStyleCSS } from '../../core/combinator/style.js'
 import { $node, $text, style, styleBehavior } from '../../core/index.js'
 import {
+  aggregate,
   at,
   empty,
   type IStream,
@@ -9,14 +10,13 @@ import {
   multicast,
   now,
   op,
-  scan,
   skip,
   skipRepeats,
   skipRepeatsWith,
   switchLatest
 } from '../../stream/index.js'
 
-export const sumFromZeroOp = scan((current: number, x: number) => current + x, 0)
+export const sumFromZeroOp = aggregate((current: number, x: number) => current + x, 0)
 
 enum Direction {
   INCREMENT,
@@ -40,7 +40,7 @@ interface NumberConfig {
 export const $NumberTicker = ({ value$, incrementColor, decrementColor, textStyle = {}, slots = 10 }: NumberConfig) => {
   const incrementMulticast = op(
     skipRepeats(value$),
-    scan((seed: CountState | null, change: number): CountState => {
+    aggregate((seed: CountState | null, change: number): CountState => {
       const changeStr = change.toLocaleString()
 
       if (seed === null) {
@@ -56,7 +56,7 @@ export const $NumberTicker = ({ value$, incrementColor, decrementColor, textStyl
 
       return { change, dir, pos, changeStr }
     }, null),
-    skip(1), // skips inital null that scans emit - preventing count from getting an inital color
+    skip(1), // skips initial null that aggregate emits - preventing count from getting an initial color
     multicast
   )
 
