@@ -2,32 +2,8 @@ import { empty, now } from '../source/stream.js'
 import { stream } from '../stream.js'
 import type { ISink, IStream } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
+import { IndexSink } from '../utils/sink.js'
 import { map } from './map.js'
-
-export function zip<T extends readonly unknown[], R>(
-  f: (...args: T) => R,
-  ...sources: [...{ [K in keyof T]: IStream<T[K]> }]
-): IStream<R> {
-  if (sources.length === 0) return empty
-  if (sources.length === 1) return map(f as any, sources[0])
-
-  return stream((scheduler, sink) => {
-    const l = sources.length
-    const disposables = new Array(l)
-    const sinks = new Array(l)
-    const buffers = new Array(l)
-
-    const zipSink = new ZipSink(f, buffers, sinks, sink)
-
-    for (let i = 0; i < l; ++i) {
-      buffers[i] = new Queue()
-      const indexSink = (sinks[i] = new IndexSink(i, zipSink))
-      disposables[i] = sources[i].run(scheduler, indexSink)
-    }
-
-    return disposeAll(disposables)
-  })
-}
 
 export function zipState<A>(
   state: {
@@ -53,6 +29,32 @@ export function zipState<A>(
       },
       ...sources
     ).run(scheduler, sink)
+  })
+}
+
+export function zip<T extends readonly unknown[], R>(
+  f: (...args: T) => R,
+  ...sourceList: [...{ [K in keyof T]: IStream<T[K]> }]
+): IStream<R> {
+  const l = sourceList.length
+
+  if (l === 0) return empty
+  if (l === 1) return map(f as any, sourceList[0])
+
+  return stream((scheduler, sink) => {
+    const disposables = new Array(l)
+    const sinks = new Array(l)
+    const buffers = new Array(l)
+
+    const zipSink = new ZipSink(f, buffers, sinks, sink)
+
+    for (let i = 0; i < l; ++i) {
+      buffers[i] = new Queue()
+      const indexSink = (sinks[i] = new IndexSink(zipSink, i))
+      disposables[i] = sourceList[i].run(scheduler, indexSink)
+    }
+
+    return disposeAll(disposables)
   })
 }
 
@@ -82,43 +84,22 @@ interface IndexedValue<T> {
   active: boolean
 }
 
-class IndexSink<T> implements ISink<T> {
-  active = true
-
+class ZipSink<I, O> implements ISink<IndexedValue<I | undefined>> {
   constructor(
-    private readonly index: number,
-    private readonly sink: ISink<IndexedValue<T>>
+    private readonly f: (...args: any[]) => O,
+    private readonly buffers: ArrayLike<Queue<I>>,
+    private readonly sinks: ArrayLike<IndexSink<I>>,
+    private readonly sink: ISink<O>
   ) {}
 
-  event(value: T): void {
-    if (this.active) {
-      this.sink.event({ index: this.index, value, active: true })
-    }
-  }
+  event(indexedValue: IndexedValue<I>): void {
+    const i = indexedValue.index
 
-  error(e: any): void {
-    this.sink.error(e)
-  }
-
-  end(): void {
-    if (this.active) {
-      this.active = false
-      this.sink.event({ index: this.index, value: undefined as any, active: false })
-    }
-  }
-}
-
-class ZipSink<A, R> implements ISink<IndexedValue<A>> {
-  constructor(
-    private readonly f: (...args: any[]) => R,
-    private readonly buffers: ArrayLike<Queue<A>>,
-    private readonly sinks: ArrayLike<IndexSink<A>>,
-    private readonly sink: ISink<R>
-  ) {}
-
-  event(indexedValue: IndexedValue<A>): void {
     if (!indexedValue.active) {
-      this.dispose(indexedValue.index)
+      const buffer = this.buffers[i]
+      if (buffer.isEmpty()) {
+        this.sink.end()
+      }
       return
     }
 
@@ -132,7 +113,16 @@ class ZipSink<A, R> implements ISink<IndexedValue<A>> {
         return
       }
 
-      this.emitZipped()
+      const values = []
+      for (let i = 0; i < this.buffers.length; i++) {
+        values.push(this.buffers[i].shift()!)
+      }
+      try {
+        const result = this.f(...values)
+        this.sink.event(result)
+      } catch (error) {
+        this.sink.error(error)
+      }
 
       if (this.ended()) {
         this.sink.end()
@@ -145,27 +135,10 @@ class ZipSink<A, R> implements ISink<IndexedValue<A>> {
   }
 
   end(): void {
-    // Individual streams handle their own end
-  }
-
-  private dispose(index: number): void {
-    const buffer = this.buffers[index]
-    if (buffer.isEmpty()) {
-      this.sink.end()
-    }
-  }
-
-  private emitZipped(): void {
-    const values = []
-    for (let i = 0; i < this.buffers.length; i++) {
-      values.push(this.buffers[i].shift()!)
-    }
-    try {
-      const result = this.f(...values)
-      this.sink.event(result)
-    } catch (error) {
-      this.sink.error(error)
-    }
+    // This should not be called directly as zip manages its own lifecycle
+    // through activeCount tracking
+    // If we reach here, it means all sources ended without errors
+    this.sink.end()
   }
 
   private ended(): boolean {

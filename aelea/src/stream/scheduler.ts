@@ -1,51 +1,34 @@
-import type { IScheduler, ITask } from './types.js'
-import { disposeWith } from './utils/disposable.js'
+import { createBrowserScheduler } from './browser-scheduler.js'
+import { createNodeScheduler } from './node-scheduler.js'
+import type { IScheduler } from './types.js'
+
+// Re-export for backward compatibility
+// Maintain backward compatibility by aliasing BrowserScheduler
+export { BrowserScheduler, BrowserScheduler as DefaultScheduler } from './browser-scheduler.js'
+export { NodeScheduler } from './node-scheduler.js'
 
 /**
- * Default scheduler implementation using native queueMicrotask
+ * Creates an environment-appropriate scheduler
  *
- * This is a minimal implementation that works well for most use cases.
- * For specialized needs, you can implement your own IScheduler:
+ * - In Node.js: Uses setImmediate for better I/O performance
+ * - In Browser: Uses queueMicrotask for smooth UI updates
+ * - Fallback: Uses browser scheduler as safe default
  *
- * - High-throughput: Add batching/buffering
- * - Testing: Use synchronous execution
- * - Debugging: Add logging/tracing
- * - Priority: Implement priority queues
- *
- * The IScheduler interface is designed to be simple to implement
- * while allowing full control over task scheduling.
+ * You can also explicitly import createBrowserScheduler or createNodeScheduler
+ * if you need a specific implementation.
  */
-export class DefaultScheduler implements IScheduler {
-  asap<TArgs extends readonly unknown[]>(task: ITask<TArgs>, ...args: TArgs): Disposable {
-    let cancelled = false
-
-    queueMicrotask(() => {
-      if (!cancelled) task(...args)
-    })
-
-    return disposeWith(() => {
-      cancelled = true
-    })
-  }
-
-  delay<TArgs extends readonly unknown[]>(task: ITask<TArgs>, delay: number, ...args: TArgs): Disposable {
-    let cancelled = false
-
-    const timeoutId = setTimeout(() => {
-      if (!cancelled) task(...args)
-    }, delay)
-
-    return disposeWith(() => {
-      cancelled = true
-      clearTimeout(timeoutId)
-    })
-  }
-
-  time(): number {
-    return performance.now()
-  }
-}
-
 export function createDefaultScheduler(): IScheduler {
-  return new DefaultScheduler()
+  // Check if we're in Node.js environment
+  if (
+    typeof globalThis !== 'undefined' &&
+    typeof globalThis.process !== 'undefined' &&
+    typeof globalThis.process.versions !== 'undefined' &&
+    typeof globalThis.process.versions.node !== 'undefined' &&
+    typeof setImmediate === 'function'
+  ) {
+    return createNodeScheduler()
+  }
+
+  // Default to browser scheduler
+  return createBrowserScheduler()
 }

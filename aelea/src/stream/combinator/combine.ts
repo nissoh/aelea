@@ -1,18 +1,22 @@
-import { now } from '../source/stream.js'
+import { empty, now } from '../source/stream.js'
 import { stream } from '../stream.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
+import { map } from './map.js'
 
 export function combine<T extends readonly unknown[], R>(
   f: (...args: T) => R,
   ...sources: [...{ [K in keyof T]: IStream<T[K]> }]
 ): IStream<R> {
+  const l = sources.length
+
+  if (l === 0) return empty
+  if (l === 1) return map(f as any, sources[0])
+
   return stream((scheduler: IScheduler, sink: ISink<R>) => {
-    const l = sources.length
     const disposables = new Array(l)
     const sinks = new Array(l)
-
     const mergeSink = new CombineSink(disposables, sinks.length, sink, f)
 
     for (let indexSink: IndexSink<any>, i = 0; i < l; ++i) {
@@ -31,10 +35,9 @@ export function combineState<A>(
 ): IStream<Readonly<A>> {
   const keys = Object.keys(state) as (keyof A)[]
   const sources = Object.values(state) as IStream<any>[]
+  const l = sources.length
 
-  if (sources.length === 0) {
-    return now({} as A)
-  }
+  if (l === 0) return now({} as A)
 
   return stream((scheduler, sink) => {
     const result = {} as A
@@ -51,7 +54,7 @@ export function combineState<A>(
   })
 }
 
-class CombineSink<A, B> implements ISink<IndexedValue<A>> {
+class CombineSink<I, O> implements ISink<IndexedValue<I | undefined>> {
   awaiting: number
   readonly values: any[]
   readonly hasValue: boolean[]
@@ -60,15 +63,15 @@ class CombineSink<A, B> implements ISink<IndexedValue<A>> {
   constructor(
     readonly disposables: Disposable[],
     sinkCount: number,
-    protected readonly sink: ISink<B>,
-    readonly f: (...args: any[]) => B
+    protected readonly sink: ISink<O>,
+    readonly f: (...args: any[]) => O
   ) {
     this.awaiting = this.activeCount = sinkCount
     this.values = new Array(sinkCount)
     this.hasValue = new Array(sinkCount).fill(false)
   }
 
-  event(indexedValue: IndexedValue<A>): void {
+  event(indexedValue: IndexedValue<I>): void {
     const i = indexedValue.index
 
     if (!indexedValue.active) {

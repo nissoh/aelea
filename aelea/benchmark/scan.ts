@@ -1,61 +1,22 @@
 import * as MC from '@most/core'
-import * as MS from '@most/scheduler'
 import { Bench } from 'tinybench'
-import { createDefaultScheduler, fromArray, op, scan, tap } from '../src/stream/index.js'
+import { fromArray, op, scan } from '../src/stream/index.js'
+import { fromArrayM, runMost, runStream } from './utils.js'
 
 const bench = new Bench({ time: 100 })
 
 const n = 1000000
-
 const arr = Array.from({ length: n }, (_, i) => i)
 
-const sum = (x: number, y: number) => {
-  // console.log(x, y)
-  return x + y
-}
-
-// Remove custom fromArray - using the imported one
-
-const fromArrayM = <A>(arr: readonly A[]) =>
-  MC.newStream<A>((sink, s) =>
-    MS.asap(
-      {
-        run(t) {
-          for (const a of arr) sink.event(t, a)
-          sink.end(t)
-        },
-        error(t, e) {
-          sink.error(t, e)
-        },
-        dispose() {}
-      },
-      s
-    )
-  )
+const sum = (x: number, y: number) => x + y
 
 bench
-  .add(`mc1 scan ${n}`, () => {
-    let r = 0
-    const s0 = MC.scan(sum, 0, fromArrayM(arr))
-    const s = MC.tap((x) => (r = x), s0)
-    return MC.runEffects(s, MS.newDefaultScheduler()).then(() => r)
+  .add(`@most/core scan ${n}`, () => {
+    const stream = MC.scan(sum, 0, fromArrayM(arr))
+    return runMost(stream)
   })
-  .add(`mc2 scan ${n}`, () => {
-    let r = 0
-    return new Promise((resolve) => {
-      const stream = op(
-        fromArray(arr),
-        scan(sum, 0),
-        tap((x) => (r = x))
-      )
-      stream.run(createDefaultScheduler(), {
-        event: () => {},
-        error: (e) => {
-          throw e
-        },
-        end: () => resolve(r)
-      })
-    })
+  .add(`@aelea scan ${n}`, () => {
+    return runStream(op(fromArray(arr), scan(sum, 0)))
   })
 
 await bench.run()

@@ -1,20 +1,20 @@
+import { empty } from '../source/stream.js'
 import { stream } from '../stream.js'
 import type { ISink, IStream } from '../types.js'
-import { disposeAll, disposeNone } from '../utils/disposable.js'
+import { disposeAll } from '../utils/disposable.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
 
 export function merge<T extends readonly unknown[]>(
   ...sourceList: readonly [...{ [K in keyof T]: IStream<T[K]> }]
 ): IStream<T[number]> {
+  const l = sourceList.length
+
+  if (l === 0) return empty
+  if (l === 1) return sourceList[0]
+
   return stream((scheduler, sink) => {
-    const l = sourceList.length
-
-    if (l === 0) return disposeNone
-    if (l === 1) return sourceList[0].run(scheduler, sink)
-
     const disposables = new Array<Disposable>(l)
     const sinks: ISink<unknown>[] = new Array(l)
-
     const mergeSink = new MergeSink(sink, disposables, l)
 
     for (let indexSink: IndexSink<any>, i = 0; i < l; ++i) {

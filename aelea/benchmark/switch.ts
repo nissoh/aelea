@@ -1,7 +1,7 @@
 import * as MC from '@most/core'
-import * as MS from '@most/scheduler'
 import { Bench } from 'tinybench'
-import { createDefaultScheduler, fromArray, map, op, scan, switchLatest, tap } from '../src/stream/index.js'
+import { fromArray, map, op, scan, switchLatest } from '../src/stream/index.js'
+import { fromArrayM, runMost, runStream } from './utils.js'
 
 const bench = new Bench({ time: 100 })
 
@@ -9,56 +9,15 @@ const n = 1000
 const m = 1000
 
 const arr = Array.from({ length: n }, () => Array.from({ length: m }, (_, j) => j))
-
-const sum = (x: number, y: number) => {
-  // console.log(x, y)
-  return x + y
-}
-
-// Removed custom fromArray - using the imported one
-
-const fromArrayM = <A>(arr: readonly A[]) =>
-  MC.newStream<A>((sink, s) =>
-    MS.asap(
-      {
-        run(t) {
-          for (const a of arr) sink.event(t, a)
-          sink.end(t)
-        },
-        error(t, e) {
-          sink.error(t, e)
-        },
-        dispose() {}
-      },
-      s
-    )
-  )
+const sum = (x: number, y: number) => x + y
 
 bench
   .add(`@most/core switch ${n} x ${m}`, () => {
-    let r = 0
-    const s0 = MC.scan(sum, 0, MC.switchLatest(MC.map(fromArrayM, fromArrayM(arr))))
-    const s = MC.tap((x) => (r = x), s0)
-    return MC.runEffects(s, MS.newDefaultScheduler()).then(() => r)
+    const stream = MC.scan(sum, 0, MC.switchLatest(MC.map(fromArrayM, fromArrayM(arr))))
+    return runMost(stream)
   })
   .add(`@aelea switch ${n} x ${m}`, () => {
-    let r = 0
-    const stream = op(
-      fromArray(arr),
-      map((arr: readonly number[]) => fromArray(arr)),
-      switchLatest,
-      scan(sum, 0),
-      tap((x) => (r = x))
-    )
-    return new Promise((resolve) => {
-      stream.run(createDefaultScheduler(), {
-        event: () => {},
-        error: (e) => {
-          throw e
-        },
-        end: () => resolve(r)
-      })
-    })
+    return runStream(op(fromArray(arr), map(fromArray), switchLatest, scan(sum, 0)))
   })
 
 bench.addEventListener('error', console.error)

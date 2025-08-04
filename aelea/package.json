@@ -6,7 +6,9 @@
     "build": "bun run build:clean && bun run bunx tsc -b",
     "build:esm": "tsc -b",
     "build:clean": "rm -rf dist",
-    "tsc:check": "bun run bunx tsc -p tsconfig.json --noEmit"
+    "tsc:check": "bun run bunx tsc -p tsconfig.json --noEmit",
+    "bench": "bun run benchmark/scheduler.ts",
+    "bench:combinators": "bun run benchmark/combinators.ts"
   },
   "license": "MIT",
   "author": "Nissan Hanina <nissanhanina@gmail.com>",
