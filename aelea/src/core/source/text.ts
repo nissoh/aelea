@@ -30,10 +30,14 @@ class DynamicTextSink extends PipeSink<string, ISlottable<Text>> {
       this.textNode = document.createTextNode(value)
       this.emitted = true
       // DOM tree creation happens in asap phase
-      this.scheduler.asap(eventText, {
-        element: this.textNode,
-        disposable: this.disposable
-      }, this.sink)
+      this.scheduler.asap(
+        eventText,
+        {
+          element: this.textNode,
+          disposable: this.disposable
+        },
+        this.sink
+      )
     } else if (this.textNode) {
       // Subsequent emissions - just update the text content
       this.textNode.nodeValue = value
@@ -60,10 +64,14 @@ function createStaticTextStream(text: string): I$Text {
   return stream((sink, scheduler) => {
     const disposable = new SettableDisposable()
     // DOM tree creation happens in asap phase
-    scheduler.asap(eventText, {
-      element: document.createTextNode(text),
-      disposable
-    }, sink)
+    scheduler.asap(
+      eventText,
+      {
+        element: document.createTextNode(text),
+        disposable
+      },
+      sink
+    )
 
     return disposable
   })
