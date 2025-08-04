@@ -20,7 +20,7 @@ export function zipState<A>(
   return stream((sink, scheduler) => {
     const result = {} as A
 
-    return zip(
+    return zipMap(
       (...values) => {
         for (let i = 0; i < keys.length; i++) {
           result[keys[i]] = values[i]
@@ -37,9 +37,9 @@ export function zipState<A>(
  *
  * streamA: -1---2---3------->
  * streamB: ---a---b---c----->
- * zip:     ---[1,a]-[2,b]-[3,c]->
+ * zipMap:  ---[1,a]-[2,b]-[3,c]->
  */
-export function zip<T extends readonly unknown[], R>(
+export function zipMap<T extends readonly unknown[], R>(
   f: (...args: T) => R,
   ...sourceList: [...{ [K in keyof T]: IStream<T[K]> }]
 ): IStream<R> {
@@ -53,7 +53,7 @@ export function zip<T extends readonly unknown[], R>(
     const sinks = new Array(l)
     const buffers = new Array(l)
 
-    const zipSink = new ZipSink(f, buffers, sinks, sink)
+    const zipSink = new ZipMapSink(f, buffers, sinks, sink)
 
     for (let i = 0; i < l; ++i) {
       buffers[i] = new Queue()
@@ -91,7 +91,7 @@ interface IndexedValue<T> {
   active: boolean
 }
 
-class ZipSink<I, O> implements ISink<IndexedValue<I | undefined>> {
+class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
   constructor(
     private readonly f: (...args: any[]) => O,
     private readonly buffers: ArrayLike<Queue<I>>,
@@ -142,7 +142,7 @@ class ZipSink<I, O> implements ISink<IndexedValue<I | undefined>> {
   }
 
   end(): void {
-    // This should not be called directly as zip manages its own lifecycle
+    // This should not be called directly as zipMap manages its own lifecycle
     // through activeCount tracking
     // If we reach here, it means all sources ended without errors
     this.sink.end()

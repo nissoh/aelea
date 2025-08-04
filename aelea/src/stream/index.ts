@@ -1,7 +1,6 @@
 export {
   aggregate,
-  chain,
-  combine,
+  combineMap,
   combineState,
   constant,
   continueWith,
@@ -13,17 +12,18 @@ export {
   fromCallback,
   fromPromise,
   join,
+  joinMap,
   map,
   merge,
-  mergeConcurrently,
+  mergeConcurrentlyMap,
   mergeMapConcurrently,
   sample,
+  sampleMap,
   since,
   skip,
   skipRepeats,
   skipRepeatsWith,
   slice,
-  snapshot,
   startWith,
   switchLatest,
   switchMap,
@@ -31,7 +31,7 @@ export {
   tap,
   throttle,
   until,
-  zip,
+  zipMap,
   zipState
 } from './combinator/index.js'
 export { behavior, multicast, replayLatest, replayState, tether } from './multicast/index.js'

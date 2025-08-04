@@ -1,5 +1,5 @@
 import { $node, $text, attr, component, style } from 'aelea/core'
-import { combine, empty, type IBehavior, map, o, startWith } from 'aelea/stream'
+import { combineMap, empty, type IBehavior, map, o, startWith } from 'aelea/stream'
 import { $column, $Field, $NumberTicker, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 
@@ -38,7 +38,7 @@ export default component(([x, XTether]: IBehavior<string, number>, [y, YTether]:
     $row(
       $node(style({ width: '36px' }))(),
       $NumberTicker({
-        value$: combine(add, x, y),
+        value$: combineMap(add, x, y),
         decrementColor: pallete.negative,
         incrementColor: pallete.positive,
         slots: 30

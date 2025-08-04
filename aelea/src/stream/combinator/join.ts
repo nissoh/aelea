@@ -3,9 +3,10 @@ import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeAll, disposeNone } from '../utils/disposable.js'
 import { curry2, curry3 } from '../utils/function.js'
 
-export const join = <A>(stream: IStream<IStream<A>>): IStream<A> => mergeConcurrently(Number.POSITIVE_INFINITY, stream)
+export const join = <A>(stream: IStream<IStream<A>>): IStream<A> =>
+  mergeConcurrentlyMap(Number.POSITIVE_INFINITY, stream)
 
-export const mergeConcurrently: IMergeConcurrentlyCurry = curry2((concurrency, stream) =>
+export const mergeConcurrentlyMap: IMergeConcurrentlyMapCurry = curry2((concurrency, stream) =>
   mergeMapConcurrently((s) => s, concurrency, stream)
 )
 
@@ -126,7 +127,7 @@ class Inner<A> implements ISink<A>, Disposable {
   }
 }
 
-export interface IMergeConcurrentlyCurry {
+export interface IMergeConcurrentlyMapCurry {
   <A>(concurrency: number, stream: IStream<IStream<A>>): IStream<A>
   <A>(concurrency: number): (stream: IStream<IStream<A>>) => IStream<A>
 }

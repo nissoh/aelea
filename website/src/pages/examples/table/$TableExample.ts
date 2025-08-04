@@ -1,5 +1,5 @@
 import { $node, $text, component, style } from 'aelea/core'
-import { combine, type IBehavior, type IStream, map, merge, now } from 'aelea/stream'
+import { combineMap, type IBehavior, type IStream, map, merge, now } from 'aelea/stream'
 import { $card, $Table, type ISortBy, type ScrollRequest, type TablePageResponse } from 'aelea/ui-components'
 
 interface ITableRow {
@@ -28,7 +28,7 @@ export const $TableExample = component(
 
     const sortState = merge(initialSort, sortBy)
 
-    const dataSource = combine(
+    const dataSource = combineMap(
       (sortField, _): TablePageResponse<ITableRow> => {
         return {
           data: data.sort((a, b) => {

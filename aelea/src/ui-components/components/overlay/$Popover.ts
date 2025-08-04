@@ -21,7 +21,7 @@ import {
   op,
   switchLatest,
   until,
-  zip
+  zipMap
 } from '../../../stream/index.js'
 import { colorAlpha } from '../../../ui-components-theme/color.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
@@ -68,7 +68,7 @@ export const $Popover = ({
       const contentOps = $contentContainer(
         popoverContentDimensionTether(observer.resize({})),
         styleBehavior(
-          zip(
+          zipMap(
             ([contentRect], [targetRect]) => {
               const screenWidth = targetRect.rootBounds?.width ?? window.innerWidth
               const targetBound = targetRect.intersectionRect

@@ -1,5 +1,5 @@
 import { Bench } from 'tinybench'
-import { combine, createDefaultScheduler, type IStream, merge, stream, zip } from '../src/stream/index.js'
+import { combineMap, createDefaultScheduler, type IStream, merge, stream, zip } from '../src/stream/index.js'
 
 // Create a stream that emits values with controlled timing
 function createControlledStream(values: number[], delayMs = 0): IStream<number> {
@@ -102,7 +102,7 @@ const mergeOrderTest = async () => {
 const combineOrderTest = async () => {
   const s1 = createControlledStream([1, 2, 3])
   const s2 = createControlledStream([10, 20, 30])
-  const combined = combine((a, b) => [a, b], s1, s2)
+  const combined = combineMap((a, b) => [a, b], s1, s2)
 
   const events: [number, number][] = []
   const scheduler = createDefaultScheduler()
@@ -171,7 +171,7 @@ bench
     const streams = Array.from({ length: 10 }, (_, i) =>
       createControlledStream(Array.from({ length: 100 }, (_, j) => i * 100 + j))
     )
-    await measureStreamTime(combine((...args) => args.reduce((a, b) => a + b, 0), ...streams))
+    await measureStreamTime(combineMap((...args) => args.reduce((a, b) => a + b, 0), ...streams))
   })
 
   // Zip: Buffers values until all streams have emitted
@@ -199,7 +199,7 @@ bench
       Array.from({ length: 10 }, (_, i) => i * 1000),
       1
     )
-    await measureStreamTime(combine((a, b) => a + b, fast, slow))
+    await measureStreamTime(combineMap((a, b) => a + b, fast, slow))
   })
 
   .add('zip - asymmetric streams', async () => {
@@ -224,7 +224,7 @@ bench
     const streams = Array.from({ length: 10 }, (_, i) =>
       createControlledStream(Array.from({ length: i === 0 ? 10 : 1000 }, (_, j) => j))
     )
-    await measureStreamTime(combine((...args) => args.reduce((a, b) => a + b, 0), ...streams))
+    await measureStreamTime(combineMap((...args) => args.reduce((a, b) => a + b, 0), ...streams))
   })
 
   .add('zip - early termination', async () => {
@@ -267,7 +267,7 @@ if (global.gc) {
   const combineStreams = Array.from({ length: 100 }, () =>
     createControlledStream(Array.from({ length: 1000 }, (_, i) => i))
   )
-  const combined = combine((...args) => args.reduce((a, b) => a + b), ...combineStreams)
+  const combined = combineMap((...args) => args.reduce((a, b) => a + b), ...combineStreams)
   const afterCombine = process.memoryUsage()
   console.log('\nCombine memory (100 streams × 1000 values):')
   console.log(`  Setup: ${((afterCombine.heapUsed - beforeCombine.heapUsed) / 1024 / 1024).toFixed(2)} MB`)

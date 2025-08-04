@@ -9,7 +9,7 @@ import {
   map,
   merge,
   now,
-  snapshot,
+  sampleMap,
   startWith,
   switchLatest
 } from 'aelea/stream'
@@ -47,7 +47,7 @@ export const $VirtualScrollExample = component(
 
     const dataSourceFilter = (filter: string) =>
       join(
-        snapshot(
+        sampleMap(
           (delay, requestNumber): IStream<ScrollResponse> => {
             const pageStart = requestNumber * PAGE_SIZE
             const pageEnd = pageStart + PAGE_SIZE

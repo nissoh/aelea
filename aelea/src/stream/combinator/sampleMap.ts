@@ -11,18 +11,18 @@ import { PipeSink } from '../utils/sink.js'
  * sampler: ---x---x---x----->
  * sample:  ---2---4---6----->
  */
-export const sample: ISampleCurry = curry2((values, sampler) => snapshot((x) => x, values, sampler))
+export const sample: ISampleCurry = curry2((values, sampler) => sampleMap((x) => x, values, sampler))
 
 /**
  * Combine values from two streams at sample times
  *
- * values:   -1-2-3-4-5-6->
- * sampler:  ---a---b---c->
- * snapshot: ---[2,a]-[4,b]-[6,c]->
+ * values:     -1-2-3-4-5-6->
+ * sampler:    ---a---b---c->
+ * sampleMap:  ---[2,a]-[4,b]-[6,c]->
  */
-export const snapshot: ISnapshotCurry = curry3((f, values, sampler) =>
+export const sampleMap: ISampleMapCurry = curry3((f, values, sampler) =>
   stream((sink, scheduler) => {
-    const seedSink = new SnapshotSink(f, sink)
+    const seedSink = new SampleMapSink(f, sink)
     const valuesDisposable = values.run(seedSink.seedSink, scheduler)
     const samplerDisposable = sampler.run(seedSink, scheduler)
 
@@ -30,7 +30,7 @@ export const snapshot: ISnapshotCurry = curry3((f, values, sampler) =>
   })
 )
 
-class SnapshotSink<A, B, C> extends PipeSink<B, C> {
+class SampleMapSink<A, B, C> extends PipeSink<B, C> {
   readonly seedSink: SeedSink<A>
 
   constructor(
@@ -78,7 +78,7 @@ export interface ISampleCurry {
   <A, B>(values: IStream<A>): (sampler: IStream<B>) => IStream<A>
 }
 
-export interface ISnapshotCurry {
+export interface ISampleMapCurry {
   <A, B, C>(f: (a: A, b: B) => C, values: IStream<A>, sampler: IStream<B>): IStream<C>
   <A, B, C>(f: (a: A, b: B) => C, values: IStream<A>): (sampler: IStream<B>) => IStream<C>
   <A, B, C>(f: (a: A, b: B) => C): (values: IStream<A>) => (sampler: IStream<B>) => IStream<C>

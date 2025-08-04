@@ -43,8 +43,8 @@ class SourceSink<T> implements ISink<T> {
   ) {}
 
   event(x: T): void {
-    this.latestValue = x
     this.hasValue = true
+    this.latestValue = x
 
     this.sink.event(x)
     for (const s of this.parent.tetherSinkList) {
@@ -58,10 +58,6 @@ class SourceSink<T> implements ISink<T> {
 
   error(e: Error): void {
     this.sink.error(e)
-    // Also propagate errors to tethered sinks
-    for (const s of this.parent.tetherSinkList) {
-      s.error(e)
-    }
   }
 }
 
@@ -82,7 +78,6 @@ class TetherSink<A> implements ISink<A> {
     if (this.sink) {
       this.sink.error(err)
     }
-    // Don't throw if sink is disposed - error is lost but won't crash
   }
 }
 
@@ -96,21 +91,18 @@ class Tether<T> implements IStream<T> {
 
   run(sink: SourceSink<T> | TetherSink<T>, scheduler: IScheduler): Disposable {
     if (sink instanceof SourceSink) {
-      // Only one primary sink allowed - dispose previous
       this.sourceDisposable[Symbol.dispose]()
-      // Clear previous sinks to prevent memory leak
-      this.sourceSinkList = [sink]
+      this.sourceSinkList.push(sink)
 
       this.sourceDisposable = this.source.run(sink, scheduler)
 
-      return disposeWith(() => {
-        const srcIdx = this.sourceSinkList.indexOf(sink)
-        if (srcIdx !== -1) {
+      return {
+        [Symbol.dispose]: () => {
+          const srcIdx = this.sourceSinkList.indexOf(sink)
           this.sourceSinkList.splice(srcIdx, 1)
+          this.sourceDisposable[Symbol.dispose]()
         }
-        this.sourceDisposable[Symbol.dispose]()
-        this.sourceDisposable = disposeNone
-      })
+      }
     }
 
     this.tetherSinkList.push(sink)
@@ -122,11 +114,13 @@ class Tether<T> implements IStream<T> {
     }
 
     return disposeWith(() => {
+      sink.end()
       const sinkIdx = this.tetherSinkList.indexOf(sink)
-      if (sinkIdx !== -1) {
+
+      if (sinkIdx > -1) {
+        // remove(sinkIdx, tetherSinkList)
         this.tetherSinkList.splice(sinkIdx, 1)
       }
-      // Don't call sink.end() here - let the source control that
     })
   }
 }

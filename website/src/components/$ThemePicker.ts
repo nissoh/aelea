@@ -1,5 +1,5 @@
 import { $svg, attr, component, type ISlottable, nodeEvent, style, stylePseudo } from 'aelea/core'
-import { type IBehavior, o, snapshot, startWith } from 'aelea/stream'
+import { type IBehavior, o, sampleMap, startWith } from 'aelea/stream'
 import { $icon } from 'aelea/ui-components'
 import { pallete, type Theme, theme } from 'aelea/ui-components-theme'
 import { setTheme } from 'aelea/ui-components-theme-browser'
@@ -19,7 +19,7 @@ export const $Picker = (themeList: Theme[]) =>
         stylePseudo(':hover', { fill: pallete.primary }),
         changeThemeEffectTether(
           nodeEvent('click'),
-          snapshot((current) => {
+          sampleMap((current) => {
             const toIdx = (themeList.indexOf(current) + 1) % themeList.length
             const toTheme = themeList[toIdx]
 

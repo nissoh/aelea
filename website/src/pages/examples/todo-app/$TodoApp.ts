@@ -1,10 +1,10 @@
 import { $element, $text, component, style } from 'aelea/core'
 import {
   behavior,
-  chain,
-  combine,
+  combineMap,
   empty,
   type IBehavior,
+  joinMap,
   merge,
   now,
   replayState,
@@ -47,7 +47,7 @@ export default (todos: Todo[]) =>
           ),
 
           $column(spacing.small)(
-            chain(
+            joinMap(
               (todo: Todo) => {
                 const [remove, removeTether] = behavior<MouseEvent, MouseEvent>()
                 const [completed, completedTether] = behavior<boolean, boolean>()
@@ -56,7 +56,7 @@ export default (todos: Todo[]) =>
 
                 return until(remove)(
                   switchLatest(
-                    combine(
+                    combineMap(
                       (onlyCompleted, isCompleted) =>
                         onlyCompleted === isCompleted
                           ? $TodoItem({

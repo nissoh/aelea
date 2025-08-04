@@ -5,12 +5,12 @@ import { mergeMapConcurrently } from './join.js'
 /**
  * Map each value to a stream and flatten all resulting streams (flatMap)
  *
- * stream:              -1----2----3->
- * chain(x => [x,x+1]): -1-2--2-3--3-4->
+ * stream:                 -1----2----3->
+ * joinMap(x => [x,x+1]):  -1-2--2-3--3-4->
  */
-export const chain: IChainCurry = curry2((f, source) => mergeMapConcurrently(f, Number.POSITIVE_INFINITY, source))
+export const joinMap: IJoinMapCurry = curry2((f, source) => mergeMapConcurrently(f, Number.POSITIVE_INFINITY, source))
 
-export interface IChainCurry {
+export interface IJoinMapCurry {
   <A, B>(f: (a: A) => IStream<B>, source: IStream<A>): IStream<B>
   <A, B>(f: (a: A) => IStream<B>): (source: IStream<A>) => IStream<B>
 }

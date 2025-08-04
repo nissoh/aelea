@@ -1,5 +1,5 @@
 import { $element, attr, component, type INode, nodeEvent, styleBehavior } from '../../../core/index.js'
-import { empty, type IBehavior, map, merge, op, snapshot } from '../../../stream/index.js'
+import { empty, type IBehavior, map, merge, op, sampleMap } from '../../../stream/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'
@@ -45,7 +45,7 @@ export const $Autocomplete = ({ type = InputType.TEXT, value = empty, name, plac
           dismissTether(dismissOp),
 
           changeTether((inputNode) =>
-            snapshot(
+            sampleMap(
               (node, text) => {
                 // applying by setting `HTMLInputElement.value` imperatively(only way known to me)
                 node.element.value = String(text)

@@ -1,5 +1,5 @@
 import type { IStream } from '../../stream/index.js'
-import { chain, curry2, disposeWith, fromCallback, isStream } from '../../stream/index.js'
+import { curry2, disposeWith, fromCallback, isStream, joinMap } from '../../stream/index.js'
 import type { I$Slottable, INodeElement } from '../types.js'
 
 type PickEvent<A, B> = A extends keyof B ? B[A] : Event
@@ -51,12 +51,12 @@ export interface INodeEventCurry {
 
 export const nodeEvent: INodeEventCurry = curry2((eventType, descriptor) => {
   if (isStream(descriptor)) {
-    return chain((ns) => {
+    return joinMap((ns) => {
       return eventElementTarget(eventType, ns.element, { capture: true })
     }, descriptor)
   }
 
-  return chain((ns) => {
+  return joinMap((ns) => {
     return eventElementTarget(eventType, ns.element, descriptor.options)
   }, descriptor.$node)
 })

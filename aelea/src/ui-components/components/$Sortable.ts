@@ -5,18 +5,18 @@ import { motion } from '../../core/index.js'
 import type { I$Node, ISlottable } from '../../core/types.js'
 import {
   behavior,
-  chain,
-  combine,
+  combineMap,
   delay,
   filter,
   type IBehavior,
+  joinMap,
   map,
   merge,
   multicast,
   now,
   o,
+  sampleMap,
   skipRepeats,
-  snapshot,
   startWith,
   switchLatest,
   until
@@ -99,7 +99,7 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
           )(orderMulticat)
 
           const yDragPosition = merge(
-            chain((s) => {
+            joinMap((s) => {
               if (s.isDragging) {
                 return now(s.delta)
               }
@@ -109,7 +109,7 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
             draggingMotion(startWith(i * iHeight, yMotion))
           )
 
-          const applyTransformStyle = combine(
+          const applyTransformStyle = combineMap(
             (ypos, scale) => ({
               transform: `translateY(${ypos}px) scale(${scale})`
             }),
@@ -137,8 +137,8 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
           return $dragItem(
             dragYTether(
               nodeEvent('pointerdown'),
-              // list order continously changing, snapshot is used to get a(snapshot) of the latest list
-              snapshot((list, startEv) => {
+              // list order continously changing, sampleMap is used to get a sample of the latest list
+              sampleMap((list, startEv) => {
                 const drag = merge(eventElementTarget('pointerup', window), eventElementTarget('pointermove', window))
                 const moveUntilUp = until(
                   filter((ev) => ev.type === 'pointerup', drag),

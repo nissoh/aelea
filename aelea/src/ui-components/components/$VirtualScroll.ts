@@ -5,13 +5,13 @@ import { $text } from '../../core/source/text.js'
 import type { I$Node, I$Slottable, INode } from '../../core/types.js'
 import {
   aggregate,
-  chain,
   delay,
   empty,
   filter,
   type IBehavior,
   type IOps,
   type IStream,
+  joinMap,
   map,
   merge,
   multicast,
@@ -94,7 +94,7 @@ export const $VirtualScroll = ({ dataSource, containerOps = o(), $loader = $defa
 
     return [
       $container(
-        chain(($list) => {
+        joinMap(($list) => {
           const $items = Array.isArray($list) ? $list : $list.$items
           return merge(...$items)
         }, multicastDatasource),

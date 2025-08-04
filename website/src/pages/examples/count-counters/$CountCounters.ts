@@ -2,14 +2,14 @@ import { $node, $text, component, style } from 'aelea/core'
 import {
   aggregate,
   behavior,
-  chain,
   constant,
   type IBehavior,
+  joinMap,
   map,
   merge,
   now,
   replayState,
-  snapshot,
+  sampleMap,
   until
 } from 'aelea/stream'
 import { $Button, $column, $row, $seperator, spacing } from 'aelea/ui-components'
@@ -53,7 +53,7 @@ export default component(
             click: addedCounterTether()
           })
         ),
-        chain(() => {
+        joinMap(() => {
           const [remove, removeTether] = behavior<PointerEvent, PointerEvent>()
           const [valueChange, valueChangeTether] = behavior<number, number>()
 
@@ -67,15 +67,15 @@ export default component(
                 $TrashBtn({
                   click: removeTether(
                     disposeCounterTether(),
-                    disposedCounterCountTether(snapshot((val) => -val, value))
+                    disposedCounterCountTether(sampleMap((val) => -val, value))
                   )
                 }),
                 $Counter({ value })({
                   increment: countersIncrementTether(
-                    valueChangeTether(snapshot((val, increment) => val + increment, value))
+                    valueChangeTether(sampleMap((val, increment) => val + increment, value))
                   ),
                   decrement: countersDecrementTether(
-                    valueChangeTether(snapshot((val, increment) => val + increment, value))
+                    valueChangeTether(sampleMap((val, increment) => val + increment, value))
                   )
                 })
               )

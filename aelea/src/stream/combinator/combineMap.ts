@@ -8,11 +8,11 @@ import { map } from './map.js'
 /**
  * Combine latest values from multiple streams whenever any stream emits
  *
- * streamA: -1---2-------3->
- * streamB: ---a---b-c------>
- * combine: ---[1,a]-[2,a]-[2,b]-[2,c]-[3,c]->
+ * streamA:    -1---2-------3->
+ * streamB:    ---a---b-c------>
+ * combineMap: ---[1,a]-[2,a]-[2,b]-[2,c]-[3,c]->
  */
-export function combine<T extends readonly unknown[], R>(
+export function combineMap<T extends readonly unknown[], R>(
   f: (...args: T) => R,
   ...sources: [...{ [K in keyof T]: IStream<T[K]> }]
 ): IStream<R> {
@@ -24,7 +24,7 @@ export function combine<T extends readonly unknown[], R>(
   return stream((sink: ISink<R>, scheduler: IScheduler) => {
     const disposables = new Array(l)
     const sinks = new Array(l)
-    const mergeSink = new CombineSink(disposables, sinks.length, sink, f)
+    const mergeSink = new CombineMapSink(disposables, sinks.length, sink, f)
 
     for (let indexSink: IndexSink<any>, i = 0; i < l; ++i) {
       indexSink = sinks[i] = new IndexSink(mergeSink, i)
@@ -49,7 +49,7 @@ export function combineState<A>(
   return stream((sink, scheduler) => {
     const result = {} as A
 
-    return combine(
+    return combineMap(
       (...values) => {
         for (let i = 0; i < keys.length; i++) {
           result[keys[i]] = values[i]
@@ -61,7 +61,7 @@ export function combineState<A>(
   })
 }
 
-class CombineSink<I, O> implements ISink<IndexedValue<I | undefined>> {
+class CombineMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
   awaiting: number
   readonly values: any[]
   readonly hasValue: boolean[]
@@ -107,7 +107,7 @@ class CombineSink<I, O> implements ISink<IndexedValue<I | undefined>> {
   }
 
   end(): void {
-    // This should not be called directly as combine manages its own lifecycle
+    // This should not be called directly as combineMap manages its own lifecycle
     // through activeCount tracking
     // If we reach here, it means all sources ended without errors
     this.sink.end()

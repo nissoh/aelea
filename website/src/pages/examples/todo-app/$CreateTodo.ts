@@ -1,5 +1,5 @@
 import { $text, component, style } from 'aelea/core'
-import { constant, type IBehavior, map, merge, now, snapshot, startWith } from 'aelea/stream'
+import { constant, type IBehavior, map, merge, now, sampleMap, startWith } from 'aelea/stream'
 import { $Button, $Field, $row } from 'aelea/ui-components'
 
 let iid = 0
@@ -28,7 +28,7 @@ export default component(
     const valueChahnges = merge(inputChange, value)
     const disabled = map((x) => !x, valueChahnges)
 
-    const add = snapshot((text) => ({ id: iid++, text, completed: false }), inputState, create)
+    const add = sampleMap((text) => ({ id: iid++, text, completed: false }), inputState, create)
 
     return [
       $row(style({ flex: 1 }))(

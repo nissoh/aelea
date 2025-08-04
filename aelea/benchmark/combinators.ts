@@ -1,6 +1,6 @@
 import * as MC from '@most/core'
 import { Bench } from 'tinybench'
-import { combine, fromArray, merge, op, tap, zip } from '../src/stream/index.js'
+import { combineMap, fromArray, merge, op, tap, zipMap } from '../src/stream/index.js'
 import { fromArrayM, runMost, runStream } from './utils.js'
 
 const bench = new Bench({ time: 100 })
@@ -60,7 +60,7 @@ bench
     const s2 = fromArray(numbers)
     return runStream(
       op(
-        combine(sum, s1, s2),
+        combineMap(sum, s1, s2),
         tap((x: number) => x)
       )
     )
@@ -79,7 +79,7 @@ bench
     const s3 = fromArray(numbers)
     return runStream(
       op(
-        combine(add3, s1, s2, s3),
+        combineMap(add3, s1, s2, s3),
         tap((x: number) => x)
       )
     )
@@ -96,7 +96,7 @@ bench
     const s2 = fromArray(numbers)
     return runStream(
       op(
-        zip(sum, s1, s2),
+        zipMap(sum, s1, s2),
         tap((x: number) => x)
       )
     )
@@ -115,7 +115,7 @@ bench
     const s3 = fromArray(numbers)
     return runStream(
       op(
-        zip(add3, s1, s2, s3),
+        zipMap(add3, s1, s2, s3),
         tap((x: number) => x)
       )
     )
@@ -135,7 +135,7 @@ bench
     const streams = arrays.slice(0, 3).map((arr) => fromArray(arr))
     return runStream(
       op(
-        combine(add3, ...(streams as [any, any, any])),
+        combineMap(add3, ...(streams as [any, any, any])),
         tap((x: number) => x)
       )
     )
@@ -144,7 +144,7 @@ bench
     const streams = arrays.slice(0, 3).map((arr) => fromArray(arr))
     return runStream(
       op(
-        zip(add3, ...(streams as [any, any, any])),
+        zipMap(add3, ...(streams as [any, any, any])),
         tap((x: number) => x)
       )
     )
