@@ -25,7 +25,6 @@ export interface Field extends Input<string | number> {
   type?: InputType
   name?: string
   fieldStyle?: IStyleCSS
-
   inputOp?: IOps<INode>
 }
 
@@ -38,9 +37,7 @@ export const $Field = ({ value = empty, fieldStyle = {}, validation = constant(n
       [change, changeTether]: IBehavior<INode<HTMLInputElement>, string>
     ) => {
       const multicastValidation = o(validation, startWith(''), multicast)
-
       const alert = multicastValidation(change)
-
       const focus = merge(focusStyle, dismissstyle)
       const state = combine({ focus, alert })
 
@@ -83,7 +80,6 @@ export const $Field = ({ value = empty, fieldStyle = {}, validation = constant(n
                 filter(
                   () => false,
                   tap(val => {
-                    // applying by setting `HTMLInputElement.value` imperatively(only way known to me)
                     node.element.value = String(val)
                   }, value)
                 )

@@ -45,13 +45,10 @@ export function toDisposable(value: any): Disposable {
   return disposeNone
 }
 
-export const disposeAll = (disposables: readonly Disposable[]): Disposable => ({
-  [Symbol.dispose]: () => {
-    for (const d of disposables) {
-      d[Symbol.dispose]()
-    }
-  }
-})
+export const disposeAll = (disposables: Iterable<Disposable>): Disposable =>
+  disposeWith(() => {
+    for (const d of disposables) d[Symbol.dispose]()
+  })
 
 export const disposeNone: Disposable = {
   [Symbol.dispose]: () => {}

@@ -4,13 +4,13 @@ import type { I$Slottable, ICreateComponent, IOutputTethers } from '../types.js'
 
 type IComponent = <T>(oTether: ICreateComponent<T>) => (iTether: IOutputTethers<T>) => I$Slottable
 
-export const component: IComponent = callCreate => iTether2 => {
-  // Create behavior pairs based on component's arity
-  // Each behavior is a [stream, tether] tuple for bidirectional data flow
-  const behaviors = Array(callCreate.length).fill(null).map(behavior)
-  const [view, outputSources] = callCreate(...behaviors)
-
+export const component: IComponent = createCallback => iTether2 => {
   return stream((sink, scheduler) => {
+    // Create behavior pairs based on component's arity
+    // Each behavior is a [stream, tether] tuple for bidirectional data flow
+    const behaviors = Array(createCallback.length).fill(null).map(behavior)
+    const [view, outputSources] = createCallback(...behaviors)
+
     const outputDisposables: Disposable[] = []
 
     for (const k in iTether2) {
@@ -25,6 +25,7 @@ export const component: IComponent = callCreate => iTether2 => {
       }
     }
 
-    return disposeBoth(view.run(sink, scheduler), disposeAll(outputDisposables))
+    const viewDisposable = view.run(sink, scheduler)
+    return disposeBoth(viewDisposable, disposeAll(outputDisposables))
   })
 }
