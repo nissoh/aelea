@@ -35,9 +35,9 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
         ),
         styleInline(
           map(
-            (s) => ({ height: `${s}%` }),
+            s => ({ height: `${s}%` }),
             switchLatest(
-              map((_) => {
+              map(_ => {
                 return motion({ stiffness: 160, damping: 36, precision: 0.1 }, fromArray([0, 100]))
               }, change)
             )
@@ -92,7 +92,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                     return value
                   }
                 ),
-                filter((node) => node !== never),
+                filter(node => node !== never),
                 startWith(
                   $node(style({ color: pallete.foreground, fontSize: '75%' }))($text('Loading Typescript Service...'))
                 )

@@ -27,7 +27,7 @@ export const $ButtonIcon = ($content: I$Slottable) =>
         clickTether(nodeEvent('pointerup')),
 
         styleBehavior(
-          map((active) => (active ? { borderColor: pallete.primary } : null), merge(focusStyle, dismissstyle))
+          map(active => (active ? { borderColor: pallete.primary } : null), merge(focusStyle, dismissstyle))
         )
       )
 

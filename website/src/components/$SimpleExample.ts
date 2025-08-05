@@ -4,7 +4,7 @@ import { type IBehavior, map } from 'aelea/stream'
 export default component(([input, inputTether]: IBehavior<INode<HTMLInputElement>, string>) => {
   const inputBehavior = inputTether(
     nodeEvent('input'),
-    map((inputEv) => {
+    map(inputEv => {
       if (inputEv.target instanceof HTMLInputElement) {
         return inputEv.target.value
       }

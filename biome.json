@@ -62,7 +62,8 @@
     "formatter": {
       "quoteStyle": "single",
       "trailingCommas": "none",
-      "semicolons": "asNeeded"
+      "semicolons": "asNeeded",
+      "arrowParentheses": "asNeeded"
     }
   },
   "assist": {

@@ -1,4 +1,4 @@
-import { empty, type ISink, type IStream, merge, PipeSink } from '../../stream/index.js'
+import { disposeNone, empty, type ISink, type IStream, merge } from '../../stream/index.js'
 import { stream } from '../stream.js'
 import type { I$Scheduler, ISlottable } from '../types.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
@@ -12,17 +12,16 @@ function createDynamicTextStream(textSource: IStream<string>): I$Text {
   })
 }
 
-class DynamicTextSink extends PipeSink<string, ISlottable<Text>> {
+class DynamicTextSink implements ISink<string> {
   private textNode: Text | null = null
   private emitted = false
+  private currentDisposable: Disposable = disposeNone
 
   constructor(
-    sink: ISink<ISlottable<Text>>,
+    readonly sink: ISink<ISlottable<Text>>,
     private readonly disposable: SettableDisposable,
     private readonly scheduler: I$Scheduler
-  ) {
-    super(sink)
-  }
+  ) {}
 
   event(value: string): void {
     if (!this.emitted) {
@@ -30,18 +29,26 @@ class DynamicTextSink extends PipeSink<string, ISlottable<Text>> {
       this.textNode = document.createTextNode(value)
       this.emitted = true
       // DOM tree creation happens in asap phase
-      this.scheduler.asap(
-        eventText,
-        {
-          element: this.textNode,
-          disposable: this.disposable
-        },
-        this.sink
-      )
+      this.currentDisposable = this.scheduler.asap(eventText, this.sink, {
+        element: this.textNode,
+        disposable: this.disposable
+      })
     } else if (this.textNode) {
       // Subsequent emissions - just update the text content
       this.textNode.nodeValue = value
     }
+  }
+
+  end(): void {
+    this.currentDisposable[Symbol.dispose]()
+    this.currentDisposable = disposeNone
+    this.textNode = null
+    this.emitted = false
+    this.sink.end()
+  }
+
+  error(e: any): void {
+    this.sink.error(e)
   }
 }
 
@@ -53,7 +60,7 @@ export const $text = (...textSourceList: (IStream<string> | string)[]): I$Text =
     return typeof source === 'string' ? createStaticTextStream(source) : createDynamicTextStream(source)
   }
 
-  const streams = textSourceList.map((source) =>
+  const streams = textSourceList.map(source =>
     typeof source === 'string' ? createStaticTextStream(source) : createDynamicTextStream(source)
   )
 
@@ -64,19 +71,15 @@ function createStaticTextStream(text: string): I$Text {
   return stream((sink, scheduler) => {
     const disposable = new SettableDisposable()
     // DOM tree creation happens in asap phase
-    scheduler.asap(
-      eventText,
-      {
-        element: document.createTextNode(text),
-        disposable
-      },
-      sink
-    )
+    scheduler.asap(eventText, sink, {
+      element: document.createTextNode(text),
+      disposable
+    })
 
     return disposable
   })
 }
 
-function eventText(value: ISlottable<Text>, sink: ISink<ISlottable<Text>>): void {
+function eventText(sink: ISink<ISlottable<Text>>, value: ISlottable<Text>): void {
   sink.event(value)
 }

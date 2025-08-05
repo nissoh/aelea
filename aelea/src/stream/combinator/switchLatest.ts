@@ -1,9 +1,9 @@
 import { stream } from '../stream.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
-import { disposeNone } from '../utils/disposable.js'
+import { disposeBoth, disposeNone } from '../utils/disposable.js'
 
 /**
- * Switch to the latest inner stream, cancelling the previous one
+ * Switch to the latest inner stream, disposing the previous one
  *
  * stream of streams: -s1----s2----s3->
  *           s1:      -a-b-c-|
@@ -11,14 +11,14 @@ import { disposeNone } from '../utils/disposable.js'
  *           s3:                  -g-h->
  * switchLatest:      -a-b-c-d-e-f-g-h->
  */
-export const switchLatest = <T>(souce: IStream<IStream<T>>): IStream<T> =>
-  stream((sink, scheduler) => souce.run(new SwitchSink(scheduler, sink), scheduler))
+export const switchLatest = <T>(source: IStream<IStream<T>>): IStream<T> =>
+  stream((sink, scheduler) => {
+    const switchSink = new SwitchSink(scheduler, sink)
+    return disposeBoth(switchSink, source.run(switchSink, scheduler))
+  })
 
-class SwitchSink<T> implements ISink<IStream<T>> {
-  currentDisposable: Disposable = disposeNone
-  outerEnded = false
-  innerEnded = false
-
+class SwitchSink<T> implements ISink<IStream<T>>, Disposable {
+  private currentDisposable: Disposable = disposeNone
   private innerSink: InnerSink<T>
 
   constructor(
@@ -28,22 +28,27 @@ class SwitchSink<T> implements ISink<IStream<T>> {
     this.innerSink = new InnerSink(this, sink)
   }
 
-  event(source: IStream<T>): void {
-    this.currentDisposable[Symbol.dispose]()
-    this.innerEnded = false
-    this.currentDisposable = source.run(this.innerSink, this.scheduler)
+  event(inner: IStream<T>): void {
+    this.disposeInner()
+    this.currentDisposable = inner.run(this.innerSink, this.scheduler)
   }
 
   error(error: any): void {
-    this.currentDisposable[Symbol.dispose]()
     this.sink.error(error)
   }
 
   end(): void {
-    this.outerEnded = true
-    if (this.innerEnded || this.currentDisposable === disposeNone) {
-      this.sink.end()
-    }
+    this.disposeInner()
+    this.sink.end()
+  }
+
+  [Symbol.dispose](): void {
+    this.disposeInner()
+  }
+
+  disposeInner(): void {
+    this.currentDisposable[Symbol.dispose]()
+    this.currentDisposable = disposeNone
   }
 }
 
@@ -62,9 +67,6 @@ class InnerSink<T> implements ISink<T> {
   }
 
   end(): void {
-    this.parent.innerEnded = true
-    if (this.parent.outerEnded) {
-      this.sink.end()
-    }
+    this.parent.disposeInner()
   }
 }

@@ -7,13 +7,13 @@ export const fromPromise = <T>(promise: Promise<T>): IStream<T> =>
     let cancelled = false
 
     promise.then(
-      (value) => {
+      value => {
         if (!cancelled) {
           sink.event(value)
           sink.end()
         }
       },
-      (error) => {
+      error => {
         if (!cancelled) {
           sink.error(error)
         }

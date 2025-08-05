@@ -67,7 +67,7 @@ export function readDomTheme() {
   let theme = themeList[0]
 
   if (storedThemeName) {
-    const matchedTheme = themeList.find((name) => name.name === storedThemeName)
+    const matchedTheme = themeList.find(name => name.name === storedThemeName)
     if (matchedTheme) {
       theme = matchedTheme
     } else {
@@ -78,7 +78,7 @@ export function readDomTheme() {
   } else {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     if (prefersDark) {
-      const darkTheme = themeList.find((theme) => theme.name.includes('dark'))
+      const darkTheme = themeList.find(theme => theme.name.includes('dark'))
       if (darkTheme) {
         theme = darkTheme
       } else {
@@ -91,11 +91,11 @@ export function readDomTheme() {
 }
 
 export function applyTheme(themeList: Theme[], theme: Theme): void {
-  const matchedTheme = themeList.find((name) => name.name === theme.name)
+  const matchedTheme = themeList.find(name => name.name === theme.name)
 
   if (!matchedTheme) {
     throw new Error(
-      `Theme "${theme.name}" not found in the list of available themes. Available themes: ${themeList.map((x) => x.name).join(', ')}`
+      `Theme "${theme.name}" not found in the list of available themes. Available themes: ${themeList.map(x => x.name).join(', ')}`
     )
   }
 

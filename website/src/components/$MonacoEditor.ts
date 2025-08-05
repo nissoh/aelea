@@ -1,6 +1,6 @@
 import { $node, $wrapNativeElement, component, type INode, type IStyleCSS, style } from 'aelea/core'
 import {
-  combineState,
+  combine,
   continueWith,
   delay,
   empty,
@@ -99,11 +99,11 @@ async function cacheGet(key: string, queryStore: () => Promise<PackageJson>): Pr
 export async function fetchFileListContent(name: string, version = 'latest') {
   const meta = (await fetchMeta(name, version)).files
 
-  let dtsFiles: JSDelivrMeta[] = meta.filter((metaFile) => /\.d\.ts$/.test(metaFile.name))
+  let dtsFiles: JSDelivrMeta[] = meta.filter(metaFile => /\.d\.ts$/.test(metaFile.name))
 
   if (dtsFiles.length === 0) {
     // if no .d.ts files found, fallback to .ts files
-    dtsFiles = meta.filter((metaFile) => /\.ts$/.test(metaFile.name))
+    dtsFiles = meta.filter(metaFile => /\.ts$/.test(metaFile.name))
   }
 
   if (dtsFiles.length === 0) {
@@ -111,7 +111,7 @@ export async function fetchFileListContent(name: string, version = 'latest') {
   }
 
   const dtsQueries = dtsFiles.map(async (file): Promise<PackageFile> => {
-    const content: string = await fetch(`https://cdn.jsdelivr.net/npm/${name}@${version}${file.name}`).then((r) =>
+    const content: string = await fetch(`https://cdn.jsdelivr.net/npm/${name}@${version}${file.name}`).then(r =>
       r.text()
     )
 
@@ -184,7 +184,7 @@ const whitespaceRegexp = /[\n\r\s\t]+/g
 
 const elementBecameVisibleEvent = o(
   observer.intersection(),
-  filter((intersectionEvent) => intersectionEvent[0].intersectionRatio > 0),
+  filter(intersectionEvent => intersectionEvent[0].intersectionRatio > 0),
   take(1)
 )
 
@@ -336,7 +336,7 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
           changeTether(
             // ensure we load editor only when it's visible on the screen
             elementBecameVisibleEvent,
-            switchMap(async (elEvents) => {
+            switchMap(async elEvents => {
               const node = elEvents[0].target as HTMLElement
 
               const modelChangeWithDelay = delay(
@@ -369,7 +369,7 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
                     syntacticDiagnostics
                   }
                 },
-                combineState({
+                combine({
                   ignoreWhitespaceChanges,
                   worketStream
                 })

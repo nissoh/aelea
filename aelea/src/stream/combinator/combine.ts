@@ -6,6 +6,42 @@ import { type IndexedValue, IndexSink } from '../utils/sink.js'
 import { map } from './map.js'
 
 /**
+ * Combine multiple streams into an object stream
+ *
+ * temperature: -20-21-22-23->
+ * humidity:    -45-46-47-48->
+ * combine({
+ *   temp: temperature,
+ *   humidity: humidity
+ * }):          -{temp:20,humidity:45}-{temp:21,humidity:45}-{temp:21,humidity:46}->
+ */
+export function combine<A>(
+  state: {
+    [P in keyof A]: IStream<A[P]>
+  }
+): IStream<Readonly<A>> {
+  const keys = Object.keys(state) as (keyof A)[]
+  const sources = Object.values(state) as IStream<any>[]
+  const l = sources.length
+
+  if (l === 0) return now({} as A)
+
+  return stream((sink, scheduler) => {
+    const result = {} as A
+
+    return combineMap(
+      (...values) => {
+        for (let i = 0; i < keys.length; i++) {
+          result[keys[i]] = values[i]
+        }
+        return result as Readonly<A>
+      },
+      ...sources
+    ).run(sink, scheduler)
+  })
+}
+
+/**
  * Combine latest values from multiple streams whenever any stream emits
  *
  * streamA:    -1---2-------3->
@@ -32,32 +68,6 @@ export function combineMap<T extends readonly unknown[], R>(
     }
 
     return disposeAll(disposables)
-  })
-}
-
-export function combineState<A>(
-  state: {
-    [P in keyof A]: IStream<A[P]>
-  }
-): IStream<Readonly<A>> {
-  const keys = Object.keys(state) as (keyof A)[]
-  const sources = Object.values(state) as IStream<any>[]
-  const l = sources.length
-
-  if (l === 0) return now({} as A)
-
-  return stream((sink, scheduler) => {
-    const result = {} as A
-
-    return combineMap(
-      (...values) => {
-        for (let i = 0; i < keys.length; i++) {
-          result[keys[i]] = values[i]
-        }
-        return result as Readonly<A>
-      },
-      ...sources
-    ).run(sink, scheduler)
   })
 }
 

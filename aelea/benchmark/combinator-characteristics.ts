@@ -41,14 +41,14 @@ async function measureStreamTime<T>(stream: IStream<T>): Promise<{ time: number;
   const start = performance.now()
   let count = 0
 
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const scheduler = createDefaultScheduler()
     stream.run(
       {
         event: () => {
           count++
         },
-        error: (e) => {
+        error: e => {
           throw e
         },
         end: () => {
@@ -81,11 +81,11 @@ const mergeOrderTest = async () => {
   const events: number[] = []
   const scheduler = createDefaultScheduler()
 
-  return new Promise<void>((resolve) => {
+  return new Promise<void>(resolve => {
     merged.run(
       {
-        event: (v) => events.push(v),
-        error: (e) => {
+        event: v => events.push(v),
+        error: e => {
           throw e
         },
         end: () => {
@@ -107,11 +107,11 @@ const combineOrderTest = async () => {
   const events: [number, number][] = []
   const scheduler = createDefaultScheduler()
 
-  return new Promise<void>((resolve) => {
+  return new Promise<void>(resolve => {
     combined.run(
       {
-        event: (v) => events.push(v),
-        error: (e) => {
+        event: v => events.push(v),
+        error: e => {
           throw e
         },
         end: () => {
@@ -133,11 +133,11 @@ const zipOrderTest = async () => {
   const events: [number, number][] = []
   const scheduler = createDefaultScheduler()
 
-  return new Promise<void>((resolve) => {
+  return new Promise<void>(resolve => {
     zipped.run(
       {
-        event: (v) => events.push(v),
-        error: (e) => {
+        event: v => events.push(v),
+        error: e => {
           throw e
         },
         end: () => {
@@ -237,7 +237,7 @@ bench
 await bench.run()
 
 console.table(
-  bench.tasks.map((task) => ({
+  bench.tasks.map(task => ({
     Test: task.name,
     'Ops/sec': Math.round(task.result!.hz).toLocaleString(),
     'Avg time (ms)': (task.result!.mean * 1000).toFixed(3),

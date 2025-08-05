@@ -16,7 +16,7 @@ import { switchLatest } from './switchLatest.js'
  */
 export const switchMap: ISwitchMapCurry = curry2((cb, s) => {
   return switchLatest(
-    map((cbParam) => {
+    map(cbParam => {
       const cbRes = cb(cbParam)
       return isStream(cbRes) ? cbRes : fromPromise(cbRes)
     }, s)

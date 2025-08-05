@@ -71,7 +71,7 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
       config.$list,
       delay(
         0,
-        map((s) => s.list, orderMulticat)
+        map(s => s.list, orderMulticat)
       )
     )
     const draggingMotion = motion({ stiffness: 150, damping: 20 })
@@ -90,7 +90,7 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
           const [dragY, dragYTether]: IBehavior<ISlottable, DraggingState<T>> = behavior()
 
           const multicastedDrag = multicast(dragY)
-          const isDraggingStream = skipRepeats(map((x) => x.isDragging, multicastedDrag))
+          const isDraggingStream = skipRepeats(map(x => x.isDragging, multicastedDrag))
           const iHeight = config.itemHeight + (config.gap ?? 0)
 
           const yMotion = o(
@@ -99,7 +99,7 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
           )(orderMulticat)
 
           const yDragPosition = merge(
-            joinMap((s) => {
+            joinMap(s => {
               if (s.isDragging) {
                 return now(s.delta)
               }
@@ -117,19 +117,19 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
             draggingMotion(
               startWith(
                 1,
-                map((id) => (id ? 1.1 : 1), isDraggingStream)
+                map(id => (id ? 1.1 : 1), isDraggingStream)
               )
             )
           )
 
           const applyBoxShadowStyle = map(
-            (shadow) => ({
+            shadow => ({
               boxShadow: `0px ${shadow}px ${shadow * 3}px 0px rgba(0, 0, 0, 0.25`
             }),
             draggingMotion(
               startWith(
                 0,
-                map((id) => (id ? 5 : 0), isDraggingStream)
+                map(id => (id ? 5 : 0), isDraggingStream)
               )
             )
           )
@@ -141,7 +141,7 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
               sampleMap((list, startEv) => {
                 const drag = merge(eventElementTarget('pointerup', window), eventElementTarget('pointermove', window))
                 const moveUntilUp = until(
-                  filter((ev) => ev.type === 'pointerup', drag),
+                  filter(ev => ev.type === 'pointerup', drag),
                   drag
                 )
 
@@ -168,7 +168,7 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
 
             styleInline(merge(applyTransformStyle, applyBoxShadowStyle)),
 
-            styleBehavior(map((x) => ({ zIndex: x ? 1000 : 0 }), isDraggingStream))
+            styleBehavior(map(x => ({ zIndex: x ? 1000 : 0 }), isDraggingStream))
           )($item)
         })
       ),

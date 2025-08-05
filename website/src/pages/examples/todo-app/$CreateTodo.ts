@@ -26,9 +26,9 @@ export default component(
     const inputState = startWith('', inputChange)
     const value = constant('', merge(create, now(null)))
     const valueChahnges = merge(inputChange, value)
-    const disabled = map((x) => !x, valueChahnges)
+    const disabled = map(x => !x, valueChahnges)
 
-    const add = sampleMap((text) => ({ id: iid++, text, completed: false }), inputState, create)
+    const add = sampleMap(text => ({ id: iid++, text, completed: false }), inputState, create)
 
     return [
       $row(style({ flex: 1 }))(

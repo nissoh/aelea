@@ -17,10 +17,10 @@ export const $Tabs = (config: Tabs) => {
     return [
       merge(
         $node(
-          ...config.tabs.map((t) => {
+          ...config.tabs.map(t => {
             return clickTabTether(
               nodeEvent('click'),
-              map((_clickEvent) => {
+              map(_clickEvent => {
                 return t
               })
             )(t.head)

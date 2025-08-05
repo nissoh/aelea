@@ -123,7 +123,7 @@ bench
 
   // Nested stream benchmarks (more complex) - Aelea only
   .add(`@aelea merge nested: ${n} streams of ${m} numbers`, () => {
-    const streams = arrays.map((arr) => fromArray(arr))
+    const streams = arrays.map(arr => fromArray(arr))
     return runStream(
       op(
         merge(...streams),
@@ -132,7 +132,7 @@ bench
     )
   })
   .add(`@aelea combine nested: 3 streams of ${m} numbers`, () => {
-    const streams = arrays.slice(0, 3).map((arr) => fromArray(arr))
+    const streams = arrays.slice(0, 3).map(arr => fromArray(arr))
     return runStream(
       op(
         combineMap(add3, ...(streams as [any, any, any])),
@@ -141,7 +141,7 @@ bench
     )
   })
   .add(`@aelea zip nested: 3 streams of ${m} numbers`, () => {
-    const streams = arrays.slice(0, 3).map((arr) => fromArray(arr))
+    const streams = arrays.slice(0, 3).map(arr => fromArray(arr))
     return runStream(
       op(
         zipMap(add3, ...(streams as [any, any, any])),

@@ -118,7 +118,7 @@ export const $Popover = ({
         }),
         overlayClickTether(
           nodeEvent('pointerdown'),
-          filter((ev) => {
+          filter(ev => {
             if (ev.target instanceof HTMLElement) {
               const computedStyle = getComputedStyle(ev.target)
               if (computedStyle.zIndex === '2321' && computedStyle.inset === '0px') {
@@ -136,7 +136,7 @@ export const $Popover = ({
 
       const $content = op(
         openMulticast,
-        map((content) => {
+        map(content => {
           return until(dismissEvent, merge(style({ zIndex: 3456, left: 0 })(contentOps(content)), $overlay()))
         }),
         switchLatest

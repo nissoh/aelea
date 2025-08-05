@@ -6,7 +6,7 @@ export { fetchJson } from './fetch.js'
 
 // Render and scheduler
 export type { IRunEnvironment } from './render.js'
-export { $createRoot } from './render.js'
+export { render } from './render.js'
 export { createDomScheduler } from './scheduler.js'
 
 // Node creation

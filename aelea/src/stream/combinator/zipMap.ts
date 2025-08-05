@@ -13,9 +13,7 @@ export function zipState<A>(
   const keys = Object.keys(state) as (keyof A)[]
   const sources = Object.values(state) as IStream<any>[]
 
-  if (sources.length === 0) {
-    return now({} as A)
-  }
+  if (sources.length === 0) return now({} as A)
 
   return stream((sink, scheduler) => {
     const result = {} as A
@@ -52,7 +50,6 @@ export function zipMap<T extends readonly unknown[], R>(
     const disposables = new Array(l)
     const sinks = new Array(l)
     const buffers = new Array(l)
-
     const zipSink = new ZipMapSink(f, buffers, sinks, sink)
 
     for (let i = 0; i < l; ++i) {

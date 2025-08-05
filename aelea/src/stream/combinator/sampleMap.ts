@@ -11,7 +11,7 @@ import { PipeSink } from '../utils/sink.js'
  * sampler: ---x---x---x----->
  * sample:  ---2---4---6----->
  */
-export const sample: ISampleCurry = curry2((values, sampler) => sampleMap((x) => x, values, sampler))
+export const sample: ISampleCurry = curry2((values, sampler) => sampleMap(x => x, values, sampler))
 
 /**
  * Combine values from two streams at sample times

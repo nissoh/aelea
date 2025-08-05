@@ -25,7 +25,7 @@ export function eventElementTarget<A extends INodeElementEventNameList, B extend
   element: B,
   options: boolean | AddEventListenerOptions = false
 ): IStream<INodeElementEventTypeMap<A, B>> {
-  return fromCallback((cb) => {
+  return fromCallback(cb => {
     element.addEventListener(eventType, cb as EventListener, options)
 
     return disposeWith(() => {
@@ -51,12 +51,12 @@ export interface INodeEventCurry {
 
 export const nodeEvent: INodeEventCurry = curry2((eventType, descriptor) => {
   if (isStream(descriptor)) {
-    return joinMap((ns) => {
+    return joinMap(ns => {
       return eventElementTarget(eventType, ns.element, { capture: true })
     }, descriptor)
   }
 
-  return joinMap((ns) => {
+  return joinMap(ns => {
     return eventElementTarget(eventType, ns.element, descriptor.options)
   }, descriptor.$node)
 })

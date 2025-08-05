@@ -47,11 +47,17 @@ class DomScheduler implements I$Scheduler {
   asap<TArgs extends readonly unknown[]>(task: ITask<TArgs>, ...args: TArgs): Disposable {
     let cancelled = false
 
-    queueMicrotask(() => {
+    Promise.resolve(null).then(() => {
       if (!cancelled) {
         task(...args)
       }
     })
+
+    // queueMicrotask(() => {
+    //   if (!cancelled) {
+    //     task(...args)
+    //   }
+    // })
 
     return disposeWith(() => {
       cancelled = true

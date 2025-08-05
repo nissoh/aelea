@@ -19,7 +19,7 @@ import { pallete } from 'aelea/ui-components-theme'
 
 function filterArrayByText(array: string[], filter: string) {
   const filterLowercase = filter.toLocaleLowerCase()
-  return array.filter((id) => id.indexOf(filterLowercase) > -1)
+  return array.filter(id => id.indexOf(filterLowercase) > -1)
 }
 
 const $label = (label: string, value: IStream<string> | string) =>
@@ -52,7 +52,7 @@ export const $VirtualScrollExample = component(
             const pageStart = requestNumber * PAGE_SIZE
             const pageEnd = pageStart + PAGE_SIZE
             const filteredItems = filterArrayByText(stubbedData, filter)
-            const $items = filteredItems.slice(pageStart, pageEnd).map((id) => {
+            const $items = filteredItems.slice(pageStart, pageEnd).map(id => {
               return $item($text(id))
             })
 
@@ -74,7 +74,7 @@ export const $VirtualScrollExample = component(
         $row(spacing.big)(
           $label(
             'Page: ',
-            map((l) => String(l), scrollRequest)
+            map(l => String(l), scrollRequest)
           ),
           $label('Page Size:', String(PAGE_SIZE)),
           $label('Total Items:', String(TOTAL_ITEMS))
@@ -104,7 +104,7 @@ export const $VirtualScrollExample = component(
         $card(style({ padding: 0 }))(
           switchLatest(
             map(
-              (searchText) =>
+              searchText =>
                 $VirtualScroll({
                   dataSource: dataSourceFilter(searchText),
                   containerOps: style({ padding: '8px', maxHeight: '400px' })

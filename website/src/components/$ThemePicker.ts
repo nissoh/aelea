@@ -19,7 +19,7 @@ export const $Picker = (themeList: Theme[]) =>
         stylePseudo(':hover', { fill: pallete.primary }),
         changeThemeEffectTether(
           nodeEvent('click'),
-          sampleMap((current) => {
+          sampleMap(current => {
             const toIdx = (themeList.indexOf(current) + 1) % themeList.length
             const toTheme = themeList[toIdx]
 

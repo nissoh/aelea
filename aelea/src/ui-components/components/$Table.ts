@@ -109,7 +109,7 @@ export const $Table = <T, FilterState = never>({
         })
       )
 
-      const sortBy = joinMap((state) => {
+      const sortBy = joinMap(state => {
         const changeState = aggregate(
           (seed, change): ISortBy<T> => {
             const direction = seed.name === change ? (seed.direction === 'asc' ? 'desc' : 'asc') : 'desc'
@@ -124,7 +124,7 @@ export const $Table = <T, FilterState = never>({
       }, sortChange)
 
       const $header = $rowHeaderContainer(
-        ...columns.map((col) => {
+        ...columns.map(col => {
           if (col.sortBy) {
             const behavior = sortByChangeTether(nodeEvent('click'), constant(col.sortBy))
 
@@ -133,7 +133,7 @@ export const $Table = <T, FilterState = never>({
             return $cellHeader(behavior, col.columnOp || o())(
               $node(style({ cursor: 'pointer' }))(col.$head),
               switchLatest(
-                map((s) => {
+                map(s => {
                   return $column(style({ cursor: 'pointer' }))(
                     $icon({
                       $content: $sortArrowDown,
@@ -170,9 +170,9 @@ export const $Table = <T, FilterState = never>({
             return $VirtualScroll({
               ...scrollConfig,
               dataSource: map((res): ScrollResponse => {
-                const $items = (Array.isArray(res) ? res : res.data).map((rowData) =>
+                const $items = (Array.isArray(res) ? res : res.data).map(rowData =>
                   $rowContainer(
-                    ...columns.map((col) => {
+                    ...columns.map(col => {
                       const cellOps = o(cellBodyOp, col.columnOp || o())
                       return cellOps(switchLatest(col.$body(now(rowData))))
                     })

@@ -1,5 +1,5 @@
 export { aggregate } from './aggregate.js'
-export { combineMap, combineState } from './combineMap.js'
+export { combine, combineMap } from './combine.js'
 export { constant, startWith } from './constant.js'
 export { continueWith } from './continueWith.js'
 export { debounce } from './debounce.js'

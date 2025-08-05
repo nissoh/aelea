@@ -23,12 +23,12 @@ export const $Button = ({ disabled = never, $content, buttonOp = op }: IButton) 
       const $button = $element('button')(
         designSheet.btn,
         clickTether(nodeEvent('pointerup')),
-        styleBehavior(map((disabled) => (disabled ? { opacity: 0.4, pointerEvents: 'none' } : null), disabled)),
+        styleBehavior(map(disabled => (disabled ? { opacity: 0.4, pointerEvents: 'none' } : null), disabled)),
 
-        attrBehavior(map((disabled) => ({ disabled }), disabled)),
+        attrBehavior(map(disabled => ({ disabled }), disabled)),
 
         styleBehavior(
-          map((active) => (active ? { borderColor: pallete.primary } : null), merge(focusStyle, dismissstyle))
+          map(active => (active ? { borderColor: pallete.primary } : null), merge(focusStyle, dismissstyle))
         ),
 
         interactionTether(interactionOp),

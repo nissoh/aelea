@@ -45,7 +45,7 @@ export const $Pallete = (themeDef: Theme) =>
 export const $Theme = component(() => {
   return [
     $row(spacing.big)(
-      ...themeList.map((themeDef) => {
+      ...themeList.map(themeDef => {
         return $Pallete(themeDef)({})
       })
     )

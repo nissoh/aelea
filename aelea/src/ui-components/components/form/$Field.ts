@@ -3,7 +3,7 @@ import { $element, component, nodeEvent, style, styleBehavior } from '../../../c
 import type { INode } from '../../../core/types.js'
 import type { IBehavior, IOps } from '../../../stream/index.js'
 import {
-  combineState,
+  combine,
   constant,
   empty,
   filter,
@@ -42,7 +42,7 @@ export const $Field = ({ value = empty, fieldStyle = {}, validation = constant(n
       const alert = multicastValidation(change)
 
       const focus = merge(focusStyle, dismissstyle)
-      const state = combineState({ focus, alert })
+      const state = combine({ focus, alert })
 
       return [
         $element('input')(
@@ -51,7 +51,7 @@ export const $Field = ({ value = empty, fieldStyle = {}, validation = constant(n
 
           changeTether(
             nodeEvent('input'),
-            map((inputEv) => {
+            map(inputEv => {
               if (inputEv.target instanceof HTMLInputElement) {
                 const text = inputEv.target.value
                 return text || ''
@@ -77,12 +77,12 @@ export const $Field = ({ value = empty, fieldStyle = {}, validation = constant(n
           blurTether(nodeEvent('blur')),
 
           o(
-            map((node) =>
+            map(node =>
               merge(
                 now(node),
                 filter(
                   () => false,
-                  tap((val) => {
+                  tap(val => {
                     // applying by setting `HTMLInputElement.value` imperatively(only way known to me)
                     node.element.value = String(val)
                   }, value)

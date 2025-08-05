@@ -25,14 +25,14 @@ function resolveRoute(pathChange: IStream<PathEvent>, parentFragments: Fragment[
     const contains = op(
       pathChange,
       diff,
-      filter((next) => {
+      filter(next => {
         return isMatched(fragment, next[fragIdx])
       })
     )
 
     const match = op(
       pathChange,
-      map((evt) => {
+      map(evt => {
         if (evt.length !== fragments.length) {
           return false
         }
@@ -41,7 +41,7 @@ function resolveRoute(pathChange: IStream<PathEvent>, parentFragments: Fragment[
 
         return everyMatched
       }),
-      tap((isMatched) => {
+      tap(isMatched => {
         if (isMatched) {
           document.title = title || ''
         }
@@ -51,7 +51,7 @@ function resolveRoute(pathChange: IStream<PathEvent>, parentFragments: Fragment[
     const miss = op(
       pathChange,
       diff,
-      filter((next) => !isMatched(fragment, next[fragIdx]))
+      filter(next => !isMatched(fragment, next[fragIdx]))
     )
 
     return {
@@ -75,7 +75,7 @@ export const contains =
   <T>(route: Route) =>
   (ns: IStream<T>) => {
     return switchLatest(
-      map((isMatch) => {
+      map(isMatch => {
         return isMatch ? ns : empty
       }, route.contains)
     )
@@ -85,7 +85,7 @@ export const match =
   <T>(route: Route) =>
   (ns: IStream<T>) => {
     return switchLatest(
-      map((isMatch) => {
+      map(isMatch => {
         return isMatch ? ns : empty
       }, route.match)
     )

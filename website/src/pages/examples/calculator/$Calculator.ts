@@ -1,9 +1,7 @@
 import { $node, $text, attr, component, style } from 'aelea/core'
-import { combineMap, empty, type IBehavior, map, o, startWith } from 'aelea/stream'
+import { combine, empty, type IBehavior, map, o, startWith } from 'aelea/stream'
 import { $column, $Field, $NumberTicker, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
-
-const add = (x: number, y: number) => x + y
 
 const extractValue = o(
   map((str: string) => Number(str)),
@@ -21,16 +19,16 @@ const $plus = $node(
 )
 
 const placeholderZero = attr({ placeholder: '0' })
-export default component(([x, XTether]: IBehavior<string, number>, [y, YTether]: IBehavior<string, number>) => [
+export default component(([n1, n1Tether]: IBehavior<string, number>, [n2, n2Tether]: IBehavior<string, number>) => [
   $column(spacing.small)(
     $row(
       $plus($text('+')),
       $column(spacing.tiny)(
         $Field({ value: empty, inputOp: placeholderZero })({
-          change: XTether(extractValue)
+          change: n1Tether(extractValue)
         }),
         $Field({ value: empty, inputOp: placeholderZero })({
-          change: YTether(extractValue)
+          change: n2Tether(extractValue)
         })
       )
     ),
@@ -38,7 +36,7 @@ export default component(([x, XTether]: IBehavior<string, number>, [y, YTether]:
     $row(
       $node(style({ width: '36px' }))(),
       $NumberTicker({
-        value: combineMap(add, x, y),
+        value: map(params => params.n1 + params.n2, combine({ n1, n2 })),
         decrementColor: pallete.negative,
         incrementColor: pallete.positive,
         slots: 30

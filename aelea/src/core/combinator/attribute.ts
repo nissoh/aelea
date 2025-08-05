@@ -6,7 +6,7 @@ export type IAttributeProperties<T> = {
 }
 
 export const attr: IAttributeCurry = curry2((attrs, ns) =>
-  map((node) => {
+  map(node => {
     const attributes = { ...node.attributes, ...attrs }
 
     return { ...node, attributes } as INode
@@ -14,7 +14,7 @@ export const attr: IAttributeCurry = curry2((attrs, ns) =>
 )
 
 export const attrBehavior: IAttributeBehaviorCurry = curry2((attrs, node) => {
-  return map((node) => {
+  return map(node => {
     const attributesBehavior = [...node.attributesBehavior, attrs]
 
     return { ...node, attributesBehavior }

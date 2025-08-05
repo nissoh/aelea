@@ -14,7 +14,7 @@ export const dismissOp = o(
     const newLocal = merge(nodeEvent('blur', src), nodeEvent('pointerout', src))
     return newLocal
   },
-  filter((x) => document.activeElement !== x.target), // focused elements cannot be dismissed
+  filter(x => document.activeElement !== x.target), // focused elements cannot be dismissed
   constant(false)
 )
 

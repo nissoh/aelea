@@ -51,20 +51,20 @@ export const $VirtualScroll = ({ dataSource, containerOps = o(), $loader = $defa
 
     const scrollReuqestWithInitial: IStream<ScrollRequest> = skip(
       1,
-      aggregate((seed) => seed + 1, -1, intersecting)
+      aggregate(seed => seed + 1, -1, intersecting)
     )
 
     const $container = $column(
       designSheet.customScroll,
       style({ overflow: 'auto' }),
-      map((node) => ({ ...node, insertAscending: false })),
+      map(node => ({ ...node, insertAscending: false })),
       containerOps
     )
 
     const intersectedLoader = intersectingTether(
       observer.intersection({ threshold: 1 }),
-      map((entryList) => entryList[0]),
-      filter((entry) => {
+      map(entryList => entryList[0]),
+      filter(entry => {
         return entry.isIntersecting === true
       })
     )
@@ -73,11 +73,11 @@ export const $VirtualScroll = ({ dataSource, containerOps = o(), $loader = $defa
 
     const delayDatasource = delay(45, multicastDatasource)
     const loadState = merge(
-      map((data) => ({ $intermediate: $observer, data }), delayDatasource),
+      map(data => ({ $intermediate: $observer, data }), delayDatasource),
       map(() => ({ $intermediate: $loader }), scrollReuqestWithInitial)
     )
 
-    const $itemLoader = map((state) => {
+    const $itemLoader = map(state => {
       if ('data' in state && state.data) {
         if (Array.isArray(state.data)) {
           return empty
@@ -94,7 +94,7 @@ export const $VirtualScroll = ({ dataSource, containerOps = o(), $loader = $defa
 
     return [
       $container(
-        joinMap(($list) => {
+        joinMap($list => {
           const $items = Array.isArray($list) ? $list : $list.$items
           return merge(...$items)
         }, multicastDatasource),

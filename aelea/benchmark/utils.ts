@@ -30,7 +30,7 @@ export const runStream = <T>(stream: IStream<T>): Promise<T> => {
   return new Promise((resolve, reject) => {
     stream.run(
       {
-        event: (value) => {
+        event: value => {
           result = value
         },
         error: reject,

@@ -61,16 +61,16 @@ export const $TableExample = component(
           columns: [
             {
               $head: $text('First'),
-              $body: map((x) => $node($text(x.id))),
+              $body: map(x => $node($text(x.id))),
               sortBy: 'id'
             },
             {
               $head: $text('Second'),
-              $body: map((x) => $node($text(x.id)))
+              $body: map(x => $node($text(x.id)))
             },
             {
               $head: $text('Random Number'),
-              $body: map((x) => $node($text(x.random.toString()))),
+              $body: map(x => $node($text(x.random.toString()))),
               sortBy: 'random'
             }
           ]

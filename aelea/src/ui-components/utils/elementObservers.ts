@@ -16,7 +16,7 @@ export const intersection = (config: IntersectionObserverInit = {}) => {
   return o(
     map((node: INode) =>
       fromCallback(
-        (cb) => {
+        cb => {
           const intersectionObserver = new IntersectionObserver(cb, config)
           intersectionObserver.observe(node.element)
           return () => intersectionObserver.unobserve(node.element)
@@ -32,7 +32,7 @@ export const resize = (config: ResizeObserverOptions = {}) =>
   o(
     map((node: INode) =>
       fromCallback(
-        (cb) => {
+        cb => {
           const ro = new ResizeObserver(cb)
           ro.observe(node.element, config)
           return () => ro.unobserve(node.element)
@@ -53,7 +53,7 @@ export const mutation = (
   o(
     map((node: INode) =>
       fromCallback(
-        (cb) => {
+        cb => {
           const mo = new MutationObserver(cb)
           mo.observe(node.element, config)
           return () => mo.disconnect()

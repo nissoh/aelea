@@ -37,7 +37,7 @@ export const $TextField = (config: TextField) =>
     ([change, valueTether]: IBehavior<string, string>, [blur, blurTether]: IBehavior<FocusEvent, FocusEvent>) => {
       const { hint } = config
       const multicastValidation = config.validation
-        ? o(config.validation, (src) => sample(src, blur), multicast)
+        ? o(config.validation, src => sample(src, blur), multicast)
         : undefined
       const fieldOp = config.containerOp ?? o()
       const validation = multicastValidation ? skipRepeats(multicastValidation(change)) : never
@@ -45,7 +45,7 @@ export const $TextField = (config: TextField) =>
       const $messageLabel = $node(style({ fontSize: '75%', width: '100%' }))
       const $hint = hint ? now($messageLabel($text(hint))) : never
 
-      const $alert = map((msg) => {
+      const $alert = map(msg => {
         if (msg) {
           const negativeStyle = style({ color: pallete.negative })
           return negativeStyle($messageLabel($text(msg)) as any)

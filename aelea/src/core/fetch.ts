@@ -3,7 +3,7 @@ export async function fetchJson<T>(
   init: RequestInit & { parseJson?: (a: T) => T } = {}
 ): Promise<T> {
   const fetchResponse = await fetch(input, init)
-  const { parseJson = (x) => x } = init
+  const { parseJson = x => x } = init
   const json = parseJson(await fetchResponse.json())
   return json
 }

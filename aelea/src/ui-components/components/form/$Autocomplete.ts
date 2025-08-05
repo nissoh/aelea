@@ -25,7 +25,7 @@ export const $Autocomplete = ({ type = InputType.TEXT, value = empty, name, plac
 
           changeTether(
             nodeEvent('input'),
-            map((inputEv) => {
+            map(inputEv => {
               if (inputEv.target instanceof HTMLInputElement) {
                 const text = inputEv.target.value
                 return text || ''
@@ -37,14 +37,14 @@ export const $Autocomplete = ({ type = InputType.TEXT, value = empty, name, plac
           styleBehavior(
             op(
               merge(focus, dismissstyle),
-              map((active) => (active ? { borderBottom: `1px solid ${pallete.primary}` } : null))
+              map(active => (active ? { borderBottom: `1px solid ${pallete.primary}` } : null))
             )
           ),
 
           focusTether(interactionOp),
           dismissTether(dismissOp),
 
-          changeTether((inputNode) =>
+          changeTether(inputNode =>
             sampleMap(
               (node, text) => {
                 // applying by setting `HTMLInputElement.value` imperatively(only way known to me)

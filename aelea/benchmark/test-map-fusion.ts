@@ -17,9 +17,9 @@ console.log('Has map marker:', Object.getOwnPropertySymbols(testStream).length >
 
 // Run the actual value through to verify correctness
 const testResult: number[] = []
-await new Promise<void>((resolve) => {
+await new Promise<void>(resolve => {
   testStream.run(createDefaultScheduler(), {
-    event: (x) => testResult.push(x),
+    event: x => testResult.push(x),
     error: console.error,
     end: resolve
   })
@@ -28,7 +28,7 @@ await new Promise<void>((resolve) => {
 console.log('\nExpected: [(1+1)*2/3, (2+1)*2/3, (3+1)*2/3] = [1.33, 2, 2.67]')
 console.log(
   'Actual:  ',
-  testResult.map((x) => Math.round(x * 100) / 100)
+  testResult.map(x => Math.round(x * 100) / 100)
 )
 
 // Quick performance test
@@ -60,9 +60,9 @@ const fusedStream = op(
 
 const start2 = performance.now()
 let lastValue = 0
-await new Promise<void>((resolve) => {
+await new Promise<void>(resolve => {
   fusedStream.run(createDefaultScheduler(), {
-    event: (x) => {
+    event: x => {
       lastValue = x
     },
     error: console.error,

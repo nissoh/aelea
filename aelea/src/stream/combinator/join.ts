@@ -7,7 +7,7 @@ export const join = <A>(stream: IStream<IStream<A>>): IStream<A> =>
   mergeConcurrentlyMap(Number.POSITIVE_INFINITY, stream)
 
 export const mergeConcurrentlyMap: IMergeConcurrentlyMapCurry = curry2((concurrency, stream) =>
-  mergeMapConcurrently((s) => s, concurrency, stream)
+  mergeMapConcurrently(s => s, concurrency, stream)
 )
 
 export const mergeMapConcurrently: IMergeMapConcurrentlyCurry = curry3((f, concurrency, source) =>

@@ -63,10 +63,7 @@ export default component(
               $seperator,
               $row(style({ alignItems: 'center' }), spacing.big)(
                 $TrashBtn({
-                  click: removeTether(
-                    disposeCounterTether(),
-                    disposedCounterCountTether(sampleMap((val) => -val, value))
-                  )
+                  click: removeTether(disposeCounterTether(), disposedCounterCountTether(sampleMap(val => -val, value)))
                 }),
                 $Counter({ value })({
                   increment: countersIncrementTether(

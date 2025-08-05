@@ -72,13 +72,6 @@ export const $NumberTicker = ({ value, incrementColor, decrementColor, textStyle
     ...Array(slots)
       .fill(undefined)
       .map((_, slot) => {
-        const $label = op(
-          incrementMulticast,
-          map(({ changeStr }: CountState) => changeStr[slot] ?? ''),
-          skipRepeats,
-          $text
-        )
-
         return $node(
           styledTextTransition,
           styleBehavior(
@@ -98,7 +91,15 @@ export const $NumberTicker = ({ value, incrementColor, decrementColor, textStyle
               switchLatest
             )
           )
-        )($label)
+        )(
+          $text(
+            op(
+              incrementMulticast,
+              map(({ changeStr }: CountState) => changeStr[slot] ?? ''),
+              skipRepeats
+            )
+          )
+        )
       })
   )
 }

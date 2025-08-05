@@ -35,7 +35,7 @@ export const $Slider = ({ value, step = 0.01 }: Slider) =>
         // stylePseudo('::-moz-range-thumb', sliderThunmbStyle),
         changeTether(
           nodeEvent('input'),
-          map((evt) => {
+          map(evt => {
             const target: HTMLInputElement = evt.target! as any
             return Number(target.value)
           })
@@ -43,12 +43,12 @@ export const $Slider = ({ value, step = 0.01 }: Slider) =>
         attr({ type: 'range', min: 0, max: 1, step }),
 
         o(
-          map((node) =>
+          map(node =>
             merge(
               now(node),
               filter(
                 () => false,
-                tap((val) => {
+                tap(val => {
                   // applying by setting `HTMLInputElement.value` imperatively(only way known to me)
                   node.element.value = String(val)
                 }, value)

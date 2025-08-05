@@ -14,7 +14,7 @@ import $Guide from './guide/$Guide'
 const popStateEvent = eventElementTarget('popstate', window)
 const initialLocation = now(document.location)
 const requestRouteChange = merge(initialLocation, popStateEvent)
-const locationChange = map((location) => {
+const locationChange = map(location => {
   return location
 }, requestRouteChange)
 
