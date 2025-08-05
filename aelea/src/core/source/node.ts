@@ -1,4 +1,4 @@
-import { type Fn, type ISink, isFunction, never } from '../../stream/index.js'
+import { disposeBoth, type Fn, type ISink, isFunction, never } from '../../stream/index.js'
 import { stream } from '../stream.js'
 import type { I$Node, I$Op, I$Slottable, INode, INodeCompose, INodeElement } from '../types.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
@@ -22,10 +22,9 @@ function createNodeSource<A, B extends INodeElement>(
       stylePseudo: []
     }
 
-    // DOM tree creation happens in asap phase
-    scheduler.asap(eventNode, nodeState, sink)
+    const nodeTask = scheduler.asap(eventNode, nodeState, sink)
 
-    return disposable
+    return disposeBoth(disposable, nodeTask)
   })
 }
 

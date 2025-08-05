@@ -37,7 +37,7 @@ type SinkMap<T> = Map<ISink<T>, Map<IStream<T>, Disposable | null>>
  * This enables the component pattern where DOM events flow through behaviors
  * while also being available for output/composition.
  */
-class IBehaviorSource<I, O> implements IStream<O> {
+class Behavior<I, O> implements IStream<O> {
   queuedBehaviors: IStream<O>[] = []
 
   sinksMap: SinkMap<O> = new Map()
@@ -116,7 +116,7 @@ class IBehaviorSource<I, O> implements IStream<O> {
  * // clicks stream now emits true/false for left clicks
  */
 export function behavior<T, R>(): IBehavior<T, R> {
-  const ss = new IBehaviorSource<T, R>()
+  const ss = new Behavior<T, R>()
 
   return [ss, ss.sample]
 }

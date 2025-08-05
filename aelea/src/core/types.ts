@@ -47,9 +47,7 @@ export interface I$Scheduler extends IScheduler {
 // Component types
 export type IOutputTethers<A> = { [P in keyof A]?: IOps<A[P], A[P]> }
 
-export type ICreateComponent<A extends INodeElement, B extends I$Slottable<A>, D> = (
-  ...args: IBehavior<unknown, unknown>[]
-) => [B, IComponentBehavior<D>] | [B]
+export type ICreateComponent<D> = (...args: IBehavior<unknown, unknown>[]) => [I$Slottable, IComponentBehavior<D>]
 
 export type IComponentBehavior<T> = {
   [P in keyof T]: IStream<T[P]>

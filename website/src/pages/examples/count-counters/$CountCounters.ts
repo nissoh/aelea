@@ -17,10 +17,6 @@ import { pallete } from 'aelea/ui-components-theme'
 import { $TrashBtn } from '../../../elements/$common'
 import $Counter from './$Counter'
 
-const $AddBtn = $Button({
-  $content: $text('Add One')
-})
-
 export default component(
   (
     [addedCounter, addedCounterTether]: IBehavior<PointerEvent, PointerEvent>,
@@ -47,7 +43,9 @@ export default component(
             $node(style({ color: pallete.foreground }))($text('Sum: ')),
             $text(map(String, totalCount))
           ),
-          $AddBtn({
+          $Button({
+            $content: $text('Add One')
+          })({
             click: addedCounterTether()
           })
         ),
