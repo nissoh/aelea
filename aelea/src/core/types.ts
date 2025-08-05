@@ -1,4 +1,4 @@
-import type { IBehavior, IOps, IScheduler, IStream, ITask } from '../stream/index.js'
+import type { IOps, IScheduler, IStream, ITask } from '../stream/index.js'
 import type { IAttributeProperties } from './combinator/attribute.js'
 import type { IStyleCSS } from './combinator/style.js'
 import type { SettableDisposable } from './utils/SettableDisposable.js'
@@ -46,8 +46,6 @@ export interface I$Scheduler extends IScheduler {
 
 // Component types
 export type IOutputTethers<A> = { [P in keyof A]?: IOps<A[P], A[P]> }
-
-export type ICreateComponent<D> = (...args: IBehavior<unknown, unknown>[]) => [I$Slottable, IComponentBehavior<D>]
 
 export type IComponentBehavior<T> = {
   [P in keyof T]: IStream<T[P]>

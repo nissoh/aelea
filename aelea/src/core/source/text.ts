@@ -14,7 +14,6 @@ function createDynamicTextStream(textSource: IStream<string>): I$Text {
 
 class DynamicTextSink implements ISink<string> {
   private textNode: Text | null = null
-  private emitted = false
   private currentDisposable: Disposable = disposeNone
 
   constructor(
@@ -24,12 +23,11 @@ class DynamicTextSink implements ISink<string> {
   ) {}
 
   event(value: string): void {
-    if (!this.emitted) {
+    if (this.textNode === null) {
       // First emission - create text node and emit it
       this.textNode = document.createTextNode(value)
-      this.emitted = true
       // DOM tree creation happens in asap phase
-      this.currentDisposable = this.scheduler.asap(eventText, this.sink, {
+      this.currentDisposable = this.scheduler.asap(emitText, this.sink, {
         element: this.textNode,
         disposable: this.disposable
       })
@@ -43,7 +41,6 @@ class DynamicTextSink implements ISink<string> {
     this.currentDisposable[Symbol.dispose]()
     this.currentDisposable = disposeNone
     this.textNode = null
-    this.emitted = false
     this.sink.end()
   }
 
@@ -71,7 +68,7 @@ function createStaticTextStream(text: string): I$Text {
   return stream((sink, scheduler) => {
     const disposable = new SettableDisposable()
     // DOM tree creation happens in asap phase
-    scheduler.asap(eventText, sink, {
+    scheduler.asap(emitText, sink, {
       element: document.createTextNode(text),
       disposable
     })
@@ -80,6 +77,6 @@ function createStaticTextStream(text: string): I$Text {
   })
 }
 
-function eventText(sink: ISink<ISlottable<Text>>, value: ISlottable<Text>): void {
+function emitText(sink: ISink<ISlottable<Text>>, value: ISlottable<Text>): void {
   sink.event(value)
 }

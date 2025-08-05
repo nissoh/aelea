@@ -20,7 +20,7 @@ export const fromCallback = <T, FnArgs extends any[] = T[]>(
 
       return toDisposable(maybeDisposable)
     } catch (error) {
-      return scheduler.asap(eventError, error, sink)
+      return scheduler.asap(emitError, sink, error)
     }
   })
 
@@ -28,6 +28,6 @@ function defaultMapFn<T>(...args: T[]): T {
   return args[0]
 }
 
-function eventError<T>(error: any, sink: ISink<T>): void {
+function emitError<T>(sink: ISink<T>, error: any): void {
   sink.error(error)
 }

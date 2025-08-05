@@ -22,13 +22,13 @@ function createNodeSource<A, B extends INodeElement>(
       stylePseudo: []
     }
 
-    const nodeTask = scheduler.asap(eventNode, nodeState, sink)
+    const nodeTask = scheduler.asap(emitNode, sink, nodeState)
 
     return disposeBoth(disposable, nodeTask)
   })
 }
 
-export function eventNode<T>(value: T, sink: ISink<T>): void {
+export function emitNode<T>(sink: ISink<T>, value: T): void {
   sink.event(value)
 }
 

@@ -1,8 +1,10 @@
-import { behavior, disposeAll, disposeBoth, nullSink } from '../../stream/index.js'
+import { behavior, disposeAll, disposeBoth, type IBehavior, nullSink } from '../../stream/index.js'
 import { stream } from '../stream.js'
-import type { I$Slottable, ICreateComponent, IOutputTethers } from '../types.js'
+import type { I$Slottable, IComponentBehavior, IOutputTethers } from '../types.js'
 
-type IComponent = <T>(oTether: ICreateComponent<T>) => (iTether: IOutputTethers<T>) => I$Slottable
+type IComponent = <T>(
+  oTether: (...args: IBehavior<unknown, unknown>[]) => [I$Slottable, IComponentBehavior<T>] | [I$Slottable]
+) => (iTether: IOutputTethers<T>) => I$Slottable
 
 export const component: IComponent = createCallback => iTether2 => {
   return stream((sink, scheduler) => {
@@ -10,6 +12,10 @@ export const component: IComponent = createCallback => iTether2 => {
     // Each behavior is a [stream, tether] tuple for bidirectional data flow
     const behaviors = Array(createCallback.length).fill(null).map(behavior)
     const [view, outputSources] = createCallback(...behaviors)
+
+    if (outputSources === undefined || Object.keys(outputSources).length === 0) {
+      return view.run(sink, scheduler)
+    }
 
     const outputDisposables: Disposable[] = []
 

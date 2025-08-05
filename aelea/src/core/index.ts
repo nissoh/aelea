@@ -20,7 +20,6 @@ export type {
   I$Slottable,
   IAttributeProperties,
   IComponentBehavior,
-  ICreateComponent,
   INode,
   INodeCompose,
   INodeElement,
