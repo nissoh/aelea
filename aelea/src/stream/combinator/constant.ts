@@ -5,8 +5,8 @@ import { map } from './map.js'
 import { merge } from './merge.js'
 
 export interface IStartWithCurry {
-  <T>(value: T, stream: IStream<T>): IStream<T>
-  <T>(value: T): (stream: IStream<T>) => IStream<T>
+  <A, B>(value: A, stream: IStream<B>): IStream<A | B>
+  <A, B>(value: A): (stream: IStream<B>) => IStream<A | B>
 }
 
 /**

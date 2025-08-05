@@ -29,9 +29,13 @@ export interface IStyleBehaviorCurry {
   <T extends INodeElement>(styleInput: IStream<IStyleCSS | null>): (node: I$Node<T>) => I$Node<T>
 }
 
-export const styleInline =
-  <A extends INodeElement>(style: IStream<IStyleCSS>) =>
-  ($node: I$Node<A>): I$Node<A> => {
+export interface IStyleInlineCurry {
+  <T extends INodeElement>(style: IStream<IStyleCSS>, node: I$Node<T>): I$Node<T>
+  <T extends INodeElement>(style: IStream<IStyleCSS>): (node: I$Node<T>) => I$Node<T>
+}
+
+export const styleInline: IStyleInlineCurry = curry2(
+  <T extends INodeElement>(style: IStream<IStyleCSS>, $node: I$Node<T>): I$Node<T> => {
     return map(node => {
       const applyInlineStyleStream = tap(styleObj => {
         const keys = Object.keys(styleObj)
@@ -55,6 +59,7 @@ export const styleInline =
       }
     }, $node)
   }
+)
 
 export const style: IStyleCurry = curry2(
   <T extends INodeElement>(styleInput: IStyleCSS, source: I$Node<T>): I$Node<T> => {

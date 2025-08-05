@@ -1,7 +1,7 @@
 import { $element, $text, $wrapNativeElement, component, eventElementTarget, style } from 'aelea/core'
 import * as router from 'aelea/router'
 import { $RouterAnchor } from 'aelea/router'
-import { type IBehavior, map, merge, multicast, now } from 'aelea/stream'
+import { type IBehavior, map, merge, multicast, startWith } from 'aelea/stream'
 import { $column, $icon, $row, designSheet, spacing } from 'aelea/ui-components'
 import { pallete, themeList } from 'aelea/ui-components-theme'
 import { $Picker } from '../components/$ThemePicker'
@@ -12,8 +12,8 @@ import $Examples from './examples/$Examples'
 import $Guide from './guide/$Guide'
 
 const popStateEvent = eventElementTarget('popstate', window)
-const initialLocation = now(document.location)
-const requestRouteChange = merge(initialLocation, popStateEvent)
+
+const requestRouteChange = startWith(document.location, popStateEvent)
 const locationChange = map(location => {
   return location
 }, requestRouteChange)

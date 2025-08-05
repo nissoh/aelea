@@ -6,7 +6,7 @@ export function fadeIn($content: I$Slottable) {
   const fadeIn = motion({ stiffness: 70, damping: 26, precision: 3 }, fromArray([0, 100]))
   const slideIn = motion({ stiffness: 370, damping: 46, precision: 3 }, fromArray([15, 0]))
 
-  const newLocal = combineMap(
+  const animation = combineMap(
     (state, slide) => ({
       opacity: `${state}%`,
       transform: `translate(0, ${slide}px)`
@@ -14,8 +14,9 @@ export function fadeIn($content: I$Slottable) {
     fadeIn,
     slideIn
   )
-  const styleWithEnd = continueWith(() => now({ opacity: '', transform: '' }), newLocal)
-  const animation = styleInline(styleWithEnd)
+  const withEndAnimation = continueWith(() => {
+    return now({ opacity: '', transform: '' })
+  })
 
-  return animation($content)
+  return styleInline(withEndAnimation(animation), $content)
 }
