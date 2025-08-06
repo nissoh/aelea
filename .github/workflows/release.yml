@@ -43,10 +43,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: workspace
-          path: |
-            website/
-            !website/node_modules
-            !website/.git
+          path: .
           retention-days: 1
 
       - name: Release via Changesets
