@@ -22,7 +22,6 @@ export default ({ parentRoute }: MainMenu) =>
 
     return [
       $row(spacing.small, style({ alignItems: 'center', placeContent: 'center' }))(
-
         $Link({
           $content: $text("Developer's Guide"),
           url: '/p/guide',
