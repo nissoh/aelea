@@ -2,11 +2,11 @@
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "bun install --frozen-lockfile && cd aelea && bun run build && cd ../website && bunx --bun vite build",
+    "buildCommand": "bun install && bun run build",
     "nixpacksPlan": {
       "phases": {
         "setup": {
-          "nixPkgs": ["bun"]
+          "nixPkgs": ["nodejs_22", "bun"]
         }
       }
     }
