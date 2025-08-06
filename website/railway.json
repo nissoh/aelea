@@ -2,13 +2,16 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "bun run build",
-    "watchPatterns": [
-      "website/**/*",
-      "aelea/src/**/*"
-    ]
+    "nixpacksPlan": {
+      "phases": {
+        "setup": {
+          "nixPkgs": ["bun"]
+        }
+      }
+    }
   },
   "deploy": {
-    "startCommand": "cd website && bunx serve dist -s -l $PORT"
+    "startCommand": "bunx serve . -s -l $PORT",
+    "restartPolicyType": "NEVER"
   }
 }
