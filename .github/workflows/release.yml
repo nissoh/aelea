@@ -1,22 +1,26 @@
-name: CI
+name: CI/CD
 
 on: push
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      website-changed: ${{ steps.changes.outputs.website }}
     steps:
-
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
-          # https://yarnpkg.com/features/release-workflow/#ensuring-that-versions-are-bumped-ci
           fetch-depth: 0
 
-      - name: Use Node.js 14.x
-        uses: actions/setup-node@v1
+      - name: Check for changes
+        uses: dorny/paths-filter@v2
+        id: changes
         with:
-          node-version: 14.x
+          filters: |
+            website:
+              - 'website/**'
+              - 'aelea/**'
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
@@ -27,8 +31,23 @@ jobs:
       - name: Lint
         run: bun run biome:check
 
-      - name: Build
+      - name: Build Aelea Package
         run: cd aelea && bun run build
+
+      - name: Build Website
+        if: steps.changes.outputs.website == 'true'
+        run: cd website && bun run build
+
+      - name: Upload workspace for deployment
+        if: steps.changes.outputs.website == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: workspace
+          path: |
+            website/
+            !website/node_modules
+            !website/.git
+          retention-days: 1
 
       - name: Release via Changesets
         uses: changesets/action@v1
@@ -37,3 +56,22 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_AUTH }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-website:
+    name: Deploy Website
+    runs-on: ubuntu-latest
+    container: ghcr.io/railwayapp/cli:latest
+    needs: build
+    if: needs.build.outputs.website-changed == 'true' && github.ref == 'refs/heads/main'
+    env:
+      RAILWAY_TOKEN: ${{ secrets.AELEA_RAILWAY_TOKEN }}
+      SVC_ID: ${{ secrets.RAILWAY_WEBSITE_SERVICE_ID }}
+    steps:
+      - name: Download workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: workspace
+          path: .
+      
+      - name: Deploy to Railway
+        run: railway up --service=${{ env.SVC_ID }}

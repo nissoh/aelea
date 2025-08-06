@@ -1,0 +1,14 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "bun run aelea:build && cd ../website && bun run build",
+    "watchPatterns": [
+      "website/**/*",
+      "aelea/src/**/*"
+    ]
+  },
+  "deploy": {
+    "startCommand": "cd website && bunx serve dist -s -l $PORT"
+  }
+}
