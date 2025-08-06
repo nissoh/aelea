@@ -5,22 +5,12 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      website-changed: ${{ steps.changes.outputs.website }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Check for changes
-        uses: dorny/paths-filter@v2
-        id: changes
-        with:
-          filters: |
-            website:
-              - 'website/**'
-              - 'aelea/**'
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
@@ -35,11 +25,9 @@ jobs:
         run: cd aelea && bun run build
 
       - name: Build Website
-        if: steps.changes.outputs.website == 'true'
         run: cd website && bun run build
 
       - name: Upload workspace for deployment
-        if: steps.changes.outputs.website == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: workspace
@@ -59,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/railwayapp/cli:latest
     needs: build
-    if: needs.build.outputs.website-changed == 'true' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     env:
       RAILWAY_TOKEN: ${{ secrets.AELEA_RAILWAY_TOKEN }}
       SVC_ID: ${{ secrets.RAILWAY_WEBSITE_SERVICE_ID }}
