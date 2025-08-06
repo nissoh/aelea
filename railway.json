@@ -1,0 +1,18 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "bun install --frozen-lockfile && cd aelea && bun run build && cd ../website && bun run build",
+    "nixpacksPlan": {
+      "phases": {
+        "setup": {
+          "nixPkgs": ["bun"]
+        }
+      }
+    }
+  },
+  "deploy": {
+    "startCommand": "bunx serve website/dist -s -l $PORT",
+    "restartPolicyType": "NEVER"
+  }
+}
