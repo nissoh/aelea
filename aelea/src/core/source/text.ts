@@ -7,46 +7,56 @@ export type I$Text = IStream<ISlottable<Text>>
 
 function createDynamicTextStream(textSource: IStream<string>): I$Text {
   return stream((sink, scheduler) => {
-    const disposable = new SettableDisposable()
-    return textSource.run(new DynamicTextSink(sink, disposable, scheduler), scheduler)
+    return new DynamicTextSink(sink, scheduler, textSource)
   })
 }
 
-class DynamicTextSink implements ISink<string> {
-  private textNode: Text | null = null
+class DynamicTextSink implements ISink<string>, Disposable {
+  private textNode: ISlottable<Text> | null = null
   private currentDisposable: Disposable = disposeNone
+  private sourceDisposable: Disposable
 
   constructor(
     readonly sink: ISink<ISlottable<Text>>,
-    private readonly disposable: SettableDisposable,
-    private readonly scheduler: I$Scheduler
-  ) {}
+    readonly scheduler: I$Scheduler,
+    textSource: IStream<string>
+  ) {
+    this.sourceDisposable = textSource.run(this, scheduler)
+  }
 
   event(value: string): void {
     if (this.textNode === null) {
       // First emission - create text node and emit it
-      this.textNode = document.createTextNode(value)
+      this.textNode = {
+        element: document.createTextNode(value),
+        disposable: new SettableDisposable()
+      }
       // DOM tree creation happens in asap phase
-      this.currentDisposable = this.scheduler.asap(emitText, this.sink, {
-        element: this.textNode,
-        disposable: this.disposable
-      })
+      this.currentDisposable = this.scheduler.asap(emitText, this.sink, this.textNode)
     } else if (this.textNode) {
       // Subsequent emissions - just update the text content
-      this.textNode.nodeValue = value
+      this.textNode.element.nodeValue = value
     }
   }
 
   end(): void {
-    this.currentDisposable[Symbol.dispose]()
-    this.currentDisposable = disposeNone
-    this.textNode = null
     this.sink.end()
   }
 
   error(e: any): void {
     this.sink.error(e)
   }
+
+  [Symbol.dispose](): void {
+    this.sourceDisposable[Symbol.dispose]()
+    this.currentDisposable[Symbol.dispose]()
+    this.textNode = null
+    this.sourceDisposable = disposeNone
+  }
+}
+
+function emitText(sink: ISink<ISlottable<Text>>, value: ISlottable<Text>): void {
+  sink.event(value)
 }
 
 export const $text = (...textSourceList: (IStream<string> | string)[]): I$Text => {
@@ -75,8 +85,4 @@ function createStaticTextStream(text: string): I$Text {
 
     return disposable
   })
-}
-
-function emitText(sink: ISink<ISlottable<Text>>, value: ISlottable<Text>): void {
-  sink.event(value)
 }

@@ -50,7 +50,7 @@ export function createNode<A, B extends INodeElement>(
       }
 
       // Otherwise, treat as children (I$Slottable[])
-      const $segments = input.length ? (input as I$Slottable[]) : [never as unknown as I$Slottable]
+      const $segments = input.length ? (input as I$Slottable[]) : [never]
       const $branch = createNodeSource(seedValue, sourceOp, $segments)
 
       return postOp($branch)
