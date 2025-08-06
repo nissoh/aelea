@@ -1,4 +1,4 @@
-import { $node, $wrapNativeElement, component, type INode, type IStyleCSS, style } from 'aelea/core'
+import { $text, $wrapNativeElement, component, type INode, type IStyleCSS, style } from 'aelea/core'
 import {
   combine,
   continueWith,
@@ -9,20 +9,23 @@ import {
   fromPromise,
   type IBehavior,
   type IStream,
-  join,
-  map,
   merge,
-  multicast,
   now,
   o,
   skipRepeatsWith,
-  startWith,
-  switchLatest,
   switchMap,
-  take
+  tap
 } from 'aelea/stream'
-import { fetchJson, observer } from 'aelea/ui-components'
+import { $column, fetchJson, observer } from 'aelea/ui-components'
 import type * as monaco from 'monaco-editor'
+
+// Monaco will be loaded dynamically from CDN
+declare global {
+  interface Window {
+    monaco: typeof monaco
+    require: any
+  }
+}
 
 interface JSDelivrFlat {
   files: JSDelivrMeta[]
@@ -182,60 +185,133 @@ export function definePackageTree(pkg: PackageTree, monacoGlobal: typeof monaco)
 
 const whitespaceRegexp = /[\n\r\s\t]+/g
 
-const elementBecameVisibleEvent = o(
-  observer.intersection(),
-  filter(intersectionEvent => intersectionEvent[0].intersectionRatio > 0),
-  take(1)
-)
+let monacoQuery: Promise<{ monacoGlobal: typeof monaco; pkg: PackageTree }> | null = null
 
-// Before loading vs/editor/editor.main, define a global MonacoEnvironment that overwrites
-// the default worker url location (used when creating WebWorkers). The problem here is that
-// HTML5 does not allow cross-domain web workers, so we need to proxy the instantiation of
-// a web worker through a same-domain script
-// @ts-ignore
-window.MonacoEnvironment = {
-  getWorkerUrl: () =>
-    `data:text/javascriptcharset=utf-8,${encodeURIComponent(`
-        self.MonacoEnvironment = {
-          baseUrl: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.23.0/min/'
-        }
-        importScripts('https://cdn.jsdelivr.net/npm/monaco-editor@0.23.0/min/vs/base/worker/workerMain.js')`)}`
+export async function loadMonacoTSEditor() {
+  if (!monacoQuery) {
+    monacoQuery = initializeMonaco()
+  }
+  return monacoQuery
 }
 
-export async function asyncloadMonacoEditor() {
-  // @ts-ignore
-  const monacoQuery: Promise<typeof monaco> = /* @vite-ignore */ import(
-    'https://cdn.skypack.dev/pin/monaco-editor@v0.23.0-nVyIshjiDqruq90zejl0/mode=imports,min/optimized/monaco-editor.js'
-  )
-  const precacheAeleaDependanciesQuery = fetchAndCacheDependancyTree('@aelea/core', '0.1.0')
+async function loadMonacoFromCDN() {
+  // Load Monaco Editor from CDN
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js'
+  document.head.appendChild(script)
 
-  // @ts-ignore
-  const codiConQuery: Promise<any> = new FontFace(
-    'codicon',
-    `url('https://cdn.jsdelivr.net/npm/monaco-editor@0.23.0/min/vs/base/browser/ui/codicons/codicon/codicon.ttf')`
-  )
+  return new Promise<typeof monaco>(resolve => {
+    script.onload = () => {
+      window.require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs' } })
+      window.require(['vs/editor/editor.main'], () => {
+        resolve(window.monaco)
+      })
+    }
+  })
+}
 
-  const monacoGlobal = await monacoQuery
-  const codiConFont = await codiConQuery
+async function loadAeleaPackageLocally() {
+  // Load aelea types from CDN (published version)
+  const version = '2.2.5'
+  const baseUrl = `https://cdn.jsdelivr.net/npm/aelea@${version}`
 
-  const pkg = await precacheAeleaDependanciesQuery
+  try {
+    // Fetch type definition files directly
+    const [coreTypes, streamTypes, uiTypes] = await Promise.all([
+      fetch(`${baseUrl}/dist/types/core/index.d.ts`).then(r => r.text()),
+      fetch(`${baseUrl}/dist/types/stream/index.d.ts`).then(r => r.text()),
+      fetch(`${baseUrl}/dist/types/ui-components/index.d.ts`)
+        .then(r => r.text())
+        .catch(() => '')
+    ])
+
+    const files: PackageFile[] = [
+      {
+        name: '/index.d.ts',
+        content: `export * from './core/index'\nexport * from './stream/index'\nexport * from './ui-components/index'`,
+        hash: '',
+        size: 0,
+        time: new Date().toISOString()
+      },
+      {
+        name: '/core/index.d.ts',
+        content: coreTypes,
+        hash: '',
+        size: coreTypes.length,
+        time: new Date().toISOString()
+      },
+      {
+        name: '/stream/index.d.ts',
+        content: streamTypes,
+        hash: '',
+        size: streamTypes.length,
+        time: new Date().toISOString()
+      }
+    ]
+
+    if (uiTypes) {
+      files.push({
+        name: '/ui-components/index.d.ts',
+        content: uiTypes,
+        hash: '',
+        size: uiTypes.length,
+        time: new Date().toISOString()
+      })
+    }
+
+    return {
+      name: 'aelea',
+      version,
+      typings: 'index.d.ts',
+      files,
+      dependencies: []
+    } as PackageTree
+  } catch (err) {
+    console.warn('Failed to load aelea types from CDN, falling back to basic types', err)
+    // Fallback to minimal types
+    return {
+      name: 'aelea',
+      version,
+      typings: 'index.d.ts',
+      files: [
+        {
+          name: '/index.d.ts',
+          content: 'export {}',
+          hash: '',
+          size: 0,
+          time: new Date().toISOString()
+        }
+      ],
+      dependencies: []
+    } as PackageTree
+  }
+}
+
+async function initializeMonaco() {
+  const [monacoGlobal, pkg] = await Promise.all([loadMonacoFromCDN(), loadAeleaPackageLocally()])
+
+  // Configure TypeScript defaults for better performance
+  monacoGlobal.languages.typescript.typescriptDefaults.setEagerModelSync(true)
+  monacoGlobal.languages.typescript.typescriptDefaults.setCompilerOptions({
+    ...monacoGlobal.languages.typescript.typescriptDefaults.getCompilerOptions(),
+    module: monacoGlobal.languages.typescript.ModuleKind.ESNext,
+    moduleResolution: monacoGlobal.languages.typescript.ModuleResolutionKind.NodeJs
+  })
+
+  // Load codicon font from CDN
+  try {
+    const codiconFont = new FontFace(
+      'codicon',
+      `url('https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/base/browser/ui/codicons/codicon/codicon.ttf')`
+    )
+    await codiconFont.load()
+    ;(document.fonts as any).add(codiconFont)
+  } catch (err) {
+    console.warn('Failed to load codicon font:', err)
+  }
 
   definePackageTree(pkg, monacoGlobal)
-
-  // @ts-ignore
-  document.fonts.add(codiConFont)
-
   return { monacoGlobal, pkg }
-}
-
-let monacoQuery: null | Promise<any> = null
-
-export async function loadMonacoTSEditor(): ReturnType<typeof asyncloadMonacoEditor> {
-  if (monacoQuery) return monacoQuery
-
-  monacoQuery = asyncloadMonacoEditor()
-
-  return monacoQuery
 }
 
 export interface ModelChangeBehavior {
@@ -251,75 +327,64 @@ export interface ModelChangeBehavior {
 
 let monacoEntryFileId = 0
 
-export interface IMonacoEditor {
+export interface IMonacoEditorProps {
   code: string
-  // monacoGlobal: typeof monaco,
   config?: monaco.editor.IStandaloneEditorConstructionOptions
   override?: monaco.editor.IEditorOverrideServices
   containerStyle?: IStyleCSS
 }
 
-export const $MonacoEditor = ({ code, config, override, containerStyle = { flex: 1 } }: IMonacoEditor) =>
-  component(([change, changeTether]: IBehavior<INode<HTMLElement>, ModelChangeBehavior>) => {
+export const $MonacoEditor = ({ code, config, override, containerStyle = { flex: 1 } }: IMonacoEditorProps) =>
+  component(([change, changeTether]: IBehavior<INode, ModelChangeBehavior>) => {
     const editorload = fromPromise(loadMonacoTSEditor())
 
-    const $editor = map(({ monacoGlobal }) => {
-      const editorElement = document.createElement('div')
+    return [
+      switchMap(({ monacoGlobal }) => {
+        const editorElement = document.createElement('div')
 
-      monacoGlobal.languages.typescript.typescriptDefaults.setCompilerOptions({
-        ...monacoGlobal.languages.typescript.typescriptDefaults.getCompilerOptions(),
-        module: monacoGlobal.languages.typescript.ModuleKind.ESNext,
-        moduleResolution: monacoGlobal.languages.typescript.ModuleResolutionKind.NodeJs
-      })
+        const model = monacoGlobal.editor.createModel(
+          code.replace(/(} from '@)/g, `} from '%40`),
+          'typescript',
+          monacoGlobal.Uri.parse(`file://root/test${++monacoEntryFileId}.ts`)
+        )
 
-      const model = monacoGlobal.editor.createModel(
-        code.replace(/(} from '@)/g, `} from '%40`),
-        'typescript',
-        monacoGlobal.Uri.parse(`file://root/test${++monacoEntryFileId}.ts`)
-      )
+        const ops: monaco.editor.IStandaloneEditorConstructionOptions = {
+          theme: 'vs-dark',
+          'semanticHighlighting.enabled': true,
+          minimap: { enabled: false },
+          overviewRulerLanes: 0,
+          lineNumbers: 'off',
+          glyphMargin: false,
+          folding: false,
+          lineDecorationsWidth: 15,
+          lineNumbersMinChars: 0,
+          hover: { delay: 0 },
+          padding: { top: 16, bottom: 16 },
+          renderLineHighlight: 'none',
+          // renderIndentGuides: false,
+          scrollBeyondLastLine: false,
+          automaticLayout: false,
+          model,
+          ...config
+        }
 
-      const ops: monaco.editor.IStandaloneEditorConstructionOptions = {
-        theme: 'vs-dark',
-        'semanticHighlighting.enabled': true,
-        minimap: { enabled: false },
-        overviewRulerLanes: 0,
-        lineNumbers: 'off',
-        glyphMargin: false,
-        folding: false,
-        lineDecorationsWidth: 15,
-        lineNumbersMinChars: 0,
-        hover: { delay: 0 },
-        padding: { top: 16, bottom: 16 },
-        renderLineHighlight: 'none',
-        // renderIndentGuides: false,
-        scrollBeyondLastLine: false,
-        automaticLayout: false,
-        model,
-        ...config
-      }
+        const instance = monacoGlobal.editor.create(editorElement, ops, override)
 
-      const instance = monacoGlobal.editor.create(editorElement, ops, override)
+        const updateHeight = () => {
+          if (ops.automaticLayout) {
+            const contentHeight = instance.getContentHeight()
+            editorElement.style.minHeight = `${contentHeight}px`
+            instance.layout({
+              width: editorElement.clientWidth,
+              height: contentHeight
+            })
+            instance.layout()
+          } else instance.layout()
+        }
 
-      const updateHeight = () => {
-        if (ops.automaticLayout) {
-          const contentHeight = instance.getContentHeight()
-          editorElement.style.minHeight = `${contentHeight}px`
-          instance.layout({
-            width: editorElement.clientWidth,
-            height: contentHeight
-          })
-          instance.layout()
-        } else instance.layout()
-      }
+        instance.onDidContentSizeChange(updateHeight)
 
-      instance.onDidContentSizeChange(updateHeight)
-
-      type Awaited<T> = T extends PromiseLike<infer U> ? Awaited<U> : T
-
-      const attempDuration = 50
-
-      const worketStream: IStream<Awaited<ReturnType<typeof monacoGlobal.languages.typescript.getTypeScriptWorker>>> =
-        o(
+        const worketStream: IStream<() => Promise<monaco.languages.typescript.TypeScriptWorker>> = o(
           continueWith(() => {
             return fromPromise(monacoGlobal.languages.typescript.getTypeScriptWorker())
           })
@@ -330,12 +395,17 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
           // })
         )(empty)
 
-      const $editor = $wrapNativeElement(editorElement)(
-        o(
+        const $editor = $wrapNativeElement(editorElement)(
           style({ flexDirection: 'column', ...containerStyle }),
           changeTether(
+            tap(x => {
+              return x
+            }),
             // ensure we load editor only when it's visible on the screen
-            elementBecameVisibleEvent,
+            observer.intersection(),
+            filter(intersectionEvent => {
+              return intersectionEvent[0].intersectionRatio > 0
+            }),
             switchMap(async elEvents => {
               const node = elEvents[0].target as HTMLElement
 
@@ -352,7 +422,8 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
 
               const tsModelChanges = switchMap(
                 async (params): Promise<ModelChangeBehavior> => {
-                  const worker = await params.worketStream(model.uri)
+                  const getWorker = params.worketStream
+                  const worker = await getWorker()
                   const semanticDiagnosticsQuery = worker.getSemanticDiagnostics(model.uri.toString())
                   const syntacticDiagnosticsQuery = worker.getSyntacticDiagnostics(model.uri.toString())
                   const semanticDiagnostics = await semanticDiagnosticsQuery
@@ -376,17 +447,12 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
               )
 
               return tsModelChanges
-            }),
-            join,
-            multicast
+            })
           )
-        )
-      )()
+        )()
 
-      const disposeMonacoStub: IStream<never> = { run: () => instance }
-
-      return merge($editor, disposeMonacoStub)
-    }, editorload)
-
-    return [switchLatest(startWith($node(style(containerStyle))(), $editor)), { change }]
+        return $column($text('feffef,'), $editor)
+      }, editorload),
+      { change }
+    ]
   })

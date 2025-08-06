@@ -8,15 +8,15 @@ export const fromPromise = <T>(promise: Promise<T>): IStream<T> =>
 
     promise.then(
       value => {
-        if (!cancelled) {
-          sink.event(value)
-          sink.end()
-        }
+        if (cancelled) return
+
+        sink.event(value)
+        sink.end()
       },
       error => {
-        if (!cancelled) {
-          sink.error(error)
-        }
+        if (cancelled) return
+
+        sink.error(error)
       }
     )
 
