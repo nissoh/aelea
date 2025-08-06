@@ -1,40 +1,46 @@
 name: CI/CD
 
-on: push
+on:
+  push:
+    branches: [main]
+  pull_request:
 
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: ${{ runner.os }}-bun-
 
-      - name: Install Dependencies
-        run: bun install --frozen-lockfile
+      - run: bun install
 
-      - name: Lint
-        run: bun run biome:check
+      - name: Lint and Build
+        run: |
+          bun run biome:check
+          bun run build
 
-      - name: Build Aelea Package
-        run: cd aelea && bun run build
-
-      - name: Build Website
-        run: cd website && bun run build
-
-      - name: Upload workspace for deployment
+      - name: Upload website artifact
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
-          name: workspace
-          path: .
+          name: website-dist
+          path: website/dist
           retention-days: 1
 
-      - name: Release via Changesets
+      - name: Release packages
+        if: github.ref == 'refs/heads/main'
         uses: changesets/action@v1
         with:
           publish: bun run changeset:publish
@@ -42,21 +48,23 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_AUTH }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  deploy-website:
-    name: Deploy Website
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: ci
     runs-on: ubuntu-latest
-    container: ghcr.io/railwayapp/cli:latest
-    needs: build
-    if: success()
-    env:
-      RAILWAY_TOKEN: ${{ secrets.AELEA_RAILWAY_TOKEN }}
-      SVC_ID: ${{ secrets.RAILWAY_WEBSITE_SERVICE_ID }}
     steps:
-      - name: Download workspace
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
         with:
-          name: workspace
-          path: .
-      
-      - name: Deploy to Railway
-        run: railway up --service=${{ env.SVC_ID }}
+          sparse-checkout: |
+            railway.json
+            website/package.json
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: website-dist
+          path: website/dist
+
+      - uses: blacha/workflow-railway-deploy@v1
+        with:
+          service: ${{ secrets.RAILWAY_WEBSITE_SERVICE_ID }}
+          token: ${{ secrets.AELEA_RAILWAY_TOKEN }}
