@@ -22,9 +22,6 @@ export default ({ parentRoute }: MainMenu) =>
 
     return [
       $row(spacing.small, style({ alignItems: 'center', placeContent: 'center' }))(
-        // $Link({ $content: $text('Why?!'), href: '/drag-and-sort', route: guideRoute })({
-        //   click: sampleLinkClick()
-        // }),
 
         $Link({
           $content: $text("Developer's Guide"),
