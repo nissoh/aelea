@@ -63,10 +63,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: website-dist
-          path: dist
-      
-      - name: Setup deployment
-        run: cp website/railway.json railway.json
+          path: website/dist
       
       - name: Deploy to Railway
         run: railway up --service=${{ secrets.RAILWAY_WEBSITE_SERVICE_ID }}

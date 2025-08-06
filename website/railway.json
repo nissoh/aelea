@@ -11,7 +11,7 @@
     }
   },
   "deploy": {
-    "startCommand": "bunx serve . -s -l $PORT",
+    "startCommand": "bunx serve website/dist -s -l $PORT",
     "restartPolicyType": "NEVER"
   }
 }
