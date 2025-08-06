@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/railwayapp/cli:latest
     needs: build
-    if: github.ref == 'refs/heads/main'
+    if: success()
     env:
       RAILWAY_TOKEN: ${{ secrets.AELEA_RAILWAY_TOKEN }}
       SVC_ID: ${{ secrets.RAILWAY_WEBSITE_SERVICE_ID }}
