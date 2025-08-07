@@ -14,12 +14,12 @@ export const throttle: IThrottleCurry = curry2((period, source) =>
 )
 
 class ThrottleSink<T> extends PipeSink<T> {
-  private lastTime = 0
+  lastTime = 0
 
   constructor(
-    private readonly period: number,
+    readonly period: number,
     sink: ISink<T>,
-    private readonly scheduler: IScheduler
+    readonly scheduler: IScheduler
   ) {
     super(sink)
   }

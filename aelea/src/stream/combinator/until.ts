@@ -55,8 +55,8 @@ export const during: IDuringCurry = curry2((timeWindow, stream) => {
 
 class UntilSink implements ISink<unknown> {
   constructor(
-    private readonly sink: ISink<any>,
-    private readonly disposable: Disposable
+    readonly sink: ISink<any>,
+    readonly disposable: Disposable
   ) {}
 
   event(): void {
@@ -75,7 +75,7 @@ class UntilSink implements ISink<unknown> {
 
 class SinceSink<A> extends PipeSink<A> {
   constructor(
-    private readonly min: LowerBoundSink<A>,
+    readonly min: LowerBoundSink<A>,
     sink: ISink<A>
   ) {
     super(sink)
@@ -90,11 +90,11 @@ class SinceSink<A> extends PipeSink<A> {
 
 class LowerBoundSink<A> implements ISink<unknown>, Disposable {
   allow = false
-  private disposable: Disposable
+  disposable: Disposable
 
   constructor(
     signal: IStream<unknown>,
-    private readonly sink: ISink<A>,
+    readonly sink: ISink<A>,
     scheduler: IScheduler
   ) {
     this.disposable = signal.run(this, scheduler)

@@ -15,8 +15,8 @@ export const aggregate: IAggregateCurry = curry3((f, initial, s) =>
 
 class AggregateSink<I, O> extends PipeSink<I, O> {
   constructor(
-    public readonly f: (acc: O, value: I) => O,
-    private accumulator: O,
+    readonly f: (acc: O, value: I) => O,
+    public accumulator: O,
     sink: ISink<O>
   ) {
     super(sink)

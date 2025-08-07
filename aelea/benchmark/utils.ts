@@ -1,6 +1,6 @@
 import * as MC from '@most/core'
 import * as MS from '@most/scheduler'
-import { createDefaultScheduler, type IStream } from '../src/stream/index.js'
+import { createDefaultScheduler, type ISink, type IStream } from '../src/stream/index.js'
 
 /**
  * @most/core helper to create streams from arrays
@@ -22,22 +22,34 @@ export const fromArrayM = <A>(arr: readonly A[]) =>
     )
   )
 
+// Optimized sink implementation for running streams
+class RunStreamSink<T> implements ISink<T> {
+  result: T | undefined
+
+  constructor(
+    private resolve: (value: T) => void,
+    private reject: (error: any) => void
+  ) {}
+
+  event(value: T): void {
+    this.result = value
+  }
+
+  error(error: any): void {
+    this.reject(error)
+  }
+
+  end(): void {
+    this.resolve(this.result!)
+  }
+}
+
 /**
  * Run an Aelea stream and capture the last emitted value
  */
 export const runStream = <T>(stream: IStream<T>): Promise<T> => {
-  let result: T
   return new Promise((resolve, reject) => {
-    stream.run(
-      {
-        event: value => {
-          result = value
-        },
-        error: reject,
-        end: () => resolve(result!)
-      },
-      createDefaultScheduler()
-    )
+    stream.run(new RunStreamSink(resolve, reject), createDefaultScheduler())
   })
 }
 

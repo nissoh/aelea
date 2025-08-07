@@ -1,5 +1,5 @@
-import type { IScheduler, ITask } from './types.js'
-import { disposeWith } from './utils/disposable.js'
+import type { IScheduler, ITask } from '../types.js'
+import { runTask } from './PropagateTask.js'
 
 /**
  * Browser-optimized scheduler implementation using native queueMicrotask
@@ -19,30 +19,39 @@ import { disposeWith } from './utils/disposable.js'
  * The IScheduler interface is designed to be simple to implement
  * while allowing full control over task scheduling.
  */
+
 export class BrowserScheduler implements IScheduler {
-  asap<TArgs extends readonly unknown[]>(task: ITask<TArgs>, ...args: TArgs): Disposable {
-    let cancelled = false
+  private asapTasks: ITask[] = []
+  private asapScheduled = false
 
-    queueMicrotask(() => {
-      if (!cancelled) task(...args)
-    })
+  private flushAsapTasks = (): void => {
+    this.asapScheduled = false
+    const tasks = this.asapTasks
+    this.asapTasks = []
 
-    return disposeWith(() => {
-      cancelled = true
-    })
+    for (const task of tasks) task.run()
   }
 
-  delay<TArgs extends readonly unknown[]>(task: ITask<TArgs>, delay: number, ...args: TArgs): Disposable {
-    let cancelled = false
+  asap(task: ITask): Disposable {
+    this.asapTasks.push(task)
 
-    const timeoutId = setTimeout(() => {
-      if (!cancelled) task(...args)
-    }, delay)
+    if (!this.asapScheduled) {
+      this.asapScheduled = true
+      queueMicrotask(this.flushAsapTasks)
+    }
 
-    return disposeWith(() => {
-      cancelled = true
-      clearTimeout(timeoutId)
-    })
+    return task
+  }
+
+  delay(task: ITask, delay: number): Disposable {
+    setTimeout(runTask, delay, task)
+    return task
+  }
+
+  cancel(task: ITask): void {
+    // PropagateTask handles its own lifecycle through the active property
+    // Just dispose the task
+    task[Symbol.dispose]()
   }
 
   time(): number {

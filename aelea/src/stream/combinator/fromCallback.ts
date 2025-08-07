@@ -1,5 +1,6 @@
-import type { ISink, IStream } from '../../stream/types.js'
+import type { IStream } from '../../stream/types.js'
 import { toDisposable } from '../../stream/utils/disposable.js'
+import { propagateErrorTask } from '../scheduler/PropagateTask.js'
 import { stream } from '../stream.js'
 
 export const fromCallback = <T, FnArgs extends any[] = T[]>(
@@ -20,14 +21,10 @@ export const fromCallback = <T, FnArgs extends any[] = T[]>(
 
       return toDisposable(maybeDisposable)
     } catch (error) {
-      return scheduler.asap(emitError, sink, error)
+      return scheduler.asap(propagateErrorTask(sink, scheduler, error))
     }
   })
 
 function defaultMapFn<T>(...args: T[]): T {
   return args[0]
-}
-
-function emitError<T>(sink: ISink<T>, error: any): void {
-  sink.error(error)
 }

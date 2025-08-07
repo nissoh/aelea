@@ -13,17 +13,17 @@ import { disposeBoth, disposeNone } from '../utils/disposable.js'
  */
 export const switchLatest = <T>(source: IStream<IStream<T>>): IStream<T> =>
   stream((sink, scheduler) => {
-    const switchSink = new SwitchSink(scheduler, sink)
+    const switchSink = new SwitchSink(sink, scheduler)
     return disposeBoth(switchSink, source.run(switchSink, scheduler))
   })
 
 class SwitchSink<T> implements ISink<IStream<T>>, Disposable {
-  private currentDisposable: Disposable = disposeNone
-  private innerSink: InnerSink<T>
+  currentDisposable: Disposable = disposeNone
+  innerSink: InnerSink<T>
 
   constructor(
-    private scheduler: IScheduler,
-    private sink: ISink<T>
+    readonly sink: ISink<T>,
+    readonly scheduler: IScheduler
   ) {
     this.innerSink = new InnerSink(this, sink)
   }
@@ -54,8 +54,8 @@ class SwitchSink<T> implements ISink<IStream<T>>, Disposable {
 
 class InnerSink<T> implements ISink<T> {
   constructor(
-    private parent: SwitchSink<T>,
-    private sink: ISink<T>
+    readonly parent: SwitchSink<T>,
+    readonly sink: ISink<T>
   ) {}
 
   event(value: T): void {

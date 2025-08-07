@@ -19,10 +19,10 @@ export interface ITakeCurry {
 }
 
 class TakeSink<T> extends PipeSink<T> {
-  private taken = 0
+  taken = 0
 
   constructor(
-    private readonly n: number,
+    readonly n: number,
     sink: ISink<T>
   ) {
     super(sink)

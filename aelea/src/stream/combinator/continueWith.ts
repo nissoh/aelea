@@ -19,12 +19,12 @@ export const continueWith: IContinueWithCurry = curry2((f, s) =>
 )
 
 class ContinueWithSink<A, B> implements ISink<A> {
-  private disposable: Disposable | null = null
+  disposable: Disposable | null = null
 
   constructor(
-    private sink: ISink<A | B>,
-    private scheduler: IScheduler,
-    private f: () => IStream<B>
+    readonly sink: ISink<A | B>,
+    readonly scheduler: IScheduler,
+    readonly f: () => IStream<B>
   ) {}
 
   event(value: A): void {

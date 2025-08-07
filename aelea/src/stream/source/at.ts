@@ -1,12 +1,13 @@
+import { propagateRunEventTask } from '../scheduler/PropagateTask.js'
 import { stream } from '../stream.js'
 import type { ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 
 export const at: IAtCurry = curry2((delay, value) =>
-  stream((sink, scheduler) => scheduler.delay(atOnce, delay, sink, value))
+  stream((sink, scheduler) => scheduler.delay(propagateRunEventTask(sink, scheduler, emitOnce, value), delay))
 )
 
-function atOnce<T>(sink: ISink<T>, value: T) {
+function emitOnce<T>(sink: ISink<T>, value: T) {
   sink.event(value)
   sink.end()
 }

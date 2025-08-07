@@ -1,4 +1,5 @@
-import { disposeWith, type ITask } from '../stream/index.js'
+import type { ITask } from '../stream/index.js'
+import { runTask } from '../stream/scheduler/PropagateTask.js'
 import type { I$Scheduler } from './types.js'
 
 /**
@@ -19,100 +20,62 @@ import type { I$Scheduler } from './types.js'
  * Design your code to handle this async behavior or ensure dependent tasks
  * are scheduled in the correct phase.
  */
+
 class DomScheduler implements I$Scheduler {
-  // Ring buffer for render tasks
-  private static readonly RENDER_BUFFER_SIZE = 1024
-  private static readonly RENDER_MASK = 1023
-  private renderTasks: Array<(() => void) | null> = new Array(DomScheduler.RENDER_BUFFER_SIZE)
-  private renderHead = 0
-  private renderTail = 0
-  private rafId: number | null = null
+  // Instance arrays for asap and paint phases
+  private asapTasks: ITask[] = []
+  private paintTasks: ITask[] = []
+  private asapScheduled = false
+  private paintScheduled = false
 
-  // Standard IScheduler methods
-  delay<TArgs extends readonly unknown[]>(task: ITask<TArgs>, delay: number, ...args: TArgs): Disposable {
-    let cancelled = false
+  // Arrow functions as instance properties - created once per scheduler instance
+  private flushAsapTasks = (): void => {
+    this.asapScheduled = false
+    const tasks = this.asapTasks
+    this.asapTasks = []
 
-    const timeoutId = setTimeout(() => {
-      if (!cancelled) {
-        task(...args)
-      }
-    }, delay)
-
-    return disposeWith(() => {
-      cancelled = true
-      clearTimeout(timeoutId)
-    })
+    for (const task of tasks) task.run()
   }
 
-  asap<TArgs extends readonly unknown[]>(task: ITask<TArgs>, ...args: TArgs): Disposable {
-    let cancelled = false
+  private flushPaintTasks = (): void => {
+    this.paintScheduled = false
+    const tasks = this.paintTasks
+    this.paintTasks = []
 
-    Promise.resolve(null).then(() => {
-      if (!cancelled) {
-        task(...args)
-      }
-    })
-
-    // queueMicrotask(() => {
-    //   if (!cancelled) {
-    //     task(...args)
-    //   }
-    // })
-
-    return disposeWith(() => {
-      cancelled = true
-    })
+    for (const task of tasks) task.run()
   }
 
-  paint<TArgs extends readonly unknown[]>(task: ITask<TArgs>, ...args: TArgs): Disposable {
-    let cancelled = false
-
-    // Fast ring buffer enqueue
-    const nextTail = (this.renderTail + 1) & DomScheduler.RENDER_MASK
-    if (nextTail === this.renderHead) {
-      throw new Error('DomScheduler render buffer overflow - too many pending paint tasks')
-    }
-
-    this.renderTasks[this.renderTail] = () => {
-      if (!cancelled) {
-        task(...args)
-      }
-    }
-    this.renderTail = nextTail
-
-    if (this.rafId === null) {
-      this.rafId = requestAnimationFrame(() => {
-        this.rafId = null
-        this.flushRender()
-      })
-    }
-
-    return disposeWith(() => {
-      cancelled = true
-    })
+  delay(task: ITask, delay: number): Disposable {
+    setTimeout(runTask, delay, task)
+    return task
   }
 
-  private flushRender(): void {
-    // Cache for faster access
-    const tasks = this.renderTasks
-    const mask = DomScheduler.RENDER_MASK
-    let head = this.renderHead
-    const tail = this.renderTail
+  asap(task: ITask): Disposable {
+    this.asapTasks.push(task)
 
-    // Tight execution loop
-    while (head !== tail) {
-      const task = tasks[head]
-      tasks[head] = null // Clear reference to allow GC
-      try {
-        task!() // Non-null assertion - we know task exists here
-      } catch (error) {
-        // Log but don't stop processing other tasks
-        console.error('Error in render task:', error)
-      }
-      head = (head + 1) & mask
+    if (!this.asapScheduled) {
+      this.asapScheduled = true
+      queueMicrotask(this.flushAsapTasks)
     }
 
-    this.renderHead = head
+    return task
+  }
+
+  paint(task: ITask): Disposable {
+    this.paintTasks.push(task)
+
+    if (!this.paintScheduled) {
+      this.paintScheduled = true
+      requestAnimationFrame(this.flushPaintTasks)
+    }
+
+    return task
+  }
+
+  cancel(task: ITask): void {
+    // PropagateTask handles its own lifecycle through the active property
+    // Just dispose the task
+    task[Symbol.dispose]()
   }
 
   time(): number {

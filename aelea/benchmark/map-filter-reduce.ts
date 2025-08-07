@@ -1,6 +1,6 @@
 import * as MC from '@most/core'
 import { Bench } from 'tinybench'
-import { filter, fromArray, map, op, scanMap } from '../src/stream/index.js'
+import { aggregate, filter, fromArray, map, op } from '../src/stream/index.js'
 import { fromArrayM, runMost, runStream } from './utils.js'
 
 const bench = new Bench({ time: 100 })
@@ -18,7 +18,7 @@ bench
     return runMost(stream)
   })
   .add(`@aelea map-filter-reduce ${n}`, () => {
-    return runStream(op(fromArray(arr), map(add1), filter(even), scanMap(sum, 0)))
+    return runStream(op(fromArray(arr), map(add1), filter(even), aggregate(sum, 0)))
   })
 
 await bench.run()

@@ -28,8 +28,8 @@
     "verbatimModuleSyntax": true,
     "resolveJsonModule": true,
     // Language and environment
-    "moduleResolution": "NodeNext",
-    "module": "NodeNext",
+    "moduleResolution": "bundler",
+    "module": "esnext",
     "target": "ES2021", // Setting this to `ES2021` enables native support for `Node v16+`: https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping.
     "lib": [
       "ESNext"

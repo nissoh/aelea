@@ -63,7 +63,7 @@ export function zipMap<T extends readonly unknown[], R>(
 }
 
 class Queue<T> {
-  private items: T[] = []
+  items: T[] = []
 
   push(item: T): void {
     this.items.push(item)
@@ -90,10 +90,10 @@ interface IndexedValue<T> {
 
 class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
   constructor(
-    private readonly f: (...args: any[]) => O,
-    private readonly buffers: ArrayLike<Queue<I>>,
-    private readonly sinks: ArrayLike<IndexSink<I>>,
-    private readonly sink: ISink<O>
+    readonly f: (...args: any[]) => O,
+    readonly buffers: ArrayLike<Queue<I>>,
+    readonly sinks: ArrayLike<IndexSink<I>>,
+    readonly sink: ISink<O>
   ) {}
 
   event(indexedValue: IndexedValue<I>): void {
@@ -145,7 +145,7 @@ class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
     this.sink.end()
   }
 
-  private ended(): boolean {
+  ended(): boolean {
     for (let i = 0; i < this.buffers.length; i++) {
       if (this.buffers[i].isEmpty() && !this.sinks[i].active) {
         return true
@@ -154,7 +154,7 @@ class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
     return false
   }
 
-  private ready(): boolean {
+  ready(): boolean {
     for (let i = 0; i < this.buffers.length; i++) {
       if (this.buffers[i].isEmpty()) {
         return false

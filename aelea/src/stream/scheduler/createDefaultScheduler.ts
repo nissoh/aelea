@@ -1,11 +1,6 @@
-import { createBrowserScheduler } from './browser-scheduler.js'
-import { createNodeScheduler } from './node-scheduler.js'
-import type { IScheduler } from './types.js'
-
-// Re-export for backward compatibility
-// Maintain backward compatibility by aliasing BrowserScheduler
-export { BrowserScheduler, BrowserScheduler as DefaultScheduler } from './browser-scheduler.js'
-export { NodeScheduler } from './node-scheduler.js'
+import type { IScheduler } from '../types.js'
+import { createBrowserScheduler } from './BrowserScheduler.js'
+import { createNodeScheduler } from './NodeScheduler.js'
 
 /**
  * Creates an environment-appropriate scheduler

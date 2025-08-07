@@ -19,10 +19,15 @@ export interface ISink<T> {
   end(): void
 }
 
+export type IRunTask<TArgs extends readonly unknown[]> = (...args: TArgs) => void
+
 /**
  * A scheduled task callback that receives a sink and optional arguments
  */
-export type ITask<TArgs extends readonly unknown[]> = (...args: TArgs) => void
+export interface ITask extends Disposable {
+  run(): void
+  active: boolean
+}
 
 /**
  * Scheduler interface for controlling the timing and execution of stream events.
@@ -38,24 +43,13 @@ export type ITask<TArgs extends readonly unknown[]> = (...args: TArgs) => void
  * - Test: May use virtual time for deterministic testing
  */
 export interface IScheduler {
-  /**
-   * Schedule a task to run after a specified delay
-   * @param task - Function to execute with (sink, ...args)
-   * @param delay - Delay in milliseconds
-   * @param args - Additional arguments to pass to callback
-   */
-  delay<TArgs extends readonly unknown[]>(task: ITask<TArgs>, delay: number, ...args: TArgs): Disposable
+  /** Schedule a task to run after a specified delay */
+  delay(task: ITask, delay: number): Disposable
 
-  /**
-   * Schedule a task to run as soon as possible (next microtask)
-   * @param task - Function to execute with (sink, ...args)
-   * @param args - Additional arguments to pass to task
-   */
-  asap<TArgs extends readonly unknown[]>(task: ITask<TArgs>, ...args: TArgs): Disposable
+  /** Schedule a task to run as soon as possible (next microtask) */
+  asap(task: ITask): Disposable
 
-  /**
-   * Get the current scheduler time in milliseconds
-   */
+  /** Get the current scheduler time in milliseconds */
   time(): number
 }
 

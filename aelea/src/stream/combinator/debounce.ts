@@ -1,5 +1,7 @@
+import { propagateRunEventTask } from '../scheduler/PropagateTask.js'
 import { stream } from '../stream.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
+import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 
 /**
@@ -9,27 +11,27 @@ import { curry2 } from '../utils/function.js'
  * debounce(3):   -------3---------5-------6->
  */
 export const debounce: IDebounceCurry = curry2((period, source) =>
-  stream((sink, scheduler) => new DebounceSink(period, source, sink, scheduler))
+  stream((sink, scheduler) => {
+    const disposableSink = new DebounceSink(sink, scheduler, period)
+
+    return disposeBoth(disposableSink, source.run(disposableSink, scheduler))
+  })
 )
 
 class DebounceSink<T> implements ISink<T>, Disposable {
   pendingValue: { value: T } | null = null
   timer: Disposable | null = null
-  private readonly disposable: Disposable
 
   constructor(
-    private readonly dt: number,
-    source: IStream<T>,
-    private readonly sink: ISink<T>,
-    private readonly scheduler: IScheduler
-  ) {
-    this.disposable = source.run(this, scheduler)
-  }
+    readonly sink: ISink<T>,
+    readonly scheduler: IScheduler,
+    readonly dt: number
+  ) {}
 
   event(value: T): void {
     this.clearTimer()
     this.pendingValue = { value }
-    this.timer = this.scheduler.delay(emitDebounced, this.dt, this.sink, this)
+    this.timer = this.scheduler.delay(propagateRunEventTask(this.sink, this.scheduler, emitDebounced, this), this.dt)
   }
 
   error(e: Error): void {
@@ -49,10 +51,9 @@ class DebounceSink<T> implements ISink<T>, Disposable {
 
   [Symbol.dispose](): void {
     this.clearTimer()
-    this.disposable[Symbol.dispose]()
   }
 
-  private clearTimer(): void {
+  clearTimer(): void {
     if (this.timer !== null) {
       this.timer[Symbol.dispose]()
       this.timer = null

@@ -57,8 +57,8 @@ export const disposeNone: Disposable = {
 export const disposeOnce = (disposable: Disposable): Disposable => new DisposeOnce(disposable)
 
 class DisposeOnce implements Disposable {
-  private disposed = false
-  private disposable?: Disposable
+  disposed = false
+  disposable?: Disposable
 
   constructor(disposable: Disposable) {
     this.disposable = disposable

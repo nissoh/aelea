@@ -34,7 +34,7 @@ class SampleMapSink<A, B, C> extends PipeSink<B, C> {
   readonly seedSink: SeedSink<A>
 
   constructor(
-    private readonly f: (a: A, b: B) => C,
+    readonly f: (a: A, b: B) => C,
     sink: ISink<C>
   ) {
     super(sink)
@@ -57,7 +57,7 @@ class SeedSink<A> implements ISink<A> {
   hasValue = false
   value?: A
 
-  constructor(private readonly sink: ISink<unknown>) {}
+  constructor(readonly sink: ISink<unknown>) {}
 
   event(x: A): void {
     this.value = x

@@ -29,10 +29,10 @@ class BranchEffectsSink implements ISink<INode | ISlottable> {
   segmentsSlotList: Map<INode | ISlottable, Disposable>[] = []
 
   constructor(
-    private readonly env: IRunEnvironment,
-    private readonly branchNode: INode,
-    private readonly segmentPosition: number,
-    private readonly segmentsCount: number[]
+    readonly env: IRunEnvironment,
+    readonly branchNode: INode,
+    readonly segmentPosition: number,
+    readonly segmentsCount: number[]
   ) {}
 
   event(childNode: INode) {
@@ -137,8 +137,8 @@ class BranchChildrenSinkList implements Disposable {
   disposables = new Map<I$Slottable, Disposable>()
 
   constructor(
-    private env: IRunEnvironment,
-    private node: INode
+    readonly env: IRunEnvironment,
+    readonly node: INode
   ) {
     const l = node.$segments.length
     const segmentsCount = new Array(l).fill(0)
@@ -263,7 +263,7 @@ export function render(config: {
     scheduler: config.scheduler ?? createDomScheduler(),
     rootAttachment: config.rootAttachment,
     cache: config.cache ?? [],
-    namespace: config.namespace ?? 'ω',
+    namespace: config.namespace ?? 'Ω',
     stylesheet: new CSSStyleSheet()
   }
 

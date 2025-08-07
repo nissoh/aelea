@@ -19,10 +19,10 @@ export interface ISkipCurry {
 }
 
 class SkipSink<T> extends PipeSink<T> {
-  private skipped = 0
+  skipped = 0
 
   constructor(
-    private readonly n: number,
+    readonly n: number,
     sink: ISink<T>
   ) {
     super(sink)

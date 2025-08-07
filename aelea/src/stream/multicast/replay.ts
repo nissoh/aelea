@@ -36,7 +36,7 @@ export const replayState = <T>(s: IStream<T>, initialState?: T): IStream<T> =>
 
 class StateSink<A> extends PipeSink<A> {
   constructor(
-    private readonly parent: ReplayLatest<A>,
+    readonly parent: ReplayLatest<A>,
     sink: ISink<A>
   ) {
     super(sink)
@@ -54,8 +54,8 @@ export class ReplayLatest<A> implements IStream<A> {
   hasValue = false
 
   constructor(
-    private readonly source: IStream<A>,
-    private readonly initialState?: A
+    readonly source: IStream<A>,
+    readonly initialState?: A
   ) {}
 
   run(sink: ISink<A>, scheduler: IScheduler): Disposable {

@@ -41,7 +41,7 @@ export interface INodeCompose<TElement extends INodeElement = INodeElement> {
 }
 
 export interface I$Scheduler extends IScheduler {
-  paint<TArgs extends readonly unknown[]>(task: ITask<TArgs>, ...args: TArgs): Disposable
+  paint(task: ITask): Disposable
 }
 
 // Component types

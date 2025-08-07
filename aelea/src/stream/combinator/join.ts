@@ -15,14 +15,14 @@ export const mergeMapConcurrently: IMergeMapConcurrentlyCurry = curry3((f, concu
 )
 
 class Outer<A, B> implements ISink<A>, Disposable {
-  private readonly scheduler: IScheduler
-  private readonly disposable: Disposable
-  private active: boolean
-  private readonly concurrency: number
-  private readonly f: (a: A) => IStream<B>
-  private readonly sink: ISink<B>
-  private readonly current: Inner<B>[]
-  private readonly pending: A[]
+  readonly scheduler: IScheduler
+  readonly disposable: Disposable
+  active: boolean
+  readonly concurrency: number
+  readonly f: (a: A) => IStream<B>
+  readonly sink: ISink<B>
+  readonly current: Inner<B>[]
+  readonly pending: A[]
 
   constructor(f: (a: A) => IStream<B>, concurrency: number, source: IStream<A>, sink: ISink<B>, scheduler: IScheduler) {
     this.f = f
@@ -39,7 +39,7 @@ class Outer<A, B> implements ISink<A>, Disposable {
     this.addInner(x)
   }
 
-  private addInner(x: A): void {
+  addInner(x: A): void {
     if (this.current.length < this.concurrency) {
       this.startInner(x)
     } else {
@@ -47,7 +47,7 @@ class Outer<A, B> implements ISink<A>, Disposable {
     }
   }
 
-  private startInner(x: A): void {
+  startInner(x: A): void {
     try {
       this.initInner(x)
     } catch (e) {
@@ -55,7 +55,7 @@ class Outer<A, B> implements ISink<A>, Disposable {
     }
   }
 
-  private initInner(x: A): void {
+  initInner(x: A): void {
     const innerSink = new Inner(this, this.sink)
     const innerStream = this.f(x)
     innerSink.disposable = innerStream.run(innerSink, this.scheduler)
@@ -85,7 +85,7 @@ class Outer<A, B> implements ISink<A>, Disposable {
     }
   }
 
-  private checkEnd(): void {
+  checkEnd(): void {
     if (!this.active && this.current.length === 0) {
       this.sink.end()
     }
@@ -100,9 +100,9 @@ class Outer<A, B> implements ISink<A>, Disposable {
 }
 
 class Inner<A> implements ISink<A>, Disposable {
-  private readonly outer: Outer<any, A>
+  readonly outer: Outer<any, A>
   disposable: Disposable
-  private readonly sink: ISink<A>
+  readonly sink: ISink<A>
 
   constructor(outer: Outer<any, A>, sink: ISink<A>) {
     this.outer = outer

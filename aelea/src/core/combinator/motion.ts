@@ -1,4 +1,5 @@
 import { curry2, disposeNone, type ISink, type IStream } from '../../stream/index.js'
+import { propagateRunEventTask } from '../../stream/scheduler/PropagateTask.js'
 import { stream } from '../stream.js'
 import type { I$Scheduler } from '../types.js'
 
@@ -24,19 +25,19 @@ export const motion: IMotionCurry = curry2(
 )
 
 class MotionSink implements ISink<number>, Disposable {
-  private position = 0
-  private target = 0
-  private velocity = 0
+  position = 0
+  target = 0
+  velocity = 0
 
-  private animating = false
-  private rafDisposable = disposeNone
-  private sourceDisposable: Disposable
-  private initialized = false
+  animating = false
+  rafDisposable = disposeNone
+  sourceDisposable: Disposable
+  initialized = false
 
   constructor(
-    private sink: ISink<number>,
-    private scheduler: I$Scheduler,
-    private config: MotionConfig,
+    readonly sink: ISink<number>,
+    readonly scheduler: I$Scheduler,
+    readonly config: MotionConfig,
     position: IStream<number>
   ) {
     this.sourceDisposable = position.run(this, scheduler)
@@ -53,7 +54,7 @@ class MotionSink implements ISink<number>, Disposable {
 
     if (!this.animating) {
       this.animating = true
-      this.rafDisposable = this.scheduler.paint(this.animate)
+      this.rafDisposable = this.scheduler.paint(propagateRunEventTask(this.sink, this.scheduler, animate, this))
     }
   }
 
@@ -70,43 +71,45 @@ class MotionSink implements ISink<number>, Disposable {
     this.sink.end()
   }
 
-  private animate = (): void => {
-    const delta = this.target - this.position
-    const absDelta = delta < 0 ? -delta : delta
-    const absVelocity = this.velocity < 0 ? -this.velocity : this.velocity
-
-    // Check if settled
-    if (absVelocity < this.config.precision && absDelta < this.config.precision) {
-      this.position = this.target
-      this.velocity = 0
-      this.animating = false
-      this.rafDisposable = disposeNone
-      this.sink.event(this.target)
-
-      if (this.sourceDisposable === disposeNone) {
-        this.sink.end()
-      }
-
-      return
-    }
-
-    // Spring physics calculation
-    const acceleration = this.config.stiffness * delta - this.config.damping * this.velocity
-
-    // Update state (dt = 1/60 for 60fps)
-    this.velocity += acceleration * 0.01666666666666666 // 1/60
-    this.position += this.velocity * 0.01666666666666666
-
-    this.sink.event(this.position)
-    this.rafDisposable = this.scheduler.paint(this.animate)
-  };
-
   [Symbol.dispose](): void {
     this.rafDisposable[Symbol.dispose]()
     this.sourceDisposable[Symbol.dispose]()
 
     this.sourceDisposable = disposeNone
   }
+}
+
+function animate(sink: ISink<number>, ms: MotionSink): void {
+  const delta = ms.target - ms.position
+  const absDelta = delta < 0 ? -delta : delta
+  const absVelocity = ms.velocity < 0 ? -ms.velocity : ms.velocity
+
+  // Check if settled
+  if (absVelocity < ms.config.precision && absDelta < ms.config.precision) {
+    ms.position = ms.target
+    ms.velocity = 0
+    ms.animating = false
+    ms.rafDisposable = disposeNone
+
+    sink.event(ms.target)
+
+    if (ms.sourceDisposable === disposeNone) {
+      sink.end()
+      return
+    }
+
+    return
+  }
+
+  // Spring physics calculation
+  const acceleration = ms.config.stiffness * delta - ms.config.damping * ms.velocity
+
+  // Update state (dt = 1/60 for 60fps)
+  ms.velocity += acceleration * 0.01666666666666666 // 1/60
+  ms.position += ms.velocity * 0.01666666666666666
+
+  sink.event(ms.position)
+  ms.rafDisposable = ms.scheduler.paint(propagateRunEventTask(ms.sink, ms.scheduler, animate, ms))
 }
 
 export interface IMotionCurry {

@@ -38,7 +38,7 @@ class SourceSink<T> implements ISink<T> {
   latestValue!: T
 
   constructor(
-    private parent: Tether<T>,
+    readonly parent: Tether<T>,
     public sink: ISink<T>
   ) {}
 
@@ -87,7 +87,7 @@ class Tether<T> implements IStream<T> {
 
   sourceDisposable: Disposable = disposeNone
 
-  constructor(private source: IStream<T>) {}
+  constructor(readonly source: IStream<T>) {}
 
   run(sink: SourceSink<T> | TetherSink<T>, scheduler: IScheduler): Disposable {
     if (sink instanceof SourceSink) {

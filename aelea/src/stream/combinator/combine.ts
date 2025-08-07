@@ -80,7 +80,7 @@ class CombineMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
   constructor(
     readonly disposables: Disposable[],
     sinkCount: number,
-    protected readonly sink: ISink<O>,
+    readonly sink: ISink<O>,
     readonly f: (...args: any[]) => O
   ) {
     this.awaiting = this.activeCount = sinkCount

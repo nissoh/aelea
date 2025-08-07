@@ -27,11 +27,11 @@ export interface ISkipRepeatsWithCurry {
 }
 
 class SkipRepeatsSink<T> extends PipeSink<T> {
-  private hasValue = false
-  private previousValue!: T
+  hasValue = false
+  previousValue!: T
 
   constructor(
-    private readonly equals: (a: T, b: T) => boolean,
+    readonly equals: (a: T, b: T) => boolean,
     sink: ISink<T>
   ) {
     super(sink)

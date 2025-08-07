@@ -3,8 +3,8 @@
  * Useful for cases where the disposable needs to be created after construction.
  */
 export class SettableDisposable implements Disposable {
-  private disposable: Disposable | null = null
-  private disposed = false
+  disposable: Disposable | null = null
+  disposed = false
 
   set(disposable: Disposable): void {
     if (this.disposable !== null) {

@@ -1,6 +1,6 @@
 {
   "name": "aelea",
-  "version": "2.2.5",
+  "version": "2.3.50",
   "type": "module",
   "scripts": {
     "build": "bun run build:clean && bun run bunx tsc -b",
@@ -27,7 +27,6 @@
   "devDependencies": {
     "@most/core": "^1.6.1",
     "@most/scheduler": "^1.3.0",
-    "@types/bun": "1.2.19",
     "tinybench": "4.0.1"
   },
   "publishConfig": {

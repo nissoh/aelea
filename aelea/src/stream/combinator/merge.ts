@@ -48,7 +48,7 @@ class MergeSink<A> implements ISink<IndexedValue<A | undefined>> {
     }
   }
 
-  private dispose(index: number): void {
+  dispose(index: number): void {
     this.disposables[index][Symbol.dispose]()
     if (--this.activeCount === 0) {
       this.sink.end()

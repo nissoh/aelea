@@ -17,7 +17,13 @@ bench
     return runMost(stream)
   })
   .add(`@aelea switch ${n} x ${m}`, () => {
-    return runStream(op(fromArray(arr), map(fromArray), switchLatest, aggregate(sum, 0)))
+    return op(
+      fromArray(arr), //
+      map(fromArray),
+      switchLatest,
+      aggregate(sum, 0),
+      runStream
+    )
   })
 
 bench.addEventListener('error', console.error)

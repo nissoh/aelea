@@ -70,7 +70,7 @@ bench
     const s1 = fromArrayM(numbers)
     const s2 = fromArrayM(numbers)
     const s3 = fromArrayM(numbers)
-    return runMost(MC.combine(add3, s1, s2, s3))
+    return runMost(MC.combineArray(add3, [s1, s2, s3]))
   })
   // Combine 3 streams - Aelea
   .add(`@aelea combine 3 streams of ${n} numbers`, () => {
@@ -106,7 +106,7 @@ bench
     const s1 = fromArrayM(numbers)
     const s2 = fromArrayM(numbers)
     const s3 = fromArrayM(numbers)
-    return runMost(MC.zip(add3, s1, s2, s3))
+    return runMost(MC.zipArray(add3, [s1, s2, s3]))
   })
   // Zip 3 streams - Aelea
   .add(`@aelea zip 3 streams of ${n} numbers`, () => {

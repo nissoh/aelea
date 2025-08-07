@@ -1,5 +1,6 @@
 import { Bench } from 'tinybench'
 import { combineMap, createDefaultScheduler, type IStream, merge, stream, zipMap } from '../src/stream/index.js'
+import { propagateRunTask } from '../src/stream/scheduler/PropagateTask.js'
 
 // Create a stream that emits values with controlled timing
 function createControlledStream(values: number[], delayMs = 0): IStream<number> {
@@ -16,16 +17,16 @@ function createControlledStream(values: number[], delayMs = 0): IStream<number> 
       sink.event(values[index++])
 
       if (delayMs > 0) {
-        scheduler.delay(emitNext, delayMs)
+        scheduler.delay(propagateRunTask(sink, scheduler, emitNext), delayMs)
       } else {
-        scheduler.asap(emitNext)
+        scheduler.asap(propagateRunTask(sink, scheduler, emitNext))
       }
     }
 
     if (delayMs > 0) {
-      scheduler.delay(emitNext, delayMs)
+      scheduler.delay(propagateRunTask(sink, scheduler, emitNext), delayMs)
     } else {
-      scheduler.asap(emitNext)
+      scheduler.asap(propagateRunTask(sink, scheduler, emitNext))
     }
 
     return {
@@ -102,7 +103,7 @@ const mergeOrderTest = async () => {
 const combineOrderTest = async () => {
   const s1 = createControlledStream([1, 2, 3])
   const s2 = createControlledStream([10, 20, 30])
-  const combined = combineMap((a, b) => [a, b], s1, s2)
+  const combined = combineMap((a, b): [number, number] => [a, b], s1, s2)
 
   const events: [number, number][] = []
   const scheduler = createDefaultScheduler()
@@ -128,7 +129,7 @@ const combineOrderTest = async () => {
 const zipOrderTest = async () => {
   const s1 = createControlledStream([1, 2, 3, 4, 5])
   const s2 = createControlledStream([10, 20, 30]) // Shorter stream
-  const zipped = zipMap((a, b) => [a, b], s1, s2)
+  const zipped = zipMap((a, b): [number, number] => [a, b], s1, s2)
 
   const events: [number, number][] = []
   const scheduler = createDefaultScheduler()
@@ -239,10 +240,10 @@ await bench.run()
 console.table(
   bench.tasks.map(task => ({
     Test: task.name,
-    'Ops/sec': Math.round(task.result!.hz).toLocaleString(),
-    'Avg time (ms)': (task.result!.mean * 1000).toFixed(3),
-    'Min time (ms)': (task.result!.min * 1000).toFixed(3),
-    'Max time (ms)': (task.result!.max * 1000).toFixed(3)
+    'Ops/sec': Math.round(1000 / task.result!.latency.mean).toLocaleString(),
+    'Avg time (ms)': task.result!.latency.mean.toFixed(3),
+    'Min time (ms)': task.result!.latency.min.toFixed(3),
+    'Max time (ms)': task.result!.latency.max.toFixed(3)
   }))
 )
 
