@@ -9,6 +9,7 @@ export const periodic: IPeriodicCurry = curry2((period, value) =>
 
 class Periodic<T> implements Disposable {
   currentDisposable: Disposable | null = null
+  disposed = false
 
   constructor(
     readonly scheduler: IScheduler,
@@ -16,31 +17,29 @@ class Periodic<T> implements Disposable {
     readonly period: number,
     readonly value: T
   ) {
+    this.scheduleNext()
+  }
+
+  scheduleNext(): void {
+    if (this.disposed) return
+
     this.currentDisposable = this.scheduler.delay(
-      propagateRunEventTask(sink, scheduler, eventPeriodic, value),
+      propagateRunEventTask(this.sink, this.scheduler, emitPeriodic, this),
       this.period
     )
   }
 
-  emit(): void {
-    try {
-      this.sink.event(this.value)
-      this.currentDisposable = this.scheduler.delay(
-        propagateRunEventTask(this.sink, this.scheduler, eventPeriodic, this.value),
-        this.period
-      )
-    } catch (error) {
-      this.sink.error(error)
-    }
-  }
-
   [Symbol.dispose](): void {
+    this.disposed = true
     this.currentDisposable?.[Symbol.dispose]()
   }
 }
 
-function eventPeriodic<T>(sink: ISink<T>, value: T): void {
-  sink.event(value)
+function emitPeriodic<T>(sink: ISink<T>, periodic: Periodic<T>): void {
+  if (periodic.disposed) return
+
+  sink.event(periodic.value)
+  periodic.scheduleNext()
 }
 
 export interface IPeriodicCurry {

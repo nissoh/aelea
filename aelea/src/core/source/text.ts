@@ -8,22 +8,19 @@ export type I$Text = IStream<ISlottable<Text>>
 
 function createDynamicTextStream(textSource: IStream<string>): I$Text {
   return stream((sink, scheduler) => {
-    return new DynamicTextSink(sink, scheduler, textSource)
+    const textDisposable = new DynamicTextSink(sink, scheduler)
+    return disposeBoth(textDisposable, textSource.run(textDisposable, scheduler))
   })
 }
 
 class DynamicTextSink implements ISink<string>, Disposable {
   textNode: ISlottable<Text> | null = null
   currentDisposable: Disposable = disposeNone
-  sourceDisposable: Disposable
 
   constructor(
     readonly sink: ISink<ISlottable<Text>>,
-    readonly scheduler: I$Scheduler,
-    textSource: IStream<string>
-  ) {
-    this.sourceDisposable = textSource.run(this, scheduler)
-  }
+    readonly scheduler: I$Scheduler
+  ) {}
 
   event(value: string): void {
     if (this.textNode === null) {
@@ -51,10 +48,8 @@ class DynamicTextSink implements ISink<string>, Disposable {
   }
 
   [Symbol.dispose](): void {
-    this.sourceDisposable[Symbol.dispose]()
     this.currentDisposable[Symbol.dispose]()
     this.textNode = null
-    this.sourceDisposable = disposeNone
   }
 }
 

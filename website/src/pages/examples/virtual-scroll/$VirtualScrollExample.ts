@@ -9,12 +9,9 @@ import {
   map,
   merge,
   now,
-  op,
-  periodic,
   sampleMap,
   startWith,
-  switchLatest,
-  take
+  switchLatest
 } from 'aelea/stream'
 import type { ScrollRequest, ScrollResponse } from 'aelea/ui-components'
 import { $card, $column, $row, $seperator, $TextField, $VirtualScroll, spacing } from 'aelea/ui-components'
@@ -69,18 +66,8 @@ export const $VirtualScrollExample = component(
     const filterText = startWith('', filter)
     const debouncedFilterText = debounce(300, filterText)
 
-    const testHighOrderTextSwitch = op(
-      periodic(1000, null),
-      map(() => `Virtual Scroll Example - ${new Date().toLocaleTimeString()}`),
-      take(2),
-      map(time => {
-        return $text(time)
-      }),
-      switchLatest
-    )
     return [
       $column(spacing.big)(
-        testHighOrderTextSwitch,
         $text(
           'High performance dynamically loaded list based on Intersection Observer Web API. this example shows a very common pagination and REST like fetching asynchnously more pages'
         ),

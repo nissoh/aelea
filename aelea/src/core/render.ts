@@ -116,16 +116,15 @@ class BranchEffectsSink implements ISink<INode | ISlottable> {
   }
 
   end() {
-    // Dispose all segment disposables
-    for (const s of this.segmentsSlotList) {
-      for (const d of s.values()) {
-        d[Symbol.dispose]()
-      }
-      s.clear() // Clear the map to release references
-    }
-
-    // Clear arrays to release references
-    this.segmentsSlotList.length = 0
+    // // Dispose all segment disposables
+    // for (const s of this.segmentsSlotList) {
+    //   for (const d of s.values()) {
+    //     d[Symbol.dispose]()
+    //   }
+    //   s.clear() // Clear the map to release references
+    // }
+    // // Clear arrays to release references
+    // this.segmentsSlotList.length = 0
   }
 
   error(err: Error) {
