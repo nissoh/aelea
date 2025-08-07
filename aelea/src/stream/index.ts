@@ -1,6 +1,6 @@
 export * from './combinator/index.js'
 export { behavior, multicast, replayLatest, replayState, tether } from './multicast/index.js'
-export { createDefaultScheduler } from './scheduler/index.js'
+export * from './scheduler/index.js'
 export * from './source/index.js'
 export { stream } from './stream.js'
 export type {

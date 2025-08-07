@@ -1,6 +1,5 @@
 import type { IScheduler, ISink, ITask } from '../types.js'
 
-// Static handler to avoid creating closures for delayed tasks
 export function runTask(task: ITask): void {
   task.run()
 }
