@@ -1,5 +1,4 @@
 import {
-  curry2,
   disposeBoth,
   type IScheduler,
   type ISink,
@@ -17,9 +16,8 @@ import { multicast } from './multicast.js'
  * subscriber1:   ^1-2-3--->
  * subscriber2:     ^2-3--->
  */
-export const state: IReplayCurry = curry2(
-  <T>(initialState: T, source: IStream<T>): IStream<T> => new ReplayLatest(multicast(source), initialState)
-)
+export const state = <T>(source: IStream<T>, initialState?: T): IStream<T> =>
+  new ReplayLatest(multicast(source), initialState)
 
 class StateSink<A> extends PipeSink<A> {
   constructor(
@@ -68,9 +66,4 @@ export class ReplayLatest<A> implements IStream<A> {
 
     return sourceDisposable
   }
-}
-
-export interface IReplayCurry {
-  <T>(initialState: T, source: IStream<T>): IStream<T>
-  <T>(initialState: T): (source: IStream<T>) => IStream<T>
 }

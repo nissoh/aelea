@@ -42,7 +42,7 @@ export default component(
           const [remove, removeTether] = behavior<PointerEvent, PointerEvent>()
           const [valueChange, valueChangeTether] = behavior<number, number>()
 
-          const value = state(0, valueChange)
+          const value = state(valueChange, 0)
 
           return until(
             remove,
