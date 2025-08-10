@@ -1,5 +1,5 @@
-import { $element, $node, $text, component, type INode, nodeEvent } from 'aelea/core'
 import { type IBehavior, map } from 'aelea/stream'
+import { $element, $node, $text, component, type INode, nodeEvent } from 'aelea/ui'
 
 export default component(([input, inputTether]: IBehavior<INode<HTMLInputElement>, string>) => {
   const inputBehavior = inputTether(

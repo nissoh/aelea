@@ -1,9 +1,6 @@
-import type { IStyleCSS } from '../../core/combinator/style.js'
-import { $node, $text, style, styleBehavior } from '../../core/index.js'
 import {
   aggregate,
   at,
-  empty,
   type IStream,
   map,
   merge,
@@ -12,9 +9,11 @@ import {
   op,
   skipRepeats,
   skipRepeatsWith,
-  switchLatest,
-  tap
+  switchLatest
 } from '../../stream/index.js'
+import type { IStyleCSS } from '../../ui/combinator/style.js'
+import { $node, $text, style, styleBehavior } from '../../ui/index.js'
+import { pallete } from '../../ui-components-theme/globalState.js'
 
 export const sumFromZeroOp = aggregate((current: number, x: number) => current + x, 0)
 
@@ -32,15 +31,20 @@ type CountState = {
 
 export interface NumberConfig {
   value: IStream<number>
-  incrementColor: string
-  decrementColor: string
+  incrementColor?: string
+  decrementColor?: string
   textStyle?: IStyleCSS
   slots?: number // can be deprecated
 }
-export const $NumberTicker = ({ value, incrementColor, decrementColor, textStyle = {}, slots = 10 }: NumberConfig) => {
+export const $NumberTicker = ({
+  value,
+  incrementColor = pallete.positive,
+  decrementColor = pallete.negative,
+  textStyle = {},
+  slots = 10
+}: NumberConfig) => {
   const incrementMulticast = op(
     value,
-    tap(console.log),
     aggregate((seed: CountState | null, change: number): CountState => {
       const changeStr = change.toLocaleString()
 
@@ -50,10 +54,13 @@ export const $NumberTicker = ({ value, incrementColor, decrementColor, textStyle
 
       const dir = change > seed.change ? Direction.INCREMENT : Direction.DECREMENT
       const currentStr = seed.change.toLocaleString()
-      const isWholeNumber = changeStr.split('.').length === 1
 
-      // TODO handle fractions
-      const pos = isWholeNumber && changeStr.length > currentStr.length ? 0 : getDetlaSlotIdex(currentStr, changeStr, 0)
+      // Find the position where strings differ
+      let pos = 0
+      const minLen = Math.min(currentStr.length, changeStr.length)
+      while (pos < minLen && currentStr[pos] === changeStr[pos]) {
+        pos++
+      }
 
       return { change, dir, pos, changeStr }
     }, null),
@@ -61,12 +68,11 @@ export const $NumberTicker = ({ value, incrementColor, decrementColor, textStyle
     multicast
   )
 
-  const dirStyleMap = {
-    [Direction.INCREMENT]: { color: incrementColor },
-    [Direction.DECREMENT]: { color: decrementColor }
-  }
-
-  const styledTextTransition = style({ transition: 'ease-out .25s color', ...textStyle })
+  const styledTextTransition = style({
+    fontVariantNumeric: 'tabular-nums',
+    transition: 'ease-out .25s color',
+    ...textStyle
+  })
 
   return $node(
     ...Array(slots)
@@ -80,13 +86,26 @@ export const $NumberTicker = ({ value, incrementColor, decrementColor, textStyle
               skipRepeatsWith(
                 (x: CountState, y: CountState) => x.changeStr[slot] === y.changeStr[slot] && slot < y.pos
               ),
-              map(({ pos, dir }: CountState) => {
+              map((state: CountState | null) => {
+                if (!state) return now({})
+
+                const { pos, dir } = state
+                const resetStyle = now({})
                 const decayColor = at(1000, {})
+
+                // If this slot is before the change position, just reset
                 if (slot < pos) {
-                  return decayColor
+                  return resetStyle
                 }
 
-                return merge(dir ? now(dirStyleMap[dir]) : empty, decayColor)
+                // If no direction (initial state), return reset
+                if (dir === null || dir === undefined) {
+                  return resetStyle
+                }
+
+                // Apply color and then decay
+                const color = dir === Direction.INCREMENT ? incrementColor : decrementColor
+                return merge(now({ color }), decayColor)
               }),
               switchLatest
             )
@@ -95,17 +114,11 @@ export const $NumberTicker = ({ value, incrementColor, decrementColor, textStyle
           $text(
             op(
               incrementMulticast,
-              map(({ changeStr }: CountState) => changeStr[slot] ?? ''),
+              map((state: CountState | null) => state?.changeStr[slot] ?? ''),
               skipRepeats
             )
           )
         )
       })
   )
-}
-
-function getDetlaSlotIdex(current: string, change: string, i: number): number {
-  if (current[i] !== change[i] || i > change.length) return i
-
-  return getDetlaSlotIdex(current, change, i + 1)
 }

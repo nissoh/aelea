@@ -1,4 +1,4 @@
-import { disposeBoth, disposeWith, empty, type IStream, nullSink, stream, tap } from '../../stream/index.js'
+import { disposeBoth, disposeWith, empty, type IStream, nullSink, stream, tap } from '../stream/index.js'
 
 export function fromWebsocket<I, O>(
   url: string,

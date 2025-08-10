@@ -1,4 +1,3 @@
-import { $node, $text, component, style } from 'aelea/core'
 import {
   aggregate,
   behavior,
@@ -12,6 +11,7 @@ import {
   sampleMap,
   until
 } from 'aelea/stream'
+import { $node, $text, component, style } from 'aelea/ui'
 import { $Button, $column, $row, $seperator, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 import { $TrashBtn } from '../../../elements/$common'

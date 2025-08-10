@@ -1,6 +1,6 @@
-import { component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
-import type { I$Slottable, ISlottable } from '../../../core/types.js'
 import { type IBehavior, map, merge, o } from '../../../stream/index.js'
+import { component, nodeEvent, style, styleBehavior } from '../../../ui/index.js'
+import type { I$Slottable, ISlottable } from '../../../ui/types.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $icon } from '../../elements/$icon.js'
 import { designSheet } from '../../style/designSheet.js'

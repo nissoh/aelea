@@ -1,5 +1,5 @@
-import { $element, attr, component, type INode, nodeEvent, styleBehavior } from '../../../core/index.js'
 import { empty, type IBehavior, map, merge, op, sampleMap } from '../../../stream/index.js'
+import { $element, attr, component, type INode, nodeEvent, styleBehavior } from '../../../ui/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'

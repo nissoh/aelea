@@ -1,7 +1,6 @@
-import { $text, component, style } from 'aelea/core'
 import { constant, type IBehavior, type IStream } from 'aelea/stream'
+import { $text, component, style } from 'aelea/ui'
 import { $Button, $column, $NumberTicker, $row, spacing } from 'aelea/ui-components'
-import { pallete } from 'aelea/ui-components-theme'
 
 interface Counter {
   value: IStream<number>
@@ -28,9 +27,7 @@ export default ({ value }: Counter) =>
             value: value,
             textStyle: {
               fontSize: '30px'
-            },
-            decrementColor: pallete.negative,
-            incrementColor: pallete.positive
+            }
           })
         ),
 

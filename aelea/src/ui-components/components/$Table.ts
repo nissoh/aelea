@@ -1,6 +1,3 @@
-import { attr, component, nodeEvent, style, stylePseudo } from '../../core/index.js'
-import { $node, $svg } from '../../core/source/node.js'
-import type { I$Node, I$Slottable, ISlottable } from '../../core/types.js'
 import {
   aggregate,
   constant,
@@ -16,6 +13,9 @@ import {
   startWith,
   switchLatest
 } from '../../stream/index.js'
+import { attr, component, nodeEvent, style, stylePseudo } from '../../ui/index.js'
+import { $node, $svg } from '../../ui/source/node.js'
+import type { I$Node, I$Slottable, ISlottable } from '../../ui/types.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column, $row } from '../elements/$elements.js'
 import { $icon } from '../elements/$icon.js'

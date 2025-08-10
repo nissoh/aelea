@@ -1,7 +1,7 @@
-import type { I$Slottable, IStyleCSS } from 'aelea/core'
-import { $element, component, style, styleBehavior } from 'aelea/core'
 import { $RouterAnchor, type IAnchor } from 'aelea/router'
 import { combineMap, type IBehavior } from 'aelea/stream'
+import type { I$Slottable, IStyleCSS } from 'aelea/ui'
+import { $element, component, style, styleBehavior } from 'aelea/ui'
 import { pallete } from 'aelea/ui-components-theme'
 
 export interface ILink extends Omit<IAnchor, '$anchor'> {

@@ -5,18 +5,25 @@
     // Incremental builds
     // NOTE: Enabling incremental builds speeds up `tsc`. Keep in mind though that it does not reliably bust the cache when the `tsconfig.json` file changes.
     "incremental": true,
+    // tsBuildInfoFile configured per package to avoid conflicts
     "sourceMap": true,
+    // Performance optimizations for IntelliSense
+    "disableSourceOfProjectReferenceRedirect": true,
+    "disableSolutionSearching": true,
     // Type checking
     "strict": true,
-    "useDefineForClassFields": true, // Not enabled by default in `strict` mode unless we bump `target` to ES2022.
+    "alwaysStrict": true, // Always parse in strict mode
     "noFallthroughCasesInSwitch": true, // Not enabled by default in `strict` mode.
     "noImplicitReturns": true, // Not enabled by default in `strict` mode.
     "useUnknownInCatchVariables": true, // TODO: This would normally be enabled in `strict` mode but would require some adjustments to the codebase.
-    "noImplicitOverride": true, // Not enabled by default in `strict` mode.
-    "noUnusedLocals": false, // Not enabled by default in `strict` mode.
-    "noUnusedParameters": false, // Not enabled by default in `strict` mode.
-    // TODO: Uncomment and fix types.
-    // "noUncheckedIndexedAccess": true,
+    // Functional programming strictness
+    // "noUncheckedIndexedAccess": true, // TODO: Enable for safer array/object access
+    "noUnusedLocals": false, // Cleaner functional code
+    "noUnusedParameters": false, // Cleaner functional code
+    "allowUnusedLabels": false, // No unused labels
+    "allowUnreachableCode": false, // No dead code
+    "exactOptionalPropertyTypes": false, // Disabled - conflicts with optional stream properties
+    // "noPropertyAccessFromIndexSignature": true, // Conflicts with biome linter preferences
     // JavaScript support
     "allowJs": false,
     "checkJs": false,
@@ -27,13 +34,20 @@
     "forceConsistentCasingInFileNames": true,
     "verbatimModuleSyntax": true,
     "resolveJsonModule": true,
+    "resolvePackageJsonExports": true, // Respect package.json "exports" field
+    "resolvePackageJsonImports": true, // Respect package.json "imports" field
+    // Focus on pure TypeScript modules
     // Language and environment
-    "moduleResolution": "bundler",
-    "module": "esnext",
-    "target": "ES2021", // Setting this to `ES2021` enables native support for `Node v16+`: https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping.
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "target": "ES2023", // Use specific ES version for consistent output
     "lib": [
-      "ESNext"
+      "ES2023", // Core ES2023 features
+      "ES2023.Array", // Array methods like toSorted, toReversed
+      "ES2023.Collection", // WeakMap/WeakSet improvements
+      "ESNext.Disposable" // using/await using syntax
     ],
+    "moduleDetection": "force", // Treat all files as modules
     // Skip type checking for node modules
     "skipLibCheck": true
   },

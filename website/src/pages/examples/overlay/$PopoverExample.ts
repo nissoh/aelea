@@ -1,5 +1,5 @@
-import { $text, component, style } from 'aelea/core'
 import { aggregate, constant, type IBehavior, merge, now } from 'aelea/stream'
+import { $text, component, style } from 'aelea/ui'
 import { $Button, $column, $Popover, $row, $TextField, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 import $Counter from '../count-counters/$Counter'

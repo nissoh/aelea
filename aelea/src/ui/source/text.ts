@@ -8,7 +8,7 @@ export type I$Text = IStream<ISlottable<Text>>
 
 function createDynamicTextStream(textSource: IStream<string>): I$Text {
   return stream((sink, scheduler) => {
-    const textDisposable = new DynamicTextSink(sink, scheduler)
+    const textDisposable = new DynamicTextSink(sink, scheduler as I$Scheduler)
     return disposeBoth(textDisposable, textSource.run(textDisposable, scheduler))
   })
 }
@@ -80,7 +80,9 @@ function createStaticTextStream(text: string): I$Text {
       element: document.createTextNode(text),
       disposable
     }
-    const emitTextDisposable = scheduler.asap(propagateRunEventTask(sink, scheduler, emitText, textNode))
+    const emitTextDisposable = (scheduler as I$Scheduler).asap(
+      propagateRunEventTask(sink, scheduler as I$Scheduler, emitText, textNode)
+    )
 
     return disposeBoth(emitTextDisposable, disposable)
   })

@@ -17,6 +17,7 @@ export { $text } from './source/text.js'
 export type {
   I$Node,
   I$Op,
+  I$Scheduler,
   I$Slottable,
   IAttributeProperties,
   IComponentBehavior,

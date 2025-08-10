@@ -1,6 +1,6 @@
-import type { I$Slottable } from 'aelea/core'
-import { motion, styleInline } from 'aelea/core'
 import { combineMap, continueWith, fromArray, now } from 'aelea/stream'
+import type { I$Slottable } from 'aelea/ui'
+import { motion, styleInline } from 'aelea/ui'
 
 export function fadeIn($content: I$Slottable) {
   const fadeIn = motion({ stiffness: 70, damping: 26, precision: 3 }, fromArray([0, 100]))

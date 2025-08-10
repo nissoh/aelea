@@ -4,34 +4,36 @@ import { disposeAll, disposeNone } from '../utils/disposable.js'
 import { curry2, curry3 } from '../utils/function.js'
 
 export const join = <A>(stream: IStream<IStream<A>>): IStream<A> =>
-  mergeConcurrentlyMap(Number.POSITIVE_INFINITY, stream)
+  joinConcurrentlyMap(Number.POSITIVE_INFINITY, stream)
 
-export const mergeConcurrentlyMap: IMergeConcurrentlyMapCurry = curry2((concurrency, stream) =>
-  mergeMapConcurrently(s => s, concurrency, stream)
+export const joinMap: IJoinMapCurry = curry2((f, source) => joinMapConcurrently(f, Number.POSITIVE_INFINITY, source))
+
+export interface IJoinMapCurry {
+  <A, B>(f: (a: A) => IStream<B>, source: IStream<A>): IStream<B>
+  <A, B>(f: (a: A) => IStream<B>): (source: IStream<A>) => IStream<B>
+}
+
+export const joinConcurrentlyMap: IMergeConcurrentlyMapCurry = curry2((concurrency, stream) =>
+  joinMapConcurrently(s => s, concurrency, stream)
 )
 
-export const mergeMapConcurrently: IMergeMapConcurrentlyCurry = curry3((f, concurrency, source) =>
-  stream((sink, scheduler) => new Outer(f, concurrency, source, sink, scheduler))
+export const joinMapConcurrently: IMergeMapConcurrentlyCurry = curry3((f, concurrency, source) =>
+  stream((sink, scheduler) => new Join(sink, scheduler, source, f, concurrency))
 )
 
-class Outer<A, B> implements ISink<A>, Disposable {
-  readonly scheduler: IScheduler
+class Join<A, B> implements ISink<A>, Disposable {
   readonly disposable: Disposable
-  active: boolean
-  readonly concurrency: number
-  readonly f: (a: A) => IStream<B>
-  readonly sink: ISink<B>
-  readonly current: Inner<B>[]
-  readonly pending: A[]
+  active = true
+  readonly current: Inner<B>[] = []
+  readonly pending: A[] = []
 
-  constructor(f: (a: A) => IStream<B>, concurrency: number, source: IStream<A>, sink: ISink<B>, scheduler: IScheduler) {
-    this.f = f
-    this.concurrency = concurrency
-    this.sink = sink
-    this.scheduler = scheduler
-    this.pending = []
-    this.current = []
-    this.active = true
+  constructor(
+    readonly sink: ISink<B>,
+    readonly scheduler: IScheduler,
+    source: IStream<A>,
+    readonly f: (a: A) => IStream<B>,
+    readonly concurrency: number
+  ) {
     this.disposable = source.run(this, scheduler)
   }
 
@@ -100,26 +102,23 @@ class Outer<A, B> implements ISink<A>, Disposable {
 }
 
 class Inner<A> implements ISink<A>, Disposable {
-  readonly outer: Outer<any, A>
-  disposable: Disposable
-  readonly sink: ISink<A>
+  disposable: Disposable = disposeNone
 
-  constructor(outer: Outer<any, A>, sink: ISink<A>) {
-    this.outer = outer
-    this.sink = sink
-    this.disposable = disposeNone
-  }
+  constructor(
+    readonly parentJoin: Join<any, A>,
+    readonly sink: ISink<A>
+  ) {}
 
   event(x: A): void {
     this.sink.event(x)
   }
 
   end(): void {
-    this.outer.endInner(this)
+    this.parentJoin.endInner(this)
   }
 
   error(e: any): void {
-    this.outer.error(e)
+    this.parentJoin.error(e)
   }
 
   [Symbol.dispose](): void {

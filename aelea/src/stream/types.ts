@@ -1,14 +1,14 @@
 /**
  * Represents a stream of values that can be observed
  */
-export interface IStream<T, S extends IScheduler = IScheduler> {
-  run(sink: ISink<T>, scheduler: S): Disposable
+export interface IStream<T> {
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable
 }
 
 /**
  * Factory function for creating a stream
  */
-export type ICreateStream<T, S extends IScheduler> = (sink: ISink<T>, scheduler: S) => Disposable
+export type ICreateStream<T> = <S extends IScheduler>(sink: ISink<T>, scheduler: S) => Disposable
 
 /**
  * Observer interface for consuming stream values

@@ -1,4 +1,3 @@
-import { $custom, $node, $text, component, type I$Slottable, motion, style, styleInline } from 'aelea/core'
 import {
   debounce,
   empty,
@@ -12,6 +11,7 @@ import {
   switchLatest,
   switchMap
 } from 'aelea/stream'
+import { $custom, $node, $text, component, type I$Slottable, motion, style, styleInline } from 'aelea/ui'
 import { $column, $row } from 'aelea/ui-components'
 import { pallete, theme } from 'aelea/ui-components-theme'
 import { $MonacoEditor, type ModelChangeBehavior } from '../$MonacoEditor'

@@ -1,6 +1,6 @@
-import { $svg, attr, style } from '../../core/index.js'
-import type { I$Node, INode } from '../../core/types.js'
 import { type IOps, o } from '../../stream/index.js'
+import { $svg, attr, style } from '../../ui/index.js'
+import type { I$Node, INode } from '../../ui/types.js'
 
 interface Icon {
   /**  in pixels */

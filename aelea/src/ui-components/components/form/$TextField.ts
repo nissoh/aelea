@@ -1,9 +1,3 @@
-import { component } from '../../../core/combinator/component.js'
-import type { IStyleCSS } from '../../../core/combinator/style.js'
-import { style } from '../../../core/combinator/style.js'
-import { $node } from '../../../core/source/node.js'
-import { $text } from '../../../core/source/text.js'
-import type { INode } from '../../../core/types.js'
 import type { IBehavior, IOps } from '../../../stream/index.js'
 import {
   empty,
@@ -17,6 +11,12 @@ import {
   skipRepeats,
   switchLatest
 } from '../../../stream/index.js'
+import { component } from '../../../ui/combinator/component.js'
+import type { IStyleCSS } from '../../../ui/combinator/style.js'
+import { style } from '../../../ui/combinator/style.js'
+import { $node } from '../../../ui/source/node.js'
+import { $text } from '../../../ui/source/text.js'
+import type { INode } from '../../../ui/types.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $row } from '../../elements/$elements.js'
 import { layoutSheet } from '../../style/layoutSheet.js'

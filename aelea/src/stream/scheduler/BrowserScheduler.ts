@@ -48,12 +48,6 @@ export class BrowserScheduler implements IScheduler {
     return task
   }
 
-  cancel(task: ITask): void {
-    // PropagateTask handles its own lifecycle through the active property
-    // Just dispose the task
-    task[Symbol.dispose]()
-  }
-
   time(): number {
     return performance.now()
   }

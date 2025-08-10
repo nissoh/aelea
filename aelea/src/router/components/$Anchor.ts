@@ -1,7 +1,7 @@
-import { attr, component, nodeEvent, style } from '../../core/index.js'
-import type { I$Node, INode } from '../../core/types.js'
 import { constant, map, merge, o, op, startWith } from '../../stream/index.js'
 import type { IBehavior, IOps } from '../../stream/types.js'
+import { attr, component, nodeEvent, style } from '../../ui/index.js'
+import type { I$Node, INode } from '../../ui/types.js'
 import type { Route } from '../types.js'
 
 export interface IAnchor {

@@ -1,6 +1,6 @@
-import { $element, $node, $text, attr, component, style, stylePseudo } from 'aelea/core'
 import type { Route } from 'aelea/router'
 import type { IBehavior } from 'aelea/stream'
+import { $element, $node, $text, attr, component, style, stylePseudo } from 'aelea/ui'
 import { $icon, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 import { $Link } from '../components/$Link'

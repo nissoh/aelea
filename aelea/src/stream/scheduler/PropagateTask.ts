@@ -31,7 +31,6 @@ export abstract class PropagateTask<T> implements ITask, Disposable {
 
   [Symbol.dispose](): void {
     this.active = false
-    // this.scheduler.cancel(this)
   }
 
   run(): void {

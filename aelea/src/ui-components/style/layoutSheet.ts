@@ -1,5 +1,5 @@
-import { style } from '../../core/combinator/style.js'
 import { o } from '../../stream/index.js'
+import { style } from '../../ui/combinator/style.js'
 
 const stretch = style({
   position: 'absolute',

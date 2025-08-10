@@ -1,5 +1,3 @@
-import { eventElementTarget } from '../../core/combinator/event.js'
-import type { INode } from '../../core/types.js'
 import {
   constant,
   continueWith,
@@ -11,6 +9,8 @@ import {
   switchLatest,
   until
 } from '../../stream/index.js'
+import { eventElementTarget } from '../../ui/combinator/event.js'
+import type { INode } from '../../ui/types.js'
 
 export const intersection = (config: IntersectionObserverInit = {}) => {
   return o(

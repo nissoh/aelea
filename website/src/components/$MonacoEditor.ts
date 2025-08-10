@@ -1,4 +1,3 @@
-import { $text, $wrapNativeElement, component, type INode, type IStyleCSS, style } from 'aelea/core'
 import {
   combine,
   continueWith,
@@ -16,6 +15,7 @@ import {
   switchMap,
   tap
 } from 'aelea/stream'
+import { $text, $wrapNativeElement, component, type INode, type IStyleCSS, style } from 'aelea/ui'
 import { $column, fetchJson, observer } from 'aelea/ui-components'
 import type * as monaco from 'monaco-editor'
 

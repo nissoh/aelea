@@ -20,7 +20,7 @@ export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
 export const motion: IMotionCurry = curry2(
   (config: Partial<MotionConfig>, position: IStream<number>): IStream<number> => {
     const cfg = { ...MOTION_NO_WOBBLE, ...config }
-    return stream((sink, scheduler) => new MotionSink(sink, scheduler, cfg, position))
+    return stream((sink, scheduler) => new MotionSink(sink, scheduler as I$Scheduler, cfg, position))
   }
 )
 

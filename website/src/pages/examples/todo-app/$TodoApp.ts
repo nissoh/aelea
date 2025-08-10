@@ -1,4 +1,3 @@
-import { $element, $text, component, style } from 'aelea/core'
 import {
   behavior,
   combineMap,
@@ -12,6 +11,7 @@ import {
   take,
   until
 } from 'aelea/stream'
+import { $element, $text, component, style } from 'aelea/ui'
 import { $Checkbox, $column, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 import type { Todo } from './$CreateTodo'

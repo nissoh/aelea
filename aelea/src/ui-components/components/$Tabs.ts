@@ -1,6 +1,6 @@
-import { $node, component, nodeEvent } from '../../core/index.js'
-import type { I$Slottable } from '../../core/types.js'
 import { type IBehavior, type IStream, map, merge, switchLatest } from '../../stream/index.js'
+import { $node, component, nodeEvent } from '../../ui/index.js'
+import type { I$Slottable } from '../../ui/types.js'
 
 export interface Tab {
   content: I$Slottable

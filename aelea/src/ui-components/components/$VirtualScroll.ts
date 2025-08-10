@@ -1,8 +1,3 @@
-import { component } from '../../core/combinator/component.js'
-import { style } from '../../core/combinator/style.js'
-import { $custom, $node } from '../../core/source/node.js'
-import { $text } from '../../core/source/text.js'
-import type { I$Node, I$Slottable, INode } from '../../core/types.js'
 import {
   aggregate,
   delay,
@@ -20,6 +15,11 @@ import {
   startWith,
   switchLatest
 } from '../../stream/index.js'
+import { component } from '../../ui/combinator/component.js'
+import { style } from '../../ui/combinator/style.js'
+import { $custom, $node } from '../../ui/source/node.js'
+import { $text } from '../../ui/source/text.js'
+import type { I$Node, I$Slottable, INode } from '../../ui/types.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column } from '../elements/$elements.js'
 import { designSheet } from '../style/designSheet.js'

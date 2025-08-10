@@ -1,8 +1,3 @@
-import { component } from '../../core/combinator/component.js'
-import { eventElementTarget, nodeEvent } from '../../core/combinator/event.js'
-import { style, styleBehavior, styleInline } from '../../core/combinator/style.js'
-import { motion } from '../../core/index.js'
-import type { I$Node, ISlottable } from '../../core/types.js'
 import {
   behavior,
   combineMap,
@@ -21,6 +16,11 @@ import {
   switchLatest,
   until
 } from '../../stream/index.js'
+import { component } from '../../ui/combinator/component.js'
+import { eventElementTarget, nodeEvent } from '../../ui/combinator/event.js'
+import { style, styleBehavior, styleInline } from '../../ui/combinator/style.js'
+import { motion } from '../../ui/index.js'
+import type { I$Node, ISlottable } from '../../ui/types.js'
 import { $column, $row } from '../elements/$elements.js'
 import { layoutSheet } from '../style/layoutSheet.js'
 

@@ -55,19 +55,16 @@ class MulticastSource<T> implements IStream<T>, ISink<T>, Disposable {
       return
     }
 
+    if (len === 2) {
+      sinks[0].event(value)
+      sinks[1].event(value)
+
+      return
+    }
+
     // Use a copy to handle synchronous unsubscription during event
     const sinksCopy = sinks.slice()
-    for (let i = 0; i < len; i++) {
-      try {
-        sinksCopy[i].event(value)
-      } catch (e) {
-        // Sink error: isolate to that subscriber, others continue
-        // This handles errors thrown by subscribers during event processing
-        try {
-          sinksCopy[i].error(e)
-        } catch {} // Ignore errors in error handlers
-      }
-    }
+    for (const sink of sinksCopy) sink.event(value)
   }
 
   error(error: any): void {

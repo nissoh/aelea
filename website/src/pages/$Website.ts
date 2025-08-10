@@ -1,7 +1,7 @@
-import { $element, $text, $wrapNativeElement, component, eventElementTarget, style } from 'aelea/core'
 import * as router from 'aelea/router'
 import { $RouterAnchor } from 'aelea/router'
 import { type IBehavior, map, merge, multicast, startWith } from 'aelea/stream'
+import { $element, $text, $wrapNativeElement, component, eventElementTarget, style } from 'aelea/ui'
 import { $column, $icon, $row, designSheet, spacing } from 'aelea/ui-components'
 import { pallete, themeList } from 'aelea/ui-components-theme'
 import { $Picker } from '../components/$ThemePicker'

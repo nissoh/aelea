@@ -1,5 +1,5 @@
-import { $text, component, style } from 'aelea/core'
 import { constant, type IBehavior, map, merge, now, sampleMap, startWith } from 'aelea/stream'
+import { $text, component, style } from 'aelea/ui'
 import { $Button, $Field, $row } from 'aelea/ui-components'
 
 let iid = 0

@@ -5,7 +5,7 @@ import { disposeAll } from '../utils/disposable.js'
 import { IndexSink } from '../utils/sink.js'
 import { map } from './map.js'
 
-export function zipState<A>(
+export function zip<A>(
   state: {
     [P in keyof A]: IStream<A[P]>
   }

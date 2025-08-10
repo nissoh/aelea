@@ -1,5 +1,4 @@
-import type { IStream } from '../../stream/index.js'
-import { curry2, disposeWith, fromCallback, isStream, joinMap } from '../../stream/index.js'
+import { curry2, disposeWith, fromCallback, type IStream, isStream, joinMap } from '../../stream/index.js'
 import type { I$Slottable, INodeElement } from '../types.js'
 
 type PickEvent<A, B> = A extends keyof B ? B[A] : Event

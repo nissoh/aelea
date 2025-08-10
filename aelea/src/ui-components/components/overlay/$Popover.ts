@@ -1,15 +1,4 @@
 import {
-  $node,
-  component,
-  type I$Node,
-  type INode,
-  type INodeCompose,
-  type IStyleCSS,
-  nodeEvent,
-  style,
-  styleBehavior
-} from '../../../core/index.js'
-import {
   constant,
   empty,
   filter,
@@ -23,6 +12,17 @@ import {
   until,
   zipMap
 } from '../../../stream/index.js'
+import {
+  $node,
+  component,
+  type I$Node,
+  type INode,
+  type INodeCompose,
+  type IStyleCSS,
+  nodeEvent,
+  style,
+  styleBehavior
+} from '../../../ui/index.js'
 import { colorAlpha } from '../../../ui-components-theme/color.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $column } from '../../elements/$elements.js'

@@ -26,7 +26,7 @@ bun add aelea
 In Aelea, UI updates are driven by streams of data:
 
 ```typescript
-import { $text, stream } from 'aelea/core'
+import { $text, stream } from 'aelea/ui'
 import { map, periodic, aggregate } from 'aelea/stream'
 
 // Create a stream that emits incremented numbers every second
@@ -41,7 +41,7 @@ const $counter = $text(map(String, counter))
 DOM elements are created through element factories:
 
 ```typescript
-import { $element, $custom, style } from 'aelea/core'
+import { $element, $custom, style } from 'aelea/ui'
 
 // Create standard HTML elements
 const $div = $element('div')
@@ -70,7 +70,7 @@ const $label = $element('label')
 Components receive behavior streams and output both UI and new streams:
 
 ```typescript
-import { component, behavior, eventElementTarget, $text, $element } from 'aelea/core'
+import { component, behavior, eventElementTarget, $text, $element } from 'aelea/ui'
 import { map, merge, aggregate, constant } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream'
 
@@ -106,12 +106,90 @@ const $Counter = component((
 })
 ```
 
+### 4. Component Composition
+
+Components can be composed together, with parent components wiring child component behaviors:
+
+```typescript
+import { component, behavior, $element, $text, style } from 'aelea/ui'
+import { map, merge, aggregate, now, constant } from 'aelea/stream'
+import type { IBehavior } from 'aelea/stream'
+
+// Reusable Counter component (simplified from above)
+const $Counter = ({ initial = 0 }) => component((
+  [increment, incrementTether]: IBehavior<MouseEvent, number>,
+  [decrement, decrementTether]: IBehavior<MouseEvent, number>
+) => {
+  const $button = $element('button')
+  const inc = incrementTether(eventElementTarget('click'))
+  const dec = decrementTether(eventElementTarget('click'))
+  
+  const value = aggregate((sum, n) => sum + n, initial, merge(increment, decrement))
+  
+  return [
+    $element('div')(
+      style({ display: 'flex', gap: '10px', alignItems: 'center' })
+    )(
+      $button(dec)('-'),
+      $text(map(String, value)),
+      $button(inc)('+')
+    ),
+    { value, increment, decrement }
+  ]
+})
+
+// Parent component that manages multiple counters
+const $CounterList = component((
+  [addCounter, addCounterTether]: IBehavior<MouseEvent>
+  [changeCounterList, changeCounterListTether]: IBehavior<number[]>
+) => {
+  const $button = $element('button')
+  const $div = $element('div')
+  
+  // Track total across all counters
+  const [totalChange, totalChangeTether] = behavior<number>()
+  const total = aggregate((sum, n) => sum + n, 0, totalChange)
+  
+  // Create counters dynamically
+  const addClick = addCounterTether(eventElementTarget('click'))
+
+  const counterList = replayState(changeCounterList, [5])
+  
+  return [
+    $div()(
+      $div(style({ marginBottom: '20px' }))(
+        $text(map(n => `Total: ${n}`, total)),
+        $button(addClick)('Add Counter')
+      ),
+      
+      // Create initial counter
+      $Counter({ initial: 5 })({
+        increment: totalChangeTether(constant(1)),
+        decrement: totalChangeTether(constant(-1))
+      }),
+      
+      // More counters can be added dynamically using streams
+    )
+  ]
+})
+```
+
+**Key Composition Concepts:**
+
+1. **Behavior Tethering**: Parent components pass behavior tethers to children, allowing them to wire up event handlers while maintaining control over the data flow
+
+2. **Output Contracts**: Child components return both UI elements and streams/values that parent components can use
+
+3. **Stream Transformation**: Parents can transform child outputs before using them (e.g., converting increment/decrement clicks to total changes)
+
+4. **Reusability**: Components are pure functions that can be instantiated multiple times with different configurations
+
 ## Getting Started
 
 ### Hello World
 
 ```typescript
-import { runBrowser, $text } from 'aelea/core'
+import { runBrowser, $text } from 'aelea/ui'
 import { now } from 'aelea/stream'
 
 runBrowser({ 
@@ -124,7 +202,7 @@ runBrowser({
 ### Interactive Counter
 
 ```typescript
-import { runBrowser, component, style, eventElementTarget, $text, $element } from 'aelea/core'
+import { runBrowser, component, style, eventElementTarget, $text, $element } from 'aelea/ui'
 import { behavior, map, aggregate, startWith } from 'aelea/stream'
 
 const $App = component(() => {
@@ -165,7 +243,7 @@ runBrowser({ rootNode: document.body })($App())
 
 ```typescript
 import { fromPromise, switchLatest, map } from 'aelea/stream'
-import { $text, $element } from 'aelea/core'
+import { $text, $element } from 'aelea/ui'
 
 const fetchUsers = () => 
   fetch('https://jsonplaceholder.typicode.com/users')
@@ -189,7 +267,7 @@ const $UserList = switchLatest(
 ### Animated Transitions
 
 ```typescript
-import { motion, component, styleBehavior, $element } from 'aelea/core'
+import { motion, component, styleBehavior, $element } from 'aelea/ui'
 import { behavior, map, startWith } from 'aelea/stream'
 
 const $AnimatedBox = component(() => {
@@ -308,7 +386,7 @@ const $App = $element('div')()(
 Aelea uses a DOM-optimized scheduler that batches updates efficiently:
 
 ```typescript
-import { createDomScheduler } from 'aelea/core'
+import { createDomScheduler } from 'aelea/ui'
 
 const scheduler = createDomScheduler()
 // Microtasks for computations

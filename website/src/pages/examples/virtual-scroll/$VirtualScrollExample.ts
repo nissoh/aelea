@@ -1,4 +1,3 @@
-import { $node, $p, $text, component, style } from 'aelea/core'
 import {
   at,
   debounce,
@@ -13,6 +12,7 @@ import {
   startWith,
   switchLatest
 } from 'aelea/stream'
+import { $node, $p, $text, component, style } from 'aelea/ui'
 import type { ScrollRequest, ScrollResponse } from 'aelea/ui-components'
 import { $card, $column, $row, $seperator, $TextField, $VirtualScroll, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'

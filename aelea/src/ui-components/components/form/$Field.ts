@@ -1,6 +1,3 @@
-import type { IStyleCSS } from '../../../core/combinator/style.js'
-import { $element, component, nodeEvent, style, styleBehavior } from '../../../core/index.js'
-import type { INode } from '../../../core/types.js'
 import type { IBehavior, IOps } from '../../../stream/index.js'
 import {
   combine,
@@ -16,6 +13,9 @@ import {
   switchLatest,
   tap
 } from '../../../stream/index.js'
+import type { IStyleCSS } from '../../../ui/combinator/style.js'
+import { $element, component, nodeEvent, style, styleBehavior } from '../../../ui/index.js'
+import type { INode } from '../../../ui/types.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'

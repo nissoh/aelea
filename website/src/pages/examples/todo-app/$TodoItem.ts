@@ -1,5 +1,5 @@
-import { component, style } from 'aelea/core'
 import { type IBehavior, type IStream, now, o } from 'aelea/stream'
+import { component, style } from 'aelea/ui'
 import { $Checkbox, $Field, $row, spacing } from 'aelea/ui-components'
 import { $TrashBtn } from '../../../elements/$common'
 import type { Todo } from './$CreateTodo'

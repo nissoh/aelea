@@ -43,12 +43,6 @@ export class NodeScheduler implements IScheduler {
     return task
   }
 
-  cancel(task: ITask): void {
-    // PropagateTask handles its own lifecycle through the active property
-    // Just dispose the task
-    task[Symbol.dispose]()
-  }
-
   time(): number {
     // Use performance.now() for consistency with browser scheduler
     // It's available in Node.js and provides monotonic time
