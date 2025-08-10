@@ -153,7 +153,7 @@ const $CounterList = component((
   // Create counters dynamically
   const addClick = addCounterTether(eventElementTarget('click'))
 
-  const counterList = replayState(changeCounterList, [5])
+  const counterList = replay([5], changeCounterList)
   
   return [
     $div()(
