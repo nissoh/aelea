@@ -1,5 +1,5 @@
 import { aggregate, constant, joinMap, map, merge, now, sampleMap, until } from 'aelea/stream'
-import { behavior, type IBehavior, replay } from 'aelea/stream-extended'
+import { behavior, type IBehavior, state } from 'aelea/stream-extended'
 import { $node, $text, component, style } from 'aelea/ui'
 import { $Button, $column, $row, $seperator, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
@@ -42,7 +42,7 @@ export default component(
           const [remove, removeTether] = behavior<PointerEvent, PointerEvent>()
           const [valueChange, valueChangeTether] = behavior<number, number>()
 
-          const value = replay(0, valueChange)
+          const value = state(0, valueChange)
 
           return until(
             remove,

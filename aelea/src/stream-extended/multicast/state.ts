@@ -13,11 +13,11 @@ import { multicast } from './multicast.js'
  * Create a multicast stream that remembers its latest value
  *
  * stream:        -1-2-3--->
- * replay:   -1-2-3--->
+ * state:   -1-2-3--->
  * subscriber1:   ^1-2-3--->
  * subscriber2:     ^2-3--->
  */
-export const replay: IReplayCurry = curry2(
+export const state: IReplayCurry = curry2(
   <T>(initialState: T, source: IStream<T>): IStream<T> => new ReplayLatest(multicast(source), initialState)
 )
 

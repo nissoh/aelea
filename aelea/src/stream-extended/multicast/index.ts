@@ -1,4 +1,4 @@
 export { behavior } from './behavior.js'
 export { multicast } from './multicast.js'
-export { replay } from './replay.js'
+export { state } from './state.js'
 export { tether } from './tether.js'
