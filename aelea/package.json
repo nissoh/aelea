@@ -1,6 +1,6 @@
 {
   "name": "aelea",
-  "version": "2.4.4",
+  "version": "2.4.6",
   "type": "module",
   "scripts": {
     "build": "bun run build:clean && bun run bunx tsc -b",
@@ -16,9 +16,33 @@
     "dist"
   ],
   "exports": {
-    "./*": {
-      "types": "./dist/types/*/index.d.ts",
-      "import": "./dist/esm/*/index.js"
+    "./stream": {
+      "types": "./dist/types/stream/index.d.ts",
+      "import": "./dist/esm/stream/index.js"
+    },
+    "./stream-extended": {
+      "types": "./dist/types/stream-extended/index.d.ts",
+      "import": "./dist/esm/stream-extended/index.js"
+    },
+    "./ui": {
+      "types": "./dist/types/ui/index.d.ts",
+      "import": "./dist/esm/ui/index.js"
+    },
+    "./ui-components": {
+      "types": "./dist/types/ui-components/index.d.ts",
+      "import": "./dist/esm/ui-components/index.js"
+    },
+    "./ui-components-theme": {
+      "types": "./dist/types/ui-components-theme/index.d.ts",
+      "import": "./dist/esm/ui-components-theme/index.js"
+    },
+    "./ui-components-theme-browser": {
+      "types": "./dist/types/ui-components-theme-browser/index.d.ts",
+      "import": "./dist/esm/ui-components-theme-browser/index.js"
+    },
+    "./router": {
+      "types": "./dist/types/router/index.d.ts",
+      "import": "./dist/esm/router/index.js"
     }
   },
   "dependencies": {
