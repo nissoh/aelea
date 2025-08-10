@@ -1,4 +1,5 @@
-import { filter, type IBehavior, map, merge, now, o, switchLatest, tap } from '../../../stream/index.js'
+import { filter, map, merge, now, o, switchLatest, tap } from '../../../stream/index.js'
+import { type IBehavior } from '../../../stream-extended/index.js'
 import type { IStyleCSS } from '../../../ui/combinator/style.js'
 import { $element, attr, component, nodeEvent, style, stylePseudo } from '../../../ui/index.js'
 import type { INode } from '../../../ui/types.js'

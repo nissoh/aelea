@@ -1,6 +1,4 @@
-import { startWith } from '../combinator/constant.js'
-import type { IScheduler, ISink, IStream } from '../types.js'
-import { PipeSink } from '../utils/sink.js'
+import { type IScheduler, type ISink, type IStream, PipeSink, startWith } from '../../stream/index.js'
 import { multicast } from './multicast.js'
 
 export interface IReplayLatestCurry {

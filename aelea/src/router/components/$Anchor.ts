@@ -1,5 +1,6 @@
 import { constant, map, merge, o, op, startWith } from '../../stream/index.js'
-import type { IBehavior, IOps } from '../../stream/types.js'
+import type { IOps } from '../../stream/types.js'
+import type { IBehavior } from '../../stream-extended/index.js'
 import { attr, component, nodeEvent, style } from '../../ui/index.js'
 import type { I$Node, INode } from '../../ui/types.js'
 import type { Route } from '../types.js'

@@ -1,4 +1,4 @@
-import type { IBehavior, IOps } from '../../../stream/index.js'
+import type { IOps } from '../../../stream/index.js'
 import {
   empty,
   map,
@@ -11,6 +11,7 @@ import {
   skipRepeats,
   switchLatest
 } from '../../../stream/index.js'
+import type { IBehavior } from '../../../stream-extended/index.js'
 import { component } from '../../../ui/combinator/component.js'
 import type { IStyleCSS } from '../../../ui/combinator/style.js'
 import { style } from '../../../ui/combinator/style.js'

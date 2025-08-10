@@ -1,4 +1,4 @@
-import type { IBehavior, IOps } from '../../../stream/index.js'
+import type { IOps } from '../../../stream/index.js'
 import {
   combine,
   constant,
@@ -13,6 +13,7 @@ import {
   switchLatest,
   tap
 } from '../../../stream/index.js'
+import type { IBehavior } from '../../../stream-extended/index.js'
 import type { IStyleCSS } from '../../../ui/combinator/style.js'
 import { $element, component, nodeEvent, style, styleBehavior } from '../../../ui/index.js'
 import type { INode } from '../../../ui/types.js'

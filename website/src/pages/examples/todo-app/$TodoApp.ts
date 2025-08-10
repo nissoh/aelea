@@ -1,12 +1,10 @@
 import {
-  behavior,
   combineMap,
   empty,
   type IBehavior,
   joinMap,
   merge,
   now,
-  replayState,
   switchLatest,
   take,
   until
@@ -17,6 +15,7 @@ import { pallete } from 'aelea/ui-components-theme'
 import type { Todo } from './$CreateTodo'
 import $CreateTodo from './$CreateTodo'
 import $TodoItem from './$TodoItem'
+import { behavior, replayState } from 'aelea/stream-extended'
 
 export const $label = $element('label')(
   style({ display: 'flex', flexDirection: 'row' }),

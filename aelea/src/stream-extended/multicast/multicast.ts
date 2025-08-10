@@ -1,5 +1,4 @@
-import type { IScheduler, ISink, IStream } from '../types.js'
-import { disposeNone, disposeWith } from '../utils/disposable.js'
+import { disposeNone, disposeWith, type IScheduler, type ISink, type IStream } from '../../stream/index.js'
 
 /**
  * Creates a multicast stream that shares a single source subscription among multiple subscribers.

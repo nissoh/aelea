@@ -1,6 +1,4 @@
-import { stream } from '../stream.js'
-import type { IScheduler, ISink, IStream } from '../types.js'
-import { disposeNone, disposeWith } from '../utils/disposable.js'
+import { disposeNone, disposeWith, type IScheduler, type ISink, type IStream, stream } from '../../stream/index.js'
 
 /**
  * Creates a "tethered" pair of streams from a single source.

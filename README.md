@@ -70,9 +70,9 @@ const $label = $element('label')
 Components receive behavior streams and output both UI and new streams:
 
 ```typescript
-import { component, behavior, eventElementTarget, $text, $element } from 'aelea/ui'
-import { map, merge, aggregate, constant } from 'aelea/stream'
-import type { IBehavior } from 'aelea/stream'
+import { component, eventElementTarget, $text, $element } from 'aelea/ui'
+import { map, merge, aggregate, constant, type IBehavior } from 'aelea/stream'
+import { behavior } from 'aelea/stream-extended'
 
 // Create reusable element factories
 const $div = $element('div')
@@ -111,9 +111,9 @@ const $Counter = component((
 Components can be composed together, with parent components wiring child component behaviors:
 
 ```typescript
-import { component, behavior, $element, $text, style } from 'aelea/ui'
-import { map, merge, aggregate, now, constant } from 'aelea/stream'
-import type { IBehavior } from 'aelea/stream'
+import { component, $element, $text, style } from 'aelea/ui'
+import { map, merge, aggregate, now, constant, type IBehavior } from 'aelea/stream'
+import { behavior } from 'aelea/stream-extended'
 
 // Reusable Counter component (simplified from above)
 const $Counter = ({ initial = 0 }) => component((
@@ -203,7 +203,8 @@ runBrowser({
 
 ```typescript
 import { runBrowser, component, style, eventElementTarget, $text, $element } from 'aelea/ui'
-import { behavior, map, aggregate, startWith } from 'aelea/stream'
+import { map, aggregate, startWith } from 'aelea/stream'
+import { behavior } from 'aelea/stream-extended'
 
 const $App = component(() => {
   const [clicks, clicksTether] = behavior<MouseEvent>()
@@ -268,7 +269,8 @@ const $UserList = switchLatest(
 
 ```typescript
 import { motion, component, styleBehavior, $element } from 'aelea/ui'
-import { behavior, map, startWith } from 'aelea/stream'
+import { map, startWith } from 'aelea/stream'
+import { behavior } from 'aelea/stream-extended'
 
 const $AnimatedBox = component(() => {
   const [position, positionTether] = behavior<number>()
