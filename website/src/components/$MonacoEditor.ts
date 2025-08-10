@@ -15,8 +15,9 @@ import {
   switchMap,
   tap
 } from 'aelea/stream'
+import { fetchJson } from 'aelea/stream-extended'
 import { $text, $wrapNativeElement, component, type INode, type IStyleCSS, style } from 'aelea/ui'
-import { $column, fetchJson, observer } from 'aelea/ui-components'
+import { $column, observer } from 'aelea/ui-components'
 import type * as monaco from 'monaco-editor'
 
 // Monaco will be loaded dynamically from CDN

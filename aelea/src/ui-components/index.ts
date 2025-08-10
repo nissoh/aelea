@@ -1,4 +1,3 @@
-export { fetchJson } from '../ui/fetch.js'
 export { $NumberTicker } from './components/$NumberTicker.js'
 export { $Sortable } from './components/$Sortable.js'
 export type { IPageRequest, ISortBy, TablePageResponse } from './components/$Table.js'

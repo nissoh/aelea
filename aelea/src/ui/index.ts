@@ -1,5 +1,4 @@
 export * from './combinator/index.js'
-export { fetchJson } from './fetch.js'
 export type { IRunEnvironment } from './render.js'
 export { render } from './render.js'
 export { createDomScheduler } from './scheduler.js'
