@@ -2,7 +2,6 @@ import {
   at,
   debounce,
   empty,
-  type IBehavior,
   type IStream,
   join,
   map,
@@ -12,6 +11,7 @@ import {
   startWith,
   switchLatest
 } from 'aelea/stream'
+import type { IBehavior } from 'aelea/stream-extended'
 import { $node, $p, $text, component, style } from 'aelea/ui'
 import type { ScrollRequest, ScrollResponse } from 'aelea/ui-components'
 import { $card, $column, $row, $seperator, $TextField, $VirtualScroll, spacing } from 'aelea/ui-components'

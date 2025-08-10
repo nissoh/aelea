@@ -6,7 +6,6 @@ import {
   filter,
   map,
   merge,
-  multicast,
   now,
   o,
   startWith,
@@ -14,6 +13,7 @@ import {
   tap
 } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
+import { multicast } from '../../../stream-extended/index.js'
 import type { IStyleCSS } from '../../../ui/combinator/style.js'
 import { $element, component, nodeEvent, style, styleBehavior } from '../../../ui/index.js'
 import type { INode } from '../../../ui/types.js'

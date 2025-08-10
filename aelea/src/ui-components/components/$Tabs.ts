@@ -1,5 +1,5 @@
 import { type IStream, map, merge, switchLatest } from '../../stream/index.js'
-import { type IBehavior } from '../../stream-extended/index.js'
+import type { IBehavior } from '../../stream-extended/index.js'
 import { $node, component, nodeEvent } from '../../ui/index.js'
 import type { I$Slottable } from '../../ui/types.js'
 

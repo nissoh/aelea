@@ -3,18 +3,17 @@ import {
   delay,
   empty,
   filter,
-  type IBehavior,
   type IOps,
   type IStream,
   joinMap,
   map,
   merge,
-  multicast,
   o,
   skip,
   startWith,
   switchLatest
 } from '../../stream/index.js'
+import { type IBehavior, multicast } from '../../stream-extended/index.js'
 import { component } from '../../ui/combinator/component.js'
 import { style } from '../../ui/combinator/style.js'
 import { $custom, $node } from '../../ui/source/node.js'

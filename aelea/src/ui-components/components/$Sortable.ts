@@ -2,7 +2,6 @@ import {
   combineMap,
   delay,
   filter,
-  type IBehavior,
   joinMap,
   map,
   merge,
@@ -14,7 +13,7 @@ import {
   switchLatest,
   until
 } from '../../stream/index.js'
-import { behavior, multicast } from '../../stream-extended/index.js'
+import { behavior, type IBehavior, multicast } from '../../stream-extended/index.js'
 import { component } from '../../ui/combinator/component.js'
 import { eventElementTarget, nodeEvent } from '../../ui/combinator/event.js'
 import { style, styleBehavior, styleInline } from '../../ui/combinator/style.js'

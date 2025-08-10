@@ -1,16 +1,5 @@
-import {
-  aggregate,
-  behavior,
-  constant,
-  type IBehavior,
-  joinMap,
-  map,
-  merge,
-  now,
-  replayState,
-  sampleMap,
-  until
-} from 'aelea/stream'
+import { aggregate, constant, joinMap, map, merge, now, sampleMap, until } from 'aelea/stream'
+import { behavior, type IBehavior, replayState } from 'aelea/stream-extended'
 import { $node, $text, component, style } from 'aelea/ui'
 import { $Button, $column, $row, $seperator, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'

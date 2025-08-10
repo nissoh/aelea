@@ -1,4 +1,5 @@
-import { combine, empty, type IBehavior, map, o, startWith } from 'aelea/stream'
+import { combine, empty, map, o, startWith } from 'aelea/stream'
+import type { IBehavior } from 'aelea/stream-extended'
 import { $node, $text, attr, component, style } from 'aelea/ui'
 import { $column, $Field, $NumberTicker, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'

@@ -1,5 +1,5 @@
 import { map, merge, o } from '../../../stream/index.js'
-import { type IBehavior } from '../../../stream-extended/index.js'
+import type { IBehavior } from '../../../stream-extended/index.js'
 import { component, nodeEvent, style, styleBehavior } from '../../../ui/index.js'
 import type { I$Slottable, ISlottable } from '../../../ui/types.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'

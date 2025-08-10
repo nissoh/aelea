@@ -1,12 +1,13 @@
 import {
   disposeAll,
   disposeWith,
-  type IBehavior,
   type IOps,
   type IScheduler,
   type ISink,
-  type IStream
+  type IStream,
+  op
 } from '../../stream/index.js'
+import type { IBehavior } from '../types.js'
 import { tether } from './tether.js'
 
 type SinkMap<T> = Map<ISink<T>, StreamDisposableMap<T>>

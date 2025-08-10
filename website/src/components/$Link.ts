@@ -1,5 +1,6 @@
 import { $RouterAnchor, type IAnchor } from 'aelea/router'
-import { combineMap, type IBehavior } from 'aelea/stream'
+import { combineMap } from 'aelea/stream'
+import type { IBehavior } from 'aelea/stream-extended'
 import type { I$Slottable, IStyleCSS } from 'aelea/ui'
 import { $element, component, style, styleBehavior } from 'aelea/ui'
 import { pallete } from 'aelea/ui-components-theme'

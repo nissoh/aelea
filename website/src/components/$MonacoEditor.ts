@@ -6,7 +6,6 @@ import {
   filter,
   fromCallback,
   fromPromise,
-  type IBehavior,
   type IStream,
   merge,
   now,
@@ -15,7 +14,7 @@ import {
   switchMap,
   tap
 } from 'aelea/stream'
-import { fetchJson } from 'aelea/stream-extended'
+import { fetchJson, type IBehavior } from 'aelea/stream-extended'
 import { $text, $wrapNativeElement, component, type INode, type IStyleCSS, style } from 'aelea/ui'
 import { $column, observer } from 'aelea/ui-components'
 import type * as monaco from 'monaco-editor'
@@ -452,7 +451,7 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
           )
         )()
 
-        return $column($text('feffef,'), $editor)
+        return $editor
       }, editorload),
       { change }
     ]

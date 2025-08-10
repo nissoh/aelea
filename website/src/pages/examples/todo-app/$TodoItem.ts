@@ -1,4 +1,5 @@
-import { type IBehavior, type IStream, now, o } from 'aelea/stream'
+import { type IStream, now, o } from 'aelea/stream'
+import type { IBehavior } from 'aelea/stream-extended'
 import { component, style } from 'aelea/ui'
 import { $Checkbox, $Field, $row, spacing } from 'aelea/ui-components'
 import { $TrashBtn } from '../../../elements/$common'

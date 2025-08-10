@@ -1,7 +1,6 @@
 import {
   aggregate,
   constant,
-  type IBehavior,
   type IOps,
   type IStream,
   joinMap,
@@ -13,6 +12,7 @@ import {
   startWith,
   switchLatest
 } from '../../stream/index.js'
+import type { IBehavior } from '../../stream-extended/index.js'
 import { attr, component, nodeEvent, style, stylePseudo } from '../../ui/index.js'
 import { $node, $svg } from '../../ui/source/node.js'
 import type { I$Node, I$Slottable, ISlottable } from '../../ui/types.js'

@@ -2,16 +2,15 @@ import {
   constant,
   empty,
   filter,
-  type IBehavior,
   type IStream,
   map,
   merge,
-  multicast,
   op,
   switchLatest,
   until,
   zipMap
 } from '../../../stream/index.js'
+import { type IBehavior, multicast } from '../../../stream-extended/index.js'
 import {
   $node,
   component,

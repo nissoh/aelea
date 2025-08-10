@@ -62,4 +62,3 @@ export type Fn<T, R> = (a: T) => R
  * Stream transformation function
  */
 export type IOps<I, O = I> = Fn<IStream<I>, IStream<O>>
-

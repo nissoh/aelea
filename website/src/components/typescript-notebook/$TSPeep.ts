@@ -1,16 +1,5 @@
-import {
-  debounce,
-  empty,
-  filter,
-  fromArray,
-  type IBehavior,
-  map,
-  never,
-  op,
-  startWith,
-  switchLatest,
-  switchMap
-} from 'aelea/stream'
+import { debounce, empty, filter, fromArray, map, never, op, startWith, switchLatest, switchMap } from 'aelea/stream'
+import type { IBehavior } from 'aelea/stream-extended'
 import { $custom, $node, $text, component, type I$Slottable, motion, style, styleInline } from 'aelea/ui'
 import { $column, $row } from 'aelea/ui-components'
 import { pallete, theme } from 'aelea/ui-components-theme'

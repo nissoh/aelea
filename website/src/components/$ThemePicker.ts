@@ -1,4 +1,5 @@
-import { type IBehavior, o, sampleMap, startWith } from 'aelea/stream'
+import { o, sampleMap, startWith } from 'aelea/stream'
+import type { IBehavior } from 'aelea/stream-extended'
 import { $svg, attr, component, type ISlottable, nodeEvent, style, stylePseudo } from 'aelea/ui'
 import { $icon } from 'aelea/ui-components'
 import { pallete, type Theme, theme } from 'aelea/ui-components-theme'

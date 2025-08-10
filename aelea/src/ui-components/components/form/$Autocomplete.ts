@@ -1,5 +1,5 @@
 import { empty, map, merge, op, sampleMap } from '../../../stream/index.js'
-import { type IBehavior } from '../../../stream-extended/index.js'
+import type { IBehavior } from '../../../stream-extended/index.js'
 import { $element, attr, component, type INode, nodeEvent, styleBehavior } from '../../../ui/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'

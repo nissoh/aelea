@@ -1,5 +1,5 @@
 import { type IOps, map, merge, never, op } from '../../../stream/index.js'
-import { type IBehavior } from '../../../stream-extended/index.js'
+import type { IBehavior } from '../../../stream-extended/index.js'
 import type { IStyleCSS } from '../../../ui/combinator/style.js'
 import { $element, attrBehavior, component, nodeEvent, styleBehavior } from '../../../ui/index.js'
 import type { I$Slottable, INode, ISlottable } from '../../../ui/types.js'

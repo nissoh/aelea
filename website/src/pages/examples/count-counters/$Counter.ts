@@ -1,4 +1,5 @@
-import { constant, type IBehavior, type IStream } from 'aelea/stream'
+import { constant, type IStream } from 'aelea/stream'
+import type { IBehavior } from 'aelea/stream-extended'
 import { $text, component, style } from 'aelea/ui'
 import { $Button, $column, $NumberTicker, $row, spacing } from 'aelea/ui-components'
 

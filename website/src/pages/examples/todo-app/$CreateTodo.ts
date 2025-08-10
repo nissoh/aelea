@@ -1,4 +1,5 @@
-import { constant, type IBehavior, map, merge, now, sampleMap, startWith } from 'aelea/stream'
+import { constant, map, merge, now, sampleMap, startWith } from 'aelea/stream'
+import type { IBehavior } from 'aelea/stream-extended'
 import { $text, component, style } from 'aelea/ui'
 import { $Button, $Field, $row } from 'aelea/ui-components'
 

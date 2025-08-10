@@ -4,13 +4,13 @@ import {
   type IStream,
   map,
   merge,
-  multicast,
   now,
   op,
   skipRepeats,
   skipRepeatsWith,
   switchLatest
 } from '../../stream/index.js'
+import { multicast } from '../../stream-extended/index.js'
 import type { IStyleCSS } from '../../ui/combinator/style.js'
 import { $node, $text, style, styleBehavior } from '../../ui/index.js'
 import { pallete } from '../../ui-components-theme/globalState.js'

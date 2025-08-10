@@ -1,4 +1,5 @@
-import { aggregate, constant, type IBehavior, merge, now } from 'aelea/stream'
+import { aggregate, constant, merge, now } from 'aelea/stream'
+import type { IBehavior } from 'aelea/stream-extended'
 import { $text, component, style } from 'aelea/ui'
 import { $Button, $column, $Popover, $row, $TextField, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
