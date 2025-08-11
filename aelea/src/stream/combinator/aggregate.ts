@@ -3,20 +3,20 @@ import type { ISink, IStream } from '../types.js'
 import { curry3 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
+export type AggregateFunction<I, S, O> = (seed: S, value: I) => { seed: S; value: O }
+
 /**
- * Accumulate values from a stream
- *
- * stream:          -1-2-3-4->
- * aggregate(+, 0): -1-3-6-10->
+ * Accumulate results using a feedback loop that emits one value and feeds back
+ * another to be used in the next iteration.
  */
 export const aggregate: IAggregateCurry = curry3((f, initial, s) =>
   stream((sink, scheduler) => s.run(new AggregateSink(f, initial, sink), scheduler))
 )
 
-class AggregateSink<I, O> extends PipeSink<I, O> {
+class AggregateSink<I, S, O> extends PipeSink<I, O> {
   constructor(
-    readonly f: (acc: O, value: I) => O,
-    public accumulator: O,
+    readonly f: AggregateFunction<I, S, O>,
+    public seed: S,
     sink: ISink<O>
   ) {
     super(sink)
@@ -24,17 +24,17 @@ class AggregateSink<I, O> extends PipeSink<I, O> {
 
   event(value: I) {
     try {
-      this.accumulator = this.f(this.accumulator, value)
+      const result = this.f(this.seed, value)
+      this.seed = result.seed
+      this.sink.event(result.value)
     } catch (error) {
       this.sink.error(error)
-      return
     }
-    this.sink.event(this.accumulator)
   }
 }
 
 export interface IAggregateCurry {
-  <I, O>(f: (acc: O, value: I) => O, initial: O, s: IStream<I>): IStream<O>
-  <I, O>(f: (acc: O, value: I) => O, initial: O): (s: IStream<I>) => IStream<O>
-  <I, O>(f: (acc: O, value: I) => O): (initial: O) => (s: IStream<I>) => IStream<O>
+  <I, S, O>(f: AggregateFunction<I, S, O>, initial: S, s: IStream<I>): IStream<O>
+  <I, S, O>(f: AggregateFunction<I, S, O>, initial: S): (s: IStream<I>) => IStream<O>
+  <I, S, O>(f: AggregateFunction<I, S, O>): (initial: S) => (s: IStream<I>) => IStream<O>
 }
