@@ -1,4 +1,4 @@
-import { aggregate, constant, joinMap, map, merge, now, sampleMap, until } from 'aelea/stream'
+import { constant, joinMap, map, merge, now, reduce, sampleMap, until } from 'aelea/stream'
 import { behavior, type IBehavior, state } from 'aelea/stream-extended'
 import { $node, $text, component, style } from 'aelea/ui'
 import { $Button, $column, $row, $seperator, spacing } from 'aelea/ui-components'
@@ -15,7 +15,7 @@ export default component(
     [disposedCounterCount, disposedCounterCountTether]: IBehavior<any, number>
   ) => {
     const INITAL_COUNT = 0
-    const sumWithInitial = aggregate((current: number, x: number) => current + x, INITAL_COUNT)
+    const sumWithInitial = reduce((current, x: number) => current + x, INITAL_COUNT)
 
     const counting = merge(disposedCounterCount, counterIncrement, counterDecrement)
     const totalCount = sumWithInitial(counting)

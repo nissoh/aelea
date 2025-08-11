@@ -7,63 +7,67 @@ import {
   type IStream,
   op
 } from '../../stream/index.js'
-import type { IBehavior } from '../types.js'
+import type { IBehavior, IComposeBehavior } from '../types.js'
 import { tether } from './tether.js'
 
-type SinkMap<T> = Map<ISink<T>, StreamDisposableMap<T>>
-type StreamDisposableMap<T> = Map<IStream<T>, Disposable>
+type SubscriberInfo<O> = {
+  sink: ISink<O>
+  scheduler: IScheduler
+  disposables: Map<IStream<O>, Disposable>
+}
 
-class Behavior<I, O> implements IStream<O> {
-  behaviorList: IStream<O>[] = []
+class BehaviorSource<T> implements IStream<T> {
+  private streams = new Set<IStream<T>>() // Use Set to prevent duplicates
+  private subscribers = new Map<ISink<T>, SubscriberInfo<T>>()
 
-  sinksMap: SinkMap<O> = new Map()
-  scheduler: IScheduler | undefined
+  addStream(stream: IStream<T>): void {
+    // Prevent duplicate streams
+    if (this.streams.has(stream)) return
 
-  run(sink: ISink<O>, scheduler: IScheduler): Disposable {
-    this.scheduler = scheduler
+    this.streams.add(stream)
 
-    const behaviorDisposaleMap = this.sinksMap.get(sink) || (new Map() as StreamDisposableMap<O>)
-    this.sinksMap.set(sink, behaviorDisposaleMap)
-
-    for (const behavior of this.behaviorList) {
-      behaviorDisposaleMap.set(behavior, behavior.run(sink, scheduler))
+    // Hot-wire to existing subscribers with error isolation
+    for (const subscriberInfo of this.subscribers.values()) {
+      const { sink, scheduler, disposables } = subscriberInfo
+      const disposable = stream.run(sink, scheduler)
+      disposables.set(stream, disposable)
     }
-
-    return disposeWith(() => {
-      disposeAll(behaviorDisposaleMap.values())
-      behaviorDisposaleMap.clear()
-      this.sinksMap.delete(sink)
-    })
   }
 
-  tether(...ops: IOps<any, any>[]) {
-    return (sb: IStream<I>): IStream<I> => {
-      const [s0, s1] = tether(sb)
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    const disposables = new Map<IStream<T>, Disposable>()
 
-      // @ts-ignore - op accepts variadic arguments
-      const bops = op(s1, ...ops) as IStream<O>
-
-      this.behaviorList.push(bops)
-
-      if (this.sinksMap.size > 0) {
-        const scheduler = this.scheduler
-
-        if (!scheduler) throw new Error('BehaviorSource: scheduler is not defined')
-
-        for (const [sink, sourcesMap] of this.sinksMap) {
-          sourcesMap.set(bops, bops.run(sink, scheduler!))
-        }
-      }
-
-      return s0
+    // Subscribe with error isolation
+    for (const stream of this.streams) {
+      disposables.set(stream, stream.run(sink, scheduler))
     }
+
+    const subscriberInfo: SubscriberInfo<T> = { sink, scheduler, disposables }
+    this.subscribers.set(sink, subscriberInfo)
+
+    return disposeWith(() => {
+      disposeAll(disposables.values())
+      this.subscribers.delete(sink)
+    })
   }
 }
 
-export function behavior<T, R>(): IBehavior<T, R> {
-  const ss = new Behavior<T, R>()
+export function behavior<I, O = I>(): IBehavior<I, O> {
+  const behaviorSource = new BehaviorSource<O>()
 
-  const tetr = (...ops: IOps<T, R>[]) => ss.tether(...ops)
+  const compose: IComposeBehavior<I, O> = ((...ops: IOps<any, any>[]) => {
+    return (source: IStream<I>): IStream<I> => {
+      const [s0, s1] = tether(source)
 
-  return [ss, tetr]
+      // @ts-ignore - op accepts variadic arguments
+      const transformed = op(s1, ...ops)
+
+      behaviorSource.addStream(transformed)
+
+      return s0
+    }
+  }) as IComposeBehavior<I, O>
+
+  // Return behavior source (outputs O) and compose function
+  return [behaviorSource, compose]
 }

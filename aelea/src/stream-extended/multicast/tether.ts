@@ -1,4 +1,13 @@
-import { disposeNone, disposeWith, type IScheduler, type ISink, type IStream, stream } from '../../stream/index.js'
+import {
+  disposeNone,
+  disposeWith,
+  type IScheduler,
+  type ISink,
+  type IStream,
+  propagateRunEventTask,
+  stream
+} from '../../stream/index.js'
+import { tryError, tryEvent } from '../utils.js'
 
 /**
  * Creates a "tethered" pair of streams from a single source.
@@ -44,10 +53,13 @@ class SourceSink<T> implements ISink<T> {
     this.hasValue = true
     this.latestValue = x
 
-    this.sink.event(x)
-    for (const s of this.parent.tetherSinkList) {
-      s.event(x)
-    }
+    // Send to primary sink with error isolation
+    tryEvent(this.sink, x)
+
+    const sinkList = this.parent.tetherSinkList.slice()
+
+    // Broadcast to tethered sinks with error isolation
+    for (const s of sinkList) tryEvent(s, x)
   }
 
   end() {
@@ -55,27 +67,28 @@ class SourceSink<T> implements ISink<T> {
   }
 
   error(e: Error): void {
-    this.sink.error(e)
+    // Send error to primary sink
+    tryError(this.sink, e)
+
+    const sinkList = this.parent.tetherSinkList.slice()
+    // Propagate error to tethered sinks
+    for (const s of sinkList) tryError(s, e)
   }
 }
 
 class TetherSink<A> implements ISink<A> {
-  constructor(public sink: ISink<A> | null) {}
+  constructor(public readonly sink: ISink<A>) {}
 
   event(value: A): void {
-    if (this.sink) {
-      this.sink.event(value)
-    }
+    this.sink.event(value)
   }
 
   end(): void {
-    this.sink = null
+    // Don't end the wrapped sink - tethered streams continue
   }
 
   error(err: Error): void {
-    if (this.sink) {
-      this.sink.error(err)
-    }
+    this.sink.error(err)
   }
 }
 
@@ -89,36 +102,45 @@ class Tether<T> implements IStream<T> {
 
   run(sink: SourceSink<T> | TetherSink<T>, scheduler: IScheduler): Disposable {
     if (sink instanceof SourceSink) {
+      // Dispose previous source and clear old sinks
       this.sourceDisposable[Symbol.dispose]()
-      this.sourceSinkList.push(sink)
+      this.sourceSinkList = [sink] // Only keep current sink
 
       this.sourceDisposable = this.source.run(sink, scheduler)
 
-      return {
-        [Symbol.dispose]: () => {
-          const srcIdx = this.sourceSinkList.indexOf(sink)
+      return disposeWith(() => {
+        const srcIdx = this.sourceSinkList.indexOf(sink)
+        if (srcIdx > -1) {
           this.sourceSinkList.splice(srcIdx, 1)
+        }
+        // Only dispose source if this is the active sink
+        if (this.sourceSinkList.length === 0) {
           this.sourceDisposable[Symbol.dispose]()
         }
-      }
+      })
     }
 
     this.tetherSinkList.push(sink)
 
-    for (const s of this.sourceSinkList) {
-      if (s.hasValue) {
-        sink.event(s.latestValue)
-      }
+    // Send latest value asynchronously to prevent stack overflow
+    const activeSource = this.sourceSinkList[0]
+    let taskDisposable: Disposable = disposeNone
+
+    if (activeSource?.hasValue && this.tetherSinkList.includes(sink as TetherSink<T>)) {
+      // Use PropagateTask to handle disposal and active state properly
+      taskDisposable = scheduler.asap(propagateRunEventTask(sink.sink, scheduler, emitLatestValue, activeSource))
     }
 
     return disposeWith(() => {
-      sink.end()
+      taskDisposable[Symbol.dispose]()
       const sinkIdx = this.tetherSinkList.indexOf(sink)
-
       if (sinkIdx > -1) {
-        // remove(sinkIdx, tetherSinkList)
         this.tetherSinkList.splice(sinkIdx, 1)
       }
     })
   }
+}
+
+const emitLatestValue = <T>(sink: ISink<T>, source: SourceSink<T>) => {
+  sink.event(source.latestValue)
 }

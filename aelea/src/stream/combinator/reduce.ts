@@ -15,7 +15,7 @@ export const reduce: IReduceCurry = curry3((f, initial, s) =>
 
 class ReduceSink<I, O> extends PipeSink<I, O> {
   constructor(
-    readonly f: ReduceFunction<I, O, O>,
+    readonly f: ReduceFunction<I, O>,
     public accumulator: O,
     sink: ISink<O>
   ) {
@@ -33,10 +33,10 @@ class ReduceSink<I, O> extends PipeSink<I, O> {
   }
 }
 
-export type ReduceFunction<I, S, O> = (acc: S, value: I) => O
+export type ReduceFunction<I, O> = (acc: O, value: I) => O
 
 export interface IReduceCurry {
-  <I, O>(f: ReduceFunction<I, O, O>, initial: O, s: IStream<I>): IStream<O>
-  <I, O>(f: ReduceFunction<I, O, O>, initial: O): (s: IStream<I>) => IStream<O>
-  <I, O>(f: ReduceFunction<I, O, O>): (initial: O) => (s: IStream<I>) => IStream<O>
+  <I, O>(f: ReduceFunction<I, O>, initial: O, s: IStream<I>): IStream<O>
+  <I, O>(f: ReduceFunction<I, O>, initial: O): (s: IStream<I>) => IStream<O>
+  <I, O>(f: ReduceFunction<I, O>): (initial: O) => (s: IStream<I>) => IStream<O>
 }

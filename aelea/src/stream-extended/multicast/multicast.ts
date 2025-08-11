@@ -1,38 +1,58 @@
 import { disposeNone, disposeWith, type IScheduler, type ISink, type IStream } from '../../stream/index.js'
+import { tryEnd, tryError, tryEvent } from '../utils.js'
 
 /**
- * Creates a multicast stream that shares a single source subscription among multiple subscribers.
+ * multicast :: Stream a -> Stream a
  *
- * Error handling behavior:
- * - Sink errors (subscriber throws): Isolated to that subscriber, others continue receiving events
- * - Source errors (upstream failure): Propagated to all subscribers, stream continues running
- * - Only end() is a terminal signal that disposes the stream
+ * Returns a Stream equivalent to the original but which can be shared more
+ * efficiently among multiple consumers.
+ *
+ * stream:             -a-b-c-d-e->
+ * multicast(stream):  -a-b-c-d-e->
+ * subscriber1:        -a-b-c-d-e->
+ * subscriber2:            -c-d|
+ * subscriber3:              -d-e->
+ *
+ * Multicast allows you to build up a stream of maps, filters, and other
+ * transformations, and then share it efficiently with multiple observers.
  */
-export const multicast = <T>(source: IStream<T>): IStream<T> => new MulticastSource(source)
+export const multicast = <T>(source: IStream<T>): IStream<T> => {
+  if (source instanceof Multicast) return source
+  return new Multicast(source)
+}
+
+class Multicast<T> implements IStream<T> {
+  private readonly source: MulticastSource<T>
+
+  constructor(source: IStream<T>) {
+    this.source = new MulticastSource(source)
+  }
+
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    return this.source.run(sink, scheduler)
+  }
+}
 
 class MulticastSource<T> implements IStream<T>, ISink<T>, Disposable {
-  sinks: ISink<T>[] = []
-  disposable: Disposable = disposeNone
-  running = false
+  private sinks: ISink<T>[] = []
+  private disposable: Disposable = disposeNone
 
   constructor(readonly source: IStream<T>) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    this.sinks.push(sink)
+    const n = this.sinks.push(sink)
 
-    if (!this.running && this.sinks.length === 1) {
-      this.running = true
+    if (n === 1) {
       this.disposable = this.source.run(this, scheduler)
     }
 
     return disposeWith(() => {
-      const index = this.sinks.indexOf(sink)
-      if (index >= 0) {
-        this.sinks.splice(index, 1)
-      }
-
-      if (this.sinks.length === 0) {
-        this[Symbol.dispose]()
+      const i = this.sinks.indexOf(sink)
+      if (i > -1) {
+        this.sinks.splice(i, 1)
+        if (this.sinks.length === 0) {
+          this[Symbol.dispose]()
+        }
       }
     })
   }
@@ -40,7 +60,6 @@ class MulticastSource<T> implements IStream<T>, ISink<T>, Disposable {
   [Symbol.dispose](): void {
     const d = this.disposable
     this.disposable = disposeNone
-    this.running = false
     d[Symbol.dispose]()
   }
 
@@ -50,34 +69,48 @@ class MulticastSource<T> implements IStream<T>, ISink<T>, Disposable {
     const len = sinks.length
 
     if (len === 1) {
-      sinks[0].event(value)
+      tryEvent(sinks[0], value)
       return
     }
 
     if (len === 2) {
-      sinks[0].event(value)
-      sinks[1].event(value)
-
+      const s0 = sinks[0]
+      const s1 = sinks[1]
+      tryEvent(s0, value)
+      // Check if s1 still exists (in case s0 unsubscribed s1 synchronously)
+      if (this.sinks.length > 1 && this.sinks[1] === s1) {
+        tryEvent(s1, value)
+      }
       return
     }
 
     // Use a copy to handle synchronous unsubscription during event
     const sinksCopy = sinks.slice()
-    for (const sink of sinksCopy) sink.event(value)
+    for (const sink of sinksCopy) tryEvent(sink, value)
   }
 
-  error(error: any): void {
-    // Propagate error to all sinks
-    // Don't dispose - allow the stream to potentially recover
-    const sinks = this.sinks.slice()
-    for (const sink of sinks) sink.error(error)
+  error(error: unknown): void {
+    const sinks = this.sinks
+    const len = sinks.length
+
+    if (len === 0) return
+
+    if (len === 1) {
+      tryError(sinks[0], error)
+      return
+    }
+
+    // For multiple sinks, use a copy
+    const sinksCopy = sinks.slice()
+    for (const sink of sinksCopy) tryError(sink, error)
   }
 
   end(): void {
     const sinks = this.sinks.slice()
     this.sinks.length = 0
-    this.running = false
-    for (const sink of sinks) sink.end()
+
+    for (const sink of sinks) tryEnd(sink)
+
     this[Symbol.dispose]()
   }
 }

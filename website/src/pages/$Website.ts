@@ -2,7 +2,7 @@ import * as router from 'aelea/router'
 import { $RouterAnchor } from 'aelea/router'
 import { map, merge, startWith } from 'aelea/stream'
 import { type IBehavior, multicast } from 'aelea/stream-extended'
-import { $element, $text, $wrapNativeElement, component, eventElementTarget, style } from 'aelea/ui'
+import { $element, $text, component, eventElementTarget, style } from 'aelea/ui'
 import { $column, $icon, $row, designSheet, spacing } from 'aelea/ui-components'
 import { pallete, themeList } from 'aelea/ui-components-theme'
 import { $Picker } from '../components/$ThemePicker'
@@ -47,7 +47,7 @@ export default ({ baseRoute }: Website) =>
     })
 
     return [
-      $wrapNativeElement(document.body)(
+      $column(
         designSheet.main,
         designSheet.customScroll,
         style({

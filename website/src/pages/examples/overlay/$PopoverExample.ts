@@ -1,4 +1,4 @@
-import { aggregate, constant, merge, now } from 'aelea/stream'
+import { constant, merge, now, reduce } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $text, component, style } from 'aelea/ui'
 import { $Button, $column, $Popover, $row, $TextField, spacing } from 'aelea/ui-components'
@@ -24,7 +24,7 @@ export const $PopoverExample = component(
     const $popContent = $column(spacing.default)(
       $text('Well, hello $Counter component!'),
       $row(style({ placeContent: 'center' }))(
-        $Counter({ value: aggregate((s, n) => s + n, 0, count) })({
+        $Counter({ value: reduce((s, n) => s + n, 0, count) })({
           decrement: countDownTether(),
           increment: countUpTether()
         })
