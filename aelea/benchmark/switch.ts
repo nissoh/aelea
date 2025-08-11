@@ -31,6 +31,3 @@ bench.addEventListener('error', console.error)
 await bench.run()
 
 console.table(bench.table())
-function reduce(sum: (x: number, y: number) => number, arg1: number): (_: unknown) => unknown {
-  throw new Error('Function not implemented.')
-}
