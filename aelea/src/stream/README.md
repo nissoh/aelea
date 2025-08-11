@@ -16,30 +16,30 @@ This library distinguishes between **stream failures** and **application errors*
 - **event**: Normal data events
 - **error**: Error events (non-terminal by default)
 - **end**: Stream completion (terminal - no more events)
-- **dispose**: Resource cleanup
+- **dispose**: Resource cleanup (terminal - no more events - no furthur sink feedback)
+
+## Stream Contract
+
+### Source Responsibilities
+- A source MUST NOT emit events after calling `end()`
+- A source MUST NOT call `end()` more than once
+- A source MAY emit multiple `error()` events (for application/recoverable errors)
+- A source SHOULD call `error()` followed by `end()` for stream failures (unrecoverable errors where no more events can be produced)
+- A source MUST NOT emit any events after being disposed
+
+### Sink Responsibilities
+- A sink MUST handle multiple `error()` calls gracefully
+- A sink MUST handle `dispose()` being called at any time
+- A sink SHOULD NOT assume the source follows the contract perfectly
+- A sink MUST NOT call any source methods after being disposed
 
 ## Core Concepts
 
 ### Streams
 Streams are lazy, composable event sources that emit values over time.
 
-### Behaviors
-Behaviors are bidirectional stream connectors that enable two-way data flow:
-- A behavior is a pair: `[stream, tether]`
-- The stream flows data out, the tether accepts data in
-- Used for reactive UI components that both display and modify state
-
-```typescript
-const [temperature$, temperatureTether] = behavior<number>()
-// temperature$ - stream of temperature values (output)
-// temperatureTether - accepts new temperature values (input)
-```
-
 ### Schedulers
 Control the timing of event delivery.
 
 ### Operators
 Transform, filter, and combine streams.
-
-### Multicast
-Share stream subscriptions among multiple consumers.
