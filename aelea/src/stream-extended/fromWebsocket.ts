@@ -73,7 +73,7 @@ export function fromWebsocket<I, O>(
 
     const onMessage = (msg: MessageEvent) => {
       if (isCleanedUp) return // Prevent processing after cleanup
-      
+
       if (typeof msg.data === 'string') {
         try {
           const data = deserializer(msg.data)
@@ -139,7 +139,7 @@ export function fromWebsocket<I, O>(
 
     const sendInputEffect = tap((value: O) => {
       if (isCleanedUp) return // Prevent processing after cleanup
-      
+
       if (socket && socket.readyState === WebSocket.OPEN) {
         sendMessage(value)
       } else if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.CLOSING)) {
