@@ -1,5 +1,5 @@
+import { reduce } from '../stream/combinator/reduce.js'
 import {
-  aggregate,
   disposeAll,
   disposeNone,
   disposeWith,
@@ -159,7 +159,7 @@ class BranchChildrenSinkList implements Disposable {
 function styleBehavior(styleBehavior: IStream<IStyleCSS | null>, node: INode, cacheService: IRunEnvironment) {
   return op(
     styleBehavior,
-    aggregate((previousCssRule: null | ReturnType<typeof useStyleRule>, styleObject) => {
+    reduce((previousCssRule: null | ReturnType<typeof useStyleRule>, styleObject) => {
       if (previousCssRule) {
         if (styleObject === null) {
           node.element.classList.remove(previousCssRule)

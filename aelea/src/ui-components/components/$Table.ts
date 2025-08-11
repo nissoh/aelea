@@ -1,5 +1,4 @@
 import {
-  aggregate,
   constant,
   type IOps,
   type IStream,
@@ -9,6 +8,7 @@ import {
   never,
   now,
   o,
+  reduce,
   startWith,
   switchLatest
 } from '../../stream/index.js'
@@ -110,7 +110,7 @@ export const $Table = <T, FilterState = never>({
       )
 
       const sortBy = joinMap(state => {
-        const changeState = aggregate(
+        const changeState = reduce(
           (seed, change): ISortBy<T> => {
             const direction = seed.name === change ? (seed.direction === 'asc' ? 'desc' : 'asc') : 'desc'
 

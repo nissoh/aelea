@@ -1,5 +1,5 @@
+import { reduce } from '../../stream/combinator/reduce.js'
 import {
-  aggregate,
   at,
   type IStream,
   map,
@@ -15,7 +15,7 @@ import type { IStyleCSS } from '../../ui/combinator/style.js'
 import { $node, $text, style, styleBehavior } from '../../ui/index.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 
-export const sumFromZeroOp = aggregate((current: number, x: number) => current + x, 0)
+export const sumFromZeroOp = reduce((current: number, x: number) => current + x, 0)
 
 enum Direction {
   INCREMENT,
@@ -45,7 +45,7 @@ export const $NumberTicker = ({
 }: NumberConfig) => {
   const incrementMulticast = op(
     value,
-    aggregate((seed: CountState | null, change: number): CountState => {
+    reduce((seed: CountState | null, change: number): CountState => {
       const changeStr = change.toLocaleString()
 
       if (seed === null) {

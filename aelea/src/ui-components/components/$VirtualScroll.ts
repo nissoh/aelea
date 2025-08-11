@@ -1,5 +1,4 @@
 import {
-  aggregate,
   delay,
   empty,
   filter,
@@ -9,6 +8,7 @@ import {
   map,
   merge,
   o,
+  reduce,
   skip,
   startWith,
   switchLatest
@@ -50,7 +50,7 @@ export const $VirtualScroll = ({ dataSource, containerOps = o(), $loader = $defa
 
     const scrollReuqestWithInitial: IStream<ScrollRequest> = skip(
       1,
-      aggregate(seed => seed + 1, -1, intersecting)
+      reduce(seed => seed + 1, -1, intersecting)
     )
 
     const $container = $column(

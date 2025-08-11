@@ -1,6 +1,6 @@
 import * as MC from '@most/core'
 import { Bench } from 'tinybench'
-import { aggregate, fromArray, map, op, switchLatest } from '../src/stream/index.js'
+import { fromArray, map, op, reduce, switchLatest } from '../src/stream/index.js'
 import { fromArrayM, runMost, runStream } from './utils.js'
 
 const bench = new Bench({ time: 100 })
@@ -21,7 +21,7 @@ bench
       fromArray(arr), //
       map(fromArray),
       switchLatest,
-      aggregate(sum, 0),
+      reduce(sum, 0),
       runStream
     )
   })
@@ -31,3 +31,6 @@ bench.addEventListener('error', console.error)
 await bench.run()
 
 console.table(bench.table())
+function reduce(sum: (x: number, y: number) => number, arg1: number): (_: unknown) => unknown {
+  throw new Error('Function not implemented.')
+}
