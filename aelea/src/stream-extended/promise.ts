@@ -1,4 +1,4 @@
-import { type ISink, type IStream, stream } from '../stream/index.js'
+import type { IScheduler, ISink, IStream } from '../stream/index.js'
 
 export enum PromiseStatus {
   DONE,
@@ -11,8 +11,19 @@ export type PromiseStatePending = { status: PromiseStatus.PENDING }
 export type PromiseStateError = { status: PromiseStatus.ERROR; error: Error }
 export type PromiseState<T> = PromiseStateDone<T> | PromiseStatePending | PromiseStateError
 
+/**
+ * Stream that transforms a stream of promises into a stream of promise states
+ */
+class PromiseStateStream<T> implements IStream<PromiseState<T>> {
+  constructor(private readonly source: IStream<Promise<T>>) {}
+
+  run(sink: ISink<PromiseState<T>>, scheduler: IScheduler): Disposable {
+    return this.source.run(new PromiseStateSink(sink), scheduler)
+  }
+}
+
 export const promiseState = <T>(querySrc: IStream<Promise<T>>): IStream<PromiseState<T>> => {
-  return stream((sink, scheduler) => querySrc.run(new PromiseStateSink(sink), scheduler))
+  return new PromiseStateStream(querySrc)
 }
 
 class PromiseStateSink<T> implements ISink<Promise<T>>, Disposable {

@@ -1,6 +1,6 @@
 import { disposeBoth, type Fn, type ISink, isFunction, never } from '../../stream/index.js'
 import { propagateRunEventTask } from '../../stream/scheduler/PropagateTask.js'
-import { stream } from '../stream.js'
+import { stream } from '../../stream-extended/index.js'
 import type { I$Node, I$Op, I$Slottable, INode, INodeCompose, INodeElement } from '../types.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
 
@@ -23,7 +23,7 @@ function createNodeSource<A, B extends INodeElement>(
       stylePseudo: []
     }
 
-    const nodeTask = scheduler.asap(propagateRunEventTask(sink, scheduler, emitNode, nodeState))
+    const nodeTask = scheduler.asap(propagateRunEventTask(sink, emitNode, nodeState))
 
     return disposeBoth(disposable, nodeTask)
   })

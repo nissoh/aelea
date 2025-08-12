@@ -21,6 +21,10 @@ export const multicast = <T>(source: IStream<T>): IStream<T> => {
   return new Multicast(source)
 }
 
+/**
+ * Multicast stream implementation that shares a single source subscription
+ * among multiple observers
+ */
 class Multicast<T> implements IStream<T> {
   private readonly source: MulticastSource<T>
 

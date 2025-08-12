@@ -1,12 +1,16 @@
-import { stream } from '../stream.js'
-import type { IStream } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeWith } from '../utils/disposable.js'
 
-export const fromPromise = <T>(promise: Promise<T>): IStream<T> =>
-  stream((sink, _) => {
+/**
+ * Stream that emits the resolved value of a promise
+ */
+class FromPromise<T> implements IStream<T> {
+  constructor(private readonly promise: Promise<T>) {}
+
+  run(sink: ISink<T>, _scheduler: IScheduler): Disposable {
     let disposed = false
 
-    promise.then(
+    this.promise.then(
       value => {
         if (disposed) return
 
@@ -24,4 +28,7 @@ export const fromPromise = <T>(promise: Promise<T>): IStream<T> =>
     return disposeWith(() => {
       disposed = true
     })
-  })
+  }
+}
+
+export const fromPromise = <T>(promise: Promise<T>): IStream<T> => new FromPromise(promise)

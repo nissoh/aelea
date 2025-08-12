@@ -1,17 +1,54 @@
 import { propagateEndTask, propagateRunEventTask } from '../scheduler/PropagateTask.js'
-import { stream } from '../stream.js'
-import type { ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeNone } from '../utils/disposable.js'
 
-export const fromArray = <T>(arr: readonly T[]): IStream<T> =>
-  stream((sink, scheduler) => scheduler.asap(propagateRunEventTask(sink, scheduler, emitArray, arr)))
+/**
+ * Stream that emits all values from an array and then ends
+ */
+class FromArray<T> implements IStream<T> {
+  constructor(private readonly arr: readonly T[]) {}
 
-export const now = <A>(value: A): IStream<A> =>
-  stream((sink, scheduler) => scheduler.asap(propagateRunEventTask(sink, scheduler, emitNow, value)))
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    return scheduler.asap(propagateRunEventTask(sink, emitArray, this.arr))
+  }
+}
 
-export const never: IStream<never> = stream(() => disposeNone)
+/**
+ * Stream that emits a single value immediately and then ends
+ */
+class Now<T> implements IStream<T> {
+  constructor(private readonly value: T) {}
 
-export const empty: IStream<never> = stream((sink, scheduler) => scheduler.asap(propagateEndTask(sink, scheduler)))
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    return scheduler.asap(propagateRunEventTask(sink, emitNow, this.value))
+  }
+}
+
+/**
+ * Stream that never emits any values and never ends
+ */
+class Never implements IStream<never> {
+  run(): Disposable {
+    return disposeNone
+  }
+}
+
+/**
+ * Stream that immediately ends without emitting any values
+ */
+class Empty implements IStream<never> {
+  run(sink: ISink<never>, scheduler: IScheduler): Disposable {
+    return scheduler.asap(propagateEndTask(sink))
+  }
+}
+
+export const fromArray = <T>(arr: readonly T[]): IStream<T> => new FromArray(arr)
+
+export const now = <A>(value: A): IStream<A> => new Now(value)
+
+export const never: IStream<never> = new Never()
+
+export const empty: IStream<never> = new Empty()
 
 function emitNow<T>(sink: ISink<T>, value: T) {
   sink.event(value)

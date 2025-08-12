@@ -2,7 +2,10 @@ import type { IScheduler, ISink, IStream } from '../types.js'
 import { compose, curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
-class MapSource<T, R> implements IStream<R> {
+/**
+ * Transform each value in a stream with a function
+ */
+class MapStream<T, R> implements IStream<R> {
   constructor(
     readonly f: (value: T) => R,
     readonly source: IStream<T>
@@ -20,11 +23,11 @@ class MapSource<T, R> implements IStream<R> {
  * map(x => x*2): -2-4-6-8->
  */
 export const map: IMapCurry = curry2((f, source) => {
-  if (source instanceof MapSource) {
-    return new MapSource(compose(source.f, f), source.source)
+  if (source instanceof MapStream) {
+    return new MapStream(compose(source.f, f), source.source)
   }
 
-  return new MapSource(f, source)
+  return new MapStream(f, source)
 })
 
 class MapSink<I, O> extends PipeSink<I, O> {

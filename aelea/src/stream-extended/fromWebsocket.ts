@@ -1,4 +1,13 @@
-import { disposeBoth, disposeWith, empty, type IStream, nullSink, stream, tap } from '../stream/index.js'
+import {
+  disposeBoth,
+  disposeWith,
+  empty,
+  type IScheduler,
+  type ISink,
+  type IStream,
+  nullSink,
+  tap
+} from '../stream/index.js'
 
 const readyStateMap: Record<number, string> = {
   [WebSocket.CONNECTING]: 'CONNECTING',
@@ -7,29 +16,34 @@ const readyStateMap: Record<number, string> = {
   [WebSocket.CLOSED]: 'CLOSED'
 }
 
-export function fromWebsocket<I, O>(
-  url: string,
-  input: IStream<O> = empty,
-  protocols: string | string[] | undefined = undefined,
-  options: {
-    binaryType?: BinaryType
-    maxBufferSize?: number
-    connectionTimeout?: number
-    serializer?: (data: O) => any
-    deserializer?: (data: string) => I
-  } = {}
-): IStream<I> {
-  return stream((sink, scheduler) => {
+/**
+ * Stream that creates a WebSocket connection and emits received messages
+ */
+class WebsocketStream<I, O> implements IStream<I> {
+  constructor(
+    private readonly url: string,
+    private readonly input: IStream<O> = empty,
+    private readonly protocols: string | string[] | undefined = undefined,
+    private readonly options: {
+      binaryType?: BinaryType
+      maxBufferSize?: number
+      connectionTimeout?: number
+      serializer?: (data: O) => any
+      deserializer?: (data: string) => I
+    } = {}
+  ) {}
+
+  run(sink: ISink<I>, scheduler: IScheduler): Disposable {
     let socket: WebSocket | null
     try {
-      socket = new WebSocket(url, protocols)
+      socket = new WebSocket(this.url, this.protocols)
     } catch (error) {
       sink.error(error)
       return disposeWith(() => {})
     }
 
-    if (options.binaryType) {
-      socket.binaryType = options.binaryType
+    if (this.options.binaryType) {
+      socket.binaryType = this.options.binaryType
     }
 
     const messageBuffer: O[] = []
@@ -69,7 +83,7 @@ export function fromWebsocket<I, O>(
       sink.end()
     }
 
-    const deserializer = options.deserializer ?? JSON.parse
+    const deserializer = this.options.deserializer ?? JSON.parse
 
     const onMessage = (msg: MessageEvent) => {
       if (isCleanedUp) return // Prevent processing after cleanup
@@ -89,7 +103,7 @@ export function fromWebsocket<I, O>(
       }
     }
 
-    const serializer = options.serializer ?? JSON.stringify
+    const serializer = this.options.serializer ?? JSON.stringify
 
     const sendMessage = (value: O) => {
       try {
@@ -135,7 +149,7 @@ export function fromWebsocket<I, O>(
         sink.error(new Error('WebSocket connection timeout'))
         sink.end()
       }
-    }, options.connectionTimeout ?? 5000)
+    }, this.options.connectionTimeout ?? 5000)
 
     const sendInputEffect = tap((value: O) => {
       if (isCleanedUp) return // Prevent processing after cleanup
@@ -143,7 +157,7 @@ export function fromWebsocket<I, O>(
       if (socket && socket.readyState === WebSocket.OPEN) {
         sendMessage(value)
       } else if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.CLOSING)) {
-        if (messageBuffer.length < (options.maxBufferSize ?? Number.POSITIVE_INFINITY)) {
+        if (messageBuffer.length < (this.options.maxBufferSize ?? Number.POSITIVE_INFINITY)) {
           messageBuffer.push(value)
         } else {
           console.warn('[WebSocket] Buffer full, dropping message')
@@ -153,8 +167,23 @@ export function fromWebsocket<I, O>(
           `[WebSocket] Cannot send message, socket state: ${socket ? readyStateMap[socket.readyState] : 'null'}`
         )
       }
-    }, input).run(nullSink, scheduler)
+    }, this.input).run(nullSink, scheduler)
 
     return disposeBoth(disposeWith(cleanup), sendInputEffect)
-  })
+  }
+}
+
+export function fromWebsocket<I, O>(
+  url: string,
+  input: IStream<O> = empty,
+  protocols: string | string[] | undefined = undefined,
+  options: {
+    binaryType?: BinaryType
+    maxBufferSize?: number
+    connectionTimeout?: number
+    serializer?: (data: O) => any
+    deserializer?: (data: string) => I
+  } = {}
+): IStream<I> {
+  return new WebsocketStream(url, input, protocols, options)
 }

@@ -1,6 +1,7 @@
 import { Bench } from 'tinybench'
-import { combineMap, createDefaultScheduler, type IStream, merge, stream, zipMap } from '../src/stream/index.js'
+import { combineMap, createDefaultScheduler, type IStream, merge, zipMap } from '../src/stream/index.js'
 import { propagateRunTask } from '../src/stream/scheduler/PropagateTask.js'
+import { stream } from '../src/stream-extended/index.js'
 
 // Create a stream that emits values with controlled timing
 function createControlledStream(values: number[], delayMs = 0): IStream<number> {
@@ -17,16 +18,16 @@ function createControlledStream(values: number[], delayMs = 0): IStream<number> 
       sink.event(values[index++])
 
       if (delayMs > 0) {
-        scheduler.delay(propagateRunTask(sink, scheduler, emitNext), delayMs)
+        scheduler.delay(propagateRunTask(sink, emitNext), delayMs)
       } else {
-        scheduler.asap(propagateRunTask(sink, scheduler, emitNext))
+        scheduler.asap(propagateRunTask(sink, emitNext))
       }
     }
 
     if (delayMs > 0) {
-      scheduler.delay(propagateRunTask(sink, scheduler, emitNext), delayMs)
+      scheduler.delay(propagateRunTask(sink, emitNext), delayMs)
     } else {
-      scheduler.asap(propagateRunTask(sink, scheduler, emitNext))
+      scheduler.asap(propagateRunTask(sink, emitNext))
     }
 
     return {

@@ -1,7 +1,20 @@
-import { stream } from '../stream.js'
-import type { ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
+
+/**
+ * Stream that skips the first n values from the source stream
+ */
+class Skip<T> implements IStream<T> {
+  constructor(
+    private readonly n: number,
+    private readonly source: IStream<T>
+  ) {}
+
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    return this.source.run(new SkipSink(this.n, sink), scheduler)
+  }
+}
 
 /**
  * Skip the first n values from a stream
@@ -9,9 +22,7 @@ import { PipeSink } from '../utils/sink.js'
  * stream:   -1-2-3-4-5-6->
  * skip(3):  -------4-5-6->
  */
-export const skip: ISkipCurry = curry2((n, source) =>
-  stream((sink, scheduler) => source.run(new SkipSink(n, sink), scheduler))
-)
+export const skip: ISkipCurry = curry2((n, source) => new Skip(n, source))
 
 export interface ISkipCurry {
   <T>(n: number, source: IStream<T>): IStream<T>

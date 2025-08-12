@@ -1,8 +1,26 @@
-import { stream } from '../stream.js'
-import type { ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2, curry3 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
+
+/**
+ * Stream that combines values from two streams at sample times
+ */
+class SampleMap<A, B, C> implements IStream<C> {
+  constructor(
+    private readonly f: (a: A, b: B) => C,
+    private readonly values: IStream<A>,
+    private readonly sampler: IStream<B>
+  ) {}
+
+  run(sink: ISink<C>, scheduler: IScheduler): Disposable {
+    const seedSink = new SampleMapSink(this.f, sink)
+    const valuesDisposable = this.values.run(seedSink.seedSink, scheduler)
+    const samplerDisposable = this.sampler.run(seedSink, scheduler)
+
+    return disposeBoth(samplerDisposable, valuesDisposable)
+  }
+}
 
 /**
  * Sample values from one stream at the times of events in another
@@ -20,15 +38,7 @@ export const sample: ISampleCurry = curry2((values, sampler) => sampleMap(x => x
  * sampler:    ---a---b---c->
  * sampleMap:  ---[2,a]-[4,b]-[6,c]->
  */
-export const sampleMap: ISampleMapCurry = curry3((f, values, sampler) =>
-  stream((sink, scheduler) => {
-    const seedSink = new SampleMapSink(f, sink)
-    const valuesDisposable = values.run(seedSink.seedSink, scheduler)
-    const samplerDisposable = sampler.run(seedSink, scheduler)
-
-    return disposeBoth(samplerDisposable, valuesDisposable)
-  })
-)
+export const sampleMap: ISampleMapCurry = curry3((f, values, sampler) => new SampleMap(f, values, sampler))
 
 class SampleMapSink<A, B, C> extends PipeSink<B, C> {
   readonly seedSink: SeedSink<A>

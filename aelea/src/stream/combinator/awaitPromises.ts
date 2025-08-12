@@ -1,6 +1,19 @@
-import { stream } from '../stream.js'
-import type { ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
+
+/**
+ * Stream that transforms a stream of promises into a stream of their values
+ */
+class AwaitPromises<T> implements IStream<T> {
+  constructor(private readonly source: IStream<Promise<T>>) {}
+
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    const awaitSink = new AwaitPromisesSink(sink)
+    const disposable = this.source.run(awaitSink, scheduler)
+
+    return disposeBoth(disposable, awaitSink)
+  }
+}
 
 /**
  * Turn a Stream of promises into a Stream containing the promises' values.
@@ -12,13 +25,7 @@ import { disposeBoth } from '../utils/disposable.js'
  * stream:                -p---q---r->
  * awaitPromises(stream): ---1--2--3->
  */
-export const awaitPromises = <T>(s: IStream<Promise<T>>): IStream<T> =>
-  stream((sink, scheduler) => {
-    const awaitSink = new AwaitPromisesSink(sink)
-    const disposable = s.run(awaitSink, scheduler)
-
-    return disposeBoth(disposable, awaitSink)
-  })
+export const awaitPromises = <T>(s: IStream<Promise<T>>): IStream<T> => new AwaitPromises(s)
 
 class AwaitPromisesSink<T> implements ISink<Promise<T>>, Disposable {
   private queue: Promise<unknown> = Promise.resolve()

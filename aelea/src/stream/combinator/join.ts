@@ -1,7 +1,21 @@
-import { stream } from '../stream.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeAll, disposeNone } from '../utils/disposable.js'
 import { curry2, curry3 } from '../utils/function.js'
+
+/**
+ * Stream that flattens a stream of streams with concurrency control
+ */
+class JoinMapConcurrently<A, B> implements IStream<B> {
+  constructor(
+    private readonly f: (a: A) => IStream<B>,
+    private readonly concurrency: number,
+    private readonly source: IStream<A>
+  ) {}
+
+  run(sink: ISink<B>, scheduler: IScheduler): Disposable {
+    return new Join(sink, scheduler, this.source, this.f, this.concurrency)
+  }
+}
 
 export const join = <A>(stream: IStream<IStream<A>>): IStream<A> =>
   joinConcurrentlyMap(Number.POSITIVE_INFINITY, stream)
@@ -17,8 +31,8 @@ export const joinConcurrentlyMap: IMergeConcurrentlyMapCurry = curry2((concurren
   joinMapConcurrently(s => s, concurrency, stream)
 )
 
-export const joinMapConcurrently: IMergeMapConcurrentlyCurry = curry3((f, concurrency, source) =>
-  stream((sink, scheduler) => new Join(sink, scheduler, source, f, concurrency))
+export const joinMapConcurrently: IMergeMapConcurrentlyCurry = curry3(
+  (f, concurrency, source) => new JoinMapConcurrently(f, concurrency, source)
 )
 
 class Join<A, B> implements ISink<A>, Disposable {

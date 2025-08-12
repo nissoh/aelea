@@ -1,6 +1,5 @@
-import { curry2, disposeNone, type ISink, type IStream } from '../../stream/index.js'
+import { curry2, disposeNone, type IScheduler, type ISink, type IStream } from '../../stream/index.js'
 import { propagateRunEventTask } from '../../stream/scheduler/PropagateTask.js'
-import { stream } from '../stream.js'
 import type { I$Scheduler } from '../types.js'
 
 interface MotionConfig {
@@ -15,12 +14,26 @@ export const MOTION_WOBBLY = { stiffness: 180, damping: 12, precision: 0.01 }
 export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
 
 /**
+ * Stream that animates value changes using spring physics
+ */
+class Motion implements IStream<number> {
+  constructor(
+    private readonly config: MotionConfig,
+    private readonly position: IStream<number>
+  ) {}
+
+  run(sink: ISink<number>, scheduler: IScheduler): Disposable {
+    return new MotionSink(sink, scheduler as I$Scheduler, this.config, this.position)
+  }
+}
+
+/**
  * Animates value changes using spring physics
  */
 export const motion: IMotionCurry = curry2(
   (config: Partial<MotionConfig>, position: IStream<number>): IStream<number> => {
     const cfg = { ...MOTION_NO_WOBBLE, ...config }
-    return stream((sink, scheduler) => new MotionSink(sink, scheduler as I$Scheduler, cfg, position))
+    return new Motion(cfg, position)
   }
 )
 
@@ -28,11 +41,12 @@ class MotionSink implements ISink<number>, Disposable {
   position = 0
   target = 0
   velocity = 0
-
   animating = false
-  rafDisposable = disposeNone
-  sourceDisposable: Disposable
   initialized = false
+  rafDisposable = disposeNone
+  sourceEnded = false
+  sourceDisposable: Disposable
+  readonly dt = 0.016666666666666666 // 1/60
 
   constructor(
     readonly sink: ISink<number>,
@@ -43,27 +57,27 @@ class MotionSink implements ISink<number>, Disposable {
     this.sourceDisposable = position.run(this, scheduler)
   }
 
-  event(newTarget: number): void {
-    this.target = newTarget
+  event(target: number): void {
+    this.target = target
 
     if (!this.initialized) {
       this.initialized = true
-      this.position = newTarget
-      this.sink.event(newTarget)
+      this.position = target
+      this.sink.event(target)
     }
 
     if (!this.animating) {
       this.animating = true
-      this.rafDisposable = this.scheduler.paint(propagateRunEventTask(this.sink, this.scheduler, animate, this))
+      this.rafDisposable = this.scheduler.paint(propagateRunEventTask(this.sink, animate, this))
     }
   }
 
-  error(err: any): void {
+  error(err: unknown): void {
     this.sink.error(err)
   }
 
   end(): void {
-    this.sourceDisposable = disposeNone
+    this.sourceEnded = true
 
     if (this.animating) return
 
@@ -74,15 +88,13 @@ class MotionSink implements ISink<number>, Disposable {
   [Symbol.dispose](): void {
     this.rafDisposable[Symbol.dispose]()
     this.sourceDisposable[Symbol.dispose]()
-
-    this.sourceDisposable = disposeNone
   }
 }
 
 function animate(sink: ISink<number>, ms: MotionSink): void {
   const delta = ms.target - ms.position
-  const absDelta = delta < 0 ? -delta : delta
-  const absVelocity = ms.velocity < 0 ? -ms.velocity : ms.velocity
+  const absDelta = Math.abs(delta)
+  const absVelocity = Math.abs(ms.velocity)
 
   // Check if settled
   if (absVelocity < ms.config.precision && absDelta < ms.config.precision) {
@@ -93,23 +105,21 @@ function animate(sink: ISink<number>, ms: MotionSink): void {
 
     sink.event(ms.target)
 
-    if (ms.sourceDisposable === disposeNone) {
+    if (ms.sourceEnded) {
       sink.end()
-      return
     }
-
     return
   }
 
   // Spring physics calculation
   const acceleration = ms.config.stiffness * delta - ms.config.damping * ms.velocity
 
-  // Update state (dt = 1/60 for 60fps)
-  ms.velocity += acceleration * 0.01666666666666666 // 1/60
-  ms.position += ms.velocity * 0.01666666666666666
+  // Update state
+  ms.velocity += acceleration * ms.dt
+  ms.position += ms.velocity * ms.dt
 
   sink.event(ms.position)
-  ms.rafDisposable = ms.scheduler.paint(propagateRunEventTask(ms.sink, ms.scheduler, animate, ms))
+  ms.rafDisposable = ms.scheduler.paint(propagateRunEventTask(sink, animate, ms))
 }
 
 export interface IMotionCurry {

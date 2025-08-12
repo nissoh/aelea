@@ -1,10 +1,21 @@
-import { stream } from '../stream.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
 import { isStream } from '../utils/common.js'
 import { disposeBoth, disposeNone } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 import { fromPromise } from './fromPromise.js'
 import { map } from './map.js'
+
+/**
+ * Stream that switches to the latest inner stream, disposing the previous one
+ */
+class SwitchLatest<T> implements IStream<T> {
+  constructor(private readonly source: IStream<IStream<T>>) {}
+
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    const switchSink = new SwitchSink(sink, scheduler)
+    return disposeBoth(switchSink, this.source.run(switchSink, scheduler))
+  }
+}
 
 /**
  * Switch to the latest inner stream, disposing the previous one
@@ -21,11 +32,7 @@ import { map } from './map.js'
  *
  * It only ends when both have ended.
  */
-export const switchLatest = <T>(source: IStream<IStream<T>>): IStream<T> =>
-  stream((sink, scheduler) => {
-    const switchSink = new SwitchSink(sink, scheduler)
-    return disposeBoth(switchSink, source.run(switchSink, scheduler))
-  })
+export const switchLatest = <T>(source: IStream<IStream<T>>): IStream<T> => new SwitchLatest(source)
 
 /**
  * Map each value to a stream and switch to the latest one

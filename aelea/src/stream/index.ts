@@ -1,7 +1,6 @@
 export * from './combinator/index.js'
 export * from './scheduler/index.js'
 export * from './source/index.js'
-export { stream } from './stream.js'
 export type {
   Fn,
   ICreateStream,

@@ -1,46 +1,41 @@
-import { propagateRunEventTask } from '../scheduler/PropagateTask.js'
-import { stream } from '../stream.js'
+import { propagateRunTask } from '../scheduler/PropagateTask.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 
-export const periodic: IPeriodicCurry = curry2((period, value) =>
-  stream((sink, scheduler) => new Periodic(scheduler, sink, period, value))
-)
-
-class Periodic<T> implements Disposable {
-  currentDisposable: Disposable | null = null
-  disposed = false
-
+/**
+ * Stream that emits a value periodically at specified intervals
+ */
+class Periodic<T> implements IStream<T> {
   constructor(
-    readonly scheduler: IScheduler,
-    readonly sink: ISink<T>,
-    readonly period: number,
-    readonly value: T
-  ) {
-    this.scheduleNext()
-  }
+    private readonly period: number,
+    private readonly value: T
+  ) {}
 
-  scheduleNext(): void {
-    if (this.disposed) return
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    let active = true
 
-    this.currentDisposable = this.scheduler.delay(
-      propagateRunEventTask(this.sink, this.scheduler, emitPeriodic, this),
-      this.period
-    )
-  }
+    const emitNext = () => {
+      if (!active) return
 
-  [Symbol.dispose](): void {
-    this.disposed = true
-    this.currentDisposable?.[Symbol.dispose]()
+      sink.event(this.value)
+
+      if (active) {
+        disposable = scheduler.delay(propagateRunTask(sink, emitNext), this.period)
+      }
+    }
+
+    let disposable = scheduler.asap(propagateRunTask(sink, emitNext))
+
+    return {
+      [Symbol.dispose](): void {
+        active = false
+        disposable[Symbol.dispose]()
+      }
+    }
   }
 }
 
-function emitPeriodic<T>(sink: ISink<T>, periodic: Periodic<T>): void {
-  if (periodic.disposed) return
-
-  sink.event(periodic.value)
-  periodic.scheduleNext()
-}
+export const periodic: IPeriodicCurry = curry2((period, value) => new Periodic(period, value))
 
 export interface IPeriodicCurry {
   <T>(period: number, value: T): IStream<T>

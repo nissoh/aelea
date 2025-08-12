@@ -1,4 +1,3 @@
-import { stream } from '../stream.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
@@ -7,23 +6,50 @@ import { PipeSink } from '../utils/sink.js'
 import { join } from './join.js'
 
 /**
+ * Stream that takes values until a signal stream emits
+ */
+class Until<A> implements IStream<A> {
+  constructor(
+    private readonly signal: IStream<unknown>,
+    private readonly source: IStream<A>
+  ) {}
+
+  run(sink: ISink<A>, scheduler: IScheduler): Disposable {
+    const disposable = new SettableDisposable()
+
+    const d1 = this.source.run(sink, scheduler)
+    const d2 = this.signal.run(new UntilSink(sink, disposable), scheduler)
+    disposable.set(disposeBoth(d1, d2))
+
+    return disposable
+  }
+}
+
+/**
+ * Stream that takes values starting when a signal stream emits
+ */
+class Since<A> implements IStream<A> {
+  constructor(
+    private readonly signal: IStream<unknown>,
+    private readonly source: IStream<A>
+  ) {}
+
+  run(sink: ISink<A>, scheduler: IScheduler): Disposable {
+    const min = new LowerBoundSink(this.signal, sink, scheduler)
+    const sourceDisposable = this.source.run(new SinceSink(min, sink), scheduler)
+
+    return disposeBoth(min, sourceDisposable)
+  }
+}
+
+/**
  * Take values until a signal stream emits
  *
  * stream: -1-2-3-4-5-6->
  * signal: -------x------>
  * until:  -1-2-3-|
  */
-export const until: IUntilCurry = curry2((signal, source) =>
-  stream((sink, scheduler) => {
-    const disposable = new SettableDisposable()
-
-    const d1 = source.run(sink, scheduler)
-    const d2 = signal.run(new UntilSink(sink, disposable), scheduler)
-    disposable.set(disposeBoth(d1, d2))
-
-    return disposable
-  })
-)
+export const until: IUntilCurry = curry2((signal, source) => new Until(signal, source))
 
 /**
  * Take values starting when a signal stream emits
@@ -32,14 +58,7 @@ export const until: IUntilCurry = curry2((signal, source) =>
  * signal: -------x------>
  * since:  -------4-5-6->
  */
-export const since: ISinceCurry = curry2((signal, source) =>
-  stream((sink, scheduler) => {
-    const min = new LowerBoundSink(signal, sink, scheduler)
-    const sourceDisposable = source.run(new SinceSink(min, sink), scheduler)
-
-    return disposeBoth(min, sourceDisposable)
-  })
-)
+export const since: ISinceCurry = curry2((signal, source) => new Since(signal, source))
 
 /**
  * Take values only during time windows

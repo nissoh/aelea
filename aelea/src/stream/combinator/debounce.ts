@@ -1,8 +1,22 @@
 import { propagateRunEventTask } from '../scheduler/PropagateTask.js'
-import { stream } from '../stream.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
+
+/**
+ * Stream that waits for a pause in values before emitting the latest one
+ */
+class Debounce<T> implements IStream<T> {
+  constructor(
+    private readonly period: number,
+    private readonly source: IStream<T>
+  ) {}
+
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    const disposableSink = new DebounceSink(sink, scheduler, this.period)
+    return disposeBoth(disposableSink, this.source.run(disposableSink, scheduler))
+  }
+}
 
 /**
  * Wait for a pause in values before emitting the latest one
@@ -10,13 +24,7 @@ import { curry2 } from '../utils/function.js'
  * stream:        -1-2-3-------4-5-------6->
  * debounce(3):   -------3---------5-------6->
  */
-export const debounce: IDebounceCurry = curry2((period, source) =>
-  stream((sink, scheduler) => {
-    const disposableSink = new DebounceSink(sink, scheduler, period)
-
-    return disposeBoth(disposableSink, source.run(disposableSink, scheduler))
-  })
-)
+export const debounce: IDebounceCurry = curry2((period, source) => new Debounce(period, source))
 
 class DebounceSink<T> implements ISink<T>, Disposable {
   pendingValue: { value: T } | null = null
@@ -31,7 +39,7 @@ class DebounceSink<T> implements ISink<T>, Disposable {
   event(value: T): void {
     this.clearTimer()
     this.pendingValue = { value }
-    this.timer = this.scheduler.delay(propagateRunEventTask(this.sink, this.scheduler, emitDebounced, this), this.dt)
+    this.timer = this.scheduler.delay(propagateRunEventTask(this.sink, emitDebounced, this), this.dt)
   }
 
   error(e: Error): void {

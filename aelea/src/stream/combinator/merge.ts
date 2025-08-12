@@ -1,8 +1,28 @@
 import { empty } from '../source/stream.js'
-import { stream } from '../stream.js'
-import type { ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
+
+/**
+ * Stream that merges multiple streams into one, emitting values as they arrive
+ */
+class Merge<T> implements IStream<T> {
+  constructor(private readonly sourceList: readonly IStream<T>[]) {}
+
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    const l = this.sourceList.length
+    const disposables = new Array<Disposable>(l)
+    const sinks: ISink<unknown>[] = new Array(l)
+    const mergeSink = new MergeSink(sink, disposables, l)
+
+    for (let indexSink: IndexSink<any>, i = 0; i < l; ++i) {
+      indexSink = sinks[i] = new IndexSink(mergeSink, i)
+      disposables[i] = this.sourceList[i].run(indexSink, scheduler)
+    }
+
+    return disposeAll(disposables)
+  }
+}
 
 /**
  * Merge multiple streams into one, emitting values as they arrive
@@ -19,18 +39,7 @@ export function merge<T extends readonly unknown[]>(
   if (l === 0) return empty
   if (l === 1) return sourceList[0]
 
-  return stream((sink, scheduler) => {
-    const disposables = new Array<Disposable>(l)
-    const sinks: ISink<unknown>[] = new Array(l)
-    const mergeSink = new MergeSink(sink, disposables, l)
-
-    for (let indexSink: IndexSink<any>, i = 0; i < l; ++i) {
-      indexSink = sinks[i] = new IndexSink(mergeSink, i)
-      disposables[i] = sourceList[i].run(indexSink, scheduler)
-    }
-
-    return disposeAll(disposables)
-  })
+  return new Merge(sourceList as readonly IStream<T[number]>[])
 }
 
 class MergeSink<A> implements ISink<IndexedValue<A | undefined>> {

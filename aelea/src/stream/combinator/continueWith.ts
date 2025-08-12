@@ -1,7 +1,21 @@
-import { stream } from '../stream.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
+
+/**
+ * Stream that continues with values from another stream when the first ends
+ */
+class ContinueWith<A, B> implements IStream<A | B> {
+  constructor(
+    private readonly f: () => IStream<B>,
+    private readonly source: IStream<A>
+  ) {}
+
+  run(sink: ISink<A | B>, scheduler: IScheduler): Disposable {
+    const dsink = new ContinueWithSink(sink, scheduler, this.f)
+    return disposeBoth(this.source.run(dsink, scheduler), dsink)
+  }
+}
 
 /**
  * When stream ends, continue with values from another stream
@@ -10,13 +24,7 @@ import { curry2 } from '../utils/function.js'
  * streamB:                 -4-5-6->
  * continueWith(f): -1-2-3-4-5-6->
  */
-export const continueWith: IContinueWithCurry = curry2((f, s) =>
-  stream((sink, scheduler) => {
-    const dsink = new ContinueWithSink(sink, scheduler, f)
-
-    return disposeBoth(s.run(dsink, scheduler), dsink)
-  })
-)
+export const continueWith: IContinueWithCurry = curry2((f, s) => new ContinueWith(f, s))
 
 class ContinueWithSink<A, B> implements ISink<A> {
   disposable: Disposable | null = null

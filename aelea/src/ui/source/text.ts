@@ -1,6 +1,6 @@
 import { disposeBoth, disposeNone, empty, type ISink, type IStream, merge } from '../../stream/index.js'
 import { propagateRunEventTask } from '../../stream/scheduler/PropagateTask.js'
-import { stream } from '../stream.js'
+import { stream } from '../../stream-extended/index.js'
 import type { I$Scheduler, ISlottable } from '../types.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
 
@@ -30,9 +30,7 @@ class DynamicTextSink implements ISink<string>, Disposable {
         disposable: new SettableDisposable()
       }
       // DOM tree creation happens in asap phase
-      this.currentDisposable = this.scheduler.asap(
-        propagateRunEventTask(this.sink, this.scheduler, emitText, this.textNode)
-      )
+      this.currentDisposable = this.scheduler.asap(propagateRunEventTask(this.sink, emitText, this.textNode))
     } else if (this.textNode) {
       // Subsequent emissions - just update the text content
       this.textNode.element.nodeValue = value
@@ -80,9 +78,7 @@ function createStaticTextStream(text: string): I$Text {
       element: document.createTextNode(text),
       disposable
     }
-    const emitTextDisposable = (scheduler as I$Scheduler).asap(
-      propagateRunEventTask(sink, scheduler as I$Scheduler, emitText, textNode)
-    )
+    const emitTextDisposable = (scheduler as I$Scheduler).asap(propagateRunEventTask(sink, emitText, textNode))
 
     return disposeBoth(emitTextDisposable, disposable)
   })

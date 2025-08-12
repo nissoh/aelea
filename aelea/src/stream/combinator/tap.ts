@@ -1,5 +1,4 @@
-import { stream } from '../stream.js'
-import type { ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
@@ -9,9 +8,18 @@ import { PipeSink } from '../utils/sink.js'
  * stream:           -1-2-3->
  * tap(console.log): -1-2-3->  (logs: 1, 2, 3)
  */
-export const tap: ITapCurry = curry2((f, source) =>
-  stream((sink, scheduler) => source.run(new TapSink(f, sink), scheduler))
-)
+class Tap<T> implements IStream<T> {
+  constructor(
+    private readonly f: (value: T) => unknown,
+    private readonly source: IStream<T>
+  ) {}
+
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    return this.source.run(new TapSink(this.f, sink), scheduler)
+  }
+}
+
+export const tap: ITapCurry = curry2((f, source) => new Tap(f, source))
 export interface ITapCurry {
   <T>(f: (value: T) => unknown, source: IStream<T>): IStream<T>
   <T>(f: (value: T) => unknown): (source: IStream<T>) => IStream<T>

@@ -1,33 +1,72 @@
 import { empty, now } from '../source/stream.js'
-import { stream } from '../stream.js'
-import type { ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { IndexSink } from '../utils/sink.js'
 import { map } from './map.js'
+
+/**
+ * Stream that combines values from multiple streams into an object in lockstep
+ */
+class Zip<A> implements IStream<Readonly<A>> {
+  private readonly keys: (keyof A)[]
+  private readonly sources: IStream<any>[]
+
+  constructor(state: { [P in keyof A]: IStream<A[P]> }) {
+    this.keys = Object.keys(state) as (keyof A)[]
+    this.sources = Object.values(state) as IStream<any>[]
+  }
+
+  run(sink: ISink<Readonly<A>>, scheduler: IScheduler): Disposable {
+    const result = {} as A
+
+    return zipMap(
+      (...values) => {
+        for (let i = 0; i < this.keys.length; i++) {
+          result[this.keys[i]] = values[i]
+        }
+        return result as Readonly<A>
+      },
+      ...this.sources
+    ).run(sink, scheduler)
+  }
+}
 
 export function zip<A>(
   state: {
     [P in keyof A]: IStream<A[P]>
   }
 ): IStream<Readonly<A>> {
-  const keys = Object.keys(state) as (keyof A)[]
-  const sources = Object.values(state) as IStream<any>[]
+  const sources = Object.values(state)
 
   if (sources.length === 0) return now({} as A)
 
-  return stream((sink, scheduler) => {
-    const result = {} as A
+  return new Zip(state)
+}
 
-    return zipMap(
-      (...values) => {
-        for (let i = 0; i < keys.length; i++) {
-          result[keys[i]] = values[i]
-        }
-        return result as Readonly<A>
-      },
-      ...sources
-    ).run(sink, scheduler)
-  })
+/**
+ * Stream that combines values from multiple streams using a mapping function in lockstep
+ */
+class ZipMap<T extends readonly unknown[], R> implements IStream<R> {
+  constructor(
+    private readonly f: (...args: T) => R,
+    private readonly sourceList: [...{ [K in keyof T]: IStream<T[K]> }]
+  ) {}
+
+  run(sink: ISink<R>, scheduler: IScheduler): Disposable {
+    const l = this.sourceList.length
+    const disposables = new Array(l)
+    const sinks = new Array(l)
+    const buffers = new Array(l)
+    const zipSink = new ZipMapSink(this.f, buffers, sinks, sink)
+
+    for (let i = 0; i < l; ++i) {
+      buffers[i] = new Queue()
+      const indexSink = (sinks[i] = new IndexSink(zipSink, i))
+      disposables[i] = this.sourceList[i].run(indexSink, scheduler)
+    }
+
+    return disposeAll(disposables)
+  }
 }
 
 /**
@@ -46,20 +85,7 @@ export function zipMap<T extends readonly unknown[], R>(
   if (l === 0) return empty
   if (l === 1) return map(f as any, sourceList[0])
 
-  return stream((sink, scheduler) => {
-    const disposables = new Array(l)
-    const sinks = new Array(l)
-    const buffers = new Array(l)
-    const zipSink = new ZipMapSink(f, buffers, sinks, sink)
-
-    for (let i = 0; i < l; ++i) {
-      buffers[i] = new Queue()
-      const indexSink = (sinks[i] = new IndexSink(zipSink, i))
-      disposables[i] = sourceList[i].run(indexSink, scheduler)
-    }
-
-    return disposeAll(disposables)
-  })
+  return new ZipMap(f, sourceList)
 }
 
 class Queue<T> {

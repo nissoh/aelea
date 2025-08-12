@@ -1,15 +1,34 @@
 # Aelea Performance Benchmark Report
 
-## Recent Optimizations
+## Recent Optimizations (2025)
 
-The following optimizations were applied to all scheduler implementations:
+### Stream Implementation Refactoring
 
-1. **Eliminated closure creation** - Static handlers and instance-bound methods replace inline arrow functions
-2. **Implemented task batching** - Multiple tasks scheduled in the same turn are processed together
-3. **Leveraged PropagateTask lifecycle** - The `active` property handles cancellation without complex tracking
-4. **Applied memory-efficient patterns** - Direct task storage, array reuse, and simple for loops
+1. **Migration from Factory Functions to Stream Classes**
+   - Eliminated `stream` factory function overhead by implementing direct Stream classes
+   - Examples: `Periodic`, `Motion`, `Component`, `At`, `MapStream`, etc.
+   - Benefits: Better debugging, reduced function call overhead, more efficient instantiation
 
-These optimizations resulted in a **10.5x performance improvement** for switch operations.
+2. **PropagateTask Optimization**
+   - Removed unnecessary scheduler parameter from task functions
+   - Eliminated `stepTask`/`recurTask` in favor of direct PropagateTask usage
+   - Result: Cleaner API and reduced memory allocations
+
+3. **Periodic Stream Micro-optimizations**
+   - Removed state object in favor of individual variables
+   - Eliminated null checks by using `disposeNone`
+   - Used `propagateRunTask` instead of `propagateRunEventTask` where appropriate
+
+4. **Motion Combinator Optimization**
+   - Moved `dt` constant to class level (avoid recreating each frame)
+   - Created dedicated `Motion` Stream class
+   - Removed method call overhead by inlining where appropriate
+
+5. **Component Stream Class**
+   - Replaced `stream` factory with dedicated `Component` class
+   - Better type safety with explicit generic parameters
+
+These optimizations build upon the previous scheduler improvements that resulted in a **10.5x performance improvement** for switch operations.
 
 ## Benchmark Results
 
@@ -17,28 +36,28 @@ These optimizations resulted in a **10.5x performance improvement** for switch o
 
 | Implementation | Throughput (ops/s) | Latency (ms) | Performance |
 |----------------|-------------------|--------------|-------------|
-| @most/core     | 278 ± 0.47%      | 3.60ms       | Baseline    |
-| Aelea          | 248 ± 2.34%      | 4.09ms       | -10.8%      |
+| @most/core     | 284 ± 4.44%      | 3.70ms       | Baseline    |
+| Aelea          | 293 ± 1.65%      | 3.43ms       | **+3.2%**   |
 
-**Analysis**: Aelea shows slightly lower performance in complex operation chains. This is expected as @most/core has more aggressive optimizations for chained operations.
+**Analysis**: After recent optimizations, Aelea now outperforms @most/core in map-filter-reduce operations, showing the effectiveness of the Stream class refactoring.
 
-### Scan (1,000,000 items)
+### Reduce (1,000,000 items) - Equivalent to Scan
 
 | Implementation | Throughput (ops/s) | Latency (ms) | Performance |
 |----------------|-------------------|--------------|-------------|
-| @most/core     | 481 ± 4.52%      | 2.20ms       | Baseline    |
-| Aelea          | 445 ± 4.19%      | 2.37ms       | -7.5%       |
+| @most/core scan | 482 ± 2.53%      | 2.10ms       | Baseline    |
+| Aelea reduce   | 548 ± 1.04%      | 1.83ms       | **+13.7%**  |
 
-**Analysis**: @most/core shows better performance in scan operations, though both libraries have higher variance in this benchmark.
+**Analysis**: Aelea's reduce operation outperforms @most/core's scan by 13.7%, demonstrating excellent performance for accumulation operations.
 
 ### Switch (1000 x 1000 items)
 
 | Implementation | Throughput (ops/s) | Latency (ms) | Performance |
 |----------------|-------------------|--------------|-------------|
-| @most/core     | 5,227 ± 0.67%    | 0.194ms      | Baseline    |
-| Aelea          | 54,915 ± 0.29%   | 0.019ms      | **+950.4%** |
+| @most/core     | 5,307 ± 0.67%    | 0.191ms      | Baseline    |
+| Aelea          | 58,125 ± 0.21%   | 0.018ms      | **+995.4%** |
 
-**Analysis**: After optimizing schedulers to avoid closure creation, Aelea demonstrates exceptional performance in switch operations, outperforming @most/core by 10.5x. This showcases the impact of avoiding closures in hot paths and proper lifecycle management of inner streams.
+**Analysis**: Aelea continues to demonstrate exceptional performance in switch operations, outperforming @most/core by nearly 11x. This showcases the impact of avoiding closures in hot paths and proper lifecycle management of inner streams.
 
 ### Stream Combinators (100 items per stream)
 
@@ -46,12 +65,12 @@ Direct performance comparison between @most/core and Aelea:
 
 | Combinator | Scenario | @most/core (ops/s) | Aelea (ops/s) | Performance |
 |------------|----------|-------------------|---------------|-------------|
-| **Merge** | 2 streams | 719,455 | 417,394 | @most/core +72.4% |
-| | 5 streams | 303,367 | 214,525 | @most/core +41.4% |
-| **Combine** | 2 streams | 410,776 | 248,258 | @most/core +65.5% |
-| | 3 streams | 325,206 | 198,732 | @most/core +63.6% |
-| **Zip** | 2 streams | 210,396 | 111,684 | @most/core +88.4% |
-| | 3 streams | 174,792 | 80,328 | @most/core +117.6% |
+| **Merge** | 2 streams | 794,441 | 504,998 | @most/core +57.3% |
+| | 5 streams | 400,879 | 300,170 | @most/core +33.6% |
+| **Combine** | 2 streams | 536,357 | 248,417 | @most/core +115.9% |
+| | 3 streams | 418,340 | 210,501 | @most/core +98.7% |
+| **Zip** | 2 streams | 225,341 | 115,659 | @most/core +94.8% |
+| | 3 streams | 190,639 | 84,410 | @most/core +125.9% |
 
 **Detailed Performance Metrics**:
 
@@ -89,19 +108,21 @@ Direct performance comparison between @most/core and Aelea:
 Map fusion automatically combines multiple map operations into a single operation:
 
 ```typescript
-// These three maps are fused into one operation
+// These four maps should be fused into one operation
 map(x => x + 1)
 map(x => x * 2)  
 map(x => x / 3)
+map(x => x - 4)
 ```
 
 **Results**:
 - Correctness: ✅ Verified
+- Fusion Status: ❌ Not implemented (no symbol markers detected)
 - 10,000 items performance:
-  - Direct loop: 0.31ms
-  - Fused stream: 0.52ms (1.68x overhead)
+  - Direct loop: 0.29ms
+  - Stream processing: 0.85ms (2.93x overhead)
 
-The overhead is minimal and expected due to stream abstraction.
+The overhead indicates that map fusion is not yet implemented in Aelea, presenting an opportunity for future optimization.
 
 ## Overview
 
@@ -122,20 +143,21 @@ All benchmarks use the default scheduler optimized for each environment.
 
 ### Performance Comparison Overview
 
-1. **Switch Operations**: Aelea is **241.4% faster** - exceptional performance
-2. **Map-Filter-Reduce**: @most/core is 10.8% faster in complex operation chains
-3. **Scan Operations**: @most/core shows 7.5% better performance
-4. **Stream Combinators**: @most/core outperforms Aelea:
-   - **Merge**: @most/core is 41-72% faster
-   - **Combine**: @most/core is 64-66% faster
-   - **Zip**: @most/core is 88-118% faster
+1. **Switch Operations**: Aelea is **995.4% faster** (nearly 11x) - exceptional performance
+2. **Map-Filter-Reduce**: Aelea is **3.2% faster** after recent optimizations
+3. **Reduce Operations**: Aelea is **13.7% faster** than @most/core's scan
+4. **Stream Combinators**: @most/core still outperforms Aelea:
+   - **Merge**: @most/core is 33-57% faster
+   - **Combine**: @most/core is 98-116% faster
+   - **Zip**: @most/core is 95-126% faster
 
 ### Aelea Performance Characteristics
 
-- **Switch Excellence**: Exceptional 241.4% faster than @most/core in switch operations
+- **Switch Excellence**: Exceptional 995.4% faster (11x) than @most/core in switch operations
+- **Basic Operations**: Now outperforms @most/core in map-filter-reduce (+3.2%) and reduce (+13.7%)
 - **Consistent Performance**: Low variance across all operations
 - **Predictable Behavior**: Simple implementation leads to predictable results
-- **Map Fusion**: Working correctly with minimal overhead (1.68x)
+- **Map Fusion**: Not yet implemented (2.93x overhead opportunity)
 - **Environment-aware Scheduling**: Automatically optimizes for browser/Node.js
 - **Zero-overhead Scheduler**: Direct native function binding in Node.js
 
@@ -160,7 +182,8 @@ All benchmarks use the default scheduler optimized for each environment.
 Aelea provides a clean, maintainable reactive streams implementation with trade-offs:
 
 **Strengths**:
-- **Switch Operations**: Exceptional performance - 241.4% faster than @most/core
+- **Switch Operations**: Exceptional performance - 995.4% faster (11x) than @most/core
+- **Basic Operations**: Now faster than @most/core in map-filter-reduce and reduce operations
 - **Simplicity**: Clean, understandable codebase that's easy to maintain
 - **Consistent Performance**: Low variance and predictable behavior
 - **Environment Optimization**: Automatic scheduler selection for browser/Node.js
@@ -169,18 +192,24 @@ Aelea provides a clean, maintainable reactive streams implementation with trade-
 
 **Trade-offs**:
 - @most/core's aggressive optimizations yield better performance in combinators
-- Complex operation chains show ~10% performance gap
-- Higher latency in merge/combine/zip operations
+- Higher latency in merge/combine/zip operations (33-126% slower)
+- Map fusion not yet implemented (potential 2.93x improvement)
 
 **When to Choose Aelea**:
 - Prioritizing code maintainability and simplicity
 - Building applications where switch operations are common
+- Working with basic stream operations (map, filter, reduce)
 - Need predictable, consistent performance
 - Want excellent TypeScript integration
 
 **When to Choose @most/core**:
-- Maximum performance is critical
 - Heavy use of merge/combine/zip operations
-- Complex stream transformation pipelines
+- Need maximum performance in stream combinators
+- Already invested in @most/core ecosystem
 
-Aelea demonstrates that a simpler implementation can still deliver competitive performance while being significantly easier to understand, maintain, and extend.
+**Future Optimization Opportunities**:
+- Implement map fusion for 2.93x potential improvement
+- Optimize merge/combine/zip operations
+- Further micro-optimizations in hot paths
+
+Aelea demonstrates that a simpler implementation can deliver competitive and often superior performance while being significantly easier to understand, maintain, and extend. The recent optimizations have successfully improved performance in basic operations, making Aelea a compelling choice for most reactive programming needs.

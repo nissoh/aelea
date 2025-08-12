@@ -58,9 +58,7 @@ export class ReplayLatest<A> implements IStream<A> {
 
     // If we have a cached value, emit it asynchronously
     if (this.hasValue) {
-      const cachedDisposable = scheduler.asap(
-        propagateRunEventTask(sink, scheduler, emitCachedValue, this.latestValue!)
-      )
+      const cachedDisposable = scheduler.asap(propagateRunEventTask(sink, emitCachedValue, this.latestValue!))
       return disposeBoth(cachedDisposable, sourceDisposable)
     }
 

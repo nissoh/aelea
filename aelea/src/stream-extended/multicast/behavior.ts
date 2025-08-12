@@ -10,27 +10,27 @@ import {
 import type { IBehavior, IComposeBehavior } from '../types.js'
 import { tether } from './tether.js'
 
-type SubscriberInfo<O> = {
-  sink: ISink<O>
+type SubscriberInfo<T> = {
+  sink: ISink<T>
   scheduler: IScheduler
-  disposables: Map<IStream<O>, Disposable>
+  disposables: Map<IStream<T>, Disposable>
 }
 
 class BehaviorSource<T> implements IStream<T> {
-  private streams = new Set<IStream<T>>() // Use Set to prevent duplicates
+  private samplerList = new Set<IStream<T>>() // Use Set to prevent duplicates
   private subscribers = new Map<ISink<T>, SubscriberInfo<T>>()
 
-  addStream(stream: IStream<T>): void {
+  sample(samplerSource: IStream<T>): void {
     // Prevent duplicate streams
-    if (this.streams.has(stream)) return
+    if (this.samplerList.has(samplerSource)) return
 
-    this.streams.add(stream)
+    this.samplerList.add(samplerSource)
 
     // Hot-wire to existing subscribers with error isolation
     for (const subscriberInfo of this.subscribers.values()) {
       const { sink, scheduler, disposables } = subscriberInfo
-      const disposable = stream.run(sink, scheduler)
-      disposables.set(stream, disposable)
+      const disposable = samplerSource.run(sink, scheduler)
+      disposables.set(samplerSource, disposable)
     }
   }
 
@@ -38,7 +38,7 @@ class BehaviorSource<T> implements IStream<T> {
     const disposables = new Map<IStream<T>, Disposable>()
 
     // Subscribe with error isolation
-    for (const stream of this.streams) {
+    for (const stream of this.samplerList) {
       disposables.set(stream, stream.run(sink, scheduler))
     }
 
@@ -52,21 +52,21 @@ class BehaviorSource<T> implements IStream<T> {
   }
 }
 
-export function behavior<I, O = I>(): IBehavior<I, O> {
-  const behaviorSource = new BehaviorSource<O>()
+export function behavior<A, B = A>(): IBehavior<A, B> {
+  const behaviorSource = new BehaviorSource<B>()
 
-  const compose: IComposeBehavior<I, O> = ((...ops: IOps<any, any>[]) => {
-    return (source: IStream<I>): IStream<I> => {
+  const compose: IComposeBehavior<A, B> = ((...ops: IOps<any, any>[]) => {
+    return (source: IStream<A>): IStream<A> => {
       const [s0, s1] = tether(source)
 
       // @ts-ignore - op accepts variadic arguments
       const transformed = op(s1, ...ops)
 
-      behaviorSource.addStream(transformed)
+      behaviorSource.sample(transformed)
 
       return s0
     }
-  }) as IComposeBehavior<I, O>
+  }) as IComposeBehavior<A, B>
 
   // Return behavior source (outputs O) and compose function
   return [behaviorSource, compose]

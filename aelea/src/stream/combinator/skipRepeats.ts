@@ -1,7 +1,20 @@
-import { stream } from '../stream.js'
-import type { ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
+
+/**
+ * Stream that skips consecutive values that are equal according to provided function
+ */
+class SkipRepeatsWith<T> implements IStream<T> {
+  constructor(
+    private readonly equals: (a: T, b: T) => boolean,
+    private readonly source: IStream<T>
+  ) {}
+
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    return this.source.run(new SkipRepeatsSink(this.equals, sink), scheduler)
+  }
+}
 
 /**
  * Skip consecutive duplicate values, a === b strict equality
@@ -17,9 +30,7 @@ export const skipRepeats = <T>(stream: IStream<T>): IStream<T> => skipRepeatsWit
  * stream:             -{a:1}-{a:1}-{a:2}-{a:2}-{a:3}->
  * skipRepeatsWith(f): -{a:1}-------{a:2}-------{a:3}->
  */
-export const skipRepeatsWith: ISkipRepeatsWithCurry = curry2((equals, source) =>
-  stream((sink, scheduler) => source.run(new SkipRepeatsSink(equals, sink), scheduler))
-)
+export const skipRepeatsWith: ISkipRepeatsWithCurry = curry2((equals, source) => new SkipRepeatsWith(equals, source))
 
 export interface ISkipRepeatsWithCurry {
   <T>(equals: (a: T, b: T) => boolean, source: IStream<T>): IStream<T>

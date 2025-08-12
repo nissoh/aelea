@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, ITask } from '../types.js'
+import type { ISink, ITask } from '../types.js'
 
 export function runTask(task: ITask): void {
   task.run()
@@ -6,26 +6,20 @@ export function runTask(task: ITask): void {
 
 export const propagateRunEventTask = <TSinkValue, TValue>(
   sink: ISink<TSinkValue>,
-  scheduler: IScheduler,
   run: (sink: ISink<TSinkValue>, value: TValue) => void,
   value: TValue
-) => new PropagateRunEventTask(sink, scheduler, run, value)
+) => new PropagateRunEventTask(sink, run, value)
 
-export const propagateRunTask = <T>(sink: ISink<T>, scheduler: IScheduler, run: (sink: ISink<T>) => void) =>
-  new PropagateRunTask(sink, scheduler, run)
+export const propagateRunTask = <T>(sink: ISink<T>, run: (sink: ISink<T>) => void) => new PropagateRunTask(sink, run)
 
-export const propagateEndTask = (sink: ISink<any>, scheduler: IScheduler) => new PropagateEndTask(sink, scheduler)
+export const propagateEndTask = (sink: ISink<any>) => new PropagateEndTask(sink)
 
-export const propagateErrorTask = (sink: ISink<unknown>, scheduler: IScheduler, error: unknown) =>
-  new PropagateErrorTask(sink, scheduler, error)
+export const propagateErrorTask = (sink: ISink<unknown>, error: unknown) => new PropagateErrorTask(sink, error)
 
 export abstract class PropagateTask<T> implements ITask, Disposable {
   active = true
 
-  constructor(
-    readonly sink: ISink<T>,
-    readonly scheduler: IScheduler
-  ) {}
+  constructor(readonly sink: ISink<T>) {}
 
   abstract runIfActive(): void
 
@@ -49,11 +43,10 @@ export abstract class PropagateTask<T> implements ITask, Disposable {
 class PropagateRunEventTask<TSinkValue, TValue> extends PropagateTask<TSinkValue> {
   constructor(
     sink: ISink<TSinkValue>,
-    scheduler: IScheduler,
     readonly runEvent: (sink: ISink<TSinkValue>, value: TValue) => void,
     readonly value: TValue
   ) {
-    super(sink, scheduler)
+    super(sink)
   }
 
   runIfActive(): void {
@@ -64,10 +57,9 @@ class PropagateRunEventTask<TSinkValue, TValue> extends PropagateTask<TSinkValue
 class PropagateRunTask extends PropagateTask<any> {
   constructor(
     sink: ISink<any>,
-    scheduler: IScheduler,
     readonly runEvent: (sink: ISink<any>) => void
   ) {
-    super(sink, scheduler)
+    super(sink)
   }
 
   runIfActive(): void {
@@ -84,10 +76,9 @@ class PropagateEndTask extends PropagateTask<any> {
 class PropagateErrorTask extends PropagateTask<any> {
   constructor(
     sink: ISink<unknown>,
-    scheduler: IScheduler,
     readonly errorValue: unknown
   ) {
-    super(sink, scheduler)
+    super(sink)
   }
 
   runIfActive(): void {

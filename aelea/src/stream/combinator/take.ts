@@ -1,7 +1,20 @@
-import { stream } from '../stream.js'
-import type { ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
+
+/**
+ * Stream that takes only the first n values from the source stream
+ */
+class Take<T> implements IStream<T> {
+  constructor(
+    private readonly n: number,
+    private readonly source: IStream<T>
+  ) {}
+
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    return this.source.run(new TakeSink(this.n, sink), scheduler)
+  }
+}
 
 /**
  * Take only the first n values from a stream
@@ -9,9 +22,7 @@ import { PipeSink } from '../utils/sink.js'
  * stream:   -1-2-3-4-5-6->
  * take(3):  -1-2-3-|
  */
-export const take: ITakeCurry = curry2((n, source) =>
-  stream((sink, scheduler) => source.run(new TakeSink(n, sink), scheduler))
-)
+export const take: ITakeCurry = curry2((n, source) => new Take(n, source))
 
 export interface ITakeCurry {
   <T>(n: number, source: IStream<T>): IStream<T>

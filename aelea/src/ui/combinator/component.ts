@@ -1,18 +1,27 @@
-import { disposeAll, disposeBoth, nullSink } from '../../stream/index.js'
+import { disposeAll, disposeBoth, type IScheduler, type ISink, type IStream, nullSink } from '../../stream/index.js'
 import { behavior, type IBehavior } from '../../stream-extended/index.js'
-import { stream } from '../stream.js'
-import type { I$Slottable, IComponentBehavior, IOutputTethers } from '../types.js'
+import type { I$Slottable, IComponentBehavior, IOutputTethers, ISlottable } from '../types.js'
 
 type IComponent = <T>(
-  oTether: (...args: IBehavior<unknown, unknown>[]) => [I$Slottable, IComponentBehavior<T>] | [I$Slottable]
+  createCallback: (...args: IBehavior<unknown, unknown>[]) => [I$Slottable, IComponentBehavior<T>] | [I$Slottable]
 ) => (iTether: IOutputTethers<T>) => I$Slottable
 
-export const component: IComponent = createCallback => iTether2 => {
-  return stream((sink, scheduler) => {
+/**
+ * Stream that represents a component with bidirectional data flow
+ */
+class Component<T> implements IStream<ISlottable> {
+  constructor(
+    private readonly createCallback: (
+      ...args: IBehavior<unknown, unknown>[]
+    ) => [I$Slottable, IComponentBehavior<T>] | [I$Slottable],
+    private readonly outputTethers: IOutputTethers<T>
+  ) {}
+
+  run(sink: ISink<ISlottable>, scheduler: IScheduler): Disposable {
     // Create behavior pairs based on component's arity
     // Each behavior is a [stream, tether] tuple for bidirectional data flow
-    const behaviors = Array(createCallback.length).fill(null).map(behavior)
-    const [view, outputSources] = createCallback(...behaviors)
+    const behaviors = Array.from({ length: this.createCallback.length }, behavior)
+    const [view, outputSources] = this.createCallback(...behaviors)
 
     if (outputSources === undefined || Object.keys(outputSources).length === 0) {
       return view.run(sink, scheduler)
@@ -20,9 +29,9 @@ export const component: IComponent = createCallback => iTether2 => {
 
     const outputDisposables: Disposable[] = []
 
-    for (const k in iTether2) {
-      if (iTether2[k] && outputSources) {
-        const consumerSampler = iTether2[k]
+    for (const k in this.outputTethers) {
+      if (this.outputTethers[k] && outputSources) {
+        const consumerSampler = this.outputTethers[k]
 
         if (consumerSampler) {
           const componentOutputTethers = outputSources[k]
@@ -34,5 +43,9 @@ export const component: IComponent = createCallback => iTether2 => {
 
     const viewDisposable = view.run(sink, scheduler)
     return disposeBoth(viewDisposable, disposeAll(outputDisposables))
-  })
+  }
+}
+
+export const component: IComponent = createCallback => outputTethers => {
+  return new Component(createCallback, outputTethers)
 }

@@ -1,9 +1,35 @@
 import { empty, now } from '../source/stream.js'
-import { stream } from '../stream.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
 import { map } from './map.js'
+
+/**
+ * Stream that combines multiple streams into an object stream
+ */
+class Combine<A> implements IStream<Readonly<A>> {
+  private readonly keys: (keyof A)[]
+  private readonly sources: IStream<any>[]
+
+  constructor(state: { [P in keyof A]: IStream<A[P]> }) {
+    this.keys = Object.keys(state) as (keyof A)[]
+    this.sources = Object.values(state) as IStream<any>[]
+  }
+
+  run(sink: ISink<Readonly<A>>, scheduler: IScheduler): Disposable {
+    const result = {} as A
+
+    return combineMap(
+      (...values) => {
+        for (let i = 0; i < this.keys.length; i++) {
+          result[this.keys[i]] = values[i]
+        }
+        return result as Readonly<A>
+      },
+      ...this.sources
+    ).run(sink, scheduler)
+  }
+}
 
 /**
  * Combine multiple streams into an object stream
@@ -20,25 +46,35 @@ export function combine<A>(
     [P in keyof A]: IStream<A[P]>
   }
 ): IStream<Readonly<A>> {
-  const keys = Object.keys(state) as (keyof A)[]
-  const sources = Object.values(state) as IStream<any>[]
-  const l = sources.length
+  const l = Object.keys(state).length
 
   if (l === 0) return now({} as A)
 
-  return stream((sink, scheduler) => {
-    const result = {} as A
+  return new Combine(state)
+}
 
-    return combineMap(
-      (...values) => {
-        for (let i = 0; i < keys.length; i++) {
-          result[keys[i]] = values[i]
-        }
-        return result as Readonly<A>
-      },
-      ...sources
-    ).run(sink, scheduler)
-  })
+/**
+ * Stream that combines latest values from multiple streams using a mapping function
+ */
+class CombineMap<T extends readonly unknown[], R> implements IStream<R> {
+  constructor(
+    private readonly f: (...args: T) => R,
+    private readonly sources: [...{ [K in keyof T]: IStream<T[K]> }]
+  ) {}
+
+  run(sink: ISink<R>, scheduler: IScheduler): Disposable {
+    const l = this.sources.length
+    const disposables = new Array(l)
+    const sinks = new Array(l)
+    const mergeSink = new CombineMapSink(disposables, sinks.length, sink, this.f)
+
+    for (let indexSink: IndexSink<any>, i = 0; i < l; ++i) {
+      indexSink = sinks[i] = new IndexSink(mergeSink, i)
+      disposables[i] = this.sources[i].run(indexSink, scheduler)
+    }
+
+    return disposeAll(disposables)
+  }
 }
 
 /**
@@ -57,18 +93,7 @@ export function combineMap<T extends readonly unknown[], R>(
   if (l === 0) return empty
   if (l === 1) return map(f as any, sources[0])
 
-  return stream((sink: ISink<R>, scheduler: IScheduler) => {
-    const disposables = new Array(l)
-    const sinks = new Array(l)
-    const mergeSink = new CombineMapSink(disposables, sinks.length, sink, f)
-
-    for (let indexSink: IndexSink<any>, i = 0; i < l; ++i) {
-      indexSink = sinks[i] = new IndexSink(mergeSink, i)
-      disposables[i] = sources[i].run(indexSink, scheduler)
-    }
-
-    return disposeAll(disposables)
-  })
+  return new CombineMap(f, sources)
 }
 
 class CombineMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
