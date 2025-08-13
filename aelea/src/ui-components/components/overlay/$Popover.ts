@@ -1,15 +1,5 @@
-import {
-  combine,
-  constant,
-  empty,
-  type IStream,
-  map,
-  merge,
-  startWith,
-  switchLatest,
-  until
-} from '../../../stream/index.js'
-import { type IBehavior, multicast } from '../../../stream-extended/index.js'
+import { combine, constant, empty, type IStream, map, merge, op, startWith, switchMap } from '../../../stream/index.js'
+import { type IBehavior, multicast, state } from '../../../stream-extended/index.js'
 import {
   $node,
   component,
@@ -39,7 +29,7 @@ export const $defaultPopoverContentContainer = $column(
   })
 )
 
-interface IPocus {
+interface IPopover {
   $open: IStream<I$Node>
   $target: I$Node
 
@@ -50,22 +40,21 @@ interface IPocus {
 }
 
 export const $Popover = ({
-  $open: open,
+  $open,
   $target,
   $contentContainer = $defaultPopoverContentContainer,
   $container = $node,
   dismiss = empty,
   spacing = 10
-}: IPocus) =>
+}: IPopover) =>
   component(
     (
       [overlayClick, overlayClickTether]: IBehavior<INode, false>,
       [targetIntersection, targetIntersectionTether]: IBehavior<INode, IntersectionObserverEntry[]>
     ) => {
-      const openMulticast = multicast(open)
       const dismissEvent = merge(overlayClick, dismiss)
 
-      let targetElement: HTMLElement | null = null
+      let targetElement: Element | null = null
 
       // Update events stream
       const updateEvents = merge(
@@ -83,22 +72,39 @@ export const $Popover = ({
         overlayClickTether(nodeEvent('pointerdown'), constant(false))
       )
 
-      const $content = switchLatest(
-        map(content => {
-          const contentWithPosition = $contentContainer(
+      const openContent = multicast(merge($open, constant(null, dismissEvent)))
+
+      // Apply z-index to target when popover is open
+      const $targetWithZIndex = op(
+        $target,
+        targetIntersectionTether(state, observer.intersection()),
+        styleBehavior(
+          map($isOpen => {
+            return $isOpen ? ({ zIndex: 2345, position: 'relative' } as const) : null
+          }, openContent)
+        )
+      )
+
+      const $popover = switchMap($content => {
+        if (!$content) {
+          return empty
+        }
+
+        return merge(
+          $contentContainer(
             style({ position: 'fixed', zIndex: 3456 }),
             styleInline(
               map(
-                ({ targetIntersection, updateEvent }) => {
-                  const [entry] = targetIntersection
+                params => {
+                  const [entry] = params.targetIntersection
 
                   // Store target element for scroll updates
-                  if (entry?.target) {
-                    targetElement = entry.target as HTMLElement
+                  if (entry.target) {
+                    targetElement = entry.target
                   }
 
                   // Use stored element or entry
-                  const el = updateEvent ? targetElement : (entry?.target as HTMLElement)
+                  const el = params.updateEvent ? targetElement : entry.target
                   if (!el) return { visibility: 'hidden' }
 
                   const rect = el.getBoundingClientRect()
@@ -128,22 +134,16 @@ export const $Popover = ({
                 })
               )
             )
-          )(content)
+          )($content),
+          $overlay()
+        )
+      }, openContent)
 
-          return until(dismissEvent, merge(contentWithPosition, $overlay()))
-        }, openMulticast)
-      )
+      // ($target)
 
-      // Apply z-index to target when popover is open
-      const targetWithZIndex = targetIntersectionTether(observer.intersection())(
-        styleBehavior(
-          merge(
-            map(() => ({ zIndex: 2345, position: 'relative' as const }), openMulticast),
-            map(() => null, dismissEvent)
-          )
-        )($target)
-      )
-
-      return [$container(targetWithZIndex, $content), { overlayClick }]
+      return [
+        $container($targetWithZIndex, $popover), //
+        { overlayClick }
+      ]
     }
   )

@@ -1,4 +1,13 @@
-import type { IScheduler, ISink, IStream } from '../../stream/index.js'
+import {
+  disposeBoth,
+  disposeNone,
+  disposeWith,
+  type IScheduler,
+  type ISink,
+  type IStream,
+  propagateRunEventTask
+} from '../../stream/index.js'
+import { append, remove } from '../utils.js'
 import { MulticastSink } from './sink.js'
 
 /**
@@ -38,41 +47,53 @@ import { MulticastSink } from './sink.js'
  * @returns [primary, tethered] stream tuple
  */
 export const tether = <T>(source: IStream<T>): [IStream<T>, IStream<T>] => {
-  const tetherStream = new TetherStream<T>()
+  const tetherStream = new Tether<T>()
   return [new PrimaryStream(source, tetherStream), tetherStream]
+}
+
+function emitCachedValue<T>(sink: ISink<T>, value: T): void {
+  sink.event(value)
 }
 
 class TetherSink<T> implements ISink<T> {
   constructor(
     private readonly primarySink: ISink<T>,
-    private readonly tetherStream: TetherStream<T>
-  ) {}
+    private readonly tether: Tether<T>
+  ) {
+    // Emit cached value if tether has one
+    if (this.tether.hasValue) {
+      this.primarySink.event(this.tether.latestValue!)
+    }
+  }
 
-  event(x: T): void {
-    this.primarySink.event(x)
-    this.tetherStream.event(x)
+  event(value: T): void {
+    this.primarySink.event(value)
+    this.tether.latestValue = value
+    this.tether.hasValue = true
+    this.tether.event(value)
   }
 
   end(): void {
     this.primarySink.end()
-    this.tetherStream.end()
+    this.tether.end()
   }
 
   error(err: Error): void {
     this.primarySink.error(err)
-    this.tetherStream.error(err)
+    this.tether.error(err)
   }
 }
 
 class PrimaryStream<T> implements IStream<T> {
   constructor(
     private readonly source: IStream<T>,
-    private readonly tether: TetherStream<T>
+    private readonly tether: Tether<T>
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
     // Each subscription gets its own TetherSink
     const tetherSink = new TetherSink(sink, this.tether)
+
     return this.source.run(tetherSink, scheduler)
   }
 }
@@ -81,4 +102,30 @@ class PrimaryStream<T> implements IStream<T> {
  * A multicast stream that receives events from the TetherSink
  * Supports multiple subscribers without needing a source stream
  */
-class TetherStream<T> extends MulticastSink<T> implements IStream<T> {}
+class Tether<T> extends MulticastSink<T> implements IStream<T> {
+  active = false
+  latestValue: T | undefined
+  hasValue = false
+
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    this.sinkList = append(this.sinkList, sink)
+    this.active = true
+
+    // Emit cached value if available
+    const asapDisposable = this.hasValue
+      ? scheduler.asap(propagateRunEventTask(sink, emitCachedValue, this.latestValue!))
+      : disposeNone
+
+    const unsubscribeDisposable = disposeWith(() => {
+      const i = this.sinkList.indexOf(sink)
+
+      if (i > -1) this.sinkList = remove(this.sinkList, i)
+
+      if (this.sinkList.length === 0) {
+        this.active = false
+      }
+    })
+
+    return disposeBoth(asapDisposable, unsubscribeDisposable)
+  }
+}

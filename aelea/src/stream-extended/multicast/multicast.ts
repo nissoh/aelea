@@ -1,4 +1,5 @@
 import { disposeNone, disposeWith, type IScheduler, type ISink, type IStream } from '../../stream/index.js'
+import { append, remove } from '../utils.js'
 import { MulticastSink } from './sink.js'
 
 /**
@@ -45,15 +46,18 @@ export class MulticastSource<T> extends MulticastSink<T> implements Disposable, 
   }
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    const prevLength = this.sinkList.length
-    const disposer = super.run(sink, scheduler)
+    this.sinkList = append(this.sinkList, sink)
 
-    if (prevLength === 0 && this.sinkList.length === 1) {
+    if (this.sinkList.length === 1) {
       this.disposable = this.source.run(this, scheduler)
     }
 
     return disposeWith(() => {
-      disposer[Symbol.dispose]()
+      const i = this.sinkList.indexOf(sink)
+      if (i > -1) {
+        this.sinkList = remove(this.sinkList, i)
+      }
+
       if (this.sinkList.length === 0) {
         this[Symbol.dispose]()
       }
