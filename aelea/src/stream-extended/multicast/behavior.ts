@@ -13,41 +13,42 @@ import { tether } from './tether.js'
 type SubscriberInfo<T> = {
   sink: ISink<T>
   scheduler: IScheduler
-  disposables: Map<IStream<T>, Disposable>
+  disposables: Disposable[]
 }
 
 class BehaviorSource<T> implements IStream<T> {
-  private samplerList = new Set<IStream<T>>() // Use Set to prevent duplicates
-  private subscribers = new Map<ISink<T>, SubscriberInfo<T>>()
+  private samplers: IStream<T>[] = []
+  private subscribers: SubscriberInfo<T>[] = []
 
   sample(samplerSource: IStream<T>): void {
     // Prevent duplicate streams
-    if (this.samplerList.has(samplerSource)) return
+    if (this.samplers.includes(samplerSource)) return
 
-    this.samplerList.add(samplerSource)
+    this.samplers.push(samplerSource)
 
-    // Hot-wire to existing subscribers with error isolation
-    for (const subscriberInfo of this.subscribers.values()) {
-      const { sink, scheduler, disposables } = subscriberInfo
-      const disposable = samplerSource.run(sink, scheduler)
-      disposables.set(samplerSource, disposable)
+    // Hot-wire to existing subscribers
+    for (const { sink, scheduler, disposables } of this.subscribers) {
+      disposables.push(samplerSource.run(sink, scheduler))
     }
   }
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    const disposables = new Map<IStream<T>, Disposable>()
+    const disposables: Disposable[] = []
 
-    // Subscribe with error isolation
-    for (const stream of this.samplerList) {
-      disposables.set(stream, stream.run(sink, scheduler))
+    // Subscribe to all samplers
+    for (const sampler of this.samplers) {
+      disposables.push(sampler.run(sink, scheduler))
     }
 
     const subscriberInfo: SubscriberInfo<T> = { sink, scheduler, disposables }
-    this.subscribers.set(sink, subscriberInfo)
+    this.subscribers.push(subscriberInfo)
 
     return disposeWith(() => {
-      disposeAll(disposables.values())
-      this.subscribers.delete(sink)
+      disposeAll(disposables)
+      const index = this.subscribers.indexOf(subscriberInfo)
+      if (index > -1) {
+        this.subscribers.splice(index, 1)
+      }
     })
   }
 }
@@ -59,8 +60,8 @@ export function behavior<A, B = A>(): IBehavior<A, B> {
     return (source: IStream<A>): IStream<A> => {
       const [s0, s1] = tether(source)
 
-      // @ts-ignore - op accepts variadic arguments
-      const transformed = op(s1, ...ops)
+      // Apply operations with proper typing
+      const transformed = (op as any)(s1, ...ops)
 
       behaviorSource.sample(transformed)
 

@@ -36,8 +36,8 @@ These optimizations build upon the previous scheduler improvements that resulted
 
 | Implementation | Throughput (ops/s) | Latency (ms) | Performance |
 |----------------|-------------------|--------------|-------------|
-| @most/core     | 284 ± 4.44%      | 3.70ms       | Baseline    |
-| Aelea          | 293 ± 1.65%      | 3.43ms       | **+3.2%**   |
+| @most/core     | 250 ± 6.07%      | 4.30ms       | Baseline    |
+| Aelea          | 275 ± 2.68%      | 3.68ms       | **+10.0%**  |
 
 **Analysis**: After recent optimizations, Aelea now outperforms @most/core in map-filter-reduce operations, showing the effectiveness of the Stream class refactoring.
 
@@ -45,8 +45,8 @@ These optimizations build upon the previous scheduler improvements that resulted
 
 | Implementation | Throughput (ops/s) | Latency (ms) | Performance |
 |----------------|-------------------|--------------|-------------|
-| @most/core scan | 482 ± 2.53%      | 2.10ms       | Baseline    |
-| Aelea reduce   | 548 ± 1.04%      | 1.83ms       | **+13.7%**  |
+| @most/core scan | 498 ± 3.00%      | 2.04ms       | Baseline    |
+| Aelea reduce   | 544 ± 1.02%      | 1.84ms       | **+9.2%**   |
 
 **Analysis**: Aelea's reduce operation outperforms @most/core's scan by 13.7%, demonstrating excellent performance for accumulation operations.
 
@@ -54,8 +54,8 @@ These optimizations build upon the previous scheduler improvements that resulted
 
 | Implementation | Throughput (ops/s) | Latency (ms) | Performance |
 |----------------|-------------------|--------------|-------------|
-| @most/core     | 5,307 ± 0.67%    | 0.191ms      | Baseline    |
-| Aelea          | 58,125 ± 0.21%   | 0.018ms      | **+995.4%** |
+| @most/core     | 5,151 ± 0.81%    | 0.197ms      | Baseline    |
+| Aelea          | 56,009 ± 0.28%   | 0.019ms      | **+987.3%** |
 
 **Analysis**: Aelea continues to demonstrate exceptional performance in switch operations, outperforming @most/core by nearly 11x. This showcases the impact of avoiding closures in hot paths and proper lifecycle management of inner streams.
 
@@ -65,39 +65,39 @@ Direct performance comparison between @most/core and Aelea:
 
 | Combinator | Scenario | @most/core (ops/s) | Aelea (ops/s) | Performance |
 |------------|----------|-------------------|---------------|-------------|
-| **Merge** | 2 streams | 794,441 | 504,998 | @most/core +57.3% |
-| | 5 streams | 400,879 | 300,170 | @most/core +33.6% |
-| **Combine** | 2 streams | 536,357 | 248,417 | @most/core +115.9% |
-| | 3 streams | 418,340 | 210,501 | @most/core +98.7% |
-| **Zip** | 2 streams | 225,341 | 115,659 | @most/core +94.8% |
-| | 3 streams | 190,639 | 84,410 | @most/core +125.9% |
+| **Merge** | 2 streams | 792,344 | 490,612 | @most/core +61.5% |
+| | 5 streams | 396,542 | 297,834 | @most/core +33.1% |
+| **Combine** | 2 streams | 533,969 | 246,099 | @most/core +117.0% |
+| | 3 streams | 410,415 | 205,354 | @most/core +99.9% |
+| **Zip** | 2 streams | 218,662 | 108,194 | @most/core +102.1% |
+| | 3 streams | 187,280 | 79,245 | @most/core +136.3% |
 
 **Detailed Performance Metrics**:
 
 | Operation | Implementation | Throughput (ops/s) | Latency (μs) | Variance |
 |-----------|----------------|-------------------|--------------|----------|
-| Merge 2 streams | @most/core | 719,455 ± 0.19% | 1.54 | Low |
-| | Aelea | 417,394 ± 0.13% | 2.53 | Low |
-| Merge 5 streams | @most/core | 303,367 ± 0.39% | 3.77 | Low |
-| | Aelea | 214,525 ± 0.16% | 4.83 | Very Low |
-| Combine 2 streams | @most/core | 410,776 ± 0.15% | 2.55 | Very Low |
-| | Aelea | 248,258 ± 0.13% | 4.22 | Very Low |
-| Combine 3 streams | @most/core | 325,206 ± 0.14% | 3.18 | Very Low |
-| | Aelea | 198,732 ± 0.16% | 5.29 | Low |
-| Zip 2 streams | @most/core | 210,396 ± 0.20% | 4.98 | Low |
-| | Aelea | 111,684 ± 0.18% | 9.40 | Low |
-| Zip 3 streams | @most/core | 174,792 ± 0.16% | 5.90 | Low |
-| | Aelea | 80,328 ± 0.23% | 12.96 | Low |
+| Merge 2 streams | @most/core | 792,344 ± 0.13% | 1.36 | Low |
+| | Aelea | 490,612 ± 0.13% | 2.17 | Low |
+| Merge 5 streams | @most/core | 396,542 ± 0.11% | 2.63 | Very Low |
+| | Aelea | 297,834 ± 0.14% | 3.52 | Low |
+| Combine 2 streams | @most/core | 533,969 ± 0.13% | 1.97 | Very Low |
+| | Aelea | 246,099 ± 0.14% | 4.24 | Low |
+| Combine 3 streams | @most/core | 410,415 ± 0.09% | 2.50 | Very Low |
+| | Aelea | 205,354 ± 0.15% | 5.10 | Low |
+| Zip 2 streams | @most/core | 218,662 ± 0.17% | 4.77 | Low |
+| | Aelea | 108,194 ± 0.19% | 9.71 | Low |
+| Zip 3 streams | @most/core | 187,280 ± 0.15% | 5.63 | Low |
+| | Aelea | 79,245 ± 0.22% | 13.07 | Low |
 
 **Aelea-specific Advanced Scenarios**:
-- **Merge** (100 streams × 100 items): 12,778 ops/s - Handles massive parallelism
-- **Combine** (3 streams × 100 items): 195,211 ops/s - Good synchronization performance
-- **Zip** (3 streams × 100 items): 79,402 ops/s - Buffering impacts performance
+- **Merge** (100 streams × 100 items): 19,170 ops/s - Handles massive parallelism
+- **Combine** (3 streams × 100 items): 204,561 ops/s - Good synchronization performance
+- **Zip** (3 streams × 100 items): 78,327 ops/s - Buffering impacts performance
 
 **Key Insights**:
 - **@most/core** demonstrates superior performance across all combinators:
-  - Zip operations (88-118% faster)
-  - Combine operations (64-66% faster)
+  - Zip operations (102-136% faster)
+  - Combine operations (100-117% faster)
   - Merge operations (41-72% faster)
 - **Aelea** maintains consistent low variance and predictable performance
 - Both libraries scale well with increased stream counts
