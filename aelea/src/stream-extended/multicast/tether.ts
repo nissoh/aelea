@@ -1,36 +1,45 @@
-import { disposeWith, type IScheduler, type ISink, type IStream } from '../../stream/index.js'
+import type { IScheduler, ISink, IStream } from '../../stream/index.js'
 import { MulticastSink } from './sink.js'
 
 /**
  * Creates a "tethered" pair of streams from a single source.
  *
- * The pattern creates a split topology:
+ * The pattern creates a split topology where each primary subscription
+ * creates its own TetherSink that forwards events to both destinations:
+ *
  * ```
- *                source
- *                  |
- *                  v
- *            [TetherSink]
- *               /     \
- *              /       \
- *             v         v
- *      Primary Sink    Tether Multicast
- *      (unicast)       (multicast)
- *          |            /    |    \
- *          v           v     v     v
- *        sink      sink1  sink2  sink3
+ * Source ──┬── TetherSink₁ ──┬──> Primary Sink₁
+ *          │                 └──┐
+ *          │                    │
+ *          ├── TetherSink₂ ──┬──> Primary Sink₂
+ *          │                 └──┤
+ *          │                    │
+ *          └── TetherSink₃ ──┬──> Primary Sink₃
+ *                            └──┤
+ *                               ↓
+ *                        Tether Multicast
+ *                         /    |    \
+ *                        v     v     v
+ *                     tether tether tether
+ *                     sub₁   sub₂   sub₃
  * ```
  *
+ * Example flow for event 'x':
+ * - Primary subscription 1: Source → TetherSink₁ → Primary Sink₁ + Tether
+ * - Primary subscription 2: Source → TetherSink₂ → Primary Sink₂ + Tether
+ * - Tether sees 'x' twice (once from each primary subscription)
+ *
  * Key behaviors:
- * - Primary stream: Unicast (only one subscriber allowed)
- * - Tether stream: Multicast (multiple subscribers supported)
- * - Source lifecycle controlled by primary stream
- * - All events flow to both primary and tether subscribers
+ * - Primary stream: Normal stream behavior (multiple subscribers allowed)
+ * - Tether stream: Multicast that aggregates events from ALL primary subscriptions
+ * - Each primary subscription creates its own TetherSink
+ * - Tether receives events from every primary subscription (may see duplicates)
  *
  * @returns [primary, tethered] stream tuple
  */
 export const tether = <T>(source: IStream<T>): [IStream<T>, IStream<T>] => {
-  const tetherSource = new TetherStream<T>()
-  return [new PrimaryStream(source, tetherSource), tetherSource]
+  const tetherStream = new TetherStream<T>()
+  return [new PrimaryStream(source, tetherStream), tetherStream]
 }
 
 class TetherSink<T> implements ISink<T> {
@@ -56,27 +65,15 @@ class TetherSink<T> implements ISink<T> {
 }
 
 class PrimaryStream<T> implements IStream<T> {
-  private disposable: Disposable | null = null
-
   constructor(
     private readonly source: IStream<T>,
     private readonly tether: TetherStream<T>
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    if (this.disposable) {
-      throw new Error('Primary stream already has a subscriber (unicast restriction)')
-    }
-
+    // Each subscription gets its own TetherSink
     const tetherSink = new TetherSink(sink, this.tether)
-    const sourceDisposable = this.source.run(tetherSink, scheduler)
-
-    this.disposable = disposeWith(() => {
-      this.disposable = null
-      sourceDisposable[Symbol.dispose]()
-    })
-
-    return this.disposable
+    return this.source.run(tetherSink, scheduler)
   }
 }
 
