@@ -46,8 +46,8 @@ import { MulticastSink } from './sink.js'
  *
  * @returns [primary, tethered] stream tuple
  */
-export const tether = <T>(source: IStream<T>): [IStream<T>, IStream<T>] => {
-  const tetherStream = new Tether<T>()
+export const tether = <T>(source: IStream<T>, replayLatest = false): [IStream<T>, IStream<T>] => {
+  const tetherStream = new Tether<T>(replayLatest)
   return [new PrimaryStream(source, tetherStream), tetherStream]
 }
 
@@ -103,29 +103,31 @@ class PrimaryStream<T> implements IStream<T> {
  * Supports multiple subscribers without needing a source stream
  */
 class Tether<T> extends MulticastSink<T> implements IStream<T> {
-  active = false
   latestValue: T | undefined
   hasValue = false
 
+  constructor(private readonly replayLatest: boolean) {
+    super()
+  }
+
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
     this.sinkList = append(this.sinkList, sink)
-    this.active = true
-
-    // Emit cached value if available
-    const asapDisposable = this.hasValue
-      ? scheduler.asap(propagateRunEventTask(sink, emitCachedValue, this.latestValue!))
-      : disposeNone
 
     const unsubscribeDisposable = disposeWith(() => {
       const i = this.sinkList.indexOf(sink)
 
       if (i > -1) this.sinkList = remove(this.sinkList, i)
-
-      if (this.sinkList.length === 0) {
-        this.active = false
-      }
     })
 
-    return disposeBoth(asapDisposable, unsubscribeDisposable)
+    if (this.replayLatest) {
+      // Emit cached value if available
+      const asapDisposable = this.hasValue
+        ? scheduler.asap(propagateRunEventTask(sink, emitCachedValue, this.latestValue!))
+        : disposeNone
+
+      return disposeBoth(asapDisposable, unsubscribeDisposable)
+    }
+
+    return unsubscribeDisposable
   }
 }

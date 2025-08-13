@@ -58,7 +58,7 @@ export function behavior<A, B = A>(): IBehavior<A, B> {
 
   const compose: IComposeBehavior<A, B> = ((...ops: IOps<any, any>[]) => {
     return (source: IStream<A>): IStream<A> => {
-      const [s0, s1] = tether(source)
+      const [s0, s1] = tether(source, true)
 
       // Apply operations with proper typing
       const transformed = (op as any)(s1, ...ops)
