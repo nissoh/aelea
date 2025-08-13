@@ -30,7 +30,7 @@ import { MulticastSink } from './sink.js'
  * - Tether sees 'x' twice (once from each primary subscription)
  *
  * Key behaviors:
- * - Primary stream: Normal stream behavior (multiple subscribers allowed)
+ * - Primary stream: Unicast (each subscriber gets independent source subscription)
  * - Tether stream: Multicast that aggregates events from ALL primary subscriptions
  * - Each primary subscription creates its own TetherSink
  * - Tether receives events from every primary subscription (may see duplicates)
