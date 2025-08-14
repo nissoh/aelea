@@ -70,119 +70,119 @@ const $label = $element('label')
 Components receive behavior streams and output both UI and new streams:
 
 ```typescript
-import { component, eventElementTarget, $text, $element } from 'aelea/ui'
-import { map, merge, aggregate, constant, type IBehavior } from 'aelea/stream'
-import { behavior } from 'aelea/stream-extended'
+import { type IStream, map, merge, sampleMap } from 'aelea/stream'
+import type { IBehavior } from 'aelea/stream-extended'
+import { $element, $text, component, type INode, nodeEvent, style } from 'aelea/ui'
 
-// Create reusable element factories
-const $div = $element('div')
-const $button = $element('button')
-
-const $Counter = component((
-  [increment, incrementTether]: IBehavior<MouseEvent, 1>,
-  [decrement, decrementTether]: IBehavior<MouseEvent, -1>
+export const $Counter = (value: IStream<number>) => component((
+  [increment, incrementTether]: IBehavior<INode, MouseEvent>,
+  [decrement, decrementTether]: IBehavior<INode, MouseEvent>
 ) => {
-  // Wire up click events to behaviors
-  const inc = incrementTether(
-    eventElementTarget('click'), 
-    constant(1)
-  )
-  const dec = decrementTether(
-    eventElementTarget('click'), 
-    constant(-1)
-  )
-  
-  // Combine streams to create counter state
-  const count = aggregate((sum, n) => sum + n, 0, merge(increment, decrement))
-  
+  const $button = $element('button')
+  const $container = $element('div')(style({ display: 'flex', gap: '10px', alignItems: 'center' }))
+
   return [
-    $div()(
-      $button(inc)('+'),
-      $text(map(String, count)),
-      $button(dec)('-')
+    $container(
+      $button(incrementTether(nodeEvent('click')))(
+        $text('+')
+      ),
+
+      $text(map(String, value)),
+
+      $button(decrementTether(nodeEvent('click')))(
+        $text('-')
+      )
     ),
-    { count } // Output the count stream for parent components
+
+    // Output stream
+    {
+      valueChange: merge(
+        sampleMap(v => v + 1, value, increment),
+        sampleMap(v => v - 1, value, decrement)
+      )
+    }
   ]
 })
 ```
 
 ### 4. Component Composition
 
-Components can be composed together, with parent components wiring child component behaviors:
+Components can receive state as input and output state changes. This pattern allows for flexible state management:
 
 ```typescript
-import { component, $element, $text, style } from 'aelea/ui'
-import { map, merge, aggregate, now, constant, type IBehavior } from 'aelea/stream'
-import { behavior } from 'aelea/stream-extended'
-
-// Reusable Counter component (simplified from above)
-const $Counter = ({ initial = 0 }) => component((
-  [increment, incrementTether]: IBehavior<MouseEvent, number>,
-  [decrement, decrementTether]: IBehavior<MouseEvent, number>
-) => {
-  const $button = $element('button')
-  const inc = incrementTether(eventElementTarget('click'))
-  const dec = decrementTether(eventElementTarget('click'))
-  
-  const value = aggregate((sum, n) => sum + n, initial, merge(increment, decrement))
-  
-  return [
-    $element('div')(
-      style({ display: 'flex', gap: '10px', alignItems: 'center' })
-    )(
-      $button(dec)('-'),
-      $text(map(String, value)),
-      $button(inc)('+')
-    ),
-    { value, increment, decrement }
-  ]
-})
-
-// Parent component that manages multiple counters
-const $CounterList = component((
-  [addCounter, addCounterTether]: IBehavior<MouseEvent>
-  [changeCounterList, changeCounterListTether]: IBehavior<number[]>
-) => {
-  const $button = $element('button')
-  const $div = $element('div')
-  
-  // Track total across all counters
-  const [totalChange, totalChangeTether] = behavior<number>()
-  const total = aggregate((sum, n) => sum + n, 0, totalChange)
-  
-  // Create counters dynamically
-  const addClick = addCounterTether(eventElementTarget('click'))
-
-  const counterList = state([5], changeCounterList)
-  
-  return [
-    $div()(
-      $div(style({ marginBottom: '20px' }))(
-        $text(map(n => `Total: ${n}`, total)),
-        $button(addClick)('Add Counter')
+// Component that receives state and outputs changes
+const $CounterList = ({ counterList }: { counterList: IStream<number[]> }) =>
+  component((
+    [addCounter, addCounterTether]: IBehavior<INode, MouseEvent>,
+    [updateCounter, updateCounterTether]: IBehavior<number, { index: number; value: number }>
+  ) => {
+    const $button = $element('button')
+    const $div = $element('div')
+    
+    return [
+      $div()(
+        // Display derived state
+        $text('Total: '),
+        $text(map(list => String(list.reduce((a, b) => a + b, 0)), counterList)),
+        $text(' | '),
+        $button(addCounterTether(nodeEvent('click')))($text('Add Counter')),
+        
+        // Render each counter
+        switchMap(list => 
+          $div()(
+            ...list.map((value, index) => 
+              $Counter(constant(value))({
+                valueChange: updateCounterTether(
+                  map(newValue => ({ index, value: newValue }))
+                )
+              })
+            )
+          )
+        , counterList)
       ),
       
-      // Create initial counter
-      $Counter({ initial: 5 })({
-        increment: totalChangeTether(constant(1)),
-        decrement: totalChangeTether(constant(-1))
-      }),
-      
-      // More counters can be added dynamically using streams
-    )
+      // Output: state changes
+      {
+        changeCounterList: merge(
+          // Add counter
+          sampleMap(list => [...list, 0], counterList, addCounter),
+          // Update counter
+          sampleMap((list, { index, value }) => {
+            const newList = [...list]
+            newList[index] = value
+            return newList
+          }, counterList, updateCounter)
+        )
+      }
+    ]
+  })
+
+// Parent manages state
+const $App = component((
+  [listChange, listChangeTether]: IBehavior<number[]>
+) => {
+  // Parent owns the state
+  const counterList = state(listChange, [0, 0])
+  
+  return [
+    $CounterList({ counterList })({
+      changeCounterList: listChangeTether()
+    })
   ]
 })
 ```
 
 **Key Composition Concepts:**
 
-1. **Behavior Tethering**: Parent components pass behavior tethers to children, allowing them to wire up event handlers while maintaining control over the data flow
+1. **State as Input**: Components receive state as streams, not manage it internally. This allows parent components to control where and how state is stored.
 
-2. **Output Contracts**: Child components return both UI elements and streams/values that parent components can use
+2. **Changes as Output**: Components output state changes through behaviors. The component describes what should change, not how to change it.
 
-3. **Stream Transformation**: Parents can transform child outputs before using them (e.g., converting increment/decrement clicks to total changes)
+3. **Parent Owns State**: The parent component creates the actual state using `state()` and wires the child's change outputs back to update it.
 
-4. **Reusability**: Components are pure functions that can be instantiated multiple times with different configurations
+4. **Flexible Architecture**: This pattern allows state to be managed at any level - locally in a parent, globally in a store, or even remotely on a server.
+
+**Note**: There are many ways to manage state flows in Aelea. This example shows a simple and generic pattern where components receive state and output changes, making them reusable and testable.
 
 ## Getting Started
 
@@ -199,71 +199,6 @@ runBrowser({
 )
 ```
 
-### Interactive Counter
-
-```typescript
-import { runBrowser, component, style, eventElementTarget, $text, $element } from 'aelea/ui'
-import { map, aggregate, startWith } from 'aelea/stream'
-import { behavior } from 'aelea/stream-extended'
-
-const $App = component(() => {
-  const [clicks, clicksTether] = behavior<MouseEvent>()
-  
-  const count = startWith(
-    0,
-    aggregate((sum, _) => sum + 1, 0, clicks)
-  )
-  
-  return [
-    $element('div')(
-      style({ 
-        padding: '40px', 
-        textAlign: 'center',
-        fontFamily: 'system-ui'
-      })
-    )(
-      $element('h1')()($text('Reactive Counter')),
-      $element('button')(
-        clicksTether(eventElementTarget('click')),
-        style({ 
-          padding: '10px 20px',
-          fontSize: '18px',
-          cursor: 'pointer'
-        })
-      )(
-        $text(map(n => `Clicked ${n} times`, count))
-      )
-    )
-  ]
-})
-
-runBrowser({ rootNode: document.body })($App())
-```
-
-### Fetching Data
-
-```typescript
-import { fromPromise, switchLatest, map } from 'aelea/stream'
-import { $text, $element } from 'aelea/ui'
-
-const fetchUsers = () => 
-  fetch('https://jsonplaceholder.typicode.com/users')
-    .then(res => res.json())
-
-const users$ = fromPromise(fetchUsers())
-
-const $UserList = switchLatest(
-  map(users => 
-    $element('div')()(
-      $element('ul')()(
-        ...users.map(user => 
-          $element('li')()($text(user.name))
-        )
-      )
-    )
-  , users$)
-)
-```
 
 ### Animated Transitions
 

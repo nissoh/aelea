@@ -3,7 +3,7 @@ import type { IBehavior } from 'aelea/stream-extended'
 import { $text, component, style } from 'aelea/ui'
 import { $Button, $column, $Popover, $row, $TextField, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
-import $Counter from '../count-counters/$Counter'
+import { $Counter } from '../count-counters/$Counter'
 
 export function hexAlpha(color: string, opacity: number): string {
   // coerce values so ti is between 0 and 1.

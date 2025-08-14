@@ -1,26 +1,22 @@
-import { constant, type IStream } from 'aelea/stream'
+import { type IStream, merge, sampleMap } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $text, component, style } from 'aelea/ui'
 import { $Button, $column, $NumberTicker, $row, spacing } from 'aelea/ui-components'
 
-interface Counter {
-  value: IStream<number>
-}
-
-export default ({ value }: Counter) =>
+export const $Counter = (value: IStream<number>) =>
   component(
     (
-      [increment, incrementTether]: IBehavior<PointerEvent, 1>,
-      [decrement, decrementTether]: IBehavior<PointerEvent, -1>
+      [increment, incrementTether]: IBehavior<PointerEvent, PointerEvent>,
+      [decrement, decrementTether]: IBehavior<PointerEvent, PointerEvent>
     ) => {
       return [
         $row(style({ alignItems: 'center', placeContent: 'space-between' }), spacing.default)(
           $column(style({ borderRadius: '5px', alignItems: 'center' }), spacing.default)(
             $Button({ $content: $text('+') })({
-              click: incrementTether(constant(1))
+              click: incrementTether()
             }),
             $Button({ $content: $text('-') })({
-              click: decrementTether(constant(-1))
+              click: decrementTether()
             })
           ),
 
@@ -32,7 +28,12 @@ export default ({ value }: Counter) =>
           })
         ),
 
-        { increment, decrement }
+        {
+          valueChange: merge(
+            sampleMap(v => v + 1, value, increment),
+            sampleMap(v => v - 1, value, decrement)
+          )
+        }
       ]
     }
   )

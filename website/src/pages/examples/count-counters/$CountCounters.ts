@@ -1,70 +1,91 @@
-import { constant, joinMap, map, merge, now, reduce, sampleMap, until } from 'aelea/stream'
-import { behavior, type IBehavior, state } from 'aelea/stream-extended'
+import { constant, type IStream, map, merge, sampleMap, skipRepeats, skipRepeatsWith, switchMap } from 'aelea/stream'
+import type { IBehavior } from 'aelea/stream-extended'
 import { $node, $text, component, style } from 'aelea/ui'
 import { $Button, $column, $row, $seperator, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 import { $TrashBtn } from '../../../elements/$common'
-import $Counter from './$Counter'
+import { $Counter } from './$Counter'
 
-export default component(
-  (
-    [addedCounter, addedCounterTether]: IBehavior<PointerEvent, PointerEvent>,
-    [disposeCounter, disposeCounterTether]: IBehavior<PointerEvent, PointerEvent>,
-    [counterIncrement, countersIncrementTether]: IBehavior<1, 1>,
-    [counterDecrement, countersDecrementTether]: IBehavior<-1, -1>,
-    [disposedCounterCount, disposedCounterCountTether]: IBehavior<any, number>
-  ) => {
-    const INITAL_COUNT = 0
-    const sumWithInitial = reduce((current, x: number) => current + x, INITAL_COUNT)
+interface CountCounters {
+  counterList: IStream<number[]>
+}
 
-    const counting = merge(disposedCounterCount, counterIncrement, counterDecrement)
-    const totalCount = sumWithInitial(counting)
-    const addCounter = merge(addedCounter, now(null))
+export const $CountCounters = ({ counterList }: CountCounters) =>
+  component(
+    (
+      [addCounter, addCounterTether]: IBehavior<PointerEvent, PointerEvent>,
+      [removeCounter, removeCounterTether]: IBehavior<PointerEvent, number>,
+      [updateCounter, updateCounterTether]: IBehavior<number, { index: number; value: number }>
+    ) => {
+      // Derived state
+      const totalSum = map(list => list.reduce((sum, val) => sum + val, 0), counterList)
+      const counterCount = map(list => list.length, counterList)
 
-    return [
-      $column(spacing.default)(
-        $row(style({ placeContent: 'space-between', alignItems: 'center' }), spacing.default)(
-          $row(spacing.small)(
-            $node(style({ color: pallete.foreground }))($text('Counters: ')),
-            $text(map(String, sumWithInitial(merge(constant(1, addCounter), constant(-1, disposeCounter)))))
+      const listLens = skipRepeatsWith((a, b) => a.length === b.length, counterList)
+      const counterLens = (index: number) => skipRepeats(map(list => list[index], counterList))
+
+      return [
+        $column(spacing.default)(
+          // Header with stats and add button
+          $row(style({ placeContent: 'space-between', alignItems: 'center' }), spacing.default)(
+            $row(spacing.small)(
+              $node(style({ color: pallete.foreground }))($text('Counters: ')),
+              $text(map(String, counterCount))
+            ),
+            $row(spacing.small)(
+              $node(style({ color: pallete.foreground }))($text('Sum: ')),
+              $text(map(String, totalSum))
+            ),
+            $Button({
+              $content: $text('Add Counter')
+            })({
+              click: addCounterTether()
+            })
           ),
-          $row(spacing.small)(
-            $node(style({ color: pallete.foreground }))($text('Sum: ')),
-            $text(map(String, totalCount))
-          ),
-          $Button({
-            $content: $text('Add One')
-          })({
-            click: addedCounterTether()
-          })
-        ),
-        joinMap(() => {
-          const [remove, removeTether] = behavior<PointerEvent, PointerEvent>()
-          const [valueChange, valueChangeTether] = behavior<number, number>()
 
-          const value = state(valueChange, 0)
+          // Counter list - only re-render when length changes
+          switchMap(list => {
+            return $column(spacing.default)(
+              ...list.flatMap((_, index) => {
+                const value = counterLens(index)
 
-          return until(
-            remove,
-            $column(spacing.default)(
-              $seperator,
-              $row(style({ alignItems: 'center' }), spacing.big)(
-                $TrashBtn({
-                  click: removeTether(disposeCounterTether(), disposedCounterCountTether(sampleMap(val => -val, value)))
-                }),
-                $Counter({ value })({
-                  increment: countersIncrementTether(
-                    valueChangeTether(sampleMap((val, increment) => val + increment, value))
-                  ),
-                  decrement: countersDecrementTether(
-                    valueChangeTether(sampleMap((val, increment) => val + increment, value))
+                return [
+                  $seperator,
+                  $row(style({ alignItems: 'center' }), spacing.big)(
+                    $TrashBtn({
+                      click: removeCounterTether(constant(index))
+                    }),
+                    $Counter(value)({
+                      valueChange: updateCounterTether(map(newValue => ({ index, value: newValue })))
+                    })
                   )
-                })
-              )
+                ]
+              })
+            )
+          }, listLens)
+        ),
+
+        // Output: merged list updates
+        {
+          changeCounterList: merge(
+            // Add new counter with initial value 0
+            sampleMap(list => [...list, 0], counterList, addCounter),
+
+            // Remove counter at index
+            sampleMap((list, index) => list.filter((_, i) => i !== index), counterList, removeCounter),
+
+            // Update counter value at index
+            sampleMap(
+              (list, { index, value }) => {
+                const newList = [...list]
+                newList[index] = value
+                return newList
+              },
+              counterList,
+              updateCounter
             )
           )
-        }, addCounter)
-      )
-    ]
-  }
-)
+        }
+      ]
+    }
+  )

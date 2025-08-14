@@ -1,5 +1,5 @@
 import { match, type Route } from 'aelea/router'
-import type { IBehavior } from 'aelea/stream-extended'
+import { type IBehavior, state } from 'aelea/stream-extended'
 import { $node, $text, component, style } from 'aelea/ui'
 import { $column, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
@@ -7,7 +7,7 @@ import { $Example } from '../../components/$Example'
 import { $Link } from '../../components/$Link'
 import { fadeIn } from '../../components/transitions/enter'
 import $Calculator from './calculator/$Calculator'
-import $CountCounters from './count-counters/$CountCounters'
+import { $CountCounters } from './count-counters/$CountCounters'
 import $DragList from './dragList/$DragList'
 // import $DragList from './dragList/$DragList'
 import { $PopoverExample } from './overlay/$PopoverExample'
@@ -154,7 +154,24 @@ export default ({ router }: Website) =>
             $Example({ file: 'src/components/$QuantumList.ts' })($VirtualScrollExample({}))({})
           ),
 
-          match(countCountersRoute)($Example({ file: 'src/components/$CountCounters.ts' })($CountCounters({}))({})),
+          match(countCountersRoute)(
+            fadeIn(
+              component(([changeCounterList, changeCounterListTether]: IBehavior<number[]>) => {
+                const counterList = state(changeCounterList, [0])
+
+                return [
+                  $column(
+                    spacing.big,
+                    style({ flex: 1 })
+                  )(
+                    $CountCounters({ counterList })({
+                      changeCounterList: changeCounterListTether()
+                    })
+                  )
+                ]
+              })({})
+            )
+          ),
 
           match(todoAppRoute)(
             $Example({ file: 'src/components/todo-app/$TodoApp.ts' })(
