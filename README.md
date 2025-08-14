@@ -120,7 +120,7 @@ const $CounterList = ({ counterList }: { counterList: IStream<number[]> }) =>
     const $div = $element('div')
     
     return [
-      $div()(
+      $div(
         // Display derived state
         $text('Total: '),
         $text(map(list => String(list.reduce((a, b) => a + b, 0)), counterList)),
@@ -129,9 +129,9 @@ const $CounterList = ({ counterList }: { counterList: IStream<number[]> }) =>
         
         // Render each counter
         switchMap(list => 
-          $div()(
-            ...list.map((value, index) => 
-              $Counter(constant(value))({
+          $div(
+            ...list.map((_, index) => 
+              $Counter(map(list => list[index], counterList))({
                 valueChange: updateCounterTether(
                   map(newValue => ({ index, value: newValue }))
                 )

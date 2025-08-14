@@ -1,4 +1,4 @@
-import { constant, merge, now, reduce } from 'aelea/stream'
+import { constant, now, reduce } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $text, component, style } from 'aelea/ui'
 import { $Button, $column, $Popover, $row, $TextField, spacing } from 'aelea/ui-components'
@@ -16,17 +16,15 @@ export const $PopoverExample = component(
     [pop, popTether]: IBehavior<any, any>,
     [popCard, popCardTether]: IBehavior<any, any>,
     [popCardBottom, popCardBottomTether]: IBehavior<any, any>,
-    [countUp, countUpTether]: IBehavior<1, 1>,
-    [countDown, countDownTether]: IBehavior<-1, -1>
+    [countChange, countChangeTether]: IBehavior<number, number>
   ) => {
-    const count = merge(countUp, countDown)
+    const countValue = reduce((s, n) => s + n, 0, countChange)
 
     const $popContent = $column(spacing.default)(
       $text('Well, hello $Counter component!'),
       $row(style({ placeContent: 'center' }))(
-        $Counter({ value: reduce((s, n) => s + n, 0, count) })({
-          decrement: countDownTether(),
-          increment: countUpTether()
+        $Counter(countValue)({
+          valueChange: countChangeTether()
         })
       )
     )
