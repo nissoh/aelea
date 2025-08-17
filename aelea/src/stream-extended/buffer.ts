@@ -1,26 +1,22 @@
-import { disposeWith, type IStream } from '../stream/index.js'
+import { disposeWith, type IScheduler, type ISink, type IStream, PipeSink } from '../stream/index.js'
 
 export function flattenEvents<T>(source: IStream<T[]>): IStream<T> {
-  return {
-    run(sink, scheduler) {
-      return source.run(
-        {
-          event: items => {
-            if (!Array.isArray(items)) {
-              sink.error(new Error(`flattenEvents: expected array but got ${typeof items}`))
-              return
-            }
+  return new FlattenEventsStream(source)
+}
 
-            for (const item of items) {
-              sink.event(item)
-            }
-          },
-          error: error => sink.error(error),
-          end: () => sink.end()
-        },
-        scheduler
-      )
+class FlattenEventsSink<T> extends PipeSink<T[], T> {
+  event(items: T[]): void {
+    for (let i = 0; i < items.length; i++) {
+      this.sink.event(items[i])
     }
+  }
+}
+
+class FlattenEventsStream<T> implements IStream<T> {
+  constructor(private readonly source: IStream<T[]>) {}
+
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    return this.source.run(new FlattenEventsSink(sink), scheduler)
   }
 }
 
@@ -36,49 +32,71 @@ export function bufferEvents<T>(
     throw new Error('Max buffer size must be positive')
   }
 
-  return {
-    run(sink, scheduler) {
-      let buffer: T[] = []
-      let nextEmitTime: number | null = null
+  return new BufferEventsStream(source, period, maxSize)
+}
 
-      const emitBuffer = (time: number) => {
-        if (buffer.length > 0) {
-          sink.event(buffer)
-          buffer = []
-        }
-        nextEmitTime = time + period
-      }
+class BufferEventsSink<T> implements ISink<T> {
+  buffer: T[] = []
+  private nextEmitTime: number | null = null
 
-      const onEvent = (event: T) => {
-        const time = scheduler.time()
-        // Initialize timing on first event
-        if (nextEmitTime === null) {
-          nextEmitTime = time + period
-        }
+  constructor(
+    private readonly sink: ISink<readonly T[]>,
+    private readonly scheduler: IScheduler,
+    private readonly period: number,
+    private readonly maxSize: number
+  ) {}
 
-        buffer.push(event)
-
-        // Emit if period elapsed or buffer full
-        if (time >= nextEmitTime || buffer.length >= maxSize) {
-          emitBuffer(time)
-        }
-      }
-
-      const onError = (error: unknown) => sink.error(error)
-
-      const onEnd = () => {
-        if (buffer.length > 0) {
-          sink.event(buffer)
-        }
-        sink.end()
-      }
-
-      const disposable = source.run({ event: onEvent, error: onError, end: onEnd }, scheduler)
-
-      return disposeWith(() => {
-        buffer = []
-        disposable[Symbol.dispose]()
-      })
+  event(value: T): void {
+    const time = this.scheduler.time()
+    
+    // Initialize timing on first event
+    if (this.nextEmitTime === null) {
+      this.nextEmitTime = time + this.period
     }
+
+    this.buffer.push(value)
+
+    // Emit if period elapsed or buffer full
+    if (time >= this.nextEmitTime || this.buffer.length >= this.maxSize) {
+      this.emitBuffer(time)
+    }
+  }
+
+  error(err: unknown): void {
+    this.sink.error(err)
+  }
+
+  end(): void {
+    if (this.buffer.length > 0) {
+      this.sink.event(this.buffer)
+      this.buffer = []
+    }
+    this.sink.end()
+  }
+
+  private emitBuffer(time: number): void {
+    if (this.buffer.length > 0) {
+      this.sink.event(this.buffer)
+      this.buffer = []
+    }
+    this.nextEmitTime = time + this.period
+  }
+}
+
+class BufferEventsStream<T> implements IStream<readonly T[]> {
+  constructor(
+    private readonly source: IStream<T>,
+    private readonly period: number,
+    private readonly maxSize: number
+  ) {}
+
+  run(sink: ISink<readonly T[]>, scheduler: IScheduler): Disposable {
+    const bufferSink = new BufferEventsSink(sink, scheduler, this.period, this.maxSize)
+    const disposable = this.source.run(bufferSink, scheduler)
+    
+    return disposeWith(() => {
+      bufferSink.buffer.length = 0  // Clear buffer on dispose
+      disposable[Symbol.dispose]()
+    })
   }
 }

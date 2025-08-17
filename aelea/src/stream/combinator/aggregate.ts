@@ -27,7 +27,7 @@ export const aggregate: IAggregateCurry = curry3((f, initial, s) => new Aggregat
 
 class AggregateSink<I, S, O> extends PipeSink<I, O> {
   constructor(
-    readonly f: AggregateFunction<I, S, O>,
+    readonly step: AggregateFunction<I, S, O>,
     public seed: S,
     sink: ISink<O>
   ) {
@@ -36,7 +36,7 @@ class AggregateSink<I, S, O> extends PipeSink<I, O> {
 
   event(value: I) {
     try {
-      const result = this.f(this.seed, value)
+      const result = this.step(this.seed, value)
       this.seed = result.seed
       this.sink.event(result.value)
     } catch (error) {

@@ -1,29 +1,41 @@
 import { curry2, disposeWith, fromCallback, type IStream, isStream, joinMap } from '../../stream/index.js'
 import type { I$Slottable, INodeElement } from '../types.js'
 
-type PickEvent<A, B> = A extends keyof B ? B[A] : Event
+type EventMapFor<T> = T extends Window
+  ? WindowEventMap
+  : T extends Document
+    ? DocumentEventMap
+    : T extends HTMLElement
+      ? HTMLElementEventMap
+      : T extends SVGElement
+        ? SVGElementEventMap
+        : T extends IDBOpenDBRequest
+          ? IDBOpenDBRequestEventMap
+          : T extends EventSource
+            ? EventSourceEventMap
+            : T extends WebSocket
+              ? WebSocketEventMap
+              : T extends XMLHttpRequest
+                ? XMLHttpRequestEventMap
+                : T extends Worker
+                  ? WorkerEventMap
+                  : T extends FileReader
+                    ? FileReaderEventMap
+                    : T extends AbortSignal
+                      ? AbortSignalEventMap
+                      : T extends Animation
+                        ? AnimationEventMap
+                        : T extends BroadcastChannel
+                          ? BroadcastChannelEventMap
+                          : T extends MessagePort
+                            ? MessagePortEventMap
+                            : GlobalEventHandlersEventMap
 
-type INodeElementEventList = DocumentEventMap &
-  SVGElementEventMap &
-  HTMLElementEventMap &
-  WindowEventMap &
-  IDBOpenDBRequestEventMap
-type INodeElementEventNameList = keyof INodeElementEventList
-type GuessByName<A extends INodeElementEventNameList> = INodeElementEventList[A]
-
-type INodeElementEventTypeMap<A extends INodeElementEventNameList, B> = B extends Window
-  ? PickEvent<A, WindowEventMap>
-  : B extends HTMLElement
-    ? PickEvent<A, DocumentEventMap>
-    : B extends SVGAElement
-      ? PickEvent<A, SVGElementEventMap>
-      : GuessByName<A>
-
-export function eventElementTarget<A extends INodeElementEventNameList, B extends EventTarget>(
-  eventType: A,
-  element: B,
+export function eventElementTarget<T extends EventTarget, K extends keyof EventMapFor<T> & string>(
+  element: T,
+  eventType: K,
   options: boolean | AddEventListenerOptions = false
-): IStream<INodeElementEventTypeMap<A, B>> {
+): IStream<EventMapFor<T>[K]> {
   return fromCallback(cb => {
     element.addEventListener(eventType, cb as EventListener, options)
 
@@ -39,23 +51,23 @@ type INodeEventDescriptor<B extends INodeElement> = {
 }
 
 export interface INodeEventCurry {
-  <A extends INodeElementEventNameList, B extends INodeElement>(
-    eventType: A,
-    descriptor: I$Slottable<B> | INodeEventDescriptor<B>
-  ): IStream<INodeElementEventTypeMap<A, B>>
-  <A extends INodeElementEventNameList, B extends INodeElement>(
-    eventType: A
-  ): (descriptor: I$Slottable<B> | INodeEventDescriptor<B>) => IStream<INodeElementEventTypeMap<A, B>>
+  <T extends INodeElement, K extends keyof EventMapFor<T> & string>(
+    eventType: K,
+    descriptor: I$Slottable<T> | INodeEventDescriptor<T>
+  ): IStream<EventMapFor<T>[K]>
+  <T extends INodeElement, K extends keyof EventMapFor<T> & string>(
+    eventType: K
+  ): (descriptor: I$Slottable<T> | INodeEventDescriptor<T>) => IStream<EventMapFor<T>[K]>
 }
 
 export const nodeEvent: INodeEventCurry = curry2((eventType, descriptor) => {
   if (isStream(descriptor)) {
     return joinMap(ns => {
-      return eventElementTarget(eventType, ns.element, { capture: true })
+      return eventElementTarget(ns.element, eventType, { capture: true })
     }, descriptor)
   }
 
   return joinMap(ns => {
-    return eventElementTarget(eventType, ns.element, descriptor.options)
+    return eventElementTarget(ns.element, eventType, descriptor.options)
   }, descriptor.$node)
 })
