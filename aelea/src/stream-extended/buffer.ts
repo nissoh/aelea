@@ -48,7 +48,7 @@ class BufferEventsSink<T> implements ISink<T> {
 
   event(value: T): void {
     const time = this.scheduler.time()
-    
+
     // Initialize timing on first event
     if (this.nextEmitTime === null) {
       this.nextEmitTime = time + this.period
@@ -93,9 +93,9 @@ class BufferEventsStream<T> implements IStream<readonly T[]> {
   run(sink: ISink<readonly T[]>, scheduler: IScheduler): Disposable {
     const bufferSink = new BufferEventsSink(sink, scheduler, this.period, this.maxSize)
     const disposable = this.source.run(bufferSink, scheduler)
-    
+
     return disposeWith(() => {
-      bufferSink.buffer.length = 0  // Clear buffer on dispose
+      bufferSink.buffer.length = 0 // Clear buffer on dispose
       disposable[Symbol.dispose]()
     })
   }
