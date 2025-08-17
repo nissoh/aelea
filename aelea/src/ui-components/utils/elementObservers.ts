@@ -9,7 +9,7 @@ import {
   switchLatest,
   until
 } from '../../stream/index.js'
-import { eventElementTarget } from '../../ui/combinator/event.js'
+import { fromEventTarget } from '../../ui/combinator/event.js'
 import type { INode } from '../../ui/types.js'
 
 export const intersection = (config: IntersectionObserverInit = {}) => {
@@ -64,7 +64,7 @@ export const mutation = (
     switchLatest
   )
 
-const documentVisibilityChange = eventElementTarget(document, 'visibilitychange')
+const documentVisibilityChange = fromEventTarget(document, 'visibilitychange')
 const documentVisible = filter(() => document.visibilityState === 'visible', documentVisibilityChange)
 const documentHidden = filter(() => document.visibilityState === 'hidden', documentVisibilityChange)
 

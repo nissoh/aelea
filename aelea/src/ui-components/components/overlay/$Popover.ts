@@ -3,7 +3,7 @@ import { type IBehavior, multicast, state } from '../../../stream-extended/index
 import {
   $node,
   component,
-  eventElementTarget,
+  fromEventTarget,
   type I$Node,
   type INode,
   type INodeCompose,
@@ -58,8 +58,8 @@ export const $Popover = ({
 
       // Update events stream
       const updateEvents = merge(
-        eventElementTarget(window, 'scroll', { capture: true }),
-        eventElementTarget(window, 'resize')
+        fromEventTarget(window, 'scroll', { capture: true }),
+        fromEventTarget(window, 'resize')
       )
 
       const $overlay = $node(

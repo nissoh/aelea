@@ -15,7 +15,7 @@ import {
 } from '../../stream/index.js'
 import { behavior, type IBehavior, multicast } from '../../stream-extended/index.js'
 import { component } from '../../ui/combinator/component.js'
-import { eventElementTarget, nodeEvent } from '../../ui/combinator/event.js'
+import { fromEventTarget, nodeEvent } from '../../ui/combinator/event.js'
 import { style, styleBehavior, styleInline } from '../../ui/combinator/style.js'
 import { motion } from '../../ui/index.js'
 import type { I$Node, ISlottable } from '../../ui/types.js'
@@ -137,7 +137,7 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
               nodeEvent('pointerdown'),
               // list order continously changing, sampleMap is used to get a sample of the latest list
               sampleMap((list, startEv) => {
-                const drag = merge(eventElementTarget(window, 'pointerup'), eventElementTarget(window, 'pointermove'))
+                const drag = merge(fromEventTarget(window, 'pointerup'), fromEventTarget(window, 'pointermove'))
                 const moveUntilUp = until(
                   filter(ev => ev.type === 'pointerup', drag),
                   drag

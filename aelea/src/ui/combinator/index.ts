@@ -1,5 +1,5 @@
 export { attr, attrBehavior } from './attribute.js'
 export { component } from './component.js'
-export { eventElementTarget, nodeEvent } from './event.js'
+export { fromEventTarget, nodeEvent } from './event.js'
 export { MOTION_GENTLE, MOTION_NO_WOBBLE, MOTION_STIFF, MOTION_WOBBLY, motion } from './motion.js'
 export { style, styleBehavior, styleInline, stylePseudo } from './style.js'

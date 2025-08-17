@@ -31,7 +31,7 @@ type EventMapFor<T> = T extends Window
                             ? MessagePortEventMap
                             : GlobalEventHandlersEventMap
 
-export function eventElementTarget<T extends EventTarget, K extends keyof EventMapFor<T> & string>(
+export function fromEventTarget<T extends EventTarget, K extends keyof EventMapFor<T> & string>(
   element: T,
   eventType: K,
   options: boolean | AddEventListenerOptions = false
@@ -63,11 +63,11 @@ export interface INodeEventCurry {
 export const nodeEvent: INodeEventCurry = curry2((eventType, descriptor) => {
   if (isStream(descriptor)) {
     return joinMap(ns => {
-      return eventElementTarget(ns.element, eventType, { capture: true })
+      return fromEventTarget(ns.element, eventType, { capture: true })
     }, descriptor)
   }
 
   return joinMap(ns => {
-    return eventElementTarget(ns.element, eventType, descriptor.options)
+    return fromEventTarget(ns.element, eventType, descriptor.options)
   }, descriptor.$node)
 })
