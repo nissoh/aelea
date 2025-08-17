@@ -64,7 +64,7 @@ export const mutation = (
     switchLatest
   )
 
-const documentVisibilityChange = eventElementTarget('visibilitychange', document)
+const documentVisibilityChange = eventElementTarget(document, 'visibilitychange')
 const documentVisible = filter(() => document.visibilityState === 'visible', documentVisibilityChange)
 const documentHidden = filter(() => document.visibilityState === 'hidden', documentVisibilityChange)
 

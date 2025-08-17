@@ -137,7 +137,7 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
               nodeEvent('pointerdown'),
               // list order continously changing, sampleMap is used to get a sample of the latest list
               sampleMap((list, startEv) => {
-                const drag = merge(eventElementTarget('pointerup', window), eventElementTarget('pointermove', window))
+                const drag = merge(eventElementTarget(window, 'pointerup'), eventElementTarget(window, 'pointermove'))
                 const moveUntilUp = until(
                   filter(ev => ev.type === 'pointerup', drag),
                   drag

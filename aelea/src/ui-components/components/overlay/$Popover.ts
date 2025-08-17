@@ -58,8 +58,8 @@ export const $Popover = ({
 
       // Update events stream
       const updateEvents = merge(
-        eventElementTarget('scroll', window, { capture: true }),
-        eventElementTarget('resize', window)
+        eventElementTarget(window, 'scroll', { capture: true }),
+        eventElementTarget(window, 'resize')
       )
 
       const $overlay = $node(
