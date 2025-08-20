@@ -5,6 +5,46 @@ import { type IndexedValue, IndexSink } from '../utils/sink.js'
 import { map } from './map.js'
 
 /**
+ * Combine multiple streams into an object stream
+ *
+ * temperature: -20-21-22-23->
+ * humidity:    -45-46-47-48->
+ * combine({
+ *   temp: temperature,
+ *   humidity: humidity
+ * }):          -{temp:20,humidity:45}-{temp:21,humidity:45}-{temp:21,humidity:46}->
+ */
+export function combine<A>(
+  state: {
+    [P in keyof A]: IStream<A[P]>
+  }
+): IStream<Readonly<A>> {
+  const l = Object.keys(state).length
+
+  if (l === 0) return now({} as A)
+
+  return new Combine(state)
+}
+/**
+ * Combine latest values from multiple streams whenever any stream emits
+ *
+ * streamA:    -1---2-------3->
+ * streamB:    ---a---b-c------>
+ * combineMap: ---[1,a]-[2,a]-[2,b]-[2,c]-[3,c]->
+ */
+export function combineMap<T extends readonly unknown[], R>(
+  f: (...args: T) => R,
+  ...sources: [...{ [K in keyof T]: IStream<T[K]> }]
+): IStream<R> {
+  const l = sources.length
+
+  if (l === 0) return empty
+  if (l === 1) return map(f as any, sources[0])
+
+  return new CombineMap(f, sources)
+}
+
+/**
  * Stream that combines multiple streams into an object stream
  */
 class Combine<A> implements IStream<Readonly<A>> {
@@ -32,28 +72,6 @@ class Combine<A> implements IStream<Readonly<A>> {
 }
 
 /**
- * Combine multiple streams into an object stream
- *
- * temperature: -20-21-22-23->
- * humidity:    -45-46-47-48->
- * combine({
- *   temp: temperature,
- *   humidity: humidity
- * }):          -{temp:20,humidity:45}-{temp:21,humidity:45}-{temp:21,humidity:46}->
- */
-export function combine<A>(
-  state: {
-    [P in keyof A]: IStream<A[P]>
-  }
-): IStream<Readonly<A>> {
-  const l = Object.keys(state).length
-
-  if (l === 0) return now({} as A)
-
-  return new Combine(state)
-}
-
-/**
  * Stream that combines latest values from multiple streams using a mapping function
  */
 class CombineMap<T extends readonly unknown[], R> implements IStream<R> {
@@ -75,25 +93,6 @@ class CombineMap<T extends readonly unknown[], R> implements IStream<R> {
 
     return disposeAll(disposables)
   }
-}
-
-/**
- * Combine latest values from multiple streams whenever any stream emits
- *
- * streamA:    -1---2-------3->
- * streamB:    ---a---b-c------>
- * combineMap: ---[1,a]-[2,a]-[2,b]-[2,c]-[3,c]->
- */
-export function combineMap<T extends readonly unknown[], R>(
-  f: (...args: T) => R,
-  ...sources: [...{ [K in keyof T]: IStream<T[K]> }]
-): IStream<R> {
-  const l = sources.length
-
-  if (l === 0) return empty
-  if (l === 1) return map(f as any, sources[0])
-
-  return new CombineMap(f, sources)
 }
 
 class CombineMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {

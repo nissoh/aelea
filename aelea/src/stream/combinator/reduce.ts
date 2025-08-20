@@ -3,6 +3,14 @@ import { curry3 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
 /**
+ * Accumulate values from a stream
+ *
+ * stream:          -1-2-3-4->
+ * reduce(+, 0): -1-3-6-10->
+ */
+export const reduce: IReduceCurry = curry3((f, initial, s) => new Reduce(f, { ...(initial as any) }, s))
+
+/**
  * Stream that accumulates values using a reducer function
  */
 class Reduce<I, O> implements IStream<O> {
@@ -16,14 +24,6 @@ class Reduce<I, O> implements IStream<O> {
     return this.source.run(new ReduceSink(this.f, this.initial, sink), scheduler)
   }
 }
-
-/**
- * Accumulate values from a stream
- *
- * stream:          -1-2-3-4->
- * reduce(+, 0): -1-3-6-10->
- */
-export const reduce: IReduceCurry = curry3((f, initial, s) => new Reduce(f, initial, s))
 
 class ReduceSink<I, O> extends PipeSink<I, O> {
   constructor(

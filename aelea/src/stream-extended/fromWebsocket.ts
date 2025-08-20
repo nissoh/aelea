@@ -1,13 +1,8 @@
-import {
-  disposeBoth,
-  disposeWith,
-  empty,
-  type IScheduler,
-  type ISink,
-  type IStream,
-  nullSink,
-  tap
-} from '../stream/index.js'
+import { tap } from '../stream/combinator/tap.js'
+import { propagateEndTask, propagateRunTask } from '../stream/scheduler/PropagateTask.js'
+import type { IScheduler, ISink, IStream } from '../stream/types.js'
+import { nullSink } from '../stream/utils/common.js'
+import { disposeBoth, disposeNone, disposeWith } from '../stream/utils/disposable.js'
 
 const readyStateMap: Record<number, string> = {
   [WebSocket.CONNECTING]: 'CONNECTING',
@@ -16,37 +11,43 @@ const readyStateMap: Record<number, string> = {
   [WebSocket.CLOSED]: 'CLOSED'
 }
 
+type WebSocketOptions<TSend, TReceive> = {
+  input?: IStream<TSend>
+  protocols?: string | string[]
+  binaryType?: BinaryType
+  maxBufferSize?: number
+  connectionTimeout?: number
+  onOpen?: (socket: WebSocket) => void
+  serializer?: (data: TSend) => any
+  deserializer?: (data: string) => TReceive
+}
+
 /**
  * Stream that creates a WebSocket connection and emits received messages
  */
-class WebsocketStream<I, O> implements IStream<I> {
+class FromWebSocket<TReceive, TSend> implements IStream<TReceive> {
   constructor(
     private readonly url: string,
-    private readonly input: IStream<O> = empty,
-    private readonly protocols: string | string[] | undefined = undefined,
-    private readonly options: {
-      binaryType?: BinaryType
-      maxBufferSize?: number
-      connectionTimeout?: number
-      serializer?: (data: O) => any
-      deserializer?: (data: string) => I
-    } = {}
+    private readonly options: WebSocketOptions<TSend, TReceive> = {}
   ) {}
 
-  run(sink: ISink<I>, scheduler: IScheduler): Disposable {
+  run(sink: ISink<TReceive>, scheduler: IScheduler): Disposable {
     let socket: WebSocket | null
     try {
-      socket = new WebSocket(this.url, this.protocols)
+      socket = new WebSocket(this.url, this.options.protocols)
     } catch (error) {
-      sink.error(error)
-      return disposeWith(() => {})
+      return scheduler.asap(
+        propagateRunTask(sink, sink => {
+          sink.error(error)
+          sink.end()
+        })
+      )
     }
 
     if (this.options.binaryType) {
       socket.binaryType = this.options.binaryType
     }
 
-    const messageBuffer: O[] = []
     const connectionStartTime = Date.now()
     let isCleanedUp = false
 
@@ -71,16 +72,18 @@ class WebsocketStream<I, O> implements IStream<I> {
         }
         socket = null
       }
-
-      messageBuffer.length = 0
     }
 
     const onError = (error: Event) => {
       const errorMsg = error instanceof ErrorEvent ? error.message : 'WebSocket connection error'
       console.error(`[WebSocket] Error: ${errorMsg}`)
       cleanup()
-      sink.error(new Error(`WebSocket error: ${errorMsg}`))
-      sink.end()
+      scheduler.asap(
+        propagateRunTask(sink, sink => {
+          sink.error(new Error(`WebSocket error: ${errorMsg}`))
+          sink.end()
+        })
+      )
     }
 
     const deserializer = this.options.deserializer ?? JSON.parse
@@ -95,17 +98,21 @@ class WebsocketStream<I, O> implements IStream<I> {
         } catch (parseError) {
           console.error(`[WebSocket] Parse error: ${parseError}`)
           cleanup()
-          sink.error(new Error(`Parse error: ${parseError}`))
-          sink.end()
+          scheduler.asap(
+            propagateRunTask(sink, sink => {
+              sink.error(new Error(`Parse error: ${parseError}`))
+              sink.end()
+            })
+          )
         }
       } else {
-        sink.event(msg.data as I)
+        sink.event(msg.data as TReceive)
       }
     }
 
     const serializer = this.options.serializer ?? JSON.stringify
 
-    const sendMessage = (value: O) => {
+    const sendMessage = (value: TSend) => {
       try {
         if (socket) {
           socket.send(serializer(value))
@@ -115,11 +122,25 @@ class WebsocketStream<I, O> implements IStream<I> {
       }
     }
 
+    let sendInputEffect = disposeNone
+
     const onOpen = () => {
       clearTimeout(timeoutId)
-      while (messageBuffer.length > 0) {
-        const message = messageBuffer.shift()!
-        sendMessage(message)
+
+      this.options.onOpen?.(socket as WebSocket)
+
+      if (this.options.input) {
+        sendInputEffect = tap((value: TSend) => {
+          if (isCleanedUp) return // Prevent processing after cleanup
+
+          if (socket && socket.readyState === WebSocket.OPEN) {
+            sendMessage(value)
+          } else {
+            console.warn(
+              `[WebSocket] Cannot send message, socket state: ${socket ? readyStateMap[socket.readyState] : 'null'}`
+            )
+          }
+        }, this.options.input).run(nullSink, scheduler)
       }
     }
 
@@ -134,7 +155,7 @@ class WebsocketStream<I, O> implements IStream<I> {
 
       if (!isCleanedUp) {
         cleanup()
-        sink.end()
+        scheduler.asap(propagateEndTask(sink))
       }
     }
 
@@ -146,44 +167,22 @@ class WebsocketStream<I, O> implements IStream<I> {
     timeoutId = setTimeout(() => {
       if (!isCleanedUp && socket && socket.readyState === WebSocket.CONNECTING) {
         cleanup()
-        sink.error(new Error('WebSocket connection timeout'))
-        sink.end()
-      }
-    }, this.options.connectionTimeout ?? 5000)
-
-    const sendInputEffect = tap((value: O) => {
-      if (isCleanedUp) return // Prevent processing after cleanup
-
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        sendMessage(value)
-      } else if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.CLOSING)) {
-        if (messageBuffer.length < (this.options.maxBufferSize ?? Number.POSITIVE_INFINITY)) {
-          messageBuffer.push(value)
-        } else {
-          console.warn('[WebSocket] Buffer full, dropping message')
-        }
-      } else {
-        console.warn(
-          `[WebSocket] Cannot send message, socket state: ${socket ? readyStateMap[socket.readyState] : 'null'}`
+        scheduler.asap(
+          propagateRunTask(sink, sink => {
+            sink.error(new Error('WebSocket connection timeout'))
+            sink.end()
+          })
         )
       }
-    }, this.input).run(nullSink, scheduler)
+    }, this.options.connectionTimeout ?? 5000)
 
     return disposeBoth(disposeWith(cleanup), sendInputEffect)
   }
 }
 
-export function fromWebsocket<I, O>(
+export function fromWebsocket<TReceive, TSend>(
   url: string,
-  input: IStream<O> = empty,
-  protocols: string | string[] | undefined = undefined,
-  options: {
-    binaryType?: BinaryType
-    maxBufferSize?: number
-    connectionTimeout?: number
-    serializer?: (data: O) => any
-    deserializer?: (data: string) => I
-  } = {}
-): IStream<I> {
-  return new WebsocketStream(url, input, protocols, options)
+  options: WebSocketOptions<TSend, TReceive> = {}
+): IStream<TReceive> {
+  return new FromWebSocket(url, options)
 }
