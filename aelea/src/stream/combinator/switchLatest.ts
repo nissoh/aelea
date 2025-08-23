@@ -9,7 +9,7 @@ import { map } from './map.js'
  * Stream that switches to the latest inner stream, disposing the previous one
  */
 class SwitchLatest<T> implements IStream<T> {
-  constructor(private readonly source: IStream<IStream<T>>) {}
+  constructor(readonly source: IStream<IStream<T>>) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
     const switchSink = new SwitchSink(sink, scheduler)

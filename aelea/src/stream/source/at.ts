@@ -7,8 +7,8 @@ import { curry2 } from '../utils/function.js'
  */
 class At<T> implements IStream<T> {
   constructor(
-    private readonly delay: number,
-    private readonly value: T
+    readonly delay: number,
+    readonly value: T
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {

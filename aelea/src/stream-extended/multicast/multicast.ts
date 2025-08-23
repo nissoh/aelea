@@ -27,7 +27,7 @@ export const multicast = <T>(source: IStream<T>): IStream<T> => {
  * among multiple observers
  */
 class Multicast<T> implements IStream<T> {
-  private readonly source: MulticastSource<T>
+  readonly source: MulticastSource<T>
 
   constructor(source: IStream<T>) {
     this.source = new MulticastSource(source)
@@ -39,7 +39,7 @@ class Multicast<T> implements IStream<T> {
 }
 
 export class MulticastSource<T> extends MulticastSink<T> implements Disposable, IStream<T> {
-  private disposable: Disposable = disposeNone
+  disposable: Disposable = disposeNone
 
   constructor(readonly source: IStream<T>) {
     super()

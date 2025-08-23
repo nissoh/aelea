@@ -10,8 +10,8 @@ import { PipeSink } from '../utils/sink.js'
  */
 class Tap<T> implements IStream<T> {
   constructor(
-    private readonly f: (value: T) => unknown,
-    private readonly source: IStream<T>
+    readonly f: (value: T) => unknown,
+    readonly source: IStream<T>
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {

@@ -7,8 +7,8 @@ import { PipeSink } from '../utils/sink.js'
  */
 class SkipRepeatsWith<T> implements IStream<T> {
   constructor(
-    private readonly equals: (a: T, b: T) => boolean,
-    private readonly source: IStream<T>
+    readonly equals: (a: T, b: T) => boolean,
+    readonly source: IStream<T>
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {

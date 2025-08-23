@@ -15,7 +15,7 @@ export type PromiseState<T> = PromiseStateDone<T> | PromiseStatePending | Promis
  * Stream that transforms a stream of promises into a stream of promise states
  */
 class PromiseStateStream<T> implements IStream<PromiseState<T>> {
-  constructor(private readonly source: IStream<Promise<T>>) {}
+  constructor(readonly source: IStream<Promise<T>>) {}
 
   run(sink: ISink<PromiseState<T>>, scheduler: IScheduler): Disposable {
     return this.source.run(new PromiseStateSink(sink), scheduler)
@@ -27,12 +27,12 @@ export const promiseState = <T>(querySrc: IStream<Promise<T>>): IStream<PromiseS
 }
 
 class PromiseStateSink<T> implements ISink<Promise<T>>, Disposable {
-  private latestPromise: Promise<T> | null = null
-  private isPending = false
-  private sourceEnded = false
-  private abortController?: AbortController
+  latestPromise: Promise<T> | null = null
+  isPending = false
+  sourceEnded = false
+  abortController?: AbortController
 
-  constructor(private readonly sink: ISink<PromiseState<T>>) {}
+  constructor(readonly sink: ISink<PromiseState<T>>) {}
 
   event(promise: Promise<T>): void {
     this.latestPromise = promise
@@ -56,7 +56,7 @@ class PromiseStateSink<T> implements ISink<Promise<T>>, Disposable {
     )
   }
 
-  private handleResult(promise: Promise<T>, state: PromiseState<T>): void {
+  handleResult(promise: Promise<T>, state: PromiseState<T>): void {
     // Ignore outdated promises
     if (promise !== this.latestPromise) return
 

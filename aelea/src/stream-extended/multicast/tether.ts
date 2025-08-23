@@ -57,8 +57,8 @@ function emitCachedValue<T>(sink: ISink<T>, value: T): void {
 
 class TetherSink<T> implements ISink<T> {
   constructor(
-    private readonly primarySink: ISink<T>,
-    private readonly tether: Tether<T>
+    readonly primarySink: ISink<T>,
+    readonly tether: Tether<T>
   ) {
     // Emit cached value if tether has one
     if (this.tether.hasValue) {
@@ -86,8 +86,8 @@ class TetherSink<T> implements ISink<T> {
 
 class PrimaryStream<T> implements IStream<T> {
   constructor(
-    private readonly source: IStream<T>,
-    private readonly tether: Tether<T>
+    readonly source: IStream<T>,
+    readonly tether: Tether<T>
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
@@ -106,7 +106,7 @@ class Tether<T> extends MulticastSink<T> implements IStream<T> {
   latestValue: T | undefined
   hasValue = false
 
-  constructor(private readonly replayLatest: boolean) {
+  constructor(readonly replayLatest: boolean) {
     super()
   }
 

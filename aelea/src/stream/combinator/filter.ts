@@ -17,8 +17,8 @@ export interface IFilterCurry {
  */
 class Filter<T> implements IStream<T> {
   constructor(
-    private readonly predicateFn: (value: T) => boolean,
-    private readonly source: IStream<T>
+    readonly predicateFn: (value: T) => boolean,
+    readonly source: IStream<T>
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {

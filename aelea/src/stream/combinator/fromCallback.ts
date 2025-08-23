@@ -7,9 +7,9 @@ import { propagateErrorTask } from '../scheduler/PropagateTask.js'
  */
 class FromCallback<T, FnArgs extends any[] = T[]> implements IStream<T> {
   constructor(
-    private readonly callbackFunction: (cb: (...args: FnArgs) => any) => any,
-    private readonly mapFn: (...args: FnArgs) => T = defaultMapFn as any,
-    private readonly context: any = null
+    readonly callbackFunction: (cb: (...args: FnArgs) => any) => any,
+    readonly mapFn: (...args: FnArgs) => T = defaultMapFn as any,
+    readonly context: any = null
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {

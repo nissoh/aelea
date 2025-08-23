@@ -7,7 +7,7 @@ import { type IndexedValue, IndexSink } from '../utils/sink.js'
  * Stream that merges multiple streams into one, emitting values as they arrive
  */
 class Merge<T> implements IStream<T> {
-  constructor(private readonly sourceList: readonly IStream<T>[]) {}
+  constructor(readonly sourceList: readonly IStream<T>[]) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
     const l = this.sourceList.length

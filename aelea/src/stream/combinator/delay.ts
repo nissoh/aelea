@@ -12,8 +12,8 @@ import { PipeSink } from '../utils/sink.js'
  */
 class Delay<T> implements IStream<T> {
   constructor(
-    private readonly delayMs: number,
-    private readonly source: IStream<T>
+    readonly delayMs: number,
+    readonly source: IStream<T>
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {

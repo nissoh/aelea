@@ -10,8 +10,8 @@ import { join } from './join.js'
  */
 class Until<A> implements IStream<A> {
   constructor(
-    private readonly signal: IStream<unknown>,
-    private readonly source: IStream<A>
+    readonly signal: IStream<unknown>,
+    readonly source: IStream<A>
   ) {}
 
   run(sink: ISink<A>, scheduler: IScheduler): Disposable {
@@ -30,8 +30,8 @@ class Until<A> implements IStream<A> {
  */
 class Since<A> implements IStream<A> {
   constructor(
-    private readonly signal: IStream<unknown>,
-    private readonly source: IStream<A>
+    readonly signal: IStream<unknown>,
+    readonly source: IStream<A>
   ) {}
 
   run(sink: ISink<A>, scheduler: IScheduler): Disposable {

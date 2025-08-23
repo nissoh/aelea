@@ -8,9 +8,9 @@ import { PipeSink } from '../utils/sink.js'
  */
 class SampleMap<A, B, C> implements IStream<C> {
   constructor(
-    private readonly f: (a: A, b: B) => C,
-    private readonly values: IStream<A>,
-    private readonly sampler: IStream<B>
+    readonly f: (a: A, b: B) => C,
+    readonly values: IStream<A>,
+    readonly sampler: IStream<B>
   ) {}
 
   run(sink: ISink<C>, scheduler: IScheduler): Disposable {

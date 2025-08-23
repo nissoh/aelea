@@ -18,8 +18,8 @@ export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
  */
 class Motion implements IStream<number> {
   constructor(
-    private readonly config: MotionConfig,
-    private readonly position: IStream<number>
+    readonly config: MotionConfig,
+    readonly position: IStream<number>
   ) {}
 
   run(sink: ISink<number>, scheduler: IScheduler): Disposable {

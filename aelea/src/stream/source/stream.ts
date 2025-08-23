@@ -6,7 +6,7 @@ import { disposeNone } from '../utils/disposable.js'
  * Stream that emits all values from an array and then ends
  */
 class FromArray<T> implements IStream<T> {
-  constructor(private readonly arr: readonly T[]) {}
+  constructor(readonly arr: readonly T[]) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
     return scheduler.asap(propagateRunEventTask(sink, emitArray, this.arr))
@@ -17,7 +17,7 @@ class FromArray<T> implements IStream<T> {
  * Stream that emits a single value immediately and then ends
  */
 class Now<T> implements IStream<T> {
-  constructor(private readonly value: T) {}
+  constructor(readonly value: T) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
     return scheduler.asap(propagateRunEventTask(sink, emitNow, this.value))

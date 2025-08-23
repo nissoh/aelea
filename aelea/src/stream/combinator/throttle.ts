@@ -7,8 +7,8 @@ import { PipeSink } from '../utils/sink.js'
  */
 class Throttle<T> implements IStream<T> {
   constructor(
-    private readonly period: number,
-    private readonly source: IStream<T>
+    readonly period: number,
+    readonly source: IStream<T>
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {

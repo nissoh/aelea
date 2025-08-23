@@ -11,10 +11,18 @@ import { multicast } from './multicast.js'
 /**
  * Create a multicast stream that remembers its latest value
  *
+ * @param source - The source stream to multicast
+ * @param initialState - Optional initial value that will be emitted immediately to new subscribers
+ *
+ * Without initialState:
  * stream:        -1-2-3--->
- * state:   -1-2-3--->
- * subscriber1:   ^1-2-3--->
- * subscriber2:     ^2-3--->
+ * subscriber1:   -1-2-3--->
+ * subscriber2:      2-3--->
+ *
+ * With initialState (0):
+ * stream:        -1-2-3--->
+ * subscriber1:   0-1-2-3--->
+ * subscriber2:     1-2-3--->
  */
 export const state = <T>(source: IStream<T>, initialState?: T): IStream<T> =>
   new ReplayLatest(multicast(source), initialState)
@@ -34,7 +42,7 @@ class StateSink<A> extends PipeSink<A> {
   }
 }
 
-function emitCachedValue<A>(sink: ISink<A>, value: A): void {
+function emitState<A>(sink: ISink<A>, value: A): void {
   sink.event(value)
 }
 
@@ -58,7 +66,7 @@ export class ReplayLatest<A> implements IStream<A> {
 
     // If we have a cached value, emit it asynchronously
     if (this.hasValue) {
-      const cachedDisposable = scheduler.asap(propagateRunEventTask(sink, emitCachedValue, this.latestValue!))
+      const cachedDisposable = scheduler.asap(propagateRunEventTask(sink, emitState, this.latestValue!))
       return disposeBoth(cachedDisposable, sourceDisposable)
     }
 

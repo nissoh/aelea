@@ -8,8 +8,8 @@ import { curry2 } from '../utils/function.js'
  */
 class Debounce<T> implements IStream<T> {
   constructor(
-    private readonly period: number,
-    private readonly source: IStream<T>
+    readonly period: number,
+    readonly source: IStream<T>
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {

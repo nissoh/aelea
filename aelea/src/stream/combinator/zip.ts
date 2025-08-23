@@ -8,8 +8,8 @@ import { map } from './map.js'
  * Stream that combines values from multiple streams into an object in lockstep
  */
 class Zip<A> implements IStream<Readonly<A>> {
-  private readonly keys: (keyof A)[]
-  private readonly sources: IStream<any>[]
+  readonly keys: (keyof A)[]
+  readonly sources: IStream<any>[]
 
   constructor(state: { [P in keyof A]: IStream<A[P]> }) {
     this.keys = Object.keys(state) as (keyof A)[]
@@ -48,8 +48,8 @@ export function zip<A>(
  */
 class ZipMap<T extends readonly unknown[], R> implements IStream<R> {
   constructor(
-    private readonly f: (...args: T) => R,
-    private readonly sourceList: [...{ [K in keyof T]: IStream<T[K]> }]
+    readonly f: (...args: T) => R,
+    readonly sourceList: [...{ [K in keyof T]: IStream<T[K]> }]
   ) {}
 
   run(sink: ISink<R>, scheduler: IScheduler): Disposable {

@@ -4,13 +4,6 @@ import type { IScheduler, ISink, IStream } from '../stream/types.js'
 import { nullSink } from '../stream/utils/common.js'
 import { disposeBoth, disposeNone, disposeWith } from '../stream/utils/disposable.js'
 
-const readyStateMap: Record<number, string> = {
-  [WebSocket.CONNECTING]: 'CONNECTING',
-  [WebSocket.OPEN]: 'OPEN',
-  [WebSocket.CLOSING]: 'CLOSING',
-  [WebSocket.CLOSED]: 'CLOSED'
-}
-
 type WebSocketOptions<TSend, TReceive> = {
   input?: IStream<TSend>
   protocols?: string | string[]
@@ -22,56 +15,68 @@ type WebSocketOptions<TSend, TReceive> = {
   deserializer?: (data: string) => TReceive
 }
 
+export function fromWebsocket<TReceive, TSend>(
+  url: string,
+  options: WebSocketOptions<TSend, TReceive> = {}
+): IStream<TReceive> {
+  return new FromWebSocket(url, options)
+}
+
+const readyStateMap: Record<number, string> = {
+  [WebSocket.CONNECTING]: 'CONNECTING',
+  [WebSocket.OPEN]: 'OPEN',
+  [WebSocket.CLOSING]: 'CLOSING',
+  [WebSocket.CLOSED]: 'CLOSED'
+}
+
 /**
  * Stream that creates a WebSocket connection and emits received messages
  */
 class FromWebSocket<TReceive, TSend> implements IStream<TReceive> {
   constructor(
-    private readonly url: string,
-    private readonly options: WebSocketOptions<TSend, TReceive> = {}
+    readonly url: string,
+    readonly options: WebSocketOptions<TSend, TReceive> = {}
   ) {}
 
   run(sink: ISink<TReceive>, scheduler: IScheduler): Disposable {
-    let socket: WebSocket | null
-    try {
-      socket = new WebSocket(this.url, this.options.protocols)
-    } catch (error) {
+    // Check if WebSocket is available in runtime using globalThis
+    const WebSocketConstructor = globalThis.WebSocket || (globalThis as any).WebSocket
+
+    if (!WebSocketConstructor) {
       return scheduler.asap(
         propagateRunTask(sink, sink => {
-          sink.error(error)
+          sink.error(new Error('WebSocket is not available in this environment'))
           sink.end()
         })
       )
     }
+
+    let socket: WebSocket | null = new WebSocketConstructor(this.url, this.options.protocols)
 
     if (this.options.binaryType) {
       socket.binaryType = this.options.binaryType
     }
 
     const connectionStartTime = Date.now()
-    let isCleanedUp = false
 
     // Declare timeout variable that will be assigned later
     // biome-ignore lint/style/useConst: timeoutId must be declared before cleanup function but assigned after event handlers
     let timeoutId: ReturnType<typeof setTimeout>
 
     const cleanup = () => {
-      if (isCleanedUp) return
-      isCleanedUp = true
+      if (!socket) return
 
       clearTimeout(timeoutId)
 
-      if (socket) {
-        socket.removeEventListener('error', onError)
-        socket.removeEventListener('message', onMessage)
-        socket.removeEventListener('open', onOpen)
-        socket.removeEventListener('close', onClose)
+      socket.removeEventListener('error', onError)
+      socket.removeEventListener('message', onMessage)
+      socket.removeEventListener('open', onOpen)
+      socket.removeEventListener('close', onClose)
 
-        if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
-          socket.close()
-        }
-        socket = null
+      if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
+        socket.close()
       }
+      socket = null
     }
 
     const onError = (error: Event) => {
@@ -89,7 +94,7 @@ class FromWebSocket<TReceive, TSend> implements IStream<TReceive> {
     const deserializer = this.options.deserializer ?? JSON.parse
 
     const onMessage = (msg: MessageEvent) => {
-      if (isCleanedUp) return // Prevent processing after cleanup
+      if (!socket) return // Prevent processing after cleanup
 
       if (typeof msg.data === 'string') {
         try {
@@ -127,18 +132,18 @@ class FromWebSocket<TReceive, TSend> implements IStream<TReceive> {
     const onOpen = () => {
       clearTimeout(timeoutId)
 
-      this.options.onOpen?.(socket as WebSocket)
+      if (socket) {
+        this.options.onOpen?.(socket)
+      }
 
       if (this.options.input) {
         sendInputEffect = tap((value: TSend) => {
-          if (isCleanedUp) return // Prevent processing after cleanup
+          if (!socket) return // Prevent processing after cleanup
 
-          if (socket && socket.readyState === WebSocket.OPEN) {
+          if (socket.readyState === WebSocket.OPEN) {
             sendMessage(value)
           } else {
-            console.warn(
-              `[WebSocket] Cannot send message, socket state: ${socket ? readyStateMap[socket.readyState] : 'null'}`
-            )
+            console.warn(`[WebSocket] Cannot send message, socket state: ${readyStateMap[socket.readyState]}`)
           }
         }, this.options.input).run(nullSink, scheduler)
       }
@@ -153,7 +158,7 @@ class FromWebSocket<TReceive, TSend> implements IStream<TReceive> {
         )
       }
 
-      if (!isCleanedUp) {
+      if (socket) {
         cleanup()
         scheduler.asap(propagateEndTask(sink))
       }
@@ -165,7 +170,7 @@ class FromWebSocket<TReceive, TSend> implements IStream<TReceive> {
     socket.addEventListener('close', onClose)
 
     timeoutId = setTimeout(() => {
-      if (!isCleanedUp && socket && socket.readyState === WebSocket.CONNECTING) {
+      if (socket && socket.readyState === WebSocket.CONNECTING) {
         cleanup()
         scheduler.asap(
           propagateRunTask(sink, sink => {
@@ -178,11 +183,4 @@ class FromWebSocket<TReceive, TSend> implements IStream<TReceive> {
 
     return disposeBoth(disposeWith(cleanup), sendInputEffect)
   }
-}
-
-export function fromWebsocket<TReceive, TSend>(
-  url: string,
-  options: WebSocketOptions<TSend, TReceive> = {}
-): IStream<TReceive> {
-  return new FromWebSocket(url, options)
 }

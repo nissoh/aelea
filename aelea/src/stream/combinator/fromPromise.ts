@@ -5,7 +5,7 @@ import { disposeWith } from '../utils/disposable.js'
  * Stream that emits the resolved value of a promise
  */
 class FromPromise<T> implements IStream<T> {
-  constructor(private readonly promise: Promise<T>) {}
+  constructor(readonly promise: Promise<T>) {}
 
   run(sink: ISink<T>, _scheduler: IScheduler): Disposable {
     let disposed = false

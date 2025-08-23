@@ -7,9 +7,9 @@ import { curry2, curry3 } from '../utils/function.js'
  */
 class JoinMapConcurrently<A, B> implements IStream<B> {
   constructor(
-    private readonly f: (a: A) => IStream<B>,
-    private readonly concurrency: number,
-    private readonly source: IStream<A>
+    readonly f: (a: A) => IStream<B>,
+    readonly concurrency: number,
+    readonly source: IStream<A>
   ) {}
 
   run(sink: ISink<B>, scheduler: IScheduler): Disposable {

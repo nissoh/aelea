@@ -13,7 +13,7 @@ class FlattenEventsSink<T> extends PipeSink<T[], T> {
 }
 
 class FlattenEventsStream<T> implements IStream<T> {
-  constructor(private readonly source: IStream<T[]>) {}
+  constructor(readonly source: IStream<T[]>) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
     return this.source.run(new FlattenEventsSink(sink), scheduler)
@@ -37,13 +37,13 @@ export function bufferEvents<T>(
 
 class BufferEventsSink<T> implements ISink<T> {
   buffer: T[] = []
-  private nextEmitTime: number | null = null
+  nextEmitTime: number | null = null
 
   constructor(
-    private readonly sink: ISink<readonly T[]>,
-    private readonly scheduler: IScheduler,
-    private readonly period: number,
-    private readonly maxSize: number
+    readonly sink: ISink<readonly T[]>,
+    readonly scheduler: IScheduler,
+    readonly period: number,
+    readonly maxSize: number
   ) {}
 
   event(value: T): void {
@@ -74,7 +74,7 @@ class BufferEventsSink<T> implements ISink<T> {
     this.sink.end()
   }
 
-  private emitBuffer(time: number): void {
+  emitBuffer(time: number): void {
     if (this.buffer.length > 0) {
       this.sink.event(this.buffer)
       this.buffer = []
@@ -85,9 +85,9 @@ class BufferEventsSink<T> implements ISink<T> {
 
 class BufferEventsStream<T> implements IStream<readonly T[]> {
   constructor(
-    private readonly source: IStream<T>,
-    private readonly period: number,
-    private readonly maxSize: number
+    readonly source: IStream<T>,
+    readonly period: number,
+    readonly maxSize: number
   ) {}
 
   run(sink: ISink<readonly T[]>, scheduler: IScheduler): Disposable {

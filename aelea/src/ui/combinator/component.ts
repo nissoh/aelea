@@ -11,10 +11,10 @@ type IComponent = <T>(
  */
 class Component<T> implements IStream<ISlottable> {
   constructor(
-    private readonly createCallback: (
+    readonly createCallback: (
       ...args: IBehavior<unknown, unknown>[]
     ) => [I$Slottable, IComponentBehavior<T>] | [I$Slottable],
-    private readonly outputTethers: IOutputTethers<T>
+    readonly outputTethers: IOutputTethers<T>
   ) {}
 
   run(sink: ISink<ISlottable>, scheduler: IScheduler): Disposable {

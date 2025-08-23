@@ -7,8 +7,8 @@ import { curry2 } from '../utils/function.js'
  */
 class ContinueWith<A, B> implements IStream<A | B> {
   constructor(
-    private readonly f: () => IStream<B>,
-    private readonly source: IStream<A>
+    readonly f: () => IStream<B>,
+    readonly source: IStream<A>
   ) {}
 
   run(sink: ISink<A | B>, scheduler: IScheduler): Disposable {

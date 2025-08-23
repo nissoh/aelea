@@ -5,7 +5,7 @@ import { disposeBoth } from '../utils/disposable.js'
  * Stream that transforms a stream of promises into a stream of their values
  */
 class AwaitPromises<T> implements IStream<T> {
-  constructor(private readonly source: IStream<Promise<T>>) {}
+  constructor(readonly source: IStream<Promise<T>>) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
     const awaitSink = new AwaitPromisesSink(sink)
@@ -28,10 +28,10 @@ class AwaitPromises<T> implements IStream<T> {
 export const awaitPromises = <T>(s: IStream<Promise<T>>): IStream<T> => new AwaitPromises(s)
 
 class AwaitPromisesSink<T> implements ISink<Promise<T>>, Disposable {
-  private queue: Promise<unknown> = Promise.resolve()
-  private sourceEnded = false
-  private ended = false
-  private disposed = false
+  queue: Promise<unknown> = Promise.resolve()
+  sourceEnded = false
+  ended = false
+  disposed = false
 
   constructor(readonly sink: ISink<T>) {}
 
@@ -56,20 +56,20 @@ class AwaitPromisesSink<T> implements ISink<Promise<T>>, Disposable {
   }
 
   // Pre-create closures to avoid creating them per event
-  private eventBound = (value: T): void => {
+  eventBound = (value: T): void => {
     if (!this.disposed) {
       this.sink.event(value)
     }
   }
 
-  private endBound = (): void => {
+  endBound = (): void => {
     if (!this.disposed && !this.ended) {
       this.ended = true
       this.sink.end()
     }
   }
 
-  private errorBound = (error: any): void => {
+  errorBound = (error: any): void => {
     if (!this.disposed) {
       this.sink.error(error)
       // Only end if the source has ended

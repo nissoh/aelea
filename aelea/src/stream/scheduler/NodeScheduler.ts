@@ -16,10 +16,10 @@ import { runTask } from './PropagateTask.js'
 
 export class NodeScheduler implements IScheduler {
   // Task queues to avoid closures
-  private asapTasks: ITask[] = []
-  private asapScheduled = false
+  asapTasks: ITask[] = []
+  asapScheduled = false
 
-  private flushAsapTasks = (): void => {
+  flushAsapTasks = (): void => {
     this.asapScheduled = false
     const tasks = this.asapTasks
     this.asapTasks = []

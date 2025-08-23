@@ -45,7 +45,7 @@ export const $NumberTicker = ({
 }: NumberConfig) => {
   const incrementMulticast = op(
     value,
-    reduce((seed: CountState | null, change: number): CountState => {
+    reduce((seed: CountState | null, change): CountState => {
       const changeStr = change.toLocaleString()
 
       if (seed === null) {

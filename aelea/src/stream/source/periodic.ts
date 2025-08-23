@@ -7,8 +7,8 @@ import { curry2 } from '../utils/function.js'
  */
 class Periodic<T> implements IStream<T> {
   constructor(
-    private readonly period: number,
-    private readonly value: T
+    readonly period: number,
+    readonly value: T
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {

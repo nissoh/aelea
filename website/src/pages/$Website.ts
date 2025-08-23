@@ -12,7 +12,7 @@ import $MainMenu from './$MainMenu'
 import $Examples from './examples/$Examples'
 import $Guide from './guide/$Guide'
 
-const popStateEvent = fromEventTarget('popstate', window)
+const popStateEvent = fromEventTarget(window, 'popstate')
 
 const requestRouteChange = startWith(document.location, popStateEvent)
 const locationChange = map(location => {

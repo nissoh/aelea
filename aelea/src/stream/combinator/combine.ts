@@ -48,8 +48,8 @@ export function combineMap<T extends readonly unknown[], R>(
  * Stream that combines multiple streams into an object stream
  */
 class Combine<A> implements IStream<Readonly<A>> {
-  private readonly keys: (keyof A)[]
-  private readonly sources: IStream<any>[]
+  readonly keys: (keyof A)[]
+  readonly sources: IStream<any>[]
 
   constructor(state: { [P in keyof A]: IStream<A[P]> }) {
     this.keys = Object.keys(state) as (keyof A)[]
@@ -76,8 +76,8 @@ class Combine<A> implements IStream<Readonly<A>> {
  */
 class CombineMap<T extends readonly unknown[], R> implements IStream<R> {
   constructor(
-    private readonly f: (...args: T) => R,
-    private readonly sources: [...{ [K in keyof T]: IStream<T[K]> }]
+    readonly f: (...args: T) => R,
+    readonly sources: [...{ [K in keyof T]: IStream<T[K]> }]
   ) {}
 
   run(sink: ISink<R>, scheduler: IScheduler): Disposable {

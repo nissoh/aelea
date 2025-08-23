@@ -27,8 +27,8 @@ class RunStreamSink<T> implements ISink<T> {
   result: T | undefined
 
   constructor(
-    private resolve: (value: T) => void,
-    private reject: (error: any) => void
+    readonly resolve: (value: T) => void,
+    readonly reject: (error: any) => void
   ) {}
 
   event(value: T): void {

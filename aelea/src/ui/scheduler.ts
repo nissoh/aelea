@@ -23,13 +23,13 @@ import type { I$Scheduler } from './types.js'
 
 class DomScheduler implements I$Scheduler {
   // Instance arrays for asap and paint phases
-  private asapTasks: ITask[] = []
-  private paintTasks: ITask[] = []
-  private asapScheduled = false
-  private paintScheduled = false
+  asapTasks: ITask[] = []
+  paintTasks: ITask[] = []
+  asapScheduled = false
+  paintScheduled = false
 
   // Arrow functions as instance properties - created once per scheduler instance
-  private flushAsapTasks = (): void => {
+  flushAsapTasks = (): void => {
     this.asapScheduled = false
     const tasks = this.asapTasks
     this.asapTasks = []
@@ -37,7 +37,7 @@ class DomScheduler implements I$Scheduler {
     for (const task of tasks) task.run()
   }
 
-  private flushPaintTasks = (): void => {
+  flushPaintTasks = (): void => {
     this.paintScheduled = false
     const tasks = this.paintTasks
     this.paintTasks = []

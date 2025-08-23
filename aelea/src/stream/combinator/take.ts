@@ -7,8 +7,8 @@ import { PipeSink } from '../utils/sink.js'
  */
 class Take<T> implements IStream<T> {
   constructor(
-    private readonly n: number,
-    private readonly source: IStream<T>
+    readonly n: number,
+    readonly source: IStream<T>
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
