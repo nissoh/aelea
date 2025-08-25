@@ -17,8 +17,8 @@ type SubscriberInfo<T> = {
 }
 
 class BehaviorSource<T> implements IStream<T> {
-  private samplers: IStream<T>[] = []
-  private subscribers: SubscriberInfo<T>[] = []
+  samplers: IStream<T>[] = []
+  subscribers: SubscriberInfo<T>[] = []
 
   sample(samplerSource: IStream<T>): void {
     // Prevent duplicate streams
