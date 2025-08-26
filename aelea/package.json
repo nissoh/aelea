@@ -1,6 +1,6 @@
 {
   "name": "aelea",
-  "version": "2.5.12",
+  "version": "2.5.13",
   "type": "module",
   "scripts": {
     "build": "bun run build:clean && bun run bunx tsc -b",

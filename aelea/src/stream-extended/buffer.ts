@@ -5,26 +5,37 @@ import { curry2 } from '../stream/utils/function.js'
 interface IBufferEvents {
   period: number
   maxSize?: number
+  prune?: boolean // When true, discards old events to keep only maxSize newest events per period
 }
 
 /**
  * Buffer events from a stream into arrays based on time period and/or max size
  *
- * Time:      0ms      50ms     100ms    150ms    200ms    250ms    300ms
- *            |        |        |        |        |        |        |
- * stream:    -1-2-3-4-5-6-7-8-9---------10-11----12-------13------>
- *            |        |        |        |        |        |        |
- * bufferEvents({period: 100, maxSize: 4}):
- *            |        |        |        |        |        |        |
- * output:    ---------[1,2,3,4][5,6,7,8]---------[9,10,11][12]----[13]->
- *                     |        |                 |        |       |
- *                     |        |                 |        |       +-- period end
- *                     |        |                 |        +-- period (300ms)
- *                     |        |                 +-- period (200ms)
- *                     |        +-- overflow: emit 4, keep excess
- *                     +-- overflow: emit 4, keep excess
+ * Two core behaviors:
+ * 1. **Time-based buffering**: Collects events during each period interval
+ * 2. **Overflow handling**: if prune is false, buffer exceeds maxSize, excess events carry over to next period
  *
- * Load spreading: Instead of bursts of 8-9 events, outputs consistent batches of ≤4
+ * stream:              12345678-9------AB--C----D--->
+ * bufferEvents({period: 10, maxSize: 4}):
+ * output:              ---------a------b---c----d--e->
+ *                               |      |   |    |  |
+ *                               |      |   |    |  +-- e=[D] (t30)
+ *                               |      |   |    +-- d=[C] (t20)
+ *                               |      |   +-- c=[9,A,B] (t20)
+ *                               |      +-- b=[5,6,7,8] (t10), kept [9]
+ *                               +-- a=[1,2,3,4] (t10), kept [5,6,7,8,9]
+ *
+ * With prune=true: Discards old events to keep only maxSize newest per period
+ * stream:              12345678-9------AB--C----D--->
+ * output:              ---------a------b---c----d--e->
+ *                               |      |   |    |  |
+ *                               |      |   |    |  +-- e=[D] (t30)
+ *                               |      |   |    +-- d=[C] (t20)
+ *                               |      |   +-- c=[A,B] (t20)
+ *                               |      +-- b=[9] (t10)
+ *                               +-- a=[5,6,7,8] (t10), discarded [1,2,3,4]
+ *
+ * Load spreading: Ensures consistent batch sizes of ≤maxSize per period
  */
 export const bufferEvents: IBufferEventsCurry = curry2((options: IBufferEvents, source) => {
   const period = options.period
@@ -48,7 +59,13 @@ class BufferEventsStream<T> implements IStream<readonly T[]> {
   ) {}
 
   run(sink: ISink<readonly T[]>, scheduler: IScheduler): Disposable {
-    const bufferSink = new BufferEventsSink(sink, scheduler, this.options.period, this.options.maxSize)
+    const bufferSink = new BufferEventsSink(
+      sink,
+      scheduler,
+      this.options.period,
+      this.options.maxSize,
+      this.options.prune
+    )
     const sourceDisposable = this.source.run(bufferSink, scheduler)
 
     return disposeBoth(bufferSink, sourceDisposable)
@@ -65,7 +82,8 @@ class BufferEventsSink<T> implements ISink<T>, Disposable {
     readonly sink: ISink<readonly T[]>,
     readonly scheduler: IScheduler,
     readonly period: number,
-    readonly maxSize = 1000
+    readonly maxSize = 1000,
+    readonly prune = false
   ) {}
 
   event(value: T): void {
@@ -77,22 +95,14 @@ class BufferEventsSink<T> implements ISink<T>, Disposable {
 
     this.buffer.push(value)
 
-    // Handle overflow - emit maxSize items and keep excess for next period
-    if (this.buffer.length > this.maxSize) {
-      // Create array with exactly maxSize items
-      const toEmit = new Array(this.maxSize)
+    // Pruning mode: keep only the newest maxSize events
+    if (this.prune && this.buffer.length > this.maxSize) {
+      // Shift buffer to keep only the newest maxSize events
+      const excess = this.buffer.length - this.maxSize
       for (let i = 0; i < this.maxSize; i++) {
-        toEmit[i] = this.buffer[i]
+        this.buffer[i] = this.buffer[i + excess]
       }
-
-      // Shift remaining items to the beginning
-      const remaining = this.buffer.length - this.maxSize
-      for (let i = 0; i < remaining; i++) {
-        this.buffer[i] = this.buffer[i + this.maxSize]
-      }
-      this.buffer.length = remaining
-
-      this.sink.event(toEmit)
+      this.buffer.length = this.maxSize
     }
   }
 
@@ -135,13 +145,30 @@ function emitPeriodically<T>(sink: ISink<readonly T[]>, bufferSink: BufferEvents
   // Emit buffer if not empty
   const len = bufferSink.buffer.length
   if (len > 0) {
-    // Always create a copy to maintain immutability
-    const events = new Array(len)
-    for (let i = 0; i < len; i++) {
+    // Emit at most maxSize items per period
+    const emitCount = Math.min(len, bufferSink.maxSize)
+    const events = new Array(emitCount)
+    for (let i = 0; i < emitCount; i++) {
       events[i] = bufferSink.buffer[i]
     }
     sink.event(events)
-    bufferSink.buffer.length = 0
+
+    // Keep remaining items for next period (unless pruning)
+    if (bufferSink.prune) {
+      // Pruning mode: clear buffer after each emission
+      bufferSink.buffer.length = 0
+    } else {
+      // Default mode: keep excess events for next period
+      const remaining = len - emitCount
+      if (remaining > 0) {
+        for (let i = 0; i < remaining; i++) {
+          bufferSink.buffer[i] = bufferSink.buffer[i + emitCount]
+        }
+        bufferSink.buffer.length = remaining
+      } else {
+        bufferSink.buffer.length = 0
+      }
+    }
   }
 
   // Check if we should end the stream (after potentially emitting)
