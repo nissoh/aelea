@@ -14,10 +14,10 @@ class Periodic<T> implements IStream<T> {
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
     let active = true
 
-    const emitNext = () => {
+    const emitNext = (time: number) => {
       if (!active) return
 
-      sink.event(this.value)
+      sink.event(time, this.value)
 
       if (active) {
         disposable = scheduler.delay(propagateRunTask(sink, emitNext), this.period)

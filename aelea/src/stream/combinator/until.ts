@@ -78,16 +78,16 @@ class UntilSink implements ISink<unknown> {
     readonly disposable: Disposable
   ) {}
 
-  event(): void {
+  event(time: number): void {
     this.disposable[Symbol.dispose]()
-    this.sink.end()
+    this.sink.end(time)
   }
 
-  error(e: any): void {
-    this.sink.error(e)
+  error(time: number, e: any): void {
+    this.sink.error(time, e)
   }
 
-  end(): void {
+  end(time: number): void {
     // Don't end main stream if signal ends
   }
 }
@@ -100,9 +100,9 @@ class SinceSink<A> extends PipeSink<A> {
     super(sink)
   }
 
-  event(x: A): void {
+  event(time: number, x: A): void {
     if (this.min.allow) {
-      this.sink.event(x)
+      this.sink.event(time, x)
     }
   }
 }
@@ -119,16 +119,16 @@ class LowerBoundSink<A> implements ISink<unknown>, Disposable {
     this.disposable = signal.run(this, scheduler)
   }
 
-  event(): void {
+  event(time: number): void {
     this.allow = true
     this[Symbol.dispose]()
   }
 
-  error(e: any): void {
-    this.sink.error(e)
+  error(time: number, e: any): void {
+    this.sink.error(time, e)
   }
 
-  end(): void {
+  end(time: number): void {
     // Don't propagate end from signal
   }
 

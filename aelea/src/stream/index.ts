@@ -3,7 +3,6 @@ export * from './scheduler/index.js'
 export * from './source/index.js'
 export type {
   Fn,
-  ICreateStream,
   IOps,
   IScheduler,
   ISink,

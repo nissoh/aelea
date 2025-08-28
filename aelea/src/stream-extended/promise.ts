@@ -34,7 +34,7 @@ class PromiseStateSink<T> implements ISink<Promise<T>>, Disposable {
 
   constructor(readonly sink: ISink<PromiseState<T>>) {}
 
-  event(promise: Promise<T>): void {
+  event(time: number, promise: Promise<T>): void {
     this.latestPromise = promise
 
     // Cancel previous pending operations if supported
@@ -43,7 +43,7 @@ class PromiseStateSink<T> implements ISink<Promise<T>>, Disposable {
 
     if (!this.isPending) {
       this.isPending = true
-      this.sink.event({ status: PromiseStatus.PENDING })
+      this.sink.event(time, { status: PromiseStatus.PENDING })
     }
 
     promise.then(
@@ -61,25 +61,27 @@ class PromiseStateSink<T> implements ISink<Promise<T>>, Disposable {
     if (promise !== this.latestPromise) return
 
     this.isPending = false
-    this.sink.event(state)
+    // We need to get current time for the event
+    const currentTime = Date.now()
+    this.sink.event(currentTime, state)
 
     // If source has ended and this was the last pending promise, end the stream
     if (this.sourceEnded) {
-      this.sink.end()
+      this.sink.end(currentTime)
     }
   }
 
-  end(): void {
+  end(time: number): void {
     this.sourceEnded = true
     // Only end immediately if no promise is pending
     if (!this.isPending) {
-      this.sink.end()
+      this.sink.end(time)
     }
     // Otherwise, wait for the pending promise to complete in handleResult
   }
 
-  error(e: unknown): void {
-    this.sink.error(e)
+  error(time: number, e: unknown): void {
+    this.sink.error(time, e)
   }
 
   [Symbol.dispose](): void {

@@ -51,43 +51,36 @@ class Join<A, B> implements ISink<A>, Disposable {
     this.disposable = source.run(this, scheduler)
   }
 
-  event(x: A): void {
-    this.addInner(x)
-  }
-
-  addInner(x: A): void {
+  event(time: number, x: A): void {
     if (this.current.length < this.concurrency) {
-      this.startInner(x)
+      this.startInner(time, x)
     } else {
       this.pending.push(x)
     }
   }
 
-  startInner(x: A): void {
+  startInner(time: number, value: A): void {
     try {
-      this.initInner(x)
+      const innerSink = new Inner(this, this.sink)
+      const innerStream = this.f(value)
+      innerSink.disposable = innerStream.run(innerSink, this.scheduler)
+      this.current.push(innerSink)
     } catch (e) {
-      this.error(e)
+      this.error(time, e)
     }
   }
 
-  initInner(x: A): void {
-    const innerSink = new Inner(this, this.sink)
-    const innerStream = this.f(x)
-    innerSink.disposable = innerStream.run(innerSink, this.scheduler)
-    this.current.push(innerSink)
-  }
-
-  end(): void {
+  end(time: number): void {
     this.active = false
-    this.checkEnd()
+    this.checkEnd(time)
   }
 
-  error(e: any): void {
+  error(time: number, e: any): void {
     // Don't set active = false - allow stream to continue after error
-    this.sink.error(e)
+    this.sink.error(time, e)
   }
-  endInner(inner: Inner<B>): void {
+
+  endInner(time: number, inner: Inner<B>): void {
     const i = this.current.indexOf(inner)
     if (i >= 0) {
       this.current.splice(i, 1)
@@ -95,15 +88,15 @@ class Join<A, B> implements ISink<A>, Disposable {
     inner[Symbol.dispose]()
 
     if (this.pending.length > 0) {
-      this.startInner(this.pending.shift()!)
+      this.startInner(time, this.pending.shift()!)
     } else {
-      this.checkEnd()
+      this.checkEnd(time)
     }
   }
 
-  checkEnd(): void {
+  checkEnd(time: number): void {
     if (!this.active && this.current.length === 0) {
-      this.sink.end()
+      this.sink.end(time)
     }
   }
 
@@ -123,16 +116,16 @@ class Inner<A> implements ISink<A>, Disposable {
     readonly sink: ISink<A>
   ) {}
 
-  event(x: A): void {
-    this.sink.event(x)
+  event(time: number, x: A): void {
+    this.sink.event(time, x)
   }
 
-  end(): void {
-    this.parentJoin.endInner(this)
+  end(time: number): void {
+    this.parentJoin.endInner(time, this)
   }
 
-  error(e: any): void {
-    this.parentJoin.error(e)
+  error(time: number, e: any): void {
+    this.parentJoin.error(time, e)
   }
 
   [Symbol.dispose](): void {

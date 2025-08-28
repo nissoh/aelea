@@ -51,36 +51,31 @@ export const tether = <T>(source: IStream<T>, replayLatest = false): [IStream<T>
   return [new PrimaryStream(source, tetherStream), tetherStream]
 }
 
-function emitCachedValue<T>(sink: ISink<T>, value: T): void {
-  sink.event(value)
+function emitCachedValue<T>(time: number, sink: ISink<T>, value: T): void {
+  sink.event(time, value)
 }
 
 class TetherSink<T> implements ISink<T> {
   constructor(
     readonly primarySink: ISink<T>,
     readonly tether: Tether<T>
-  ) {
-    // Emit cached value if tether has one
-    if (this.tether.hasValue) {
-      this.primarySink.event(this.tether.latestValue!)
-    }
-  }
+  ) {}
 
-  event(value: T): void {
-    this.primarySink.event(value)
+  event(time: number, value: T): void {
+    this.primarySink.event(time, value)
     this.tether.latestValue = value
     this.tether.hasValue = true
-    this.tether.event(value)
+    this.tether.event(time, value)
   }
 
-  end(): void {
-    this.primarySink.end()
-    this.tether.end()
+  end(time: number): void {
+    this.primarySink.end(time)
+    this.tether.end(time)
   }
 
-  error(err: Error): void {
-    this.primarySink.error(err)
-    this.tether.error(err)
+  error(time: number, err: Error): void {
+    this.primarySink.error(time, err)
+    this.tether.error(time, err)
   }
 }
 
@@ -93,6 +88,12 @@ class PrimaryStream<T> implements IStream<T> {
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
     // Each subscription gets its own TetherSink
     const tetherSink = new TetherSink(sink, this.tether)
+
+    // Emit cached value if tether has one
+    if (this.tether.hasValue) {
+      const currentTime = scheduler.time()
+      sink.event(currentTime, this.tether.latestValue!)
+    }
 
     return this.source.run(tetherSink, scheduler)
   }

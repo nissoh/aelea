@@ -12,22 +12,27 @@ export function spreadArray<T>(source: IStream<T[]>): IStream<T> {
 }
 
 class SpreadArraySink<T> extends PipeSink<T[], T> {
-  event(items: T[]): void {
+  event(time: number, items: T[]): void {
+    if (!Array.isArray(items)) {
+      this.sink.error(time, new Error('spreadArray: source stream must emit arrays'))
+      return
+    }
+
     const len = items.length
     // Manual unrolling for common small arrays (micro-optimization)
     switch (len) {
       case 0:
         return
       case 1:
-        this.sink.event(items[0])
+        this.sink.event(time, items[0])
         return
       case 2:
-        this.sink.event(items[0])
-        this.sink.event(items[1])
+        this.sink.event(time, items[0])
+        this.sink.event(time, items[1])
         return
       default:
         for (let i = 0; i < len; i++) {
-          this.sink.event(items[i])
+          this.sink.event(time, items[i])
         }
     }
   }

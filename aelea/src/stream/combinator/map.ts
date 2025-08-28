@@ -38,17 +38,17 @@ class MapSink<I, O> extends PipeSink<I, O> {
     super(sink)
   }
 
-  event(value: I) {
-    eventTryMap(this.sink, this.f, value)
+  event(time: number, value: I) {
+    eventTryMap(this.sink, time, this.f, value)
   }
 }
 
-export function eventTryMap<In, Out>(sink: ISink<Out>, f: (value: In) => Out, value: In): void {
+export function eventTryMap<In, Out>(sink: ISink<Out>, time: number, f: (value: In) => Out, value: In): void {
   try {
     const transformed = f(value)
-    sink.event(transformed)
+    sink.event(time, transformed)
   } catch (error) {
-    sink.error(error)
+    sink.error(time, error)
   }
 }
 

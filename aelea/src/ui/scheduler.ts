@@ -34,15 +34,17 @@ class DomScheduler implements I$Scheduler {
     const tasks = this.asapTasks
     this.asapTasks = []
 
-    for (const task of tasks) task.run()
+    const time = this.time()
+
+    for (const task of tasks) task.run(time)
   }
 
-  flushPaintTasks = (): void => {
+  flushPaintTasks = (time: DOMHighResTimeStamp): void => {
     this.paintScheduled = false
     const tasks = this.paintTasks
     this.paintTasks = []
 
-    for (const task of tasks) task.run()
+    for (const task of tasks) task.run(time)
   }
 
   delay(task: ITask, delay: number): Disposable {

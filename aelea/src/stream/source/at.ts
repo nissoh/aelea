@@ -16,9 +16,9 @@ class At<T> implements IStream<T> {
   }
 }
 
-function emitOnce<T>(sink: ISink<T>, value: T) {
-  sink.event(value)
-  sink.end()
+function emitOnce<T>(time: number, sink: ISink<T>, value: T) {
+  sink.event(time, value)
+  sink.end(time)
 }
 
 export const at: IAtCurry = curry2((delay, value) => new At(delay, value))

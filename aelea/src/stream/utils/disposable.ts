@@ -77,10 +77,10 @@ class DisposeOnce implements Disposable {
 
 // Try to dispose the disposable.  If it throws, send
 // the error to sink.error with the provided Time value
-export const tryDispose = curry2((disposable: Disposable, sink: ISink<unknown>): void => {
+export const tryDispose = (time: number, disposable: Disposable, sink: ISink<unknown>): void => {
   try {
     disposable[Symbol.dispose]()
   } catch (e) {
-    sink.error(e)
+    sink.error(time, e)
   }
-})
+}

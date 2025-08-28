@@ -86,7 +86,7 @@ class BufferEventsSink<T> implements ISink<T>, Disposable {
     readonly prune = false
   ) {}
 
-  event(value: T): void {
+  event(time: number, value: T): void {
     // Start periodic emissions on first event
     if (!this.emitting) {
       this.emitting = true
@@ -106,11 +106,11 @@ class BufferEventsSink<T> implements ISink<T>, Disposable {
     }
   }
 
-  error(err: unknown): void {
-    this.sink.error(err)
+  error(time: number, err: unknown): void {
+    this.sink.error(time, err)
   }
 
-  end(): void {
+  end(time: number): void {
     this.sourceEnded = true
 
     // If buffer is empty, end immediately
@@ -119,7 +119,7 @@ class BufferEventsSink<T> implements ISink<T>, Disposable {
       this.emitting = false
       this.scheduledTask[Symbol.dispose]()
       this.scheduledTask = disposeNone
-      this.sink.end()
+      this.sink.end(time)
     }
     // Otherwise let the scheduled task handle ending when buffer empties
   }
@@ -135,7 +135,7 @@ class BufferEventsSink<T> implements ISink<T>, Disposable {
 }
 
 // Static function to avoid closure creation
-function emitPeriodically<T>(sink: ISink<readonly T[]>, bufferSink: BufferEventsSink<T>): void {
+function emitPeriodically<T>(time: number, sink: ISink<readonly T[]>, bufferSink: BufferEventsSink<T>): void {
   // Clear any existing scheduled task before proceeding
   bufferSink.scheduledTask = disposeNone
 
@@ -151,7 +151,7 @@ function emitPeriodically<T>(sink: ISink<readonly T[]>, bufferSink: BufferEvents
     for (let i = 0; i < emitCount; i++) {
       events[i] = bufferSink.buffer[i]
     }
-    sink.event(events)
+    sink.event(time, events)
 
     // Keep remaining items for next period (unless pruning)
     if (bufferSink.prune) {
@@ -173,7 +173,7 @@ function emitPeriodically<T>(sink: ISink<readonly T[]>, bufferSink: BufferEvents
 
   // Check if we should end the stream (after potentially emitting)
   if (bufferSink.sourceEnded && bufferSink.buffer.length === 0) {
-    sink.end()
+    sink.end(time)
     return
   }
 

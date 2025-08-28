@@ -39,11 +39,11 @@ class SkipSink<T> extends PipeSink<T> {
     super(sink)
   }
 
-  event(value: T): void {
+  event(time: number, value: T): void {
     if (this.skipped < this.n) {
       this.skipped++
     } else {
-      this.sink.event(value)
+      this.sink.event(time, value)
     }
   }
 }

@@ -35,11 +35,11 @@ class DelaySink<T> extends PipeSink<T> implements Disposable {
     super(sink)
   }
 
-  event(value: T): void {
+  event(time: number, value: T): void {
     this.disposableList.push(this.scheduler.delay(propagateRunEventTask(this.sink, emitDelay, value), this.n))
   }
 
-  override end(): void {
+  override end(time: number): void {
     this.disposableList.push(this.scheduler.delay(propagateEndTask(this.sink), this.n))
   }
 
@@ -48,8 +48,8 @@ class DelaySink<T> extends PipeSink<T> implements Disposable {
   }
 }
 
-function emitDelay<T>(sink: ISink<T>, value: T): void {
-  sink.event(value)
+function emitDelay<T>(time: number, sink: ISink<T>, value: T): void {
+  sink.event(time, value)
 }
 
 export interface IDelayCurry {

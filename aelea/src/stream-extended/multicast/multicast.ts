@@ -70,8 +70,8 @@ export class MulticastSource<T> extends MulticastSink<T> implements Disposable, 
     d[Symbol.dispose]()
   }
 
-  end(): void {
-    super.end()
+  end(time: number): void {
+    super.end(time)
     this[Symbol.dispose]()
   }
 }

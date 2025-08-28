@@ -32,13 +32,13 @@ class AggregateSink<I, S, O> extends PipeSink<I, O> {
     super(sink)
   }
 
-  event(value: I) {
+  event(time: number, value: I) {
     try {
       const result = this.step(this.seed, value)
       this.seed = result.seed
-      this.sink.event(result.value)
+      this.sink.event(time, result.value)
     } catch (error) {
-      this.sink.error(error)
+      this.sink.error(time, error)
     }
   }
 }

@@ -35,12 +35,10 @@ class ThrottleSink<T> extends PipeSink<T> {
     super(sink)
   }
 
-  event(value: T): void {
-    const now = this.scheduler.time()
-
-    if (now >= this.lastTime + this.period) {
-      this.lastTime = now
-      this.sink.event(value)
+  event(time: number, value: T): void {
+    if (time >= this.lastTime + this.period) {
+      this.lastTime = time
+      this.sink.event(time, value)
     }
   }
 }

@@ -35,7 +35,7 @@ class BranchEffectsSink implements ISink<INode | ISlottable> {
     readonly segmentsCount: number[]
   ) {}
 
-  event(childNode: INode) {
+  event(time: number, childNode: INode) {
     try {
       childNode.disposable.set(
         disposeWith(nodeToRemove => {
@@ -115,7 +115,7 @@ class BranchEffectsSink implements ISink<INode | ISlottable> {
     this.segmentsSlotList[this.segmentPosition].set(childNode, disposeAll([...childDisposables, newDisp]))
   }
 
-  end() {
+  end(time: number) {
     // // Dispose all segment disposables
     // for (const s of this.segmentsSlotList) {
     //   for (const d of s.values()) {
@@ -127,7 +127,7 @@ class BranchEffectsSink implements ISink<INode | ISlottable> {
     // this.segmentsSlotList.length = 0
   }
 
-  error(err: Error) {
+  error(time: number, err: unknown) {
     console.error(err)
   }
 }

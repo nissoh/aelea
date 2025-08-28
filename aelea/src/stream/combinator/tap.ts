@@ -33,13 +33,13 @@ class TapSink<T> extends PipeSink<T> {
     super(sink)
   }
 
-  event(value: T) {
+  event(time: number, value: T) {
     try {
       this.f(value)
     } catch (error) {
-      this.sink.error(error)
+      this.sink.error(time, error)
       return
     }
-    this.sink.event(value)
+    this.sink.event(time, value)
   }
 }

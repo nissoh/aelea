@@ -29,8 +29,8 @@ function createNodeSource<A, B extends INodeElement>(
   })
 }
 
-export function emitNode<T>(sink: ISink<T>, value: T): void {
-  sink.event(value)
+export function emitNode<T>(time: number, sink: ISink<T>, value: T): void {
+  sink.event(time, value)
 }
 
 export function createNode<A, B extends INodeElement>(

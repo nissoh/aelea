@@ -71,21 +71,21 @@ class SwitchSink<T> implements ISink<IStream<T>>, Disposable {
     this.innerSink = new InnerSink(this, sink)
   }
 
-  event(inner: IStream<T>): void {
+  event(time: number, inner: IStream<T>): void {
     this.disposeInner()
     this.innerDisposable = inner.run(this.innerSink, this.scheduler)
   }
 
-  error(error: any): void {
-    this.sink.error(error)
+  error(time: number, error: any): void {
+    this.sink.error(time, error)
   }
 
-  end(): void {
+  end(time: number): void {
     this.sourceEnded = true
 
     // Only end if no inner stream is active
     // Otherwise, ride inner stream until completion
-    if (this.innerDisposable === disposeNone) this.sink.end()
+    if (this.innerDisposable === disposeNone) this.sink.end(time)
   }
 
   [Symbol.dispose](): void {
@@ -106,19 +106,19 @@ class InnerSink<T> implements ISink<T> {
     readonly sink: ISink<T>
   ) {}
 
-  event(value: T): void {
-    this.sink.event(value)
+  event(time: number, value: T): void {
+    this.sink.event(time, value)
   }
 
-  error(error: any): void {
-    this.sink.error(error)
+  error(time: number, error: any): void {
+    this.sink.error(time, error)
   }
 
-  end(): void {
+  end(time: number): void {
     this.parent.innerDisposable = disposeNone
     // End the output only if the source stream has already ended
     if (this.parent.sourceEnded) {
-      this.sink.end()
+      this.sink.end(time)
     }
   }
 }

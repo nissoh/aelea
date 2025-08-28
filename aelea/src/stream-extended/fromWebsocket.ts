@@ -66,7 +66,7 @@ class FromWebSocket<I, O> implements IStream<O> {
       if (disposed) return
 
       const errorMessage = error instanceof ErrorEvent ? error.message : `WebSocket error: ${error.type}`
-      sink.error(new Error(errorMessage))
+      sink.error(scheduler.time(), new Error(errorMessage))
 
       if (socket.readyState === WebSocket.CLOSED || socket.readyState === WebSocket.CLOSING) {
         dispose()
@@ -77,9 +77,9 @@ class FromWebSocket<I, O> implements IStream<O> {
       if (disposed) return
 
       try {
-        sink.event(deserializer(msg.data))
+        sink.event(scheduler.time(), deserializer(msg.data))
       } catch (parseError) {
-        sink.error(new Error(`Parse error: ${parseError}`))
+        sink.error(scheduler.time(), new Error(`Parse error: ${parseError}`))
       }
     }
 
@@ -95,7 +95,7 @@ class FromWebSocket<I, O> implements IStream<O> {
           try {
             socket.send(serializer(value))
           } catch (sendError) {
-            sink.error(new Error(`WebSocket send error: ${sendError}`))
+            sink.error(scheduler.time(), new Error(`WebSocket send error: ${sendError}`))
           }
         }, this.input).run(nullSink, scheduler)
       }
@@ -109,6 +109,7 @@ class FromWebSocket<I, O> implements IStream<O> {
         const closeReason = event.reason || 'No reason provided'
 
         sink.error(
+          scheduler.time(),
           new Error(
             `WebSocket closed unexpectedly after ${connectionDuration}ms - Code: ${event.code}, Reason: ${closeReason}`
           )

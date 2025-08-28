@@ -51,13 +51,13 @@ class SampleMapSink<A, B, C> extends PipeSink<B, C> {
     this.seedSink = new SeedSink(this)
   }
 
-  event(x: B): void {
+  event(time: number, x: B): void {
     if (this.seedSink.hasValue) {
       try {
         const result = this.f(this.seedSink.value!, x)
-        this.sink.event(result)
+        this.sink.event(time, result)
       } catch (error) {
-        this.sink.error(error)
+        this.sink.error(time, error)
       }
     }
   }
@@ -69,16 +69,16 @@ class SeedSink<A> implements ISink<A> {
 
   constructor(readonly sink: ISink<unknown>) {}
 
-  event(x: A): void {
+  event(time: number, x: A): void {
     this.value = x
     this.hasValue = true
   }
 
-  error(e: any): void {
-    this.sink.error(e)
+  error(time: number, e: any): void {
+    this.sink.error(time, e)
   }
 
-  end(): void {
+  end(time: number): void {
     // Don't propagate end from values stream
   }
 }

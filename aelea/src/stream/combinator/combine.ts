@@ -112,13 +112,13 @@ class CombineMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
     this.hasValue = new Array(sinkCount).fill(false)
   }
 
-  event(indexedValue: IndexedValue<I>): void {
+  event(time: number, indexedValue: IndexedValue<I>): void {
     const i = indexedValue.index
 
     if (!indexedValue.active) {
       this.disposables[i][Symbol.dispose]()
       if (--this.activeCount === 0) {
-        this.sink.end()
+        this.sink.end(time)
       }
       return
     }
@@ -132,18 +132,18 @@ class CombineMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
 
     this.values[i] = indexedValue.value
     if (this.awaiting === 0) {
-      this.sink.event(this.f(...this.values))
+      this.sink.event(time, this.f(...this.values))
     }
   }
 
-  error(e: any): void {
-    this.sink.error(e)
+  error(time: number, e: any): void {
+    this.sink.error(time, e)
   }
 
-  end(): void {
+  end(time: number): void {
     // This should not be called directly as combineMap manages its own lifecycle
     // through activeCount tracking
     // If we reach here, it means all sources ended without errors
-    this.sink.end()
+    this.sink.end(time)
   }
 }

@@ -17,9 +17,9 @@ class FromCallback<T, FnArgs extends any[] = T[]> implements IStream<T> {
       const maybeDisposable = this.callbackFunction.call(this.context, (...args: FnArgs) => {
         try {
           const value = this.mapFn(...args)
-          sink.event(value)
+          sink.event(scheduler.time(), value)
         } catch (error) {
-          sink.error(error)
+          sink.error(scheduler.time(), error)
         }
       })
 

@@ -57,13 +57,13 @@ class MotionSink implements ISink<number>, Disposable {
     this.sourceDisposable = position.run(this, scheduler)
   }
 
-  event(target: number): void {
+  event(time: number, target: number): void {
     this.target = target
 
     if (!this.initialized) {
       this.initialized = true
       this.position = target
-      this.sink.event(target)
+      this.sink.event(time, target)
     }
 
     if (!this.animating) {
@@ -72,17 +72,17 @@ class MotionSink implements ISink<number>, Disposable {
     }
   }
 
-  error(err: unknown): void {
-    this.sink.error(err)
+  error(time: number, err: unknown): void {
+    this.sink.error(time, err)
   }
 
-  end(): void {
+  end(time: number): void {
     this.sourceEnded = true
 
     if (this.animating) return
 
     this.rafDisposable[Symbol.dispose]()
-    this.sink.end()
+    this.sink.end(time)
   }
 
   [Symbol.dispose](): void {
@@ -91,7 +91,7 @@ class MotionSink implements ISink<number>, Disposable {
   }
 }
 
-function animate(sink: ISink<number>, ms: MotionSink): void {
+function animate(time: number, sink: ISink<number>, ms: MotionSink): void {
   const delta = ms.target - ms.position
   const absDelta = Math.abs(delta)
   const absVelocity = Math.abs(ms.velocity)
@@ -103,10 +103,10 @@ function animate(sink: ISink<number>, ms: MotionSink): void {
     ms.animating = false
     ms.rafDisposable = disposeNone
 
-    sink.event(ms.target)
+    sink.event(time, ms.target)
 
     if (ms.sourceEnded) {
-      sink.end()
+      sink.end(time)
     }
     return
   }
@@ -118,7 +118,7 @@ function animate(sink: ISink<number>, ms: MotionSink): void {
   ms.velocity += acceleration * ms.dt
   ms.position += ms.velocity * ms.dt
 
-  sink.event(ms.position)
+  sink.event(time, ms.position)
   ms.rafDisposable = ms.scheduler.paint(propagateRunEventTask(sink, animate, ms))
 }
 

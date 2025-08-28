@@ -36,25 +36,25 @@ class DebounceSink<T> implements ISink<T>, Disposable {
     readonly dt: number
   ) {}
 
-  event(value: T): void {
+  event(time: number, value: T): void {
     this.clearTimer()
     this.pendingValue = { value }
     this.timer = this.scheduler.delay(propagateRunEventTask(this.sink, emitDebounced, this), this.dt)
   }
 
-  error(e: Error): void {
+  error(time: number, e: Error): void {
     this.clearTimer()
-    this.sink.error(e)
+    this.sink.error(time, e)
   }
 
-  end(): void {
+  end(time: number): void {
     // Emit pending value if any
     if (this.timer !== null && this.pendingValue !== null) {
       this.clearTimer()
-      this.sink.event(this.pendingValue.value)
+      this.sink.event(time, this.pendingValue.value)
       this.pendingValue = null
     }
-    this.sink.end()
+    this.sink.end(time)
   }
 
   [Symbol.dispose](): void {
@@ -69,9 +69,9 @@ class DebounceSink<T> implements ISink<T>, Disposable {
   }
 }
 
-function emitDebounced<T>(sink: ISink<T>, debounceSink: DebounceSink<T>): void {
+function emitDebounced<T>(time: number, sink: ISink<T>, debounceSink: DebounceSink<T>): void {
   if (debounceSink.pendingValue !== null) {
-    sink.event(debounceSink.pendingValue.value)
+    sink.event(time, debounceSink.pendingValue.value)
     debounceSink.pendingValue = null
   }
   debounceSink.timer = null

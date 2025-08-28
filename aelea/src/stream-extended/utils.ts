@@ -1,18 +1,18 @@
 import type { ISink } from '../stream/index.js'
 
-export function tryEvent<T>(sink: ISink<T>, value: T): void {
+export function tryEvent<T>(sink: ISink<T>, time: number, value: T): void {
   try {
-    sink.event(value)
+    sink.event(time, value)
   } catch (e) {
-    sink.error(e)
+    sink.error(time, e)
   }
 }
 
-export function tryEnd(sink: ISink<unknown>): void {
+export function tryEnd(sink: ISink<unknown>, time: number): void {
   try {
-    sink.end()
+    sink.end(time)
   } catch (e) {
-    sink.error(e)
+    sink.error(time, e)
   }
 }
 

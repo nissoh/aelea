@@ -28,8 +28,9 @@ export class BrowserScheduler implements IScheduler {
     this.asapScheduled = false
     const tasks = this.asapTasks
     this.asapTasks = []
+    const time = this.time()
 
-    for (const task of tasks) task.run()
+    for (const task of tasks) task.run(time)
   }
 
   asap(task: ITask): Disposable {
@@ -44,7 +45,7 @@ export class BrowserScheduler implements IScheduler {
   }
 
   delay(task: ITask, delay: number): Disposable {
-    setTimeout(runTask, delay, task)
+    setTimeout(runTask, delay, this.time() + delay, task)
     return task
   }
 

@@ -48,7 +48,7 @@ class SkipRepeatsSink<T> extends PipeSink<T> {
     super(sink)
   }
 
-  event(value: T) {
+  event(time: number, value: T) {
     let shouldEmit = false
 
     if (!this.hasValue) {
@@ -57,7 +57,7 @@ class SkipRepeatsSink<T> extends PipeSink<T> {
       try {
         shouldEmit = !this.equals(this.previousValue, value)
       } catch (error) {
-        this.sink.error(error)
+        this.sink.error(time, error)
         return
       }
     }
@@ -65,7 +65,7 @@ class SkipRepeatsSink<T> extends PipeSink<T> {
     if (shouldEmit) {
       this.hasValue = true
       this.previousValue = value
-      this.sink.event(value)
+      this.sink.event(time, value)
     }
   }
 }

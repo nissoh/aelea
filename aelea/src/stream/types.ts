@@ -6,28 +6,23 @@ export interface IStream<T> {
 }
 
 /**
- * Factory function for creating a stream
+ * A scheduled task callback that receives a sink and optional arguments
  */
-export type ICreateStream<T> = <S extends IScheduler>(sink: ISink<T>, scheduler: S) => Disposable
+export interface ITask extends Disposable {
+  run(time: number): void
+  active: boolean
+}
 
 /**
  * Observer interface for consuming stream values
  */
 export interface ISink<T> {
-  event(value: T): void
-  error(error: unknown): void
-  end(): void
+  event(time: number, value: T): void
+  error(time: number, error: unknown): void
+  end(time: number): void
 }
 
 export type IRunTask<TArgs extends readonly unknown[]> = (...args: TArgs) => void
-
-/**
- * A scheduled task callback that receives a sink and optional arguments
- */
-export interface ITask extends Disposable {
-  run(): void
-  active: boolean
-}
 
 /**
  * Scheduler interface for controlling the timing and execution of stream events.

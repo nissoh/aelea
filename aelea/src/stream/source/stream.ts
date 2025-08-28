@@ -50,14 +50,14 @@ export const never: IStream<never> = new Never()
 
 export const empty: IStream<never> = new Empty()
 
-function emitNow<T>(sink: ISink<T>, value: T) {
-  sink.event(value)
-  sink.end()
+function emitNow<T>(time: number, sink: ISink<T>, value: T) {
+  sink.event(time, value)
+  sink.end(time)
 }
 
-function emitArray<T extends readonly unknown[]>(sink: ISink<T[number]>, arr: T): void {
+function emitArray<T extends readonly unknown[]>(time: number, sink: ISink<T[number]>, arr: T): void {
   for (const a of arr) {
-    sink.event(a)
+    sink.event(time, a)
   }
-  sink.end()
+  sink.end(time)
 }

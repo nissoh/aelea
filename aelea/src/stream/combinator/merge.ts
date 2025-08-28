@@ -49,29 +49,29 @@ class MergeSink<A> implements ISink<IndexedValue<A | undefined>> {
     public activeCount: number
   ) {}
 
-  event(indexValue: IndexedValue<A | undefined>): void {
+  event(time: number, indexValue: IndexedValue<A | undefined>): void {
     if (indexValue.active) {
-      this.sink.event(indexValue.value)
+      this.sink.event(time, indexValue.value)
     } else {
-      this.dispose(indexValue.index)
+      this.dispose(time, indexValue.index)
     }
   }
 
-  dispose(index: number): void {
+  dispose(time: number, index: number): void {
     this.disposables[index][Symbol.dispose]()
     if (--this.activeCount === 0) {
-      this.sink.end()
+      this.sink.end(time)
     }
   }
 
-  error(err: any): void {
-    this.sink.error(err)
+  error(time: number, err: any): void {
+    this.sink.error(time, err)
   }
 
-  end(): void {
+  end(time: number): void {
     // This should not be called directly as merge manages its own lifecycle
     // through activeCount tracking
     // If we reach here, it means all sources ended without errors
-    this.sink.end()
+    this.sink.end(time)
   }
 }

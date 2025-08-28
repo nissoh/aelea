@@ -22,7 +22,7 @@ class DynamicTextSink implements ISink<string>, Disposable {
     readonly scheduler: I$Scheduler
   ) {}
 
-  event(value: string): void {
+  event(time: number, value: string): void {
     if (this.textNode === null) {
       // First emission - create text node and emit it
       this.textNode = {
@@ -37,12 +37,12 @@ class DynamicTextSink implements ISink<string>, Disposable {
     }
   }
 
-  end(): void {
+  end(time: number): void {
     // this.sink.end()
   }
 
-  error(e: any): void {
-    this.sink.error(e)
+  error(time: number, e: unknown): void {
+    this.sink.error(time, e)
   }
 
   [Symbol.dispose](): void {
@@ -51,8 +51,8 @@ class DynamicTextSink implements ISink<string>, Disposable {
   }
 }
 
-function emitText(sink: ISink<ISlottable<Text>>, value: ISlottable<Text>): void {
-  sink.event(value)
+function emitText(time: number, sink: ISink<ISlottable<Text>>, value: ISlottable<Text>): void {
+  sink.event(time, value)
 }
 
 export const $text = (...textSourceList: (IStream<string> | string)[]): I$Text => {

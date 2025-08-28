@@ -35,15 +35,15 @@ class StateSink<A> extends PipeSink<A> {
     super(sink)
   }
 
-  event(x: A): void {
+  event(time: number, x: A): void {
     this.parent.latestValue = x
     this.parent.hasValue = true
-    this.sink.event(x)
+    this.sink.event(time, x)
   }
 }
 
-function emitState<A>(sink: ISink<A>, value: A): void {
-  sink.event(value)
+function emitState<A>(time: number, sink: ISink<A>, value: A): void {
+  sink.event(time, value)
 }
 
 export class ReplayLatest<A> implements IStream<A> {

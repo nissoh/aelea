@@ -3,14 +3,14 @@ import type { ISink } from '../types.js'
 export abstract class PipeSink<I, O = I> implements ISink<I> {
   constructor(readonly sink: ISink<O>) {}
 
-  abstract event(value: I): void
+  abstract event(time: number, value: I): void
 
-  error(e: any): void {
-    this.sink.error(e)
+  error(time: number, e: any): void {
+    this.sink.error(time, e)
   }
 
-  end(): void {
-    this.sink.end()
+  end(time: number): void {
+    this.sink.end(time)
   }
 }
 
@@ -29,22 +29,22 @@ export class IndexSink<A> implements ISink<A> {
     public index: number
   ) {}
 
-  event(x: A): void {
+  event(time: number, x: A): void {
     if (this.active) {
       this.value = x
-      this.sink.event(this)
+      this.sink.event(time, this)
     }
   }
 
-  end(): void {
+  end(time: number): void {
     if (!this.active) {
       return
     }
     this.active = false
-    this.sink.event(this)
+    this.sink.event(time, this)
   }
 
-  error(error: unknown): void {
-    this.sink.error(error)
+  error(time: number, error: unknown): void {
+    this.sink.error(time, error)
   }
 }

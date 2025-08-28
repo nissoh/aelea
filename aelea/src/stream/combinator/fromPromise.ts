@@ -7,21 +7,21 @@ import { disposeWith } from '../utils/disposable.js'
 class FromPromise<T> implements IStream<T> {
   constructor(readonly promise: Promise<T>) {}
 
-  run(sink: ISink<T>, _scheduler: IScheduler): Disposable {
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
     let disposed = false
 
     this.promise.then(
       value => {
         if (disposed) return
-
-        sink.event(value)
-        sink.end()
+        const time = scheduler.time()
+        sink.event(time, value)
+        sink.end(time)
       },
       error => {
         if (disposed) return
-
-        sink.error(error)
-        sink.end()
+        const time = scheduler.time()
+        sink.error(time, error)
+        sink.end(time)
       }
     )
 

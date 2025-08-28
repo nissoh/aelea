@@ -35,15 +35,15 @@ class ContinueWithSink<A, B> implements ISink<A> {
     readonly f: () => IStream<B>
   ) {}
 
-  event(value: A): void {
-    this.sink.event(value)
+  event(time: number, value: A): void {
+    this.sink.event(time, value)
   }
 
-  error(error: any): void {
-    this.sink.error(error)
+  error(time: number, error: any): void {
+    this.sink.error(time, error)
   }
 
-  end(): void {
+  end(time: number): void {
     if (this.disposable) {
       this.disposable[Symbol.dispose]()
     }
@@ -51,7 +51,7 @@ class ContinueWithSink<A, B> implements ISink<A> {
       const nextStream = this.f()
       this.disposable = nextStream.run(this.sink, this.scheduler)
     } catch (error) {
-      this.sink.error(error)
+      this.sink.error(time, error)
     }
   }
 

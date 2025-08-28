@@ -35,13 +35,13 @@ class AwaitPromisesSink<T> implements ISink<Promise<T>>, Disposable {
 
   constructor(readonly sink: ISink<T>) {}
 
-  event(promise: Promise<T>) {
+  event(time: number, promise: Promise<T>) {
     if (this.disposed) return
 
     this.queue = this.queue.then(() => promise.then(this.eventBound)).catch(this.errorBound)
   }
 
-  end() {
+  end(time: number) {
     if (this.disposed) return
 
     this.sourceEnded = true
@@ -49,33 +49,33 @@ class AwaitPromisesSink<T> implements ISink<Promise<T>>, Disposable {
     this.queue = this.queue.then(this.endBound).catch(this.errorBound)
   }
 
-  error(error: unknown): void {
+  error(time: number, error: unknown): void {
     if (this.disposed) return
 
-    this.sink.error(error)
+    this.sink.error(time, error)
   }
 
   // Pre-create closures to avoid creating them per event
   eventBound = (value: T): void => {
     if (!this.disposed) {
-      this.sink.event(value)
+      this.sink.event(0, value)
     }
   }
 
   endBound = (): void => {
     if (!this.disposed && !this.ended) {
       this.ended = true
-      this.sink.end()
+      this.sink.end(0)
     }
   }
 
   errorBound = (error: any): void => {
     if (!this.disposed) {
-      this.sink.error(error)
+      this.sink.error(0, error)
       // Only end if the source has ended
       if (this.sourceEnded && !this.ended) {
         this.ended = true
-        this.sink.end()
+        this.sink.end(0)
       }
     }
   };

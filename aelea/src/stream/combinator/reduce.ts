@@ -29,8 +29,8 @@ class Reduce<I, O> implements IStream<O> {
   }
 }
 
-function emitSeed<O>(sink: ISink<O>, value: O): void {
-  sink.event(value)
+function emitSeed<O>(time: number, sink: ISink<O>, value: O): void {
+  sink.event(time, value)
 }
 
 class ReduceSink<I, O> extends PipeSink<I, O> {
@@ -42,14 +42,14 @@ class ReduceSink<I, O> extends PipeSink<I, O> {
     super(sink)
   }
 
-  event(value: I) {
+  event(time: number, value: I) {
     try {
       this.accumulator = this.f(this.accumulator, value)
     } catch (error) {
-      this.sink.error(error)
+      this.sink.error(time, error)
       return
     }
-    this.sink.event(this.accumulator)
+    this.sink.event(time, this.accumulator)
   }
 }
 

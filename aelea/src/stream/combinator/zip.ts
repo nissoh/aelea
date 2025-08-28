@@ -122,13 +122,13 @@ class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
     readonly sink: ISink<O>
   ) {}
 
-  event(indexedValue: IndexedValue<I>): void {
+  event(time: number, indexedValue: IndexedValue<I>): void {
     const i = indexedValue.index
 
     if (!indexedValue.active) {
       const buffer = this.buffers[i]
       if (buffer.isEmpty()) {
-        this.sink.end()
+        this.sink.end(time)
       }
       return
     }
@@ -149,26 +149,26 @@ class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
       }
       try {
         const result = this.f(...values)
-        this.sink.event(result)
+        this.sink.event(time, result)
       } catch (error) {
-        this.sink.error(error)
+        this.sink.error(time, error)
       }
 
       if (this.ended()) {
-        this.sink.end()
+        this.sink.end(time)
       }
     }
   }
 
-  error(e: any): void {
-    this.sink.error(e)
+  error(time: number, e: any): void {
+    this.sink.error(time, e)
   }
 
-  end(): void {
+  end(time: number): void {
     // This should not be called directly as zipMap manages its own lifecycle
     // through activeCount tracking
     // If we reach here, it means all sources ended without errors
-    this.sink.end()
+    this.sink.end(time)
   }
 
   ended(): boolean {
