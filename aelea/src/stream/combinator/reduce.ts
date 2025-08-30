@@ -23,14 +23,8 @@ class Reduce<I, O> implements IStream<O> {
   ) {}
 
   run(sink: ISink<O>, scheduler: IScheduler): Disposable {
-    const initialEmitDisposable = scheduler.asap(propagateRunEventTask(sink, emitSeed, this.seed))
-    const sourceDisposable = this.source.run(new ReduceSink(this.f, this.seed, sink), scheduler)
-    return disposeBoth(initialEmitDisposable, sourceDisposable)
+    return this.source.run(new ReduceSink(this.f, this.seed, sink), scheduler)
   }
-}
-
-function emitSeed<O>(time: number, sink: ISink<O>, value: O): void {
-  sink.event(time, value)
 }
 
 class ReduceSink<I, O> extends PipeSink<I, O> {
