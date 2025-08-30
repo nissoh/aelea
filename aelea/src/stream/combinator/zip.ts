@@ -72,9 +72,13 @@ class ZipMap<T extends readonly unknown[], R> implements IStream<R> {
 /**
  * Combine values from multiple streams in lockstep
  *
- * streamA: -1---2---3------->
- * streamB: ---a---b---c----->
- * zipMap:  ---[1,a]-[2,b]-[3,c]->
+ * streamA: -1---2---3------>
+ * streamB: ---a---b---c---->
+ * zipMap:  ---A---B---C---->
+ *             |   |   |
+ *             |   |   +-- [3,c]
+ *             |   +-- [2,b]
+ *             +-- [1,a]
  */
 export function zipMap<T extends readonly unknown[], R>(
   f: (...args: T) => R,

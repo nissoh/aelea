@@ -7,12 +7,13 @@ import { map } from './map.js'
 /**
  * Combine multiple streams into an object stream
  *
- * temperature: -20-21-22-23->
- * humidity:    -45-46-47-48->
- * combine({
- *   temp: temperature,
- *   humidity: humidity
- * }):          -{temp:20,humidity:45}-{temp:21,humidity:45}-{temp:21,humidity:46}->
+ * temperature: -a-b-c->
+ * humidity:    -x-y-z->
+ * combine:     -A-B-C->
+ *               | | |
+ *               | | +-- {temp:b,humidity:y}
+ *               | +-- {temp:b,humidity:x}
+ *               +-- {temp:a,humidity:x}
  */
 export function combine<A>(
   state: {
@@ -28,9 +29,14 @@ export function combine<A>(
 /**
  * Combine latest values from multiple streams whenever any stream emits
  *
- * streamA:    -1---2-------3->
- * streamB:    ---a---b-c------>
- * combineMap: ---[1,a]-[2,a]-[2,b]-[2,c]-[3,c]->
+ * streamA:    -1---2|
+ * streamB:    ---a---b-c---->
+ * combineMap: ---A-B-C-D---->
+ *                | | | |
+ *                | | | +-- [2,c]
+ *                | | +-- [2,b]
+ *                | +-- [2,a]
+ *                +-- [1,a]
  */
 export function combineMap<T extends readonly unknown[], R>(
   f: (...args: T) => R,

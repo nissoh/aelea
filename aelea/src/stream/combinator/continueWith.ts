@@ -5,9 +5,9 @@ import { curry2 } from '../utils/function.js'
 /**
  * When stream ends, continue with values from another stream
  *
- * streamA:         -abc|
- * streamB:             123->
- * continueWith(f): -abc123->
+ * streamA:         -a-b-c|
+ * streamB:               -x-y-z->
+ * continueWith(f): -a-b-c-x-y-z->
  */
 export const continueWith: IContinueWithCurry = curry2((f, s) => new ContinueWith(f, s))
 

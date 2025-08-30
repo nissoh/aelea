@@ -12,8 +12,8 @@ export interface IStartCurry {
 /**
  * Prepend a value to the beginning of a stream
  *
- * stream:   -123->
- * start(a): a123->
+ * stream:   -x-y-z->
+ * start(a): a-x-y-z->
  */
 export const start: IStartCurry = curry2((value, stream) => merge(now(value), stream))
 
@@ -25,14 +25,14 @@ export interface IConstantCurry {
 /**
  * Replace all values in a stream with a constant
  *
- * stream:      abcd->
- * constant(x): xxxx->
+ * stream:      -a-b-c-d->
+ * constant(x): -x-x-x-x->
  */
 export const constant: IConstantCurry = curry2((value, stream) => map(() => value, stream)) /**
  * Prepend a computed value to the beginning of a stream
  *
- * stream:       0123->
- * startWith(f): a123->
+ * stream:       -x-y-z->
+ * startWith(f): a-x-y-z->
 
  */
 export const startWith: IStartWithCurry = curry2((f, stream) => merge(nowWith(f), stream))

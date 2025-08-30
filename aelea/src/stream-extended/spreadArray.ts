@@ -4,8 +4,12 @@ import { PipeSink } from '../stream/utils/sink.js'
 /**
  * Spreads a stream of arrays into a stream of individual elements
  *
- * stream:       --[1,2,3]--[4]--[5,6]-->
- * spreadArray:  --1-2-3----4----5-6---->
+ * stream:       --A-------B----C------>
+ * spreadArray:  --1-2-3---4----5-6---->
+ *                 |       |    |
+ *                 |       |    +-- [5,6]
+ *                 |       +-- [4]
+ *                 +-- [1,2,3]
  */
 export function spreadArray<T>(source: IStream<T[]>): IStream<T> {
   return new SpreadArrayStream(source)

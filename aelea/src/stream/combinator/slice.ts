@@ -6,8 +6,8 @@ import { take } from './take.js'
 /**
  * Take a slice of values from start index to end index
  *
- * stream:      01234567->
- * slice(2, 5): --234|
+ * stream:      -a-b-c-d-e-f->
+ * slice(2, 5): -----c-d-e|
  */
 export const slice: ISliceCurry = curry3((start, end, source) => {
   const count = Math.max(0, end - start)

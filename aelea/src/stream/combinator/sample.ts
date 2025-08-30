@@ -16,7 +16,11 @@ export const sample: ISampleCurry = curry2((values, sampler) => sampleMap(x => x
  *
  * values:     -1-2-3-4-5-6->
  * sampler:    ---a---b---c->
- * sampleMap:  ---[2,a]-[4,b]-[6,c]->
+ * sampleMap:  ---A---B---C->
+ *                |   |   |
+ *                |   |   +-- [6,c]
+ *                |   +-- [4,b]
+ *                +-- [2,a]
  */
 export const sampleMap: ISampleMapCurry = curry3((f, values, sampler) => new SampleMap(f, values, sampler))
 

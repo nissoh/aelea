@@ -27,8 +27,11 @@ export const skipRepeats = <T>(stream: IStream<T>): IStream<T> => skipRepeatsWit
 /**
  * Skip consecutive values that are equal according to provided function
  *
- * stream:             -{a:1}-{a:1}-{a:2}-{a:2}-{a:3}->
- * skipRepeatsWith(f): -{a:1}-------{a:2}-------{a:3}->
+ * stream:             -A-A-B-B-C->
+ * skipRepeatsWith(f): -A---B---C->
+ *   where A = {a:1}
+ *         B = {a:2}
+ *         C = {a:3}
  */
 export const skipRepeatsWith: ISkipRepeatsWithCurry = curry2((equals, source) => new SkipRepeatsWith(equals, source))
 

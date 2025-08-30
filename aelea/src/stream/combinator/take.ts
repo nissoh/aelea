@@ -19,8 +19,8 @@ class Take<T> implements IStream<T> {
 /**
  * Take only the first n values from a stream
  *
- * stream:   abcdef->
- * take(3):  abc|
+ * stream:   -a-b-c-d-e-f->
+ * take(3):  -a-b-c|
  */
 export const take: ITakeCurry = curry2((n, source) => new Take(n, source))
 
