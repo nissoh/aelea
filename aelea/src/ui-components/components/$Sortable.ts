@@ -1,6 +1,5 @@
 import {
   combineMap,
-  delay,
   filter,
   joinMap,
   map,
@@ -67,10 +66,7 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
     // This prevents stack overflow when drag events update the list
     const $listChangesWithInitial = startWith(
       config.$list,
-      delay(
-        0,
-        map(s => s.list, orderMulticat)
-      )
+      map(s => s.list, orderMulticat)
     )
     const draggingMotion = motion({ stiffness: 150, damping: 20 })
 

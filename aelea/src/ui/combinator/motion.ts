@@ -1,11 +1,4 @@
-import {
-  curry2,
-  disposeBoth,
-  PropagateTask,
-  type IScheduler,
-  type ISink,
-  type IStream
-} from '../../stream/index.js'
+import { curry2, disposeBoth, type IScheduler, type ISink, type IStream, PropagateTask } from '../../stream/index.js'
 import type { I$Scheduler } from '../types.js'
 
 interface MotionConfig {

@@ -1,5 +1,4 @@
 import type { ISink } from '../types.js'
-import { curry2 } from './function.js'
 
 /**
  * Create a Disposable that disposes the provided value using a dispose function

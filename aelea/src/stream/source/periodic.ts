@@ -1,5 +1,5 @@
-import { propagateRunEventTask, PropagateTask } from '../index.js'
-import type { IScheduler, ISink, IStream, ITask } from '../types.js'
+import { PropagateTask, propagateRunEventTask } from '../index.js'
+import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 
 interface IPeriodic<T> {
