@@ -64,7 +64,21 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                   syntacticDiagnostics
                 }: ModelChangeBehavior): Promise<I$Slottable> => {
                   if (semanticDiagnostics.length || syntacticDiagnostics.length) {
-                    return never
+                    const allDiagnostics = [...semanticDiagnostics, ...syntacticDiagnostics]
+                    
+                    return $column(style({ gap: '8px', padding: '8px' }))(
+                      ...allDiagnostics.map(diagnostic => {
+                        const severity = diagnostic.category === 1 ? '❌ Error' : '⚠️ Warning'
+                        const line = diagnostic.start ? model.getPositionAt(diagnostic.start).lineNumber : '?'
+                        const message = typeof diagnostic.messageText === 'string' 
+                          ? diagnostic.messageText 
+                          : diagnostic.messageText?.messageText || 'Unknown error'
+                        
+                        return $row(style({ gap: '8px', fontSize: '14px' }))(
+                          $text(`${severity} [Line ${line}]: ${message}`)
+                        )
+                      })
+                    )
                   }
 
                   const emittedFiles = await worker.getEmitOutput(model.uri.toString())
@@ -79,7 +93,6 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                   return value
                 }
               ),
-              filter(node => node !== never),
               start(
                 $node(style({ color: pallete.foreground, fontSize: '75%' }))($text('Loading Typescript Service...'))
               ),

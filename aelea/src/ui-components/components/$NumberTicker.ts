@@ -1,7 +1,6 @@
 import { reduce } from '../../stream/combinator/reduce.js'
 import {
   at,
-  constant,
   filterNull,
   type IStream,
   map,
@@ -97,7 +96,7 @@ export const $NumberTicker = ({
 
                 const { pos, dir } = state
                 const resetStyle = now({})
-                const decayColor = constant({}, at(1000))
+                const decayColor = at(1000, {})
 
                 // If this slot is before the change position, just reset
                 if (slot < pos) {

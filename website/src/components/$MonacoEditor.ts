@@ -1,15 +1,11 @@
 import {
   combine,
-  continueWith,
   delay,
-  empty,
   filter,
   fromCallback,
   fromPromise,
-  type IStream,
   merge,
   now,
-  o,
   skipRepeatsWith,
   switchMap,
   tap
@@ -384,16 +380,7 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
 
         instance.onDidContentSizeChange(updateHeight)
 
-        const worketStream: IStream<() => Promise<monaco.languages.typescript.TypeScriptWorker>> = o(
-          continueWith(() => {
-            return fromPromise(monacoGlobal.languages.typescript.getTypeScriptWorker())
-          })
-          // recoverWith((err) => {
-          //   console.error(err)
-          //   attempDuration += 100
-          //   return join(at(attempDuration, getWorkerStream))
-          // })
-        )(empty)
+        const worketStream = fromPromise(monacoGlobal.languages.typescript.getTypeScriptWorker())
 
         const $editor = $wrapNativeElement(editorElement)(
           style({ flexDirection: 'column', ...containerStyle }),

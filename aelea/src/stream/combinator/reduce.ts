@@ -29,10 +29,6 @@ class Reduce<I, O> implements IStream<O> {
   }
 }
 
-function emitSeed<O>(time: number, sink: ISink<O>, value: O): void {
-  sink.event(time, value)
-}
-
 class ReduceSink<I, O> extends PipeSink<I, O> {
   constructor(
     readonly f: ReduceFunction<I, O>,
@@ -51,6 +47,10 @@ class ReduceSink<I, O> extends PipeSink<I, O> {
     }
     this.sink.event(time, this.accumulator)
   }
+}
+
+function emitSeed<O>(time: number, sink: ISink<O>, value: O): void {
+  sink.event(time, value)
 }
 
 export type ReduceFunction<I, O> = (acc: O, value: I) => O
