@@ -36,8 +36,11 @@ class StateSink<A> extends PipeSink<A> {
   }
 
   event(time: number, x: A): void {
-    this.parent.latestValue = x
-    this.parent.hasValue = true
+    if (this.parent.latestValue === undefined) {
+      this.parent.latestValue = { value: x }
+    } else {
+      this.parent.latestValue.value = x
+    }
     this.sink.event(time, x)
   }
 }
@@ -47,16 +50,14 @@ function emitState<A>(time: number, sink: ISink<A>, value: A): void {
 }
 
 export class ReplayLatest<A> implements IStream<A> {
-  latestValue: A | undefined
-  hasValue = false
+  latestValue?: { value: A }
 
   constructor(
     readonly source: IStream<A>,
     readonly initialState?: A
   ) {
     if (initialState !== undefined) {
-      this.latestValue = initialState
-      this.hasValue = true
+      this.latestValue = { value: initialState }
     }
   }
 
@@ -65,8 +66,9 @@ export class ReplayLatest<A> implements IStream<A> {
     const sourceDisposable = this.source.run(new StateSink(this, sink), scheduler)
 
     // If we have a cached value, emit it asynchronously
-    if (this.hasValue) {
-      const cachedDisposable = scheduler.asap(propagateRunEventTask(sink, emitState, this.latestValue!))
+    const boxedValue = this.latestValue
+    if (boxedValue !== undefined) {
+      const cachedDisposable = scheduler.asap(propagateRunEventTask(sink, emitState, boxedValue.value))
       return disposeBoth(cachedDisposable, sourceDisposable)
     }
 

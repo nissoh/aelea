@@ -1,5 +1,4 @@
 import type { IScheduler, ITask } from '../types.js'
-import { runTask } from './PropagateTask.js'
 
 /**
  * Browser-optimized scheduler implementation using native queueMicrotask
@@ -24,6 +23,11 @@ export class BrowserScheduler implements IScheduler {
   asapTasks: ITask[] = []
   asapScheduled = false
 
+  // Arrow function for delayed task execution - created once per scheduler instance
+  runDelayedTask = (task: ITask): void => {
+    task.run(this.time())
+  }
+
   flushAsapTasks = (): void => {
     this.asapScheduled = false
     const tasks = this.asapTasks
@@ -45,7 +49,7 @@ export class BrowserScheduler implements IScheduler {
   }
 
   delay(task: ITask, delay: number): Disposable {
-    setTimeout(runTask, delay, this.time() + delay, task)
+    setTimeout(this.runDelayedTask, delay, task)
     return task
   }
 

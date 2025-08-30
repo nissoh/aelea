@@ -1,5 +1,4 @@
 import type { IScheduler, ITask } from '../types.js'
-import { runTask } from './PropagateTask.js'
 
 /**
  * Node.js optimized scheduler implementation
@@ -18,6 +17,11 @@ export class NodeScheduler implements IScheduler {
   // Task queues to avoid closures
   asapTasks: ITask[] = []
   asapScheduled = false
+
+  // Arrow function for delayed task execution - created once per scheduler instance
+  runDelayedTask = (task: ITask): void => {
+    task.run(this.time())
+  }
 
   flushAsapTasks = (): void => {
     this.asapScheduled = false
@@ -40,7 +44,7 @@ export class NodeScheduler implements IScheduler {
   }
 
   delay(task: ITask, delay: number): Disposable {
-    setTimeout(runTask, delay, this.time() + delay, task)
+    setTimeout(this.runDelayedTask, delay, task)
     return task
   }
 

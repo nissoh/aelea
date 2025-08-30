@@ -1,5 +1,4 @@
 import type { ITask } from '../stream/index.js'
-import { runTask } from '../stream/scheduler/PropagateTask.js'
 import type { I$Scheduler } from './types.js'
 
 /**
@@ -28,6 +27,10 @@ class DomScheduler implements I$Scheduler {
   asapScheduled = false
   paintScheduled = false
 
+  runDelayedTask = (task: ITask): void => {
+    task.run(this.time())
+  }
+
   // Arrow functions as instance properties - created once per scheduler instance
   flushAsapTasks = (): void => {
     this.asapScheduled = false
@@ -48,7 +51,7 @@ class DomScheduler implements I$Scheduler {
   }
 
   delay(task: ITask, delay: number): Disposable {
-    setTimeout(runTask, delay, task)
+    setTimeout(this.runDelayedTask, delay, task)
     return task
   }
 

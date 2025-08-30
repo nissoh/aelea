@@ -9,8 +9,9 @@ export interface IStream<T> {
  * A scheduled task callback that receives a sink and optional arguments
  */
 export interface ITask extends Disposable {
-  run(time: number): void
   active: boolean
+  run(time: number): void
+  error(time: number, e: Error): void
 }
 
 /**

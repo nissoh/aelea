@@ -25,6 +25,7 @@ class Delay<T> implements IStream<T> {
 export const delay: IDelayCurry = curry2((n, source) => new Delay(n, source))
 
 class DelaySink<T> extends PipeSink<T> implements Disposable {
+  private active = true
   readonly disposableList: Disposable[] = []
 
   constructor(
@@ -35,16 +36,20 @@ class DelaySink<T> extends PipeSink<T> implements Disposable {
     super(sink)
   }
 
-  event(time: number, value: T): void {
+  event(_time: number, value: T): void {
+    if (!this.active) return
     this.disposableList.push(this.scheduler.delay(propagateRunEventTask(this.sink, emitDelay, value), this.n))
   }
 
-  override end(time: number): void {
+  override end(_time: number): void {
+    if (!this.active) return
     this.disposableList.push(this.scheduler.delay(propagateEndTask(this.sink), this.n))
   }
 
   [Symbol.dispose](): void {
-    for (const d of this.disposableList.values()) d[Symbol.dispose]()
+    this.active = false
+    for (const d of this.disposableList) d[Symbol.dispose]()
+    this.disposableList.length = 0
   }
 }
 

@@ -23,9 +23,9 @@ class Reduce<I, O> implements IStream<O> {
   ) {}
 
   run(sink: ISink<O>, scheduler: IScheduler): Disposable {
-    const seedDisposable = scheduler.asap(propagateRunEventTask(sink, emitSeed, this.seed))
+    const initialEmitDisposable = scheduler.asap(propagateRunEventTask(sink, emitSeed, this.seed))
     const sourceDisposable = this.source.run(new ReduceSink(this.f, this.seed, sink), scheduler)
-    return disposeBoth(seedDisposable, sourceDisposable)
+    return disposeBoth(initialEmitDisposable, sourceDisposable)
   }
 }
 
