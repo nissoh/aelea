@@ -1,4 +1,4 @@
-import { o, sampleMap, startWith } from 'aelea/stream'
+import { o, sampleMap, start } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $svg, attr, component, type ISlottable, nodeEvent, style, stylePseudo } from 'aelea/ui'
 import { $icon } from 'aelea/ui-components'
@@ -7,7 +7,7 @@ import { setTheme } from 'aelea/ui-components-theme-browser'
 
 export const $Picker = (themeList: Theme[]) =>
   component(([changeThemeEffect, changeThemeEffectTether]: IBehavior<ISlottable, Theme>) => {
-    const currentTheme = startWith(theme, changeThemeEffect)
+    const currentTheme = start(theme, changeThemeEffect)
 
     return [
       o(

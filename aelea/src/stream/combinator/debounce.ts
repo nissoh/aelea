@@ -21,8 +21,8 @@ class Debounce<T> implements IStream<T> {
 /**
  * Wait for a pause in values before emitting the latest one
  *
- * stream:        -1-2-3-------4-5-------6->
- * debounce(3):   -------3---------5-------6->
+ * periodic():              abcd----abcd---->
+ * debounce(2, stream): -----d-------d-->
  */
 export const debounce: IDebounceCurry = curry2((period, source) => new Debounce(period, source))
 

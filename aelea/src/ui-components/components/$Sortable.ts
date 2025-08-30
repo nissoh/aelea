@@ -8,7 +8,7 @@ import {
   o,
   sampleMap,
   skipRepeats,
-  startWith,
+  start,
   switchLatest,
   until
 } from '../../stream/index.js'
@@ -64,7 +64,7 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
     const orderMulticat = multicast(orderChange)
     // Add delay(0) to break the synchronous circular dependency
     // This prevents stack overflow when drag events update the list
-    const $listChangesWithInitial = startWith(
+    const $listChangesWithInitial = start(
       config.$list,
       map(s => s.list, orderMulticat)
     )
@@ -98,9 +98,9 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
                 return now(s.delta)
               }
 
-              return draggingMotion(startWith(s.delta, now(s.list.indexOf($item) * iHeight)))
+              return draggingMotion(start(s.delta, now(s.list.indexOf($item) * iHeight)))
             }, multicastedDrag),
-            draggingMotion(startWith(i * iHeight, yMotion))
+            draggingMotion(start(i * iHeight, yMotion))
           )
 
           const applyTransformStyle = combineMap(
@@ -109,7 +109,7 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
             }),
             yDragPosition,
             draggingMotion(
-              startWith(
+              start(
                 1,
                 map(id => (id ? 1.1 : 1), isDraggingStream)
               )
@@ -121,7 +121,7 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
               boxShadow: `0px ${shadow}px ${shadow * 3}px 0px rgba(0, 0, 0, 0.25`
             }),
             draggingMotion(
-              startWith(
+              start(
                 0,
                 map(id => (id ? 5 : 0), isDraggingStream)
               )

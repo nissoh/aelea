@@ -406,7 +406,7 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
             filter(intersectionEvent => {
               return intersectionEvent[0].intersectionRatio > 0
             }),
-            switchMap(async elEvents => {
+            switchMap(elEvents => {
               const node = elEvents[0].target as HTMLElement
 
               const modelChangeWithDelay = delay(

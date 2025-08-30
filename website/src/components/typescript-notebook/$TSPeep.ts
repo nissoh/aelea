@@ -1,4 +1,4 @@
-import { debounce, empty, filter, fromArray, map, never, op, startWith, switchLatest, switchMap } from 'aelea/stream'
+import { debounce, empty, filter, fromArray, map, never, op, start, switchLatest, switchMap } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $custom, $node, $text, component, type I$Slottable, motion, style, styleInline } from 'aelea/ui'
 import { $column, $row } from 'aelea/ui-components'
@@ -80,7 +80,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                 }
               ),
               filter(node => node !== never),
-              startWith(
+              start(
                 $node(style({ color: pallete.foreground, fontSize: '75%' }))($text('Loading Typescript Service...'))
               ),
               switchLatest

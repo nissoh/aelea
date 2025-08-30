@@ -1,6 +1,6 @@
 import * as router from 'aelea/router'
 import { $RouterAnchor } from 'aelea/router'
-import { map, merge, startWith } from 'aelea/stream'
+import { map, merge, start } from 'aelea/stream'
 import { type IBehavior, multicast } from 'aelea/stream-extended'
 import { $element, $text, component, fromEventTarget, style } from 'aelea/ui'
 import { $column, $icon, $row, designSheet, spacing } from 'aelea/ui-components'
@@ -14,7 +14,7 @@ import $Guide from './guide/$Guide'
 
 const popStateEvent = fromEventTarget(window, 'popstate')
 
-const requestRouteChange = startWith(document.location, popStateEvent)
+const requestRouteChange = start(document.location, popStateEvent)
 const locationChange = map(location => {
   return location
 }, requestRouteChange)

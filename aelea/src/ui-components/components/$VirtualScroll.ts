@@ -10,7 +10,7 @@ import {
   o,
   reduce,
   skip,
-  startWith,
+  start,
   switchLatest
 } from '../../stream/index.js'
 import { type IBehavior, multicast } from '../../stream-extended/index.js'
@@ -97,7 +97,7 @@ export const $VirtualScroll = ({ dataSource, containerOps = o(), $loader = $defa
           const $items = Array.isArray($list) ? $list : $list.$items
           return merge(...$items)
         }, multicastDatasource),
-        switchLatest(startWith($observer, $itemLoader))
+        switchLatest(start($observer, $itemLoader))
       ),
 
       { scrollIndex: scrollReuqestWithInitial }

@@ -8,7 +8,7 @@ import {
   merge,
   now,
   o,
-  startWith,
+  start,
   switchLatest,
   tap
 } from '../../../stream/index.js'
@@ -37,7 +37,7 @@ export const $Field = ({ value = empty, fieldStyle = {}, validation = constant(n
       [blur, blurTether]: IBehavior<INode, FocusEvent>,
       [change, changeTether]: IBehavior<INode<HTMLInputElement>, string>
     ) => {
-      const multicastValidation = o(validation, startWith(''), multicast)
+      const multicastValidation = o(validation, start(''), multicast)
       const alert = multicastValidation(change)
       const focus = merge(focusStyle, dismissstyle)
       const state = combine({ focus, alert })

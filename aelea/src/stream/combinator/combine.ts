@@ -1,4 +1,4 @@
-import { empty, now } from '../source/stream.js'
+import { constant, empty, now } from '../source/stream.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
@@ -21,7 +21,7 @@ export function combine<A>(
 ): IStream<Readonly<A>> {
   const l = Object.keys(state).length
 
-  if (l === 0) return now({} as A)
+  if (l === 0) return constant({}, now)
 
   return new Combine(state)
 }

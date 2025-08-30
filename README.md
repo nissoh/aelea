@@ -214,7 +214,7 @@ const $AnimatedBox = component(() => {
   const animatedPosition = motion({ 
     stiffness: 170, 
     damping: 26 
-  }, startWith(0, position))
+  }, start(0, position))
   
   return [
     $element('div')(

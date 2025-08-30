@@ -9,7 +9,7 @@ import {
   now,
   o,
   reduce,
-  startWith,
+  start,
   switchLatest
 } from '../../stream/index.js'
 import type { IBehavior } from '../../stream-extended/index.js'
@@ -120,7 +120,7 @@ export const $Table = <T, FilterState = never>({
           sortByChange
         )
 
-        return startWith(state, changeState)
+        return start(state, changeState)
       }, sortChange)
 
       const $header = $rowHeaderContainer(
@@ -193,7 +193,7 @@ export const $Table = <T, FilterState = never>({
               scrollIndex: scrollIndexTether()
             })
           },
-          startWith(null, requestPageFilters)
+          start(null, requestPageFilters)
         )
       )
 

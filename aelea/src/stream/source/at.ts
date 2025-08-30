@@ -1,29 +1,20 @@
-import { propagateRunEventTask } from '../scheduler/PropagateTask.js'
+import { propagateRunTask } from '../scheduler/PropagateTask.js'
 import type { IScheduler, ISink, IStream } from '../types.js'
-import { curry2 } from '../utils/function.js'
 
 /**
  * Stream that emits a single value after a specified delay
  */
-class At<T> implements IStream<T> {
-  constructor(
-    readonly delay: number,
-    readonly value: T
-  ) {}
+class At implements IStream<number> {
+  constructor(readonly delay: number) {}
 
-  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    return scheduler.delay(propagateRunEventTask(sink, emitOnce, this.value), this.delay)
+  run(sink: ISink<number>, scheduler: IScheduler): Disposable {
+    return scheduler.delay(propagateRunTask(sink, emitOnce), this.delay)
   }
 }
 
-function emitOnce<T>(time: number, sink: ISink<T>, value: T) {
-  sink.event(time, value)
+function emitOnce(time: number, sink: ISink<number>) {
+  sink.event(time, time)
   sink.end(time)
 }
 
-export const at: IAtCurry = curry2((delay, value) => new At(delay, value))
-
-export interface IAtCurry {
-  <T>(delay: number, value: T): IStream<T>
-  <T>(delay: number): (value: T) => IStream<T>
-}
+export const at = (delay: number) => new At(delay)

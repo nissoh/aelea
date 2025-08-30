@@ -2,20 +2,20 @@ import { propagateEndTask, propagateRunEventTask } from '../scheduler/PropagateT
 import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeNone } from '../utils/disposable.js'
 
-/**
- * Stream that emits all values from an array and then ends
- */
-class FromArray<T> implements IStream<T> {
-  constructor(readonly arr: readonly T[]) {}
-
-  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    return scheduler.asap(propagateRunEventTask(sink, emitArray, this.arr))
+export const fromArray = <T>(arr: readonly T[]): IStream<T> => new FromArray(arr)
+export const nowWith = <T>(f: (time: number) => T): IStream<T> => new NowWith(f)
+export const now = <A>(value: A): IStream<A> => new Now(value)
+export const never: IStream<never> = {
+  run(_: ISink<never>, __: IScheduler): Disposable {
+    return disposeNone
+  }
+}
+export const empty: IStream<never> = {
+  run(sink: ISink<never>, scheduler: IScheduler): Disposable {
+    return scheduler.asap(propagateEndTask(sink))
   }
 }
 
-/**
- * Stream that emits a single value immediately and then ends
- */
 class Now<T> implements IStream<T> {
   constructor(readonly value: T) {}
 
@@ -24,34 +24,33 @@ class Now<T> implements IStream<T> {
   }
 }
 
-/**
- * Stream that never emits any values and never ends
- */
-class Never implements IStream<never> {
-  run(): Disposable {
-    return disposeNone
+class NowWith<T> implements IStream<T> {
+  constructor(private f: (time: number) => T) {}
+
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    return scheduler.asap(propagateRunEventTask(sink, emitNowWith, this.f))
   }
 }
 
-/**
- * Stream that immediately ends without emitting any values
- */
-class Empty implements IStream<never> {
-  run(sink: ISink<never>, scheduler: IScheduler): Disposable {
-    return scheduler.asap(propagateEndTask(sink))
+class FromArray<T> implements IStream<T> {
+  constructor(readonly arr: readonly T[]) {}
+
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    return scheduler.asap(propagateRunEventTask(sink, emitArray, this.arr))
   }
 }
-
-export const fromArray = <T>(arr: readonly T[]): IStream<T> => new FromArray(arr)
-
-export const now = <A>(value: A): IStream<A> => new Now(value)
-
-export const never: IStream<never> = new Never()
-
-export const empty: IStream<never> = new Empty()
 
 function emitNow<T>(time: number, sink: ISink<T>, value: T) {
   sink.event(time, value)
+  sink.end(time)
+}
+
+function emitNowWith<T>(time: number, sink: ISink<T>, f: (time: number) => T) {
+  try {
+    sink.event(time, f(time))
+  } catch (e) {
+    sink.error(time, e)
+  }
   sink.end(time)
 }
 

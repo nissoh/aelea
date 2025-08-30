@@ -1,5 +1,6 @@
 import {
   at,
+  constant,
   debounce,
   empty,
   type IStream,
@@ -8,7 +9,7 @@ import {
   merge,
   now,
   sampleMap,
-  startWith,
+  start,
   switchLatest
 } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
@@ -56,14 +57,14 @@ export const $VirtualScrollExample = component(
               return $item($text(id))
             })
 
-            return at(delay, { $items: $items, offset: 0, pageSize: PAGE_SIZE })
+            return constant({ $items: $items, offset: 0, pageSize: PAGE_SIZE }, at(delay))
           },
           delayWithInitial,
           scrollRequest
         )
       )
 
-    const filterText = startWith('', filter)
+    const filterText = start('', filter)
     const debouncedFilterText = debounce(300, filterText)
 
     return [

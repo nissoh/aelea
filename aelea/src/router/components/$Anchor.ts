@@ -1,4 +1,4 @@
-import { constant, map, merge, o, op, startWith } from '../../stream/index.js'
+import { constant, map, merge, o, op, start } from '../../stream/index.js'
 import type { IOps } from '../../stream/types.js'
 import type { IBehavior } from '../../stream-extended/index.js'
 import { attr, component, nodeEvent, style } from '../../ui/index.js'
@@ -46,7 +46,7 @@ export const $RouterAnchor = ({ url, route, $anchor, anchorOp = o() }: IAnchor) 
           const focus = constant(true, merge(nodeEvent('focus', $anchor), nodeEvent('pointerenter', $anchor)))
           const blur = constant(false, merge(nodeEvent('blur', $anchor), nodeEvent('pointerleave', $anchor)))
 
-          return startWith(false, merge(focus, blur))
+          return start(false, merge(focus, blur))
         }),
         anchorOp
       ),

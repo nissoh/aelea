@@ -1,4 +1,4 @@
-import { combine, constant, empty, type IStream, map, merge, op, startWith, switchMap } from '../../../stream/index.js'
+import { combine, constant, empty, type IStream, map, merge, op, start, switchMap } from '../../../stream/index.js'
 import { type IBehavior, multicast, state } from '../../../stream-extended/index.js'
 import {
   $node,
@@ -130,7 +130,7 @@ export const $Popover = ({
                 },
                 combine({
                   targetIntersection,
-                  updateEvent: startWith(null, updateEvents)
+                  updateEvent: start(null, updateEvents)
                 })
               )
             )
