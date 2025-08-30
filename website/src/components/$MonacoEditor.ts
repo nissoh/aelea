@@ -147,13 +147,28 @@ export async function fetchAndCacheDependancyTree(name: string, version = 'lates
 
 export function defineModel(pkg: PackageTree, monacoGlobal: typeof monaco) {
   const pkgModelUri = monacoGlobal.Uri.parse(`file://root/node_modules/${pkg.name}/package.json`)
-  const model = monacoGlobal.editor.getModel(pkgModelUri)
 
-  if (!model) {
+  // Check if model already exists
+  const model = monacoGlobal.editor.getModel(pkgModelUri)
+  if (model) {
+    // Model already exists, update its content instead of creating a new one
     const dependencies = Object.entries(pkg.dependencies).reduce(
       (acc, [key, val]) => ({ ...acc, [key.replace(/^@/, '%40')]: val }),
       {}
-    ) // https://github.com/microsoft/monaco-editor/issues/1306
+    )
+    const pakgDefJsonStr = JSON.stringify({
+      name: pkg.name,
+      version: pkg.version,
+      typings: pkg.typings,
+      dependencies
+    })
+    model.setValue(pakgDefJsonStr)
+  } else {
+    // Create new model
+    const dependencies = Object.entries(pkg.dependencies).reduce(
+      (acc, [key, val]) => ({ ...acc, [key.replace(/^@/, '%40')]: val }),
+      {}
+    )
     const pakgDefJsonStr = JSON.stringify({
       name: pkg.name,
       version: pkg.version,
@@ -161,13 +176,19 @@ export function defineModel(pkg: PackageTree, monacoGlobal: typeof monaco) {
       dependencies
     })
     monacoGlobal.editor.createModel(pakgDefJsonStr, 'typescript', pkgModelUri)
+  }
 
-    for (const file of pkg.files) {
-      monacoGlobal.editor.createModel(
-        file.content,
-        'typescript',
-        monacoGlobal.Uri.parse(`file://root/node_modules/${pkg.name}${file.name}`)
-      )
+  // Handle file models
+  for (const file of pkg.files) {
+    const fileUri = monacoGlobal.Uri.parse(`file://root/node_modules/${pkg.name}${file.name}`)
+    const existingModel = monacoGlobal.editor.getModel(fileUri)
+
+    if (existingModel) {
+      // Update existing model
+      existingModel.setValue(file.content)
+    } else {
+      // Create new model
+      monacoGlobal.editor.createModel(file.content, 'typescript', fileUri)
     }
   }
 }
@@ -207,33 +228,85 @@ async function loadMonacoFromCDN() {
 }
 
 async function loadAeleaPackageLocally() {
-  // Load aelea types from CDN (published version)
-  const version = '2.2.5'
-  const baseUrl = `https://cdn.jsdelivr.net/npm/aelea@${version}`
+  // Load aelea package definition based on the actual package.json exports
+  const version = '2.5.18'
 
   try {
-    // Fetch type definition files directly
-    const [coreTypes, streamTypes, uiTypes] = await Promise.all([
-      fetch(`${baseUrl}/dist/types/core/index.d.ts`).then(r => r.text()),
-      fetch(`${baseUrl}/dist/types/stream/index.d.ts`).then(r => r.text()),
-      fetch(`${baseUrl}/dist/types/ui-components/index.d.ts`)
-        .then(r => r.text())
-        .catch(() => '')
-    ])
+    // Define basic types for each export path defined in aelea's package.json
+    const streamTypes = `
+      export interface IStream<T> { run(sink: ISink<T>, scheduler: IScheduler): Disposable }
+      export interface ISink<T> { event(time: number, value: T): void; error(time: number, err: any): void; end(time: number): void }
+      export interface IScheduler { asap(task: any): Disposable; delay(task: any, delay: number): Disposable; time(): number }
+      export declare function map(...args: any[]): any
+      export declare function filter(...args: any[]): any
+      export declare function merge(...args: any[]): any
+      export declare function switchLatest(...args: any[]): any
+      export declare function debounce(...args: any[]): any
+      export declare function reduce(...args: any[]): any
+      export declare function now(...args: any[]): any
+      export declare function empty(...args: any[]): any
+      export declare function never(...args: any[]): any
+      export declare function fromArray(...args: any[]): any
+      export declare function constant(...args: any[]): any
+      export declare function start(...args: any[]): any
+      export declare function op(...args: any[]): any
+    `
+
+    const streamExtendedTypes = `
+      import { IStream } from '../stream/index'
+      export interface IBehavior<T> extends IStream<T> { value: T }
+    `
+
+    const uiTypes = `
+      import { IStream } from '../stream/index'
+      export interface I$Slottable {}
+      export declare function component(...args: any[]): any
+      export declare function $text(...args: any[]): any
+      export declare function $node(...args: any[]): any
+      export declare function $custom(...args: any[]): any
+      export declare function style(...args: any[]): any
+      export declare function styleInline(...args: any[]): any
+      export declare function motion(...args: any[]): any
+    `
+
+    const uiComponentsTypes = `
+      import { I$Slottable } from '../ui/index'
+      export declare function $row(...args: any[]): any
+      export declare function $column(...args: any[]): any
+      export declare function $Button(...args: any[]): any
+      export declare function $TextField(...args: any[]): any
+      export declare function $Popover(...args: any[]): any
+      export declare const spacing: any
+      export declare const pallete: any
+      export declare const theme: any
+    `
+
+    const uiComponentsThemeTypes = `
+      export declare const pallete: any
+      export declare const theme: any
+    `
+
+    const routerTypes = `
+      export declare function resolveUrl(...args: any[]): any
+    `
 
     const files: PackageFile[] = [
       {
-        name: '/index.d.ts',
-        content: `export * from './core/index'\nexport * from './stream/index'\nexport * from './ui-components/index'`,
+        name: '/package.json',
+        content: JSON.stringify({
+          name: 'aelea',
+          version,
+          exports: {
+            './stream': './stream/index.js',
+            './stream-extended': './stream-extended/index.js',
+            './ui': './ui/index.js',
+            './ui-components': './ui-components/index.js',
+            './ui-components-theme': './ui-components-theme/index.js',
+            './router': './router/index.js'
+          }
+        }),
         hash: '',
         size: 0,
-        time: new Date().toISOString()
-      },
-      {
-        name: '/core/index.d.ts',
-        content: coreTypes,
-        hash: '',
-        size: coreTypes.length,
         time: new Date().toISOString()
       },
       {
@@ -242,18 +315,43 @@ async function loadAeleaPackageLocally() {
         hash: '',
         size: streamTypes.length,
         time: new Date().toISOString()
-      }
-    ]
-
-    if (uiTypes) {
-      files.push({
-        name: '/ui-components/index.d.ts',
+      },
+      {
+        name: '/stream-extended/index.d.ts',
+        content: streamExtendedTypes,
+        hash: '',
+        size: streamExtendedTypes.length,
+        time: new Date().toISOString()
+      },
+      {
+        name: '/ui/index.d.ts',
         content: uiTypes,
         hash: '',
         size: uiTypes.length,
         time: new Date().toISOString()
-      })
-    }
+      },
+      {
+        name: '/ui-components/index.d.ts',
+        content: uiComponentsTypes,
+        hash: '',
+        size: uiComponentsTypes.length,
+        time: new Date().toISOString()
+      },
+      {
+        name: '/ui-components-theme/index.d.ts',
+        content: uiComponentsThemeTypes,
+        hash: '',
+        size: uiComponentsThemeTypes.length,
+        time: new Date().toISOString()
+      },
+      {
+        name: '/router/index.d.ts',
+        content: routerTypes,
+        hash: '',
+        size: routerTypes.length,
+        time: new Date().toISOString()
+      }
+    ]
 
     return {
       name: 'aelea',

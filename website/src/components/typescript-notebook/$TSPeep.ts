@@ -1,4 +1,4 @@
-import { debounce, empty, filter, fromArray, map, never, op, start, switchLatest, switchMap } from 'aelea/stream'
+import { debounce, empty, fromArray, map, op, start, switchLatest, switchMap } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $custom, $node, $text, component, type I$Slottable, motion, style, styleInline } from 'aelea/ui'
 import { $column, $row } from 'aelea/ui-components'
@@ -65,15 +65,16 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                 }: ModelChangeBehavior): Promise<I$Slottable> => {
                   if (semanticDiagnostics.length || syntacticDiagnostics.length) {
                     const allDiagnostics = [...semanticDiagnostics, ...syntacticDiagnostics]
-                    
+
                     return $column(style({ gap: '8px', padding: '8px' }))(
                       ...allDiagnostics.map(diagnostic => {
                         const severity = diagnostic.category === 1 ? '❌ Error' : '⚠️ Warning'
                         const line = diagnostic.start ? model.getPositionAt(diagnostic.start).lineNumber : '?'
-                        const message = typeof diagnostic.messageText === 'string' 
-                          ? diagnostic.messageText 
-                          : diagnostic.messageText?.messageText || 'Unknown error'
-                        
+                        const message =
+                          typeof diagnostic.messageText === 'string'
+                            ? diagnostic.messageText
+                            : diagnostic.messageText?.messageText || 'Unknown error'
+
                         return $row(style({ gap: '8px', fontSize: '14px' }))(
                           $text(`${severity} [Line ${line}]: ${message}`)
                         )
