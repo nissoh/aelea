@@ -17,7 +17,7 @@ console.log('Has map marker:', Object.getOwnPropertySymbols(testStream).length >
 
 // Run the actual value through to verify correctness
 const testResult: number[] = []
-await new Promise<void>(resolve => {
+await new Promise<number>(resolve => {
   testStream.run(
     {
       event: x => testResult.push(x),
@@ -63,7 +63,7 @@ const fusedStream = op(
 
 const start2 = performance.now()
 let lastValue = 0
-await new Promise<void>(resolve => {
+await new Promise<number>(resolve => {
   fusedStream.run(
     {
       event: x => {

@@ -21,8 +21,8 @@ import { multicast } from './multicast.js'
  *
  * With initialState (0):
  * stream:        -1-2-3--->
- * subscriber1:   0-1-2-3--->
- * subscriber2:     1-2-3--->
+ * subscriber1:   01-2-3--->
+ * subscriber2:    1-2-3--->
  */
 export const state = <T>(source: IStream<T>, initialState?: T): IStream<T> =>
   new ReplayLatest(multicast(source), initialState)

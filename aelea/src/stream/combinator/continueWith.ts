@@ -3,11 +3,20 @@ import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 
 /**
+ * When stream ends, continue with values from another stream
+ *
+ * streamA:         -abc|
+ * streamB:             123->
+ * continueWith(f): -abc123->
+ */
+export const continueWith: IContinueWithCurry = curry2((f, s) => new ContinueWith(f, s))
+
+/**
  * Stream that continues with values from another stream when the first ends
  */
 class ContinueWith<A, B> implements IStream<A | B> {
   constructor(
-    readonly f: () => IStream<B>,
+    readonly f: (time: number) => IStream<B>,
     readonly source: IStream<A>
   ) {}
 
@@ -17,22 +26,13 @@ class ContinueWith<A, B> implements IStream<A | B> {
   }
 }
 
-/**
- * When stream ends, continue with values from another stream
- *
- * streamA:         -1-2-3-|
- * streamB:                 -4-5-6->
- * continueWith(f): -1-2-3-4-5-6->
- */
-export const continueWith: IContinueWithCurry = curry2((f, s) => new ContinueWith(f, s))
-
 class ContinueWithSink<A, B> implements ISink<A> {
   disposable: Disposable | null = null
 
   constructor(
     readonly sink: ISink<A | B>,
     readonly scheduler: IScheduler,
-    readonly f: () => IStream<B>
+    readonly f: (time: number) => IStream<B>
   ) {}
 
   event(time: number, value: A): void {
@@ -48,7 +48,7 @@ class ContinueWithSink<A, B> implements ISink<A> {
       this.disposable[Symbol.dispose]()
     }
     try {
-      const nextStream = this.f()
+      const nextStream = this.f(time)
       this.disposable = nextStream.run(this.sink, this.scheduler)
     } catch (error) {
       this.sink.error(time, error)
@@ -63,6 +63,6 @@ class ContinueWithSink<A, B> implements ISink<A> {
 }
 
 export interface IContinueWithCurry {
-  <A, B>(f: () => IStream<B>, s: IStream<A>): IStream<A | B>
-  <A, B>(f: () => IStream<B>): (s: IStream<A>) => IStream<A | B>
+  <A, B>(f: (time: number) => IStream<B>, s: IStream<A>): IStream<A | B>
+  <A, B>(f: (time: number) => IStream<B>): (s: IStream<A>) => IStream<A | B>
 }

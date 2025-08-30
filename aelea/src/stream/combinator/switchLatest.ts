@@ -20,11 +20,11 @@ class SwitchLatest<T> implements IStream<T> {
 /**
  * Switch to the latest inner stream, disposing the previous one
  *
- * stream of streams: -s1----s2----s3-|
+ * stream of streams: -s1----s2----s3|
  *           s1:      -a-b-c-|
  *           s2:            -d-e-f-|
- *           s3:                  -g-h-i-j-|
- * switchLatest:      -a-b-c-d-e-f-g-h-i-j-|
+ *           s3:                  -g-h-i-j|
+ * switchLatest:      -a-b-c-d-e-f-g-h-i-j|
  *
  * The output stream remains active as long as:
  * - The source stream (stream of streams) is still active, OR

@@ -45,9 +45,9 @@ class Since<A> implements IStream<A> {
 /**
  * Take values until a signal stream emits
  *
- * stream: -1-2-3-4-5-6->
- * signal: -------x------>
- * until:  -1-2-3-|
+ * stream: 123456->
+ * signal: ---x--->
+ * until:  123|
  */
 export const until: IUntilCurry = curry2((signal, source) => new Until(signal, source))
 
