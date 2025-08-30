@@ -8,7 +8,7 @@ import { PipeSink } from '../utils/sink.js'
  * Accumulate values from a stream
  *
  * stream:       -1-2-3->
- * reduce(+, 0): -1-3-6->
+ * reduce(+, 0): 0-1-3-6->
  */
 export const reduce: IReduceCurry = curry3((f, seed, s) => new Reduce(f, seed, s))
 
@@ -23,8 +23,14 @@ class Reduce<I, O> implements IStream<O> {
   ) {}
 
   run(sink: ISink<O>, scheduler: IScheduler): Disposable {
-    return this.source.run(new ReduceSink(this.f, this.seed, sink), scheduler)
+    const initialEmitDisposable = scheduler.asap(propagateRunEventTask(sink, emitSeed, this.seed))
+    const sourceDisposable = this.source.run(new ReduceSink(this.f, this.seed, sink), scheduler)
+    return disposeBoth(initialEmitDisposable, sourceDisposable)
   }
+}
+
+function emitSeed<O>(time: number, sink: ISink<O>, value: O): void {
+  sink.event(time, value)
 }
 
 class ReduceSink<I, O> extends PipeSink<I, O> {

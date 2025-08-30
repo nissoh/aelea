@@ -5,14 +5,24 @@ import { PipeSink } from '../stream/utils/sink.js'
  * Spreads a stream of arrays into a stream of individual elements
  *
  * stream:       --A-------B----C------>
- * spreadArray:  --1-2-3---4----5-6---->
+ * spreadArray:  --*-------*----*------>
  *                 |       |    |
- *                 |       |    +-- [5,6]
- *                 |       +-- [4]
- *                 +-- [1,2,3]
+ *                 |       |    +-- emits 5,6 synchronously
+ *                 |       +-- emits 4
+ *                 +-- emits 1,2,3 synchronously
+ *
+ * where A = [1,2,3], B = [4], C = [5,6]
  */
 export function spreadArray<T>(source: IStream<T[]>): IStream<T> {
   return new SpreadArrayStream(source)
+}
+
+class SpreadArrayStream<T> implements IStream<T> {
+  constructor(readonly source: IStream<T[]>) {}
+
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    return this.source.run(new SpreadArraySink(sink), scheduler)
+  }
 }
 
 class SpreadArraySink<T> extends PipeSink<T[], T> {
@@ -39,12 +49,5 @@ class SpreadArraySink<T> extends PipeSink<T[], T> {
           this.sink.event(time, items[i])
         }
     }
-  }
-}
-export class SpreadArrayStream<T> implements IStream<T> {
-  constructor(readonly source: IStream<T[]>) {}
-
-  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    return this.source.run(new SpreadArraySink(sink), scheduler)
   }
 }
