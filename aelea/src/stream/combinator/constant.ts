@@ -1,4 +1,4 @@
-import { now } from '../source/stream.js'
+import { now } from '../source/now.js'
 import type { IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { map } from './map.js'

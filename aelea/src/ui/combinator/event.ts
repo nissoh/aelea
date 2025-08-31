@@ -1,4 +1,5 @@
-import { curry2, disposeWith, fromCallback, type IStream, isStream, joinMap } from '../../stream/index.js'
+import { curry2, disposeWith, type IStream, isStream, joinMap } from '../../stream/index.js'
+import { fromCallback } from '../../stream-extended/index.js'
 import type { I$Slottable, INodeElement } from '../types.js'
 
 type EventMapFor<T> = T extends Window

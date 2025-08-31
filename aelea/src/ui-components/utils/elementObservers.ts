@@ -1,14 +1,5 @@
-import {
-  constant,
-  continueWith,
-  filter,
-  fromCallback,
-  type IStream,
-  map,
-  o,
-  switchLatest,
-  until
-} from '../../stream/index.js'
+import { constant, continueWith, filter, type IStream, map, o, switchLatest, until } from '../../stream/index.js'
+import { fromCallback } from '../../stream-extended/index.js'
 import { fromEventTarget } from '../../ui/combinator/event.js'
 import type { INode } from '../../ui/types.js'
 

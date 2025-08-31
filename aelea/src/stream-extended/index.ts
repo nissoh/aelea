@@ -1,5 +1,6 @@
 export * from './buffer.js'
 export * from './fetch.js'
+export * from './fromCallback.js'
 export * from './fromWebsocket.js'
 export * from './multicast/index.js'
 export * from './promise.js'

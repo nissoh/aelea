@@ -1,5 +1,5 @@
 import { constant } from '../combinator/constant.js'
-import { now } from '../source/stream.js'
+import { now } from '../source/now.js'
 import type { IOps, ISink, IStream } from '../types.js'
 import { op } from './function.js'
 
