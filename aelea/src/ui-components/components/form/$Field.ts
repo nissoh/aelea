@@ -1,17 +1,5 @@
 import type { IOps } from '../../../stream/index.js'
-import {
-  combine,
-  constant,
-  empty,
-  filter,
-  map,
-  merge,
-  now,
-  o,
-  start,
-  switchLatest,
-  tap
-} from '../../../stream/index.js'
+import { combine, constant, empty, filter, map, merge, o, start, switchLatest, tap } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
 import { multicast } from '../../../stream-extended/index.js'
 import type { IStyleCSS } from '../../../ui/combinator/style.js'
@@ -76,8 +64,8 @@ export const $Field = ({ value = empty, fieldStyle = {}, validation = constant(n
 
           o(
             map(node =>
-              merge(
-                now(node),
+              start(
+                node,
                 filter(
                   () => false,
                   tap(val => {

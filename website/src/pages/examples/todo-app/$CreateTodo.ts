@@ -25,7 +25,7 @@ export default component(
     [inputChange, inputChangeTether]: IBehavior<string, string>
   ) => {
     const inputState = start('', inputChange)
-    const value = constant('', merge(create, now(null)))
+    const value = constant('', merge(create, now))
     const valueChahnges = merge(inputChange, value)
     const disabled = map(x => !x, valueChahnges)
 

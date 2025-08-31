@@ -1,6 +1,6 @@
 import * as MC from '@most/core'
 import { Bench } from 'tinybench'
-import { fromArray, map, op, reduce, switchLatest } from '../src/stream/index.js'
+import { iterate, map, op, reduce, switchLatest } from '../src/stream/index.js'
 import { fromArrayM, runMost, runStream } from './utils.js'
 
 const bench = new Bench({ time: 100 })
@@ -18,8 +18,8 @@ bench
   })
   .add(`@aelea switch ${n} x ${m}`, () => {
     return op(
-      fromArray(arr), //
-      map(fromArray),
+      iterate(arr), //
+      map(iterate),
       switchLatest,
       reduce(sum, 0),
       runStream

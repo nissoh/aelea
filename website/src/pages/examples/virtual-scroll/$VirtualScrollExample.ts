@@ -1,5 +1,5 @@
 import {
-  after,
+  constant,
   debounce,
   empty,
   type IStream,
@@ -9,7 +9,8 @@ import {
   now,
   sampleMap,
   start,
-  switchLatest
+  switchLatest,
+  wait
 } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $node, $p, $text, component, style } from 'aelea/ui'
@@ -35,7 +36,7 @@ export const $VirtualScrollExample = component(
     const TOTAL_ITEMS = 1000
 
     const formatNumber = Intl.NumberFormat().format
-    const initialDelayResponse = now(1600)
+    const initialDelayResponse = constant(1600, now)
     const delayWithInitial = merge(initialDelayResponse, delayResponse)
 
     let i = 0
@@ -56,7 +57,7 @@ export const $VirtualScrollExample = component(
               return $item($text(id))
             })
 
-            return after(delay, { $items: $items, offset: 0, pageSize: PAGE_SIZE })
+            return constant({ $items: $items, offset: 0, pageSize: PAGE_SIZE }, wait(delay))
           },
           delayWithInitial,
           scrollRequest

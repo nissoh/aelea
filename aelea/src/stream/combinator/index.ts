@@ -1,7 +1,7 @@
 export { aggregate } from './aggregate.js'
 export { awaitPromises } from './awaitPromises.js'
 export { combine, combineMap } from './combine.js'
-export { constant, start, startWith } from './constant.js'
+export { constant, start } from './constant.js'
 export { continueWith } from './continueWith.js'
 export { debounce } from './debounce.js'
 export { delay } from './delay.js'

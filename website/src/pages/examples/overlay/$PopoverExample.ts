@@ -54,8 +54,8 @@ export const $PopoverExample = component(
             })
           )(
             $row(spacing.default)(
-              $TextField({ label: 'One', value: now('') })({}),
-              $TextField({ label: 'Two', value: now('') })({}),
+              $TextField({ label: 'One', value: constant('', now) })({}),
+              $TextField({ label: 'Two', value: constant('', now) })({}),
               $Button({ $content: $text('Advanced') })({
                 click: popCardTether()
               })
@@ -74,8 +74,8 @@ export const $PopoverExample = component(
             })
           )(
             $row(spacing.default)(
-              $TextField({ label: 'One', value: now('') })({}),
-              $TextField({ label: 'Two', value: now('') })({}),
+              $TextField({ label: 'One', value: constant('', now) })({}),
+              $TextField({ label: 'Two', value: constant('', now) })({}),
               $Button({ $content: $text('Advanced') })({
                 click: popCardBottomTether()
               })

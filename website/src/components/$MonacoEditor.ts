@@ -4,6 +4,7 @@ import {
   filter,
   fromCallback,
   fromPromise,
+  map,
   merge,
   now,
   skipRepeatsWith,
@@ -497,9 +498,11 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
               const modelChangeWithDelay = delay(
                 10,
                 fromCallback(model.onDidChangeContent, () => model.getValue(), model)
-              ) // delay is required because change emits an event before diagnostics and other stuff are finished
+              )
+
               const editorChanges = modelChangeWithDelay
-              const changesWithInitial = merge(now(model.getValue()), editorChanges)
+              const changesWithInitial = merge(editorChanges, map(model.getValue, now))
+
               const ignoreWhitespaceChanges = skipRepeatsWith(
                 (prev, next) => prev.replace(whitespaceRegexp, '') === next.replace(whitespaceRegexp, ''),
                 changesWithInitial

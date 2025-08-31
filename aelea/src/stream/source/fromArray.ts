@@ -1,19 +1,26 @@
 import { propagateRunEventTask } from '../scheduler/PropagateTask.js'
 import type { IScheduler, ISink, IStream, Time } from '../types.js'
 
-export const fromArray = <T>(arr: readonly T[]): IStream<T> => new FromArray(arr)
+/**
+ * Creates a stream from any iterable (arrays, Sets, Maps, generators, etc.)
+ *
+ * iterate([1,2,3]):     123|
+ * iterate(new Set([1,2])): 12|
+ * iterate(generator()):    ...values...|
+ */
+export const iterate = <T>(iterable: Iterable<T>): IStream<T> => new Iterate(iterable)
 
-class FromArray<T> implements IStream<T> {
-  constructor(readonly arr: readonly T[]) {}
+class Iterate<T> implements IStream<T> {
+  constructor(readonly iterable: Iterable<T>) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    return scheduler.asap(propagateRunEventTask(sink, emitArray, this.arr))
+    return scheduler.asap(propagateRunEventTask(sink, emitIterable, this.iterable))
   }
 }
 
-function emitArray<T extends readonly unknown[]>(time: Time, sink: ISink<T[number]>, arr: T): void {
-  for (const a of arr) {
-    sink.event(time, a)
+function emitIterable<T>(time: Time, sink: ISink<T>, iterable: Iterable<T>): void {
+  for (const value of iterable) {
+    sink.event(time, value)
   }
   sink.end(time)
 }

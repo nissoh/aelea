@@ -1,5 +1,5 @@
+import { constant } from '../combinator/constant.js'
 import { now } from '../source/stream.js'
-import { empty } from '../source/void.js'
 import type { IOps, ISink, IStream } from '../types.js'
 import { op } from './function.js'
 
@@ -8,7 +8,7 @@ export function maybeOps<A, B>(a?: IOps<A, B>) {
 }
 
 export function toStream<T>(maybeStream: T | IStream<T>): IStream<T> {
-  return isStream(maybeStream) ? maybeStream : now(maybeStream)
+  return isStream(maybeStream) ? maybeStream : constant(maybeStream, now)
 }
 
 export function isStream(s: unknown): s is IStream<unknown> {
@@ -17,10 +17,6 @@ export function isStream(s: unknown): s is IStream<unknown> {
 
 export function isFunction(s: unknown): s is IOps<unknown, unknown> {
   return s instanceof Function
-}
-
-export function isEmpty(s: IStream<unknown>): boolean {
-  return s === empty
 }
 
 export const nullSink: ISink<any> = {

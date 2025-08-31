@@ -1,6 +1,6 @@
 import * as MC from '@most/core'
 import { Bench } from 'tinybench'
-import { combineMap, fromArray, merge, op, tap, zipMap } from '../src/stream/index.js'
+import { combineMap, iterate, merge, op, tap, zipMap } from '../src/stream/index.js'
 import { fromArrayM, runMost, runStream } from './utils.js'
 
 const bench = new Bench({ time: 100 })
@@ -24,8 +24,8 @@ bench
   })
   // Merge benchmarks - Aelea
   .add(`@aelea merge 2 streams of ${n} numbers`, () => {
-    const s1 = fromArray(numbers)
-    const s2 = fromArray(numbers)
+    const s1 = iterate(numbers)
+    const s2 = iterate(numbers)
     return runStream(
       op(
         merge(s1, s2),
@@ -40,7 +40,7 @@ bench
   })
   // Merge 5 streams - Aelea
   .add(`@aelea merge 5 streams of ${n} numbers`, () => {
-    const streams = Array.from({ length: 5 }, () => fromArray(numbers))
+    const streams = Array.from({ length: 5 }, () => iterate(numbers))
     return runStream(
       op(
         merge(...streams),
@@ -56,8 +56,8 @@ bench
   })
   // Combine benchmarks - Aelea
   .add(`@aelea combine 2 streams of ${n} numbers`, () => {
-    const s1 = fromArray(numbers)
-    const s2 = fromArray(numbers)
+    const s1 = iterate(numbers)
+    const s2 = iterate(numbers)
     return runStream(
       op(
         combineMap(sum, s1, s2),
@@ -74,9 +74,9 @@ bench
   })
   // Combine 3 streams - Aelea
   .add(`@aelea combine 3 streams of ${n} numbers`, () => {
-    const s1 = fromArray(numbers)
-    const s2 = fromArray(numbers)
-    const s3 = fromArray(numbers)
+    const s1 = iterate(numbers)
+    const s2 = iterate(numbers)
+    const s3 = iterate(numbers)
     return runStream(
       op(
         combineMap(add3, s1, s2, s3),
@@ -92,8 +92,8 @@ bench
   })
   // Zip benchmarks - Aelea
   .add(`@aelea zip 2 streams of ${n} numbers`, () => {
-    const s1 = fromArray(numbers)
-    const s2 = fromArray(numbers)
+    const s1 = iterate(numbers)
+    const s2 = iterate(numbers)
     return runStream(
       op(
         zipMap(sum, s1, s2),
@@ -110,9 +110,9 @@ bench
   })
   // Zip 3 streams - Aelea
   .add(`@aelea zip 3 streams of ${n} numbers`, () => {
-    const s1 = fromArray(numbers)
-    const s2 = fromArray(numbers)
-    const s3 = fromArray(numbers)
+    const s1 = iterate(numbers)
+    const s2 = iterate(numbers)
+    const s3 = iterate(numbers)
     return runStream(
       op(
         zipMap(add3, s1, s2, s3),
@@ -123,7 +123,7 @@ bench
 
   // Nested stream benchmarks (more complex) - Aelea only
   .add(`@aelea merge nested: ${n} streams of ${m} numbers`, () => {
-    const streams = arrays.map(arr => fromArray(arr))
+    const streams = arrays.map(arr => iterate(arr))
     return runStream(
       op(
         merge(...streams),
@@ -132,7 +132,7 @@ bench
     )
   })
   .add(`@aelea combine nested: 3 streams of ${m} numbers`, () => {
-    const streams = arrays.slice(0, 3).map(arr => fromArray(arr))
+    const streams = arrays.slice(0, 3).map(arr => iterate(arr))
     return runStream(
       op(
         combineMap(add3, ...(streams as [any, any, any])),
@@ -141,7 +141,7 @@ bench
     )
   })
   .add(`@aelea zip nested: 3 streams of ${m} numbers`, () => {
-    const streams = arrays.slice(0, 3).map(arr => fromArray(arr))
+    const streams = arrays.slice(0, 3).map(arr => iterate(arr))
     return runStream(
       op(
         zipMap(add3, ...(streams as [any, any, any])),

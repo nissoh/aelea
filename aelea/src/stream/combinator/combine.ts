@@ -1,8 +1,8 @@
-import { now } from '../source/stream.js'
 import { empty } from '../source/void.js'
 import type { IScheduler, ISink, IStream, Time } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
+import { start } from './constant.js'
 import { map } from './map.js'
 
 /**
@@ -23,7 +23,7 @@ export function combine<A>(
 ): IStream<Readonly<A>> {
   const l = Object.keys(state).length
 
-  if (l === 0) return now({})
+  if (l === 0) return start({}, empty)
 
   return new Combine(state)
 }

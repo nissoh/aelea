@@ -10,7 +10,7 @@ export type {
   ITask,
   Time
 } from './types.js'
-export { isEmpty, isFunction, isStream, maybeOps, nullSink, toStream } from './utils/common.js'
+export { isFunction, isStream, maybeOps, nullSink, toStream } from './utils/common.js'
 export {
   disposeAll,
   disposeBoth,

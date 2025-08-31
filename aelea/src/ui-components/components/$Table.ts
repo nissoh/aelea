@@ -174,7 +174,7 @@ export const $Table = <T, FilterState = never>({
                   $rowContainer(
                     ...columns.map(col => {
                       const cellOps = o(cellBodyOp, col.columnOp || o())
-                      return cellOps(switchLatest(col.$body(now(rowData))))
+                      return cellOps(switchLatest(col.$body(constant(rowData, now))))
                     })
                   )
                 )

@@ -190,12 +190,11 @@ const $App = component((
 
 ```typescript
 import { runBrowser, $text } from 'aelea/ui'
-import { now } from 'aelea/stream'
 
 runBrowser({ 
   rootNode: document.body 
 })(
-  $text(now('Hello, Aelea!'))
+  $text('Hello, Aelea!')
 )
 ```
 
