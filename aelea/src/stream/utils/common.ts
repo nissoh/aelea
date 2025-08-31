@@ -1,4 +1,5 @@
-import { empty, now } from '../source/stream.js'
+import { now } from '../source/stream.js'
+import { empty } from '../source/void.js'
 import type { IOps, ISink, IStream } from '../types.js'
 import { op } from './function.js'
 

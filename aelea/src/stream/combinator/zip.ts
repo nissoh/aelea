@@ -1,4 +1,5 @@
-import { empty, now } from '../source/stream.js'
+import { now } from '../source/stream.js'
+import { empty } from '../source/void.js'
 import type { IScheduler, ISink, IStream, Time } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { IndexSink } from '../utils/sink.js'
