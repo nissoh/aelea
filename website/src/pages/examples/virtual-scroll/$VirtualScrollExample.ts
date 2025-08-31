@@ -1,4 +1,16 @@
-import { at, debounce, empty, type IStream, join, map, merge, now, sampleMap, start, switchLatest } from 'aelea/stream'
+import {
+  after,
+  debounce,
+  empty,
+  type IStream,
+  join,
+  map,
+  merge,
+  now,
+  sampleMap,
+  start,
+  switchLatest
+} from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $node, $p, $text, component, style } from 'aelea/ui'
 import type { ScrollRequest, ScrollResponse } from 'aelea/ui-components'
@@ -44,7 +56,7 @@ export const $VirtualScrollExample = component(
               return $item($text(id))
             })
 
-            return at(delay, { $items: $items, offset: 0, pageSize: PAGE_SIZE })
+            return after(delay, { $items: $items, offset: 0, pageSize: PAGE_SIZE })
           },
           delayWithInitial,
           scrollRequest

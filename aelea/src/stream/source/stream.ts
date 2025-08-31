@@ -1,9 +1,6 @@
 import { propagateRunEventTask } from '../scheduler/PropagateTask.js'
 import type { IScheduler, ISink, IStream, Time } from '../types.js'
 
-export { at, atWith } from './at.js'
-export { empty, never } from './void.js'
-
 /**
  * Computes and emits a value immediately using function f, then ends
  *
