@@ -1,8 +1,8 @@
-import { createDefaultScheduler, iterate, map, op } from '../src/stream/index.js'
+import { createDefaultScheduler, fromIterable, map, op } from '../src/stream/index.js'
 
 // Test fusion is working
 const testStream = op(
-  iterate([1, 2, 3]),
+  fromIterable([1, 2, 3]),
   map((x: number) => x + 1),
   map((x: number) => x * 2),
   map((x: number) => x / 3)
@@ -54,7 +54,7 @@ const time1 = performance.now() - start1
 
 // With fusion (using composed stream)
 const fusedStream = op(
-  iterate(arr),
+  fromIterable(arr),
   map((x: number) => x + 1),
   map((x: number) => x * 2),
   map((x: number) => x / 3),

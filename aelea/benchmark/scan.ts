@@ -1,6 +1,6 @@
 import * as MC from '@most/core'
 import { Bench } from 'tinybench'
-import { iterate, op, reduce } from '../src/stream/index.js'
+import { fromIterable, op, reduce } from '../src/stream/index.js'
 import { fromArrayM, runMost, runStream } from './utils.js'
 
 const bench = new Bench({ time: 100 })
@@ -16,7 +16,7 @@ bench
     return runMost(stream)
   })
   .add(`@aelea reduce ${n}`, () => {
-    return runStream(op(iterate(arr), reduce(sum, 0)))
+    return runStream(op(fromIterable(arr), reduce(sum, 0)))
   })
 
 await bench.run()

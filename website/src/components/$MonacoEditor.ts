@@ -1,17 +1,5 @@
-import {
-  combine,
-  delay,
-  filter,
-  fromCallback,
-  fromPromise,
-  map,
-  merge,
-  now,
-  skipRepeatsWith,
-  switchMap,
-  tap
-} from 'aelea/stream'
-import { fetchJson, type IBehavior } from 'aelea/stream-extended'
+import { combine, delay, filter, fromPromise, map, merge, now, skipRepeatsWith, switchMap, tap } from 'aelea/stream'
+import { fetchJson, fromCallback, type IBehavior } from 'aelea/stream-extended'
 import { $wrapNativeElement, component, type INode, type IStyleCSS, style } from 'aelea/ui'
 import { observer } from 'aelea/ui-components'
 import type * as monaco from 'monaco-editor'
@@ -500,8 +488,10 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
                 fromCallback(model.onDidChangeContent, () => model.getValue(), model)
               )
 
-              const editorChanges = modelChangeWithDelay
-              const changesWithInitial = merge(editorChanges, map(model.getValue, now))
+              const changesWithInitial = merge(
+                modelChangeWithDelay,
+                map(x => model.getValue(), now)
+              )
 
               const ignoreWhitespaceChanges = skipRepeatsWith(
                 (prev, next) => prev.replace(whitespaceRegexp, '') === next.replace(whitespaceRegexp, ''),

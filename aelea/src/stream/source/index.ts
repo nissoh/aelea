@@ -1,6 +1,6 @@
 export { at } from './at.js'
 export { throwError } from './error.js'
-export { iterate } from './fromArray.js'
+export { fromIterable } from './fromIterable.js'
 export { fromPromise } from './fromPromise.js'
 export { now } from './now.js'
 export { periodic } from './periodic.js'
