@@ -1,4 +1,4 @@
-import { combineMap, empty, iterate, joinMap, merge, now, switchLatest, take, until } from 'aelea/stream'
+import { combineMap, empty, iterate, joinMap, merge, switchLatest, take, until } from 'aelea/stream'
 import { behavior, type IBehavior, state } from 'aelea/stream-extended'
 import { $element, $text, component, style } from 'aelea/ui'
 import { $Checkbox, $column, $row, spacing } from 'aelea/ui-components'

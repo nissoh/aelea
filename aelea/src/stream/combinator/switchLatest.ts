@@ -1,8 +1,8 @@
+import { fromPromise } from '../source/fromPromise.js'
 import type { IScheduler, ISink, IStream, Time } from '../types.js'
 import { isStream } from '../utils/common.js'
 import { disposeBoth, disposeNone } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
-import { fromPromise } from './fromPromise.js'
 import { map } from './map.js'
 
 /**
