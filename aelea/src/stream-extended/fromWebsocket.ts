@@ -8,13 +8,13 @@ import {
   nullSink,
   propagateEndTask,
   propagateErrorTask,
+  type Time,
   tap
 } from '../stream/index.js'
 
 type WebSocketOptions<I, O> = {
   url: string
-  connectionTimeout?: number
-  source?: string // Add source identification for better error logging
+  delayTimeout?: Time
 
   createWebsocket?: () => WebSocket
   serializer?: (data: I) => any
@@ -39,8 +39,7 @@ class FromWebSocket<I, O> implements IStream<O> {
   run(sink: ISink<O>, scheduler: IScheduler): Disposable {
     const {
       url,
-      connectionTimeout = 5000,
-      source = url, // Default to URL if no source provided
+      delayTimeout = 5000,
       createWebsocket = () => new globalThis.WebSocket(url),
       serializer = this.options.serializer ?? JSON.stringify,
       deserializer = this.options.deserializer ?? JSON.parse
@@ -60,7 +59,7 @@ class FromWebSocket<I, O> implements IStream<O> {
 
         dispose()
       }
-    }, connectionTimeout)
+    }, delayTimeout)
 
     const onError = (error: Event) => {
       if (disposed) return

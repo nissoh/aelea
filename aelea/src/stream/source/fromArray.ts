@@ -1,5 +1,5 @@
 import { propagateRunEventTask } from '../scheduler/PropagateTask.js'
-import type { IScheduler, ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream, Time } from '../types.js'
 
 export const fromArray = <T>(arr: readonly T[]): IStream<T> => new FromArray(arr)
 
@@ -11,7 +11,7 @@ class FromArray<T> implements IStream<T> {
   }
 }
 
-function emitArray<T extends readonly unknown[]>(time: number, sink: ISink<T[number]>, arr: T): void {
+function emitArray<T extends readonly unknown[]>(time: Time, sink: ISink<T[number]>, arr: T): void {
   for (const a of arr) {
     sink.event(time, a)
   }

@@ -1,4 +1,4 @@
-import type { ISink } from '../types.js'
+import type { ISink, Time } from '../types.js'
 
 /**
  * Create a Disposable that disposes the provided value using a dispose function
@@ -76,7 +76,7 @@ class DisposeOnce implements Disposable {
 
 // Try to dispose the disposable.  If it throws, send
 // the error to sink.error with the provided Time value
-export const tryDispose = (time: number, disposable: Disposable, sink: ISink<unknown>): void => {
+export const tryDispose = (time: Time, disposable: Disposable, sink: ISink<unknown>): void => {
   try {
     disposable[Symbol.dispose]()
   } catch (e) {

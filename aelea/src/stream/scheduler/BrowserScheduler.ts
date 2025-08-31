@@ -1,4 +1,4 @@
-import type { IScheduler, ITask } from '../types.js'
+import type { IScheduler, ITask, Time } from '../types.js'
 
 /**
  * Browser-optimized scheduler implementation using native queueMicrotask
@@ -22,6 +22,9 @@ import type { IScheduler, ITask } from '../types.js'
 export class BrowserScheduler implements IScheduler {
   asapTasks: ITask[] = []
   asapScheduled = false
+
+  // Sample time at initialization for delta calculation
+  private readonly startTime = performance.now()
 
   // Arrow function for delayed task execution - created once per scheduler instance
   runDelayedTask = (task: ITask): void => {
@@ -48,13 +51,14 @@ export class BrowserScheduler implements IScheduler {
     return task
   }
 
-  delay(task: ITask, delay: number): Disposable {
+  delay(task: ITask, delay: Time): Disposable {
     setTimeout(this.runDelayedTask, delay, task)
     return task
   }
 
-  time(): number {
-    return performance.now()
+  time(): Time {
+    // Return delta from initialization time
+    return performance.now() - this.startTime
   }
 }
 

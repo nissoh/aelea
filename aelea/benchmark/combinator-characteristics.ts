@@ -1,6 +1,13 @@
 import { Bench } from 'tinybench'
-import { combineMap, createDefaultScheduler, type IStream, merge, zipMap } from '../src/stream/index.js'
-import { propagateRunTask } from '../src/stream/scheduler/PropagateTask.js'
+import {
+  combineMap,
+  createDefaultScheduler,
+  type IStream,
+  merge,
+  propagateRunTask,
+  type Time,
+  zipMap
+} from '../src/stream/index.js'
 import { stream } from '../src/stream-extended/index.js'
 
 // Create a stream that emits values with controlled timing
@@ -10,12 +17,13 @@ function createControlledStream(values: number[], delayMs = 0): IStream<number> 
     let disposed = false
 
     const emitNext = () => {
+      const time = scheduler.time()
       if (disposed || index >= values.length) {
-        if (!disposed) sink.end()
+        if (!disposed) sink.end(time)
         return
       }
 
-      sink.event(values[index++])
+      sink.event(time, values[index++])
 
       if (delayMs > 0) {
         scheduler.delay(propagateRunTask(sink, emitNext), delayMs)
@@ -39,7 +47,7 @@ function createControlledStream(values: number[], delayMs = 0): IStream<number> 
 }
 
 // Helper to run stream and measure time
-async function measureStreamTime<T>(stream: IStream<T>): Promise<{ time: number; count: number }> {
+async function measureStreamTime<T>(stream: IStream<T>): Promise<{ time: Time; count: number }> {
   const start = performance.now()
   let count = 0
 
@@ -112,8 +120,8 @@ const combineOrderTest = async () => {
   return new Promise<void>(resolve => {
     combined.run(
       {
-        event: v => events.push(v),
-        error: e => {
+        event: (_, v) => events.push(v),
+        error: (_, e) => {
           throw e
         },
         end: () => {
@@ -138,8 +146,8 @@ const zipOrderTest = async () => {
   return new Promise<void>(resolve => {
     zipped.run(
       {
-        event: v => events.push(v),
-        error: e => {
+        event: (_, v) => events.push(v),
+        error: (_, e) => {
           throw e
         },
         end: () => {

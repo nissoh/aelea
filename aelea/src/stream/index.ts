@@ -7,7 +7,8 @@ export type {
   IScheduler,
   ISink,
   IStream,
-  ITask
+  ITask,
+  Time
 } from './types.js'
 export { isEmpty, isFunction, isStream, maybeOps, nullSink, toStream } from './utils/common.js'
 export {

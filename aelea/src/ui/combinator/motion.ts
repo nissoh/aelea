@@ -1,4 +1,12 @@
-import { curry2, disposeBoth, type IScheduler, type ISink, type IStream, PropagateTask } from '../../stream/index.js'
+import {
+  curry2,
+  disposeBoth,
+  type IScheduler,
+  type ISink,
+  type IStream,
+  PropagateTask,
+  type Time
+} from '../../stream/index.js'
 import type { I$Scheduler } from '../types.js'
 
 interface MotionConfig {
@@ -54,7 +62,7 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
     super(sink)
   }
 
-  event(time: number, target: number): void {
+  event(time: Time, target: number): void {
     this.target = target
 
     if (!this.initialized) {
@@ -70,11 +78,11 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
     // If already animating, just update target - animation will pick it up
   }
 
-  error(time: number, err: unknown): void {
+  error(time: Time, err: unknown): void {
     this.sink.error(time, err)
   }
 
-  end(time: number): void {
+  end(time: Time): void {
     this.sourceEnded = true
 
     if (this.animating) return
@@ -82,7 +90,7 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
     this.sink.end(time)
   }
 
-  runIfActive(time: number): void {
+  runIfActive(time: Time): void {
     const delta = this.target - this.position
     const absDelta = Math.abs(delta)
     const absVelocity = Math.abs(this.velocity)

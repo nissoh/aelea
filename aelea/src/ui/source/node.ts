@@ -1,5 +1,12 @@
-import { disposeBoth, type Fn, type ISink, isFunction, never } from '../../stream/index.js'
-import { propagateRunEventTask } from '../../stream/scheduler/PropagateTask.js'
+import {
+  disposeBoth,
+  type Fn,
+  type ISink,
+  isFunction,
+  never,
+  propagateRunEventTask,
+  type Time
+} from '../../stream/index.js'
 import { stream } from '../../stream-extended/index.js'
 import type { I$Node, I$Op, I$Slottable, INode, INodeCompose, INodeElement } from '../types.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
@@ -29,7 +36,7 @@ function createNodeSource<A, B extends INodeElement>(
   })
 }
 
-export function emitNode<T>(time: number, sink: ISink<T>, value: T): void {
+export function emitNode<T>(time: Time, sink: ISink<T>, value: T): void {
   sink.event(time, value)
 }
 

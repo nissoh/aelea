@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream, Time } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2, curry3 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
@@ -54,7 +54,7 @@ class SampleMapSink<A, B, C> extends PipeSink<B, C> {
     this.seedSink = new SeedSink(this)
   }
 
-  event(time: number, x: B): void {
+  event(time: Time, x: B): void {
     const boxedValue = this.seedSink.value
     if (boxedValue !== undefined) {
       try {
@@ -72,7 +72,7 @@ class SeedSink<A> implements ISink<A> {
 
   constructor(readonly sink: ISink<unknown>) {}
 
-  event(_time: number, x: A): void {
+  event(_time: Time, x: A): void {
     if (this.value === undefined) {
       this.value = { value: x }
     } else {
@@ -80,11 +80,11 @@ class SeedSink<A> implements ISink<A> {
     }
   }
 
-  error(time: number, e: any): void {
+  error(time: Time, e: any): void {
     this.sink.error(time, e)
   }
 
-  end(_time: number): void {
+  end(_time: Time): void {
     // Don't propagate end from values stream
   }
 }

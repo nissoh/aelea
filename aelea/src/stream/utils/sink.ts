@@ -1,15 +1,15 @@
-import type { ISink } from '../types.js'
+import type { ISink, Time } from '../types.js'
 
 export abstract class PipeSink<I, O = I> implements ISink<I> {
   constructor(readonly sink: ISink<O>) {}
 
-  abstract event(time: number, value: I): void
+  abstract event(time: Time, value: I): void
 
-  error(time: number, e: any): void {
+  error(time: Time, e: any): void {
     this.sink.error(time, e)
   }
 
-  end(time: number): void {
+  end(time: Time): void {
     this.sink.end(time)
   }
 }
@@ -29,14 +29,14 @@ export class IndexSink<A> implements ISink<A> {
     public index: number
   ) {}
 
-  event(time: number, x: A): void {
+  event(time: Time, x: A): void {
     if (this.active) {
       this.value = x
       this.sink.event(time, this)
     }
   }
 
-  end(time: number): void {
+  end(time: Time): void {
     if (!this.active) {
       return
     }
@@ -44,7 +44,7 @@ export class IndexSink<A> implements ISink<A> {
     this.sink.event(time, this)
   }
 
-  error(time: number, error: unknown): void {
+  error(time: Time, error: unknown): void {
     this.sink.error(time, error)
   }
 }

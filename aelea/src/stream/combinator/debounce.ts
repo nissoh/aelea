@@ -1,5 +1,5 @@
 import { propagateRunEventTask } from '../scheduler/PropagateTask.js'
-import type { IScheduler, ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream, Time } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 
@@ -8,12 +8,12 @@ import { curry2 } from '../utils/function.js'
  */
 class Debounce<T> implements IStream<T> {
   constructor(
-    readonly period: number,
+    readonly interval: Time,
     readonly source: IStream<T>
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    const disposableSink = new DebounceSink(sink, scheduler, this.period)
+    const disposableSink = new DebounceSink(sink, scheduler, this.interval)
     return disposeBoth(disposableSink, this.source.run(disposableSink, scheduler))
   }
 }
@@ -33,21 +33,21 @@ class DebounceSink<T> implements ISink<T>, Disposable {
   constructor(
     readonly sink: ISink<T>,
     readonly scheduler: IScheduler,
-    readonly dt: number
+    readonly interval: Time
   ) {}
 
-  event(time: number, value: T): void {
+  event(time: Time, value: T): void {
     this.clearTimer()
     this.pendingValue = { value }
-    this.timer = this.scheduler.delay(propagateRunEventTask(this.sink, emitDebounced, this), this.dt)
+    this.timer = this.scheduler.delay(propagateRunEventTask(this.sink, emitDebounced, this), this.interval)
   }
 
-  error(time: number, e: Error): void {
+  error(time: Time, e: Error): void {
     this.clearTimer()
     this.sink.error(time, e)
   }
 
-  end(time: number): void {
+  end(time: Time): void {
     // Emit pending value if any
     if (this.timer !== null && this.pendingValue !== null) {
       this.clearTimer()
@@ -69,7 +69,7 @@ class DebounceSink<T> implements ISink<T>, Disposable {
   }
 }
 
-function emitDebounced<T>(time: number, sink: ISink<T>, debounceSink: DebounceSink<T>): void {
+function emitDebounced<T>(time: Time, sink: ISink<T>, debounceSink: DebounceSink<T>): void {
   if (debounceSink.pendingValue !== null) {
     sink.event(time, debounceSink.pendingValue.value)
     debounceSink.pendingValue = null
@@ -78,6 +78,6 @@ function emitDebounced<T>(time: number, sink: ISink<T>, debounceSink: DebounceSi
 }
 
 export interface IDebounceCurry {
-  <T>(delay: number, source: IStream<T>): IStream<T>
-  <T>(delay: number): (source: IStream<T>) => IStream<T>
+  <T>(interval: Time, source: IStream<T>): IStream<T>
+  <T>(interval: Time): (source: IStream<T>) => IStream<T>
 }

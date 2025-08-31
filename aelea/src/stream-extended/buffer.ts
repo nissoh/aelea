@@ -1,9 +1,16 @@
-import { disposeBoth, disposeNone, type IScheduler, type ISink, type IStream } from '../stream/index.js'
-import { propagateRunEventTask } from '../stream/scheduler/PropagateTask.js'
+import {
+  disposeBoth,
+  disposeNone,
+  type IScheduler,
+  type ISink,
+  type IStream,
+  propagateRunEventTask,
+  type Time
+} from '../stream/index.js'
 import { curry2 } from '../stream/utils/function.js'
 
 interface IBufferEvents {
-  period: number
+  interval: Time
   maxSize?: number
   prune?: boolean // When true, discards old events to keep only maxSize newest events per period
 }
@@ -38,10 +45,10 @@ interface IBufferEvents {
  * Load spreading: Ensures consistent batch sizes of ≤maxSize per period
  */
 export const bufferEvents: IBufferEventsCurry = curry2((options: IBufferEvents, source) => {
-  const period = options.period
+  const interval = options.interval
   const maxSize = options.maxSize ?? 1000
 
-  if (period <= 0) throw new Error('Buffer period must be positive')
+  if (interval <= 0) throw new Error('Buffer interval must be positive')
   if (maxSize <= 0) throw new Error('Max buffer size must be positive')
 
   return new BufferEventsStream(source, options)
@@ -62,7 +69,7 @@ class BufferEventsStream<T> implements IStream<readonly T[]> {
     const bufferSink = new BufferEventsSink(
       sink,
       scheduler,
-      this.options.period,
+      this.options.interval,
       this.options.maxSize,
       this.options.prune
     )
@@ -81,12 +88,12 @@ class BufferEventsSink<T> implements ISink<T>, Disposable {
   constructor(
     readonly sink: ISink<readonly T[]>,
     readonly scheduler: IScheduler,
-    readonly period: number,
+    readonly interval: Time,
     readonly maxSize = 1000,
     readonly prune = false
   ) {}
 
-  event(time: number, value: T): void {
+  event(time: Time, value: T): void {
     // Start periodic emissions on first event
     if (!this.emitting) {
       this.emitting = true
@@ -106,11 +113,11 @@ class BufferEventsSink<T> implements ISink<T>, Disposable {
     }
   }
 
-  error(time: number, err: unknown): void {
+  error(time: Time, err: unknown): void {
     this.sink.error(time, err)
   }
 
-  end(time: number): void {
+  end(time: Time): void {
     this.sourceEnded = true
 
     // If buffer is empty, end immediately
@@ -125,7 +132,7 @@ class BufferEventsSink<T> implements ISink<T>, Disposable {
   }
 
   scheduleEmission(): void {
-    this.scheduledTask = this.scheduler.delay(propagateRunEventTask(this.sink, emitPeriodically, this), this.period)
+    this.scheduledTask = this.scheduler.delay(propagateRunEventTask(this.sink, emitPeriodically, this), this.interval)
   }
 
   [Symbol.dispose](): void {
@@ -135,7 +142,7 @@ class BufferEventsSink<T> implements ISink<T>, Disposable {
 }
 
 // Static function to avoid closure creation
-function emitPeriodically<T>(time: number, sink: ISink<readonly T[]>, bufferSink: BufferEventsSink<T>): void {
+function emitPeriodically<T>(time: Time, sink: ISink<readonly T[]>, bufferSink: BufferEventsSink<T>): void {
   // Clear any existing scheduled task before proceeding
   bufferSink.scheduledTask = disposeNone
 

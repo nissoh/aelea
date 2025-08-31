@@ -1,5 +1,5 @@
 import { empty } from '../source/stream.js'
-import type { IScheduler, ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream, Time } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
 
@@ -49,7 +49,7 @@ class MergeSink<A> implements ISink<IndexedValue<A | undefined>> {
     public activeCount: number
   ) {}
 
-  event(time: number, indexValue: IndexedValue<A | undefined>): void {
+  event(time: Time, indexValue: IndexedValue<A | undefined>): void {
     if (indexValue.active) {
       this.sink.event(time, indexValue.value)
     } else {
@@ -57,18 +57,18 @@ class MergeSink<A> implements ISink<IndexedValue<A | undefined>> {
     }
   }
 
-  dispose(time: number, index: number): void {
+  dispose(time: Time, index: number): void {
     this.disposables[index][Symbol.dispose]()
     if (--this.activeCount === 0) {
       this.sink.end(time)
     }
   }
 
-  error(time: number, err: any): void {
+  error(time: Time, err: any): void {
     this.sink.error(time, err)
   }
 
-  end(time: number): void {
+  end(time: Time): void {
     // This should not be called directly as merge manages its own lifecycle
     // through activeCount tracking
     // If we reach here, it means all sources ended without errors

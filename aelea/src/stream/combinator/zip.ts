@@ -1,5 +1,5 @@
 import { empty, now } from '../source/stream.js'
-import type { IScheduler, ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream, Time } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { IndexSink } from '../utils/sink.js'
 import { map } from './map.js'
@@ -126,7 +126,7 @@ class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
     readonly sink: ISink<O>
   ) {}
 
-  event(time: number, indexedValue: IndexedValue<I>): void {
+  event(time: Time, indexedValue: IndexedValue<I>): void {
     const i = indexedValue.index
 
     if (!indexedValue.active) {
@@ -164,11 +164,11 @@ class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
     }
   }
 
-  error(time: number, e: any): void {
+  error(time: Time, e: any): void {
     this.sink.error(time, e)
   }
 
-  end(time: number): void {
+  end(time: Time): void {
     // This should not be called directly as zipMap manages its own lifecycle
     // through activeCount tracking
     // If we reach here, it means all sources ended without errors

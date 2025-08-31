@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, IStream } from '../stream/types.js'
+import type { IScheduler, ISink, IStream, Time } from '../stream/index.js'
 import { PipeSink } from '../stream/utils/sink.js'
 
 /**
@@ -26,7 +26,7 @@ class SpreadArrayStream<T> implements IStream<T> {
 }
 
 class SpreadArraySink<T> extends PipeSink<T[], T> {
-  event(time: number, items: T[]): void {
+  event(time: Time, items: T[]): void {
     if (!Array.isArray(items)) {
       this.sink.error(time, new Error('spreadArray: source stream must emit arrays'))
       return

@@ -1,5 +1,5 @@
 import { propagateEndTask, propagateRunEventTask } from '../scheduler/PropagateTask.js'
-import type { IScheduler, ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream, Time } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
@@ -12,12 +12,12 @@ import { PipeSink } from '../utils/sink.js'
  */
 class Delay<T> implements IStream<T> {
   constructor(
-    readonly delayMs: number,
+    readonly delay: Time,
     readonly source: IStream<T>
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    const disposableSink = new DelaySink(this.delayMs, sink, scheduler)
+    const disposableSink = new DelaySink(this.delay, sink, scheduler)
     return disposeBoth(this.source.run(disposableSink, scheduler), disposableSink)
   }
 }
@@ -29,21 +29,21 @@ class DelaySink<T> extends PipeSink<T> implements Disposable {
   readonly disposableList: Disposable[] = []
 
   constructor(
-    readonly n: number,
+    readonly delay: Time,
     override readonly sink: ISink<T>,
     readonly scheduler: IScheduler
   ) {
     super(sink)
   }
 
-  event(_time: number, value: T): void {
+  event(_time: Time, value: T): void {
     if (!this.active) return
-    this.disposableList.push(this.scheduler.delay(propagateRunEventTask(this.sink, emitDelay, value), this.n))
+    this.disposableList.push(this.scheduler.delay(propagateRunEventTask(this.sink, emitDelay, value), this.delay))
   }
 
-  override end(_time: number): void {
+  override end(_time: Time): void {
     if (!this.active) return
-    this.disposableList.push(this.scheduler.delay(propagateEndTask(this.sink), this.n))
+    this.disposableList.push(this.scheduler.delay(propagateEndTask(this.sink), this.delay))
   }
 
   [Symbol.dispose](): void {
@@ -53,11 +53,11 @@ class DelaySink<T> extends PipeSink<T> implements Disposable {
   }
 }
 
-function emitDelay<T>(time: number, sink: ISink<T>, value: T): void {
+function emitDelay<T>(time: Time, sink: ISink<T>, value: T): void {
   sink.event(time, value)
 }
 
 export interface IDelayCurry {
-  <T>(n: number, source: IStream<T>): IStream<T>
-  <T>(n: number): (source: IStream<T>) => IStream<T>
+  <T>(delay: Time, source: IStream<T>): IStream<T>
+  <T>(delay: Time): (source: IStream<T>) => IStream<T>
 }

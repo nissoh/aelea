@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, IStream } from '../stream/index.js'
+import type { IScheduler, ISink, IStream, Time } from '../stream/index.js'
 
 export enum PromiseStatus {
   DONE,
@@ -34,7 +34,7 @@ class PromiseStateSink<T> implements ISink<Promise<T>>, Disposable {
 
   constructor(readonly sink: ISink<PromiseState<T>>) {}
 
-  event(time: number, promise: Promise<T>): void {
+  event(time: Time, promise: Promise<T>): void {
     this.latestPromise = promise
 
     // Cancel previous pending operations if supported
@@ -71,7 +71,7 @@ class PromiseStateSink<T> implements ISink<Promise<T>>, Disposable {
     }
   }
 
-  end(time: number): void {
+  end(time: Time): void {
     this.sourceEnded = true
     // Only end immediately if no promise is pending
     if (!this.isPending) {
@@ -80,7 +80,7 @@ class PromiseStateSink<T> implements ISink<Promise<T>>, Disposable {
     // Otherwise, wait for the pending promise to complete in handleResult
   }
 
-  error(time: number, e: unknown): void {
+  error(time: Time, e: unknown): void {
     this.sink.error(time, e)
   }
 

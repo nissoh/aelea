@@ -235,8 +235,8 @@ async function loadAeleaPackageLocally() {
     // Define basic types for each export path defined in aelea's package.json
     const streamTypes = `
       export interface IStream<T> { run(sink: ISink<T>, scheduler: IScheduler): Disposable }
-      export interface ISink<T> { event(time: number, value: T): void; error(time: number, err: any): void; end(time: number): void }
-      export interface IScheduler { asap(task: any): Disposable; delay(task: any, delay: number): Disposable; time(): number }
+      export interface ISink<T> { event(time: Time, value: T): void; error(time: Time, err: any): void; end(time: Time): void }
+      export interface IScheduler { asap(task: any): Disposable; delay(task: any, delay: Time): Disposable; time(): Time }
       export declare function map(...args: any[]): any
       export declare function filter(...args: any[]): any
       export declare function merge(...args: any[]): any

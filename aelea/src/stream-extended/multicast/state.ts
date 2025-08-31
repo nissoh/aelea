@@ -4,15 +4,13 @@ import {
   type ISink,
   type IStream,
   PipeSink,
-  propagateRunEventTask
+  propagateRunEventTask,
+  type Time
 } from '../../stream/index.js'
 import { multicast } from './multicast.js'
 
 /**
  * Create a multicast stream that remembers its latest value
- *
- * @param source - The source stream to multicast
- * @param initialState - Optional initial value that will be emitted immediately to new subscribers
  *
  * Without initialState:
  * stream:        -1-2-3--->
@@ -35,7 +33,7 @@ class StateSink<A> extends PipeSink<A> {
     super(sink)
   }
 
-  event(time: number, x: A): void {
+  event(time: Time, x: A): void {
     if (this.parent.latestValue === undefined) {
       this.parent.latestValue = { value: x }
     } else {
@@ -45,7 +43,7 @@ class StateSink<A> extends PipeSink<A> {
   }
 }
 
-function emitState<A>(time: number, sink: ISink<A>, value: A): void {
+function emitState<A>(time: Time, sink: ISink<A>, value: A): void {
   sink.event(time, value)
 }
 

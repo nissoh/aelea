@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream, Time } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 
 /**
@@ -35,13 +35,13 @@ class AwaitPromisesSink<T> implements ISink<Promise<T>>, Disposable {
 
   constructor(readonly sink: ISink<T>) {}
 
-  event(time: number, promise: Promise<T>) {
+  event(time: Time, promise: Promise<T>) {
     if (this.disposed) return
 
     this.queue = this.queue.then(() => promise.then(this.eventBound)).catch(this.errorBound)
   }
 
-  end(time: number) {
+  end(time: Time) {
     if (this.disposed) return
 
     this.sourceEnded = true
@@ -49,7 +49,7 @@ class AwaitPromisesSink<T> implements ISink<Promise<T>>, Disposable {
     this.queue = this.queue.then(this.endBound).catch(this.errorBound)
   }
 
-  error(time: number, error: unknown): void {
+  error(time: Time, error: unknown): void {
     if (this.disposed) return
 
     this.sink.error(time, error)

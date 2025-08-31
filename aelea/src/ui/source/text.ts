@@ -1,5 +1,13 @@
-import { disposeBoth, disposeNone, empty, type ISink, type IStream, merge } from '../../stream/index.js'
-import { propagateRunEventTask } from '../../stream/scheduler/PropagateTask.js'
+import {
+  disposeBoth,
+  disposeNone,
+  empty,
+  type ISink,
+  type IStream,
+  merge,
+  propagateRunEventTask,
+  type Time
+} from '../../stream/index.js'
 import { stream } from '../../stream-extended/index.js'
 import type { I$Scheduler, ISlottable } from '../types.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
@@ -22,7 +30,7 @@ class DynamicTextSink implements ISink<string>, Disposable {
     readonly scheduler: I$Scheduler
   ) {}
 
-  event(time: number, value: string): void {
+  event(time: Time, value: string): void {
     if (this.textNode === null) {
       // First emission - create text node and emit it
       this.textNode = {
@@ -37,11 +45,11 @@ class DynamicTextSink implements ISink<string>, Disposable {
     }
   }
 
-  end(time: number): void {
+  end(time: Time): void {
     // this.sink.end()
   }
 
-  error(time: number, e: unknown): void {
+  error(time: Time, e: unknown): void {
     this.sink.error(time, e)
   }
 
@@ -51,7 +59,7 @@ class DynamicTextSink implements ISink<string>, Disposable {
   }
 }
 
-function emitText(time: number, sink: ISink<ISlottable<Text>>, value: ISlottable<Text>): void {
+function emitText(time: Time, sink: ISink<ISlottable<Text>>, value: ISlottable<Text>): void {
   sink.event(time, value)
 }
 

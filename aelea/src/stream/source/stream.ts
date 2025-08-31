@@ -1,51 +1,49 @@
-import { propagateEndTask, propagateRunEventTask } from '../scheduler/PropagateTask.js'
-import type { IScheduler, ISink, IStream } from '../types.js'
-import { disposeNone } from '../utils/disposable.js'
+import { propagateRunEventTask } from '../scheduler/PropagateTask.js'
+import type { IScheduler, ISink, IStream, Time } from '../types.js'
 
-export const nowWith = <T>(f: (time: number) => T): IStream<T> => new AtWith(0, f)
-export const now = <A>(value: A): IStream<A> => new At(0, value)
-export const never: IStream<never> = {
-  run(_: ISink<never>, __: IScheduler): Disposable {
-    return disposeNone
-  }
-}
-export const empty: IStream<never> = {
-  run(sink: ISink<never>, scheduler: IScheduler): Disposable {
-    return scheduler.asap(propagateEndTask(sink))
-  }
-}
-export const at = <T>(delay: number, value: T): IStream<T> => new At(delay, value)
-export const atWith = <T>(delay: number, f: (time: number) => T): IStream<T> => new AtWith(delay, f)
+export { at, atWith } from './at.js'
+export { empty, never } from './void.js'
 
-class At<T> implements IStream<T> {
-  constructor(
-    readonly delay: number,
-    readonly value: T
-  ) {}
+/**
+ * Computes and emits a value immediately using function f, then ends
+ * 
+ * nowWith(t => t):     0|
+ * nowWith(t => t*2):   0|
+ * nowWith(t => 'hi'):  "hi"|
+ */
+export const nowWith = <T>(f: (time: Time) => T): IStream<T> => new NowWith(f)
 
-  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    const task = propagateRunEventTask(sink, emit, this.value)
-    return this.delay > 0 ? scheduler.delay(task, this.delay) : scheduler.asap(task)
-  }
-}
+/**
+ * Emits a value immediately, then ends
+ * 
+ * now('a'):  a|
+ * now(42):   42|
+ * now(true): true|
+ */
+export const now = <A>(value: A): IStream<A> => new Now(value)
 
-class AtWith<T> implements IStream<T> {
-  constructor(
-    readonly delay: number,
-    readonly f: (time: number) => T
-  ) {}
+class Now<T> implements IStream<T> {
+  constructor(readonly value: T) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    return scheduler.delay(propagateRunEventTask(sink, emitWith, this.f), this.delay)
+    return scheduler.asap(propagateRunEventTask(sink, emitNow, this.value))
   }
 }
 
-function emit<T>(time: number, sink: ISink<T>, value: T) {
+class NowWith<T> implements IStream<T> {
+  constructor(private f: (time: Time) => T) {}
+
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable {
+    return scheduler.asap(propagateRunEventTask(sink, emitNowWith, this.f))
+  }
+}
+
+function emitNow<T>(time: Time, sink: ISink<T>, value: T) {
   sink.event(time, value)
   sink.end(time)
 }
 
-function emitWith<T>(time: number, sink: ISink<T>, f: (time: number) => T) {
+function emitNowWith<T>(time: Time, sink: ISink<T>, f: (time: Time) => T) {
   try {
     sink.event(time, f(time))
   } catch (e) {

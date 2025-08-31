@@ -1,4 +1,4 @@
-import type { ITask } from '../stream/index.js'
+import type { ITask, Time } from '../stream/index.js'
 import type { I$Scheduler } from './types.js'
 
 /**
@@ -50,7 +50,7 @@ class DomScheduler implements I$Scheduler {
     for (const task of tasks) task.run(time)
   }
 
-  delay(task: ITask, delay: number): Disposable {
+  delay(task: ITask, delay: Time): Disposable {
     setTimeout(this.runDelayedTask, delay, task)
     return task
   }
@@ -77,7 +77,7 @@ class DomScheduler implements I$Scheduler {
     return task
   }
 
-  time(): number {
+  time(): Time {
     return performance.now()
   }
 }

@@ -1,4 +1,4 @@
-import type { ISink } from '../../stream/index.js'
+import type { ISink, Time } from '../../stream/index.js'
 import { tryEnd, tryEvent } from '../utils.js'
 
 /**
@@ -9,7 +9,7 @@ export abstract class MulticastSink<T> implements ISink<T> {
   protected sinkList: readonly ISink<T>[] = []
 
   // ISink implementation - receives events to broadcast
-  event(time: number, value: T): void {
+  event(time: Time, value: T): void {
     const sl = this.sinkList
     const l = sl.length
 
@@ -29,7 +29,7 @@ export abstract class MulticastSink<T> implements ISink<T> {
     }
   }
 
-  error(time: number, error: Error): void {
+  error(time: Time, error: Error): void {
     const sl = this.sinkList
     const l = sl.length
 
@@ -43,7 +43,7 @@ export abstract class MulticastSink<T> implements ISink<T> {
     }
   }
 
-  end(time: number): void {
+  end(time: Time): void {
     const sinks = this.sinkList
     this.sinkList = []
 

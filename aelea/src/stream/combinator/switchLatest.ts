@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream, Time } from '../types.js'
 import { isStream } from '../utils/common.js'
 import { disposeBoth, disposeNone } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
@@ -71,16 +71,16 @@ class SwitchSink<T> implements ISink<IStream<T>>, Disposable {
     this.innerSink = new InnerSink(this, sink)
   }
 
-  event(time: number, inner: IStream<T>): void {
+  event(time: Time, inner: IStream<T>): void {
     this.disposeInner()
     this.innerDisposable = inner.run(this.innerSink, this.scheduler)
   }
 
-  error(time: number, error: any): void {
+  error(time: Time, error: any): void {
     this.sink.error(time, error)
   }
 
-  end(time: number): void {
+  end(time: Time): void {
     this.sourceEnded = true
 
     // Only end if no inner stream is active
@@ -106,15 +106,15 @@ class InnerSink<T> implements ISink<T> {
     readonly sink: ISink<T>
   ) {}
 
-  event(time: number, value: T): void {
+  event(time: Time, value: T): void {
     this.sink.event(time, value)
   }
 
-  error(time: number, error: any): void {
+  error(time: Time, error: any): void {
     this.sink.error(time, error)
   }
 
-  end(time: number): void {
+  end(time: Time): void {
     this.parent.innerDisposable = disposeNone
     // End the output only if the source stream has already ended
     if (this.parent.sourceEnded) {

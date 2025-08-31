@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream, Time } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
@@ -7,12 +7,12 @@ import { PipeSink } from '../utils/sink.js'
  */
 class Throttle<T> implements IStream<T> {
   constructor(
-    readonly period: number,
+    readonly interval: Time,
     readonly source: IStream<T>
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    return this.source.run(new ThrottleSink(this.period, sink, scheduler), scheduler)
+    return this.source.run(new ThrottleSink(this.interval, sink, scheduler), scheduler)
   }
 }
 
@@ -28,15 +28,15 @@ class ThrottleSink<T> extends PipeSink<T> {
   lastTime = 0
 
   constructor(
-    readonly period: number,
+    readonly interval: Time,
     sink: ISink<T>,
     readonly scheduler: IScheduler
   ) {
     super(sink)
   }
 
-  event(time: number, value: T): void {
-    if (time >= this.lastTime + this.period) {
+  event(time: Time, value: T): void {
+    if (time >= this.lastTime + this.interval) {
       this.lastTime = time
       this.sink.event(time, value)
     }
@@ -44,6 +44,6 @@ class ThrottleSink<T> extends PipeSink<T> {
 }
 
 export interface IThrottleCurry {
-  <T>(period: number, source: IStream<T>): IStream<T>
-  <T>(period: number): (source: IStream<T>) => IStream<T>
+  <T>(interval: Time, source: IStream<T>): IStream<T>
+  <T>(interval: Time): (source: IStream<T>) => IStream<T>
 }

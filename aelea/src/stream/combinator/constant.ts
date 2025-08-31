@@ -1,5 +1,5 @@
 import { now, nowWith } from '../source/stream.js'
-import type { IStream } from '../types.js'
+import type { IStream, Time } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { map } from './map.js'
 import { merge } from './merge.js'
@@ -38,6 +38,6 @@ export const constant: IConstantCurry = curry2((value, stream) => map(() => valu
 export const startWith: IStartWithCurry = curry2((f, stream) => merge(nowWith(f), stream))
 
 export interface IStartWithCurry {
-  <A, B>(f: (time: number) => A, stream: IStream<B>): IStream<A | B>
-  <A, B>(f: (time: number) => A): (stream: IStream<B>) => IStream<A | B>
+  <A, B>(f: (time: Time) => A, stream: IStream<B>): IStream<A | B>
+  <A, B>(f: (time: Time) => A): (stream: IStream<B>) => IStream<A | B>
 }

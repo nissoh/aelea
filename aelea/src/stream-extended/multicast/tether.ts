@@ -5,7 +5,8 @@ import {
   type IScheduler,
   type ISink,
   type IStream,
-  propagateRunEventTask
+  propagateRunEventTask,
+  type Time
 } from '../../stream/index.js'
 import { append, remove } from '../utils.js'
 import { MulticastSink } from './sink.js'
@@ -51,7 +52,7 @@ export const tether = <T>(source: IStream<T>, replayLatest = false): [IStream<T>
   return [new PrimaryStream(source, tetherStream), tetherStream]
 }
 
-function emitCachedValue<T>(time: number, sink: ISink<T>, value: T): void {
+function emitCachedValue<T>(time: Time, sink: ISink<T>, value: T): void {
   sink.event(time, value)
 }
 
@@ -61,19 +62,19 @@ class TetherSink<T> implements ISink<T> {
     readonly tether: Tether<T>
   ) {}
 
-  event(time: number, value: T): void {
+  event(time: Time, value: T): void {
     this.primarySink.event(time, value)
     this.tether.latestValue = value
     this.tether.hasValue = true
     this.tether.event(time, value)
   }
 
-  end(time: number): void {
+  end(time: Time): void {
     this.primarySink.end(time)
     this.tether.end(time)
   }
 
-  error(time: number, err: Error): void {
+  error(time: Time, err: Error): void {
     this.primarySink.error(time, err)
     this.tether.error(time, err)
   }

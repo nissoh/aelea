@@ -8,6 +8,7 @@ import {
   merge,
   nullSink,
   op,
+  type Time,
   tap
 } from '../stream/index.js'
 import type { IAttributeProperties } from './combinator/attribute.js'
@@ -35,7 +36,7 @@ class BranchEffectsSink implements ISink<INode | ISlottable> {
     readonly segmentsCount: number[]
   ) {}
 
-  event(time: number, childNode: INode) {
+  event(time: Time, childNode: INode) {
     try {
       childNode.disposable.set(
         disposeWith(nodeToRemove => {
@@ -115,7 +116,7 @@ class BranchEffectsSink implements ISink<INode | ISlottable> {
     this.segmentsSlotList[this.segmentPosition].set(childNode, disposeAll([...childDisposables, newDisp]))
   }
 
-  end(time: number) {
+  end(time: Time) {
     // // Dispose all segment disposables
     // for (const s of this.segmentsSlotList) {
     //   for (const d of s.values()) {
@@ -127,7 +128,7 @@ class BranchEffectsSink implements ISink<INode | ISlottable> {
     // this.segmentsSlotList.length = 0
   }
 
-  error(time: number, err: unknown) {
+  error(time: Time, err: unknown) {
     console.error(err)
   }
 }

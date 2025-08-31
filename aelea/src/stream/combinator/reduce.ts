@@ -1,5 +1,5 @@
 import { propagateRunEventTask } from '../scheduler/PropagateTask.js'
-import type { IScheduler, ISink, IStream } from '../types.js'
+import type { IScheduler, ISink, IStream, Time } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry3 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
@@ -38,7 +38,7 @@ class ReduceSink<I, O> extends PipeSink<I, O> {
     super(sink)
   }
 
-  event(time: number, value: I) {
+  event(time: Time, value: I) {
     try {
       this.accumulator = this.f(this.accumulator, value)
     } catch (error) {
@@ -49,7 +49,7 @@ class ReduceSink<I, O> extends PipeSink<I, O> {
   }
 }
 
-function emitSeed<O>(time: number, sink: ISink<O>, value: O): void {
+function emitSeed<O>(time: Time, sink: ISink<O>, value: O): void {
   sink.event(time, value)
 }
 
