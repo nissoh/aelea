@@ -6,7 +6,7 @@ export { empty, never } from './void.js'
 
 /**
  * Computes and emits a value immediately using function f, then ends
- * 
+ *
  * nowWith(t => t):     0|
  * nowWith(t => t*2):   0|
  * nowWith(t => 'hi'):  "hi"|
@@ -15,7 +15,7 @@ export const nowWith = <T>(f: (time: Time) => T): IStream<T> => new NowWith(f)
 
 /**
  * Emits a value immediately, then ends
- * 
+ *
  * now('a'):  a|
  * now(42):   42|
  * now(true): true|
