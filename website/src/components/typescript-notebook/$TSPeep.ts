@@ -1,4 +1,4 @@
-import { debounce, empty, iterate, map, op, start, switchLatest, switchMap } from 'aelea/stream'
+import { debounce, empty, fromIterable, map, op, start, switchLatest, switchMap } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $custom, $node, $text, component, type I$Slottable, motion, style, styleInline } from 'aelea/ui'
 import { $column, $row } from 'aelea/ui-components'
@@ -43,7 +43,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                   s => ({ height: `${s}%` }),
                   switchLatest(
                     map(_ => {
-                      return motion({ stiffness: 160, damping: 36, precision: 0.1 }, iterate([0, 100]))
+                      return motion({ stiffness: 160, damping: 36, precision: 0.1 }, fromIterable([0, 100]))
                     }, change)
                   )
                 )

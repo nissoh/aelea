@@ -1,4 +1,4 @@
-import { combineMap, empty, iterate, joinMap, merge, switchLatest, take, until } from 'aelea/stream'
+import { combineMap, empty, fromIterable, joinMap, merge, switchLatest, take, until } from 'aelea/stream'
 import { behavior, type IBehavior, state } from 'aelea/stream-extended'
 import { $element, $text, component, style } from 'aelea/ui'
 import { $Checkbox, $column, $row, spacing } from 'aelea/ui-components'
@@ -61,7 +61,7 @@ export default (todos: Todo[]) =>
                   )
                 )
               },
-              merge(newTodo, iterate(todos))
+              merge(newTodo, fromIterable(todos))
             )
           )
         )
