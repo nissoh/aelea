@@ -5,7 +5,7 @@ import { PipeSink } from '../utils/sink.js'
 /**
  * Transform each value in a stream with a function
  */
-class MapStream<T, R> implements IStream<R> {
+export class MapStream<T, R> implements IStream<R> {
   constructor(
     readonly f: (value: T) => R,
     readonly source: IStream<T>
@@ -23,6 +23,7 @@ class MapStream<T, R> implements IStream<R> {
  * map(x => x*2): -2-4-6-8->
  */
 export const map: IMapCurry = curry2((f, source) => {
+  // Fuse consecutive maps
   if (source instanceof MapStream) {
     return new MapStream(compose(source.f, f), source.source)
   }

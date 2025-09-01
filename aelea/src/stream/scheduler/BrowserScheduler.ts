@@ -1,32 +1,17 @@
 import type { IScheduler, ITask, Time } from '../types.js'
 
 /**
- * Browser-optimized scheduler implementation using native queueMicrotask
+ * Browser-optimized scheduler implementation
  *
- * This scheduler is optimized for browser environments where:
- * - DOM operations are common
- * - Microtask timing is critical for smooth UI updates
- * - Memory efficiency is important
- *
- * For specialized needs, you can implement your own IScheduler:
- *
- * - High-throughput: Add batching/buffering
- * - Testing: Use synchronous execution
- * - Debugging: Add logging/tracing
- * - Priority: Implement priority queues
- *
- * The IScheduler interface is designed to be simple to implement
- * while allowing full control over task scheduling.
+ * Uses queueMicrotask for asap tasks and maintains its own clock starting from instantiation.
+ * Each scheduler instance tracks time from 0, independent of when it was created.
  */
 
 export class BrowserScheduler implements IScheduler {
-  asapTasks: ITask[] = []
-  asapScheduled = false
-
-  // Sample time at initialization for delta calculation
+  private asapTasks: ITask[] = []
+  private asapScheduled = false
   private readonly startTime = performance.now()
 
-  // Arrow function for delayed task execution - created once per scheduler instance
   runDelayedTask = (task: ITask): void => {
     task.run(this.time())
   }
@@ -57,7 +42,6 @@ export class BrowserScheduler implements IScheduler {
   }
 
   time(): Time {
-    // Return delta from initialization time
     return performance.now() - this.startTime
   }
 }

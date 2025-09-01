@@ -1,32 +1,10 @@
+import { just } from '../source/just.js'
 import { empty } from '../source/void.js'
 import type { IScheduler, ISink, IStream, Time } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
-import { start } from './constant.js'
 import { map } from './map.js'
 
-/**
- * Combine multiple streams into an object stream
- *
- * temperature: -a-b-c->
- * humidity:    -x-y-z->
- * combine:     -A-B-C->
- *               | | |
- *               | | +-- {temp:b,humidity:y}
- *               | +-- {temp:b,humidity:x}
- *               +-- {temp:a,humidity:x}
- */
-export function combine<A>(
-  state: {
-    [P in keyof A]: IStream<A[P]>
-  }
-): IStream<Readonly<A>> {
-  const l = Object.keys(state).length
-
-  if (l === 0) return start({}, empty)
-
-  return new Combine(state)
-}
 /**
  * Combine latest values from multiple streams whenever any stream emits
  *
@@ -52,29 +30,49 @@ export function combineMap<T extends readonly unknown[], R>(
 }
 
 /**
+ * Combine multiple streams into an object stream
+ *
+ * temperature: -a-b-c->
+ * humidity:    -x-y-z->
+ * combine:     -A-B-C->
+ *               | | |
+ *               | | +-- {temp:b,humidity:y}
+ *               | +-- {temp:b,humidity:x}
+ *               +-- {temp:a,humidity:x}
+ */
+export function combine<A>(
+  state: {
+    [P in keyof A]: IStream<A[P]>
+  }
+): IStream<Readonly<A>> {
+  const l = Object.keys(state).length
+
+  if (l === 0) return just({})
+
+  return new Combine(state)
+}
+
+/**
  * Stream that combines multiple streams into an object stream
  */
 class Combine<A> implements IStream<Readonly<A>> {
-  readonly keys: (keyof A)[]
-  readonly sources: IStream<any>[]
+  readonly combineMap: CombineMap<any[], Readonly<A>>
 
   constructor(state: { [P in keyof A]: IStream<A[P]> }) {
-    this.keys = Object.keys(state) as (keyof A)[]
-    this.sources = Object.values(state) as IStream<any>[]
+    const keys = Object.keys(state) as (keyof A)[]
+    const sources = Object.values(state) as IStream<any>[]
+    const result = {} as A
+
+    this.combineMap = new CombineMap((...values: any[]) => {
+      for (let i = 0; i < keys.length; i++) {
+        result[keys[i]] = values[i]
+      }
+      return result as Readonly<A>
+    }, sources)
   }
 
   run(sink: ISink<Readonly<A>>, scheduler: IScheduler): Disposable {
-    const result = {} as A
-
-    return combineMap(
-      (...values) => {
-        for (let i = 0; i < this.keys.length; i++) {
-          result[this.keys[i]] = values[i]
-        }
-        return result as Readonly<A>
-      },
-      ...this.sources
-    ).run(sink, scheduler)
+    return this.combineMap.run(sink, scheduler)
   }
 }
 
@@ -90,11 +88,10 @@ class CombineMap<T extends readonly unknown[], R> implements IStream<R> {
   run(sink: ISink<R>, scheduler: IScheduler): Disposable {
     const l = this.sources.length
     const disposables = new Array(l)
-    const sinks = new Array(l)
-    const mergeSink = new CombineMapSink(disposables, sinks.length, sink, this.f)
+    const mergeSink = new CombineMapSink(disposables, l, sink, this.f)
 
-    for (let indexSink: IndexSink<any>, i = 0; i < l; ++i) {
-      indexSink = sinks[i] = new IndexSink(mergeSink, i)
+    for (let i = 0; i < l; i++) {
+      const indexSink = new IndexSink(mergeSink, i)
       disposables[i] = this.sources[i].run(indexSink, scheduler)
     }
 
@@ -116,13 +113,14 @@ class CombineMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
   ) {
     this.awaiting = this.activeCount = sinkCount
     this.values = new Array(sinkCount)
-    this.hasValue = new Array(sinkCount).fill(false)
+    this.hasValue = new Array(sinkCount)
+    for (let i = 0; i < sinkCount; i++) this.hasValue[i] = false
   }
 
   event(time: Time, indexedValue: IndexedValue<I>): void {
     const i = indexedValue.index
 
-    if (!indexedValue.active) {
+    if (indexedValue.ended) {
       this.disposables[i][Symbol.dispose]()
       if (--this.activeCount === 0) {
         this.sink.end(time)
@@ -130,11 +128,9 @@ class CombineMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
       return
     }
 
-    if (this.awaiting > 0) {
-      if (!this.hasValue[i]) {
-        this.hasValue[i] = true
-        this.awaiting -= 1
-      }
+    if (this.awaiting > 0 && !this.hasValue[i]) {
+      this.hasValue[i] = true
+      this.awaiting--
     }
 
     this.values[i] = indexedValue.value
@@ -150,7 +146,6 @@ class CombineMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
   end(time: Time): void {
     // This should not be called directly as combineMap manages its own lifecycle
     // through activeCount tracking
-    // If we reach here, it means all sources ended without errors
     this.sink.end(time)
   }
 }

@@ -33,10 +33,6 @@ export abstract class PropagateTask<T> implements ITask, Disposable {
   }
 
   error(time: Time, e: Error): void {
-    // TODO: Remove this check and just do this.sink.error( e)?
-    if (!this.active) {
-      fatalError(e)
-    }
     this.sink.error(time, e)
   }
 }
@@ -51,7 +47,7 @@ class PropagateRunEventTask<TSinkValue, TValue> extends PropagateTask<TSinkValue
   }
 
   runIfActive(time: Time): void {
-    if (this.active) this.runEvent(time, this.sink, this.value)
+    this.runEvent(time, this.sink, this.value)
   }
 }
 
@@ -64,13 +60,13 @@ class PropagateRunTask extends PropagateTask<any> {
   }
 
   runIfActive(time: Time): void {
-    if (this.active) this.runEvent(time, this.sink)
+    this.runEvent(time, this.sink)
   }
 }
 
 class PropagateEndTask extends PropagateTask<any> {
   runIfActive(time: Time): void {
-    if (this.active) this.sink.end(time)
+    this.sink.end(time)
   }
 }
 
@@ -83,7 +79,7 @@ class PropagateErrorTask extends PropagateTask<any> {
   }
 
   runIfActive(time: Time): void {
-    if (this.active) this.sink.error(time, this.errorValue)
+    this.sink.error(time, this.errorValue)
   }
 }
 

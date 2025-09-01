@@ -50,10 +50,10 @@ class MergeSink<A> implements ISink<IndexedValue<A | undefined>> {
   ) {}
 
   event(time: Time, indexValue: IndexedValue<A | undefined>): void {
-    if (indexValue.active) {
-      this.sink.event(time, indexValue.value)
-    } else {
+    if (indexValue.ended) {
       this.dispose(time, indexValue.index)
+    } else {
+      this.sink.event(time, indexValue.value)
     }
   }
 

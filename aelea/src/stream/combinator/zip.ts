@@ -2,7 +2,8 @@ import { now } from '../source/now.js'
 import { empty } from '../source/void.js'
 import type { IScheduler, ISink, IStream, Time } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
-import { IndexSink } from '../utils/sink.js'
+import { Queue } from '../utils/Queue.js'
+import { type IndexedValue, IndexSink } from '../utils/sink.js'
 import { constant } from './constant.js'
 import { map } from './map.js'
 
@@ -94,44 +95,22 @@ export function zipMap<T extends readonly unknown[], R>(
   return new ZipMap(f, sourceList)
 }
 
-class Queue<T> {
-  items: T[] = []
-
-  push(item: T): void {
-    this.items.push(item)
-  }
-
-  shift(): T | undefined {
-    return this.items.shift()
-  }
-
-  isEmpty(): boolean {
-    return this.items.length === 0
-  }
-
-  length(): number {
-    return this.items.length
-  }
-}
-
-interface IndexedValue<T> {
-  index: number
-  value: T
-  active: boolean
-}
-
 class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
+  private readonly values: any[]
+
   constructor(
     readonly f: (...args: any[]) => O,
     readonly buffers: ArrayLike<Queue<I>>,
     readonly sinks: ArrayLike<IndexSink<I>>,
     readonly sink: ISink<O>
-  ) {}
+  ) {
+    this.values = new Array(buffers.length)
+  }
 
   event(time: Time, indexedValue: IndexedValue<I>): void {
     const i = indexedValue.index
 
-    if (!indexedValue.active) {
+    if (indexedValue.ended) {
       const buffer = this.buffers[i]
       if (buffer.isEmpty()) {
         this.sink.end(time)
@@ -149,9 +128,9 @@ class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
         return
       }
 
-      const values = []
+      const values = this.values
       for (let i = 0; i < this.buffers.length; i++) {
-        values.push(this.buffers[i].shift()!)
+        values[i] = this.buffers[i].shift()!
       }
       try {
         const result = this.f(...values)
@@ -179,7 +158,7 @@ class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
 
   ended(): boolean {
     for (let i = 0; i < this.buffers.length; i++) {
-      if (this.buffers[i].isEmpty() && !this.sinks[i].active) {
+      if (this.buffers[i].isEmpty() && !this.sinks[i].ended) {
         return true
       }
     }

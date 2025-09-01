@@ -65,17 +65,16 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
   event(time: Time, target: number): void {
     this.target = target
 
+    if (this.animating) return
+
     if (!this.initialized) {
       this.initialized = true
       this.position = target
       this.sink.event(time, target)
     }
 
-    if (!this.animating) {
-      this.animating = true
-      this.scheduler.paint(this)
-    }
-    // If already animating, just update target - animation will pick it up
+    this.animating = true
+    this.scheduler.paint(this)
   }
 
   error(time: Time, err: unknown): void {

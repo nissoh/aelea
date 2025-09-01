@@ -17,12 +17,12 @@ export abstract class PipeSink<I, O = I> implements ISink<I> {
 export interface IndexedValue<A> {
   readonly index: number
   readonly value: A
-  readonly active: boolean
+  readonly ended: boolean
 }
 
 export class IndexSink<A> implements ISink<A> {
-  public active = true
-  public value: A | undefined
+  ended = false
+  value: A | undefined
 
   constructor(
     readonly sink: ISink<IndexedValue<A | undefined>>,
@@ -30,17 +30,16 @@ export class IndexSink<A> implements ISink<A> {
   ) {}
 
   event(time: Time, x: A): void {
-    if (this.active) {
-      this.value = x
-      this.sink.event(time, this)
-    }
+    if (this.ended) this.sink.error(time, new Error('Cannot send events to ended sink'))
+
+    this.value = x
+    this.sink.event(time, this)
   }
 
   end(time: Time): void {
-    if (!this.active) {
-      return
-    }
-    this.active = false
+    if (this.ended) throw new Error('Cannot end an ended sink')
+
+    this.ended = true
     this.sink.event(time, this)
   }
 

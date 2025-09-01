@@ -2,6 +2,10 @@ import * as MC from '@most/core'
 import * as MS from '@most/scheduler'
 import { createDefaultScheduler, type ISink, type IStream } from '../src/stream/index.js'
 
+// Create schedulers ONCE and reuse
+const aeleaScheduler = createDefaultScheduler()
+const mostScheduler = MS.newDefaultScheduler()
+
 /**
  * @most/core helper to create streams from arrays
  */
@@ -22,44 +26,51 @@ export const fromArrayM = <A>(arr: readonly A[]) =>
     )
   )
 
-// Optimized sink implementation for running streams
-class RunStreamSink<T> implements ISink<T> {
-  result: T | undefined
+// Optimized sink - reusable
+class RunStreamSink implements ISink<any> {
+  result: any
+  resolve!: (value: any) => void
+  reject!: (error: any) => void
 
-  constructor(
-    readonly resolve: (value: T) => void,
-    readonly reject: (error: any) => void
-  ) {}
+  reset(resolve: (value: any) => void, reject: (error: any) => void) {
+    this.result = undefined
+    this.resolve = resolve
+    this.reject = reject
+  }
 
-  event(value: T): void {
+  event(time: number, value: any): void {
     this.result = value
   }
 
-  error(error: any): void {
+  error(time: number, error: any): void {
     this.reject(error)
   }
 
-  end(): void {
-    this.resolve(this.result!)
+  end(time: number): void {
+    this.resolve(this.result)
   }
 }
 
+// Reuse sink instance
+const reusableSink = new RunStreamSink()
+
 /**
- * Run an Aelea stream and capture the last emitted value
+ * Run an Aelea stream with reused scheduler and sink
  */
 export const runStream = <T>(stream: IStream<T>): Promise<T> => {
-  return new Promise((resolve, reject) => {
-    stream.run(new RunStreamSink(resolve, reject), createDefaultScheduler())
+  return new Promise<T>((resolve, reject) => {
+    reusableSink.reset(resolve, reject)
+    stream.run(reusableSink, aeleaScheduler)
   })
 }
 
 /**
- * Run a @most/core stream and capture the last emitted value
+ * Run a @most/core stream with reused scheduler
  */
 export const runMost = <T>(stream: any): Promise<T> => {
   let result: T
   const captured = MC.tap((x: T) => {
     result = x
   }, stream)
-  return MC.runEffects(captured, MS.newDefaultScheduler()).then(() => result!)
+  return MC.runEffects(captured, mostScheduler).then(() => result!)
 }

@@ -21,33 +21,34 @@ import type { I$Scheduler } from './types.js'
  */
 
 class DomScheduler implements I$Scheduler {
-  // Instance arrays for asap and paint phases
-  asapTasks: ITask[] = []
-  paintTasks: ITask[] = []
-  asapScheduled = false
-  paintScheduled = false
+  private asapTasks: ITask[] = []
+  private paintTasks: ITask[] = []
+  private asapScheduled = false
+  private paintScheduled = false
+  private readonly startTime = performance.now()
 
   runDelayedTask = (task: ITask): void => {
     task.run(this.time())
   }
 
-  // Arrow functions as instance properties - created once per scheduler instance
   flushAsapTasks = (): void => {
-    this.asapScheduled = false
     const tasks = this.asapTasks
-    this.asapTasks = []
-
     const time = this.time()
 
-    for (const task of tasks) task.run(time)
+    this.asapScheduled = false
+    this.asapTasks = []
+
+    for (let i = 0; i < tasks.length; i++) tasks[i].run(time)
   }
 
-  flushPaintTasks = (time: DOMHighResTimeStamp): void => {
-    this.paintScheduled = false
+  flushPaintTasks = (): void => {
     const tasks = this.paintTasks
+    const time = this.time()
+
+    this.paintScheduled = false
     this.paintTasks = []
 
-    for (const task of tasks) task.run(time)
+    for (let i = 0; i < tasks.length; i++) tasks[i].run(time)
   }
 
   delay(task: ITask, delay: Time): Disposable {
@@ -78,7 +79,7 @@ class DomScheduler implements I$Scheduler {
   }
 
   time(): Time {
-    return performance.now()
+    return performance.now() - this.startTime
   }
 }
 

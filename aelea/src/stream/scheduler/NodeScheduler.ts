@@ -3,25 +3,15 @@ import type { IScheduler, ITask, Time } from '../types.js'
 /**
  * Node.js optimized scheduler implementation
  *
- * Uses Node.js specific APIs for better performance:
- * - setImmediate for asap tasks (more efficient than queueMicrotask in Node.js)
- * - process.hrtime for high-resolution time
- *
- * This scheduler is optimized for server-side stream processing where:
- * - High throughput is critical
- * - DOM operations are not needed
- * - CPU-bound tasks are common
+ * Uses setImmediate for asap tasks and maintains its own clock starting from instantiation.
+ * Each scheduler instance tracks time from 0, independent of when it was created.
  */
 
 export class NodeScheduler implements IScheduler {
-  // Task queues to avoid closures
-  asapTasks: ITask[] = []
-  asapScheduled = false
-
-  // Sample time at initialization for delta calculation
+  private asapTasks: ITask[] = []
+  private asapScheduled = false
   private readonly startTime = performance.now()
 
-  // Arrow function for delayed task execution - created once per scheduler instance
   runDelayedTask = (task: ITask): void => {
     task.run(this.time())
   }
@@ -52,7 +42,6 @@ export class NodeScheduler implements IScheduler {
   }
 
   time(): Time {
-    // Return delta from initialization time
     return performance.now() - this.startTime
   }
 }
