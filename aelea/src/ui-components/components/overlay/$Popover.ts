@@ -1,5 +1,5 @@
 import { combine, constant, empty, type IStream, map, merge, op, start, switchMap } from '../../../stream/index.js'
-import { type IBehavior, multicast, state } from '../../../stream-extended/index.js'
+import { type IBehavior, multicast } from '../../../stream-extended/index.js'
 import {
   $node,
   component,
@@ -77,7 +77,7 @@ export const $Popover = ({
       // Apply z-index to target when popover is open
       const $targetWithZIndex = op(
         $target,
-        targetIntersectionTether(state, observer.intersection()),
+        targetIntersectionTether(observer.intersection()),
         styleBehavior(
           map($isOpen => {
             return $isOpen ? ({ zIndex: 2345, position: 'relative' } as const) : null

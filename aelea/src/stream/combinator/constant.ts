@@ -1,4 +1,4 @@
-import { now } from '../source/now.js'
+import { just } from '../source/just.js'
 import type { IStream } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { map } from './map.js'
@@ -18,7 +18,7 @@ export const constant: IConstantCurry = curry2((value, stream) => map(() => valu
  * stream:   -x-y-z->
  * start(a): a-x-y-z->
  */
-export const start: IStartCurry = curry2((value, stream) => merge(constant(value, now), stream))
+export const start: IStartCurry = curry2((value, stream) => merge(just(value), stream))
 
 export interface IStartCurry {
   <A, B>(value: A, stream: IStream<B>): IStream<A | B>

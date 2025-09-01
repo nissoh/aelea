@@ -1,4 +1,4 @@
-import { constant, map, merge, now, sampleMap, start } from 'aelea/stream'
+import { constant, map, merge, sampleMap, start } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $text, component, style } from 'aelea/ui'
 import { $Button, $Field, $row } from 'aelea/ui-components'
@@ -25,9 +25,9 @@ export default component(
     [inputChange, inputChangeTether]: IBehavior<string, string>
   ) => {
     const inputState = start('', inputChange)
-    const value = constant('', merge(create, now))
-    const valueChahnges = merge(inputChange, value)
-    const disabled = map(x => !x, valueChahnges)
+    const value = start('', constant('', create))
+    const valueChanges = merge(inputChange, value)
+    const disabled = map(x => !x, valueChanges)
 
     const add = sampleMap(text => ({ id: iid++, text, completed: false }), inputState, create)
 

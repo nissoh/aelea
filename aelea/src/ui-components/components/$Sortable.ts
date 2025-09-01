@@ -1,11 +1,10 @@
 import {
   combineMap,
-  constant,
   filter,
   joinMap,
+  just,
   map,
   merge,
-  now,
   o,
   sampleMap,
   skipRepeats,
@@ -96,10 +95,10 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
           const yDragPosition = merge(
             joinMap(s => {
               if (s.isDragging) {
-                return constant(s.delta, now)
+                return just(s.delta)
               }
 
-              const init = constant(s.list.indexOf($item) * iHeight, now)
+              const init = just(s.list.indexOf($item) * iHeight)
               return draggingMotion(start(s.delta, init))
             }, multicastedDrag),
             draggingMotion(start(i * iHeight, yMotion))

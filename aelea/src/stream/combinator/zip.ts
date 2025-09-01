@@ -1,10 +1,9 @@
-import { now } from '../source/now.js'
+import { just } from '../source/just.js'
 import { empty } from '../source/void.js'
 import type { IScheduler, ISink, IStream, Time } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { Queue } from '../utils/Queue.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
-import { constant } from './constant.js'
 import { map } from './map.js'
 
 /**
@@ -41,7 +40,7 @@ export function zip<A>(
 ): IStream<Readonly<A>> {
   const sources = Object.values(state)
 
-  if (sources.length === 0) return constant({} as A, now)
+  if (sources.length === 0) return just({} as A)
 
   return new Zip(state)
 }

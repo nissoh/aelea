@@ -1,5 +1,5 @@
 import type { IOps } from '../../../stream/index.js'
-import { constant, empty, map, merge, never, now, o, sample, skipRepeats, switchLatest } from '../../../stream/index.js'
+import { empty, just, map, merge, never, o, sample, skipRepeats, switchLatest } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
 import { multicast } from '../../../stream-extended/index.js'
 import { component } from '../../../ui/combinator/component.js'
@@ -34,7 +34,7 @@ export const $TextField = (config: TextField) =>
       const validation = multicastValidation ? skipRepeats(multicastValidation(change)) : never
 
       const $messageLabel = $node(style({ fontSize: '75%', width: '100%' }))
-      const $hint = hint ? constant($messageLabel($text(hint)), now) : never
+      const $hint = hint ? just($messageLabel($text(hint))) : never
 
       const $alert = map(msg => {
         if (msg) {

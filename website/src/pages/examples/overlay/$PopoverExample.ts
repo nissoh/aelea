@@ -1,4 +1,4 @@
-import { constant, now, reduce } from 'aelea/stream'
+import { constant, just, reduce } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $text, component, style } from 'aelea/ui'
 import { $Button, $column, $Popover, $row, $TextField, spacing } from 'aelea/ui-components'
@@ -54,8 +54,8 @@ export const $PopoverExample = component(
             })
           )(
             $row(spacing.default)(
-              $TextField({ label: 'One', value: constant('', now) })({}),
-              $TextField({ label: 'Two', value: constant('', now) })({}),
+              $TextField({ label: 'One', value: just('') })({}),
+              $TextField({ label: 'Two', value: just('') })({}),
               $Button({ $content: $text('Advanced') })({
                 click: popCardTether()
               })
@@ -74,8 +74,8 @@ export const $PopoverExample = component(
             })
           )(
             $row(spacing.default)(
-              $TextField({ label: 'One', value: constant('', now) })({}),
-              $TextField({ label: 'Two', value: constant('', now) })({}),
+              $TextField({ label: 'One', value: just('') })({}),
+              $TextField({ label: 'Two', value: just('') })({}),
               $Button({ $content: $text('Advanced') })({
                 click: popCardBottomTether()
               })
