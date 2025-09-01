@@ -1,4 +1,4 @@
-import { combineMap, constant, continueWith, fromIterable, now } from 'aelea/stream'
+import { combineMap, continueWith, fromIterable, just } from 'aelea/stream'
 import type { I$Slottable } from 'aelea/ui'
 import { motion, styleInline } from 'aelea/ui'
 
@@ -15,7 +15,7 @@ export function fadeIn($content: I$Slottable) {
     slideIn
   )
   const withEndAnimation = continueWith(() => {
-    return constant({ opacity: '', transform: '' }, now)
+    return just({ opacity: '', transform: '' })
   })
 
   return styleInline(withEndAnimation(animation), $content)

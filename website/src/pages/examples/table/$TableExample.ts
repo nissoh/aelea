@@ -1,4 +1,4 @@
-import { combineMap, constant, type IStream, map, merge, now } from 'aelea/stream'
+import { combineMap, type IStream, just, map, merge } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $node, $text, component, style } from 'aelea/ui'
 import { $card, $Table, type ISortBy, type ScrollRequest, type TablePageResponse } from 'aelea/ui-components'
@@ -22,13 +22,10 @@ export const $TableExample = component(
         return { id: `item-#${++i}`, random: Math.round(Math.random() * 100) }
       })
 
-    const initialSort: IStream<ISortBy<ITableRow>> = constant(
-      {
-        direction: 'asc',
-        name: 'id'
-      },
-      now
-    )
+    const initialSort: IStream<ISortBy<ITableRow>> = just({
+      direction: 'asc',
+      name: 'id'
+    })
 
     const sortState = merge(initialSort, sortBy)
 

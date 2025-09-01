@@ -4,9 +4,9 @@ import {
   empty,
   type IStream,
   join,
+  just,
   map,
   merge,
-  now,
   sampleMap,
   start,
   switchLatest,
@@ -36,7 +36,7 @@ export const $VirtualScrollExample = component(
     const TOTAL_ITEMS = 1000
 
     const formatNumber = Intl.NumberFormat().format
-    const initialDelayResponse = constant(1600, now)
+    const initialDelayResponse = just(1600)
     const delayWithInitial = merge(initialDelayResponse, delayResponse)
 
     let i = 0

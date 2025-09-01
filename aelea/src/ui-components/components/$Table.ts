@@ -3,10 +3,10 @@ import {
   type IOps,
   type IStream,
   joinMap,
+  just,
   map,
   merge,
   never,
-  now,
   o,
   reduce,
   start,
@@ -174,7 +174,7 @@ export const $Table = <T, FilterState = never>({
                   $rowContainer(
                     ...columns.map(col => {
                       const cellOps = o(cellBodyOp, col.columnOp || o())
-                      return cellOps(switchLatest(col.$body(constant(rowData, now))))
+                      return cellOps(switchLatest(col.$body(just(rowData))))
                     })
                   )
                 )
