@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, IStream, Time } from '../types.js'
+import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
@@ -51,7 +51,7 @@ class SkipRepeatsSink<T> extends PipeSink<T> {
     super(sink)
   }
 
-  event(time: Time, value: T) {
+  event(time: ITime, value: T) {
     let shouldEmit = false
 
     if (!this.hasValue) {

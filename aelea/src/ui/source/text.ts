@@ -4,9 +4,9 @@ import {
   empty,
   type ISink,
   type IStream,
+  type ITime,
   merge,
-  propagateRunEventTask,
-  type Time
+  propagateRunEventTask
 } from '../../stream/index.js'
 import { stream } from '../../stream-extended/index.js'
 import type { I$Scheduler, ISlottable } from '../types.js'
@@ -30,7 +30,7 @@ class DynamicTextSink implements ISink<string>, Disposable {
     readonly scheduler: I$Scheduler
   ) {}
 
-  event(time: Time, value: string): void {
+  event(time: ITime, value: string): void {
     if (this.textNode === null) {
       // First emission - create text node and emit it
       this.textNode = {
@@ -45,11 +45,11 @@ class DynamicTextSink implements ISink<string>, Disposable {
     }
   }
 
-  end(time: Time): void {
+  end(time: ITime): void {
     // this.sink.end()
   }
 
-  error(time: Time, e: unknown): void {
+  error(time: ITime, e: unknown): void {
     this.sink.error(time, e)
   }
 
@@ -59,7 +59,7 @@ class DynamicTextSink implements ISink<string>, Disposable {
   }
 }
 
-function emitText(time: Time, sink: ISink<ISlottable<Text>>, value: ISlottable<Text>): void {
+function emitText(time: ITime, sink: ISink<ISlottable<Text>>, value: ISlottable<Text>): void {
   sink.event(time, value)
 }
 

@@ -3,9 +3,9 @@ import {
   type IScheduler,
   type ISink,
   type IStream,
+  type ITime,
   PipeSink,
-  propagateRunEventTask,
-  type Time
+  propagateRunEventTask
 } from '../../stream/index.js'
 import { multicast } from './multicast.js'
 
@@ -59,7 +59,7 @@ class StateSink<A> extends PipeSink<A> {
     super(sink)
   }
 
-  event(time: Time, x: A): void {
+  event(time: ITime, x: A): void {
     if (this.parent.latestValue) {
       this.parent.latestValue.value = x
     } else {
@@ -69,6 +69,6 @@ class StateSink<A> extends PipeSink<A> {
   }
 }
 
-function emitState<A>(time: Time, sink: ISink<A>, value: A): void {
+function emitState<A>(time: ITime, sink: ISink<A>, value: A): void {
   sink.event(time, value)
 }

@@ -1,4 +1,4 @@
-import type { IScheduler, ITask, Time } from '../types.js'
+import type { IScheduler, ITask, ITime } from '../types.js'
 
 /**
  * Browser-optimized scheduler implementation
@@ -36,12 +36,12 @@ export class BrowserScheduler implements IScheduler {
     return task
   }
 
-  delay(task: ITask, delay: Time): Disposable {
+  delay(task: ITask, delay: ITime): Disposable {
     setTimeout(this.runDelayedTask, delay, task)
     return task
   }
 
-  time(): Time {
+  time(): ITime {
     return performance.now() - this.startTime
   }
 }

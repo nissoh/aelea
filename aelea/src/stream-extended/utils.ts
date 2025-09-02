@@ -1,6 +1,6 @@
-import type { ISink, Time } from '../stream/index.js'
+import type { ISink, ITime } from '../stream/index.js'
 
-export function tryEvent<T>(sink: ISink<T>, time: Time, value: T): void {
+export function tryEvent<T>(sink: ISink<T>, time: ITime, value: T): void {
   try {
     sink.event(time, value)
   } catch (e) {
@@ -8,7 +8,7 @@ export function tryEvent<T>(sink: ISink<T>, time: Time, value: T): void {
   }
 }
 
-export function tryEnd(sink: ISink<unknown>, time: Time): void {
+export function tryEnd(sink: ISink<unknown>, time: ITime): void {
   try {
     sink.end(time)
   } catch (e) {

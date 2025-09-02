@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, IStream, Time } from '../types.js'
+import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { curry3 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
@@ -32,7 +32,7 @@ class AggregateSink<I, S, O> extends PipeSink<I, O> {
     super(sink)
   }
 
-  event(time: Time, value: I) {
+  event(time: ITime, value: I) {
     try {
       const result = this.step(this.seed, value)
       this.seed = result.seed

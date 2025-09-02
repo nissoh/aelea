@@ -1,5 +1,5 @@
 import { propagateEndTask, propagateRunTask } from '../scheduler/PropagateTask.js'
-import type { IScheduler, ISink, IStream, Time } from '../types.js'
+import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 
 /**
  * Emits the time value at a specific absolute time, then ends
@@ -9,12 +9,12 @@ import type { IScheduler, ISink, IStream, Time } from '../types.js'
  * at(3) when current=5:  |      (time passed, ends immediately)
  * at(0):                 0|     (emits immediately)
  */
-export const at = (time: Time): IStream<Time> => new At(time)
+export const at = (time: ITime): IStream<ITime> => new At(time)
 
-class At implements IStream<Time> {
-  constructor(readonly time: Time) {}
+class At implements IStream<ITime> {
+  constructor(readonly time: ITime) {}
 
-  run(sink: ISink<Time>, scheduler: IScheduler): Disposable {
+  run(sink: ISink<ITime>, scheduler: IScheduler): Disposable {
     const currentTime = scheduler.time()
     const delay = Math.max(0, this.time - currentTime)
 
@@ -22,7 +22,7 @@ class At implements IStream<Time> {
   }
 }
 
-function emit(time: Time, sink: ISink<Time>) {
+function emit(time: ITime, sink: ISink<ITime>) {
   sink.event(time, time)
   sink.end(time)
 }

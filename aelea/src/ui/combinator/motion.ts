@@ -4,8 +4,8 @@ import {
   type IScheduler,
   type ISink,
   type IStream,
-  PropagateTask,
-  type Time
+  type ITime,
+  PropagateTask
 } from '../../stream/index.js'
 import type { I$Scheduler } from '../types.js'
 
@@ -62,7 +62,7 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
     super(sink)
   }
 
-  event(time: Time, target: number): void {
+  event(time: ITime, target: number): void {
     this.target = target
 
     if (this.animating) return
@@ -77,11 +77,11 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
     this.scheduler.paint(this)
   }
 
-  error(time: Time, err: unknown): void {
+  error(time: ITime, err: unknown): void {
     this.sink.error(time, err)
   }
 
-  end(time: Time): void {
+  end(time: ITime): void {
     this.sourceEnded = true
 
     if (this.animating) return
@@ -89,7 +89,7 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
     this.sink.end(time)
   }
 
-  runIfActive(time: Time): void {
+  runIfActive(time: ITime): void {
     const delta = this.target - this.position
     const absDelta = Math.abs(delta)
     const absVelocity = Math.abs(this.velocity)

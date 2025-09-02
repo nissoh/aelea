@@ -10,19 +10,19 @@ export interface IStream<T> {
  */
 export interface ITask extends Disposable {
   active: boolean
-  run(time: Time): void
-  error(time: Time, e: Error): void
+  run(time: ITime): void
+  error(time: ITime, e: Error): void
 }
 
-export type Time = number
+export type ITime = number
 
 /**
  * Observer interface for consuming stream values
  */
 export interface ISink<T> {
-  event(time: Time, value: T): void
-  error(time: Time, error: unknown): void
-  end(time: Time): void
+  event(time: ITime, value: T): void
+  error(time: ITime, error: unknown): void
+  end(time: ITime): void
 }
 
 /**
@@ -40,13 +40,13 @@ export interface ISink<T> {
  */
 export interface IScheduler {
   /** Schedule a task to run after a specified delay */
-  delay(task: ITask, delay: Time): Disposable
+  delay(task: ITask, delay: ITime): Disposable
 
   /** Schedule a task to run as soon as possible (next microtask) */
   asap(task: ITask): Disposable
 
   /** Get the current scheduler time in milliseconds */
-  time(): Time
+  time(): ITime
 }
 
 /**

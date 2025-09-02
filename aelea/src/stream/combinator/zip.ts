@@ -1,6 +1,6 @@
 import { just } from '../source/just.js'
 import { empty } from '../source/void.js'
-import type { IScheduler, ISink, IStream, Time } from '../types.js'
+import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { Queue } from '../utils/Queue.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
@@ -106,7 +106,7 @@ class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
     this.values = new Array(buffers.length)
   }
 
-  event(time: Time, indexedValue: IndexedValue<I>): void {
+  event(time: ITime, indexedValue: IndexedValue<I>): void {
     const i = indexedValue.index
 
     if (indexedValue.ended) {
@@ -144,11 +144,11 @@ class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
     }
   }
 
-  error(time: Time, e: any): void {
+  error(time: ITime, e: any): void {
     this.sink.error(time, e)
   }
 
-  end(time: Time): void {
+  end(time: ITime): void {
     // This should not be called directly as zipMap manages its own lifecycle
     // through activeCount tracking
     // If we reach here, it means all sources ended without errors

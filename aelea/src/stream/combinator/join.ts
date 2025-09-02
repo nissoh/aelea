@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, IStream, Time } from '../types.js'
+import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeAll, disposeNone } from '../utils/disposable.js'
 import { curry2, curry3 } from '../utils/function.js'
 
@@ -51,7 +51,7 @@ class Join<A, B> implements ISink<A>, Disposable {
     this.disposable = source.run(this, scheduler)
   }
 
-  event(time: Time, x: A): void {
+  event(time: ITime, x: A): void {
     if (this.current.length < this.concurrency) {
       this.startInner(time, x)
     } else {
@@ -59,7 +59,7 @@ class Join<A, B> implements ISink<A>, Disposable {
     }
   }
 
-  startInner(time: Time, value: A): void {
+  startInner(time: ITime, value: A): void {
     try {
       const innerSink = new Inner(this, this.sink)
       const innerStream = this.f(value)
@@ -70,17 +70,17 @@ class Join<A, B> implements ISink<A>, Disposable {
     }
   }
 
-  end(time: Time): void {
+  end(time: ITime): void {
     this.active = false
     this.checkEnd(time)
   }
 
-  error(time: Time, e: any): void {
+  error(time: ITime, e: any): void {
     // Don't set active = false - allow stream to continue after error
     this.sink.error(time, e)
   }
 
-  endInner(time: Time, inner: Inner<B>): void {
+  endInner(time: ITime, inner: Inner<B>): void {
     const i = this.current.indexOf(inner)
     if (i >= 0) {
       this.current.splice(i, 1)
@@ -94,7 +94,7 @@ class Join<A, B> implements ISink<A>, Disposable {
     }
   }
 
-  checkEnd(time: Time): void {
+  checkEnd(time: ITime): void {
     if (!this.active && this.current.length === 0) {
       this.sink.end(time)
     }
@@ -116,15 +116,15 @@ class Inner<A> implements ISink<A>, Disposable {
     readonly sink: ISink<A>
   ) {}
 
-  event(time: Time, x: A): void {
+  event(time: ITime, x: A): void {
     this.sink.event(time, x)
   }
 
-  end(time: Time): void {
+  end(time: ITime): void {
     this.parentJoin.endInner(time, this)
   }
 
-  error(time: Time, e: any): void {
+  error(time: ITime, e: any): void {
     this.parentJoin.error(time, e)
   }
 

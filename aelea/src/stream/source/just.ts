@@ -1,5 +1,5 @@
 import { propagateRunEventTask } from '../scheduler/PropagateTask.js'
-import type { IScheduler, ISink, IStream, Time } from '../types.js'
+import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 
 /**
  * Emits a single value immediately, then ends
@@ -18,7 +18,7 @@ class Just<T> implements IStream<T> {
   }
 }
 
-function emit<T>(time: Time, sink: ISink<T>, value: T) {
+function emit<T>(time: ITime, sink: ISink<T>, value: T) {
   sink.event(time, value)
   sink.end(time)
 }

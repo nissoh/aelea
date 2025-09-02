@@ -5,16 +5,16 @@ import {
   type IScheduler,
   type ISink,
   type IStream,
+  type ITime,
   nullSink,
   propagateEndTask,
-  type Time,
   tap
 } from '../stream/index.js'
 import { propagateErrorEndTask } from '../stream/scheduler/PropagateTask.js'
 
 type WebSocketOptions<I, O> = {
   url: string
-  delayTimeout?: Time
+  delayTimeout?: ITime
 
   createWebsocket?: () => WebSocket
   serializer?: (data: I) => any

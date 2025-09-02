@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, IStream, Time } from '../types.js'
+import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeBoth, disposeNone } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 
@@ -16,7 +16,7 @@ export const continueWith: IContinueWithCurry = curry2((f, s) => new ContinueWit
  */
 class ContinueWith<A, B> implements IStream<A | B> {
   constructor(
-    readonly f: (time: Time) => IStream<B>,
+    readonly f: (time: ITime) => IStream<B>,
     readonly source: IStream<A>
   ) {}
 
@@ -34,18 +34,18 @@ class ContinueWithSink<A, B> implements ISink<A>, Disposable {
   constructor(
     readonly sink: ISink<A | B>,
     readonly scheduler: IScheduler,
-    readonly f: (time: Time) => IStream<B>
+    readonly f: (time: ITime) => IStream<B>
   ) {}
 
-  event(time: Time, value: A): void {
+  event(time: ITime, value: A): void {
     this.sink.event(time, value)
   }
 
-  error(time: Time, error: any): void {
+  error(time: ITime, error: any): void {
     this.sink.error(time, error)
   }
 
-  end(time: Time): void {
+  end(time: ITime): void {
     try {
       const nextStream = this.f(time)
       this.disposable = nextStream.run(this.sink, this.scheduler)
@@ -62,6 +62,6 @@ class ContinueWithSink<A, B> implements ISink<A>, Disposable {
 }
 
 export interface IContinueWithCurry {
-  <A, B>(f: (time: Time) => IStream<B>, s: IStream<A>): IStream<A | B>
-  <A, B>(f: (time: Time) => IStream<B>): (s: IStream<A>) => IStream<A | B>
+  <A, B>(f: (time: ITime) => IStream<B>, s: IStream<A>): IStream<A | B>
+  <A, B>(f: (time: ITime) => IStream<B>): (s: IStream<A>) => IStream<A | B>
 }

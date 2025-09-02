@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, IStream, Time } from '../types.js'
+import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2, curry3 } from '../utils/function.js'
 
@@ -57,7 +57,7 @@ class SampleSink<A, B, C> implements ISink<B>, Disposable {
     this.valuesDisposable = this.values.run(valueSink, scheduler)
   }
 
-  event(time: Time, b: B): void {
+  event(time: ITime, b: B): void {
     if (this.latestValue) {
       try {
         const result = this.f(this.latestValue.value, b)
@@ -68,11 +68,11 @@ class SampleSink<A, B, C> implements ISink<B>, Disposable {
     }
   }
 
-  error(time: Time, error: any): void {
+  error(time: ITime, error: any): void {
     this.sink.error(time, error)
   }
 
-  end(time: Time): void {
+  end(time: ITime): void {
     // Dispose values stream when sampler ends
     this.valuesDisposable[Symbol.dispose]()
     this.sink.end(time)
@@ -86,7 +86,7 @@ class SampleSink<A, B, C> implements ISink<B>, Disposable {
 class ValueSink<A> implements ISink<A> {
   constructor(readonly parent: SampleSink<A, any, any>) {}
 
-  event(_time: Time, value: A): void {
+  event(_time: ITime, value: A): void {
     if (this.parent.latestValue) {
       this.parent.latestValue.value = value
     } else {
@@ -94,11 +94,11 @@ class ValueSink<A> implements ISink<A> {
     }
   }
 
-  error(_time: Time, _error: any): void {
+  error(_time: ITime, _error: any): void {
     // Don't propagate errors from values stream
   }
 
-  end(_time: Time): void {
+  end(_time: ITime): void {
     // Don't propagate end from values stream
   }
 }

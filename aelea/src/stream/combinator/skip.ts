@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, IStream, Time } from '../types.js'
+import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
@@ -42,7 +42,7 @@ class SkipSink<T> extends PipeSink<T> {
     super(sink)
   }
 
-  event(time: Time, value: T): void {
+  event(time: ITime, value: T): void {
     if (this.skipped < this.n) {
       this.skipped++
     } else {
@@ -50,7 +50,7 @@ class SkipSink<T> extends PipeSink<T> {
     }
   }
 
-  error(time: Time, error: any): void {
+  error(time: ITime, error: any): void {
     if (this.skipped < this.n) {
       this.skipped++
     } else {

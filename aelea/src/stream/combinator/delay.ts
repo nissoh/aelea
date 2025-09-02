@@ -1,5 +1,5 @@
 import { propagateEndTask, propagateRunEventTask } from '../scheduler/PropagateTask.js'
-import type { IScheduler, ISink, IStream, Time } from '../types.js'
+import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
@@ -12,7 +12,7 @@ import { PipeSink } from '../utils/sink.js'
  */
 class Delay<T> implements IStream<T> {
   constructor(
-    readonly delay: Time,
+    readonly delay: ITime,
     readonly source: IStream<T>
   ) {}
 
@@ -29,19 +29,19 @@ class DelaySink<T> extends PipeSink<T> implements Disposable {
   readonly disposableList: Disposable[] = []
 
   constructor(
-    readonly delay: Time,
+    readonly delay: ITime,
     override readonly sink: ISink<T>,
     readonly scheduler: IScheduler
   ) {
     super(sink)
   }
 
-  event(_time: Time, value: T): void {
+  event(_time: ITime, value: T): void {
     if (!this.active) return
     this.disposableList.push(this.scheduler.delay(propagateRunEventTask(this.sink, emitDelay, value), this.delay))
   }
 
-  override end(_time: Time): void {
+  override end(_time: ITime): void {
     if (!this.active) return
     this.disposableList.push(this.scheduler.delay(propagateEndTask(this.sink), this.delay))
   }
@@ -53,11 +53,11 @@ class DelaySink<T> extends PipeSink<T> implements Disposable {
   }
 }
 
-function emitDelay<T>(time: Time, sink: ISink<T>, value: T): void {
+function emitDelay<T>(time: ITime, sink: ISink<T>, value: T): void {
   sink.event(time, value)
 }
 
 export interface IDelayCurry {
-  <T>(delay: Time, source: IStream<T>): IStream<T>
-  <T>(delay: Time): (source: IStream<T>) => IStream<T>
+  <T>(delay: ITime, source: IStream<T>): IStream<T>
+  <T>(delay: ITime): (source: IStream<T>) => IStream<T>
 }

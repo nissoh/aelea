@@ -8,7 +8,7 @@ export type {
   ISink,
   IStream,
   ITask,
-  Time
+  ITime
 } from './types.js'
 export { isFunction, isStream, maybeOps, nullSink, toStream } from './utils/common.js'
 export {

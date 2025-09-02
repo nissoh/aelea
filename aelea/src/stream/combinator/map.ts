@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, IStream, Time } from '../types.js'
+import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { compose, curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
@@ -39,12 +39,12 @@ class MapSink<I, O> extends PipeSink<I, O> {
     super(sink)
   }
 
-  event(time: Time, value: I) {
+  event(time: ITime, value: I) {
     eventTryMap(this.sink, time, this.f, value)
   }
 }
 
-export function eventTryMap<In, Out>(sink: ISink<Out>, time: Time, f: (value: In) => Out, value: In): void {
+export function eventTryMap<In, Out>(sink: ISink<Out>, time: ITime, f: (value: In) => Out, value: In): void {
   try {
     const transformed = f(value)
     sink.event(time, transformed)

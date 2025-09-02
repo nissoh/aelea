@@ -1,5 +1,5 @@
 import { PropagateTask } from '../scheduler/PropagateTask.js'
-import type { IScheduler, ISink, IStream, Time } from '../types.js'
+import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 
 /**
  * Creates a stream from any iterable (arrays, Sets, Maps, generators, etc.)
@@ -32,7 +32,7 @@ class EmitIterableTask<T> extends PropagateTask<T> {
     super(sink)
   }
 
-  runIfActive(time: Time): void {
+  runIfActive(time: ITime): void {
     try {
       for (const value of this.iterable) {
         if (!this.active) return

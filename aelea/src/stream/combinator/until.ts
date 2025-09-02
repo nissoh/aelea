@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, IStream, Time } from '../types.js'
+import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 import { SettableDisposable } from '../utils/SettableDisposable.js'
@@ -72,16 +72,16 @@ class UntilSink implements ISink<unknown> {
     readonly disposable: Disposable
   ) {}
 
-  event(time: Time): void {
+  event(time: ITime): void {
     this.disposable[Symbol.dispose]()
     this.sink.end(time)
   }
 
-  error(time: Time, e: any): void {
+  error(time: ITime, e: any): void {
     this.sink.error(time, e)
   }
 
-  end(time: Time): void {
+  end(time: ITime): void {
     // Don't end main stream if signal ends
   }
 }
@@ -94,7 +94,7 @@ class SinceSink<A> extends PipeSink<A> {
     super(sink)
   }
 
-  event(time: Time, x: A): void {
+  event(time: ITime, x: A): void {
     if (this.min.allow) {
       this.sink.event(time, x)
     }
@@ -113,16 +113,16 @@ class LowerBoundSink<A> implements ISink<unknown>, Disposable {
     this.disposable = signal.run(this, scheduler)
   }
 
-  event(time: Time): void {
+  event(time: ITime): void {
     this.allow = true
     this[Symbol.dispose]()
   }
 
-  error(time: Time, e: any): void {
+  error(time: ITime, e: any): void {
     this.sink.error(time, e)
   }
 
-  end(time: Time): void {
+  end(time: ITime): void {
     // Don't propagate end from signal
   }
 

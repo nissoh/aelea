@@ -1,5 +1,5 @@
 import { disposeNone, disposeWith, type IScheduler, type ISink, type IStream } from '../../stream/index.js'
-import type { Time } from '../../stream/types.js'
+import type { ITime } from '../../stream/types.js'
 import { append, remove } from '../utils.js'
 import { MulticastSink } from './sink.js'
 
@@ -71,7 +71,7 @@ export class MulticastSource<T> extends MulticastSink<T> implements Disposable, 
     d[Symbol.dispose]()
   }
 
-  end(time: Time): void {
+  end(time: ITime): void {
     super.end(time)
     this[Symbol.dispose]()
   }

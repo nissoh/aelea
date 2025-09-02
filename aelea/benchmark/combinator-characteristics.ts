@@ -3,9 +3,9 @@ import {
   combineMap,
   createDefaultScheduler,
   type IStream,
+  type ITime,
   merge,
   propagateRunTask,
-  type Time,
   zipMap
 } from '../src/stream/index.js'
 import { stream } from '../src/stream-extended/index.js'
@@ -47,7 +47,7 @@ function createControlledStream(values: number[], delayMs = 0): IStream<number> 
 }
 
 // Helper to run stream and measure time
-async function measureStreamTime<T>(stream: IStream<T>): Promise<{ time: Time; count: number }> {
+async function measureStreamTime<T>(stream: IStream<T>): Promise<{ time: ITime; count: number }> {
   const start = performance.now()
   let count = 0
 

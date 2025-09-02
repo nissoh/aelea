@@ -1,5 +1,5 @@
 import { propagateRunEventTask } from '../scheduler/PropagateTask.js'
-import type { IScheduler, ISink, IStream, Time } from '../types.js'
+import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 
@@ -8,7 +8,7 @@ import { curry2 } from '../utils/function.js'
  */
 class Debounce<T> implements IStream<T> {
   constructor(
-    readonly interval: Time,
+    readonly interval: ITime,
     readonly source: IStream<T>
   ) {}
 
@@ -33,21 +33,21 @@ class DebounceSink<T> implements ISink<T>, Disposable {
   constructor(
     readonly sink: ISink<T>,
     readonly scheduler: IScheduler,
-    readonly interval: Time
+    readonly interval: ITime
   ) {}
 
-  event(time: Time, value: T): void {
+  event(time: ITime, value: T): void {
     this.clearTimer()
     this.pendingValue = { value }
     this.timer = this.scheduler.delay(propagateRunEventTask(this.sink, emitDebounced, this), this.interval)
   }
 
-  error(time: Time, e: Error): void {
+  error(time: ITime, e: Error): void {
     this.clearTimer()
     this.sink.error(time, e)
   }
 
-  end(time: Time): void {
+  end(time: ITime): void {
     // Emit pending value if any
     if (this.timer !== null && this.pendingValue !== null) {
       this.clearTimer()
@@ -69,7 +69,7 @@ class DebounceSink<T> implements ISink<T>, Disposable {
   }
 }
 
-function emitDebounced<T>(time: Time, sink: ISink<T>, debounceSink: DebounceSink<T>): void {
+function emitDebounced<T>(time: ITime, sink: ISink<T>, debounceSink: DebounceSink<T>): void {
   if (debounceSink.pendingValue !== null) {
     sink.event(time, debounceSink.pendingValue.value)
     debounceSink.pendingValue = null
@@ -78,6 +78,6 @@ function emitDebounced<T>(time: Time, sink: ISink<T>, debounceSink: DebounceSink
 }
 
 export interface IDebounceCurry {
-  <T>(interval: Time, source: IStream<T>): IStream<T>
-  <T>(interval: Time): (source: IStream<T>) => IStream<T>
+  <T>(interval: ITime, source: IStream<T>): IStream<T>
+  <T>(interval: ITime): (source: IStream<T>) => IStream<T>
 }

@@ -1,16 +1,16 @@
-import type { ISink, ITask, Time } from '../types.js'
+import type { ISink, ITask, ITime } from '../types.js'
 
-export function runTask(time: Time, task: ITask): void {
+export function runTask(time: ITime, task: ITask): void {
   task.run(time)
 }
 
 export const propagateRunEventTask = <TSinkValue, TValue>(
   sink: ISink<TSinkValue>,
-  run: (time: Time, sink: ISink<TSinkValue>, value: TValue) => void,
+  run: (time: ITime, sink: ISink<TSinkValue>, value: TValue) => void,
   value: TValue
 ) => new PropagateRunEventTask(sink, run, value)
 
-export const propagateRunTask = <T>(sink: ISink<T>, run: (time: Time, sink: ISink<T>) => void) =>
+export const propagateRunTask = <T>(sink: ISink<T>, run: (time: ITime, sink: ISink<T>) => void) =>
   new PropagateRunTask(sink, run)
 
 export const propagateEndTask = (sink: ISink<any>) => new PropagateEndTask(sink)
@@ -22,17 +22,17 @@ export abstract class PropagateTask<T> implements ITask, Disposable {
 
   constructor(readonly sink: ISink<T>) {}
 
-  abstract runIfActive(time: Time): void
+  abstract runIfActive(time: ITime): void
 
   [Symbol.dispose](): void {
     this.active = false
   }
 
-  run(time: Time): void {
+  run(time: ITime): void {
     if (this.active) this.runIfActive(time)
   }
 
-  error(time: Time, e: Error): void {
+  error(time: ITime, e: Error): void {
     this.sink.error(time, e)
   }
 }
@@ -40,13 +40,13 @@ export abstract class PropagateTask<T> implements ITask, Disposable {
 class PropagateRunEventTask<TSinkValue, TValue> extends PropagateTask<TSinkValue> {
   constructor(
     sink: ISink<TSinkValue>,
-    readonly runEvent: (time: Time, sink: ISink<TSinkValue>, value: TValue) => void,
+    readonly runEvent: (time: ITime, sink: ISink<TSinkValue>, value: TValue) => void,
     readonly value: TValue
   ) {
     super(sink)
   }
 
-  runIfActive(time: Time): void {
+  runIfActive(time: ITime): void {
     this.runEvent(time, this.sink, this.value)
   }
 }
@@ -54,18 +54,18 @@ class PropagateRunEventTask<TSinkValue, TValue> extends PropagateTask<TSinkValue
 class PropagateRunTask extends PropagateTask<any> {
   constructor(
     sink: ISink<any>,
-    readonly runEvent: (time: Time, sink: ISink<any>) => void
+    readonly runEvent: (time: ITime, sink: ISink<any>) => void
   ) {
     super(sink)
   }
 
-  runIfActive(time: Time): void {
+  runIfActive(time: ITime): void {
     this.runEvent(time, this.sink)
   }
 }
 
 class PropagateEndTask extends PropagateTask<any> {
-  runIfActive(time: Time): void {
+  runIfActive(time: ITime): void {
     this.sink.end(time)
   }
 }
@@ -78,7 +78,7 @@ class PropagateErrorEndTask extends PropagateTask<any> {
     super(sink)
   }
 
-  runIfActive(time: Time): void {
+  runIfActive(time: ITime): void {
     this.sink.error(time, this.errorValue)
     this.sink.end(time)
   }
