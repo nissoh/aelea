@@ -4,7 +4,7 @@ export { createNodeScheduler } from './NodeScheduler.js'
 export {
   PropagateTask,
   propagateEndTask,
-  propagateErrorTask,
+  propagateErrorEndTask,
   propagateRunEventTask,
   propagateRunTask,
   runTask

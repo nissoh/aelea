@@ -1,5 +1,5 @@
 import type { IScheduler, ISink, IStream, Time } from '../types.js'
-import { disposeBoth } from '../utils/disposable.js'
+import { disposeBoth, disposeNone } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 
 /**
@@ -21,13 +21,15 @@ class ContinueWith<A, B> implements IStream<A | B> {
   ) {}
 
   run(sink: ISink<A | B>, scheduler: IScheduler): Disposable {
-    const dsink = new ContinueWithSink(sink, scheduler, this.f)
-    return disposeBoth(this.source.run(dsink, scheduler), dsink)
+    const continuwSinkDisposable = new ContinueWithSink(sink, scheduler, this.f)
+    const sourceDisposable = this.source.run(continuwSinkDisposable, scheduler)
+
+    return disposeBoth(sourceDisposable, continuwSinkDisposable)
   }
 }
 
-class ContinueWithSink<A, B> implements ISink<A> {
-  disposable: Disposable | null = null
+class ContinueWithSink<A, B> implements ISink<A>, Disposable {
+  disposable: Disposable = disposeNone
 
   constructor(
     readonly sink: ISink<A | B>,
@@ -44,9 +46,6 @@ class ContinueWithSink<A, B> implements ISink<A> {
   }
 
   end(time: Time): void {
-    if (this.disposable) {
-      this.disposable[Symbol.dispose]()
-    }
     try {
       const nextStream = this.f(time)
       this.disposable = nextStream.run(this.sink, this.scheduler)
@@ -56,9 +55,9 @@ class ContinueWithSink<A, B> implements ISink<A> {
   }
 
   [Symbol.dispose](): void {
-    if (this.disposable) {
-      this.disposable[Symbol.dispose]()
-    }
+    if (this.disposable === disposeNone) return
+
+    this.disposable[Symbol.dispose]()
   }
 }
 

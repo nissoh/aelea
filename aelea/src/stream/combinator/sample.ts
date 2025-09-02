@@ -1,7 +1,7 @@
 import type { IScheduler, ISink, IStream, Time } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2, curry3 } from '../utils/function.js'
-import { PipeSink } from '../utils/sink.js'
+
 /**
  * Sample values from one stream at the times of events in another
  *
@@ -35,53 +35,67 @@ class SampleMap<A, B, C> implements IStream<C> {
   ) {}
 
   run(sink: ISink<C>, scheduler: IScheduler): Disposable {
-    const seedSink = new SampleMapSink(this.f, sink)
-    const valuesDisposable = this.values.run(seedSink.seedSink, scheduler)
-    const samplerDisposable = this.sampler.run(seedSink, scheduler)
+    const disposableSampleSink = new SampleSink(sink, scheduler, this.values, this.f)
+    const disposableSampler = this.sampler.run(disposableSampleSink, scheduler)
 
-    return disposeBoth(samplerDisposable, valuesDisposable)
+    return disposeBoth(disposableSampleSink, disposableSampler)
   }
 }
 
-class SampleMapSink<A, B, C> extends PipeSink<B, C> {
-  readonly seedSink: SeedSink<A>
+class SampleSink<A, B, C> implements ISink<B>, Disposable {
+  latestValue?: { value: A }
+  valuesDisposable: Disposable
 
   constructor(
-    readonly f: (a: A, b: B) => C,
-    sink: ISink<C>
+    readonly sink: ISink<C>,
+    readonly scheduler: IScheduler,
+    readonly values: IStream<A>,
+    readonly f: (a: A, b: B) => C
   ) {
-    super(sink)
-    this.seedSink = new SeedSink(this)
+    const valueSink = new ValueSink(this)
+
+    this.valuesDisposable = this.values.run(valueSink, scheduler)
   }
 
-  event(time: Time, x: B): void {
-    const boxedValue = this.seedSink.value
-    if (boxedValue !== undefined) {
+  event(time: Time, b: B): void {
+    if (this.latestValue) {
       try {
-        const result = this.f(boxedValue.value, x)
+        const result = this.f(this.latestValue.value, b)
         this.sink.event(time, result)
       } catch (error) {
         this.sink.error(time, error)
       }
     }
   }
+
+  error(time: Time, error: any): void {
+    this.sink.error(time, error)
+  }
+
+  end(time: Time): void {
+    // Dispose values stream when sampler ends
+    this.valuesDisposable[Symbol.dispose]()
+    this.sink.end(time)
+  }
+
+  [Symbol.dispose](): void {
+    this.valuesDisposable[Symbol.dispose]()
+  }
 }
 
-class SeedSink<A> implements ISink<A> {
-  value?: { value: A }
+class ValueSink<A> implements ISink<A> {
+  constructor(readonly parent: SampleSink<A, any, any>) {}
 
-  constructor(readonly sink: ISink<unknown>) {}
-
-  event(_time: Time, x: A): void {
-    if (this.value === undefined) {
-      this.value = { value: x }
+  event(_time: Time, value: A): void {
+    if (this.parent.latestValue) {
+      this.parent.latestValue.value = value
     } else {
-      this.value.value = x
+      this.parent.latestValue = { value }
     }
   }
 
-  error(time: Time, e: any): void {
-    this.sink.error(time, e)
+  error(_time: Time, _error: any): void {
+    // Don't propagate errors from values stream
   }
 
   end(_time: Time): void {

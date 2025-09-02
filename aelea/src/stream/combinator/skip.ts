@@ -17,10 +17,13 @@ class Skip<T> implements IStream<T> {
 }
 
 /**
- * Skip the first n values from a stream
+ * Skip the first n events (values or errors) from a stream
  *
  * stream:   -1-2-3-4-5-6->
  * skip(3):  -------4-5-6->
+ *
+ * stream:   -1-X-3-4-5->  (X = error)
+ * skip(3):  -------4-5->
  */
 export const skip: ISkipCurry = curry2((n, source) => new Skip(n, source))
 
@@ -44,6 +47,14 @@ class SkipSink<T> extends PipeSink<T> {
       this.skipped++
     } else {
       this.sink.event(time, value)
+    }
+  }
+
+  error(time: Time, error: any): void {
+    if (this.skipped < this.n) {
+      this.skipped++
+    } else {
+      this.sink.error(time, error)
     }
   }
 }

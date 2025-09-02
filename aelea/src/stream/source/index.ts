@@ -1,5 +1,4 @@
 export { at } from './at.js'
-export { throwError } from './error.js'
 export { fromIterable } from './fromIterable.js'
 export { fromPromise } from './fromPromise.js'
 export { just } from './just.js'

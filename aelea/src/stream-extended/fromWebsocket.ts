@@ -7,10 +7,10 @@ import {
   type IStream,
   nullSink,
   propagateEndTask,
-  propagateErrorTask,
   type Time,
   tap
 } from '../stream/index.js'
+import { propagateErrorEndTask } from '../stream/scheduler/PropagateTask.js'
 
 type WebSocketOptions<I, O> = {
   url: string
@@ -45,7 +45,14 @@ class FromWebSocket<I, O> implements IStream<O> {
       deserializer = this.options.deserializer ?? JSON.parse
     } = this.options
 
-    const socket = createWebsocket()
+    let socket: WebSocket
+    try {
+      socket = createWebsocket()
+    } catch (error) {
+      scheduler.asap(propagateErrorEndTask(sink, new Error(`Failed to create WebSocket: ${error}`)))
+      return disposeNone
+    }
+
     const connectionStartTime = scheduler.time()
 
     let disposed = false
@@ -55,9 +62,9 @@ class FromWebSocket<I, O> implements IStream<O> {
       if (disposed) return
 
       if (socket.readyState === WebSocket.CONNECTING) {
-        scheduler.asap(propagateErrorTask(sink, new Error('WebSocket connection timeout')))
+        cleanup()
 
-        dispose()
+        scheduler.asap(propagateErrorEndTask(sink, new Error('WebSocket connection timeout')))
       }
     }, delayTimeout)
 
@@ -65,11 +72,9 @@ class FromWebSocket<I, O> implements IStream<O> {
       if (disposed) return
 
       const errorMessage = error instanceof ErrorEvent ? error.message : `WebSocket error: ${error.type}`
-      sink.error(scheduler.time(), new Error(errorMessage))
+      cleanup()
 
-      if (socket.readyState === WebSocket.CLOSED || socket.readyState === WebSocket.CLOSING) {
-        dispose()
-      }
+      scheduler.asap(propagateErrorEndTask(sink, new Error(`WebSocket connection error: ${errorMessage}`)))
     }
 
     const onMessage = (msg: MessageEvent) => {
@@ -78,6 +83,7 @@ class FromWebSocket<I, O> implements IStream<O> {
       try {
         sink.event(scheduler.time(), deserializer(msg.data))
       } catch (parseError) {
+        // Emit error but don't close the connection - bad message shouldn't kill the stream
         sink.error(scheduler.time(), new Error(`Parse error: ${parseError}`))
       }
     }
@@ -87,39 +93,48 @@ class FromWebSocket<I, O> implements IStream<O> {
 
       clearTimeout(timeoutId)
 
-      if (this.input) {
+      if (this.input && !disposed) {
         sendInputEffect = tap((value: I) => {
           if (disposed || socket.readyState !== WebSocket.OPEN) return
 
           try {
-            socket.send(serializer(value))
+            const serialized = serializer(value)
+            socket.send(serialized)
           } catch (sendError) {
+            // Emit error but don't close the connection
             sink.error(scheduler.time(), new Error(`WebSocket send error: ${sendError}`))
           }
         }, this.input).run(nullSink, scheduler)
       }
     }
 
-    const onClose = (event: CloseEvent) => {
+    const onClose = (event: CloseEvent): void => {
       if (disposed) return
 
-      if (!event.wasClean) {
-        const connectionDuration = scheduler.time() - connectionStartTime
-        const closeReason = event.reason || 'No reason provided'
+      cleanup()
 
-        sink.error(
-          scheduler.time(),
-          new Error(
-            `WebSocket closed unexpectedly after ${connectionDuration}ms - Code: ${event.code}, Reason: ${closeReason}`
-          )
-        )
+      if (event.wasClean) {
+        scheduler.asap(propagateEndTask(sink))
+
+        return
       }
 
-      dispose()
+      const connectionDuration = scheduler.time() - connectionStartTime
+      const closeReason = event.reason || 'No reason provided'
+
+      scheduler.asap(
+        propagateErrorEndTask(
+          sink,
+          new Error(
+            `WebSocket closed unexpectedly - Code: ${event.code}, Reason: ${closeReason}, Duration: ${connectionDuration}ms`
+          )
+        )
+      )
     }
 
-    const dispose = () => {
+    const cleanup = () => {
       if (disposed) return
+      disposed = true
 
       clearTimeout(timeoutId)
 
@@ -128,15 +143,11 @@ class FromWebSocket<I, O> implements IStream<O> {
       socket.removeEventListener('open', onOpen)
       socket.removeEventListener('close', onClose)
 
+      sendInputEffect[Symbol.dispose]()
+
       if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
         socket.close()
       }
-
-      disposed = true
-
-      sendInputEffect[Symbol.dispose]()
-
-      scheduler.asap(propagateEndTask(sink))
     }
 
     socket.addEventListener('error', onError)
@@ -144,6 +155,6 @@ class FromWebSocket<I, O> implements IStream<O> {
     socket.addEventListener('open', onOpen)
     socket.addEventListener('close', onClose)
 
-    return disposeWith(dispose)
+    return disposeWith(cleanup)
   }
 }

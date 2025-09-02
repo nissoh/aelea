@@ -4,9 +4,12 @@ import { skip } from './skip.js'
 import { take } from './take.js'
 
 /**
- * Take a slice of values from start index to end index
+ * Take a slice of events (values or errors) from start index to end index
  *
  * stream:      -a-b-c-d-e-f->
+ * slice(2, 5): -----c-d-e|
+ *
+ * stream:      -a-X-c-d-e->  (X = error)
  * slice(2, 5): -----c-d-e|
  */
 export const slice: ISliceCurry = curry3((start, end, source) => {

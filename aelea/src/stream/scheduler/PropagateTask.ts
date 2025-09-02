@@ -15,7 +15,7 @@ export const propagateRunTask = <T>(sink: ISink<T>, run: (time: Time, sink: ISin
 
 export const propagateEndTask = (sink: ISink<any>) => new PropagateEndTask(sink)
 
-export const propagateErrorTask = (sink: ISink<unknown>, error: unknown) => new PropagateErrorTask(sink, error)
+export const propagateErrorEndTask = (sink: ISink<unknown>, error: unknown) => new PropagateErrorEndTask(sink, error)
 
 export abstract class PropagateTask<T> implements ITask, Disposable {
   active = true
@@ -70,7 +70,7 @@ class PropagateEndTask extends PropagateTask<any> {
   }
 }
 
-class PropagateErrorTask extends PropagateTask<any> {
+class PropagateErrorEndTask extends PropagateTask<any> {
   constructor(
     sink: ISink<unknown>,
     readonly errorValue: unknown
@@ -80,13 +80,6 @@ class PropagateErrorTask extends PropagateTask<any> {
 
   runIfActive(time: Time): void {
     this.sink.error(time, this.errorValue)
+    this.sink.end(time)
   }
-}
-
-function fatalError(e: unknown): void {
-  setTimeout(rethrow, 0, e)
-}
-
-function rethrow(e: unknown): never {
-  throw e
 }

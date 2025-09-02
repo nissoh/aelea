@@ -17,10 +17,13 @@ class Take<T> implements IStream<T> {
 }
 
 /**
- * Take only the first n values from a stream
+ * Take only the first n events (values or errors) from a stream
  *
  * stream:   -a-b-c-d-e-f->
  * take(3):  -a-b-c|
+ *
+ * stream:   -a-X-c-d->  (X = error)
+ * take(3):  -a-X-c|
  */
 export const take: ITakeCurry = curry2((n, source) => new Take(n, source))
 
@@ -43,6 +46,17 @@ class TakeSink<T> extends PipeSink<T> {
     if (this.taken < this.n) {
       this.taken++
       this.sink.event(time, value)
+
+      if (this.taken === this.n) {
+        this.end(time)
+      }
+    }
+  }
+
+  error(time: Time, error: any) {
+    if (this.taken < this.n) {
+      this.taken++
+      this.sink.error(time, error)
 
       if (this.taken === this.n) {
         this.end(time)
