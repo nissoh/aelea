@@ -3,7 +3,7 @@ import type { ISink, ITime } from '../stream/index.js'
 export function tryEvent<T>(sink: ISink<T>, time: ITime, value: T): void {
   try {
     sink.event(time, value)
-  } catch (e) {
+  } catch (e: unknown) {
     sink.error(time, e)
   }
 }
@@ -11,7 +11,7 @@ export function tryEvent<T>(sink: ISink<T>, time: ITime, value: T): void {
 export function tryEnd(sink: ISink<unknown>, time: ITime): void {
   try {
     sink.end(time)
-  } catch (e) {
+  } catch (e: unknown) {
     sink.error(time, e)
   }
 }

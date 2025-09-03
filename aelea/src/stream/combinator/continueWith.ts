@@ -57,7 +57,9 @@ class ContinueWithSink<A, B> implements ISink<A>, Disposable {
   [Symbol.dispose](): void {
     if (this.disposable === disposeNone) return
 
-    this.disposable[Symbol.dispose]()
+    const d = this.disposable
+    this.disposable = disposeNone // Prevent circular disposal
+    d[Symbol.dispose]()
   }
 }
 

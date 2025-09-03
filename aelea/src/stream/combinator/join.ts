@@ -1,6 +1,21 @@
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
-import { disposeAll, disposeNone } from '../utils/disposable.js'
+import { disposeBoth, disposeNone } from '../utils/disposable.js'
 import { curry2, curry3 } from '../utils/function.js'
+
+export const join = <A>(stream: IStream<IStream<A>>): IStream<A> =>
+  joinConcurrentlyMap(Number.POSITIVE_INFINITY, stream)
+
+export const joinMap: IJoinMapCurry = curry2((f, source) => joinMapConcurrently(f, Number.POSITIVE_INFINITY, source))
+
+const identity = <T>(x: T): T => x
+
+export const joinConcurrentlyMap: IMergeConcurrentlyMapCurry = curry2((concurrency, stream) =>
+  joinMapConcurrently(identity, concurrency, stream)
+)
+
+export const joinMapConcurrently: IMergeMapConcurrentlyCurry = curry3(
+  (f, concurrency, source) => new JoinMapConcurrently(f, concurrency, source)
+)
 
 /**
  * Stream that flattens a stream of streams with concurrency control
@@ -13,43 +28,23 @@ class JoinMapConcurrently<A, B> implements IStream<B> {
   ) {}
 
   run(sink: ISink<B>, scheduler: IScheduler): Disposable {
-    return new Join(sink, scheduler, this.source, this.f, this.concurrency)
+    const joinSink = new JoinSink(sink, scheduler, this.f, this.concurrency)
+    const sourceDisposable = this.source.run(joinSink, scheduler)
+    return disposeBoth(sourceDisposable, joinSink)
   }
 }
 
-export const join = <A>(stream: IStream<IStream<A>>): IStream<A> =>
-  joinConcurrentlyMap(Number.POSITIVE_INFINITY, stream)
-
-export const joinMap: IJoinMapCurry = curry2((f, source) => joinMapConcurrently(f, Number.POSITIVE_INFINITY, source))
-
-export interface IJoinMapCurry {
-  <A, B>(f: (a: A) => IStream<B>, source: IStream<A>): IStream<B>
-  <A, B>(f: (a: A) => IStream<B>): (source: IStream<A>) => IStream<B>
-}
-
-export const joinConcurrentlyMap: IMergeConcurrentlyMapCurry = curry2((concurrency, stream) =>
-  joinMapConcurrently(s => s, concurrency, stream)
-)
-
-export const joinMapConcurrently: IMergeMapConcurrentlyCurry = curry3(
-  (f, concurrency, source) => new JoinMapConcurrently(f, concurrency, source)
-)
-
-class Join<A, B> implements ISink<A>, Disposable {
-  readonly disposable: Disposable
-  active = true
-  readonly current: Inner<B>[] = []
+class JoinSink<A, B> implements ISink<A>, Disposable {
+  sourceEnded = false
+  readonly current: InnerSink<B>[] = []
   readonly pending: A[] = []
 
   constructor(
     readonly sink: ISink<B>,
     readonly scheduler: IScheduler,
-    source: IStream<A>,
     readonly f: (a: A) => IStream<B>,
     readonly concurrency: number
-  ) {
-    this.disposable = source.run(this, scheduler)
-  }
+  ) {}
 
   event(time: ITime, x: A): void {
     if (this.current.length < this.concurrency) {
@@ -61,17 +56,17 @@ class Join<A, B> implements ISink<A>, Disposable {
 
   startInner(time: ITime, value: A): void {
     try {
-      const innerSink = new Inner(this, this.sink)
+      const innerSink = new InnerSink(this, this.sink)
       const innerStream = this.f(value)
       innerSink.disposable = innerStream.run(innerSink, this.scheduler)
       this.current.push(innerSink)
-    } catch (e) {
-      this.error(time, e)
+    } catch (err) {
+      this.sink.error(time, err)
     }
   }
 
   end(time: ITime): void {
-    this.active = false
+    this.sourceEnded = true
     this.checkEnd(time)
   }
 
@@ -80,7 +75,7 @@ class Join<A, B> implements ISink<A>, Disposable {
     this.sink.error(time, e)
   }
 
-  endInner(time: ITime, inner: Inner<B>): void {
+  endInner(time: ITime, inner: InnerSink<B>): void {
     const i = this.current.indexOf(inner)
     if (i >= 0) {
       this.current.splice(i, 1)
@@ -89,30 +84,32 @@ class Join<A, B> implements ISink<A>, Disposable {
 
     if (this.pending.length > 0) {
       this.startInner(time, this.pending.shift()!)
-    } else {
-      this.checkEnd(time)
+    } else if (this.sourceEnded && this.current.length === 0) {
+      this.sink.end(time)
     }
   }
 
   checkEnd(time: ITime): void {
-    if (!this.active && this.current.length === 0) {
+    if (this.current.length === 0) {
       this.sink.end(time)
     }
   }
 
   [Symbol.dispose](): void {
-    this.active = false
+    this.sourceEnded = true
     this.pending.length = 0
-    this.disposable[Symbol.dispose]()
-    disposeAll(this.current)[Symbol.dispose]()
+    const current = this.current.slice() // Copy array
+    this.current.length = 0 // Clear before disposing
+
+    for (let i = 0; i < current.length; i++) current[i][Symbol.dispose]()
   }
 }
 
-class Inner<A> implements ISink<A>, Disposable {
+class InnerSink<A> implements ISink<A>, Disposable {
   disposable: Disposable = disposeNone
 
   constructor(
-    readonly parentJoin: Join<any, A>,
+    readonly parentJoin: JoinSink<any, A>,
     readonly sink: ISink<A>
   ) {}
 
@@ -129,8 +126,15 @@ class Inner<A> implements ISink<A>, Disposable {
   }
 
   [Symbol.dispose](): void {
-    this.disposable[Symbol.dispose]()
+    const d = this.disposable
+    this.disposable = disposeNone // Clear before disposing to prevent circular disposal
+    d[Symbol.dispose]()
   }
+}
+
+export interface IJoinMapCurry {
+  <A, B>(f: (a: A) => IStream<B>, source: IStream<A>): IStream<B>
+  <A, B>(f: (a: A) => IStream<B>): (source: IStream<A>) => IStream<B>
 }
 
 export interface IMergeConcurrentlyMapCurry {

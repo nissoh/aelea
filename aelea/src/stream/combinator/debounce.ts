@@ -63,8 +63,9 @@ class DebounceSink<T> implements ISink<T>, Disposable {
 
   clearTimer(): void {
     if (this.timer !== null) {
-      this.timer[Symbol.dispose]()
-      this.timer = null
+      const t = this.timer
+      this.timer = null // Clear before disposing to prevent circular disposal
+      t[Symbol.dispose]()
     }
   }
 }

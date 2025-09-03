@@ -17,6 +17,10 @@ class NowWith<T> implements IStream<T> {
 }
 
 function emitNowWith<T>(time: ITime, sink: ISink<T>, fn: (time: ITime) => T) {
-  sink.event(time, fn(time))
+  try {
+    sink.event(time, fn(time))
+  } catch (err) {
+    sink.error(time, err)
+  }
   sink.end(time)
 }

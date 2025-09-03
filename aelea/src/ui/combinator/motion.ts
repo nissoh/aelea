@@ -52,7 +52,9 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
   animating = false
   initialized = false
   sourceEnded = false
+  pendingTask: Disposable | null = null
   readonly dt = 0.016666666666666666 // 1/60
+  readonly frameDelay = 16.666666666666668 // 60fps in milliseconds
 
   constructor(
     sink: ISink<number>,
@@ -65,7 +67,10 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
   event(time: ITime, target: number): void {
     this.target = target
 
-    if (this.animating) return
+    if (this.pendingTask) {
+      console.log('cancelling previous task')
+      return
+    }
 
     if (!this.initialized) {
       this.initialized = true
@@ -74,7 +79,7 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
     }
 
     this.animating = true
-    this.scheduler.paint(this)
+    this.pendingTask = this.scheduler.delay(this, this.frameDelay)
   }
 
   error(time: ITime, err: unknown): void {
@@ -90,6 +95,8 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
   }
 
   runIfActive(time: ITime): void {
+    this.pendingTask = null
+
     const delta = this.target - this.position
     const absDelta = Math.abs(delta)
     const absVelocity = Math.abs(this.velocity)
@@ -117,7 +124,7 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
 
     this.sink.event(time, this.position)
 
-    this.scheduler.paint(this)
+    this.pendingTask = this.scheduler.delay(this, this.frameDelay)
   }
 }
 

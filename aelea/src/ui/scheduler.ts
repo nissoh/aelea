@@ -24,36 +24,47 @@ class DomScheduler implements I$Scheduler {
   private asapTasks: ITask[] = []
   private paintTasks: ITask[] = []
   private asapScheduled = false
+  private asapCancelled = false
   private paintScheduled = false
   private readonly startTime = performance.now()
 
   runDelayedTask = (task: ITask): void => {
+    // First flush any pending asap tasks
+    if (this.asapScheduled) {
+      // Cancel the pending microtask and flush synchronously
+      this.asapCancelled = true
+      this.asapScheduled = false
+      const tasks = this.asapTasks
+      this.asapTasks = []
+
+      for (let i = 0; i < tasks.length; i++) tasks[i].run(this.time())
+    }
     task.run(this.time())
   }
 
   flushAsapTasks = (): void => {
-    const tasks = this.asapTasks
-    const time = this.time()
+    // Check if this flush was cancelled
+    if (this.asapCancelled) {
+      this.asapCancelled = false
+      return
+    }
+
+    // Check if already flushed (defensive programming)
+    if (!this.asapScheduled) return
 
     this.asapScheduled = false
+    const tasks = this.asapTasks
     this.asapTasks = []
 
-    for (let i = 0; i < tasks.length; i++) tasks[i].run(time)
+    for (let i = 0; i < tasks.length; i++) tasks[i].run(this.time())
   }
 
   flushPaintTasks = (): void => {
-    const tasks = this.paintTasks
-    const time = this.time()
-
     this.paintScheduled = false
+    const tasks = this.paintTasks
     this.paintTasks = []
 
-    for (let i = 0; i < tasks.length; i++) tasks[i].run(time)
-  }
-
-  delay(task: ITask, delay: ITime): Disposable {
-    setTimeout(this.runDelayedTask, delay, task)
-    return task
+    for (let i = 0; i < tasks.length; i++) tasks[i].run(this.time())
   }
 
   asap(task: ITask): Disposable {
@@ -64,6 +75,11 @@ class DomScheduler implements I$Scheduler {
       queueMicrotask(this.flushAsapTasks)
     }
 
+    return task
+  }
+
+  delay(task: ITask, delay: ITime): Disposable {
+    setTimeout(this.runDelayedTask, delay, task)
     return task
   }
 

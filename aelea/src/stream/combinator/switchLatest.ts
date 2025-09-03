@@ -95,8 +95,9 @@ class SwitchSink<T> implements ISink<IStream<T>>, Disposable {
   disposeInner(): void {
     if (this.innerDisposable === disposeNone) return
 
-    this.innerDisposable[Symbol.dispose]()
-    this.innerDisposable = disposeNone
+    const d = this.innerDisposable
+    this.innerDisposable = disposeNone // Set to disposeNone before disposing to prevent circular disposal
+    d[Symbol.dispose]()
   }
 }
 

@@ -1,3 +1,4 @@
+import { empty, never } from '../source/void.js'
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
@@ -12,7 +13,11 @@ import { join } from './join.js'
  * signal: -------x------>
  * until:  -a-b-c-|
  */
-export const until: IUntilCurry = curry2((signal, source) => new Until(signal, source))
+export const until: IUntilCurry = curry2((signal, source) => {
+  if (signal === never || signal === empty) return source
+
+  return new Until(signal, source)
+})
 
 /**
  * Take values starting when a signal stream emits

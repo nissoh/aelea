@@ -48,8 +48,9 @@ class DelaySink<T> extends PipeSink<T> implements Disposable {
 
   [Symbol.dispose](): void {
     this.active = false
-    for (const d of this.disposableList) d[Symbol.dispose]()
-    this.disposableList.length = 0
+    const list = this.disposableList.slice() // Copy the array
+    this.disposableList.length = 0 // Clear the original array
+    for (const d of list) d[Symbol.dispose]()
   }
 }
 

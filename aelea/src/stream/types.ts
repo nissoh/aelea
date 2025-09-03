@@ -11,7 +11,7 @@ export interface IStream<T> {
 export interface ITask extends Disposable {
   active: boolean
   run(time: ITime): void
-  error(time: ITime, e: Error): void
+  error(time: ITime, error: unknown): void
 }
 
 export type ITime = number
@@ -39,10 +39,10 @@ export interface ISink<T> {
  * - Test: May use virtual time for deterministic testing
  */
 export interface IScheduler {
-  /** Schedule a task to run after a specified delay */
+  /** Delay a task by a specified amount of time */
   delay(task: ITask, delay: ITime): Disposable
 
-  /** Schedule a task to run as soon as possible (next microtask) */
+  /** Run as soon as possible (next microtask) */
   asap(task: ITask): Disposable
 
   /** Get the current scheduler time in milliseconds */

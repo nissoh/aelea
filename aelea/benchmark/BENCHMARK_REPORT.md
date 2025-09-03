@@ -1,33 +1,33 @@
 # Aelea Performance Benchmark Report
 
-## Latest Benchmark Results (2025-09-01)
+## Latest Benchmark Results (2025-01-03)
 
 ### Performance Results
 
 #### Map-Filter-Reduce (1M elements)
-- **@most/core**: 4.33ms avg (249 ops/s)
-- **@aelea**: 3.72ms avg (271 ops/s)
-- **Result**: aelea is **14% faster** ✨
+- **@most/core**: 4.45ms avg (241 ops/s)
+- **@aelea**: 3.80ms avg (265 ops/s)
+- **Result**: aelea is **10% faster** ✨
 
 #### Reduce/Scan (1M elements)
-- **@most/core scan**: 1.96ms avg (512 ops/s)
-- **@aelea reduce**: 1.73ms avg (580 ops/s)
-- **Result**: aelea is **13% faster** ✨
+- **@most/core scan**: 1.97ms avg (512 ops/s)
+- **@aelea reduce**: 1.59ms avg (628 ops/s)
+- **Result**: aelea is **23% faster** ✨
 
 #### Switch (1000x1000)
-- **@most/core**: 193.7ms avg (5,274 ops/s)
-- **@aelea**: 21.1ms avg (50,575 ops/s)
-- **Result**: aelea is **9.2x faster** 🚀
+- **@most/core**: 181.9μs avg (5,620 ops/s)
+- **@aelea**: 39.3μs avg (26,247 ops/s)
+- **Result**: aelea is **4.6x faster** 🚀
 
 #### Combinators Performance (100 items per stream)
 | Combinator | Scenario | @most/core (ops/s) | @aelea (ops/s) | Performance |
 |------------|----------|-------------------|----------------|-------------|
-| **Merge** | 2 streams | 842,075 | 557,665 | -34% |
-| **Merge** | 5 streams | 415,837 | 300,885 | -28% |
-| **Combine** | 2 streams | 571,264 | 263,530 | -54% |
-| **Combine** | 3 streams | 427,148 | 211,822 | -50% |
-| **Zip** | 2 streams | 233,982 | 187,028 | -20% |
-| **Zip** | 3 streams | 192,566 | 150,405 | -22% |
+| **Merge** | 2 streams | 857,841 | 539,524 | -37% |
+| **Merge** | 5 streams | 414,374 | 285,591 | -31% |
+| **Combine** | 2 streams | 571,657 | 263,491 | -54% |
+| **Combine** | 3 streams | 434,320 | 218,032 | -50% |
+| **Zip** | 2 streams | 239,724 | 196,342 | -18% |
+| **Zip** | 3 streams | 203,263 | 157,560 | -22% |
 
 ## Environment
 

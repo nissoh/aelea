@@ -9,28 +9,14 @@ import type { IScheduler, ITask, ITime } from '../types.js'
 
 export class NodeScheduler implements IScheduler {
   private asapTasks: ITask[] = []
-  private asapScheduled = false
+  private asapImmediate: NodeJS.Immediate | null = null
   private readonly startTime = performance.now()
-
-  runDelayedTask = (task: ITask): void => {
-    task.run(this.time())
-  }
-
-  flushAsapTasks = (): void => {
-    this.asapScheduled = false
-    const tasks = this.asapTasks
-    this.asapTasks = []
-    const time = this.time()
-
-    for (const task of tasks) task.run(time)
-  }
 
   asap(task: ITask): Disposable {
     this.asapTasks.push(task)
 
-    if (!this.asapScheduled) {
-      this.asapScheduled = true
-      setImmediate(this.flushAsapTasks)
+    if (!this.asapImmediate) {
+      this.asapImmediate = setImmediate(this.flushAsapTasks)
     }
 
     return task
@@ -39,6 +25,24 @@ export class NodeScheduler implements IScheduler {
   delay(task: ITask, delay: ITime): Disposable {
     setTimeout(this.runDelayedTask, delay, task)
     return task
+  }
+
+  flushAsapTasks = (): void => {
+    this.asapImmediate = null
+    const tasks = this.asapTasks
+    this.asapTasks = []
+
+    for (let i = 0; i < tasks.length; i++) tasks[i].run(this.time())
+  }
+
+  runDelayedTask = (task: ITask): void => {
+    // First flush any pending asap tasks
+    if (this.asapImmediate) {
+      // Cancel the pending setImmediate to avoid duplicate execution
+      clearImmediate(this.asapImmediate)
+      this.flushAsapTasks()
+    }
+    task.run(this.time())
   }
 
   time(): ITime {

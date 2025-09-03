@@ -10,19 +10,30 @@ import type { IScheduler, ITask, ITime } from '../types.js'
 export class BrowserScheduler implements IScheduler {
   private asapTasks: ITask[] = []
   private asapScheduled = false
+  private asapCancelled = false
   private readonly startTime = performance.now()
 
   runDelayedTask = (task: ITask): void => {
+    // First flush any pending asap tasks
+    if (this.asapScheduled) {
+      // Mark the pending microtask as cancelled
+      this.asapCancelled = true
+      this.flushAsapTasks()
+    }
     task.run(this.time())
   }
 
   flushAsapTasks = (): void => {
+    // Check if this flush was cancelled
+    if (this.asapCancelled) {
+      this.asapCancelled = false
+      return
+    }
     this.asapScheduled = false
     const tasks = this.asapTasks
     this.asapTasks = []
-    const time = this.time()
 
-    for (const task of tasks) task.run(time)
+    for (let i = 0; i < tasks.length; i++) tasks[i].run(this.time())
   }
 
   asap(task: ITask): Disposable {

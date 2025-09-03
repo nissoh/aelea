@@ -1,6 +1,5 @@
 import {
   disposeBoth,
-  disposeNone,
   empty,
   type ISink,
   type IStream,
@@ -23,7 +22,7 @@ function createDynamicTextStream(textSource: IStream<string>): I$Text {
 
 class DynamicTextSink implements ISink<string>, Disposable {
   textNode: ISlottable<Text> | null = null
-  currentDisposable: Disposable = disposeNone
+  disposed = false
 
   constructor(
     readonly sink: ISink<ISlottable<Text>>,
@@ -31,16 +30,18 @@ class DynamicTextSink implements ISink<string>, Disposable {
   ) {}
 
   event(time: ITime, value: string): void {
+    if (this.disposed) return
+
     if (this.textNode === null) {
-      // First emission - create text node and emit it
+      // First emission - create text node and emit it immediately
       this.textNode = {
         element: document.createTextNode(value),
         disposable: new SettableDisposable()
       }
       // DOM tree creation happens in asap phase
-      this.currentDisposable = this.scheduler.asap(propagateRunEventTask(this.sink, emitText, this.textNode))
-    } else if (this.textNode) {
-      // Subsequent emissions - just update the text content
+      this.scheduler.asap(propagateRunEventTask(this.sink, emitText, this.textNode))
+    } else {
+      // Update immediately - text node updates are cheap
       this.textNode.element.nodeValue = value
     }
   }
@@ -50,11 +51,12 @@ class DynamicTextSink implements ISink<string>, Disposable {
   }
 
   error(time: ITime, e: unknown): void {
+    if (this.disposed) return
     this.sink.error(time, e)
   }
 
   [Symbol.dispose](): void {
-    this.currentDisposable[Symbol.dispose]()
+    this.disposed = true
     this.textNode = null
   }
 }
