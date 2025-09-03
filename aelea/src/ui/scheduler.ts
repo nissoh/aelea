@@ -26,7 +26,8 @@ class DomScheduler implements I$Scheduler {
   private asapScheduled = false
   private asapCancelled = false
   private paintScheduled = false
-  private readonly startTime = performance.now()
+  private readonly initialTime = performance.now()
+  private readonly initialWallClockTime = Date.now()
 
   runDelayedTask = (task: ITask): void => {
     // First flush any pending asap tasks
@@ -95,7 +96,11 @@ class DomScheduler implements I$Scheduler {
   }
 
   time(): ITime {
-    return performance.now() - this.startTime
+    return performance.now() - this.initialTime
+  }
+
+  dayTime(): ITime {
+    return this.initialWallClockTime + this.time()
   }
 }
 

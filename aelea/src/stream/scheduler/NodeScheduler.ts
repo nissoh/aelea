@@ -10,7 +10,8 @@ import type { IScheduler, ITask, ITime } from '../types.js'
 export class NodeScheduler implements IScheduler {
   private asapTasks: ITask[] = []
   private asapImmediate: NodeJS.Immediate | null = null
-  private readonly startTime = performance.now()
+  private readonly initialTime = performance.now()
+  private readonly initialWallClockTime = Date.now()
 
   asap(task: ITask): Disposable {
     this.asapTasks.push(task)
@@ -46,7 +47,11 @@ export class NodeScheduler implements IScheduler {
   }
 
   time(): ITime {
-    return performance.now() - this.startTime
+    return performance.now() - this.initialTime
+  }
+
+  dayTime(): ITime {
+    return this.initialWallClockTime + this.time()
   }
 }
 

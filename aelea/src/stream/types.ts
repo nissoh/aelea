@@ -45,8 +45,11 @@ export interface IScheduler {
   /** Run as soon as possible (next microtask) */
   asap(task: ITask): Disposable
 
-  /** Get the current scheduler time in milliseconds */
+  /** Get elapsed time in milliseconds since this scheduler was created (starts at 0) */
   time(): ITime
+
+  /** Get current wall-clock time in milliseconds (Unix timestamp like Date.now()) */
+  dayTime(): ITime
 }
 
 /**

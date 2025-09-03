@@ -11,7 +11,8 @@ export class BrowserScheduler implements IScheduler {
   private asapTasks: ITask[] = []
   private asapScheduled = false
   private asapCancelled = false
-  private readonly startTime = performance.now()
+  private readonly initialTime = performance.now()
+  private readonly initialWallClockTime = Date.now()
 
   runDelayedTask = (task: ITask): void => {
     // First flush any pending asap tasks
@@ -53,7 +54,11 @@ export class BrowserScheduler implements IScheduler {
   }
 
   time(): ITime {
-    return performance.now() - this.startTime
+    return performance.now() - this.initialTime
+  }
+
+  dayTime(): ITime {
+    return this.initialWallClockTime + this.time()
   }
 }
 
