@@ -12,7 +12,7 @@ class Throttle<T> implements IStream<T> {
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    return this.source.run(new ThrottleSink(this.interval, sink, scheduler), scheduler)
+    return this.source.run(new ThrottleSink(this.interval, sink), scheduler)
   }
 }
 
@@ -29,8 +29,7 @@ class ThrottleSink<T> extends PipeSink<T> {
 
   constructor(
     readonly interval: ITime,
-    sink: ISink<T>,
-    readonly scheduler: IScheduler
+    sink: ISink<T>
   ) {
     super(sink)
   }

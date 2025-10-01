@@ -44,8 +44,8 @@ class TakeSink<T> extends PipeSink<T> {
 
   event(time: ITime, value: T) {
     if (this.taken < this.n) {
-      this.taken++
       this.sink.event(time, value)
+      this.taken++
 
       if (this.taken === this.n) {
         this.end(time)
@@ -55,8 +55,8 @@ class TakeSink<T> extends PipeSink<T> {
 
   error(time: ITime, error: any) {
     if (this.taken < this.n) {
-      this.taken++
       this.sink.error(time, error)
+      this.taken++
 
       if (this.taken === this.n) {
         this.end(time)

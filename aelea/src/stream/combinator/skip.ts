@@ -45,16 +45,16 @@ class SkipSink<T> extends PipeSink<T> {
   event(time: ITime, value: T): void {
     if (this.skipped < this.n) {
       this.skipped++
-    } else {
-      this.sink.event(time, value)
+      return
     }
+    this.sink.event(time, value)
   }
 
   error(time: ITime, error: any): void {
     if (this.skipped < this.n) {
       this.skipped++
-    } else {
-      this.sink.error(time, error)
+      return
     }
+    this.sink.error(time, error)
   }
 }

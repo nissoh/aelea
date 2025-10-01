@@ -61,9 +61,9 @@ class Combine<A> implements IStream<Readonly<A>> {
   constructor(state: { [P in keyof A]: IStream<A[P]> }) {
     const keys = Object.keys(state) as (keyof A)[]
     const sources = Object.values(state) as IStream<any>[]
-    const result = {} as A
 
     this.combineMap = new CombineMap((...values: any[]) => {
+      const result = {} as A
       for (let i = 0; i < keys.length; i++) {
         result[keys[i]] = values[i]
       }
