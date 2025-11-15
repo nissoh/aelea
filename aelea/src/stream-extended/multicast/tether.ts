@@ -144,6 +144,8 @@ class Tether<T> extends MulticastSink<T> implements IStream<T> {
       if (i > -1) this.sinkList = remove(this.sinkList, i)
     })
 
-    return disposeAll([...initialPrimaryDisposableList, unsubscribeDisposable])
+    initialPrimaryDisposableList.push(unsubscribeDisposable)
+
+    return disposeAll(initialPrimaryDisposableList)
   }
 }
