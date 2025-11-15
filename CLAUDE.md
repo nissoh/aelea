@@ -64,11 +64,11 @@ Streams are vertically aligned by time - events in the same column happen simult
 import { now, empty } from 'aelea/stream'
 
 // Emit a single value immediately
-const greeting$ = now('Hello')
+const greeting = now('Hello')
 // Diagram: Hello|
 
 // Emit nothing and complete
-const nothing$ = empty()
+const nothing = empty()
 // Diagram: |
 ```
 
@@ -77,11 +77,11 @@ const nothing$ = empty()
 import { periodic, at } from 'aelea/stream'
 
 // Emit incrementing numbers every 1000ms
-const tick$ = periodic(1000)
+const tick = periodic(1000)
 // Diagram: -0-1-2-3-4->
 
 // Emit value at specific time
-const delayed$ = at(5000, 'ready')
+const delayed = at(5000, 'ready')
 // Diagram: -----ready|
 ```
 
@@ -89,7 +89,7 @@ const delayed$ = at(5000, 'ready')
 ```typescript
 import { fromIterable } from 'aelea/stream'
 
-const numbers$ = fromIterable([1, 2, 3, 4, 5])
+const numbers = fromIterable([1, 2, 3, 4, 5])
 // Diagram: 12345|
 ```
 
@@ -97,7 +97,7 @@ const numbers$ = fromIterable([1, 2, 3, 4, 5])
 ```typescript
 import { fromPromise } from 'aelea/stream'
 
-const userData$ = fromPromise(
+const userData = fromPromise(
   fetch('/api/user').then(r => r.json())
 )
 // Diagram: ------{user data}|
@@ -109,7 +109,7 @@ import { nodeEvent } from 'aelea/ui'
 
 // Create element and capture click events
 const button = document.querySelector('button')
-const clicks$ = nodeEvent('click')(button)
+const clicks = nodeEvent('click')(button)
 // Diagram: ----x--x-----x-> (each x is a click event)
 ```
 
@@ -121,7 +121,7 @@ Streams are lazy - they don't do anything until you run them:
 import { now } from 'aelea/stream'
 import { createDefaultScheduler } from 'aelea/stream'
 
-const stream$ = now(42)
+const stream = now(42)
 
 // Create a sink to receive values
 const sink = {
@@ -138,7 +138,7 @@ const sink = {
 
 // Run the stream
 const scheduler = createDefaultScheduler()
-const disposable = stream$.run(sink, scheduler)
+const disposable = stream.run(sink, scheduler)
 
 // Clean up when done
 disposable[Symbol.dispose]()
@@ -158,10 +158,10 @@ The power of streams comes from composing them together.
 ```typescript
 import { map, periodic } from 'aelea/stream'
 
-const numbers$ = periodic(1000)
+const numbers = periodic(1000)
 // Diagram: -0-1-2-3-4->
 
-const doubled$ = map(n => n * 2, numbers$)
+const doubled = map(n => n * 2, numbers)
 // Diagram: -0-2-4-6-8->
 ```
 
@@ -169,10 +169,10 @@ const doubled$ = map(n => n * 2, numbers$)
 ```typescript
 import { filter } from 'aelea/stream'
 
-const numbers$ = fromIterable([1, 2, 3, 4, 5, 6])
+const numbers = fromIterable([1, 2, 3, 4, 5, 6])
 // Diagram: 123456|
 
-const evens$ = filter(n => n % 2 === 0, numbers$)
+const evens = filter(n => n % 2 === 0, numbers)
 // Diagram: -2-4-6|
 ```
 
@@ -180,10 +180,10 @@ const evens$ = filter(n => n % 2 === 0, numbers$)
 ```typescript
 import { aggregate, periodic } from 'aelea/stream'
 
-const tick$ = periodic(1000)
+const tick = periodic(1000)
 // Diagram: -x-x-x-x->
 
-const count$ = aggregate((acc, _) => acc + 1, 0, tick$)
+const count = aggregate((acc, _) => acc + 1, 0, tick)
 // Diagram: -1-2-3-4->
 ```
 
@@ -193,10 +193,10 @@ const count$ = aggregate((acc, _) => acc + 1, 0, tick$)
 ```typescript
 import { merge } from 'aelea/stream'
 
-const streamA$ = /* -1---3---5-> */
-const streamB$ = /* --2---4----> */
+const streamA = /* -1---3---5-> */
+const streamB = /* --2---4----> */
 
-const merged$ = merge(streamA$, streamB$)
+const merged = merge(streamA, streamB)
 // Diagram: -12-34-5->
 ```
 
@@ -204,10 +204,10 @@ const merged$ = merge(streamA$, streamB$)
 ```typescript
 import { combine } from 'aelea/stream'
 
-const name$ =  /* -Alice---Bob-> */
-const age$ =   /* ---25------30-> */
+const name =  /* -Alice---Bob-> */
+const age =   /* ---25------30-> */
 
-const user$ = combine((name, age) => ({ name, age }), name$, age$)
+const user = combine((name, age) => ({ name, age }), name, age)
 // Diagram: ---{Alice,25}-{Bob,25}-{Bob,30}->
 ```
 
@@ -215,10 +215,10 @@ const user$ = combine((name, age) => ({ name, age }), name$, age$)
 ```typescript
 import { sample } from 'aelea/stream'
 
-const position$ = /* -0-1-2-3-4-5-> */
-const clicks$ =   /* ----x-----x---> */
+const position = /* -0-1-2-3-4-5-> */
+const clicks =   /* ----x-----x---> */
 
-const clickedPos$ = sample(position$, clicks$)
+const clickedPos = sample(position, clicks)
 // Diagram: ----2-----5->
 ```
 
@@ -226,10 +226,10 @@ const clickedPos$ = sample(position$, clicks$)
 ```typescript
 import { sampleMap } from 'aelea/stream'
 
-const value$ =     /* -5-------10-> */
-const increment$ = /* ---x--x-----> */
+const value =     /* -5-------10-> */
+const increment = /* ---x--x-----> */
 
-const result$ = sampleMap(v => v + 1, value$, increment$)
+const result = sampleMap(v => v + 1, value, increment)
 // Diagram: ---6--6---->
 // First: value is 5, +1 = 6
 // Second: value is still 5, +1 = 6
@@ -239,14 +239,14 @@ const result$ = sampleMap(v => v + 1, value$, increment$)
 
 **switchLatest - Switch to the latest inner stream:**
 ```typescript
-import { switchLatest, map, periodic } from 'aelea/stream'
+import { switchLatest, map, fromPromise } from 'aelea/stream'
 
-const query$ = /* -"cat"---"dog"--> */
+const query = /* -"cat"---"dog"--> */
 
-const searchResults$ = switchLatest(
+const searchResults = switchLatest(
   map(query =>
     fromPromise(fetch(`/api/search?q=${query}`).then(r => r.json()))
-  , query$)
+  , query)
 )
 // Cancels previous search when new query arrives
 ```
@@ -256,9 +256,9 @@ const searchResults$ = switchLatest(
 import { switchMap } from 'aelea/stream'
 
 // Equivalent to the above
-const searchResults$ = switchMap(
+const searchResults = switchMap(
   query => fromPromise(fetch(`/api/search?q=${query}`).then(r => r.json())),
-  query$
+  query
 )
 ```
 
@@ -268,8 +268,8 @@ const searchResults$ = switchMap(
 ```typescript
 import { debounce } from 'aelea/stream'
 
-const typing$ = /* -a-b-c------d-e-f-----> */
-const search$ = debounce(300, typing$)
+const typing = /* -a-b-c------d-e-f-----> */
+const search = debounce(300, typing)
 // Diagram: -------c---------f->
 // Only emits when 300ms pass without new events
 ```
@@ -278,8 +278,8 @@ const search$ = debounce(300, typing$)
 ```typescript
 import { throttle } from 'aelea/stream'
 
-const scroll$ = /* -x-x-x-x-x-x-x-x-x-> */
-const limited$ = throttle(100, scroll$)
+const scroll = /* -x-x-x-x-x-x-x-x-x-> */
+const limited = throttle(100, scroll)
 // Diagram: -x---x---x---x---x->
 // At most one event per 100ms
 ```
@@ -288,8 +288,8 @@ const limited$ = throttle(100, scroll$)
 ```typescript
 import { delay } from 'aelea/stream'
 
-const clicks$ = /* -x---x-----x-> */
-const delayed$ = delay(1000, clicks$)
+const clicks = /* -x---x-----x-> */
+const delayed = delay(1000, clicks)
 // Diagram: --x---x-----x->
 // Each event delayed by 1000ms
 ```
@@ -300,8 +300,8 @@ const delayed$ = delay(1000, clicks$)
 ```typescript
 import { skip } from 'aelea/stream'
 
-const stream$ = fromIterable([1, 2, 3, 4, 5])
-const skipped$ = skip(2, stream$)
+const stream = fromIterable([1, 2, 3, 4, 5])
+const skipped = skip(2, stream)
 // Diagram: --345|
 ```
 
@@ -309,8 +309,8 @@ const skipped$ = skip(2, stream$)
 ```typescript
 import { take } from 'aelea/stream'
 
-const infinite$ = periodic(1000)
-const limited$ = take(3, infinite$)
+const infinite = periodic(1000)
+const limited = take(3, infinite)
 // Diagram: -0-1-2|
 ```
 
@@ -318,8 +318,8 @@ const limited$ = take(3, infinite$)
 ```typescript
 import { skipRepeats } from 'aelea/stream'
 
-const values$ = fromIterable([1, 1, 2, 2, 2, 3, 1])
-const unique$ = skipRepeats(values$)
+const values = fromIterable([1, 1, 2, 2, 2, 3, 1])
+const unique = skipRepeats(values)
 // Diagram: 1-2---3-1|
 ```
 
@@ -339,9 +339,9 @@ import { component } from 'aelea/ui'
 import type { IBehavior } from 'aelea/stream-extended'
 import type { IStream } from 'aelea/stream'
 
-const $MyComponent = (inputState$: IStream<State>) =>
+const $MyComponent = (inputState: IStream<State>) =>
   component((
-    [userEvent$, userEventTether]: IBehavior<Node, Event>
+    [userEvent, userEventTether]: IBehavior<Node, Event>
   ) => {
     // Component logic here
 
@@ -351,7 +351,7 @@ const $MyComponent = (inputState$: IStream<State>) =>
 
       // 2. Output streams
       {
-        stateChange$: /* stream of state changes */
+        stateChange: /* stream of state changes */
       }
     ]
   })
@@ -371,16 +371,16 @@ type IBehavior<TMsg, TReq = TMsg> = [
 **In components:**
 ```typescript
 component((
-  [clicks$, clickTether]: IBehavior<Node, PointerEvent>
+  [clicks, clickTether]: IBehavior<Node, PointerEvent>
 ) => {
-  // clicks$ - stream of click events (output)
+  // clicks - stream of click events (output)
   // clickTether - function to wire up click sources (input)
 
   return [
     $button(
       clickTether(nodeEvent('click'))  // Wire DOM clicks to tether
     ),
-    { clicks$ }  // Expose click stream as output
+    { clicks }  // Expose click stream as output
   ]
 })
 ```
@@ -393,16 +393,16 @@ component((
 ### Simple Component Example
 
 ```typescript
-import { $text, $element, component, style } from 'aelea/ui'
-import { map, sampleMap } from 'aelea/stream'
+import { $text, $element, component, style, nodeEvent } from 'aelea/ui'
+import { map, merge, sampleMap } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import type { IStream } from 'aelea/stream'
 
 // Counter component receives current value, outputs changes
-export const $Counter = (value$: IStream<number>) =>
+export const $Counter = (value: IStream<number>) =>
   component((
-    [increment$, incrementTether]: IBehavior<Node, PointerEvent>,
-    [decrement$, decrementTether]: IBehavior<Node, PointerEvent>
+    [increment, incrementTether]: IBehavior<Node, PointerEvent>,
+    [decrement, decrementTether]: IBehavior<Node, PointerEvent>
   ) => {
     const $button = $element('button')
     const $div = $element('div')
@@ -418,7 +418,7 @@ export const $Counter = (value$: IStream<number>) =>
           $text('+')
         ),
 
-        $text(map(n => String(n), value$)),
+        $text(map(n => String(n), value)),
 
         $button(
           decrementTether(nodeEvent('click'))
@@ -429,9 +429,9 @@ export const $Counter = (value$: IStream<number>) =>
 
       // Outputs - stream of value changes
       {
-        valueChange$: merge(
-          sampleMap(v => v + 1, value$, increment$),
-          sampleMap(v => v - 1, value$, decrement$)
+        valueChange: merge(
+          sampleMap(v => v + 1, value, increment),
+          sampleMap(v => v - 1, value, decrement)
         )
       }
     ]
@@ -439,7 +439,7 @@ export const $Counter = (value$: IStream<number>) =>
 ```
 
 **How it works:**
-1. Receives `value$` stream as input
+1. Receives `value` stream as input
 2. Declares two behaviors for increment/decrement clicks
 3. Wires DOM click events to tethers
 4. Displays current value using `$text(map(...))`
@@ -458,7 +458,7 @@ const $span = $element('span')
 
 // Text nodes
 const $label = $text('Static text')
-const $dynamic = $text(streamOfStrings$)
+const $dynamic = $text(streamOfStrings)
 ```
 
 **Curried composition pattern:**
@@ -524,7 +524,7 @@ const $box = $div(
   styleBehavior(
     map(x => ({
       transform: `translateX(${x}px)`
-    }), position$)
+    }), position)
   )
 )
 ```
@@ -550,7 +550,7 @@ import { attrBehavior } from 'aelea/ui'
 
 $input(
   attrBehavior(
-    map(disabled => ({ disabled }), isDisabled$)
+    map(disabled => ({ disabled }), isDisabled)
   )
 )
 ```
@@ -562,8 +562,8 @@ $input(
 import { nodeEvent } from 'aelea/ui'
 
 component((
-  [clicks$, clickTether]: IBehavior<Node, MouseEvent>,
-  [input$, inputTether]: IBehavior<Node, InputEvent>
+  [clicks, clickTether]: IBehavior<Node, MouseEvent>,
+  [input, inputTether]: IBehavior<Node, InputEvent>
 ) => {
   return [
     $div()(
@@ -575,7 +575,7 @@ component((
         inputTether(nodeEvent('input'))
       )
     ),
-    { clicks$, input$ }
+    { clicks, input }
   ]
 })
 ```
@@ -591,17 +591,17 @@ Components compose by **receiving state** and **outputting changes**.
 **Child component** (receives state, outputs changes):
 ```typescript
 // $Counter receives value, outputs valueChange
-const $Counter = (value$: IStream<number>) =>
+const $Counter = (value: IStream<number>) =>
   component((
-    [increment$, incrementTether]: IBehavior<Node, PointerEvent>,
-    [decrement$, decrementTether]: IBehavior<Node, PointerEvent>
+    [increment, incrementTether]: IBehavior<Node, PointerEvent>,
+    [decrement, decrementTether]: IBehavior<Node, PointerEvent>
   ) => {
     return [
       $div()(/* UI */),
       {
-        valueChange$: merge(
-          sampleMap(v => v + 1, value$, increment$),
-          sampleMap(v => v - 1, value$, decrement$)
+        valueChange: merge(
+          sampleMap(v => v + 1, value, increment),
+          sampleMap(v => v - 1, value, decrement)
         )
       }
     ]
@@ -613,16 +613,16 @@ const $Counter = (value$: IStream<number>) =>
 import { state } from 'aelea/stream-extended'
 
 const $App = component((
-  [valueChange$, valueChangeTether]: IBehavior<number>
+  [valueChange, valueChangeTether]: IBehavior<number>
 ) => {
   // Parent creates and owns the state
-  const count$ = state(valueChange$, 0)  // Initial value: 0
+  const count = state(valueChange, 0)  // Initial value: 0
 
   return [
     $div()(
       // Pass state to child, wire output back to parent
-      $Counter(count$)({
-        valueChange$: valueChangeTether()
+      $Counter(count)({
+        valueChange: valueChangeTether()
       })
     ),
     {}  // No outputs (top-level component)
@@ -634,13 +634,13 @@ const $App = component((
 ```typescript
 import { state } from 'aelea/stream-extended'
 
-// state(changes$, initial) creates a stateful stream
-const count$ = state(valueChange$, 0)
+// state(changes, initial) creates a stateful stream
+const count = state(valueChange, 0)
 
 // Diagram:
-// valueChange$: ----5---3---7->
-// count$:       0---5---3---7->
-//               ^initial value, then follows changes
+// valueChange: ----5---3---7->
+// count:       0---5---3---7->
+//              ^initial value, then follows changes
 ```
 
 ### Multi-Child Composition
@@ -651,21 +651,21 @@ import { state, behavior } from 'aelea/stream-extended'
 import { map, merge, sampleMap, switchMap } from 'aelea/stream'
 
 const $CounterList = component((
-  [addCounter$, addCounterTether]: IBehavior<Node, PointerEvent>,
-  [updateCounter$, updateCounterTether]: IBehavior<number, { index: number, value: number }>
+  [addCounter, addCounterTether]: IBehavior<Node, PointerEvent>,
+  [updateCounter, updateCounterTether]: IBehavior<number, { index: number, value: number }>
 ) => {
   // State: array of counter values
-  const counterList$ = state(
+  const counterList = state(
     merge(
       // Add new counter
-      sampleMap(list => [...list, 0], counterList$, addCounter$),
+      sampleMap(list => [...list, 0], counterList, addCounter),
 
       // Update counter at index
       sampleMap((list, { index, value }) => {
         const newList = [...list]
         newList[index] = value
         return newList
-      }, counterList$, updateCounter$)
+      }, counterList, updateCounter)
     ),
     [0, 0]  // Initial: 2 counters
   )
@@ -681,15 +681,15 @@ const $CounterList = component((
         $div()(
           ...list.map((_, index) =>
             $Counter(
-              map(list => list[index], counterList$)
+              map(list => list[index], counterList)
             )({
-              valueChange$: updateCounterTether(
+              valueChange: updateCounterTether(
                 map(newValue => ({ index, value: newValue }))
               )
             })
           )
         )
-      , counterList$)
+      , counterList)
     ),
     {}
   ]
@@ -698,7 +698,7 @@ const $CounterList = component((
 
 **Key pattern:**
 - State is an array `number[]`
-- Each child gets a derived stream: `map(list => list[index], counterList$)`
+- Each child gets a derived stream: `map(list => list[index], counterList)`
 - Child outputs include the index: `{ index, value }`
 - Parent merges all updates to the list state
 
@@ -711,26 +711,26 @@ const $CounterList = component((
 import { skipRepeatsWith } from 'aelea/stream'
 
 // Only re-render when length changes
-const listByLength$ = skipRepeatsWith(
+const listByLength = skipRepeatsWith(
   (a, b) => a.length === b.length,
-  counterList$
+  counterList
 )
 
 switchMap(list =>
   $div()(/* render list */)
-, listByLength$)
+, listByLength)
 ```
 
 **Individual item optimization:**
 ```typescript
 // Skip repeats for individual counter values
-const counterValue$ = (index: number) =>
+const counterValue = (index: number) =>
   skipRepeats(
-    map(list => list[index], counterList$)
+    map(list => list[index], counterList)
   )
 
 // Use in rendering
-$Counter(counterValue$(index))
+$Counter(counterValue(index))
 ```
 
 ### Layout Composition
@@ -790,11 +790,11 @@ const $column = (...operations) =>
 import { $Button, $TextField, $NumberTicker } from 'aelea/ui-components'
 
 const $LoginForm = component((
-  [submit$, submitTether]: IBehavior<Node, PointerEvent>,
-  [usernameInput$, usernameInputTether]: IBehavior<Node, InputEvent>
+  [submit, submitTether]: IBehavior<Node, PointerEvent>,
+  [usernameInput, usernameInputTether]: IBehavior<Node, InputEvent>
 ) => {
-  const username$ = state(
-    map(e => e.target.value, usernameInput$),
+  const username = state(
+    map(e => e.target.value, usernameInput),
     ''
   )
 
@@ -802,7 +802,7 @@ const $LoginForm = component((
     $column(spacing.default)(
       $TextField({
         label: 'Username',
-        value: username$
+        value: username
       })({
         userChange: usernameInputTether()
       }),
@@ -813,7 +813,7 @@ const $LoginForm = component((
         click: submitTether()
       })
     ),
-    { submit$, username$ }
+    { submit, username }
   ]
 })
 ```
@@ -847,10 +847,10 @@ render({
 **With inputs:**
 ```typescript
 const $App = component((
-  [click$, clickTether]: IBehavior<Node, PointerEvent>
+  [click, clickTether]: IBehavior<Node, PointerEvent>
 ) => {
-  const count$ = state(
-    sampleMap(n => n + 1, count$, click$),
+  const count = state(
+    sampleMap(n => n + 1, count, click),
     0
   )
 
@@ -858,7 +858,7 @@ const $App = component((
     $button(
       clickTether(nodeEvent('click'))
     )(
-      $text(map(n => `Clicked ${n} times`, count$))
+      $text(map(n => `Clicked ${n} times`, count))
     ),
     {}
   ]
@@ -891,11 +891,11 @@ Components are invoked **twice**:
 
 ```typescript
 // 1. First call: pass input streams
-const componentWithInputs = $Counter(value$)
+const componentWithInputs = $Counter(value)
 
 // 2. Second call: wire output behaviors
 const renderedComponent = componentWithInputs({
-  valueChange$: valueChangeTether()
+  valueChange: valueChangeTether()
 })
 ```
 
@@ -910,30 +910,30 @@ $App()({})
 
 **If inputs but no outputs:**
 ```typescript
-const $Display = (value$: IStream<number>) =>
+const $Display = (value: IStream<number>) =>
   component(() => [
-    $text(map(String, value$)),
+    $text(map(String, value)),
     {}  // No outputs
   ])
 
 // First call: pass input
 // Second call: no outputs
-$Display(someValue$)({})
+$Display(someValue)({})
 ```
 
 **If outputs but no inputs:**
 ```typescript
 const $Button = component((
-  [click$, clickTether]: IBehavior<Node, PointerEvent>
+  [click, clickTether]: IBehavior<Node, PointerEvent>
 ) => [
   $button(clickTether(nodeEvent('click')))('Click'),
-  { click$ }
+  { click }
 ])
 
 // First call: no inputs
 // Second call: wire output
 $Button()({
-  click$: clickTether()
+  click: clickTether()
 })
 ```
 
@@ -1007,20 +1007,20 @@ dispose()
 
 **Computing values from state:**
 ```typescript
-const $ShoppingCart = ({ items$}: { items$: IStream<Item[]> }) =>
+const $ShoppingCart = ({ items }: { items: IStream<Item[]> }) =>
   component(() => {
     // Derive total from items
-    const total$ = map(
+    const total = map(
       items => items.reduce((sum, item) => sum + item.price, 0),
-      items$
+      items
     )
 
-    const itemCount$ = map(items => items.length, items$)
+    const itemCount = map(items => items.length, items)
 
     return [
       $div()(
-        $text(map(n => `${n} items`, itemCount$)),
-        $text(map(t => `Total: $${t.toFixed(2)}`, total$))
+        $text(map(n => `${n} items`, itemCount)),
+        $text(map(t => `Total: $${t.toFixed(2)}`, total))
       ),
       {}
     ]
@@ -1032,17 +1032,17 @@ const $ShoppingCart = ({ items$}: { items$: IStream<Item[]> }) =>
 **Input fields:**
 ```typescript
 const $NameForm = component((
-  [input$, inputTether]: IBehavior<Node, InputEvent>,
-  [submit$, submitTether]: IBehavior<Node, SubmitEvent>
+  [input, inputTether]: IBehavior<Node, InputEvent>,
+  [submit, submitTether]: IBehavior<Node, SubmitEvent>
 ) => {
   // Capture input value
-  const name$ = state(
-    map(e => (e.target as HTMLInputElement).value, input$),
+  const name = state(
+    map(e => (e.target as HTMLInputElement).value, input),
     ''
   )
 
   // Validate
-  const isValid$ = map(name => name.length >= 3, name$)
+  const isValid = map(name => name.length >= 3, name)
 
   return [
     $element('form')(
@@ -1055,11 +1055,11 @@ const $NameForm = component((
 
       $button(
         attrBehavior(
-          map(valid => ({ disabled: !valid }), isValid$)
+          map(valid => ({ disabled: !valid }), isValid)
         )
       )('Submit')
     ),
-    { name$, submit$ }
+    { name, submit }
   ]
 })
 ```
@@ -1068,14 +1068,14 @@ const $NameForm = component((
 
 **Using switchMap:**
 ```typescript
-const $Conditional = ({ isLoggedIn$ }: { isLoggedIn$: IStream<boolean> }) =>
+const $Conditional = ({ isLoggedIn }: { isLoggedIn: IStream<boolean> }) =>
   component(() => {
     return [
       switchMap(isLoggedIn =>
         isLoggedIn
           ? $div()($text('Welcome back!'))
           : $div()($text('Please log in'))
-      , isLoggedIn$),
+      , isLoggedIn),
       {}
     ]
   })
@@ -1088,13 +1088,13 @@ const $Conditional = ({ isLoggedIn$ }: { isLoggedIn$: IStream<boolean> }) =>
 import { fromPromise } from 'aelea/stream'
 import { switchMap, map } from 'aelea/stream'
 
-const $UserProfile = ({ userId$ }: { userId$: IStream<string> }) =>
+const $UserProfile = ({ userId }: { userId: IStream<string> }) =>
   component(() => {
-    const userData$ = switchMap(
+    const userData = switchMap(
       userId => fromPromise(
         fetch(`/api/user/${userId}`).then(r => r.json())
       ),
-      userId$
+      userId
     )
 
     return [
@@ -1103,7 +1103,7 @@ const $UserProfile = ({ userId$ }: { userId$: IStream<string> }) =>
           $text(`Name: ${user.name}`),
           $text(`Email: ${user.email}`)
         )
-      , userData$),
+      , userData),
       {}
     ]
   })
@@ -1113,17 +1113,17 @@ const $UserProfile = ({ userId$ }: { userId$: IStream<string> }) =>
 ```typescript
 import { merge, map, constant } from 'aelea/stream'
 
-const $AsyncData = ({ trigger$ }: { trigger$: IStream<void> }) =>
+const $AsyncData = ({ trigger }: { trigger: IStream<void> }) =>
   component(() => {
-    // Track loading state
-    const loading$ = merge(
-      map(() => true, trigger$),           // Start loading
-      map(() => false, dataLoaded$)        // Stop loading
+    const data = switchMap(
+      () => fromPromise(fetch('/api/data').then(r => r.json())),
+      trigger
     )
 
-    const data$ = switchMap(
-      () => fromPromise(fetch('/api/data').then(r => r.json())),
-      trigger$
+    // Track loading state
+    const loading = merge(
+      map(() => true, trigger),      // Start loading
+      map(() => false, data)          // Stop loading
     )
 
     return [
@@ -1133,8 +1133,8 @@ const $AsyncData = ({ trigger$ }: { trigger$: IStream<void> }) =>
             ? $text('Loading...')
             : switchMap(data =>
                 $text(`Data: ${JSON.stringify(data)}`)
-              , data$)
-        , loading$)
+              , data)
+        , loading)
       ),
       {}
     ]
@@ -1149,15 +1149,15 @@ const $AsyncData = ({ trigger$ }: { trigger$: IStream<void> }) =>
 import { state, behavior } from 'aelea/stream-extended'
 
 // Create global behaviors
-export const [userChange$, userChangeTether] = behavior<User | null>()
+export const [userChange, userChangeTether] = behavior<User | null>()
 
 // Create global state
-export const currentUser$ = state(userChange$, null)
+export const currentUser = state(userChange, null)
 ```
 
 ```typescript
 // $Header.ts
-import { currentUser$ } from './store'
+import { currentUser } from './store'
 
 const $Header = component(() => {
   return [
@@ -1166,7 +1166,7 @@ const $Header = component(() => {
         user
           ? $text(`Welcome, ${user.name}`)
           : $text('Not logged in')
-      , currentUser$)
+      , currentUser)
     ),
     {}
   ]
@@ -1178,17 +1178,17 @@ const $Header = component(() => {
 import { userChangeTether } from './store'
 
 const $LoginButton = component((
-  [click$, clickTether]: IBehavior<Node, PointerEvent>
+  [click, clickTether]: IBehavior<Node, PointerEvent>
 ) => {
-  const login$ = switchMap(
+  const login = switchMap(
     () => fromPromise(fetch('/api/login').then(r => r.json())),
-    click$
+    click
   )
 
   return [
     $button(clickTether(nodeEvent('click')))('Login'),
     {
-      login$: userChangeTether(login$)  // Update global state
+      login: userChangeTether(login)  // Update global state
     }
   ]
 })
@@ -1200,18 +1200,18 @@ const $LoginButton = component((
 ```typescript
 import { motion } from 'aelea/ui'
 
-const $AnimatedBox = ({ x$ }: { x$: IStream<number> }) =>
+const $AnimatedBox = ({ x }: { x: IStream<number> }) =>
   component(() => {
     // Smooth spring animation
-    const animatedX$ = motion(
+    const animatedX = motion(
       { stiffness: 170, damping: 26 },
-      x$
+      x
     )
 
     return [
       $div(
         styleBehavior(
-          map(x => ({ transform: `translateX(${x}px)` }), animatedX$)
+          map(x => ({ transform: `translateX(${x}px)` }), animatedX)
         )
       )('Smooth!'),
       {}
@@ -1229,7 +1229,7 @@ import { now } from 'aelea/stream'
 const $App = component(() => {
   // Create router
   const router = create({
-    fragmentsChange: hashChange$,
+    fragmentsChange: hashChange,
     fragment: location.hash.slice(1)
   })
 
@@ -1343,9 +1343,9 @@ bun run dev
 ### Code Conventions
 
 **Naming:**
-- UI components: `$ComponentName`
-- Streams (optional): `streamName$`
-- Behaviors: `[stream$, streamTether]`
+- UI components: `$ComponentName` ($ prefix)
+- Stream variables: `streamName` (no suffix needed - type tells you it's a stream)
+- Behaviors: `[stream, streamTether]`
 - Files: `$ComponentName.ts`
 
 **TypeScript:**
@@ -1455,14 +1455,14 @@ bun run sherif
 ### Component Signature
 
 ```typescript
-const $Component = (input$: IStream<Input>) =>
+const $Component = (input: IStream<Input>) =>
   component((
-    [behavior1$, behavior1Tether]: IBehavior<TMsg, TReq>,
-    [behavior2$, behavior2Tether]: IBehavior<TMsg, TReq>
+    [behavior1, behavior1Tether]: IBehavior<TMsg, TReq>,
+    [behavior2, behavior2Tether]: IBehavior<TMsg, TReq>
   ) => {
     return [
       $div(/* UI */),
-      { output$ }
+      { output }
     ]
   })
 ```
@@ -1487,13 +1487,13 @@ $div(
 
 ```typescript
 // Create stateful stream
-const state$ = state(changes$, initialValue)
+const state = state(changes, initialValue)
 
 // Create behavior
-const [stream$, tether] = behavior<T>()
+const [stream, tether] = behavior<T>()
 
 // Multicast expensive operations
-const shared$ = multicast(expensiveStream$)
+const shared = multicast(expensiveStream)
 ```
 
 ---
