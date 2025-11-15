@@ -42,22 +42,35 @@ const $Counter = (value: IStream<number>) =>
 
 ### The `o()` Composition Function
 
-**Most important function** - composes operations left-to-right:
+Composes operations left-to-right: `o(f, g, h)` means apply f, then g, then h.
+
+**Use when composing stream operations:**
 
 ```typescript
 import { o } from 'aelea/stream'
 
-// o(f, g, h) means: apply f, then g, then h
+// Compose stream transformations
 const extractNumber = o(
   map((str: string) => Number(str)),
   start(0)
 )
 
-// Compose element operations
-$row(o(spacing.default, style({ alignItems: 'center' })))
+// Compose tether transformations
+incrementTether(o(
+  nodeEvent('click'),
+  map(e => e.clientX),
+  filter(x => x > 100)
+))
+```
 
-// Compose behaviors
-incrementTether(o(nodeEvent('click'), constant(1)))
+**NOT needed for element operations** (they already compose):
+
+```typescript
+// ✓ Correct - element factories compose automatically
+$row(spacing.default, style({ alignItems: 'center' }))
+
+// ✗ Unnecessary - don't use o() here
+$row(o(spacing.default, style({ alignItems: 'center' })))
 ```
 
 ---
@@ -236,17 +249,16 @@ Tethers can transform streams before wiring:
 // Pass through unchanged
 clickTether()
 
-// Transform stream
+// Single transformation
 clickTether(map(e => e.clientX))
 
-// Compose transformations with o()
+// Multiple transformations - use o()
 clickTether(o(
-  nodeEvent('click'),
   map(e => e.clientX),
   filter(x => x > 100)
 ))
 
-// Map to constant
+// Map all events to constant value
 removeTether(constant(index))
 ```
 
@@ -711,7 +723,8 @@ const shared = multicast(expensiveStream)
 
 ### Common Patterns Checklist
 
-- ✓ Use `o()` to compose operations
+- ✓ Use `o()` to compose stream/tether transformations
+- ✓ Element operations compose automatically (no `o()` needed)
 - ✓ Use `start()` for initial values
 - ✓ Use `constant()` to map events to values
 - ✓ Use `sampleMap()` to read state on events
