@@ -1,313 +1,1422 @@
 # CLAUDE.md - AI Assistant Guide for Aelea
 
-This document provides comprehensive guidance for AI assistants working with the Aelea codebase. Last updated: 2025-11-15
+A guide for AI assistants working with Aelea, a functional reactive UI framework built on composable streams.
 
 ## Table of Contents
 
-1. [Project Overview](#project-overview)
-2. [Repository Structure](#repository-structure)
-3. [Core Architecture Patterns](#core-architecture-patterns)
-4. [Development Workflows](#development-workflows)
-5. [Code Conventions](#code-conventions)
-6. [Module Deep Dive](#module-deep-dive)
-7. [Testing & Benchmarking](#testing--benchmarking)
-8. [Common Tasks](#common-tasks)
-9. [Important Constraints](#important-constraints)
+1. [Understanding Streams](#understanding-streams)
+2. [Stream Composition](#stream-composition)
+3. [Writing Aelea Components](#writing-aelea-components)
+4. [Component Composition](#component-composition)
+5. [Rendering to the Page](#rendering-to-the-page)
+6. [Common Patterns](#common-patterns)
+7. [Project Structure](#project-structure)
+8. [Development Workflow](#development-workflow)
 
 ---
 
-## Project Overview
+## Understanding Streams
 
-**Aelea** is a functional reactive UI framework built on composable streams. It combines reactive programming with direct DOM manipulation to create dynamic user interfaces without virtual DOM or state management layers.
+### What is a Stream?
 
-### Key Characteristics
+A **stream** is a lazy, composable source of values over time. Think of it as an observable sequence that emits events.
 
-- **Type:** Monorepo with 2 workspaces (aelea library + documentation website)
-- **Language:** TypeScript 5.9.2 (strict mode, ES2023 target)
-- **Package Manager:** Bun 1.2.19
-- **License:** MIT
-- **Author:** Nissan Hanina <nissanhanina@gmail.com>
-- **Current Version:** 2.5.31 (aelea package)
+```typescript
+import type { IStream } from 'aelea/stream'
 
-### Core Philosophy
+// A stream is just this interface:
+interface IStream<T> {
+  run(sink: ISink<T>, scheduler: IScheduler): Disposable
+}
+```
 
-1. **Streams drive everything** - All data flows through `IStream<T>`
-2. **Composition over configuration** - Complex behaviors from simple, composable parts
-3. **Direct DOM updates** - No virtual DOM diffing
-4. **Lazy evaluation** - Streams don't execute until subscribed
-5. **Explicit side effects** - Effects isolated in streams, pure transformations elsewhere
+**Key characteristics:**
+- **Lazy**: Doesn't execute until `run()` is called
+- **Composable**: Streams combine to create new streams
+- **Pure**: Transformations don't mutate, they return new streams
+- **Time-based**: Represents values changing over time
+
+### Stream Diagram Notation
+
+Understanding Aelea requires understanding stream diagrams:
+
+```
+stream: -a-b-c->
+```
+- Each `-` is one unit of time (no event)
+- Letters are values emitted at that time
+- `>` means the stream continues
+- `|` means the stream completed
+
+**Multiple streams:**
+```
+streamA: -1---3---5->
+streamB: --a---b---c->
+merge:   -1a--3b--5c->
+```
+
+Streams are vertically aligned by time - events in the same column happen simultaneously.
+
+### Creating Streams (Sources)
+
+**From immediate values:**
+```typescript
+import { now, empty } from 'aelea/stream'
+
+// Emit a single value immediately
+const greeting$ = now('Hello')
+// Diagram: Hello|
+
+// Emit nothing and complete
+const nothing$ = empty()
+// Diagram: |
+```
+
+**From time-based events:**
+```typescript
+import { periodic, at } from 'aelea/stream'
+
+// Emit incrementing numbers every 1000ms
+const tick$ = periodic(1000)
+// Diagram: -0-1-2-3-4->
+
+// Emit value at specific time
+const delayed$ = at(5000, 'ready')
+// Diagram: -----ready|
+```
+
+**From arrays/iterables:**
+```typescript
+import { fromIterable } from 'aelea/stream'
+
+const numbers$ = fromIterable([1, 2, 3, 4, 5])
+// Diagram: 12345|
+```
+
+**From promises:**
+```typescript
+import { fromPromise } from 'aelea/stream'
+
+const userData$ = fromPromise(
+  fetch('/api/user').then(r => r.json())
+)
+// Diagram: ------{user data}|
+```
+
+**From user interactions (in UI context):**
+```typescript
+import { nodeEvent } from 'aelea/ui'
+
+// Create element and capture click events
+const button = document.querySelector('button')
+const clicks$ = nodeEvent('click')(button)
+// Diagram: ----x--x-----x-> (each x is a click event)
+```
+
+### Running Streams
+
+Streams are lazy - they don't do anything until you run them:
+
+```typescript
+import { now } from 'aelea/stream'
+import { createDefaultScheduler } from 'aelea/stream'
+
+const stream$ = now(42)
+
+// Create a sink to receive values
+const sink = {
+  event(time, value) {
+    console.log('Value:', value)
+  },
+  error(time, err) {
+    console.error('Error:', err)
+  },
+  end(time) {
+    console.log('Complete')
+  }
+}
+
+// Run the stream
+const scheduler = createDefaultScheduler()
+const disposable = stream$.run(sink, scheduler)
+
+// Clean up when done
+disposable[Symbol.dispose]()
+```
+
+**In practice**, you rarely run streams manually - the UI system handles this for you.
 
 ---
 
-## Repository Structure
+## Stream Composition
 
-### Root Directory
+The power of streams comes from composing them together.
 
-```
-/home/user/aelea/
-├── aelea/                    # Main library package
-├── website/                  # Documentation site & examples
-├── .changeset/               # Changesets for version management
-├── .github/workflows/        # CI/CD (release.yml)
-├── .vscode/                  # VSCode settings
-├── package.json              # Monorepo root
-├── bun.lock                  # Lockfile
-├── tsconfig.base.json        # Shared TypeScript config
-├── biome.json                # Linter/formatter config
-├── README.md                 # Main documentation
-└── GEMINI.md                 # AI assistant overview
+### Transforming Streams
+
+**map - Transform each value:**
+```typescript
+import { map, periodic } from 'aelea/stream'
+
+const numbers$ = periodic(1000)
+// Diagram: -0-1-2-3-4->
+
+const doubled$ = map(n => n * 2, numbers$)
+// Diagram: -0-2-4-6-8->
 ```
 
-### aelea/ Package Structure
+**filter - Keep only matching values:**
+```typescript
+import { filter } from 'aelea/stream'
 
-Location: `/home/user/aelea/aelea/`
+const numbers$ = fromIterable([1, 2, 3, 4, 5, 6])
+// Diagram: 123456|
 
-```
-aelea/
-├── src/
-│   ├── stream/               # Core reactive streams (45 files)
-│   ├── stream-extended/      # Advanced stream utilities (16 files)
-│   ├── ui/                   # DOM rendering system (13 files)
-│   ├── ui-components/        # Pre-built components (23 files)
-│   ├── ui-components-theme/  # Theming system
-│   ├── ui-components-theme-browser/  # Browser theme loading
-│   └── router/               # Client-side routing (4 files)
-├── benchmark/                # Performance benchmarks
-├── dist/                     # Build output (gitignored)
-│   ├── esm/                  # Compiled JavaScript
-│   └── types/                # TypeScript declarations
-├── package.json              # Package config with 7 module exports
-└── tsconfig.json             # Build configuration
+const evens$ = filter(n => n % 2 === 0, numbers$)
+// Diagram: -2-4-6|
 ```
 
-### Module Exports (7 distinct entry points)
+**aggregate - Reduce with accumulation (like scan):**
+```typescript
+import { aggregate, periodic } from 'aelea/stream'
 
-1. **`aelea/stream`** - Core reactive stream library
-2. **`aelea/stream-extended`** - Behaviors, multicast, state
-3. **`aelea/ui`** - DOM rendering, elements, styles
-4. **`aelea/ui-components`** - Pre-built UI components
-5. **`aelea/ui-components-theme`** - Theming system
-6. **`aelea/ui-components-theme-browser`** - Browser theme utilities
-7. **`aelea/router`** - Client-side routing
+const tick$ = periodic(1000)
+// Diagram: -x-x-x-x->
 
-### website/ Package Structure
-
-Location: `/home/user/aelea/website/`
-
+const count$ = aggregate((acc, _) => acc + 1, 0, tick$)
+// Diagram: -1-2-3-4->
 ```
-website/
-├── src/
-│   ├── main.ts               # Entry point
-│   ├── pages/
-│   │   ├── $Website.ts       # Main layout
-│   │   ├── $MainMenu.ts      # Navigation
-│   │   ├── guide/            # Documentation guide
-│   │   └── examples/         # 8 live interactive examples
-│   ├── components/           # Shared UI components
-│   └── elements/             # Common elements
-├── index.html                # HTML template
-├── vite.config.ts            # Vite bundler config
-├── railway.json              # Railway deployment
-└── package.json
+
+### Combining Multiple Streams
+
+**merge - Combine events from multiple streams:**
+```typescript
+import { merge } from 'aelea/stream'
+
+const streamA$ = /* -1---3---5-> */
+const streamB$ = /* --2---4----> */
+
+const merged$ = merge(streamA$, streamB$)
+// Diagram: -12-34-5->
+```
+
+**combine - Combine latest values:**
+```typescript
+import { combine } from 'aelea/stream'
+
+const name$ =  /* -Alice---Bob-> */
+const age$ =   /* ---25------30-> */
+
+const user$ = combine((name, age) => ({ name, age }), name$, age$)
+// Diagram: ---{Alice,25}-{Bob,25}-{Bob,30}->
+```
+
+**sample - Sample one stream when another emits:**
+```typescript
+import { sample } from 'aelea/stream'
+
+const position$ = /* -0-1-2-3-4-5-> */
+const clicks$ =   /* ----x-----x---> */
+
+const clickedPos$ = sample(position$, clicks$)
+// Diagram: ----2-----5->
+```
+
+**sampleMap - Sample and transform:**
+```typescript
+import { sampleMap } from 'aelea/stream'
+
+const value$ =     /* -5-------10-> */
+const increment$ = /* ---x--x-----> */
+
+const result$ = sampleMap(v => v + 1, value$, increment$)
+// Diagram: ---6--6---->
+// First: value is 5, +1 = 6
+// Second: value is still 5, +1 = 6
+```
+
+### Higher-order Stream Operations
+
+**switchLatest - Switch to the latest inner stream:**
+```typescript
+import { switchLatest, map, periodic } from 'aelea/stream'
+
+const query$ = /* -"cat"---"dog"--> */
+
+const searchResults$ = switchLatest(
+  map(query =>
+    fromPromise(fetch(`/api/search?q=${query}`).then(r => r.json()))
+  , query$)
+)
+// Cancels previous search when new query arrives
+```
+
+**switchMap - Convenience for map + switchLatest:**
+```typescript
+import { switchMap } from 'aelea/stream'
+
+// Equivalent to the above
+const searchResults$ = switchMap(
+  query => fromPromise(fetch(`/api/search?q=${query}`).then(r => r.json())),
+  query$
+)
+```
+
+### Timing Operations
+
+**debounce - Emit only after silence:**
+```typescript
+import { debounce } from 'aelea/stream'
+
+const typing$ = /* -a-b-c------d-e-f-----> */
+const search$ = debounce(300, typing$)
+// Diagram: -------c---------f->
+// Only emits when 300ms pass without new events
+```
+
+**throttle - Limit emission rate:**
+```typescript
+import { throttle } from 'aelea/stream'
+
+const scroll$ = /* -x-x-x-x-x-x-x-x-x-> */
+const limited$ = throttle(100, scroll$)
+// Diagram: -x---x---x---x---x->
+// At most one event per 100ms
+```
+
+**delay - Delay all events:**
+```typescript
+import { delay } from 'aelea/stream'
+
+const clicks$ = /* -x---x-----x-> */
+const delayed$ = delay(1000, clicks$)
+// Diagram: --x---x-----x->
+// Each event delayed by 1000ms
+```
+
+### Stream Utilities
+
+**skip - Skip first N events:**
+```typescript
+import { skip } from 'aelea/stream'
+
+const stream$ = fromIterable([1, 2, 3, 4, 5])
+const skipped$ = skip(2, stream$)
+// Diagram: --345|
+```
+
+**take - Take first N events:**
+```typescript
+import { take } from 'aelea/stream'
+
+const infinite$ = periodic(1000)
+const limited$ = take(3, infinite$)
+// Diagram: -0-1-2|
+```
+
+**skipRepeats - Skip consecutive duplicates:**
+```typescript
+import { skipRepeats } from 'aelea/stream'
+
+const values$ = fromIterable([1, 1, 2, 2, 2, 3, 1])
+const unique$ = skipRepeats(values$)
+// Diagram: 1-2---3-1|
 ```
 
 ---
 
-## Core Architecture Patterns
+## Writing Aelea Components
 
-### 1. Functional Reactive Programming (FRP)
+### The Component Pattern
 
-**Streams as first-class values:**
-```typescript
-// Streams represent values over time
-const counter$: IStream<number> = periodic(1000)
-const doubled$ = map(x => x * 2, counter$)
-```
-
-**Lazy evaluation:**
-```typescript
-// Stream definition (no execution)
-const stream$ = map(x => x + 1, source$)
-
-// Execution only happens when run() is called
-stream$.run(sink, scheduler)
-```
-
-**Pure transformations:**
-```typescript
-// All operators are pure functions
-const result = map(fn, stream)  // Returns new stream, doesn't mutate
-```
-
-### 2. Component Architecture
-
-**Core Pattern: Input State → Output Changes**
+An Aelea component is a function that:
+1. **Receives input state** as streams
+2. **Declares behaviors** for user interactions
+3. **Returns a tuple** of `[UI, outputs]`
 
 ```typescript
-// Component signature
-const $Component = (inputState$: IStream<State>) =>
+import { component } from 'aelea/ui'
+import type { IBehavior } from 'aelea/stream-extended'
+import type { IStream } from 'aelea/stream'
+
+const $MyComponent = (inputState$: IStream<State>) =>
   component((
-    [eventStream$, eventTether]: IBehavior<Node, Event>
+    [userEvent$, userEventTether]: IBehavior<Node, Event>
   ) => {
-    // Return tuple: [UI, outputs]
+    // Component logic here
+
     return [
-      $div(/* UI */),
+      // 1. UI (DOM nodes)
+      $div(/* ... */),
+
+      // 2. Output streams
       {
-        stateChange$: /* output stream */
+        stateChange$: /* stream of state changes */
       }
     ]
   })
 ```
 
-**Key principles:**
-- Components receive state as input streams (never manage state internally)
-- Components output state changes via behaviors
-- Parent components own and manage state
-- Bidirectional flow via tethers
+### Understanding Behaviors
 
-**Example:**
+A **behavior** is a bidirectional stream pair: `[stream, tether]`
+
 ```typescript
-// Child receives state, outputs changes
-const $Counter = (value$: IStream<number>) => component((
-  [click$, clickTether]: IBehavior<Node, MouseEvent>
+type IBehavior<TMsg, TReq = TMsg> = [
+  IStream<TReq>,  // Output stream (data flowing out)
+  Tether<TMsg>    // Input tether (data flowing in)
+]
+```
+
+**In components:**
+```typescript
+component((
+  [clicks$, clickTether]: IBehavior<Node, PointerEvent>
 ) => {
+  // clicks$ - stream of click events (output)
+  // clickTether - function to wire up click sources (input)
+
   return [
-    $button(clickTether(nodeEvent('click')))(
-      $text(map(String, value$))
+    $button(
+      clickTether(nodeEvent('click'))  // Wire DOM clicks to tether
     ),
-    { increment$: sampleMap(v => v + 1, value$, click$) }
-  ]
-})
-
-// Parent owns state
-const $App = component((
-  [increment$, incrementTether]: IBehavior<number>
-) => {
-  const count$ = state(increment$, 0)  // Parent manages state
-
-  return [
-    $Counter(count$)({
-      increment$: incrementTether()  // Wire child output to state
-    })
+    { clicks$ }  // Expose click stream as output
   ]
 })
 ```
 
-### 3. Element Composition via Currying
+**The tether is a function:**
+- Takes a stream as input
+- Returns a function that can be applied to DOM nodes
+- Connects external events to the component's internal stream
 
-**Two-phase function application:**
+### Simple Component Example
 
 ```typescript
-// Phase 1: Apply operations (styles, attributes, events)
-$div(
-  style({ padding: '20px' }),
-  attribute({ id: 'container' }),
-  eventTether(nodeEvent('click'))
+import { $text, $element, component, style } from 'aelea/ui'
+import { map, sampleMap } from 'aelea/stream'
+import type { IBehavior } from 'aelea/stream-extended'
+import type { IStream } from 'aelea/stream'
+
+// Counter component receives current value, outputs changes
+export const $Counter = (value$: IStream<number>) =>
+  component((
+    [increment$, incrementTether]: IBehavior<Node, PointerEvent>,
+    [decrement$, decrementTether]: IBehavior<Node, PointerEvent>
+  ) => {
+    const $button = $element('button')
+    const $div = $element('div')
+
+    return [
+      // UI - display value and buttons
+      $div(
+        style({ display: 'flex', gap: '10px' })
+      )(
+        $button(
+          incrementTether(nodeEvent('click'))
+        )(
+          $text('+')
+        ),
+
+        $text(map(n => String(n), value$)),
+
+        $button(
+          decrementTether(nodeEvent('click'))
+        )(
+          $text('-')
+        )
+      ),
+
+      // Outputs - stream of value changes
+      {
+        valueChange$: merge(
+          sampleMap(v => v + 1, value$, increment$),
+          sampleMap(v => v - 1, value$, decrement$)
+        )
+      }
+    ]
+  })
+```
+
+**How it works:**
+1. Receives `value$` stream as input
+2. Declares two behaviors for increment/decrement clicks
+3. Wires DOM click events to tethers
+4. Displays current value using `$text(map(...))`
+5. Outputs merged stream of value changes
+
+### Element Creation
+
+**Basic elements:**
+```typescript
+import { $element, $text } from 'aelea/ui'
+
+const $div = $element('div')
+const $button = $element('button')
+const $input = $element('input')
+const $span = $element('span')
+
+// Text nodes
+const $label = $text('Static text')
+const $dynamic = $text(streamOfStrings$)
+```
+
+**Curried composition pattern:**
+```typescript
+// Phase 1: Apply operations (returns function)
+const $styledDiv = $div(
+  style({ padding: '20px', color: 'blue' }),
+  attr({ id: 'container' })
 )
-// Phase 2: Add children (terminal operation)
-(
+
+// Phase 2: Add children (returns node)
+const $container = $styledDiv(
   $text('Hello'),
   $button()('Click me')
 )
 ```
 
-**How it works:**
-- Element factories return curried functions
-- First call composes operations via `o()` (function composition)
-- Second call renders with children
-
-### 4. Direct DOM Manipulation
-
-**No Virtual DOM:**
-- Streams update DOM nodes directly
-- StyleSheet API for efficient CSS injection
-- Element references maintained for updates
-
+**All in one:**
 ```typescript
-// Style updates inject CSS classes dynamically
+const $card = $div(
+  style({
+    padding: '20px',
+    border: '1px solid #ccc',
+    borderRadius: '8px'
+  })
+)(
+  $element('h2')()('Title'),
+  $element('p')()('Description text'),
+  $button()('Action')
+)
+```
+
+### Styling
+
+**Static styles:**
+```typescript
+import { style } from 'aelea/ui'
+
+$div(
+  style({
+    padding: '20px',
+    backgroundColor: 'blue',
+    color: 'white',
+
+    // Pseudo-selectors
+    ':hover': {
+      backgroundColor: 'darkblue'
+    },
+
+    // Media queries
+    '@media (max-width: 768px)': {
+      padding: '10px'
+    }
+  })
+)
+```
+
+**Reactive styles:**
+```typescript
+import { styleBehavior } from 'aelea/ui'
+
 const $box = $div(
   styleBehavior(
-    map(x => ({ transform: `translateX(${x}px)` }), position$)
+    map(x => ({
+      transform: `translateX(${x}px)`
+    }), position$)
   )
 )
 ```
 
-### 5. Scheduler Abstraction
+### Attributes
 
-**Pluggable timing control:**
-
+**Static attributes:**
 ```typescript
-interface IScheduler {
-  asap<T>(sink, task, ...args): Disposable    // Microtask
-  delay<T>(sink, task, delay, ...args): Disposable  // setTimeout
-  time(): number                                // Current time
-  // UI-specific:
-  paint?<T>(sink, task, ...args): Disposable  // requestAnimationFrame
-}
+import { attr } from 'aelea/ui'
+
+$input(
+  attr({
+    type: 'text',
+    placeholder: 'Enter your name',
+    disabled: false
+  })
+)
 ```
 
-**Implementations:**
-- **BrowserScheduler:** Uses microtasks + RAF for rendering
-- **NodeScheduler:** Node.js optimized (setImmediate)
-- **Custom schedulers:** For testing, batching, rate-limiting
-
-### 6. Resource Management
-
-**Disposable pattern (TC39 proposal):**
-
+**Reactive attributes:**
 ```typescript
-// Automatic cleanup with using/await using
-{
-  using subscription = stream$.run(sink, scheduler)
-  // Automatically disposed when scope exits
-}
+import { attrBehavior } from 'aelea/ui'
 
-// Manual disposal
-const disposable = stream$.run(sink, scheduler)
-disposable[Symbol.dispose]()
+$input(
+  attrBehavior(
+    map(disabled => ({ disabled }), isDisabled$)
+  )
+)
 ```
 
-**SettableDisposable:**
-- Swappable disposables for dynamic resources
-- Disposes old resource when setting new one
+### Events
 
-### 7. Operator Fusion
-
-**Performance optimization:**
-
+**Capturing events:**
 ```typescript
-// Multiple maps automatically fuse
-map(f, map(g, source$))
-// Becomes: map(compose(g, f), source$)
-// Single map operation instead of two
+import { nodeEvent } from 'aelea/ui'
+
+component((
+  [clicks$, clickTether]: IBehavior<Node, MouseEvent>,
+  [input$, inputTether]: IBehavior<Node, InputEvent>
+) => {
+  return [
+    $div()(
+      $button(
+        clickTether(nodeEvent('click'))
+      )('Click me'),
+
+      $input(
+        inputTether(nodeEvent('input'))
+      )
+    ),
+    { clicks$, input$ }
+  ]
+})
 ```
 
 ---
 
-## Development Workflows
+## Component Composition
 
-### Initial Setup
+### Parent-Child Pattern
+
+Components compose by **receiving state** and **outputting changes**.
+
+**Child component** (receives state, outputs changes):
+```typescript
+// $Counter receives value, outputs valueChange
+const $Counter = (value$: IStream<number>) =>
+  component((
+    [increment$, incrementTether]: IBehavior<Node, PointerEvent>,
+    [decrement$, decrementTether]: IBehavior<Node, PointerEvent>
+  ) => {
+    return [
+      $div()(/* UI */),
+      {
+        valueChange$: merge(
+          sampleMap(v => v + 1, value$, increment$),
+          sampleMap(v => v - 1, value$, decrement$)
+        )
+      }
+    ]
+  })
+```
+
+**Parent component** (owns state, wires child):
+```typescript
+import { state } from 'aelea/stream-extended'
+
+const $App = component((
+  [valueChange$, valueChangeTether]: IBehavior<number>
+) => {
+  // Parent creates and owns the state
+  const count$ = state(valueChange$, 0)  // Initial value: 0
+
+  return [
+    $div()(
+      // Pass state to child, wire output back to parent
+      $Counter(count$)({
+        valueChange$: valueChangeTether()
+      })
+    ),
+    {}  // No outputs (top-level component)
+  ]
+})
+```
+
+**How state() works:**
+```typescript
+import { state } from 'aelea/stream-extended'
+
+// state(changes$, initial) creates a stateful stream
+const count$ = state(valueChange$, 0)
+
+// Diagram:
+// valueChange$: ----5---3---7->
+// count$:       0---5---3---7->
+//               ^initial value, then follows changes
+```
+
+### Multi-Child Composition
+
+**List of counters example:**
+```typescript
+import { state, behavior } from 'aelea/stream-extended'
+import { map, merge, sampleMap, switchMap } from 'aelea/stream'
+
+const $CounterList = component((
+  [addCounter$, addCounterTether]: IBehavior<Node, PointerEvent>,
+  [updateCounter$, updateCounterTether]: IBehavior<number, { index: number, value: number }>
+) => {
+  // State: array of counter values
+  const counterList$ = state(
+    merge(
+      // Add new counter
+      sampleMap(list => [...list, 0], counterList$, addCounter$),
+
+      // Update counter at index
+      sampleMap((list, { index, value }) => {
+        const newList = [...list]
+        newList[index] = value
+        return newList
+      }, counterList$, updateCounter$)
+    ),
+    [0, 0]  // Initial: 2 counters
+  )
+
+  return [
+    $div()(
+      $button(
+        addCounterTether(nodeEvent('click'))
+      )('Add Counter'),
+
+      // Re-render list when it changes
+      switchMap(list =>
+        $div()(
+          ...list.map((_, index) =>
+            $Counter(
+              map(list => list[index], counterList$)
+            )({
+              valueChange$: updateCounterTether(
+                map(newValue => ({ index, value: newValue }))
+              )
+            })
+          )
+        )
+      , counterList$)
+    ),
+    {}
+  ]
+})
+```
+
+**Key pattern:**
+- State is an array `number[]`
+- Each child gets a derived stream: `map(list => list[index], counterList$)`
+- Child outputs include the index: `{ index, value }`
+- Parent merges all updates to the list state
+
+### Optimizing Re-renders
+
+**Problem:** `switchMap` re-renders on every array change, even if length doesn't change.
+
+**Solution:** Skip repeats based on length:
+```typescript
+import { skipRepeatsWith } from 'aelea/stream'
+
+// Only re-render when length changes
+const listByLength$ = skipRepeatsWith(
+  (a, b) => a.length === b.length,
+  counterList$
+)
+
+switchMap(list =>
+  $div()(/* render list */)
+, listByLength$)
+```
+
+**Individual item optimization:**
+```typescript
+// Skip repeats for individual counter values
+const counterValue$ = (index: number) =>
+  skipRepeats(
+    map(list => list[index], counterList$)
+  )
+
+// Use in rendering
+$Counter(counterValue$(index))
+```
+
+### Layout Composition
+
+**Using layout helpers:**
+```typescript
+import { $row, $column } from 'aelea/ui-components'
+import { spacing } from 'aelea/ui-components'
+
+const $Header = component(() => {
+  return [
+    $row(
+      spacing.default,  // Gap between items
+      style({ alignItems: 'center', placeContent: 'space-between' })
+    )(
+      $text('Logo'),
+      $button()('Menu')
+    ),
+    {}
+  ]
+})
+
+const $Page = component(() => {
+  return [
+    $column(
+      spacing.large  // Vertical spacing
+    )(
+      $Header()(),
+      $text('Content'),
+      $text('Footer')
+    ),
+    {}
+  ]
+})
+```
+
+**What $row and $column are:**
+```typescript
+// Simplified implementation
+const $row = (...operations) =>
+  $element('div')(
+    style({ display: 'flex', flexDirection: 'row' }),
+    ...operations
+  )
+
+const $column = (...operations) =>
+  $element('div')(
+    style({ display: 'flex', flexDirection: 'column' }),
+    ...operations
+  )
+```
+
+### Pre-built Components
+
+**Using ui-components:**
+```typescript
+import { $Button, $TextField, $NumberTicker } from 'aelea/ui-components'
+
+const $LoginForm = component((
+  [submit$, submitTether]: IBehavior<Node, PointerEvent>,
+  [usernameInput$, usernameInputTether]: IBehavior<Node, InputEvent>
+) => {
+  const username$ = state(
+    map(e => e.target.value, usernameInput$),
+    ''
+  )
+
+  return [
+    $column(spacing.default)(
+      $TextField({
+        label: 'Username',
+        value: username$
+      })({
+        userChange: usernameInputTether()
+      }),
+
+      $Button({
+        $content: $text('Login')
+      })({
+        click: submitTether()
+      })
+    ),
+    { submit$, username$ }
+  ]
+})
+```
+
+---
+
+## Rendering to the Page
+
+### Basic Rendering
+
+**Simple app:**
+```typescript
+import { render } from 'aelea/ui'
+
+const $App = component(() => {
+  return [
+    $div()(
+      $text('Hello, Aelea!')
+    ),
+    {}
+  ]
+})
+
+// Render to the page
+render({
+  rootAttachment: document.body,
+  $rootNode: $App()({})  // Call component with no inputs
+})
+```
+
+**With inputs:**
+```typescript
+const $App = component((
+  [click$, clickTether]: IBehavior<Node, PointerEvent>
+) => {
+  const count$ = state(
+    sampleMap(n => n + 1, count$, click$),
+    0
+  )
+
+  return [
+    $button(
+      clickTether(nodeEvent('click'))
+    )(
+      $text(map(n => `Clicked ${n} times`, count$))
+    ),
+    {}
+  ]
+})
+
+render({
+  rootAttachment: document.body,
+  $rootNode: $App()({})
+})
+```
+
+### Understanding render()
+
+```typescript
+render({
+  rootAttachment: HTMLElement,  // Where to attach
+  $rootNode: INode              // Component to render
+})
+```
+
+**What it does:**
+1. Creates a scheduler (manages timing)
+2. Runs all streams in the component tree
+3. Attaches the DOM to `rootAttachment`
+4. Sets up automatic cleanup on disposal
+
+### Component Invocation Pattern
+
+Components are invoked **twice**:
+
+```typescript
+// 1. First call: pass input streams
+const componentWithInputs = $Counter(value$)
+
+// 2. Second call: wire output behaviors
+const renderedComponent = componentWithInputs({
+  valueChange$: valueChangeTether()
+})
+```
+
+**If no inputs:**
+```typescript
+const $App = component(() => [/* ... */])
+
+// First call: no inputs (but must call)
+// Second call: no outputs (but must call)
+$App()({})
+```
+
+**If inputs but no outputs:**
+```typescript
+const $Display = (value$: IStream<number>) =>
+  component(() => [
+    $text(map(String, value$)),
+    {}  // No outputs
+  ])
+
+// First call: pass input
+// Second call: no outputs
+$Display(someValue$)({})
+```
+
+**If outputs but no inputs:**
+```typescript
+const $Button = component((
+  [click$, clickTether]: IBehavior<Node, PointerEvent>
+) => [
+  $button(clickTether(nodeEvent('click')))('Click'),
+  { click$ }
+])
+
+// First call: no inputs
+// Second call: wire output
+$Button()({
+  click$: clickTether()
+})
+```
+
+### Document Structure
+
+**Typical setup:**
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>My App</title>
+</head>
+<body>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
+```
+
+```typescript
+// src/main.ts
+import { render } from 'aelea/ui'
+import { $App } from './pages/$App'
+
+render({
+  rootAttachment: document.body,
+  $rootNode: $App()({})
+})
+```
+
+### Multiple Root Components
+
+You can render multiple independent components:
+
+```typescript
+render({
+  rootAttachment: document.querySelector('#header'),
+  $rootNode: $Header()({})
+})
+
+render({
+  rootAttachment: document.querySelector('#main'),
+  $rootNode: $Main()({})
+})
+
+render({
+  rootAttachment: document.querySelector('#footer'),
+  $rootNode: $Footer()({})
+})
+```
+
+### Cleanup
+
+Components automatically clean up when disposed:
+
+```typescript
+const { dispose } = render({
+  rootAttachment: document.body,
+  $rootNode: $App()({})
+})
+
+// Later: clean up everything
+dispose()
+```
+
+---
+
+## Common Patterns
+
+### Derived State
+
+**Computing values from state:**
+```typescript
+const $ShoppingCart = ({ items$}: { items$: IStream<Item[]> }) =>
+  component(() => {
+    // Derive total from items
+    const total$ = map(
+      items => items.reduce((sum, item) => sum + item.price, 0),
+      items$
+    )
+
+    const itemCount$ = map(items => items.length, items$)
+
+    return [
+      $div()(
+        $text(map(n => `${n} items`, itemCount$)),
+        $text(map(t => `Total: $${t.toFixed(2)}`, total$))
+      ),
+      {}
+    ]
+  })
+```
+
+### Form Handling
+
+**Input fields:**
+```typescript
+const $NameForm = component((
+  [input$, inputTether]: IBehavior<Node, InputEvent>,
+  [submit$, submitTether]: IBehavior<Node, SubmitEvent>
+) => {
+  // Capture input value
+  const name$ = state(
+    map(e => (e.target as HTMLInputElement).value, input$),
+    ''
+  )
+
+  // Validate
+  const isValid$ = map(name => name.length >= 3, name$)
+
+  return [
+    $element('form')(
+      submitTether(nodeEvent('submit'))
+    )(
+      $input(
+        attr({ type: 'text', placeholder: 'Your name' }),
+        inputTether(nodeEvent('input'))
+      ),
+
+      $button(
+        attrBehavior(
+          map(valid => ({ disabled: !valid }), isValid$)
+        )
+      )('Submit')
+    ),
+    { name$, submit$ }
+  ]
+})
+```
+
+### Conditional Rendering
+
+**Using switchMap:**
+```typescript
+const $Conditional = ({ isLoggedIn$ }: { isLoggedIn$: IStream<boolean> }) =>
+  component(() => {
+    return [
+      switchMap(isLoggedIn =>
+        isLoggedIn
+          ? $div()($text('Welcome back!'))
+          : $div()($text('Please log in'))
+      , isLoggedIn$),
+      {}
+    ]
+  })
+```
+
+### Loading States
+
+**Handling async data:**
+```typescript
+import { fromPromise } from 'aelea/stream'
+import { switchMap, map } from 'aelea/stream'
+
+const $UserProfile = ({ userId$ }: { userId$: IStream<string> }) =>
+  component(() => {
+    const userData$ = switchMap(
+      userId => fromPromise(
+        fetch(`/api/user/${userId}`).then(r => r.json())
+      ),
+      userId$
+    )
+
+    return [
+      switchMap(user =>
+        $div()(
+          $text(`Name: ${user.name}`),
+          $text(`Email: ${user.email}`)
+        )
+      , userData$),
+      {}
+    ]
+  })
+```
+
+**With loading indicator:**
+```typescript
+import { merge, map, constant } from 'aelea/stream'
+
+const $AsyncData = ({ trigger$ }: { trigger$: IStream<void> }) =>
+  component(() => {
+    // Track loading state
+    const loading$ = merge(
+      map(() => true, trigger$),           // Start loading
+      map(() => false, dataLoaded$)        // Stop loading
+    )
+
+    const data$ = switchMap(
+      () => fromPromise(fetch('/api/data').then(r => r.json())),
+      trigger$
+    )
+
+    return [
+      $div()(
+        switchMap(isLoading =>
+          isLoading
+            ? $text('Loading...')
+            : switchMap(data =>
+                $text(`Data: ${JSON.stringify(data)}`)
+              , data$)
+        , loading$)
+      ),
+      {}
+    ]
+  })
+```
+
+### Global State
+
+**Using multicast and state:**
+```typescript
+// store.ts
+import { state, behavior } from 'aelea/stream-extended'
+
+// Create global behaviors
+export const [userChange$, userChangeTether] = behavior<User | null>()
+
+// Create global state
+export const currentUser$ = state(userChange$, null)
+```
+
+```typescript
+// $Header.ts
+import { currentUser$ } from './store'
+
+const $Header = component(() => {
+  return [
+    $div()(
+      switchMap(user =>
+        user
+          ? $text(`Welcome, ${user.name}`)
+          : $text('Not logged in')
+      , currentUser$)
+    ),
+    {}
+  ]
+})
+```
+
+```typescript
+// $LoginButton.ts
+import { userChangeTether } from './store'
+
+const $LoginButton = component((
+  [click$, clickTether]: IBehavior<Node, PointerEvent>
+) => {
+  const login$ = switchMap(
+    () => fromPromise(fetch('/api/login').then(r => r.json())),
+    click$
+  )
+
+  return [
+    $button(clickTether(nodeEvent('click')))('Login'),
+    {
+      login$: userChangeTether(login$)  // Update global state
+    }
+  ]
+})
+```
+
+### Animations
+
+**Spring physics:**
+```typescript
+import { motion } from 'aelea/ui'
+
+const $AnimatedBox = ({ x$ }: { x$: IStream<number> }) =>
+  component(() => {
+    // Smooth spring animation
+    const animatedX$ = motion(
+      { stiffness: 170, damping: 26 },
+      x$
+    )
+
+    return [
+      $div(
+        styleBehavior(
+          map(x => ({ transform: `translateX(${x}px)` }), animatedX$)
+        )
+      )('Smooth!'),
+      {}
+    ]
+  })
+```
+
+### Routing
+
+**Basic routing:**
+```typescript
+import { create, match } from 'aelea/router'
+import { now } from 'aelea/stream'
+
+const $App = component(() => {
+  // Create router
+  const router = create({
+    fragmentsChange: hashChange$,
+    fragment: location.hash.slice(1)
+  })
+
+  // Define routes
+  const homeRoute = router.create({ fragment: 'home' })
+  const aboutRoute = router.create({ fragment: 'about' })
+
+  return [
+    $div()(
+      match(homeRoute)(now($HomePage()({}))),
+      match(aboutRoute)(now($AboutPage()({})))
+    ),
+    {}
+  ]
+})
+```
+
+---
+
+## Project Structure
+
+### Monorepo Layout
+
+```
+/home/user/aelea/
+├── aelea/              # Library package
+│   ├── src/            # Source code
+│   │   ├── stream/                  # Core streams
+│   │   ├── stream-extended/         # Behaviors, multicast, state
+│   │   ├── ui/                      # DOM rendering
+│   │   ├── ui-components/           # Pre-built components
+│   │   ├── ui-components-theme/     # Theming
+│   │   └── router/                  # Routing
+│   ├── dist/           # Build output
+│   └── package.json
+├── website/            # Documentation site
+│   ├── src/
+│   │   ├── pages/
+│   │   │   └── examples/  # Live examples
+│   │   └── main.ts
+│   └── package.json
+└── package.json        # Monorepo root
+```
+
+### Module Imports
+
+**Seven distinct modules:**
+```typescript
+// Core streams
+import { map, filter, merge } from 'aelea/stream'
+import { now, periodic } from 'aelea/stream'
+
+// Extended streams
+import { behavior, state, multicast } from 'aelea/stream-extended'
+import type { IBehavior } from 'aelea/stream-extended'
+
+// UI
+import { $element, $text, component } from 'aelea/ui'
+import { style, attr, nodeEvent } from 'aelea/ui'
+import { render } from 'aelea/ui'
+
+// Components
+import { $Button, $TextField, $row, $column } from 'aelea/ui-components'
+import { layoutSheet, spacing } from 'aelea/ui-components'
+
+// Theme
+import { pallete } from 'aelea/ui-components-theme'
+
+// Theme browser
+import { setTheme } from 'aelea/ui-components-theme-browser'
+
+// Router
+import { create, match } from 'aelea/router'
+```
+
+### Key Files
+
+**Library:**
+- `/home/user/aelea/aelea/src/stream/types.ts` - Core interfaces
+- `/home/user/aelea/aelea/src/ui/render.ts` - Rendering engine
+- `/home/user/aelea/aelea/src/ui/combinator/component.ts` - Component abstraction
+
+**Examples:**
+- `/home/user/aelea/website/src/pages/examples/count-counters/` - Counter example
+- `/home/user/aelea/website/src/pages/examples/todo-app/` - TodoMVC
+
+**Config:**
+- `/home/user/aelea/package.json` - Monorepo config
+- `/home/user/aelea/biome.json` - Linting rules
+- `/home/user/aelea/tsconfig.base.json` - TypeScript config
+
+---
+
+## Development Workflow
+
+### Setup
 
 ```bash
-# Clone repository
-git clone <repo-url>
-cd aelea
-
-# Install dependencies (uses Bun)
+# Install dependencies
 bun install
 
 # Build library
-bun run aelea:build
+cd aelea
+bun run build
 
-# Start development server (website)
+# Start dev server (website)
 cd website
-bun run dev  # Opens http://localhost:3000
+bun run dev
 ```
 
-### Building
+### Code Conventions
+
+**Naming:**
+- UI components: `$ComponentName`
+- Streams (optional): `streamName$`
+- Behaviors: `[stream$, streamTether]`
+- Files: `$ComponentName.ts`
+
+**TypeScript:**
+- Use `import type` for type-only imports
+- Use `export type` for type-only exports
+- Imports must include `.js` extension (ESM)
+- Strict mode enabled
+
+**Linting:**
+```bash
+# Check code
+bun run biome:check
+
+# Auto-fix
+bun run biome:check:fix
+```
+
+### Adding Components
+
+**1. Create component file:**
+```typescript
+// aelea/src/ui-components/components/$MyComponent.ts
+import { component } from '../../ui/index.js'
+
+export const $MyComponent = (props) =>
+  component(() => {
+    return [/* UI */, /* outputs */]
+  })
+```
+
+**2. Export from module:**
+```typescript
+// aelea/src/ui-components/index.ts
+export { $MyComponent } from './components/$MyComponent.js'
+```
+
+**3. Add example:**
+```typescript
+// website/src/pages/examples/my-component/$MyComponentExample.ts
+export const $MyComponentExample = component(() => {
+  return [$MyComponent({})({}) , {}]
+})
+```
+
+### Git Workflow
+
+**Branches:**
+- Feature branches: `claude/description-<session-id>`
+- Branch must start with `claude/` for CI
+
+**Commits:**
+- Format: `type: description`
+- Types: `feat`, `fix`, `refactor`, `docs`, `chore`
+- Example: `feat: add $Tooltip component`
+
+**Versioning:**
+```bash
+# Create changeset
+npx changeset
+
+# Version packages
+bun run changeset:version
+
+# Publish
+bun run changeset:publish
+```
+
+### Common Commands
 
 ```bash
-# Build entire monorepo
+# Build everything
 bun run build
 
 # Build library only
@@ -315,927 +1424,83 @@ bun run aelea:build
 
 # Build website only
 bun run website:build
-```
 
-### Linting & Formatting
-
-```bash
-# Check code with Biome
+# Lint
 bun run biome:check
 
-# Auto-fix issues
+# Fix linting
 bun run biome:check:fix
 
-# Auto-fix with unsafe transformations
-bun run biome:check:fix:unsafe
+# Sherif (workspace validation)
+bun run sherif
 ```
-
-### Version Management
-
-```bash
-# Create changeset (describe changes)
-npx changeset
-
-# Version packages based on changesets
-bun run changeset:version
-
-# Publish to npm
-bun run changeset:publish
-```
-
-### Git Workflow
-
-**Branch naming convention:**
-- Feature branches: `claude/claude-md-<session-id>`
-- CRITICAL: Branches must start with `claude/` and match session ID for push to succeed
-
-**Commit conventions:**
-- Descriptive messages following existing style
-- Prefix: `feat:`, `fix:`, `refactor:`, `docs:`, etc.
-- Example: `feat: update version to 2.5.31 and refactor tether implementation`
-
-**CI/CD Pipeline (.github/workflows/release.yml):**
-1. Trigger: Push to master or manual dispatch
-2. Lint with Biome
-3. Build both packages
-4. Publish to npm via Changesets
-5. Deploy website to Railway
-
----
-
-## Code Conventions
-
-### Naming Conventions
-
-1. **$ prefix for UI components/elements**
-   ```typescript
-   const $div = $element('div')
-   const $Counter = (props) => component(...)
-   const $MyComponent = ...
-   ```
-
-2. **$ suffix for streams (optional but common)**
-   ```typescript
-   const value$ = now(42)
-   const clicks$ = nodeEvent('click')
-   ```
-
-3. **Behavior tuple naming**
-   ```typescript
-   const [stream$, streamTether] = behavior<T>()
-   // OR in component signature:
-   [clickEvent$, clickEventTether]: IBehavior<Node, Event>
-   ```
-
-4. **File naming**
-   - Components: `$ComponentName.ts`
-   - Utilities: `camelCase.ts`
-   - Types: `types.ts` per module
-
-### TypeScript Conventions
-
-**Import/export patterns:**
-```typescript
-// Prefer type imports
-import type { IStream } from './types'
-import { map, filter } from './combinators'
-
-// Named exports only (no default exports)
-export { map, filter }
-export type { IStream, ISink }
-```
-
-**Module resolution:**
-```typescript
-// ESM with .js extensions (TypeScript requirement)
-import { map } from './map.js'
-import type { IStream } from '../types.js'
-```
-
-**Type definitions:**
-```typescript
-// Interface prefix: I
-interface IStream<T> { ... }
-interface ISink<T> { ... }
-interface IScheduler { ... }
-
-// Avoid explicit any, use type parameters
-function process<T>(value: T): T { ... }
-```
-
-### Code Organization
-
-**Currying utilities:**
-```typescript
-// Use curry2, curry3, curry4 from utils/function.ts
-export const map = curry2(mapImpl)
-export const sample = curry3(sampleImpl)
-
-// Enables flexible calling:
-map(fn, stream)        // Full application
-map(fn)(stream)        // Curried
-```
-
-**Composition operator:**
-```typescript
-import { o } from './utils/function'
-
-// Compose functions right-to-left
-const composed = o(operation1, operation2, operation3)
-
-// Used in element operations
-$div(o(style1, style2, attr1))
-```
-
-**Exports structure:**
-```typescript
-// Each module has index.ts with explicit exports
-export { map, filter, merge } from './combinator/index.js'
-export { now, periodic } from './source/index.js'
-export type { IStream, ISink } from './types.js'
-```
-
-### Styling Conventions
-
-**StyleSheet-based CSS-in-JS:**
-```typescript
-// style() generates CSS classes dynamically
-const $box = $div(
-  style({
-    padding: '20px',
-    backgroundColor: 'blue',
-    ':hover': { backgroundColor: 'darkblue' }
-  })
-)
-
-// styleBehavior() for reactive styles
-const $animated = $div(
-  styleBehavior(
-    map(x => ({ transform: `translateX(${x}px)` }), position$)
-  )
-)
-
-// Layout helpers from ui-components
-import { layoutSheet } from 'aelea/ui-components'
-$row(layoutSheet.spaceBetween, layoutSheet.alignCenter)
-```
-
-**Color utilities:**
-```typescript
-import { pallete } from 'aelea/ui-components-theme'
-
-style({
-  color: pallete.message,
-  backgroundColor: pallete.background
-})
-```
-
----
-
-## Module Deep Dive
-
-### stream/ - Core Reactive Streams
-
-**Location:** `/home/user/aelea/aelea/src/stream/`
-
-**Key files:**
-- `types.ts` (84 lines) - Core interfaces: IStream, ISink, IScheduler
-- `combinator/` - 22 stream transformation operators
-- `source/` - 8 stream creation methods
-- `scheduler/` - Pluggable scheduling implementations
-
-**Core interfaces:**
-```typescript
-interface IStream<T> {
-  run(sink: ISink<T>, scheduler: IScheduler): Disposable
-}
-
-interface ISink<T> {
-  event(time: number, value: T): void
-  end(time: number): void
-  error(time: number, err: Error): void
-}
-
-interface IScheduler {
-  asap<T>(sink: ISink<T>, task: Task<T>, ...args): Disposable
-  delay<T>(sink: ISink<T>, task: Task<T>, delay: number, ...args): Disposable
-  time(): number
-}
-```
-
-**Most-used combinators:**
-- `map` - Transform values (auto-fuses)
-- `filter` - Filter by predicate
-- `merge` - Merge multiple streams
-- `switchLatest` - Switch to latest inner stream
-- `sample` - Sample values from streams
-- `combine` - Combine latest values
-- `aggregate` - Reduce with seed (like scan)
-
-**Most-used sources:**
-- `now` - Emit single value immediately
-- `periodic` - Emit at regular intervals
-- `fromPromise` - Convert promise to stream
-- `fromIterable` - Convert array/iterable to stream
-
-**Performance notes:**
-- Map operations automatically fuse for efficiency
-- Lazy evaluation prevents unnecessary work
-- Scheduler abstraction enables batching
-
-### stream-extended/ - Advanced Utilities
-
-**Location:** `/home/user/aelea/aelea/src/stream-extended/`
-
-**Key concepts:**
-
-**Behavior (bidirectional stream):**
-```typescript
-// Create behavior tuple
-const [stream$, tether] = behavior<T>()
-
-// stream$: IStream<T> - receives values
-// tether: (input: IStream<T>) => IStream<T> - sends values
-
-// Usage in components
-component((
-  [clicks$, clickTether]: IBehavior<Node, MouseEvent>
-) => {
-  return [
-    $button(clickTether(nodeEvent('click'))),  // Wire input to tether
-    { clicks$ }  // Output stream
-  ]
-})
-```
-
-**State (stateful stream):**
-```typescript
-// Create stateful stream with initial value
-const count$ = state(increments$, 0)
-
-// Remembers last value
-// New subscribers immediately get current value
-```
-
-**Multicast (share subscriptions):**
-```typescript
-// Expensive operation
-const data$ = multicast(
-  fromPromise(fetch('/api/data').then(r => r.json()))
-)
-
-// Multiple subscribers share single fetch
-subscriber1.run(data$)
-subscriber2.run(data$)
-```
-
-**Tether (input mechanism):**
-```typescript
-// Create tether
-const tether = makeTether<T>()
-
-// Push values in
-tether(now(42))
-tether(periodic(1000))
-
-// Receive as stream
-const output$ = tether.stream$
-```
-
-### ui/ - DOM Rendering
-
-**Location:** `/home/user/aelea/aelea/src/ui/`
-
-**Key files:**
-- `render.ts` (296 lines) - Core rendering engine
-- `scheduler.ts` (109 lines) - DOM-optimized scheduler
-- `combinator/component.ts` (51 lines) - Component abstraction
-- `combinator/style.ts` (96 lines) - CSS-in-JS system
-- `combinator/motion.ts` (134 lines) - Spring physics animations
-
-**Element creation:**
-```typescript
-import { $element, $custom, $svg, $svgNS, $text } from 'aelea/ui'
-
-// Standard HTML elements
-const $div = $element('div')
-const $button = $element('button')
-const $input = $element('input')
-
-// Custom elements
-const $myCard = $custom('app-card')
-
-// SVG elements
-const $circle = $svgNS('circle')
-const $path = $svgNS('path')
-
-// Text nodes
-const $label = $text('Static text')
-const $dynamic = $text(map(String, value$))
-```
-
-**Component definition:**
-```typescript
-import { component } from 'aelea/ui'
-import type { IBehavior } from 'aelea/stream-extended'
-
-const $MyComponent = component((
-  [behavior1$, behavior1Tether]: IBehavior<Type1>,
-  [behavior2$, behavior2Tether]: IBehavior<Type2>
-) => {
-  // Component implementation
-  return [
-    $div(/* UI */),
-    { outputStream$ }
-  ]
-})
-```
-
-**Styling:**
-```typescript
-import { style, styleBehavior } from 'aelea/ui'
-
-// Static styles
-$div(style({
-  padding: '20px',
-  display: 'flex',
-  ':hover': { backgroundColor: 'blue' },
-  '@media (max-width: 768px)': { padding: '10px' }
-}))
-
-// Reactive styles
-$div(styleBehavior(
-  map(value => ({ opacity: value }), opacity$)
-))
-```
-
-**Events:**
-```typescript
-import { nodeEvent } from 'aelea/ui'
-
-$button(clickTether(nodeEvent('click')))
-$input(inputTether(nodeEvent('input')))
-```
-
-**Attributes:**
-```typescript
-import { attr, attrBehavior } from 'aelea/ui'
-
-// Static attributes
-$input(attr({ type: 'text', placeholder: 'Enter name' }))
-
-// Reactive attributes
-$input(attrBehavior(
-  map(disabled => ({ disabled }), isDisabled$)
-))
-```
-
-**Animations (spring physics):**
-```typescript
-import { motion } from 'aelea/ui'
-
-const animatedPosition$ = motion(
-  { stiffness: 170, damping: 26 },  // Spring config
-  position$  // Target values
-)
-```
-
-**Running the app:**
-```typescript
-import { runBrowser } from 'aelea/ui'
-
-runBrowser({
-  rootNode: document.body
-})(
-  $App()
-)
-```
-
-### ui-components/ - Pre-built Components
-
-**Location:** `/home/user/aelea/aelea/src/ui-components/`
-
-**Available components:**
-
-**Layout:**
-```typescript
-import { $row, $column, $card } from 'aelea/ui-components'
-
-// Flexbox row
-$row(layoutSheet.spaceBetween, layoutSheet.alignCenter)(children)
-
-// Flexbox column
-$column(layoutSheet.spacing, style({ padding: '20px' }))(children)
-
-// Card container
-$card(style({ padding: '30px' }))(children)
-```
-
-**Forms:**
-```typescript
-import {
-  $Button, $TextField, $Checkbox, $Slider, $Autocomplete
-} from 'aelea/ui-components'
-
-// Button
-$Button({
-  $content: $text('Click me'),
-  click: click$
-})
-
-// Text field
-$TextField({
-  label: 'Username',
-  value: value$,
-  validation: validation$
-})
-
-// Checkbox
-$Checkbox({
-  label: $text('Accept terms'),
-  checked: checked$
-})
-```
-
-**Data display:**
-```typescript
-import { $Table, $Tabs, $VirtualScroll } from 'aelea/ui-components'
-
-// Data table with pagination
-$Table({
-  columns: [
-    { label: 'Name', $head: $text('Name'), $body: ... }
-  ],
-  data: data$,
-  pageSize: 20
-})
-
-// Tab navigation
-$Tabs({
-  selected: selectedTab$,
-  options: ['Tab 1', 'Tab 2']
-})
-
-// Virtual scroll for large lists
-$VirtualScroll({
-  itemHeight: 50,
-  items: items$,
-  $item: (item) => $div()($text(item.name))
-})
-```
-
-**Overlays:**
-```typescript
-import { $Popover } from 'aelea/ui-components'
-
-$Popover({
-  $target: $button()('Toggle'),
-  $content: $div()('Popover content'),
-  open: isOpen$
-})
-```
-
-**Utilities:**
-```typescript
-import { $NumberTicker, $Sortable } from 'aelea/ui-components'
-
-// Animated number
-$NumberTicker({
-  value: value$,
-  format: (n) => n.toFixed(2)
-})
-
-// Drag-and-drop sorting
-$Sortable({
-  items: items$,
-  $item: (item) => $div()(item.name)
-})
-```
-
-**Style utilities:**
-```typescript
-import { layoutSheet, designSheet, spacing } from 'aelea/ui-components'
-
-// Layout utilities
-layoutSheet.flex
-layoutSheet.spaceBetween
-layoutSheet.alignCenter
-layoutSheet.spacing
-
-// Design tokens
-designSheet.btn
-designSheet.input
-designSheet.card
-
-// Spacing
-spacing.tiny    // 4px
-spacing.small   // 8px
-spacing.medium  // 16px
-spacing.large   // 24px
-```
-
-### router/ - Client-side Routing
-
-**Location:** `/home/user/aelea/aelea/src/router/`
-
-**Key files:**
-- `resolveUrl.ts` (92 lines) - URL matching logic
-- `components/$Anchor.ts` - Router-aware anchor component
-- `types.ts` - Route type definitions
-
-**Router setup:**
-```typescript
-import { create, match } from 'aelea/router'
-import { now } from 'aelea/stream'
-
-// Create router
-const router = create({
-  fragmentsChange: hashChange$,  // Stream of URL changes
-  fragment: window.location.hash.slice(1)
-})
-
-// Create route matchers
-const homeRoute = router.create({ fragment: 'home' })
-const aboutRoute = router.create({ fragment: 'about/:id' })
-
-// Match routes to components
-const $App = $div()(
-  match(homeRoute)(now($HomePage())),
-  match(aboutRoute)(now($AboutPage()))
-)
-```
-
-**Route parameters:**
-```typescript
-// Route with parameters
-const userRoute = router.create({ fragment: 'user/:userId' })
-
-// Extract parameters
-switchLatest(
-  map(params => {
-    const userId = params.userId
-    return $UserProfile({ userId })
-  }, userRoute)
-)
-```
-
-**Navigation:**
-```typescript
-import { $Anchor } from 'aelea/router'
-
-// Router-aware link
-$Anchor({
-  url: '/home',
-  $content: $text('Home')
-})
-```
-
----
-
-## Testing & Benchmarking
-
-### Current State
-
-**No formal test suite** - The project currently lacks unit/integration tests.
-
-**Benchmarking available** at `/home/user/aelea/aelea/benchmark/`
-
-### Running Benchmarks
-
-```bash
-cd aelea/benchmark
-
-# Run specific benchmark
-bun run combinator-characteristics.ts
-bun run map-filter-reduce.ts
-bun run test-map-fusion.ts
-
-# View results
-cat BENCHMARK_REPORT.md
-```
-
-### Benchmark Structure
-
-**Tool:** Tinybench 4.0.1
-**Comparison:** Benchmarks against @most/core (another reactive library)
-
-**Available benchmarks:**
-- `combinator-characteristics.ts` - Stream combinator performance
-- `combinators.ts` - General combinator benchmarks
-- `map-filter-reduce.ts` - Common operations
-- `scan.ts` - Scan operation
-- `switch.ts` - Switch operation
-- `test-map-fusion.ts` - Map fusion optimization
-
-**Benchmark results:** See `BENCHMARK_REPORT.md` for detailed performance comparisons
-
-### Performance Considerations
-
-**When working with the codebase:**
-
-1. **Map fusion** - Multiple map operations automatically fuse
-2. **Lazy evaluation** - Streams don't execute until run()
-3. **Scheduler batching** - Use scheduler for efficient updates
-4. **Multicast expensive operations** - Share subscriptions
-5. **Dispose properly** - Clean up resources to prevent leaks
-
----
-
-## Common Tasks
-
-### Adding a New Stream Combinator
-
-1. Create file in `/home/user/aelea/aelea/src/stream/combinator/`
-   ```typescript
-   // myOperator.ts
-   import type { IStream } from '../types.js'
-   import { Stream } from '../Stream.js'
-   import { curry2 } from '../utils/function.js'
-
-   const myOperatorImpl = <A, B>(fn: (a: A) => B, source: IStream<A>): IStream<B> => {
-     return new Stream((sink, scheduler) => {
-       // Implementation
-       return source.run({
-         event: (t, value) => sink.event(t, fn(value)),
-         error: (t, err) => sink.error(t, err),
-         end: (t) => sink.end(t)
-       }, scheduler)
-     })
-   }
-
-   export const myOperator = curry2(myOperatorImpl)
-   ```
-
-2. Export from `/home/user/aelea/aelea/src/stream/combinator/index.ts`
-   ```typescript
-   export { myOperator } from './myOperator.js'
-   ```
-
-3. Export from `/home/user/aelea/aelea/src/stream/index.ts`
-   ```typescript
-   export { myOperator } from './combinator/index.js'
-   ```
-
-4. Add documentation with ASCII diagrams
-5. Consider adding benchmark
-
-### Adding a New UI Component
-
-1. Create file in `/home/user/aelea/aelea/src/ui-components/components/`
-   ```typescript
-   // $MyComponent.ts
-   import { component, $element, style } from '../../ui/index.js'
-   import type { IBehavior } from '../../stream-extended/index.js'
-
-   export interface IMyComponent {
-     value: IStream<string>
-     onChange: IStream<string>
-   }
-
-   export const $MyComponent = ({ value, onChange }: IMyComponent) =>
-     component((
-       [change$, changeTether]: IBehavior<string>
-     ) => {
-       const $container = $element('div')
-
-       return [
-         $container(
-           style({ padding: '20px' })
-         )(
-           // Component UI
-         ),
-         { onChange: changeTether() }
-       ]
-     })
-   ```
-
-2. Export from `/home/user/aelea/aelea/src/ui-components/index.ts`
-   ```typescript
-   export { $MyComponent } from './components/$MyComponent.js'
-   export type { IMyComponent } from './components/$MyComponent.js'
-   ```
-
-3. Add example to website (`/home/user/aelea/website/src/pages/examples/`)
-
-### Updating Package Version
-
-```bash
-# Create changeset
-npx changeset
-# Select packages to bump
-# Choose version bump type (major/minor/patch)
-# Describe changes
-
-# Update version in package.json
-bun run changeset:version
-
-# Commit changes
-git add .
-git commit -m "chore: version bump"
-
-# Publish (CI/CD handles this on master)
-bun run changeset:publish
-```
-
-### Adding a New Example
-
-1. Create directory in `/home/user/aelea/website/src/pages/examples/`
-   ```
-   my-example/
-   ├── $MyExample.ts         # Component implementation
-   ├── readme.ts             # Description text
-   └── code.ts               # Source code as string for Monaco
-   ```
-
-2. Export from `/home/user/aelea/website/src/pages/examples/index.ts`
-
-3. Add to examples list in `/home/user/aelea/website/src/pages/examples/$Examples.ts`
-
-### Debugging Stream Issues
-
-**Common issues:**
-
-1. **Stream not updating:**
-   - Check if stream is actually running (`run()` called)
-   - Verify scheduler is executing tasks
-   - Check for errors in sink.error()
-
-2. **Memory leaks:**
-   - Ensure disposables are disposed
-   - Check for circular references in streams
-   - Use SettableDisposable for dynamic subscriptions
-
-3. **Performance issues:**
-   - Check if expensive operations are multicast
-   - Verify map fusion is working
-   - Profile with browser DevTools
-
-**Debugging utilities:**
-```typescript
-import { tap } from 'aelea/stream'
-
-// Log stream values
-const debugStream$ = tap(
-  value => console.log('Stream value:', value),
-  originalStream$
-)
-```
-
----
-
-## Important Constraints
-
-### Build & Compilation
-
-1. **TypeScript strict mode** - All code must pass strict type checking
-2. **ESM only** - No CommonJS support
-3. **.js extensions required** - Import statements must include `.js` extension
-4. **Incremental builds** - TypeScript uses composite/incremental compilation
-5. **Build before test** - Run `bun run aelea:build` before testing changes
-
-### Code Quality
-
-1. **Biome linting** - All code must pass `bun run biome:check`
-2. **Type exports** - Use `export type` for type-only exports
-3. **Const assertions** - Use `const` where possible (enforced by Biome)
-4. **Import types** - Use `import type` for type-only imports
-5. **No explicit any** - Avoid explicit `any`, use generics instead (Biome warning)
-
-### Git & CI/CD
-
-1. **Branch naming** - Feature branches must start with `claude/` for CI
-2. **Commit messages** - Follow conventional commits format
-3. **No direct master push** - All changes via pull requests
-4. **Linting in CI** - CI fails if Biome checks don't pass
-5. **Build in CI** - CI fails if build fails
-
-### Runtime Constraints
-
-1. **Browser support** - Modern browsers only (ES2023 features)
-2. **No polyfills** - Assumes native Promise, Symbol.dispose, etc.
-3. **ESM modules** - Import/export syntax required
-4. **Scheduler required** - All streams need scheduler to run
-5. **Disposal required** - Resources must be disposed to prevent leaks
-
-### API Stability
-
-1. **Published surface** - Only `dist/` is published to npm
-2. **Type compatibility** - Public types must remain backward compatible
-3. **Deprecation process** - Use @deprecated JSDoc for removed features
-4. **Semantic versioning** - Follow semver for releases
-5. **Changesets required** - All changes need changeset entries
-
-### Performance Requirements
-
-1. **Map fusion** - Don't break map fusion optimization
-2. **Lazy evaluation** - Maintain lazy stream semantics
-3. **Minimal allocations** - Avoid unnecessary object creation in hot paths
-4. **Scheduler batching** - Use scheduler for batched updates
-5. **Benchmark regression** - Don't regress benchmark performance
-
----
-
-## Additional Resources
-
-### Key Documentation Files
-
-- `/home/user/aelea/README.md` - Main project documentation (352 lines)
-- `/home/user/aelea/GEMINI.md` - AI assistant overview
-- `/home/user/aelea/aelea/src/stream/README.md` - Stream library docs
-- `/home/user/aelea/aelea/src/stream-extended/README.md` - Extended stream docs
-
-### External Resources
-
-- **TypeScript:** https://www.typescriptlang.org/docs/
-- **Biome:** https://biomejs.dev/
-- **Bun:** https://bun.sh/docs
-- **Changesets:** https://github.com/changesets/changesets
-
-### Similar Projects (for context)
-
-- **@most/core** - Monadic streams library (benchmarked against)
-- **RxJS** - Reactive Extensions for JavaScript
-- **Callbag** - Lightweight observable/iterable library
-
----
-
-## Workflow Checklist
-
-### Before Making Changes
-
-- [ ] Understand the module you're modifying
-- [ ] Read existing code in that module
-- [ ] Check if similar functionality exists
-- [ ] Review related documentation
-
-### During Development
-
-- [ ] Follow naming conventions ($ prefix, etc.)
-- [ ] Use TypeScript strict types
-- [ ] Curry functions with curry2/curry3/curry4
-- [ ] Add proper type exports
-- [ ] Handle disposal properly
-- [ ] Consider performance implications
-
-### Before Committing
-
-- [ ] Run `bun run biome:check:fix`
-- [ ] Run `bun run build` (verify build succeeds)
-- [ ] Test changes in website examples
-- [ ] Update relevant documentation
-- [ ] Create changeset if needed (`npx changeset`)
-
-### For Pull Requests
-
-- [ ] Descriptive commit messages
-- [ ] Changes described in changeset
-- [ ] Examples added/updated if needed
-- [ ] No console warnings or errors
-- [ ] Branch name follows convention
 
 ---
 
 ## Quick Reference
 
-### Most Common Imports
+### Stream Combinators
+
+| Combinator | Purpose | Diagram |
+|------------|---------|---------|
+| `map` | Transform values | `-1-2-3-> => -2-4-6->` |
+| `filter` | Keep matching values | `-1-2-3-4-> => --2---4->` |
+| `merge` | Combine streams | `A: -1-3-> B: --2-4-> => -1234->` |
+| `combine` | Latest from all | `A: -a--b-> B: --1--2-> => --A-B-C->` |
+| `sample` | Sample on events | `A: -1-2-3-> B: --x--x-> => --2---3->` |
+| `switchLatest` | Switch to latest | Cancels previous inner stream |
+| `debounce` | Wait for silence | `-abc---def-> => ---c------f->` |
+| `throttle` | Limit rate | `-xxxxxx-> => -x--x--x->` |
+
+### Component Signature
 
 ```typescript
-// Streams
-import { map, filter, merge, combine, switchLatest } from 'aelea/stream'
-import { now, periodic, fromPromise } from 'aelea/stream'
-
-// Extended
-import { behavior, state, multicast } from 'aelea/stream-extended'
-import type { IBehavior } from 'aelea/stream-extended'
-
-// UI
-import { $element, $text, component, style, attr } from 'aelea/ui'
-import { nodeEvent, runBrowser } from 'aelea/ui'
-
-// Components
-import { $row, $column, $Button, $TextField } from 'aelea/ui-components'
-import { layoutSheet, designSheet } from 'aelea/ui-components'
-
-// Router
-import { create, match } from 'aelea/router'
+const $Component = (input$: IStream<Input>) =>
+  component((
+    [behavior1$, behavior1Tether]: IBehavior<TMsg, TReq>,
+    [behavior2$, behavior2Tether]: IBehavior<TMsg, TReq>
+  ) => {
+    return [
+      $div(/* UI */),
+      { output$ }
+    ]
+  })
 ```
 
-### File Path Reference
+### Element Composition
 
+```typescript
+// Factory
+const $div = $element('div')
+
+// Operations + children
+$div(
+  style({ padding: '20px' }),
+  attr({ id: 'container' })
+)(
+  $text('Child 1'),
+  $text('Child 2')
+)
 ```
-Library source:     /home/user/aelea/aelea/src/
-Library build:      /home/user/aelea/aelea/dist/
-Website source:     /home/user/aelea/website/src/
-Website build:      /home/user/aelea/website/dist/
-Config files:       /home/user/aelea/
-Benchmarks:         /home/user/aelea/aelea/benchmark/
-Examples:           /home/user/aelea/website/src/pages/examples/
+
+### State Management
+
+```typescript
+// Create stateful stream
+const state$ = state(changes$, initialValue)
+
+// Create behavior
+const [stream$, tether] = behavior<T>()
+
+// Multicast expensive operations
+const shared$ = multicast(expensiveStream$)
 ```
 
 ---
 
 **Last Updated:** 2025-11-15
-**Document Version:** 1.0
-**Library Version:** 2.5.31
 
-For questions or clarifications, refer to existing code examples in the repository or the comprehensive README.md file.
+For more details, see:
+- `/home/user/aelea/README.md` - Main documentation
+- `/home/user/aelea/aelea/src/stream/README.md` - Stream library docs
+- `/home/user/aelea/website/src/pages/examples/` - Live examples
