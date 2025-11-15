@@ -338,25 +338,35 @@ Use when items can be dynamically added/removed:
 
 ```typescript
 import { joinMap, until, merge, fromIterable } from 'aelea/stream'
-import { behavior } from 'aelea/stream-extended'
 
+// Item component handles its own lifecycle
+const $TodoItem = (todo: Todo) =>
+  component((
+    [remove, removeTether]: IBehavior<MouseEvent>,
+    [complete, completeTether]: IBehavior<boolean>
+  ) => {
+    const isCompleted = state(complete, todo.completed)
+
+    return [
+      $row()(
+        $checkbox(completeTether())(),
+        $text(todo.text),
+        $button(removeTether(nodeEvent('click')))('×')
+      ),
+      { remove, isCompleted }
+    ]
+  })
+
+// List renders items and handles disposal via until()
 const $TodoList = ({ newTodo, initialTodos }) =>
   component(() => {
     return [
       $column()(
         joinMap(
           (todo: Todo) => {
-            // Create behaviors for THIS item
-            const [remove, removeTether] = behavior<MouseEvent>()
-            const [complete, completeTether] = behavior<boolean>()
-
-            // until(remove) disposes this component when remove emits
-            return until(remove)(
-              $TodoItem({ todo })({
-                remove: removeTether(),
-                complete: completeTether()
-              })
-            )
+            const item = $TodoItem(todo)({})
+            // Dispose when item emits remove event
+            return until(item.remove)(item)
           },
           merge(newTodo, fromIterable(initialTodos))
         )
@@ -369,6 +379,7 @@ const $TodoList = ({ newTodo, initialTodos }) =>
 **Key difference:**
 - `switchMap` + `skipRepeatsWith` = Re-render optimization
 - `joinMap` + `until` = Dynamic lifecycle control
+- Separate components for clarity
 
 ### List State Management
 
