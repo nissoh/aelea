@@ -20,7 +20,7 @@ import { SettableDisposable } from './utils/SettableDisposable.js'
 export interface IRunEnvironment {
   $rootNode: I$Node
   scheduler: I$Scheduler
-  cache: string[]
+  cache: Map<string, string>
   namespace: string
   stylesheet: CSSStyleSheet
   rootAttachment?: INodeElement
@@ -198,33 +198,38 @@ function styleObjectAsString(styleObj: IStyleCSS) {
 
 export function useStyleRule(env: IRunEnvironment, styleDefinition: IStyleCSS) {
   const properties = styleObjectAsString(styleDefinition)
-  const cachedRuleIdx = env.cache.indexOf(properties)
+  const cached = env.cache.get(properties)
 
-  if (cachedRuleIdx === -1) {
-    const index = env.stylesheet.cssRules.length
-    const namespace = env.namespace + index
-
-    env.cache.push(properties)
-    env.stylesheet.insertRule(`.${namespace} {${properties}}`, index)
-    return `${env.namespace + index}`
+  if (cached !== undefined) {
+    return cached
   }
 
-  return `${env.namespace + cachedRuleIdx}`
+  const index = env.stylesheet.cssRules.length
+  const className = env.namespace + index
+
+  env.cache.set(properties, className)
+  env.stylesheet.insertRule(`.${className} {${properties}}`, index)
+
+  return className
 }
 
 export function useStylePseudoRule(env: IRunEnvironment, styleDefinition: IStyleCSS, pseudo = '') {
   const properties = styleObjectAsString(styleDefinition)
-  const index = env.stylesheet.cssRules.length
-  const rule = `.${env.namespace + index + pseudo} {${properties}}`
-  const cachedRuleIdx = env.cache.indexOf(rule)
+  const ruleKey = `${pseudo}:${properties}`
+  const cached = env.cache.get(ruleKey)
 
-  if (cachedRuleIdx === -1) {
-    env.cache.push(rule)
-    env.stylesheet.insertRule(rule, index)
-    return `${env.namespace + index}`
+  if (cached !== undefined) {
+    return cached
   }
 
-  return `${env.namespace + cachedRuleIdx}`
+  const index = env.stylesheet.cssRules.length
+  const className = env.namespace + index
+  const rule = `.${className + pseudo} {${properties}}`
+
+  env.cache.set(ruleKey, className)
+  env.stylesheet.insertRule(rule, index)
+
+  return className
 }
 
 function applyAttributes(attrs: IAttributeProperties<unknown>, node: INodeElement) {
@@ -252,7 +257,7 @@ export function render(config: {
   $rootNode: I$Node
   scheduler?: I$Scheduler
   namespace?: string
-  cache?: string[]
+  cache?: Map<string, string>
 }): Disposable {
   if (!config.rootAttachment) {
     throw new Error('rootAttachment is required for render')
@@ -262,7 +267,7 @@ export function render(config: {
     $rootNode: config.$rootNode,
     scheduler: config.scheduler ?? createDomScheduler(),
     rootAttachment: config.rootAttachment,
-    cache: config.cache ?? [],
+    cache: config.cache ?? new Map(),
     namespace: config.namespace ?? 'Ω',
     stylesheet: new CSSStyleSheet()
   }
