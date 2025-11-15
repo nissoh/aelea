@@ -17,6 +17,45 @@ export function tryEnd(sink: ISink<unknown>, time: ITime): void {
 }
 
 /**
+ * Convert an unknown error to an Error instance with a contextual message
+ * Handles Error instances, strings, and other types properly
+ */
+export function toError(error: unknown, context?: string): Error {
+  const prefix = context ? `${context}: ` : ''
+
+  if (error instanceof Error) {
+    // If it's already an Error, optionally wrap it with context
+    if (context) {
+      const wrappedError = new Error(`${prefix}${error.message}`)
+      // Set cause property manually for better error tracking
+      Object.defineProperty(wrappedError, 'cause', {
+        value: error,
+        writable: true,
+        enumerable: false,
+        configurable: true
+      })
+      return wrappedError
+    }
+    return error
+  }
+
+  if (typeof error === 'string') {
+    return new Error(`${prefix}${error}`)
+  }
+
+  // For other types, attempt to stringify
+  try {
+    const message = typeof error === 'object' && error !== null
+      ? JSON.stringify(error)
+      : String(error)
+    return new Error(`${prefix}${message}`)
+  } catch {
+    // If stringify fails, use generic message
+    return new Error(`${prefix}Unknown error`)
+  }
+}
+
+/**
  * Immutably append an element to an array
  * Optimized for small arrays (common case for multicast)
  */

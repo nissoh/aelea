@@ -11,6 +11,7 @@ import {
   tap
 } from '../stream/index.js'
 import { propagateErrorEndTask } from '../stream/scheduler/PropagateTask.js'
+import { toError } from './utils.js'
 
 type WebSocketOptions<I, O> = {
   url: string
@@ -49,7 +50,7 @@ class FromWebSocket<I, O> implements IStream<O> {
     try {
       socket = createWebsocket()
     } catch (error) {
-      scheduler.asap(propagateErrorEndTask(sink, new Error(`Failed to create WebSocket: ${error}`)))
+      scheduler.asap(propagateErrorEndTask(sink, toError(error, 'Failed to create WebSocket')))
       return disposeNone
     }
 
@@ -84,7 +85,7 @@ class FromWebSocket<I, O> implements IStream<O> {
         sink.event(scheduler.time(), deserializer(msg.data))
       } catch (parseError) {
         // Emit error but don't close the connection - bad message shouldn't kill the stream
-        sink.error(scheduler.time(), new Error(`Parse error: ${parseError}`))
+        sink.error(scheduler.time(), toError(parseError, 'Parse error'))
       }
     }
 
@@ -102,7 +103,7 @@ class FromWebSocket<I, O> implements IStream<O> {
             socket.send(serialized)
           } catch (sendError) {
             // Emit error but don't close the connection
-            sink.error(scheduler.time(), new Error(`WebSocket send error: ${sendError}`))
+            sink.error(scheduler.time(), toError(sendError, 'WebSocket send error'))
           }
         }, this.input).run(nullSink, scheduler)
       }
