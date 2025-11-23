@@ -30,14 +30,20 @@ export class IndexSink<A> implements ISink<A> {
   ) {}
 
   event(time: ITime, x: A): void {
-    if (this.ended) this.sink.error(time, new Error('Cannot send events to ended sink'))
+    if (this.ended) {
+      this.sink.error(time, new Error('Cannot send events to ended sink'))
+      return
+    }
 
     this.value = x
     this.sink.event(time, this)
   }
 
   end(time: ITime): void {
-    if (this.ended) throw new Error('Cannot end an ended sink')
+    if (this.ended) {
+      this.sink.error(time, new Error('Cannot end an ended sink'))
+      return
+    }
 
     this.ended = true
     this.sink.event(time, this)

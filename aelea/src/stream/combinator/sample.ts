@@ -94,8 +94,8 @@ class ValueSink<A> implements ISink<A> {
     }
   }
 
-  error(_time: ITime, _error: any): void {
-    // Don't propagate errors from values stream
+  error(time: ITime, error: any): void {
+    this.parent.sink.error(time, error)
   }
 
   end(_time: ITime): void {

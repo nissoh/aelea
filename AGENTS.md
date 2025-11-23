@@ -18,8 +18,13 @@
 - Naming: components and element factories use `$Name` (e.g., `$Counter`); behaviors use `[stream, streamTether]`; keep hyphenated folder/file segments consistent (`ui-components-theme-browser`).
 
 ## Writing Aelea UI (from CLAUDE.md and demos)
-- Components are curried IO: first call supplies inputs, second call wires outputs/behaviors. Example: `$Counter(value)({ valueChange: tether })`.
-- Element factories already compose; use `o()` only for stream/tether pipelines. Element trees compose directly: `$row(spacing.default, style(...))($text('Hi'))`.
+- Components are curried IO: first call supplies inputs, second call wires outputs/behaviors. Typical shape: `$Component(inputs)({ outputs })` where inputs can be values or streams, outputs are tethers/behaviors you connect.
+- Example tether wiring (keep transforms inside the tether, use `o()` for the pipeline itself): 
+  ```ts
+  const clickTether = o(nodeEvent('click'), map(event => event.clientX), sampleMap(x => ({ x })))
+  const saveButton = $Button({ label: 'Save' })({ click: clickTether })
+  ```
+- Element factories already compose; use `o()` only for stream/tether pipelines (state transforms, event shaping). Element trees compose directly: `$row(spacing.default, style(...))($text('Hi'))`.
 - Common operators: `map`, `sampleMap`, `switchMap` for dynamic UI, `joinMap`+`until` for add/remove lifecycles, `start` for initial values, `multicast` for sharing expensive streams.
 - Tether pattern: pass transformers into the tether rather than mutating state — e.g., `clickTether(o(nodeEvent('click'), map(e => e.clientX)))`.
 - When improving demos (`website/src/pages/examples`), favor small components, clear stream names, and explicit state flows (parent owns state; children emit changes).

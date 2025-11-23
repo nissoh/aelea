@@ -8,7 +8,7 @@ class AwaitPromises<T> implements IStream<T> {
   constructor(readonly source: IStream<Promise<T>>) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    const awaitSink = new AwaitPromisesSink(sink)
+    const awaitSink = new AwaitPromisesSink(sink, scheduler)
     const disposable = this.source.run(awaitSink, scheduler)
 
     return disposeBoth(disposable, awaitSink)
@@ -33,7 +33,10 @@ class AwaitPromisesSink<T> implements ISink<Promise<T>>, Disposable {
   ended = false
   disposed = false
 
-  constructor(readonly sink: ISink<T>) {}
+  constructor(
+    readonly sink: ISink<T>,
+    readonly scheduler: IScheduler
+  ) {}
 
   event(time: ITime, promise: Promise<T>) {
     if (this.disposed) return
@@ -58,24 +61,25 @@ class AwaitPromisesSink<T> implements ISink<Promise<T>>, Disposable {
   // Pre-create closures to avoid creating them per event
   eventBound = (value: T): void => {
     if (!this.disposed) {
-      this.sink.event(0, value)
+      this.sink.event(this.scheduler.time(), value)
     }
   }
 
   endBound = (): void => {
     if (!this.disposed && !this.ended) {
       this.ended = true
-      this.sink.end(0)
+      this.sink.end(this.scheduler.time())
     }
   }
 
   errorBound = (error: any): void => {
     if (!this.disposed) {
-      this.sink.error(0, error)
+      const time = this.scheduler.time()
+      this.sink.error(time, error)
       // Only end if the source has ended
       if (this.sourceEnded && !this.ended) {
         this.ended = true
-        this.sink.end(0)
+        this.sink.end(time)
       }
     }
   };
