@@ -1,12 +1,12 @@
 # Stage 1: build static site
-FROM oven/bun:1 as build
+FROM oven/bun:1 AS build
 WORKDIR /app
 COPY package.json bun.lock ./
 COPY tsconfig.base.json ./
 COPY aelea ./aelea
 COPY website ./website
-WORKDIR /app/website
-RUN bun install --frozen-lockfile && bun run build
+# Install once from repo root, then build library and website
+RUN bun install --frozen-lockfile && bun run aelea:build && bun run website:build
 
 # Stage 2: serve with Caddy
 FROM caddy:2-alpine
