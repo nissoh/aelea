@@ -63,39 +63,56 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                   semanticDiagnostics,
                   syntacticDiagnostics
                 }: ModelChangeBehavior): Promise<I$Slottable> => {
-                  if (semanticDiagnostics.length || syntacticDiagnostics.length) {
-                    const allDiagnostics = [...semanticDiagnostics, ...syntacticDiagnostics]
+                  try {
+                    if (!worker || typeof worker.getEmitOutput !== 'function') {
+                      throw new Error('TypeScript worker unavailable')
+                    }
 
-                    return $column(style({ gap: '8px', padding: '8px' }))(
-                      ...allDiagnostics.map(diagnostic => {
-                        const severity = diagnostic.category === 1 ? '❌ Error' : '⚠️ Warning'
-                        const line = diagnostic.start ? model.getPositionAt(diagnostic.start).lineNumber : '?'
-                        const message =
-                          typeof diagnostic.messageText === 'string'
-                            ? diagnostic.messageText
-                            : diagnostic.messageText?.messageText || 'Unknown error'
+                    if (semanticDiagnostics.length || syntacticDiagnostics.length) {
+                      const allDiagnostics = [...semanticDiagnostics, ...syntacticDiagnostics]
 
-                        return $row(style({ gap: '8px', fontSize: '14px' }))(
-                          $text(`${severity} [Line ${line}]: ${message}`)
-                        )
-                      })
+                      return $column(style({ gap: '8px', padding: '8px' }))(
+                        ...allDiagnostics.map(diagnostic => {
+                          const severity = diagnostic.category === 1 ? '❌ Error' : '⚠️ Warning'
+                          const line = diagnostic.start ? model.getPositionAt(diagnostic.start).lineNumber : '?'
+                          const message =
+                            typeof diagnostic.messageText === 'string'
+                              ? diagnostic.messageText
+                              : diagnostic.messageText?.messageText || 'Unknown error'
+
+                          return $row(style({ gap: '8px', fontSize: '14px' }))(
+                            $text(`${severity} [Line ${line}]: ${message}`)
+                          )
+                        })
+                      )
+                    }
+
+                    const emittedFiles = await worker.getEmitOutput(model.uri.toString())
+                    const file = emittedFiles.outputFiles[0]?.text
+
+                    if (!file) {
+                      throw new Error('No emitted output from TypeScript worker')
+                    }
+
+                    const refImports = file
+                      .replace(/(} from '%40)/g, `} from 'https://esm.run/@`)
+                      .replace(/from ['"]aelea(\/[^'"]*)['"]/g, 'from "https://esm.run/aelea$1"')
+                      .replace(/from ["']aelea["']/g, 'from "https://esm.run/aelea"')
+                    const esModuleBlobUrl = URL.createObjectURL(new Blob([refImports], { type: 'text/javascript' }))
+                    const esModule = await import(/* @vite-ignore */ esModuleBlobUrl)
+
+                    const value: I$Slottable = esModule.default ?? empty
+                    return value
+                  } catch (err: any) {
+                    return $row(style({ gap: '8px', color: pallete.foreground }))(
+                      $text('TypeScript service unavailable.'),
+                      $text(err?.message ? `(${err.message})` : '')
                     )
                   }
-
-                  const emittedFiles = await worker.getEmitOutput(model.uri.toString())
-                  const file = emittedFiles.outputFiles[0].text
-                  const refImports = file.replace(/(} from '%40)/g, `} from 'https://esm.run/@`)
-
-                  const esModuleBlobUrl = URL.createObjectURL(new Blob([refImports], { type: 'text/javascript' }))
-                  const esModule = await import(/* @vite-ignore */ esModuleBlobUrl)
-
-                  const value: I$Slottable = esModule.default ?? empty
-
-                  return value
                 }
               ),
               start(
-                $node(style({ color: pallete.foreground, fontSize: '75%' }))($text('Loading Typescript Service...'))
+                $node(style({ color: pallete.foreground, fontSize: '75%' }))($text('Preparing TypeScript service...'))
               ),
               switchLatest
             )

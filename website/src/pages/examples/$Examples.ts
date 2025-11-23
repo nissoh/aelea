@@ -13,6 +13,7 @@ import $DragList from './dragList/$DragList'
 import { $PopoverExample } from './overlay/$PopoverExample'
 import { $TableExample } from './table/$TableExample'
 import { $Theme } from './theme/$Theme'
+import { $ToastQueue } from './toast-queue/$ToastQueue'
 import { createTodo } from './todo-app/$CreateTodo'
 import $TodoApp from './todo-app/$TodoApp'
 import { $VirtualScrollExample } from './virtual-scroll/$VirtualScrollExample'
@@ -48,6 +49,10 @@ export default ({ router }: Website) =>
     const popoverRoute = router.create({
       fragment: 'popover',
       title: 'Popover'
+    })
+    const toastRoute = router.create({
+      fragment: 'toast-queue',
+      title: 'Toast Queue'
     })
     const themeRoute = router.create({ fragment: 'theme', title: 'Theme' })
 
@@ -123,6 +128,13 @@ export default ({ router }: Website) =>
                   route: tableRoute
                 })({
                   click: linkClickTether()
+                }),
+                $Link({
+                  $content: $text('Toast Queue'),
+                  url: '/p/examples/toast-queue',
+                  route: toastRoute
+                })({
+                  click: linkClickTether()
                 })
               )
             )
@@ -153,6 +165,8 @@ export default ({ router }: Website) =>
           match(virtualScrollRoute)(
             $Example({ file: 'src/components/$QuantumList.ts' })($VirtualScrollExample({}))({})
           ),
+
+          match(toastRoute)($Example({ file: 'src/components/$ToastQueue.ts' })($ToastQueue({}))({})),
 
           match(countCountersRoute)(
             fadeIn(

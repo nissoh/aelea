@@ -229,10 +229,12 @@ async function loadAeleaPackageLocally() {
       export declare function map(...args: any[]): any
       export declare function filter(...args: any[]): any
       export declare function merge(...args: any[]): any
+      export declare function aggregate(...args: any[]): any
       export declare function switchLatest(...args: any[]): any
       export declare function debounce(...args: any[]): any
       export declare function reduce(...args: any[]): any
       export declare function now(...args: any[]): any
+      export declare function start(...args: any[]): any
       export declare function empty(...args: any[]): any
       export declare function never(...args: any[]): any
       export declare function fromArray(...args: any[]): any
@@ -243,7 +245,7 @@ async function loadAeleaPackageLocally() {
 
     const streamExtendedTypes = `
       import { IStream } from '../stream/index'
-      export interface IBehavior<T> extends IStream<T> { value: T }
+      export type IBehavior<A = any, B = A> = [IStream<B>, (...ops: any[]) => any]
     `
 
     const uiTypes = `
@@ -251,8 +253,10 @@ async function loadAeleaPackageLocally() {
       export interface I$Slottable {}
       export declare function component(...args: any[]): any
       export declare function $text(...args: any[]): any
+      export declare function $element(...args: any[]): any
       export declare function $node(...args: any[]): any
       export declare function $custom(...args: any[]): any
+      export declare function nodeEvent(...args: any[]): any
       export declare function style(...args: any[]): any
       export declare function styleInline(...args: any[]): any
       export declare function motion(...args: any[]): any
@@ -373,12 +377,14 @@ async function loadAeleaPackageLocally() {
 async function initializeMonaco() {
   const [monacoGlobal, pkg] = await Promise.all([loadMonacoFromCDN(), loadAeleaPackageLocally()])
 
-  // Configure TypeScript defaults for better performance
-  monacoGlobal.languages.typescript.typescriptDefaults.setEagerModelSync(true)
-  monacoGlobal.languages.typescript.typescriptDefaults.setCompilerOptions({
-    ...monacoGlobal.languages.typescript.typescriptDefaults.getCompilerOptions(),
-    module: monacoGlobal.languages.typescript.ModuleKind.ESNext,
-    moduleResolution: monacoGlobal.languages.typescript.ModuleResolutionKind.NodeJs
+  // Configure TypeScript defaults for better performance (tolerate missing runtime typings)
+  const tsLang: any = (monacoGlobal.languages as any).typescript
+
+  tsLang?.typescriptDefaults?.setEagerModelSync?.(true)
+  tsLang?.typescriptDefaults?.setCompilerOptions?.({
+    ...(tsLang?.typescriptDefaults?.getCompilerOptions?.() ?? {}),
+    module: tsLang?.ModuleKind?.ESNext,
+    moduleResolution: tsLang?.ModuleResolutionKind?.NodeJs
   })
 
   // Load codicon font from CDN
@@ -402,10 +408,10 @@ export interface ModelChangeBehavior {
   instance: monaco.editor.IStandaloneCodeEditor
   monacoGlobal: typeof monaco
   model: monaco.editor.ITextModel
-  semanticDiagnostics: monaco.languages.typescript.Diagnostic[]
-  syntacticDiagnostics: monaco.languages.typescript.Diagnostic[]
+  semanticDiagnostics: any[]
+  syntacticDiagnostics: any[]
   modelChange: string
-  worker: monaco.languages.typescript.TypeScriptWorker
+  worker: any
 }
 
 let monacoEntryFileId = 0
@@ -467,7 +473,14 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
 
         instance.onDidContentSizeChange(updateHeight)
 
-        const worketStream = fromPromise(monacoGlobal.languages.typescript.getTypeScriptWorker())
+        const tsLang = (monacoGlobal.languages as any).typescript as any
+
+        const worketStream = fromPromise(
+          tsLang?.getTypeScriptWorker?.() ??
+            Promise.resolve((async () => {
+              throw new Error('TypeScript worker not available')
+            }) as () => Promise<any>)
+        )
 
         const $editor = $wrapNativeElement(editorElement)(
           style({ flexDirection: 'column', ...containerStyle }),
@@ -500,12 +513,10 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
 
               const tsModelChanges = switchMap(
                 async (params): Promise<ModelChangeBehavior> => {
-                  const getWorker = params.worketStream
+                  const getWorker = params.worketStream as unknown as () => Promise<any>
                   const worker = await getWorker()
-                  const semanticDiagnosticsQuery = worker.getSemanticDiagnostics(model.uri.toString())
-                  const syntacticDiagnosticsQuery = worker.getSyntacticDiagnostics(model.uri.toString())
-                  const semanticDiagnostics = await semanticDiagnosticsQuery
-                  const syntacticDiagnostics = await syntacticDiagnosticsQuery
+                  const semanticDiagnostics = (await worker?.getSemanticDiagnostics?.(model.uri.toString())) ?? []
+                  const syntacticDiagnostics = (await worker?.getSyntacticDiagnostics?.(model.uri.toString())) ?? []
 
                   return {
                     node,

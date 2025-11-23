@@ -6,7 +6,7 @@ import { pallete } from 'aelea/ui-components-theme'
 import { $Counter } from '../count-counters/$Counter'
 
 export function hexAlpha(color: string, opacity: number): string {
-  // coerce values so ti is between 0 and 1.
+  // Coerce opacity so it stays between 0 and 1.
   const _opacity = Math.round(Math.min(Math.max(opacity || 1, 0), 1) * 255)
   return color + _opacity.toString(16).toUpperCase()
 }
@@ -33,7 +33,7 @@ export const $PopoverExample = component(
 
     return [
       $column(spacing.default)(
-        $text('Shows extra details with visible and actionable context in a floating buddle'),
+        $text('Shows extra details with visible and actionable context in a floating bubble.'),
         $row(spacing.default)(
           $text('This button is a target(context)'),
           $Popover({

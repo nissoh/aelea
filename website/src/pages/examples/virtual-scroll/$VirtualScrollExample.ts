@@ -70,7 +70,7 @@ export const $VirtualScrollExample = component(
     return [
       $column(spacing.big)(
         $text(
-          'High performance dynamically loaded list based on Intersection Observer Web API. this example shows a very common pagination and REST like fetching asynchnously more pages'
+          'High performance dynamically loaded list based on Intersection Observer Web API. This example shows a common paginated, REST-like fetch that loads pages asynchronously.'
         ),
         $row(spacing.big)(
           $label(
@@ -85,7 +85,7 @@ export const $VirtualScrollExample = component(
           $TextField({
             label: 'Filter',
             value: empty,
-            hint: 'Remove any items that does not match filter and debounce changes by 300ms to prevert spamming',
+            hint: 'Remove items that do not match the filter; debounce changes by 300ms to prevent spamming.',
             containerOp: style({ flex: 1 })
           })({
             change: filterTether()
@@ -93,7 +93,7 @@ export const $VirtualScrollExample = component(
           $TextField({
             label: 'Delay Response(ms)',
             value: initialDelayResponse,
-            hint: 'Emulate the duration of a datasource response, show a stubbed $node instead',
+            hint: 'Emulate datasource latency; shows stubbed items while waiting.',
             containerOp: style({ flex: 1 })
           })({
             change: delayResponseTether(map(Number))

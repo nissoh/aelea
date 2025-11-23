@@ -38,9 +38,9 @@ export const $TableExample = component(
             const valB = b[prop]
 
             if (typeof valA === 'string' && typeof valB === 'string') {
-              return sortField.direction === 'desc' ? valA.localeCompare(valB) : valB.localeCompare(valA)
+              return sortField.direction === 'desc' ? valB.localeCompare(valA) : valA.localeCompare(valB)
             }
-            // @ts-ignore
+            // @ts-expect-error
             return sortField.direction === 'desc' ? valB - valA : valA - valB
           }),
           offset: 0,
@@ -61,18 +61,18 @@ export const $TableExample = component(
           sortChange: initialSort,
           columns: [
             {
-              $head: $text('First'),
+              $head: $text('ID'),
               $body: map(x => $node($text(x.id))),
               sortBy: 'id'
             },
             {
-              $head: $text('Second'),
-              $body: map(x => $node($text(x.id)))
-            },
-            {
-              $head: $text('Random Number'),
+              $head: $text('Random'),
               $body: map(x => $node($text(x.random.toString()))),
               sortBy: 'random'
+            },
+            {
+              $head: $text('Reversed ID'),
+              $body: map(x => $node($text([...x.id].reverse().join(''))))
             }
           ]
         })({

@@ -4,3 +4,4 @@ dist
 tsconfig.tsbuildinfo
 cache
 .claude/
+deploy-*.yml

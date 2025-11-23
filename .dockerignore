@@ -1,0 +1,8 @@
+node_modules
+website/node_modules
+dist
+website/dist
+.git
+.github
+.DS_Store
+*.log
