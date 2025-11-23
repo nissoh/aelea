@@ -21,6 +21,7 @@
     "csstype": "3.2.3"
   },
   "devDependencies": {
+    "rimraf": "6.0.1",
     "monaco-editor": "0.55.1",
     "vite": "7.2.4"
   }

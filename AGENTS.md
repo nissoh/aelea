@@ -6,15 +6,14 @@
 - Root configs (`tsconfig.base.json`, `biome.json`, changesets) are shared across packages.
 
 ## Build, Test, and Development
-- `bun install` — install dependencies (Bun 1.2.x expected).
+- `bun install` — install dependencies (Bun 1.3.x expected per packageManager).
 - `bun run aelea:build` — clean + build the library (removes `dist`, runs `tsc -b`).
 - `bun run website:build` — build the docs/site; `bun run build` builds both workspaces.
-- `bun run biome:check` / `bun run biome:check:fix` — lint/format repo-wide (fix variant applies safe changes).
 - Inside `aelea/`: `bun run tsc:check` for types; `bun run bench` / `bun run bench:combinators` for perf checks. Inside `website/`: `bun run dev` for Vite dev server, `bun run tsc:check` for type-only.
 
 ## Coding Style
 - TypeScript in strict mode; ESNext modules with `verbatimModuleSyntax`. Prefer pure functions and stream composition over side effects.
-- Biome enforces 2-space indent, 120-char lines, single quotes, semicolons as needed. Use `export type`/`import type` where appropriate.
+- Use 2-space indent, 120-char lines, single quotes, semicolons as needed. Use `export type`/`import type` where appropriate.
 - Naming: components and element factories use `$Name` (e.g., `$Counter`); behaviors use `[stream, streamTether]`; keep hyphenated folder/file segments consistent (`ui-components-theme-browser`).
 
 ## Writing Aelea UI (from CLAUDE.md and demos)

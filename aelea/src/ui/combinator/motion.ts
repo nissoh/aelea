@@ -68,7 +68,6 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
     this.target = target
 
     if (this.pendingTask) {
-      console.log('cancelling previous task')
       return
     }
 

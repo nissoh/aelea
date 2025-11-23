@@ -15,7 +15,7 @@
     "alwaysStrict": true, // Always parse in strict mode
     "noFallthroughCasesInSwitch": true, // Not enabled by default in `strict` mode.
     "noImplicitReturns": true, // Not enabled by default in `strict` mode.
-    "useUnknownInCatchVariables": true, // TODO: This would normally be enabled in `strict` mode but would require some adjustments to the codebase.
+    "useUnknownInCatchVariables": true, // Enabled (strict default)
     // Functional programming strictness
     // "noUncheckedIndexedAccess": true, // TODO: Enable for safer array/object access
     "noUnusedLocals": false, // Cleaner functional code
