@@ -1,353 +1,191 @@
-# Aelea - Composable Reactive UI Framework
+# Aelea — Composable Reactive UI
 
-A functional reactive UI framework built on composable streams. Aelea combines reactive programming with DOM composition to create dynamic user interfaces without virtual DOM or state management layers.
+Aelea is a stream-first UI toolkit for the DOM. Components are plain functions: streams go in, DOM comes out, and child components emit new streams back to parents. No virtual DOM and no hidden state.
 
-## Key Features
+> Who this is for: teams who like explicit dataflow and DOM-only rendering, and contributors exploring the stream/router/ui internals.  
+> What you get: a stream-first UI kit—DOM factories, stream operators, and components with no VDOM or hidden state.  
+> LLM benefit: generates imperative DOM code instead of XML-like markup, so assistants emit stable code paths rather than token-by-token diffed templates. The counter example below is ~100 tokens (~400 chars), small enough to slot into prompts.
 
-- **Composable Streams**: Build complex behaviors by composing simple stream operators
-- **Composable DOM**: Elements, styles, and attributes compose through function application
-- **Direct Reactivity**: Stream events directly update DOM without intermediate layers
-- **Type Safety**: Full TypeScript support with inference
-- **Modular Design**: Tree-shakeable modules for minimal bundle size
-- **Pluggable Architecture**: Compose custom schedulers, renderers, and stream operators
+## If you know React
 
-## Installation
+- Replace `useState`/props with streams flowing down and change streams flowing up.
+- No JSX: DOM comes from `$element`, `$text`, and component composition.
+- Effects/derived state are stream operators (`map`, `merge`, `switchMap`) instead of hooks.
+- Parents own state; children are pure and only emit changes.
 
-```bash
-npm install aelea
-# or
-bun add aelea
-```
+## Mental model: inputs down, outputs up
 
-## Core Concepts
+- Components are called twice: `$Comp(inputs)({ outputs })` — first call supplies streams in, second wires emitted streams out.
+- Tethers connect child output streams to parent reducers; they keep components pure.
+- DOM is produced directly from streams; `map`/`switchMap` swap and derive subtrees without a VDOM.
 
-### 1. Streams Drive Everything
+## Quick start: counter without a VDOM
 
-In Aelea, UI updates are driven by streams of data:
-
-```typescript
-import { $text, stream } from 'aelea/ui'
-import { map, periodic, aggregate } from 'aelea/stream'
-
-// Create a stream that emits incremented numbers every second
-const counter = aggregate((count, _) => count + 1, 0, periodic(1000))
-
-// Text node that updates with stream values
-const $counter = $text(map(String, counter))
-```
-
-### 2. Elements are Functions
-
-DOM elements are created through element factories:
-
-```typescript
-import { $element, $custom, style } from 'aelea/ui'
-
-// Create standard HTML elements
-const $div = $element('div')
-const $button = $element('button')
-const $input = $element('input')
-
-// Create custom elements
-const $card = $custom('app-card')
-
-// Compose elements with styles
-const $styledCard = $div(
-  style({ padding: '20px', border: '1px solid #ccc' })
-)(
-  $element('span')()('Hello, World!')
-)
-
-// Create reusable element factories
-const $h1 = $element('h1')
-const $p = $element('p')
-const $form = $element('form')
-const $label = $element('label')
-```
-
-### 3. Components are I/O Functions
-
-Components receive behavior streams and output both UI and new streams:
-
-```typescript
-import { type IStream, map, merge, sampleMap } from 'aelea/stream'
+```ts
 import type { IBehavior } from 'aelea/stream-extended'
-import { $element, $text, component, type INode, nodeEvent, style } from 'aelea/ui'
+import type { INode } from 'aelea/ui'
+import { map, merge, reduce } from 'aelea/stream'
+import { $element, $text, component, nodeEvent, render, style } from 'aelea/ui'
 
-export const $Counter = (value: IStream<number>) => component((
-  [increment, incrementTether]: IBehavior<INode, MouseEvent>,
-  [decrement, decrementTether]: IBehavior<INode, MouseEvent>
-) => {
-  const $button = $element('button')
-  const $container = $element('div')(style({ display: 'flex', gap: '10px', alignItems: 'center' }))
+const row = style({ display: 'flex', alignItems: 'center', gap: '8px' })
 
-  return [
-    $container(
-      $button(incrementTether(nodeEvent('click')))(
-        $text('+')
-      ),
+const $Button = (label, tether) =>
+  $element('button')(
+    style({
+      padding: '6px 10px',
+      border: '1px solid #d0d7de',
+      borderRadius: '6px',
+      background: '#f6f8fa',
+      cursor: 'pointer'
+    }),
+    tether(nodeEvent('click'))
+  )($text(label))
 
-      $text(map(String, value)),
-
-      $button(decrementTether(nodeEvent('click')))(
-        $text('-')
-      )
+// Child: renders DOM from the current count stream and emits +1 / -1
+const $Counter = (count$) =>
+  component((
+    [increment, incTether]: IBehavior<INode, MouseEvent>,
+    [decrement, decTether]: IBehavior<INode, MouseEvent>
+  ) => [
+    $element('div')(row)(
+      $Button('-', decTether),
+      $text(map(n => `Count: ${n}`, count$)),
+      $Button('+', incTether)
     ),
-
-    // Output stream
     {
-      valueChange: merge(
-        sampleMap(v => v + 1, value, increment),
-        sampleMap(v => v - 1, value, decrement)
+      countChange: merge(
+        map(() => -1, decrement),
+        map(() => 1, increment)
       )
     }
-  ]
-})
-```
+  ])
 
-### 4. Component Composition
-
-Components can receive state as input and output state changes. This pattern allows for flexible state management:
-
-```typescript
-// Component that receives state and outputs changes
-const $CounterList = ({ counterList }: { counterList: IStream<number[]> }) =>
-  component((
-    [addCounter, addCounterTether]: IBehavior<INode, MouseEvent>,
-    [updateCounter, updateCounterTether]: IBehavior<number, { index: number; value: number }>
-  ) => {
-    const $button = $element('button')
-    const $div = $element('div')
-    
-    return [
-      $div(
-        // Display derived state
-        $text('Total: '),
-        $text(map(list => String(list.reduce((a, b) => a + b, 0)), counterList)),
-        $text(' | '),
-        $button(addCounterTether(nodeEvent('click')))($text('Add Counter')),
-        
-        // Render each counter
-        switchMap(list => 
-          $div(
-            ...list.map((_, index) => 
-              $Counter(map(list => list[index], counterList))({
-                valueChange: updateCounterTether(
-                  map(newValue => ({ index, value: newValue }))
-                )
-              })
-            )
-          )
-        , counterList)
-      ),
-      
-      // Output: state changes
-      {
-        changeCounterList: merge(
-          // Add counter
-          sampleMap(list => [...list, 0], counterList, addCounter),
-          // Update counter
-          sampleMap((list, { index, value }) => {
-            const newList = [...list]
-            newList[index] = value
-            return newList
-          }, counterList, updateCounter)
-        )
-      }
-    ]
-  })
-
-// Parent manages state
+// Parent: owns state, wires child output back into the reducer
 const $App = component((
-  [listChange, listChangeTether]: IBehavior<number[]>
+  [countChange, countChangeTether]: IBehavior<number>
 ) => {
-  // Parent owns the state
-  const counterList = state(listChange, [0, 0])
-  
+  const count$ = reduce((acc, delta) => acc + delta, 0, countChange)
+
   return [
-    $CounterList({ counterList })({
-      changeCounterList: listChangeTether()
-    })
+    $Counter(count$)({ countChange: countChangeTether }),
+    {}
   ]
 })
+
+render({
+  rootAttachment: document.body,
+  $rootNode: $App({})
+})
 ```
 
-**Key Composition Concepts:**
+How it reads:
+- Components are curried: first call supplies inputs (`count$`), second call wires outputs (`countChange`).
+- Tethers (`countChangeTether`) connect child output streams to the parent reducer.
+- Surface is small and tree-shakeable—import only what you need.
 
-1. **State as Input**: Components receive state as streams, not manage it internally. This allows parent components to control where and how state is stored.
+## Grow it: count counters
 
-2. **Changes as Output**: Components output state changes through behaviors. The component describes what should change, not how to change it.
+Add/remove counters and keep a running total. Parent still owns all state; children only emit deltas.
 
-3. **Parent Owns State**: The parent component creates the actual state using `state()` and wires the child's change outputs back to update it.
+```ts
+import type { IBehavior } from 'aelea/stream-extended'
+import type { INode } from 'aelea/ui'
+import { map, merge, reduce, switchMap } from 'aelea/stream'
+import { $element, $text, component, nodeEvent, render, style } from 'aelea/ui'
 
-4. **Flexible Architecture**: This pattern allows state to be managed at any level - locally in a parent, globally in a store, or even remotely on a server.
+const row = style({ display: 'flex', alignItems: 'center', gap: '8px' })
+const column = style({ display: 'flex', flexDirection: 'column', gap: '12px' })
+const wrap = style({ display: 'flex', flexWrap: 'wrap', gap: '8px' })
 
-**Note**: There are many ways to manage state flows in Aelea. This example shows a simple and generic pattern where components receive state and output changes, making them reusable and testable.
+const $Button = (label, tether) =>
+  $element('button')(
+    style({
+      padding: '6px 10px',
+      border: '1px solid #d0d7de',
+      borderRadius: '6px',
+      background: '#f6f8fa',
+      cursor: 'pointer'
+    }),
+    tether(nodeEvent('click'))
+  )($text(label))
 
-## Getting Started
+const $Counter = (label, count$) =>
+  component((
+    [increment, incTether]: IBehavior<INode, MouseEvent>,
+    [decrement, decTether]: IBehavior<INode, MouseEvent>
+  ) => [
+    $element('div')(row)(
+      $text(label),
+      $Button('-', decTether),
+      $text(map(String, count$)),
+      $Button('+', incTether)
+    ),
+    {
+      change: merge(map(() => -1, decrement), map(() => 1, increment))
+    }
+  ])
 
-### Hello World
+const $CountCounters = component((
+  [addClick, addTether]: IBehavior<INode, MouseEvent>,
+  [change, changeTether]: IBehavior<{ index: number; delta: number }>
+) => {
+  const counters$ = reduce(
+    (list, event) => {
+      if (event.type === 'add') return [...list, 0]
+      const next = [...list]
+      next[event.index] = next[event.index] + event.delta
+      return next
+    },
+    [],
+    merge(
+      map(() => ({ type: 'add' as const }), addClick),
+      map(({ index, delta }) => ({ type: 'change' as const, index, delta }), change)
+    )
+  )
 
-```typescript
-import { runBrowser, $text } from 'aelea/ui'
+  const total$ = map(list => list.reduce((sum, n) => sum + n, 0), counters$)
 
-runBrowser({ 
-  rootNode: document.body 
-})(
-  $text('Hello, Aelea!')
-)
-```
-
-
-### Animated Transitions
-
-```typescript
-import { motion, component, styleBehavior, $element } from 'aelea/ui'
-import { map, startWith } from 'aelea/stream'
-import { behavior } from 'aelea/stream-extended'
-
-const $AnimatedBox = component(() => {
-  const [position, positionTether] = behavior<number>()
-  
-  // Smooth spring animation between position changes
-  const animatedPosition = motion({ 
-    stiffness: 170, 
-    damping: 26 
-  }, start(0, position))
-  
   return [
-    $element('div')(
-      styleBehavior(
-        map(x => ({ 
-          transform: `translateX(${x}px)`
-        }), animatedPosition)
-      )
-    )('Smooth!')
+    $element('div')(column)(
+      $element('div')(row)(
+        $Button('Add counter', addTether),
+        $text(map(list => `Count: ${list.length} | Total: ${list.reduce((sum, n) => sum + n, 0)}`, counters$))
+      ),
+      switchMap(list =>
+        $element('div')(wrap)(
+          ...list.map((_, index) =>
+            $Counter(`Counter ${index + 1}`, map(xs => xs[index] ?? 0, counters$))({
+              change: changeTether(map(delta => ({ index, delta })))
+            })
+          )
+        ),
+        counters$
+      ),
+      $text(map(total => `Overall total: ${total}`, total$))
+    ),
+    {}
   ]
 })
-```
 
-## UI Components Library
-
-Aelea provides a separate `ui-components` module with pre-built components and utilities:
-
-```typescript
-import { $row, $column, $card } from 'aelea/ui-components'
-import { $Button, $TextField, $Checkbox } from 'aelea/ui-components'
-import { layoutSheet, designSheet } from 'aelea/ui-components'
-
-// Layout helpers
-const $header = $row(
-  layoutSheet.spaceBetween,
-  style({ padding: '20px' })
-)
-
-// Form components
-const $loginForm = $column()(
-  $TextField({ 
-    label: 'Username',
-    value: username$,
-    validation: /* validation stream */
-  }),
-  $Button({
-    $content: $text('Login'),
-    click: loginClick$
-  })
-)
-```
-
-## Advanced Features
-
-### Custom Schedulers
-
-Schedulers are composable components that control task execution timing. The default implementation uses `queueMicrotask`. Custom schedulers can be composed with streams:
-
-```typescript
-import type { IScheduler } from 'aelea/stream'
-
-// Example: Synchronous scheduler for testing
-class SyncScheduler implements IScheduler {
-  asap<T>(sink, task, ...args) {
-    task(sink, ...args)
-    return { [Symbol.dispose]: () => {} }
-  }
-  
-  delay<T>(sink, task, delay, ...args) {
-    const id = setTimeout(() => task(sink, ...args), delay)
-    return { [Symbol.dispose]: () => clearTimeout(id) }
-  }
-  
-  time() {
-    return performance.now()
-  }
-}
-
-// Use custom scheduler
-const scheduler = new SyncScheduler()
-stream.run(sink, scheduler)
-```
-
-Scheduler implementations can provide:
-
-- Synchronous execution for testing
-- Task execution logging
-- Batching for high-throughput scenarios
-- Priority queue scheduling
-- Rate-limited execution
-
-The IScheduler interface enables composition of different execution strategies with any stream.
-
-### Routing
-
-```typescript
-import { create, match } from 'aelea/router'
-import { now } from 'aelea/stream'
-
-const router = create({
-  fragmentsChange: /* url change stream */,
-  fragment: ''
+render({
+  rootAttachment: document.body,
+  $rootNode: $CountCounters({})
 })
-
-const home = router.create({ fragment: 'home' })
-const about = router.create({ fragment: 'about' })
-
-const $App = $element('div')()(
-  match(home)(now($HomePage())),
-  match(about)(now($AboutPage()))
-)
 ```
 
-### Custom Schedulers
+## Run the demos
 
-Aelea uses a DOM-optimized scheduler that batches updates efficiently:
+- Start the docs/examples dev server: `cd website && bun run dev` (Vite on http://localhost:5173 by default).
+- Drop snippets into the website workspace (e.g., `website/src/pages/examples`) to try variations, or render into any DOM root with `render({ rootAttachment, $rootNode })`.
 
-```typescript
-import { createDomScheduler } from 'aelea/ui'
+## Common patterns
 
-const scheduler = createDomScheduler()
-// Microtasks for computations
-scheduler.asap(sink, task, ...args)
-// Animation frame for renders  
-scheduler.paint(sink, task, ...args)
-```
+- Parent owns state; children emit change streams. Wire them with tethers rather than shared mutable state.
+- Lists: use an add/update/remove reducer; see `website/src/pages/examples/count-counters/$CountCounters.ts`.
+- Derived DOM: `map` for simple projections, `switchMap` for swapping subtrees, `joinMap`/`until` for mount/unmount lifecycles; see `website/src/pages/examples/toast-queue/$ToastQueue.ts`.
 
-## Design Principles
+## Learn more
 
-1. **Composition**: Complex systems built from simple, composable parts
-2. **Unidirectional Flow**: Data flows from streams to UI
-3. **Explicit Effects**: Side effects are contained in streams
-4. **Transparency**: All updates are traceable through the stream graph
-
-## Examples
-
-Check out the examples directory for more complex applications:
-
-- Todo MVC implementation
-- Real-time data dashboards
-- Drag-and-drop interfaces
-- Form validation
-- Animation showcases
-
-## License
-
-MIT
+- Browse the demos in `website/src/pages/examples` for list management, routing, animation, and themeable UI.
+- Check `aelea/src` for the stream, router, and UI primitives.
+- Licensed MIT.

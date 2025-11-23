@@ -23,6 +23,18 @@
 - Common operators: `map`, `sampleMap`, `switchMap` for dynamic UI, `joinMap`+`until` for add/remove lifecycles, `start` for initial values, `multicast` for sharing expensive streams.
 - Tether pattern: pass transformers into the tether rather than mutating state — e.g., `clickTether(o(nodeEvent('click'), map(e => e.clientX)))`.
 - When improving demos (`website/src/pages/examples`), favor small components, clear stream names, and explicit state flows (parent owns state; children emit changes).
+- List/state patterns (see `website/src/pages/examples/count-counters/$CountCounters.ts` and `website/src/pages/examples/toast-queue/$ToastQueue.ts`):
+  - Treat the list as a stream input; derive slices (`map`, `switchMap`, `skipRepeatsWith`) to avoid rerenders that don't change shape.
+  - Emit structural changes as events and fold them into new lists; example reducer shape:
+    ```ts
+    type ListEvent<T> = { type: 'add'; item: T } | { type: 'update'; id: string; value: T } | { type: 'remove'; id: string }
+    const items = reduce<ListEvent<Item>, Item[]>(event => {
+      if (event.type === 'add') return [...list, event.item]
+      if (event.type === 'update') return list.map(x => x.id === event.id ? { ...x, ...event.value } : x)
+      return list.filter(x => x.id !== event.id)
+    }, initialList, merge(add$, update$, remove$))
+    ```
+  - Keep child components stateless: they receive `item$` or `value$` and emit `change`/`dismiss` streams; parents own the reducer and wiring.
 
 ## Testing Guidelines
 - No dedicated test runner; rely on `bun run tsc:check` and targeted benches. Add lightweight repros near the module or under `aelea/benchmark` (follow names like `test-map-fusion.ts`).
