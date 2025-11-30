@@ -72,11 +72,11 @@ class AwaitPromisesSink<T> implements ISink<Promise<T>>, Disposable {
     }
   }
 
-  errorBound = (error: any): void => {
+  errorBound = (error: unknown): void => {
     if (!this.disposed) {
       const time = this.scheduler.time()
       this.sink.error(time, error)
-      // Only end if the source has ended
+      // Only end if the source has ended and we haven't ended yet
       if (this.sourceEnded && !this.ended) {
         this.ended = true
         this.sink.end(time)
