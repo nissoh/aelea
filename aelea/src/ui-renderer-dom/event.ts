@@ -1,6 +1,6 @@
-import { curry2, disposeWith, isStream, type ISink, type IStream } from '@/stream'
+import { curry2, disposeWith, type IStream, isStream } from '@/stream'
 import { fromCallback, stream } from '@/stream-extended'
-import type { EventDescriptor, I$Scheduler, I$Slottable } from '@/ui'
+import type { EventDescriptor, I$Slottable } from '@/ui'
 
 type EventMapFor<T> = T extends Window
   ? WindowEventMap

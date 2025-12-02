@@ -6,8 +6,8 @@ export * from './combinator/style.js'
 export { $custom, $element, $node, $svg, $text, $wrapNativeElement } from './node.js'
 export { createDomScheduler } from './scheduler.js'
 export type {
-  EventDescriptor,
   DeclarationMap,
+  EventDescriptor,
   I$Node,
   I$Op,
   I$Scheduler,
@@ -19,8 +19,8 @@ export type {
   INodeCompose,
   INodeElement,
   IOutputTethers,
-  ITextNode,
   ISlottable,
   IStyleCSS,
+  ITextNode,
   NodeKind
 } from './types.js'

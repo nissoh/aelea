@@ -1,6 +1,3 @@
-import type { I$Node, I$Slottable, ISlottable } from '@/ui'
-import { $node, $svg, attr, component, style, stylePseudo } from '@/ui'
-import { nodeEvent } from '@/ui-renderer-dom'
 import {
   constant,
   type IOps,
@@ -16,6 +13,9 @@ import {
   switchLatest
 } from '@/stream'
 import type { IBehavior } from '@/stream-extended'
+import type { I$Node, I$Slottable, ISlottable } from '@/ui'
+import { $node, $svg, attr, component, style, stylePseudo } from '@/ui'
+import { nodeEvent } from '@/ui-renderer-dom'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column, $row } from '../elements/$elements.js'
 import { $icon } from '../elements/$icon.js'

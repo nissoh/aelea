@@ -1,8 +1,7 @@
 import { merge, nullSink, op, tap } from '@/stream'
 import { stream } from '@/stream-extended'
-import type { I$Node, I$Scheduler, I$Slottable, IAttributeProperties, INode, ITextNode } from '@/ui'
+import type { I$Node, I$Scheduler, I$Slottable, IAttributeProperties, INode, IStyleCSS, ITextNode } from '@/ui'
 import { createDomScheduler } from '@/ui'
-import type { IStyleCSS } from '@/ui'
 
 interface ISnapshotEnv {
   scheduler: I$Scheduler
@@ -204,10 +203,7 @@ function observeNode(node: INode, env: ISnapshotEnv, push: (node: INode) => void
  * Produce a stream of INode snapshots from a node stream.
  * Emits when root emits or behaviors/children change (debounced to paint).
  */
-export function manifestFromNode(
-  $node: I$Node,
-  scheduler: I$Scheduler = createDomScheduler()
-) {
+export function manifestFromNode($node: I$Node, scheduler: I$Scheduler = createDomScheduler()) {
   return stream((sink, sched) => {
     ensureRaf()
     let rootObserver: Disposable | null = null

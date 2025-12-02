@@ -1,5 +1,5 @@
-import { style, stylePseudo } from '@/ui'
 import { o } from '@/stream'
+import { style, stylePseudo } from '@/ui'
 import { pallete } from '../../ui-components-theme/globalState.js'
 
 export const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1

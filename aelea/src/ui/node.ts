@@ -1,4 +1,14 @@
-import { empty, type Fn, type ISink, type IStream, type ITime, isFunction, merge, never, propagateRunEventTask } from '@/stream'
+import {
+  empty,
+  type Fn,
+  type ISink,
+  type IStream,
+  type ITime,
+  isFunction,
+  merge,
+  never,
+  propagateRunEventTask
+} from '@/stream'
 import { stream } from '@/stream-extended'
 import type { I$Node, I$Op, I$Text, INode, INodeCompose, ITextNode, NodeKind } from './types.js'
 
@@ -11,9 +21,7 @@ function createNode(
   tag: string | null,
   postOp: Fn<I$Node<unknown>, I$Node<unknown>> = <T>(x: T): T => x
 ): INodeCompose<unknown> {
-  const nodeComposeFn = (
-    ...input: (I$Op<unknown> | I$Node<unknown>)[]
-  ): INodeCompose<unknown> | I$Node<unknown> => {
+  const nodeComposeFn = (...input: (I$Op<unknown> | I$Node<unknown>)[]): INodeCompose<unknown> | I$Node<unknown> => {
     if (input.some(isFunction)) {
       const ops = input as I$Op<unknown>[]
       const composedOps = [postOp, ...ops].reduce((acc, fn) => (x: I$Node<unknown>) => fn(acc(x)))

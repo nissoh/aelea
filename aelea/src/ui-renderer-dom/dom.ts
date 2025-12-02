@@ -1,6 +1,15 @@
-import { disposeAll, disposeNone, disposeWith, type ISink, type IStream, merge, nullSink, op, tap } from '@/stream'
+import { disposeAll, disposeNone, disposeWith, type IStream, merge, nullSink, op, tap } from '@/stream'
+import type {
+  EventDescriptor,
+  I$Node,
+  I$Scheduler,
+  IAttributeProperties,
+  INode,
+  ISlottable,
+  IStyleCSS,
+  ITextNode
+} from '@/ui'
 import { createDomScheduler } from '@/ui'
-import type { EventDescriptor, I$Node, I$Scheduler, IAttributeProperties, INode, IStyleCSS, ISlottable, ITextNode } from '@/ui'
 import { DECLARATION_MAP } from './declarationMap.js'
 import type { INodeElementDom } from './types.js'
 

@@ -1,5 +1,5 @@
 import { curry2, curry3, map } from '@/stream'
-import type { I$Node, INode, I$Scheduler } from '../types.js'
+import type { I$Node, I$Scheduler, INode } from '../types.js'
 
 export interface IEffectPropCurry {
   (prop: string, source: any, node: I$Node): I$Node

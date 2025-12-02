@@ -1,5 +1,5 @@
-import { fromEventTarget } from '@/ui-renderer-dom'
 import { constant, continueWith, filter, type IStream, switchLatest, until } from '@/stream'
+import { fromEventTarget } from '@/ui-renderer-dom'
 
 const documentVisibilityChange = fromEventTarget(document, 'visibilitychange')
 const documentVisible = filter(() => document.visibilityState === 'visible', documentVisibilityChange)

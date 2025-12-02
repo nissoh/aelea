@@ -1,9 +1,9 @@
-import { constant, map, merge, o, op, start } from '@/stream'
 import type { IOps } from '@/stream'
+import { constant, map, merge, o, op, start } from '@/stream'
 import type { IBehavior } from '@/stream-extended'
+import type { I$Node, INode } from '@/ui'
 import { attr, component, style } from '@/ui'
 import { nodeEvent } from '@/ui-renderer-dom'
-import type { I$Node, INode } from '@/ui'
 import type { Route } from '../types.js'
 
 export interface IAnchor {

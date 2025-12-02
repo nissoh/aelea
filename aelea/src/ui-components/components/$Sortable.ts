@@ -1,6 +1,3 @@
-import type { I$Node, ISlottable } from '@/ui'
-import { component, motion, style, styleBehavior, styleInline } from '@/ui'
-import { fromEventTarget, nodeEvent } from '@/ui-renderer-dom'
 import {
   combineMap,
   filter,
@@ -16,6 +13,9 @@ import {
   until
 } from '@/stream'
 import { behavior, type IBehavior, multicast } from '@/stream-extended'
+import type { I$Node, ISlottable } from '@/ui'
+import { component, motion, style, styleBehavior, styleInline } from '@/ui'
+import { fromEventTarget, nodeEvent } from '@/ui-renderer-dom'
 import { $column, $row } from '../elements/$elements.js'
 import { layoutSheet } from '../style/layoutSheet.js'
 

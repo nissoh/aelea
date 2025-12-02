@@ -1,6 +1,3 @@
-import type { IStyleCSS } from '@/ui'
-import { $node, $text, style, styleBehavior } from '@/ui'
-import { reduce } from '@/stream/combinator/reduce.js'
 import {
   delay,
   filterNull,
@@ -8,12 +5,15 @@ import {
   just,
   map,
   op,
+  reduce,
   skipRepeats,
   skipRepeatsWith,
   start,
   switchLatest
 } from '@/stream'
 import { multicast } from '@/stream-extended'
+import type { IStyleCSS } from '@/ui'
+import { $node, $text, style, styleBehavior } from '@/ui'
 import { pallete } from '../../ui-components-theme/globalState.js'
 
 export const sumFromZeroOp = reduce((current: number, x: number) => current + x, 0)
@@ -49,7 +49,7 @@ export const $NumberTicker = ({
   const incrementMulticast = op(
     value,
     reduce(
-      (seed, change): CountState => {
+      (seed: CountState | null, change: number): CountState => {
         const changeStr = parser(change)
 
         if (seed === null) {
@@ -70,7 +70,7 @@ export const $NumberTicker = ({
       },
       null as CountState | null
     ),
-    filterNull,
+    filterNull<CountState>,
     skipRepeats,
     multicast
   )
@@ -90,11 +90,11 @@ export const $NumberTicker = ({
           styleBehavior(
             op(
               incrementMulticast,
-              skipRepeatsWith((x, y) => x.changeStr[slot] === y.changeStr[slot] && slot < y.pos),
+              skipRepeatsWith((x, y) => x.changeStr[slot] === y.changeStr[slot] && slot < (y.pos ?? 0)),
               map(state => {
                 if (!state) return just({})
 
-                const { pos, dir } = state
+                const { pos = 0, dir } = state
                 const resetStyle = just({})
                 const decayColor = delay(1000, resetStyle)
 
