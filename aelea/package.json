@@ -24,10 +24,6 @@
       "types": "./dist/types/stream-extended/index.d.ts",
       "import": "./dist/esm/stream-extended/index.js"
     },
-    "./ui": {
-      "types": "./dist/types/ui/index.d.ts",
-      "import": "./dist/esm/ui/index.js"
-    },
     "./ui-components": {
       "types": "./dist/types/ui-components/index.d.ts",
       "import": "./dist/esm/ui-components/index.js"

@@ -7,16 +7,15 @@ import {
   map,
   merge,
   never,
-  o,
+  op,
   reduce,
   start,
   switchLatest
 } from '@/stream'
 import type { IBehavior } from '@/stream-extended'
-import type { I$Node, I$Slottable, ISlottable } from '@/ui'
-import { $node, $svg, attr, component, style, stylePseudo } from '@/ui'
 import { pallete } from '@/ui-components-theme'
-import { nodeEvent } from '@/ui-renderer-dom'
+import type { I$Node, I$Op, I$Slottable, ISlottable } from '@/ui-renderer-dom'
+import { $node, $svg, attr, component, nodeEvent, style, stylePseudo } from '@/ui-renderer-dom'
 import { $column, $row } from '../elements/$elements.js'
 import { $icon } from '../elements/$icon.js'
 import { layoutSheet } from '../style/layoutSheet.js'
@@ -47,11 +46,11 @@ export interface TableOption<T, FilterState> {
   dataSource: IStream<TablePageResponse<T>>
   scrollConfig?: Omit<QuantumScroll, 'dataSource'>
 
-  bodyContainerOp?: IOps<ISlottable, ISlottable>
+  bodyContainerOp?: I$Op
 
-  cellOp?: IOps<ISlottable, ISlottable>
-  headerCellOp?: IOps<ISlottable, ISlottable>
-  bodyCellOp?: IOps<ISlottable, ISlottable>
+  cellOp?: I$Op
+  headerCellOp?: I$Op
+  bodyCellOp?: I$Op
 
   sortChange?: IStream<ISortBy<T>>
   filterChange?: IStream<FilterState>
@@ -63,7 +62,7 @@ export interface TableColumn<T> {
   $body: IOps<T, I$Node>
   sortBy?: keyof T
 
-  columnOp?: IOps<ISlottable, ISlottable>
+  columnOp?: I$Op
 }
 
 export const $Table = <T, FilterState = never>({
@@ -73,7 +72,7 @@ export const $Table = <T, FilterState = never>({
   cellOp,
   headerCellOp,
   bodyCellOp,
-  bodyContainerOp = o(),
+  bodyContainerOp,
   sortChange = never,
   filterChange = never,
   $sortArrowDown = $caretDown
@@ -83,7 +82,10 @@ export const $Table = <T, FilterState = never>({
       [scrollIndex, scrollIndexTether]: IBehavior<ScrollRequest, ScrollRequest>,
       [sortByChange, sortByChangeTether]: IBehavior<ISlottable, keyof T>
     ) => {
-      const cellStyle = o(style({ padding: '3px 6px', overflowWrap: 'break-word' }), layoutSheet.flex)
+      const passthrough: I$Op = source => source
+
+      const cellStyle: I$Op = source =>
+        op(source, style({ padding: '3px 6px', overflowWrap: 'break-word' }), layoutSheet.flex)
 
       const $cellHeader = $row(
         cellStyle,
@@ -93,11 +95,11 @@ export const $Table = <T, FilterState = never>({
           alignItems: 'center',
           color: pallete.foreground
         }),
-        cellOp || o(),
-        headerCellOp || o()
+        cellOp ?? passthrough,
+        headerCellOp ?? passthrough
       )
 
-      const cellBodyOp = o(cellStyle, cellOp || o(), bodyCellOp || o())
+      const cellBodyOp: I$Op = source => op(source, cellStyle, cellOp ?? passthrough, bodyCellOp ?? passthrough)
 
       const $rowContainer = $row(spacing.default)
 
@@ -130,7 +132,7 @@ export const $Table = <T, FilterState = never>({
 
             // const newLocal_1 = col.columnOp ? $cellHeader(behavior, col.columnOp) : $cellHeader(behavior)
 
-            return $cellHeader(behavior, col.columnOp || o())(
+            return $cellHeader(behavior, col.columnOp ?? passthrough)(
               $node(style({ cursor: 'pointer' }))(col.$head),
               switchLatest(
                 map(s => {
@@ -156,13 +158,14 @@ export const $Table = <T, FilterState = never>({
             )
           }
 
-          const $headCell = $cellHeader(col.columnOp || o())(col.$head)
+          const $headCell = $cellHeader(col.columnOp ?? passthrough)(col.$head)
 
           return $headCell
         })
       )
 
       const requestPageFilters = merge(sortByChange, filterChange)
+      const containerOp = bodyContainerOp ?? passthrough
 
       const $body = switchLatest(
         map(
@@ -173,7 +176,8 @@ export const $Table = <T, FilterState = never>({
                 const $items = (Array.isArray(res) ? res : res.data).map(rowData =>
                   $rowContainer(
                     ...columns.map(col => {
-                      const cellOps = o(cellBodyOp, col.columnOp || o())
+                      const cellOps: IOps<any, any> = source =>
+                        op(source as any, cellBodyOp, col.columnOp ?? passthrough)
                       return cellOps(switchLatest(col.$body(just(rowData))))
                     })
                   )
@@ -198,7 +202,7 @@ export const $Table = <T, FilterState = never>({
       )
 
       return [
-        $column(bodyContainerOp)($header, $body),
+        $column(containerOp)($header, $body),
 
         {
           scrollIndex,

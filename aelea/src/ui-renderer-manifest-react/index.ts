@@ -50,8 +50,9 @@ export function manifestToReact(node: INode): ReactElementLike {
 
   const style = (node as any).style ?? {}
   const attrs = (node as any).attributes ?? {}
-  const className = (node as any).element?.className ?? ''
-  const tag = (node as any).element?.tagName?.toLowerCase?.() ?? 'div'
+  const element = (node as any).element
+  const className = typeof element?.className === 'string' ? element.className : ''
+  const tag = (typeof element?.tag === 'string' && element.tag) || element?.tagName?.toLowerCase?.() || 'div'
 
   return createReactElement(tag, attrs, style, children as ReactNodeLike[], className)
 }

@@ -3,11 +3,9 @@ export * from './combinator/component.js'
 export * from './combinator/effect.js'
 export * from './combinator/motion.js'
 export * from './combinator/style.js'
-export { $custom, $element, $node, $svg, $text, $wrapNativeElement } from './node.js'
+export { $text, createNode } from './node.js'
 export { createDomScheduler } from './scheduler.js'
 export type {
-  DeclarationMap,
-  EventDescriptor,
   I$Node,
   I$Op,
   I$Scheduler,
@@ -21,6 +19,5 @@ export type {
   IOutputTethers,
   ISlottable,
   IStyleCSS,
-  ITextNode,
-  NodeKind
+  ITextNode
 } from './types.js'

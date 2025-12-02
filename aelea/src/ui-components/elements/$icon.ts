@@ -1,6 +1,6 @@
-import { type IOps, o } from '@/stream'
-import type { I$Node, INode } from '@/ui'
-import { $svg, attr, style } from '@/ui'
+import { type IOps, op } from '@/stream'
+import type { I$Node, INode } from '@/ui-renderer-dom'
+import { $svg, attr, style } from '@/ui-renderer-dom'
 
 interface Icon {
   /**  in pixels */
@@ -19,5 +19,5 @@ export const $icon = ({
   height = width,
   viewBox = `0 0 ${Number.parseInt(width, 10)} ${Number.parseInt(height, 10)}`,
   fill = 'inherit',
-  svgOps = o()
+  svgOps = op
 }: Icon) => $svg('svg')(attr({ viewBox, fill }), style({ width, height }), svgOps)($content)

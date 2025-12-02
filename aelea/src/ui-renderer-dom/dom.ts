@@ -1,17 +1,15 @@
 import { disposeAll, disposeNone, disposeWith, type IStream, merge, nullSink, op, tap } from '@/stream'
+import { createDomScheduler } from '@/ui'
 import type {
-  EventDescriptor,
   I$Node,
   I$Scheduler,
   IAttributeProperties,
   INode,
+  INodeElementDom,
   ISlottable,
   IStyleCSS,
   ITextNode
-} from '@/ui'
-import { createDomScheduler } from '@/ui'
-import { DECLARATION_MAP } from './declarationMap.js'
-import type { INodeElementDom } from './types.js'
+} from './types.js'
 
 const STYLE_TAG_ID = '__aelea_style__'
 let ruleCounter = 0
@@ -53,11 +51,6 @@ export function createStylePseudoRule(pseudo: string, style: IStyleCSS): string 
   return className
 }
 
-interface IRunEnvironment {
-  scheduler: I$Scheduler
-  declarationMap: typeof DECLARATION_MAP
-}
-
 function applyAttributes(attrs: IAttributeProperties<unknown> | null | undefined, element: INodeElementDom) {
   if (!attrs) return
   const el = element as Element
@@ -79,39 +72,10 @@ function applyStaticStyle(style: IStyleCSS, element: INodeElementDom) {
   }
 }
 
-function bindEvents(events: EventDescriptor[], element: INodeElementDom, scheduler: I$Scheduler) {
-  const el = element as any
-  const disposables: Disposable[] = []
-  for (const entry of events) {
-    const handler = (ev: any) => {
-      const time = scheduler.time()
-      for (const sink of entry.sinks) {
-        sink.event(time, ev)
-      }
-    }
-    el.addEventListener?.(entry.type, handler, entry.options as any)
-    disposables.push(
-      disposeWith(() => {
-        el.removeEventListener?.(entry.type, handler, entry.options as any)
-      })
-    )
-  }
-  return disposeAll(disposables)
-}
-
-function createElement(kind: string, tag: string | null, map: typeof DECLARATION_MAP): INodeElementDom {
-  if (kind === 'svg') return map.svg(tag ?? 'svg')
-  if (kind === 'custom') return map.custom(tag ?? 'div')
-  if (kind === 'node') return map.node()
-  if (kind === 'wrap') return map.wrap(map.node())
-  return map.element(tag ?? 'div')
-}
-
 function renderSlot(
   $slot: IStream<ISlottable<INodeElementDom>>,
   parent: Element,
-  env: IRunEnvironment,
-  segmentIndex: number
+  env: { scheduler: I$Scheduler }
 ): Disposable {
   return $slot.run(
     {
@@ -120,7 +84,7 @@ function renderSlot(
         let childDisposables: Disposable | null = null
 
         if ('kind' in nodeOrText && nodeOrText.kind === 'text') {
-          el = env.declarationMap.text ? env.declarationMap.text('') : document.createTextNode('')
+          el = document.createTextNode('')
           const source = (nodeOrText as ITextNode).value
           if (typeof source === 'string') {
             ;(el as any).nodeValue = source ?? ''
@@ -134,7 +98,7 @@ function renderSlot(
           }
         } else {
           const node = nodeOrText as INode<INodeElementDom>
-          el = createElement(node.kind, node.tag, env.declarationMap)
+          el = node.element
           applyStaticStyle(node.style, el)
           applyAttributes(node.attributes, el)
 
@@ -213,16 +177,7 @@ function renderSlot(
 
           childDisposables = disposeAll([styleInlineDisp, styleClass, attrBeh, pseudoDisp, propDisp])
 
-          const eventsDisp = bindEvents(node.events, el, env.scheduler)
-          childDisposables = disposeAll([childDisposables, eventsDisp].filter(Boolean) as Disposable[])
-
-          const segmentDisposables: Disposable[] = []
-          const segmentsCount = node.$segments.length
-          for (let i = 0; i < segmentsCount; i++) {
-            const seg = node.$segments[i]
-            const d = renderSlot(seg, el as Element, env, i)
-            segmentDisposables.push(d)
-          }
+          const segmentDisposables = node.$segments.map(seg => renderSlot(seg, el as Element, env))
           childDisposables = disposeAll([childDisposables, ...segmentDisposables].filter(Boolean) as Disposable[])
         }
 
@@ -237,33 +192,12 @@ function renderSlot(
   ) as unknown as Disposable
 }
 
-export function render(config: {
-  rootAttachment: Element
-  $rootNode: I$Node
-  scheduler?: I$Scheduler
-  declarationMap?: typeof DECLARATION_MAP
-}): Disposable {
-  const env: IRunEnvironment = {
-    scheduler: config.scheduler ?? createDomScheduler(),
-    declarationMap: config.declarationMap ?? DECLARATION_MAP
+export function render(config: { rootAttachment: Element; $rootNode: I$Node; scheduler?: I$Scheduler }): Disposable {
+  const env = {
+    scheduler: config.scheduler ?? createDomScheduler()
   }
 
-  const rootNode: INode = {
-    kind: 'wrap',
-    tag: null,
-    $segments: [config.$rootNode as any],
-    insertAscending: true,
-    style: {},
-    styleBehavior: [],
-    styleInline: [],
-    stylePseudo: [],
-    attributes: {},
-    attributesBehavior: [],
-    propBehavior: [],
-    events: []
-  }
-
-  const disposable = renderSlot(rootNode.$segments[0] as any, config.rootAttachment, env, 0)
+  const disposable = renderSlot(config.$rootNode as any, config.rootAttachment, env)
 
   return {
     [Symbol.dispose]() {

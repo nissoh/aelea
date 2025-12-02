@@ -1,9 +1,8 @@
 import { type IOps, map, merge, never, op } from '@/stream'
 import type { IBehavior } from '@/stream-extended'
-import type { I$Slottable, INode, ISlottable, IStyleCSS } from '@/ui'
-import { $element, attrBehavior, component, styleBehavior } from '@/ui'
 import { pallete } from '@/ui-components-theme'
-import { nodeEvent } from '@/ui-renderer-dom'
+import type { I$Node, I$Slottable, INode, ISlottable, IStyleCSS } from '@/ui-renderer-dom'
+import { $element, attrBehavior, component, nodeEvent, styleBehavior } from '@/ui-renderer-dom'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'
 import type { Control } from './types.js'
@@ -17,8 +16,8 @@ export interface IButton extends Control {
 export const $Button = ({ disabled = never, $content, buttonOp = op }: IButton) =>
   component(
     (
-      [focusStyle, interactionTether]: IBehavior<INode, true>,
-      [dismissstyle, dismissTether]: IBehavior<INode, false>,
+      [focusStyle, interactionTether]: IBehavior<ISlottable, boolean>,
+      [dismissstyle, dismissTether]: IBehavior<ISlottable, boolean>,
       [click, clickTether]: IBehavior<ISlottable, PointerEvent>
     ) => {
       const $button = $element('button')(

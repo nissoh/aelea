@@ -1,16 +1,14 @@
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeBoth, disposeNone } from '../utils/disposable.js'
-import { curry2, curry3 } from '../utils/function.js'
+import { curry2, curry3, op } from '../utils/function.js'
 
 export const join = <A>(stream: IStream<IStream<A>>): IStream<A> =>
   joinConcurrentlyMap(Number.POSITIVE_INFINITY, stream)
 
 export const joinMap: IJoinMapCurry = curry2((f, source) => joinMapConcurrently(f, Number.POSITIVE_INFINITY, source))
 
-const identity = <T>(x: T): T => x
-
 export const joinConcurrentlyMap: IMergeConcurrentlyMapCurry = curry2((concurrency, stream) =>
-  joinMapConcurrently(identity, concurrency, stream)
+  joinMapConcurrently(op, concurrency, stream)
 )
 
 export const joinMapConcurrently: IMergeMapConcurrentlyCurry = curry3(

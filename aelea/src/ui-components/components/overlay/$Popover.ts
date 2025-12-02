@@ -1,8 +1,18 @@
 import { combine, constant, empty, type IStream, map, merge, op, start, switchMap } from '@/stream'
 import { type IBehavior, multicast } from '@/stream-extended'
-import { $node, component, type I$Node, type INode, type INodeCompose, style, styleBehavior, styleInline } from '@/ui'
 import { colorAlpha, pallete } from '@/ui-components-theme'
-import { fromEventTarget, nodeEvent } from '@/ui-renderer-dom'
+import {
+  $node,
+  component,
+  fromEventTarget,
+  type I$Node,
+  type INode,
+  type INodeCompose,
+  nodeEvent,
+  style,
+  styleBehavior,
+  styleInline
+} from '@/ui-renderer-dom'
 import { $column } from '../../elements/$elements.js'
 import { isDesktopScreen } from '../../utils/screenUtils.js'
 

@@ -1,6 +1,6 @@
 import { curry2, disposeWith, type IStream, isStream } from '@/stream'
 import { fromCallback, stream } from '@/stream-extended'
-import type { EventDescriptor, I$Slottable } from '@/ui'
+import type { I$Slottable } from './types.js'
 
 type EventMapFor<T> = T extends Window
   ? WindowEventMap
@@ -46,17 +46,17 @@ export function fromEventTarget<T extends EventTarget, K extends keyof EventMapF
   })
 }
 
-type INodeEventDescriptor<T extends EventTarget> = {
+type INodeEventDescriptor<T extends Node = Node> = {
   $node: I$Slottable<T>
   options?: boolean | AddEventListenerOptions
 }
 
 export interface INodeEventCurry {
-  <T extends EventTarget, K extends keyof EventMapFor<T> & string>(
+  <T extends Node, K extends keyof EventMapFor<T> & string>(
     eventType: K,
     descriptor: I$Slottable<T> | INodeEventDescriptor<T>
   ): IStream<EventMapFor<T>[K]>
-  <T extends EventTarget, K extends keyof EventMapFor<T> & string>(
+  <T extends Node, K extends keyof EventMapFor<T> & string>(
     eventType: K
   ): (descriptor: I$Slottable<T> | INodeEventDescriptor<T>) => IStream<EventMapFor<T>[K]>
 }
@@ -65,16 +65,29 @@ export const nodeEvent: INodeEventCurry = curry2((eventType, descriptor) => {
   const target$ = isStream(descriptor) ? descriptor : descriptor.$node
 
   return stream((sink, scheduler) => {
+    let detach: Disposable | null = null
+
     const disposable = target$.run(
       {
         event(_time: number, node: any) {
-          const entry: EventDescriptor = { type: eventType, options: (descriptor as any).options, sinks: [sink] }
-          node.events = [...(node.events ?? []), entry]
+          detach?.[Symbol.dispose]?.()
+          const target = (node as any)?.element ?? node
+          if (!target?.addEventListener) return
+
+          const handler = (ev: Event) => {
+            sink.event(scheduler.time(), ev as any)
+          }
+
+          target.addEventListener(eventType, handler as EventListener, (descriptor as any).options)
+          detach = disposeWith(() => {
+            target.removeEventListener(eventType, handler as EventListener, (descriptor as any).options)
+          })
         },
         error(time: number, err: unknown) {
           sink.error(time, err)
         },
         end(time: number) {
+          detach?.[Symbol.dispose]?.()
           sink.end(time)
         }
       },
@@ -82,6 +95,7 @@ export const nodeEvent: INodeEventCurry = curry2((eventType, descriptor) => {
     )
 
     return disposeWith(() => {
+      detach?.[Symbol.dispose]?.()
       disposable?.[Symbol.dispose]?.()
     })
   })

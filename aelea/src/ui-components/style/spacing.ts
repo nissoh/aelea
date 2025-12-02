@@ -1,4 +1,4 @@
-import { style } from '@/ui'
+import { style } from '@/ui-renderer-dom'
 
 export const spacing = {
   tiny: style({ gap: '4px' }),

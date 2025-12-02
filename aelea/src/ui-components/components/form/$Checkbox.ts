@@ -1,11 +1,10 @@
-import { map, merge, o } from '@/stream'
+import { map, merge } from '@/stream'
 import type { IBehavior } from '@/stream-extended'
-import type { INode } from '@/ui'
-import { $element, $node, attr, attrBehavior, component, style, styleBehavior } from '@/ui'
 import { pallete } from '@/ui-components-theme'
-import { nodeEvent } from '@/ui-renderer-dom'
+import type { I$Node, INode } from '@/ui-renderer-dom'
+import { $element, $node, attr, attrBehavior, component, nodeEvent, style, styleBehavior } from '@/ui-renderer-dom'
 import { layoutSheet } from '../../style/layoutSheet.js'
-import { dismissOp, interactionOp } from './form.js'
+import { dismissNodeOp, interactionNodeOp } from './form.js'
 import type { Input } from './types.js'
 
 export interface Checkbox extends Input<boolean> {}
@@ -13,8 +12,8 @@ export interface Checkbox extends Input<boolean> {}
 export const $Checkbox = ({ value }: Checkbox) =>
   component(
     (
-      [focusStyle, interactionTether]: IBehavior<INode, true>,
-      [dismissstyle, dismissTether]: IBehavior<INode, false>,
+      [focusStyle, interactionTether]: IBehavior<I$Node, boolean>,
+      [dismissstyle, dismissTether]: IBehavior<I$Node, boolean>,
       [check, checkTether]: IBehavior<INode<HTMLInputElement>, boolean>
     ) => {
       const $overlay = $node(
@@ -38,11 +37,11 @@ export const $Checkbox = ({ value }: Checkbox) =>
         ),
         attr({ type: 'checkbox' }),
         attrBehavior(map(checked => ({ checked: checked ? true : null }), value)),
-        interactionTether(interactionOp),
-        dismissTether(dismissOp)
+        interactionTether(interactionNodeOp),
+        dismissTether(dismissNodeOp)
       )
 
-      const containerStyle = o(
+      const $container = $node(
         styleBehavior(
           map(active => (active ? { borderColor: pallete.primary } : null), merge(focusStyle, dismissstyle))
         ),
@@ -54,6 +53,12 @@ export const $Checkbox = ({ value }: Checkbox) =>
         })
       )
 
-      return [$node(containerStyle)($overlay(), $checkInput()), { check }]
+      return [
+        $container(
+          $overlay(), //
+          $checkInput()
+        ),
+        { check }
+      ]
     }
   )

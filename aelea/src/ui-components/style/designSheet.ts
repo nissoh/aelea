@@ -1,6 +1,6 @@
 import { o } from '@/stream'
-import { style, stylePseudo } from '@/ui'
 import { pallete } from '@/ui-components-theme'
+import { style, stylePseudo } from '@/ui-renderer-dom'
 
 export const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
 
@@ -9,6 +9,7 @@ const text = style({
   fontWeight: 100,
   fontSize: '1.15rem'
 })
+
 const customScroll = isFirefox
   ? style({ scrollbarColor: `${pallete.foreground} transparent` })
   : o(

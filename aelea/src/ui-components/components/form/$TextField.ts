@@ -1,10 +1,10 @@
-import type { IOps } from '@/stream'
-import { empty, just, map, merge, never, o, sample, skipRepeats, switchLatest } from '@/stream'
+import type { IOps, IStream } from '@/stream'
+import { empty, just, map, merge, never, op, sample, skipRepeats, switchLatest } from '@/stream'
 import type { IBehavior } from '@/stream-extended'
 import { multicast } from '@/stream-extended'
-import type { INode, IStyleCSS } from '@/ui'
-import { $node, $text, component, style } from '@/ui'
 import { pallete } from '@/ui-components-theme'
+import type { INode, IStyleCSS } from '@/ui-renderer-dom'
+import { $node, $text, component, style } from '@/ui-renderer-dom'
 import { $row } from '../../elements/$elements.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 import { spacing } from '../../style/spacing.js'
@@ -24,10 +24,10 @@ export const $TextField = (config: TextField) =>
     ([change, valueTether]: IBehavior<string, string>, [blur, blurTether]: IBehavior<FocusEvent, FocusEvent>) => {
       const { hint } = config
       const multicastValidation = config.validation
-        ? o(config.validation, src => sample(src, blur), multicast)
+        ? (src: any) => op(src, config.validation!, (s: any) => sample(s, blur), multicast)
         : undefined
-      const fieldOp = config.containerOp ?? o()
-      const validation = multicastValidation ? skipRepeats(multicastValidation(change)) : never
+      const fieldOp = config.containerOp ?? op
+      const validation: IStream<string | null> = multicastValidation ? skipRepeats(multicastValidation(change)) : never
 
       const $messageLabel = $node(style({ fontSize: '75%', width: '100%' }))
       const $hint = hint ? just($messageLabel($text(hint))) : never

@@ -12,9 +12,9 @@ import {
   switchLatest
 } from '@/stream'
 import { multicast } from '@/stream-extended'
-import type { IStyleCSS } from '@/ui'
-import { $node, $text, style, styleBehavior } from '@/ui'
 import { pallete } from '@/ui-components-theme'
+import type { IStyleCSS } from '@/ui-renderer-dom'
+import { $node, $text, style, styleBehavior } from '@/ui-renderer-dom'
 
 export const sumFromZeroOp = reduce((current: number, x: number) => current + x, 0)
 

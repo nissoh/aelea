@@ -5,7 +5,7 @@ import {
   just,
   map,
   merge,
-  o,
+  op,
   sampleMap,
   skipRepeats,
   start,
@@ -13,9 +13,8 @@ import {
   until
 } from '@/stream'
 import { behavior, type IBehavior, multicast } from '@/stream-extended'
-import type { I$Node, ISlottable } from '@/ui'
-import { component, motion, style, styleBehavior, styleInline } from '@/ui'
-import { fromEventTarget, nodeEvent } from '@/ui-renderer-dom'
+import type { I$Node, ISlottable } from '@/ui-renderer-dom'
+import { component, fromEventTarget, motion, nodeEvent, style, styleBehavior, styleInline } from '@/ui-renderer-dom'
 import { $column, $row } from '../elements/$elements.js'
 import { layoutSheet } from '../style/layoutSheet.js'
 
@@ -85,10 +84,11 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
           const isDraggingStream = skipRepeats(map(x => x.isDragging, multicastedDrag))
           const iHeight = config.itemHeight + (config.gap ?? 0)
 
-          const yMotion = o(
+          const yMotion = op(
+            orderMulticat,
             filter(({ $draggedItem }: DraggingState<T>) => $draggedItem !== $item),
             map(({ list }) => list.indexOf($item) * iHeight)
-          )(orderMulticat)
+          )
 
           const yDragPosition = merge(
             joinMap(s => {

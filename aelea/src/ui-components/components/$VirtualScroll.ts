@@ -7,16 +7,16 @@ import {
   joinMap,
   map,
   merge,
-  o,
+  op,
   reduce,
   skip,
   start,
   switchLatest
 } from '@/stream'
 import { type IBehavior, multicast } from '@/stream-extended'
-import type { I$Node, INode } from '@/ui'
-import { $custom, $node, $text, component, style } from '@/ui'
 import { pallete } from '@/ui-components-theme'
+import type { I$Node, INode } from '@/ui-renderer-dom'
+import { $custom, $node, $text, component, style } from '@/ui-renderer-dom'
 import { $column } from '../elements/$elements.js'
 import { designSheet } from '../style/designSheet.js'
 
@@ -40,7 +40,7 @@ export interface QuantumScroll {
 
 const $defaultLoader = $node(style({ color: pallete.foreground, padding: '3px 10px' }))($text('Loading...'))
 
-export const $VirtualScroll = ({ dataSource, containerOps = o(), $loader = $defaultLoader }: QuantumScroll) =>
+export const $VirtualScroll = ({ dataSource, containerOps = op, $loader = $defaultLoader }: QuantumScroll) =>
   component(([intersecting, intersectingTether]: IBehavior<INode, IntersectionObserverEntry>) => {
     const multicastDatasource = multicast(dataSource)
 
@@ -49,12 +49,7 @@ export const $VirtualScroll = ({ dataSource, containerOps = o(), $loader = $defa
       reduce(seed => seed + 1, -1, intersecting)
     )
 
-    const $container = $column(
-      designSheet.customScroll,
-      style({ overflow: 'auto' }),
-      map(node => ({ ...node, insertAscending: false })),
-      containerOps
-    )
+    const $container = $column(designSheet.customScroll, style({ overflow: 'auto' }), containerOps)
 
     const intersectedLoader = intersectingTether(
       // TODO: reintroduce a typed intersection helper; keeping a placeholder no-op for now

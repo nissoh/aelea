@@ -1,8 +1,7 @@
 import { type IStream, map, merge, switchLatest } from '@/stream'
 import type { IBehavior } from '@/stream-extended'
-import type { I$Slottable } from '@/ui'
-import { $node, component } from '@/ui'
-import { nodeEvent } from '@/ui-renderer-dom'
+import type { I$Slottable } from '@/ui-renderer-dom'
+import { $node, component, nodeEvent } from '@/ui-renderer-dom'
 
 export interface Tab {
   content: I$Slottable

@@ -1,9 +1,8 @@
 import type { IOps } from '@/stream'
-import { constant, map, merge, o, op, start } from '@/stream'
+import { constant, map, merge, op, start } from '@/stream'
 import type { IBehavior } from '@/stream-extended'
-import type { I$Node, INode } from '@/ui'
-import { attr, component, style } from '@/ui'
-import { nodeEvent } from '@/ui-renderer-dom'
+import type { I$Node, INode } from '@/ui-renderer-dom'
+import { attr, component, nodeEvent, style } from '@/ui-renderer-dom'
 import type { Route } from '../types.js'
 
 export interface IAnchor {
@@ -13,7 +12,7 @@ export interface IAnchor {
   anchorOp?: IOps<INode<HTMLAnchorElement>, INode<HTMLAnchorElement>>
 }
 
-export const $RouterAnchor = ({ url, route, $anchor, anchorOp = o() }: IAnchor) =>
+export const $RouterAnchor = ({ url, route, $anchor, anchorOp = op }: IAnchor) =>
   component(([click, clickTether]: IBehavior<INode, string>, [focus, focusTether]: IBehavior<INode, boolean>) => {
     const trailingSlash = /\/$/
     const href = url.replace(trailingSlash, '')
