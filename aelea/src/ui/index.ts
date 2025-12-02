@@ -15,8 +15,8 @@ export type {
   IComponentBehavior,
   INode,
   INodeCompose,
-  INodeElement,
   IOutputTethers,
+  ISlotChild,
   ISlottable,
   IStyleCSS,
   ITextNode

@@ -1,10 +1,10 @@
 import { map, merge } from '@/stream'
 import type { IBehavior } from '@/stream-extended'
 import { pallete } from '@/ui-components-theme'
-import type { I$Node, INode } from '@/ui-renderer-dom'
+import type { ISlottable } from '@/ui-renderer-dom'
 import { $element, $node, attr, attrBehavior, component, nodeEvent, style, styleBehavior } from '@/ui-renderer-dom'
 import { layoutSheet } from '../../style/layoutSheet.js'
-import { dismissNodeOp, interactionNodeOp } from './form.js'
+import { dismissOp, interactionOp } from './form.js'
 import type { Input } from './types.js'
 
 export interface Checkbox extends Input<boolean> {}
@@ -12,9 +12,9 @@ export interface Checkbox extends Input<boolean> {}
 export const $Checkbox = ({ value }: Checkbox) =>
   component(
     (
-      [focusStyle, interactionTether]: IBehavior<I$Node, boolean>,
-      [dismissstyle, dismissTether]: IBehavior<I$Node, boolean>,
-      [check, checkTether]: IBehavior<INode<HTMLInputElement>, boolean>
+      [focusStyle, interactionTether]: IBehavior<ISlottable<HTMLInputElement>, boolean>,
+      [dismissstyle, dismissTether]: IBehavior<ISlottable<HTMLInputElement>, boolean>,
+      [check, checkTether]: IBehavior<ISlottable<HTMLInputElement>, boolean>
     ) => {
       const $overlay = $node(
         layoutSheet.stretch,
@@ -37,8 +37,8 @@ export const $Checkbox = ({ value }: Checkbox) =>
         ),
         attr({ type: 'checkbox' }),
         attrBehavior(map(checked => ({ checked: checked ? true : null }), value)),
-        interactionTether(interactionNodeOp),
-        dismissTether(dismissNodeOp)
+        interactionTether(interactionOp),
+        dismissTether(dismissOp)
       )
 
       const $container = $node(

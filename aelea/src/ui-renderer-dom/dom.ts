@@ -1,12 +1,12 @@
-import { disposeAll, disposeNone, disposeWith, type IStream, merge, nullSink, op, tap } from '@/stream'
+import { disposeAll, disposeNone, disposeWith, merge, nullSink, op, tap, type IStream } from '@/stream'
 import { createDomScheduler } from '@/ui'
 import type {
   I$Node,
   I$Scheduler,
+  I$Slottable,
   IAttributeProperties,
   INode,
   INodeElementDom,
-  ISlottable,
   IStyleCSS,
   ITextNode
 } from './types.js'
@@ -73,14 +73,14 @@ function applyStaticStyle(style: IStyleCSS, element: INodeElementDom) {
 }
 
 function renderSlot(
-  $slot: IStream<ISlottable<INodeElementDom>>,
+  $slot: I$Slottable<INodeElementDom>,
   parent: Element,
   env: { scheduler: I$Scheduler }
 ): Disposable {
   return $slot.run(
     {
       event(time, nodeOrText) {
-        let el: INodeElementDom
+        let el: Node
         let childDisposables: Disposable | null = null
 
         if ('kind' in nodeOrText && nodeOrText.kind === 'text') {
@@ -98,9 +98,10 @@ function renderSlot(
           }
         } else {
           const node = nodeOrText as INode<INodeElementDom>
-          el = node.element
-          applyStaticStyle(node.style, el)
-          applyAttributes(node.attributes, el)
+          const element = node.element
+          el = element
+          applyStaticStyle(node.style, element)
+          applyAttributes(node.attributes, element)
 
           const pseudoDisp =
             node.stylePseudo.length === 0
@@ -110,11 +111,11 @@ function renderSlot(
                   for (const entry of node.stylePseudo) {
                     const cls = createStylePseudoRule(entry.class, entry.style)
                     classes.push(cls)
-                    ;(el as Element)?.classList?.add(cls)
+                    element.classList?.add(cls)
                   }
                   return disposeWith(() => {
                     for (const cls of classes) {
-                      ;(el as Element)?.classList?.remove(cls)
+                      element.classList?.remove(cls)
                     }
                   })
                 })()
@@ -141,7 +142,7 @@ function renderSlot(
                     op(
                       sb,
                       tap(styleObj => {
-                        applyStaticStyle(styleObj ?? {}, el)
+                        applyStaticStyle(styleObj ?? {}, element)
                       })
                     )
                   )
@@ -155,7 +156,7 @@ function renderSlot(
                     op(
                       sb,
                       tap(styleObj => {
-                        applyStaticStyle(styleObj ?? {}, el)
+                        applyStaticStyle(styleObj ?? {}, element)
                       })
                     )
                   )
@@ -169,7 +170,7 @@ function renderSlot(
                     op(
                       attrs,
                       tap(attr => {
-                        applyAttributes(attr, el)
+                        applyAttributes(attr, element)
                       })
                     )
                   )
@@ -177,11 +178,11 @@ function renderSlot(
 
           childDisposables = disposeAll([styleInlineDisp, styleClass, attrBeh, pseudoDisp, propDisp])
 
-          const segmentDisposables = node.$segments.map(seg => renderSlot(seg, el as Element, env))
+          const segmentDisposables = node.$segments.map(seg => renderSlot(seg, element, env))
           childDisposables = disposeAll([childDisposables, ...segmentDisposables].filter(Boolean) as Disposable[])
         }
 
-        parent.appendChild(el as any)
+        parent.appendChild(el)
       },
       error(_t, err) {
         console.error('render slot error', err)

@@ -1,9 +1,9 @@
 import { empty, map, merge, op } from '@/stream'
 import type { IBehavior } from '@/stream-extended'
 import { pallete } from '@/ui-components-theme'
-import { $element, attr, component, effectProp, type I$Node, nodeEvent, styleBehavior } from '@/ui-renderer-dom'
+import { $element, attr, component, effectProp, nodeEvent, styleBehavior, type ISlottable } from '@/ui-renderer-dom'
 import { designSheet } from '../../style/designSheet.js'
-import { dismissNodeOp, interactionNodeOp } from './form.js'
+import { dismissOp, interactionOp } from './form.js'
 import { type Input, InputType } from './types.js'
 
 export interface Autocomplete extends Input<string | number> {
@@ -15,8 +15,8 @@ export interface Autocomplete extends Input<string | number> {
 export const $Autocomplete = ({ type = InputType.TEXT, value = empty, name, placeholder }: Autocomplete) =>
   component(
     (
-      [focus, focusTether]: IBehavior<I$Node, boolean>,
-      [dismissstyle, dismissTether]: IBehavior<I$Node, boolean>,
+      [focus, focusTether]: IBehavior<ISlottable<HTMLInputElement>, boolean>,
+      [dismissstyle, dismissTether]: IBehavior<ISlottable<HTMLInputElement>, boolean>,
       [change, changeTether]: IBehavior<ISlottable<HTMLInputElement>, string>
     ) => {
       return [
@@ -42,8 +42,8 @@ export const $Autocomplete = ({ type = InputType.TEXT, value = empty, name, plac
             )
           ),
 
-          focusTether(interactionNodeOp),
-          dismissTether(dismissNodeOp),
+          focusTether(interactionOp),
+          dismissTether(dismissOp),
           effectProp('value', value)
         )(),
 

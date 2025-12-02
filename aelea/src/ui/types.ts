@@ -1,8 +1,6 @@
 import type * as CSS from 'csstype'
 import type { IOps, IScheduler, IStream, ITask, SettableDisposable } from '@/stream'
 
-export type INodeElement = HTMLElement | SVGElement
-
 export type IStyleCSS = CSS.Properties
 
 export type IAttributeProperties<T> = {
@@ -14,13 +12,15 @@ export interface ITextNode {
   value: string | IStream<string> | null
 }
 
-export interface ISlottable<A> {
-  element: A
+export interface ISlottable<TElement = unknown> {
+  element: TElement
   disposable: SettableDisposable
 }
 
-export interface INode<A> extends ISlottable<A> {
-  $segments: I$Slottable<A>[]
+export type ISlotChild<TElement = unknown> = ITextNode | ISlottable<TElement>
+
+export interface INode<TElement = unknown> extends ISlottable<TElement> {
+  $segments: I$Slottable<TElement>[]
   style: IStyleCSS
   stylePseudo: Array<{ style: IStyleCSS; class: string }>
   styleBehavior: IStream<IStyleCSS | null>[]
@@ -30,11 +30,11 @@ export interface INode<A> extends ISlottable<A> {
   attributesBehavior: IStream<any>[]
 }
 
-export type I$Slottable<TElement = unknown> = IStream<ISlottable<TElement>>
+export type I$Slottable<TElement = unknown> = IStream<ISlotChild<TElement>>
 
-export type I$Node<T> = IStream<INode<T>>
+export type I$Node<TElement = unknown> = IStream<INode<TElement>>
 
-export type I$Op<T> = IOps<INode<T>, INode<T>>
+export type I$Op<TElement = unknown> = IOps<INode<TElement>, INode<TElement>>
 
 export interface INodeCompose<TElement = any> {
   (): I$Node<TElement>
@@ -42,7 +42,7 @@ export interface INodeCompose<TElement = any> {
   (...$leafs: Array<I$Slottable<any> | I$Node<any>>): I$Node<TElement>
 }
 
-export type I$Text<TElement = any> = IStream<ISlottable<TElement>>
+export type I$Text = IStream<ITextNode>
 
 export interface I$Scheduler extends IScheduler {
   paint(task: ITask): Disposable
