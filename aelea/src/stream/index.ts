@@ -23,4 +23,5 @@ export {
 } from './utils/disposable.js'
 export type { Curried2, Curried3, Curried4 } from './utils/function.js'
 export { curry2, curry3, curry4, o, op } from './utils/function.js'
+export { SettableDisposable } from './utils/SettableDisposable.js'
 export { PipeSink } from './utils/sink.js'

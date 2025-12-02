@@ -1,3 +1,5 @@
+import type { IStyleCSS } from '@/ui'
+import { $node, $text, style, styleBehavior } from '@/ui'
 import { reduce } from '../../stream/combinator/reduce.js'
 import {
   delay,
@@ -12,8 +14,6 @@ import {
   switchLatest
 } from '../../stream/index.js'
 import { multicast } from '../../stream-extended/index.js'
-import type { IStyleCSS } from '../../ui/combinator/style.js'
-import { $node, $text, style, styleBehavior } from '../../ui/index.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 
 export const sumFromZeroOp = reduce((current: number, x: number) => current + x, 0)

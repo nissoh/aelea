@@ -1,3 +1,5 @@
+import type { I$Node, INode } from '@/ui'
+import { $custom, $node, $text, component, style } from '@/ui'
 import {
   delay,
   empty,
@@ -14,11 +16,6 @@ import {
   switchLatest
 } from '../../stream/index.js'
 import { type IBehavior, multicast } from '../../stream-extended/index.js'
-import { component } from '../../ui/combinator/component.js'
-import { style } from '../../ui/combinator/style.js'
-import { $custom, $node } from '../../ui/source/node.js'
-import { $text } from '../../ui/source/text.js'
-import type { I$Node, I$Slottable, INode } from '../../ui/types.js'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column } from '../elements/$elements.js'
 import { designSheet } from '../style/designSheet.js'
@@ -37,7 +34,7 @@ export type ScrollResponse = I$Node[] | IScrollPagableReponse
 export interface QuantumScroll {
   dataSource: IStream<ScrollResponse>
 
-  $loader?: I$Slottable
+  $loader?: I$Node
 
   containerOps?: IOps<INode>
 }

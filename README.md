@@ -178,6 +178,24 @@ render({
 - Start the docs/examples dev server: `cd website && bun run dev` (Vite on http://localhost:5173 by default).
 - Drop snippets into the website workspace (e.g., `website/src/pages/examples`) to try variations, or render into any DOM root with `render({ rootAttachment, $rootNode })`.
 
+## Headless rendering (tests/SSR)
+
+For tests/SSR without a DOM, use the manifest renderer factories to build a virtual tree:
+
+```ts
+import { $element, $text, renderToReactElement } from 'aelea/ui-renderer-manifest'
+
+const $App = $element('div')(
+  $element('span')($text('Hello')),
+  $element('span')($text('virtual tree'))
+)
+
+const reactTree = await renderToReactElement($App)
+// reactTree is a plain React-element-shaped object; no DOM required.
+```
+
+See `aelea/benchmark/headless-render.ts` for a runnable in-memory example.
+
 ## Common patterns
 
 - Parent owns state; children emit change streams. Wire them with tethers rather than shared mutable state.

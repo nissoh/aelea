@@ -1,16 +1,24 @@
+import type { INode } from '@/ui'
+import { fromEventTarget } from '@/ui'
 import { constant, continueWith, filter, type IStream, map, o, switchLatest, until } from '../../stream/index.js'
 import { fromCallback } from '../../stream-extended/index.js'
-import { fromEventTarget } from '../../ui/combinator/event.js'
-import type { INode } from '../../ui/types.js'
+
+const isDomElement = (element: unknown): element is Element =>
+  typeof Element !== 'undefined' && element instanceof Element
 
 export const intersection = (config: IntersectionObserverInit = {}) => {
   return o(
     map((node: INode) =>
       fromCallback(
         cb => {
+          if (!isDomElement(node.element) || typeof IntersectionObserver === 'undefined') {
+            return () => {}
+          }
+
+          const element = node.element as Element
           const intersectionObserver = new IntersectionObserver(cb, config)
-          intersectionObserver.observe(node.element)
-          return () => intersectionObserver.unobserve(node.element)
+          intersectionObserver.observe(element)
+          return () => intersectionObserver.unobserve(element)
         },
         (entries: IntersectionObserverEntry[]) => entries
       )
@@ -24,9 +32,14 @@ export const resize = (config: ResizeObserverOptions = {}) =>
     map((node: INode) =>
       fromCallback(
         cb => {
+          if (!isDomElement(node.element) || typeof ResizeObserver === 'undefined') {
+            return () => {}
+          }
+
+          const element = node.element as Element
           const ro = new ResizeObserver(cb)
-          ro.observe(node.element, config)
-          return () => ro.unobserve(node.element)
+          ro.observe(element, config)
+          return () => ro.unobserve(element)
         },
         (entries: ResizeObserverEntry[]) => entries
       )
@@ -45,8 +58,13 @@ export const mutation = (
     map((node: INode) =>
       fromCallback(
         cb => {
+          if (!isDomElement(node.element) || typeof MutationObserver === 'undefined') {
+            return () => {}
+          }
+
+          const element = node.element as Element
           const mo = new MutationObserver(cb)
-          mo.observe(node.element, config)
+          mo.observe(element, config)
           return () => mo.disconnect()
         },
         (mutations: MutationRecord[]) => mutations

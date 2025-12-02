@@ -1,47 +1,49 @@
-import { reduce } from '../stream/combinator/reduce.js'
 import {
   disposeAll,
   disposeNone,
   disposeWith,
+  empty,
   type ISink,
   type IStream,
   type ITime,
   merge,
   nullSink,
   op,
+  reduce,
+  SettableDisposable,
   tap
-} from '../stream/index.js'
-import type { IAttributeProperties } from './combinator/attribute.js'
-import type { IStyleCSS } from './combinator/style.js'
-import { createDomScheduler } from './scheduler.js'
-import type { I$Node, I$Scheduler, I$Slottable, INode, INodeElement, ISlottable } from './types.js'
-import { SettableDisposable } from './utils/SettableDisposable.js'
+} from '@/stream'
+import type { IAttributeProperties, IStyleCSS } from '@/ui'
+import { createDomScheduler, setDeclarationMap, type DeclarationMap } from '@/ui'
+import { DECLARATION_MAP } from './declarationMap.js'
+import type { I$Node, I$Scheduler, I$Slottable, INode, INodeElementDom, ISlottable } from './types.js'
 
 export interface IRunEnvironment {
-  $rootNode: I$Node
+  $rootNode: I$Node<INodeElementDom>
   scheduler: I$Scheduler
   cache: string[]
   namespace: string
   stylesheet: CSSStyleSheet
-  rootAttachment?: INodeElement
+  rootAttachment?: INodeElementDom
 }
 
-class BranchEffectsSink implements ISink<INode | ISlottable> {
-  segmentsSlotList: Map<INode | ISlottable, Disposable>[] = []
+class BranchEffectsSink implements ISink<INode<INodeElementDom> | ISlottable<INodeElementDom>> {
+  segmentsSlotList: Map<INode<INodeElementDom> | ISlottable<INodeElementDom>, Disposable>[] = []
 
   constructor(
     readonly env: IRunEnvironment,
-    readonly branchNode: INode,
+    readonly branchNode: INode<INodeElementDom>,
     readonly segmentPosition: number,
     readonly segmentsCount: number[]
   ) {}
 
-  event(time: ITime, childNode: INode) {
+  event(time: ITime, childNode: INode<INodeElementDom>) {
     try {
       childNode.disposable.set(
         disposeWith(nodeToRemove => {
           this.segmentsCount[this.segmentPosition]--
-          nodeToRemove.element.remove()
+          const element = nodeToRemove.element as ChildNode
+          element.remove?.()
           const slot = this.segmentsSlotList[this.segmentPosition]
           const disposableBranch = slot.get(nodeToRemove)
           slot.delete(nodeToRemove)
@@ -53,15 +55,15 @@ class BranchEffectsSink implements ISink<INode | ISlottable> {
       throw new Error('Cannot append node that have already been rendered, check invalid node operations')
     }
 
-    if (typeof childNode.style === 'object') {
-      const selector = useStyleRule(this.env, childNode.style)
-      childNode.element.classList.add(selector)
+    if (typeof childNode.style === 'object' && 'classList' in (childNode.element as Element)) {
+      const selector = createStyleRule(this.env, childNode.style)
+      ;(childNode.element as Element).classList.add(selector)
     }
 
-    if (typeof childNode.stylePseudo === 'object') {
+    if (typeof childNode.stylePseudo === 'object' && 'classList' in (childNode.element as Element)) {
       for (const styleDeclaration of childNode.stylePseudo) {
-        const selector = useStylePseudoRule(this.env, styleDeclaration.style, styleDeclaration.class)
-        childNode.element.classList.add(selector)
+        const selector = createStylePseudoRule(this.env, styleDeclaration.style, styleDeclaration.class)
+        ;(childNode.element as Element).classList.add(selector)
       }
     }
 
@@ -74,14 +76,38 @@ class BranchEffectsSink implements ISink<INode | ISlottable> {
     // Collect disposables for this specific child node
     const childDisposables: Disposable[] = []
 
-    if (typeof childNode.styleBehavior === 'object') {
+    if (typeof childNode.styleInline === 'object' && 'style' in (childNode.element as Element)) {
+      const applyInline = merge(
+        ...childNode.styleInline.map(styleStream =>
+          op(
+            styleStream,
+            tap(styleObj => {
+              if (!styleObj) return
+              const keys = Object.keys(styleObj)
+              for (let i = 0; i < keys.length; i++) {
+                const prop = keys[i] as keyof IStyleCSS
+                const value = styleObj[prop]
+                const target = childNode.element as any
+                if (target?.style?.setProperty) {
+                  target.style.setProperty(prop, value === null || value === undefined ? null : String(value))
+                }
+              }
+            })
+          )
+        )
+      ).run(nullSink, this.env.scheduler)
+
+      childDisposables.push(applyInline)
+    }
+
+    if (typeof childNode.styleBehavior === 'object' && 'classList' in (childNode.element as Element)) {
       const newLocal = childNode.styleBehavior.map(sb => styleBehavior(sb, childNode, this.env))
       const disposeStyle = merge(...newLocal).run(nullSink, this.env.scheduler)
 
       childDisposables.push(disposeStyle)
     }
 
-    if (typeof childNode.attributesBehavior === 'object') {
+    if (typeof childNode.attributesBehavior === 'object' && childNode.attributesBehavior.length) {
       const disposeStyle = merge(
         ...childNode.attributesBehavior.map(attrs => {
           return op(
@@ -134,11 +160,11 @@ class BranchEffectsSink implements ISink<INode | ISlottable> {
 }
 
 class BranchChildrenSinkList implements Disposable {
-  disposables = new Map<I$Slottable, Disposable>()
+  disposables = new Map<I$Slottable<INodeElementDom>, Disposable>()
 
   constructor(
     readonly env: IRunEnvironment,
-    readonly node: INode
+    readonly node: INode<INodeElementDom>
   ) {
     const l = node.$segments.length
     const segmentsCount = new Array(l).fill(0)
@@ -157,28 +183,36 @@ class BranchChildrenSinkList implements Disposable {
   }
 }
 
-function styleBehavior(styleBehavior: IStream<IStyleCSS | null>, node: INode, cacheService: IRunEnvironment) {
+function styleBehavior(
+  styleBehavior: IStream<IStyleCSS | null>,
+  node: INode<INodeElementDom>,
+  cacheService: IRunEnvironment
+) {
+  const element = node.element as Element
+  if (!('classList' in element)) {
+    return empty
+  }
   return op(
     styleBehavior,
-    reduce((previousCssRule: null | ReturnType<typeof useStyleRule>, styleObject) => {
+    reduce((previousCssRule: null | ReturnType<typeof createStyleRule>, styleObject) => {
       if (previousCssRule) {
         if (styleObject === null) {
-          node.element.classList.remove(previousCssRule)
+          element.classList.remove(previousCssRule)
           return ''
         }
 
-        const cashedCssClas = useStyleRule(cacheService, styleObject)
+        const cashedCssClas = createStyleRule(cacheService, styleObject)
 
         if (previousCssRule !== cashedCssClas) {
-          node.element.classList.replace(previousCssRule, cashedCssClas)
+          element.classList.replace(previousCssRule, cashedCssClas)
           return cashedCssClas
         }
       }
 
       if (styleObject) {
-        const cashedCssClas = useStyleRule(cacheService, styleObject)
+        const cashedCssClas = createStyleRule(cacheService, styleObject)
 
-        node.element.classList.add(cashedCssClas)
+        element.classList.add(cashedCssClas)
         return cashedCssClas
       }
 
@@ -196,7 +230,7 @@ function styleObjectAsString(styleObj: IStyleCSS) {
     .join('')
 }
 
-export function useStyleRule(env: IRunEnvironment, styleDefinition: IStyleCSS) {
+export function createStyleRule(env: IRunEnvironment, styleDefinition: IStyleCSS) {
   const properties = styleObjectAsString(styleDefinition)
   const cachedRuleIdx = env.cache.indexOf(properties)
 
@@ -212,7 +246,7 @@ export function useStyleRule(env: IRunEnvironment, styleDefinition: IStyleCSS) {
   return `${env.namespace + cachedRuleIdx}`
 }
 
-export function useStylePseudoRule(env: IRunEnvironment, styleDefinition: IStyleCSS, pseudo = '') {
+export function createStylePseudoRule(env: IRunEnvironment, styleDefinition: IStyleCSS, pseudo = '') {
   const properties = styleObjectAsString(styleDefinition)
   const index = env.stylesheet.cssRules.length
   const rule = `.${env.namespace + index + pseudo} {${properties}}`
@@ -227,36 +261,61 @@ export function useStylePseudoRule(env: IRunEnvironment, styleDefinition: IStyle
   return `${env.namespace + cachedRuleIdx}`
 }
 
-function applyAttributes(attrs: IAttributeProperties<unknown>, node: INodeElement) {
-  if (attrs) {
-    for (const [attrKey, value] of Object.entries(attrs)) {
-      if (value === undefined || value === null) {
-        node.removeAttribute(attrKey)
-      } else {
-        node.setAttribute(attrKey, String(value))
-      }
+function applyAttributes(attrs: IAttributeProperties<unknown>, node: INodeElementDom) {
+  if (!attrs) return node
+
+  const element = node as Element
+  if (!('setAttribute' in element)) return node
+
+  for (const [attrKey, value] of Object.entries(attrs)) {
+    if (value === undefined || value === null) {
+      element.removeAttribute(attrKey)
+    } else {
+      element.setAttribute(attrKey, String(value))
     }
   }
 
   return node
 }
 
-function appendToSlot(parent: INodeElement, child: INodeElement, insertAt: number) {
-  if (insertAt === 0) return parent.prepend(child)
+function appendToSlot(parent: INodeElementDom, child: INodeElementDom, insertAt: number) {
+  const parentNode = parent as unknown as {
+    prepend?: (node: INodeElementDom) => void
+    insertBefore: (node: INodeElementDom, referenceNode?: INodeElementDom | null) => void
+    children?: ArrayLike<INodeElementDom>
+    firstChild?: unknown
+  }
 
-  parent.insertBefore(child, parent.children[insertAt])
+  if (insertAt === 0) {
+    if (parentNode.prepend) {
+      parentNode.prepend(child)
+    } else {
+      parentNode.insertBefore(child, parentNode.firstChild as INodeElementDom | null)
+    }
+    return
+  }
+
+  const reference =
+    parentNode.children && insertAt < parentNode.children.length
+      ? (parentNode.children[insertAt] as INodeElementDom)
+      : null
+
+  parentNode.insertBefore(child, reference)
 }
 
 export function render(config: {
-  rootAttachment: INodeElement
+  rootAttachment: INodeElementDom
   $rootNode: I$Node
   scheduler?: I$Scheduler
   namespace?: string
   cache?: string[]
+  declarationMap?: DeclarationMap<Node>
 }): Disposable {
   if (!config.rootAttachment) {
     throw new Error('rootAttachment is required for render')
   }
+
+  setDeclarationMap(config.declarationMap ?? (DECLARATION_MAP as DeclarationMap<Node>))
 
   const env: IRunEnvironment = {
     $rootNode: config.$rootNode,
@@ -270,11 +329,16 @@ export function render(config: {
   // Add stylesheet to document
   document.adoptedStyleSheets = [...document.adoptedStyleSheets, env.stylesheet]
 
-  const rootNode: INode = {
+  const rootNode: INode<INodeElementDom> = {
+    kind: 'wrap',
+    tag: null,
     element: config.rootAttachment,
     $segments: [config.$rootNode],
     disposable: new SettableDisposable(),
     styleBehavior: [],
+    styleInline: [],
+    attributes: {},
+    style: {},
     insertAscending: true,
     attributesBehavior: [],
     stylePseudo: []

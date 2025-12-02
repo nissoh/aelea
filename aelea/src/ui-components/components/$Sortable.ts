@@ -1,3 +1,5 @@
+import type { I$Node, ISlottable } from '@/ui'
+import { component, fromEventTarget, motion, nodeEvent, style, styleBehavior, styleInline } from '@/ui'
 import {
   combineMap,
   filter,
@@ -13,11 +15,6 @@ import {
   until
 } from '../../stream/index.js'
 import { behavior, type IBehavior, multicast } from '../../stream-extended/index.js'
-import { component } from '../../ui/combinator/component.js'
-import { fromEventTarget, nodeEvent } from '../../ui/combinator/event.js'
-import { style, styleBehavior, styleInline } from '../../ui/combinator/style.js'
-import { motion } from '../../ui/index.js'
-import type { I$Node, ISlottable } from '../../ui/types.js'
 import { $column, $row } from '../elements/$elements.js'
 import { layoutSheet } from '../style/layoutSheet.js'
 

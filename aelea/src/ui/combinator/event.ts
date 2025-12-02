@@ -1,74 +1,46 @@
-import { curry2, disposeWith, type IStream, isStream, joinMap } from '../../stream/index.js'
-import { fromCallback } from '../../stream-extended/index.js'
+import { curry2, disposeWith, type IStream, isStream, joinMap } from '@/stream'
+import { fromCallback } from '@/stream-extended'
 import type { I$Slottable, INodeElement } from '../types.js'
 
-type EventMapFor<T> = T extends Window
-  ? WindowEventMap
-  : T extends Document
-    ? DocumentEventMap
-    : T extends HTMLElement
-      ? HTMLElementEventMap
-      : T extends SVGElement
-        ? SVGElementEventMap
-        : T extends IDBOpenDBRequest
-          ? IDBOpenDBRequestEventMap
-          : T extends EventSource
-            ? EventSourceEventMap
-            : T extends WebSocket
-              ? WebSocketEventMap
-              : T extends XMLHttpRequest
-                ? XMLHttpRequestEventMap
-                : T extends Worker
-                  ? WorkerEventMap
-                  : T extends FileReader
-                    ? FileReaderEventMap
-                    : T extends AbortSignal
-                      ? AbortSignalEventMap
-                      : T extends Animation
-                        ? AnimationEventMap
-                        : T extends BroadcastChannel
-                          ? BroadcastChannelEventMap
-                          : T extends MessagePort
-                            ? MessagePortEventMap
-                            : GlobalEventHandlersEventMap
+export type ListenerOptions = boolean | { capture?: boolean; once?: boolean; passive?: boolean }
 
-export function fromEventTarget<T extends EventTarget, K extends keyof EventMapFor<T> & string>(
-  element: T,
-  eventType: K,
-  options: boolean | AddEventListenerOptions = false
-): IStream<EventMapFor<T>[K]> {
+export interface EventTargetLike<TEvent = any> {
+  addEventListener(type: string, listener: (event: TEvent) => void, options?: ListenerOptions): void
+  removeEventListener(type: string, listener: (event: TEvent) => void, options?: ListenerOptions): void
+}
+
+export function fromEventTarget<TEvent = any>(
+  element: EventTargetLike<TEvent>,
+  eventType: string,
+  options: ListenerOptions = false
+): IStream<TEvent> {
   return fromCallback(cb => {
-    element.addEventListener(eventType, cb as EventListener, options)
+    element.addEventListener(eventType, cb as unknown as (ev: TEvent) => void, options)
 
     return disposeWith(() => {
-      element.removeEventListener(eventType, cb as EventListener, options)
+      element.removeEventListener(eventType, cb as unknown as (ev: TEvent) => void, options)
     })
   })
 }
 
 type INodeEventDescriptor<B extends INodeElement> = {
   $node: I$Slottable<B>
-  options: boolean | AddEventListenerOptions
+  options?: ListenerOptions
 }
 
 export interface INodeEventCurry {
-  <T extends INodeElement, K extends keyof EventMapFor<T> & string>(
-    eventType: K,
-    descriptor: I$Slottable<T> | INodeEventDescriptor<T>
-  ): IStream<EventMapFor<T>[K]>
-  <T extends INodeElement, K extends keyof EventMapFor<T> & string>(
-    eventType: K
-  ): (descriptor: I$Slottable<T> | INodeEventDescriptor<T>) => IStream<EventMapFor<T>[K]>
+  <T extends INodeElement>(eventType: string, descriptor: I$Slottable<T> | INodeEventDescriptor<T>): IStream<any>
+  <T extends INodeElement>(eventType: string): (descriptor: I$Slottable<T> | INodeEventDescriptor<T>) => IStream<any>
 }
 
 export const nodeEvent: INodeEventCurry = curry2((eventType, descriptor) => {
   if (isStream(descriptor)) {
     return joinMap(ns => {
-      return fromEventTarget(ns.element, eventType, { capture: true })
+      return fromEventTarget(ns.element as EventTargetLike, eventType, { capture: true })
     }, descriptor)
   }
 
   return joinMap(ns => {
-    return fromEventTarget(ns.element, eventType, descriptor.options)
+    return fromEventTarget(ns.element as EventTargetLike, eventType, descriptor.options)
   }, descriptor.$node)
 })

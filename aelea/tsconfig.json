@@ -11,6 +11,18 @@
     "outDir": "dist/esm",
     "rootDir": "./src",
     "declaration": true,
-    "declarationDir": "dist/types"
+    "declarationDir": "dist/types",
+    "baseUrl": ".",
+    "paths": {
+      "@/ui": [
+        "src/ui/index.ts"
+      ],
+      "@/stream": [
+        "src/stream/index.ts"
+      ],
+      "@/stream-extended": [
+        "src/stream-extended/index.ts"
+      ]
+    }
   }
 }

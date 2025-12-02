@@ -1,8 +1,7 @@
+import type { INode, IStyleCSS } from '@/ui'
+import { $element, attr, component, nodeEvent, style, stylePseudo } from '@/ui'
 import { filter, map, o, start, switchLatest, tap } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
-import type { IStyleCSS } from '../../../ui/combinator/style.js'
-import { $element, attr, component, nodeEvent, style, stylePseudo } from '../../../ui/index.js'
-import type { INode } from '../../../ui/types.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import type { Input } from './types.js'
 
@@ -44,14 +43,16 @@ export const $Slider = ({ value, step = 0.01 }: Slider) =>
         attr({ type: 'range', min: 0, max: 1, step }),
 
         o(
-          map(node =>
+          map((node: any) =>
             start(
               node,
               filter(
                 () => false,
                 tap(val => {
                   // applying by setting `HTMLInputElement.value` imperatively(only way known to me)
-                  node.element.value = String(val)
+                  if ('value' in node.element) {
+                    ;(node.element as HTMLInputElement).value = String(val)
+                  }
                 }, value)
               )
             )

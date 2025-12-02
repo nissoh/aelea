@@ -1,5 +1,5 @@
-import { disposeAll, disposeBoth, type IScheduler, type ISink, type IStream, nullSink } from '../../stream/index.js'
-import { behavior, type IBehavior } from '../../stream-extended/index.js'
+import { disposeAll, disposeBoth, type IScheduler, type ISink, type IStream, nullSink } from '@/stream'
+import { behavior, type IBehavior } from '@/stream-extended'
 import type { I$Slottable, IComponentBehavior, IOutputTethers, ISlottable } from '../types.js'
 
 type IComponent = <T>(

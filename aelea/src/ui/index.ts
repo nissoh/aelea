@@ -1,23 +1,26 @@
-export * from './combinator/index.js'
-export type { IRunEnvironment } from './render.js'
-export { render } from './render.js'
-export { createDomScheduler } from './scheduler.js'
+export * from './combinator/attribute.js'
+export * from './combinator/component.js'
+export * from './combinator/event.js'
+export * from './combinator/motion.js'
+export * from './combinator/style.js'
 export {
   $custom,
   $element,
   $node,
-  $p,
   $svg,
+  $text,
   $wrapNativeElement,
-  createNode
-} from './source/node.js'
-export type { I$Text } from './source/text.js'
-export { $text } from './source/text.js'
+  createFactories,
+  setDeclarationMap
+} from './node.js'
+export { createDomScheduler } from './scheduler.js'
 export type {
+  DeclarationMap,
   I$Node,
   I$Op,
   I$Scheduler,
   I$Slottable,
+  I$Text,
   IAttributeProperties,
   IComponentBehavior,
   INode,
@@ -25,6 +28,6 @@ export type {
   INodeElement,
   IOutputTethers,
   ISlottable,
-  ISlottableElement,
-  IStyleCSS
+  IStyleCSS,
+  NodeKind
 } from './types.js'

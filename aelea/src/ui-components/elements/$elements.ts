@@ -1,4 +1,4 @@
-import { $custom, $node, style } from '../../ui/index.js'
+import { $custom, $node, style } from '@/ui'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { elevation2 } from '../style/designSheet.js'
 import { layoutSheet } from '../style/layoutSheet.js'

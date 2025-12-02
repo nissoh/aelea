@@ -1,50 +1,63 @@
-import type { IOps, IScheduler, IStream, ITask } from '../stream/index.js'
-import type { IAttributeProperties } from './combinator/attribute.js'
-import type { IStyleCSS } from './combinator/style.js'
-import type { SettableDisposable } from './utils/SettableDisposable.js'
+import type * as CSS from 'csstype'
+import type { IOps, IScheduler, IStream, ITask, SettableDisposable } from '@/stream'
 
-// Re-export combinator types
-export type { IAttributeProperties, IStyleCSS }
+export type NodeKind = 'element' | 'custom' | 'node' | 'svg' | 'wrap'
 
-export type ISlottableElement = ChildNode
-export type INodeElement = HTMLElement | SVGElement
+export type INodeElement<T = any> = T
 
-export type I$Slottable<A extends ISlottableElement = ISlottableElement> = IStream<ISlottable<A>>
+export type IStyleCSS = CSS.Properties
 
-export interface ISlottable<A extends ISlottableElement = ISlottableElement> {
-  element: A
+export type IAttributeProperties<T> = {
+  [P in keyof T]: string | number | boolean | null | undefined
+}
+
+export type DeclarationMap<TElement> = {
+  element: (tag: string) => TElement
+  custom: (tag: string) => TElement
+  node: () => TElement
+  svg: (tag: string) => TElement
+  wrap: <A extends TElement>(element: A) => A
+  text?: (value: string) => TElement
+  setText?: (element: TElement, value: string) => void
+}
+
+export interface ISlottable<TElement = any> {
+  element: TElement
   disposable: SettableDisposable
 }
 
-export interface INode<A extends INodeElement = INodeElement> extends ISlottable<A> {
-  $segments: I$Slottable[]
+export interface INode<TElement = any> extends ISlottable<TElement> {
+  kind: NodeKind
+  tag: string | null
+  $segments: I$Slottable<TElement>[]
   insertAscending: boolean
-  style?: IStyleCSS
+  style: IStyleCSS
   stylePseudo: Array<{ style: IStyleCSS; class: string }>
-  styleBehavior: IStream<IStyleCSS | null>[]
+  styleBehavior: IStream<IStyleCSS>[]
+  styleInline: IStream<IStyleCSS>[]
 
-  attributes?: IAttributeProperties<any>
-  attributesBehavior: IStream<IAttributeProperties<any>>[]
+  attributes: any
+  attributesBehavior: IStream<any>[]
 }
 
-export type I$Node<A extends INodeElement = INodeElement> = IStream<INode<A>>
+export type I$Slottable<TElement = any> = IStream<ISlottable<TElement>>
 
-export type I$Op<TElement extends INodeElement = INodeElement> = (x: I$Node<TElement>) => I$Node<TElement>
+export type I$Node<TElement = any> = IStream<INode<TElement>>
 
-export interface INodeCompose<TElement extends INodeElement = INodeElement> {
-  // Empty call - returns node
+export type I$Op<TElement = any> = (x: I$Node<TElement>) => I$Node<TElement>
+
+export interface INodeCompose<TElement = any> {
   (): I$Node<TElement>
-  // Compose operations (at least one)
   (op1: I$Op<TElement>, ...ops: I$Op<TElement>[]): INodeCompose<TElement>
-  // Terminal operation - add children
-  (...$leafs: I$Slottable[]): I$Node<TElement>
+  (...$leafs: Array<I$Slottable<TElement> | I$Node<TElement>>): I$Node<TElement>
 }
+
+export type I$Text<TElement = any> = IStream<ISlottable<TElement>>
 
 export interface I$Scheduler extends IScheduler {
   paint(task: ITask): Disposable
 }
 
-// Component types
 export type IOutputTethers<A> = { [P in keyof A]?: IOps<A[P], A[P]> }
 
 export type IComponentBehavior<T> = {

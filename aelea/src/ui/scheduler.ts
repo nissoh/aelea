@@ -20,13 +20,27 @@ import type { I$Scheduler } from './types.js'
  * are scheduled in the correct phase.
  */
 
+const queue = typeof queueMicrotask === 'function' ? queueMicrotask : (fn: () => void) => Promise.resolve().then(fn)
+
+type RafCallback = (time: number) => void
+
+const raf: (cb: RafCallback) => number =
+  typeof globalThis.requestAnimationFrame === 'function'
+    ? globalThis.requestAnimationFrame.bind(globalThis)
+    : (cb: RafCallback) => setTimeout(() => cb(Date.now()), 16) as unknown as number
+
+const perfNow =
+  typeof globalThis.performance === 'object' && typeof globalThis.performance?.now === 'function'
+    ? () => globalThis.performance.now()
+    : () => Date.now()
+
 class DomScheduler implements I$Scheduler {
   private asapTasks: ITask[] = []
   private paintTasks: ITask[] = []
   private asapScheduled = false
   private asapCancelled = false
   private paintScheduled = false
-  private readonly initialTime = performance.now()
+  private readonly initialTime = perfNow()
   private readonly initialWallClockTime = Date.now()
 
   runDelayedTask = (task: ITask): void => {
@@ -73,7 +87,7 @@ class DomScheduler implements I$Scheduler {
 
     if (!this.asapScheduled) {
       this.asapScheduled = true
-      queueMicrotask(this.flushAsapTasks)
+      queue(this.flushAsapTasks)
     }
 
     return task
@@ -89,7 +103,7 @@ class DomScheduler implements I$Scheduler {
 
     if (!this.paintScheduled) {
       this.paintScheduled = true
-      requestAnimationFrame(this.flushPaintTasks)
+      raf(this.flushPaintTasks)
     }
 
     return task

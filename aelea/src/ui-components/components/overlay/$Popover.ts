@@ -1,5 +1,3 @@
-import { combine, constant, empty, type IStream, map, merge, op, start, switchMap } from '../../../stream/index.js'
-import { type IBehavior, multicast } from '../../../stream-extended/index.js'
 import {
   $node,
   component,
@@ -11,7 +9,9 @@ import {
   style,
   styleBehavior,
   styleInline
-} from '../../../ui/index.js'
+} from '@/ui'
+import { combine, constant, empty, type IStream, map, merge, op, start, switchMap } from '../../../stream/index.js'
+import { type IBehavior, multicast } from '../../../stream-extended/index.js'
 
 import { colorAlpha } from '../../../ui-components-theme/color.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
