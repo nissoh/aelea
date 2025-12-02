@@ -1,5 +1,6 @@
-import { $element, attr, component, type INode, nodeEvent, styleBehavior } from '@/ui'
-import { empty, map, merge, op, sampleMap } from '../../../stream/index.js'
+import { $element, attr, component, effectProp, type INode, styleBehavior } from '@/ui'
+import { nodeEvent } from '@/ui-renderer-dom'
+import { empty, map, merge, op } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
@@ -26,7 +27,7 @@ export const $Autocomplete = ({ type = InputType.TEXT, value = empty, name, plac
 
           changeTether(
             nodeEvent('input'),
-            map(inputEv => {
+            map((inputEv: Event) => {
               if (inputEv.target instanceof HTMLInputElement) {
                 const text = inputEv.target.value
                 return text || ''
@@ -44,18 +45,7 @@ export const $Autocomplete = ({ type = InputType.TEXT, value = empty, name, plac
 
           focusTether(interactionOp),
           dismissTether(dismissOp),
-
-          changeTether(inputNode =>
-            sampleMap(
-              (node, text) => {
-                // applying by setting `HTMLInputElement.value` imperatively(only way known to me)
-                node.element.value = String(text)
-                return text
-              },
-              inputNode,
-              value
-            )
-          )
+          effectProp('value', value)
         )(),
 
         {

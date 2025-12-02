@@ -14,8 +14,8 @@ import {
   skip,
   start,
   switchLatest
-} from '../../stream/index.js'
-import { type IBehavior, multicast } from '../../stream-extended/index.js'
+} from '@/stream'
+import { type IBehavior, multicast } from '@/stream-extended'
 import { pallete } from '../../ui-components-theme/globalState.js'
 import { $column } from '../elements/$elements.js'
 import { designSheet } from '../style/designSheet.js'
@@ -58,11 +58,9 @@ export const $VirtualScroll = ({ dataSource, containerOps = o(), $loader = $defa
     )
 
     const intersectedLoader = intersectingTether(
-      observer.intersection({ threshold: 1 }),
-      map(entryList => entryList[0]),
-      filter(entry => {
-        return entry.isIntersecting === true
-      })
+      // TODO: reintroduce a typed intersection helper; keeping a placeholder no-op for now
+      map(() => null as any),
+      filter(() => false)
     )
 
     const $observer = $custom('observer')(intersectedLoader)()

@@ -22,6 +22,12 @@
       ],
       "@/stream-extended": [
         "src/stream-extended/index.ts"
+      ],
+      "@/ui-renderer-dom": [
+        "src/ui-renderer-dom/index.ts"
+      ],
+      "@/ui-renderer-manifest": [
+        "src/ui-renderer-manifest/index.ts"
       ]
     }
   }

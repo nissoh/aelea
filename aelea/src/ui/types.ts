@@ -1,5 +1,5 @@
 import type * as CSS from 'csstype'
-import type { IOps, IScheduler, IStream, ITask, SettableDisposable } from '@/stream'
+import type { IOps, IScheduler, ISink, IStream, ITask } from '@/stream'
 
 export type NodeKind = 'element' | 'custom' | 'node' | 'svg' | 'wrap'
 
@@ -21,28 +21,37 @@ export type DeclarationMap<TElement> = {
   setText?: (element: TElement, value: string) => void
 }
 
-export interface ISlottable<TElement = any> {
-  element: TElement
-  disposable: SettableDisposable
+export type EventDescriptor = {
+  type: string
+  options?: unknown
+  sinks: ISink<any>[]
 }
 
-export interface INode<TElement = any> extends ISlottable<TElement> {
+export interface ITextNode {
+  kind: 'text'
+  value: string | IStream<string> | null
+}
+
+export type ISlottable<TElement = unknown> = INode<TElement> | ITextNode
+
+export interface INode<TElement = unknown> {
   kind: NodeKind
   tag: string | null
   $segments: I$Slottable<TElement>[]
   insertAscending: boolean
   style: IStyleCSS
   stylePseudo: Array<{ style: IStyleCSS; class: string }>
-  styleBehavior: IStream<IStyleCSS>[]
-  styleInline: IStream<IStyleCSS>[]
-
+  styleBehavior: IStream<IStyleCSS | null>[]
+  styleInline: IStream<IStyleCSS | null>[]
+  propBehavior: Array<{ key: string; value: IStream<any> }>
   attributes: any
   attributesBehavior: IStream<any>[]
+  events: EventDescriptor[]
 }
 
-export type I$Slottable<TElement = any> = IStream<ISlottable<TElement>>
+export type I$Slottable<TElement = unknown> = IStream<ISlottable<TElement>>
 
-export type I$Node<TElement = any> = IStream<INode<TElement>>
+export type I$Node<TElement = unknown> = IStream<INode<TElement>>
 
 export type I$Op<TElement = any> = (x: I$Node<TElement>) => I$Node<TElement>
 

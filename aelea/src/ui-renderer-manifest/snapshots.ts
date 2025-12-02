@@ -1,9 +1,8 @@
 import { merge, nullSink, op, tap } from '@/stream'
 import { stream } from '@/stream-extended'
-import type { DeclarationMap, I$Node, I$Scheduler, I$Slottable, IAttributeProperties, INode } from '@/ui'
-import { createDomScheduler, setDeclarationMap } from '@/ui'
-import type { IStyleCSS } from '../ui/index.js'
-import type { VirtualText } from './factories.js'
+import type { I$Node, I$Scheduler, I$Slottable, IAttributeProperties, INode, ITextNode } from '@/ui'
+import { createDomScheduler } from '@/ui'
+import type { IStyleCSS } from '@/ui'
 
 interface ISnapshotEnv {
   scheduler: I$Scheduler
@@ -72,14 +71,26 @@ function observeSlot(
   return $slot.run(
     {
       event(_time, node) {
-        if ('$segments' in node) {
+        if ('kind' in node && node.kind === 'text') {
+          const textNode = node as ITextNode
+          let textValue = typeof textNode.value === 'string' ? textNode.value : ''
+          let textDispose: Disposable = { [Symbol.dispose]() {} }
+
+          if (textNode.value && typeof textNode.value !== 'string') {
+            textDispose = op(
+              textNode.value,
+              tap(val => {
+                textValue = val ?? ''
+                onChild(textValue, textDispose)
+              })
+            ).run(nullSink, env.scheduler) as unknown as Disposable
+          }
+
+          onChild(textValue, textDispose)
+        } else if ('$segments' in node) {
           let childDispose: Disposable
           childDispose = observeNode(node as INode, env, childSnapshot => onChild(childSnapshot, childDispose))
           onChild(node as INode, childDispose)
-        } else if ('element' in node) {
-          const textDispose: Disposable = { [Symbol.dispose]() {} }
-          const text = (node as any).element as VirtualText
-          onChild(text.nodeValue, textDispose)
         }
       },
       error(_time, err) {
@@ -195,14 +206,10 @@ function observeNode(node: INode, env: ISnapshotEnv, push: (node: INode) => void
  */
 export function manifestFromNode(
   $node: I$Node,
-  scheduler: I$Scheduler = createDomScheduler(),
-  declarationMap?: DeclarationMap<unknown>
+  scheduler: I$Scheduler = createDomScheduler()
 ) {
   return stream((sink, sched) => {
     ensureRaf()
-    if (declarationMap) {
-      setDeclarationMap(declarationMap as DeclarationMap<unknown>)
-    }
     let rootObserver: Disposable | null = null
 
     const nodeDisposable = $node.run(

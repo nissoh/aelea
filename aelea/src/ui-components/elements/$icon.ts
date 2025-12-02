@@ -1,6 +1,6 @@
 import type { I$Node, INode } from '@/ui'
 import { $svg, attr, style } from '@/ui'
-import { type IOps, o } from '../../stream/index.js'
+import { type IOps, o } from '@/stream'
 
 interface Icon {
   /**  in pixels */

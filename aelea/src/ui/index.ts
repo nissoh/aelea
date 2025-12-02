@@ -1,20 +1,12 @@
 export * from './combinator/attribute.js'
 export * from './combinator/component.js'
-export * from './combinator/event.js'
+export * from './combinator/effect.js'
 export * from './combinator/motion.js'
 export * from './combinator/style.js'
-export {
-  $custom,
-  $element,
-  $node,
-  $svg,
-  $text,
-  $wrapNativeElement,
-  createFactories,
-  setDeclarationMap
-} from './node.js'
+export { $custom, $element, $node, $svg, $text, $wrapNativeElement } from './node.js'
 export { createDomScheduler } from './scheduler.js'
 export type {
+  EventDescriptor,
   DeclarationMap,
   I$Node,
   I$Op,
@@ -27,6 +19,7 @@ export type {
   INodeCompose,
   INodeElement,
   IOutputTethers,
+  ITextNode,
   ISlottable,
   IStyleCSS,
   NodeKind

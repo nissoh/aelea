@@ -1,5 +1,6 @@
 import type { I$Node, ISlottable } from '@/ui'
-import { component, fromEventTarget, motion, nodeEvent, style, styleBehavior, styleInline } from '@/ui'
+import { component, motion, style, styleBehavior, styleInline } from '@/ui'
+import { fromEventTarget, nodeEvent } from '@/ui-renderer-dom'
 import {
   combineMap,
   filter,
@@ -13,8 +14,8 @@ import {
   start,
   switchLatest,
   until
-} from '../../stream/index.js'
-import { behavior, type IBehavior, multicast } from '../../stream-extended/index.js'
+} from '@/stream'
+import { behavior, type IBehavior, multicast } from '@/stream-extended'
 import { $column, $row } from '../elements/$elements.js'
 import { layoutSheet } from '../style/layoutSheet.js'
 
@@ -130,10 +131,10 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
             dragYTether(
               nodeEvent('pointerdown'),
               // list order continously changing, sampleMap is used to get a sample of the latest list
-              sampleMap((list, startEv) => {
+              sampleMap((list, startEv: PointerEvent) => {
                 const drag = merge(fromEventTarget(window, 'pointerup'), fromEventTarget(window, 'pointermove'))
                 const moveUntilUp = until(
-                  filter(ev => ev.type === 'pointerup', drag),
+                  filter((ev: PointerEvent) => ev.type === 'pointerup', drag),
                   drag
                 )
 

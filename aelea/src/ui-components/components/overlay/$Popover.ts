@@ -1,22 +1,11 @@
-import {
-  $node,
-  component,
-  fromEventTarget,
-  type I$Node,
-  type INode,
-  type INodeCompose,
-  nodeEvent,
-  style,
-  styleBehavior,
-  styleInline
-} from '@/ui'
-import { combine, constant, empty, type IStream, map, merge, op, start, switchMap } from '../../../stream/index.js'
-import { type IBehavior, multicast } from '../../../stream-extended/index.js'
+import { $node, component, type I$Node, type INode, type INodeCompose, style, styleBehavior, styleInline } from '@/ui'
+import { fromEventTarget, nodeEvent } from '@/ui-renderer-dom'
+import { combine, constant, empty, type IStream, map, merge, op, start, switchMap } from '@/stream'
+import { type IBehavior, multicast } from '@/stream-extended'
 
 import { colorAlpha } from '../../../ui-components-theme/color.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { $column } from '../../elements/$elements.js'
-import { observer } from '../../utils/elementObservers.js'
 import { isDesktopScreen } from '../../utils/screenUtils.js'
 
 export const $defaultPopoverContentContainer = $column(
@@ -77,7 +66,7 @@ export const $Popover = ({
       // Apply z-index to target when popover is open
       const $targetWithZIndex = op(
         $target,
-        targetIntersectionTether(observer.intersection()),
+        targetIntersectionTether(constant([] as IntersectionObserverEntry[])),
         styleBehavior(
           map($isOpen => {
             return $isOpen ? ({ zIndex: 2345, position: 'relative' } as const) : null

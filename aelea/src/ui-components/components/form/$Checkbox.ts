@@ -1,5 +1,6 @@
 import type { INode } from '@/ui'
-import { $element, $node, attr, attrBehavior, component, nodeEvent, style, styleBehavior } from '@/ui'
+import { $element, $node, attr, attrBehavior, component, style, styleBehavior } from '@/ui'
+import { nodeEvent } from '@/ui-renderer-dom'
 import { map, merge, o } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'

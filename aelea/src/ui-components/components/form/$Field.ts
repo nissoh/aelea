@@ -1,7 +1,8 @@
 import type { INode, IStyleCSS } from '@/ui'
-import { $element, component, nodeEvent, style, styleBehavior } from '@/ui'
+import { $element, component, effectProp, style, styleBehavior } from '@/ui'
+import { nodeEvent } from '@/ui-renderer-dom'
 import type { IOps } from '../../../stream/index.js'
-import { combine, constant, empty, filter, map, merge, o, start, switchLatest, tap } from '../../../stream/index.js'
+import { combine, constant, empty, map, merge, o, start } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
 import { multicast } from '../../../stream-extended/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
@@ -60,23 +61,7 @@ export const $Field = ({ value = empty, fieldStyle = {}, validation = constant(n
           interactionTether(interactionOp),
           dismissTether(dismissOp),
           blurTether(nodeEvent('blur')),
-
-          o(
-            map((node: any) =>
-              start(
-                node,
-                filter(
-                  () => false,
-                  tap(val => {
-                    if ('value' in node.element) {
-                      ;(node.element as HTMLInputElement).value = String(val)
-                    }
-                  }, value)
-                )
-              )
-            ),
-            switchLatest
-          )
+          effectProp('value', value)
         )(),
 
         {

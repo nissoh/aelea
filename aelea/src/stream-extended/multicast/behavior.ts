@@ -6,7 +6,7 @@ import {
   type ISink,
   type IStream,
   op
-} from '../../stream/index.js'
+} from '@/stream'
 import type { IBehavior, IComposeBehavior } from '../types.js'
 import { tether } from './tether.js'
 

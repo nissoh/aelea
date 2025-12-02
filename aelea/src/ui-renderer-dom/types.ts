@@ -24,7 +24,7 @@ export type {
 } from '@/ui'
 
 export type ISlottableElementDom = ChildNode
-export type INodeElementDom = Element | Text
+export type INodeElementDom = Node
 
 export type I$SlottableDom = I$Slottable<ISlottableElementDom>
 export type ISlottableDom = ISlottable<ISlottableElementDom>

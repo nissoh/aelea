@@ -1,5 +1,6 @@
 import type { I$Slottable, ISlottable } from '@/ui'
-import { component, nodeEvent, style, styleBehavior } from '@/ui'
+import { component, style, styleBehavior } from '@/ui'
+import { nodeEvent } from '@/ui-renderer-dom'
 import { map, merge, o } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'

@@ -1,6 +1,7 @@
 import type { INode, IStyleCSS } from '@/ui'
-import { $element, attr, component, nodeEvent, style, stylePseudo } from '@/ui'
-import { filter, map, o, start, switchLatest, tap } from '../../../stream/index.js'
+import { $element, attr, component, effectProp, style, stylePseudo } from '@/ui'
+import { nodeEvent } from '@/ui-renderer-dom'
+import { map } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import type { Input } from './types.js'
@@ -35,30 +36,13 @@ export const $Slider = ({ value, step = 0.01 }: Slider) =>
         // stylePseudo('::-moz-range-thumb', sliderThunmbStyle),
         changeTether(
           nodeEvent('input'),
-          map(evt => {
+          map((evt: Event) => {
             const target: HTMLInputElement = evt.target! as any
             return Number(target.value)
           })
         ),
         attr({ type: 'range', min: 0, max: 1, step }),
-
-        o(
-          map((node: any) =>
-            start(
-              node,
-              filter(
-                () => false,
-                tap(val => {
-                  // applying by setting `HTMLInputElement.value` imperatively(only way known to me)
-                  if ('value' in node.element) {
-                    ;(node.element as HTMLInputElement).value = String(val)
-                  }
-                }, value)
-              )
-            )
-          ),
-          switchLatest
-        )
+        effectProp('value', value)
       )(),
       { change }
     ]

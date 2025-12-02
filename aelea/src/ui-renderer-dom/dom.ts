@@ -1,360 +1,264 @@
-import {
-  disposeAll,
-  disposeNone,
-  disposeWith,
-  empty,
-  type ISink,
-  type IStream,
-  type ITime,
-  merge,
-  nullSink,
-  op,
-  reduce,
-  SettableDisposable,
-  tap
-} from '@/stream'
-import type { IAttributeProperties, IStyleCSS } from '@/ui'
-import { createDomScheduler, setDeclarationMap, type DeclarationMap } from '@/ui'
+import { disposeAll, disposeNone, disposeWith, type ISink, type IStream, merge, nullSink, op, tap } from '@/stream'
+import { createDomScheduler } from '@/ui'
+import type { EventDescriptor, I$Node, I$Scheduler, IAttributeProperties, INode, IStyleCSS, ISlottable, ITextNode } from '@/ui'
 import { DECLARATION_MAP } from './declarationMap.js'
-import type { I$Node, I$Scheduler, I$Slottable, INode, INodeElementDom, ISlottable } from './types.js'
+import type { INodeElementDom } from './types.js'
 
-export interface IRunEnvironment {
-  $rootNode: I$Node<INodeElementDom>
-  scheduler: I$Scheduler
-  cache: string[]
-  namespace: string
-  stylesheet: CSSStyleSheet
-  rootAttachment?: INodeElementDom
+const STYLE_TAG_ID = '__aelea_style__'
+let ruleCounter = 0
+let styleSheet: CSSStyleSheet | null = null
+
+function ensureStyleSheet(): CSSStyleSheet | null {
+  if (styleSheet) return styleSheet
+  if (typeof document === 'undefined') return null
+  let tag = document.getElementById(STYLE_TAG_ID) as HTMLStyleElement | null
+  if (!tag) {
+    tag = document.createElement('style')
+    tag.id = STYLE_TAG_ID
+    document.head.appendChild(tag)
+  }
+  styleSheet = tag.sheet as CSSStyleSheet | null
+  return styleSheet
 }
 
-class BranchEffectsSink implements ISink<INode<INodeElementDom> | ISlottable<INodeElementDom>> {
-  segmentsSlotList: Map<INode<INodeElementDom> | ISlottable<INodeElementDom>, Disposable>[] = []
-
-  constructor(
-    readonly env: IRunEnvironment,
-    readonly branchNode: INode<INodeElementDom>,
-    readonly segmentPosition: number,
-    readonly segmentsCount: number[]
-  ) {}
-
-  event(time: ITime, childNode: INode<INodeElementDom>) {
-    try {
-      childNode.disposable.set(
-        disposeWith(nodeToRemove => {
-          this.segmentsCount[this.segmentPosition]--
-          const element = nodeToRemove.element as ChildNode
-          element.remove?.()
-          const slot = this.segmentsSlotList[this.segmentPosition]
-          const disposableBranch = slot.get(nodeToRemove)
-          slot.delete(nodeToRemove)
-          disposableBranch?.[Symbol.dispose]()
-        }, childNode)
-      )
-    } catch (error) {
-      console.error('Failed to set disposable for node:', childNode.element.nodeName, error)
-      throw new Error('Cannot append node that have already been rendered, check invalid node operations')
-    }
-
-    if (typeof childNode.style === 'object' && 'classList' in (childNode.element as Element)) {
-      const selector = createStyleRule(this.env, childNode.style)
-      ;(childNode.element as Element).classList.add(selector)
-    }
-
-    if (typeof childNode.stylePseudo === 'object' && 'classList' in (childNode.element as Element)) {
-      for (const styleDeclaration of childNode.stylePseudo) {
-        const selector = createStylePseudoRule(this.env, styleDeclaration.style, styleDeclaration.class)
-        ;(childNode.element as Element).classList.add(selector)
-      }
-    }
-
-    if (typeof childNode.attributes === 'object') {
-      if (Object.keys(childNode.attributes).length !== 0) {
-        applyAttributes(childNode.attributes, childNode.element)
-      }
-    }
-
-    // Collect disposables for this specific child node
-    const childDisposables: Disposable[] = []
-
-    if (typeof childNode.styleInline === 'object' && 'style' in (childNode.element as Element)) {
-      const applyInline = merge(
-        ...childNode.styleInline.map(styleStream =>
-          op(
-            styleStream,
-            tap(styleObj => {
-              if (!styleObj) return
-              const keys = Object.keys(styleObj)
-              for (let i = 0; i < keys.length; i++) {
-                const prop = keys[i] as keyof IStyleCSS
-                const value = styleObj[prop]
-                const target = childNode.element as any
-                if (target?.style?.setProperty) {
-                  target.style.setProperty(prop, value === null || value === undefined ? null : String(value))
-                }
-              }
-            })
-          )
-        )
-      ).run(nullSink, this.env.scheduler)
-
-      childDisposables.push(applyInline)
-    }
-
-    if (typeof childNode.styleBehavior === 'object' && 'classList' in (childNode.element as Element)) {
-      const newLocal = childNode.styleBehavior.map(sb => styleBehavior(sb, childNode, this.env))
-      const disposeStyle = merge(...newLocal).run(nullSink, this.env.scheduler)
-
-      childDisposables.push(disposeStyle)
-    }
-
-    if (typeof childNode.attributesBehavior === 'object' && childNode.attributesBehavior.length) {
-      const disposeStyle = merge(
-        ...childNode.attributesBehavior.map(attrs => {
-          return op(
-            attrs,
-            tap(attr => {
-              applyAttributes(attr, childNode.element)
-            })
-          )
-        })
-      ).run(nullSink, this.env.scheduler)
-
-      childDisposables.push(disposeStyle)
-    }
-
-    let slot = 0
-    for (let sIdx = 0; sIdx < this.segmentPosition; sIdx++) {
-      slot += this.segmentsCount[sIdx]
-    }
-
-    const insertAt = this.branchNode.insertAscending ? slot : slot + this.segmentsCount[this.segmentPosition]
-
-    this.segmentsCount[this.segmentPosition]++
-
-    appendToSlot(this.branchNode.element, childNode.element, insertAt)
-
-    const newDisp = '$segments' in childNode ? new BranchChildrenSinkList(this.env, childNode) : disposeNone
-
-    if (!this.segmentsSlotList[this.segmentPosition]) {
-      this.segmentsSlotList[this.segmentPosition] = new Map()
-    }
-
-    this.segmentsSlotList[this.segmentPosition].set(childNode, disposeAll([...childDisposables, newDisp]))
-  }
-
-  end(time: ITime) {
-    // // Dispose all segment disposables
-    // for (const s of this.segmentsSlotList) {
-    //   for (const d of s.values()) {
-    //     d[Symbol.dispose]()
-    //   }
-    //   s.clear() // Clear the map to release references
-    // }
-    // // Clear arrays to release references
-    // this.segmentsSlotList.length = 0
-  }
-
-  error(time: ITime, err: unknown) {
-    console.error(err)
-  }
-}
-
-class BranchChildrenSinkList implements Disposable {
-  disposables = new Map<I$Slottable<INodeElementDom>, Disposable>()
-
-  constructor(
-    readonly env: IRunEnvironment,
-    readonly node: INode<INodeElementDom>
-  ) {
-    const l = node.$segments.length
-    const segmentsCount = new Array(l).fill(0)
-
-    for (let i = 0; i < l; ++i) {
-      const $child = node.$segments[i]
-      const sink = new BranchEffectsSink(this.env, this.node, i, segmentsCount)
-
-      this.disposables.set($child, $child.run(sink, this.env.scheduler))
-    }
-  }
-
-  [Symbol.dispose](): void {
-    for (const d of this.disposables.values()) d[Symbol.dispose]()
-    this.disposables.clear() // Clear the map to release references
-  }
-}
-
-function styleBehavior(
-  styleBehavior: IStream<IStyleCSS | null>,
-  node: INode<INodeElementDom>,
-  cacheService: IRunEnvironment
-) {
-  const element = node.element as Element
-  if (!('classList' in element)) {
-    return empty
-  }
-  return op(
-    styleBehavior,
-    reduce((previousCssRule: null | ReturnType<typeof createStyleRule>, styleObject) => {
-      if (previousCssRule) {
-        if (styleObject === null) {
-          element.classList.remove(previousCssRule)
-          return ''
-        }
-
-        const cashedCssClas = createStyleRule(cacheService, styleObject)
-
-        if (previousCssRule !== cashedCssClas) {
-          element.classList.replace(previousCssRule, cashedCssClas)
-          return cashedCssClas
-        }
-      }
-
-      if (styleObject) {
-        const cashedCssClas = createStyleRule(cacheService, styleObject)
-
-        element.classList.add(cashedCssClas)
-        return cashedCssClas
-      }
-
-      return ''
-    }, null)
-  )
-}
-
-function styleObjectAsString(styleObj: IStyleCSS) {
-  return Object.entries(styleObj)
-    .map(([key, val]) => {
-      const kebabCaseKey = key.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
-      return `${kebabCaseKey}:${val};`
-    })
+const toKebab = (prop: string) => prop.replace(/[A-Z]/g, match => `-${match.toLowerCase()}`)
+const styleToCss = (style: IStyleCSS) =>
+  Object.entries(style)
+    .filter(([, v]) => v !== undefined && v !== null)
+    .map(([k, v]) => `${toKebab(k)}:${String(v)};`)
     .join('')
+
+export function createStyleRule(style: IStyleCSS): string {
+  const sheet = ensureStyleSheet()
+  const className = `ae-${++ruleCounter}`
+  const cssText = `.${className}{${styleToCss(style)}}`
+  sheet?.insertRule(cssText, sheet.cssRules.length)
+  return className
 }
 
-export function createStyleRule(env: IRunEnvironment, styleDefinition: IStyleCSS) {
-  const properties = styleObjectAsString(styleDefinition)
-  const cachedRuleIdx = env.cache.indexOf(properties)
-
-  if (cachedRuleIdx === -1) {
-    const index = env.stylesheet.cssRules.length
-    const namespace = env.namespace + index
-
-    env.cache.push(properties)
-    env.stylesheet.insertRule(`.${namespace} {${properties}}`, index)
-    return `${env.namespace + index}`
-  }
-
-  return `${env.namespace + cachedRuleIdx}`
+export function createStylePseudoRule(pseudo: string, style: IStyleCSS): string {
+  const sheet = ensureStyleSheet()
+  const className = `ae-${++ruleCounter}`
+  const cssText = `.${className}${pseudo}{${styleToCss(style)}}`
+  sheet?.insertRule(cssText, sheet.cssRules.length)
+  return className
 }
 
-export function createStylePseudoRule(env: IRunEnvironment, styleDefinition: IStyleCSS, pseudo = '') {
-  const properties = styleObjectAsString(styleDefinition)
-  const index = env.stylesheet.cssRules.length
-  const rule = `.${env.namespace + index + pseudo} {${properties}}`
-  const cachedRuleIdx = env.cache.indexOf(rule)
-
-  if (cachedRuleIdx === -1) {
-    env.cache.push(rule)
-    env.stylesheet.insertRule(rule, index)
-    return `${env.namespace + index}`
-  }
-
-  return `${env.namespace + cachedRuleIdx}`
+interface IRunEnvironment {
+  scheduler: I$Scheduler
+  declarationMap: typeof DECLARATION_MAP
 }
 
-function applyAttributes(attrs: IAttributeProperties<unknown>, node: INodeElementDom) {
-  if (!attrs) return node
-
-  const element = node as Element
-  if (!('setAttribute' in element)) return node
-
-  for (const [attrKey, value] of Object.entries(attrs)) {
-    if (value === undefined || value === null) {
-      element.removeAttribute(attrKey)
+function applyAttributes(attrs: IAttributeProperties<unknown> | null | undefined, element: INodeElementDom) {
+  if (!attrs) return
+  const el = element as Element
+  if (!el.setAttribute) return
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined) {
+      el.removeAttribute(k)
     } else {
-      element.setAttribute(attrKey, String(value))
+      el.setAttribute(k, String(v))
     }
   }
-
-  return node
 }
 
-function appendToSlot(parent: INodeElementDom, child: INodeElementDom, insertAt: number) {
-  const parentNode = parent as unknown as {
-    prepend?: (node: INodeElementDom) => void
-    insertBefore: (node: INodeElementDom, referenceNode?: INodeElementDom | null) => void
-    children?: ArrayLike<INodeElementDom>
-    firstChild?: unknown
+function applyStaticStyle(style: IStyleCSS, element: INodeElementDom) {
+  const el = element as any
+  if (!el?.style?.setProperty) return
+  for (const [k, v] of Object.entries(style)) {
+    el.style.setProperty(k, v === null || v === undefined ? null : String(v))
   }
+}
 
-  if (insertAt === 0) {
-    if (parentNode.prepend) {
-      parentNode.prepend(child)
-    } else {
-      parentNode.insertBefore(child, parentNode.firstChild as INodeElementDom | null)
+function bindEvents(events: EventDescriptor[], element: INodeElementDom, scheduler: I$Scheduler) {
+  const el = element as any
+  const disposables: Disposable[] = []
+  for (const entry of events) {
+    const handler = (ev: any) => {
+      const time = scheduler.time()
+      for (const sink of entry.sinks) {
+        sink.event(time, ev)
+      }
     }
-    return
+    el.addEventListener?.(entry.type, handler, entry.options as any)
+    disposables.push(
+      disposeWith(() => {
+        el.removeEventListener?.(entry.type, handler, entry.options as any)
+      })
+    )
   }
+  return disposeAll(disposables)
+}
 
-  const reference =
-    parentNode.children && insertAt < parentNode.children.length
-      ? (parentNode.children[insertAt] as INodeElementDom)
-      : null
+function createElement(kind: string, tag: string | null, map: typeof DECLARATION_MAP): INodeElementDom {
+  if (kind === 'svg') return map.svg(tag ?? 'svg')
+  if (kind === 'custom') return map.custom(tag ?? 'div')
+  if (kind === 'node') return map.node()
+  if (kind === 'wrap') return map.wrap(map.node())
+  return map.element(tag ?? 'div')
+}
 
-  parentNode.insertBefore(child, reference)
+function renderSlot(
+  $slot: IStream<ISlottable<INodeElementDom>>,
+  parent: Element,
+  env: IRunEnvironment,
+  segmentIndex: number
+): Disposable {
+  return $slot.run(
+    {
+      event(time, nodeOrText) {
+        let el: INodeElementDom
+        let childDisposables: Disposable | null = null
+
+        if ('kind' in nodeOrText && nodeOrText.kind === 'text') {
+          el = env.declarationMap.text ? env.declarationMap.text('') : document.createTextNode('')
+          const source = (nodeOrText as ITextNode).value
+          if (typeof source === 'string') {
+            ;(el as any).nodeValue = source ?? ''
+          } else if (source) {
+            childDisposables = op(
+              source as IStream<string>,
+              tap(val => {
+                ;(el as any).nodeValue = val ?? ''
+              })
+            ).run(nullSink, env.scheduler)
+          }
+        } else {
+          const node = nodeOrText as INode<INodeElementDom>
+          el = createElement(node.kind, node.tag, env.declarationMap)
+          applyStaticStyle(node.style, el)
+          applyAttributes(node.attributes, el)
+
+          const pseudoDisp =
+            node.stylePseudo.length === 0
+              ? disposeNone
+              : (() => {
+                  const classes: string[] = []
+                  for (const entry of node.stylePseudo) {
+                    const cls = createStylePseudoRule(entry.class, entry.style)
+                    classes.push(cls)
+                    ;(el as Element)?.classList?.add(cls)
+                  }
+                  return disposeWith(() => {
+                    for (const cls of classes) {
+                      ;(el as Element)?.classList?.remove(cls)
+                    }
+                  })
+                })()
+
+          const propDisp =
+            node.propBehavior.length === 0
+              ? disposeNone
+              : merge(
+                  ...node.propBehavior.map(({ key, value }) =>
+                    op(
+                      value,
+                      tap(v => {
+                        ;(el as any)[key] = v
+                      })
+                    )
+                  )
+                ).run(nullSink, env.scheduler)
+
+          const styleInlineDisp =
+            node.styleInline.length === 0
+              ? disposeNone
+              : merge(
+                  ...node.styleInline.map(sb =>
+                    op(
+                      sb,
+                      tap(styleObj => {
+                        applyStaticStyle(styleObj ?? {}, el)
+                      })
+                    )
+                  )
+                ).run(nullSink, env.scheduler)
+
+          const styleClass =
+            node.styleBehavior.length === 0
+              ? disposeNone
+              : merge(
+                  ...node.styleBehavior.map(sb =>
+                    op(
+                      sb,
+                      tap(styleObj => {
+                        applyStaticStyle(styleObj ?? {}, el)
+                      })
+                    )
+                  )
+                ).run(nullSink, env.scheduler)
+
+          const attrBeh =
+            node.attributesBehavior.length === 0
+              ? disposeNone
+              : merge(
+                  ...node.attributesBehavior.map(attrs =>
+                    op(
+                      attrs,
+                      tap(attr => {
+                        applyAttributes(attr, el)
+                      })
+                    )
+                  )
+                ).run(nullSink, env.scheduler)
+
+          childDisposables = disposeAll([styleInlineDisp, styleClass, attrBeh, pseudoDisp, propDisp])
+
+          const eventsDisp = bindEvents(node.events, el, env.scheduler)
+          childDisposables = disposeAll([childDisposables, eventsDisp].filter(Boolean) as Disposable[])
+
+          const segmentDisposables: Disposable[] = []
+          const segmentsCount = node.$segments.length
+          for (let i = 0; i < segmentsCount; i++) {
+            const seg = node.$segments[i]
+            const d = renderSlot(seg, el as Element, env, i)
+            segmentDisposables.push(d)
+          }
+          childDisposables = disposeAll([childDisposables, ...segmentDisposables].filter(Boolean) as Disposable[])
+        }
+
+        parent.appendChild(el as any)
+      },
+      error(_t, err) {
+        console.error('render slot error', err)
+      },
+      end() {}
+    },
+    env.scheduler
+  ) as unknown as Disposable
 }
 
 export function render(config: {
-  rootAttachment: INodeElementDom
+  rootAttachment: Element
   $rootNode: I$Node
   scheduler?: I$Scheduler
-  namespace?: string
-  cache?: string[]
-  declarationMap?: DeclarationMap<Node>
+  declarationMap?: typeof DECLARATION_MAP
 }): Disposable {
-  if (!config.rootAttachment) {
-    throw new Error('rootAttachment is required for render')
-  }
-
-  setDeclarationMap(config.declarationMap ?? (DECLARATION_MAP as DeclarationMap<Node>))
-
   const env: IRunEnvironment = {
-    $rootNode: config.$rootNode,
     scheduler: config.scheduler ?? createDomScheduler(),
-    rootAttachment: config.rootAttachment,
-    cache: config.cache ?? [],
-    namespace: config.namespace ?? 'Ω',
-    stylesheet: new CSSStyleSheet()
+    declarationMap: config.declarationMap ?? DECLARATION_MAP
   }
 
-  // Add stylesheet to document
-  document.adoptedStyleSheets = [...document.adoptedStyleSheets, env.stylesheet]
-
-  const rootNode: INode<INodeElementDom> = {
+  const rootNode: INode = {
     kind: 'wrap',
     tag: null,
-    element: config.rootAttachment,
-    $segments: [config.$rootNode],
-    disposable: new SettableDisposable(),
+    $segments: [config.$rootNode as any],
+    insertAscending: true,
+    style: {},
     styleBehavior: [],
     styleInline: [],
+    stylePseudo: [],
     attributes: {},
-    style: {},
-    insertAscending: true,
     attributesBehavior: [],
-    stylePseudo: []
+    propBehavior: [],
+    events: []
   }
 
-  const rootSink = new BranchChildrenSinkList(env, rootNode)
+  const disposable = renderSlot(rootNode.$segments[0] as any, config.rootAttachment, env, 0)
 
-  // Return a disposable that cleans up both the sink and the stylesheet
   return {
-    [Symbol.dispose](): void {
-      rootSink[Symbol.dispose]()
-      // Remove the stylesheet from the document
-      const index = document.adoptedStyleSheets.indexOf(env.stylesheet)
-      if (index !== -1) {
-        document.adoptedStyleSheets = document.adoptedStyleSheets.filter(sheet => sheet !== env.stylesheet)
-      }
+    [Symbol.dispose]() {
+      disposable?.[Symbol.dispose]?.()
     }
   }
 }

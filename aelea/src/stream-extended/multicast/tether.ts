@@ -7,7 +7,7 @@ import {
   type IStream,
   type ITime,
   propagateRunEventTask
-} from '../../stream/index.js'
+} from '@/stream'
 import { append, remove } from '../utils.js'
 import { MulticastSink } from './sink.js'
 

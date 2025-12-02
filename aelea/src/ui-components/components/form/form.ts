@@ -1,5 +1,6 @@
 import type { I$Node } from '@/ui'
-import { $element, nodeEvent, style } from '@/ui'
+import { $element, style } from '@/ui'
+import { nodeEvent } from '@/ui-renderer-dom'
 import { constant, filter, merge, o } from '../../../stream/index.js'
 import { pallete } from '../../../ui-components-theme/globalState.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
