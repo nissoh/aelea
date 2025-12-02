@@ -23,6 +23,9 @@
       "@/stream-extended": [
         "src/stream-extended/index.ts"
       ],
+      "@/ui-components-theme": [
+        "src/ui-components-theme/index.ts"
+      ],
       "@/ui-renderer-dom": [
         "src/ui-renderer-dom/index.ts"
       ],

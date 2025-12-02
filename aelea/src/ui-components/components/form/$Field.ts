@@ -4,8 +4,8 @@ import type { IBehavior } from '@/stream-extended'
 import { multicast } from '@/stream-extended'
 import type { INode, IStyleCSS } from '@/ui'
 import { $element, component, effectProp, style, styleBehavior } from '@/ui'
+import { pallete } from '@/ui-components-theme'
 import { nodeEvent } from '@/ui-renderer-dom'
-import { pallete } from '../../../ui-components-theme/globalState.js'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'
 import type { Input, InputType } from './types.js'
@@ -30,8 +30,9 @@ export const $Field = ({ value = empty, fieldStyle = {}, validation = constant(n
       const focus = merge(focusStyle, dismissstyle)
       const state = combine({ focus, alert })
 
+      const $input = $element('input')
       return [
-        $element('input')(
+        $input(
           designSheet.input,
           style(fieldStyle),
 

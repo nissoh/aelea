@@ -16,7 +16,7 @@ import {
 import { type IBehavior, multicast } from '@/stream-extended'
 import type { I$Node, INode } from '@/ui'
 import { $custom, $node, $text, component, style } from '@/ui'
-import { pallete } from '../../ui-components-theme/globalState.js'
+import { pallete } from '@/ui-components-theme'
 import { $column } from '../elements/$elements.js'
 import { designSheet } from '../style/designSheet.js'
 

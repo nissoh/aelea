@@ -2,8 +2,8 @@ import { map } from '@/stream'
 import type { IBehavior } from '@/stream-extended'
 import type { INode, IStyleCSS } from '@/ui'
 import { $element, attr, component, effectProp, style, stylePseudo } from '@/ui'
+import { pallete } from '@/ui-components-theme'
 import { nodeEvent } from '@/ui-renderer-dom'
-import { pallete } from '../../../ui-components-theme/globalState.js'
 import type { Input } from './types.js'
 
 export interface Slider extends Input<number> {

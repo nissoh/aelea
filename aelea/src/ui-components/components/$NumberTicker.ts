@@ -14,7 +14,7 @@ import {
 import { multicast } from '@/stream-extended'
 import type { IStyleCSS } from '@/ui'
 import { $node, $text, style, styleBehavior } from '@/ui'
-import { pallete } from '../../ui-components-theme/globalState.js'
+import { pallete } from '@/ui-components-theme'
 
 export const sumFromZeroOp = reduce((current: number, x: number) => current + x, 0)
 
