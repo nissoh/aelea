@@ -3,17 +3,20 @@
   "version": "2.5.31",
   "type": "module",
   "scripts": {
-    "build": "bun run build:clean && bun run bunx tsc -b",
-    "build:esm": "tsc -b",
+    "build": "bun run build:clean && tsgo -b",
     "build:clean": "rm -rf dist",
-    "tsc:check": "bun run bunx tsc -p tsconfig.json --noEmit",
-    "bench": "bun run benchmark/scheduler.ts",
-    "bench:combinators": "bun run benchmark/combinators.ts"
+    "tsc:check": "tsgo -p tsconfig.json --noEmit",
+    "test": "bun test test/",
+    "bench:combinators": "bun run benchmark/combinators.ts",
+    "bench:characteristics": "bun run benchmark/combinator-characteristics.ts",
+    "bench:takumi": "bun run benchmark/og-takumi.ts",
+    "bench:headless": "bun run benchmark/headless-render.ts"
   },
   "license": "MIT",
   "author": "Nissan Hanina <nissanhanina@gmail.com>",
   "files": [
-    "dist"
+    "dist",
+    "AGENTS.md"
   ],
   "exports": {
     "./stream": {
@@ -23,6 +26,10 @@
     "./stream-extended": {
       "types": "./dist/types/stream-extended/index.d.ts",
       "import": "./dist/esm/stream-extended/index.js"
+    },
+    "./ui": {
+      "types": "./dist/types/ui/index.d.ts",
+      "import": "./dist/esm/ui/index.js"
     },
     "./ui-components": {
       "types": "./dist/types/ui-components/index.d.ts",
@@ -40,13 +47,13 @@
       "types": "./dist/types/ui-renderer-dom/index.d.ts",
       "import": "./dist/esm/ui-renderer-dom/index.js"
     },
-    "./ui-renderer-manifest": {
-      "types": "./dist/types/ui-renderer-manifest/index.d.ts",
-      "import": "./dist/esm/ui-renderer-manifest/index.js"
+    "./takumi": {
+      "types": "./dist/types/ui-renderer-takumi/index.d.ts",
+      "import": "./dist/esm/ui-renderer-takumi/index.js"
     },
-    "./router": {
-      "types": "./dist/types/router/index.d.ts",
-      "import": "./dist/esm/router/index.js"
+    "./ui-router": {
+      "types": "./dist/types/ui-router/index.d.ts",
+      "import": "./dist/esm/ui-router/index.js"
     }
   },
   "dependencies": {
@@ -55,11 +62,9 @@
   "devDependencies": {
     "@most/core": "1.6.1",
     "@most/scheduler": "1.3.0",
-    "@resvg/resvg-js": "2.6.2",
-    "@takumi-rs/image-response": "0.55.2",
-    "@types/react": "19.2.7",
-    "react": "19.2.0",
-    "tinybench": "4.0.1"
+    "@takumi-rs/core": "^1.1.2",
+    "bun-types": "^1.3.13",
+    "tinybench": "^6.0.0"
   },
   "publishConfig": {
     "access": "public"

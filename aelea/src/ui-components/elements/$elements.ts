@@ -1,5 +1,5 @@
-import { pallete } from '@/ui-components-theme'
-import { $custom, $node, style } from '@/ui-renderer-dom'
+import { pallete } from '../../ui-components-theme/index.js'
+import { $custom, $node, style } from '../../ui-renderer-dom/index.js'
 import { elevation2 } from '../style/designSheet.js'
 import { layoutSheet } from '../style/layoutSheet.js'
 

@@ -1,4 +1,4 @@
-import type { IOps, IStream } from '@/stream'
+import type { IOps, IStream } from '../../../stream/index.js'
 
 export enum InputType {
   TEXT = 'text',

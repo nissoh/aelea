@@ -1,0 +1,10 @@
+# Bun config. Pinning `install.auto = "disable"` so `bun run …` cannot silently
+# install missing deps behind the lockfile — required for reproducible installs
+# in a monorepo and in CI.
+[install]
+auto = "disable"
+
+# Minimum release age for packages (supply-chain guard). 2 days — blocks
+# installs of versions published within the last 48h so freshly compromised
+# releases have time to be flagged and yanked.
+minimumReleaseAge = 172800

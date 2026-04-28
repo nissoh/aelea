@@ -1,47 +1,43 @@
-import { type IOps, map, merge, never, op } from '@/stream'
-import type { IBehavior } from '@/stream-extended'
-import { pallete } from '@/ui-components-theme'
-import type { I$Node, I$Slottable, INode, ISlottable, IStyleCSS } from '@/ui-renderer-dom'
-import { $element, attrBehavior, component, nodeEvent, styleBehavior } from '@/ui-renderer-dom'
+import { map, merge, never } from '../../../stream/index.js'
+import type { IBehavior } from '../../../stream-extended/index.js'
+import { pallete } from '../../../ui-components-theme/index.js'
+import type { I$Slottable, ISlottable } from '../../../ui-renderer-dom/index.js'
+import {
+  $element,
+  attrBehavior,
+  component,
+  type INodeCompose,
+  nodeEvent,
+  styleBehavior
+} from '../../../ui-renderer-dom/index.js'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'
 import type { Control } from './types.js'
 
+export const $defaultButtonContainer = $element('button')(designSheet.btn)
+
 export interface IButton extends Control {
   $content: I$Slottable
-  buttonStyle?: IStyleCSS
-  buttonOp?: IOps<INode<HTMLButtonElement>>
+  $container?: INodeCompose<HTMLButtonElement>
 }
 
-export const $Button = ({ disabled = never, $content, buttonOp = op }: IButton) =>
+export const $Button = ({ disabled = never, $content, $container = $defaultButtonContainer }: IButton) =>
   component(
     (
       [focusStyle, interactionTether]: IBehavior<ISlottable, boolean>,
       [dismissstyle, dismissTether]: IBehavior<ISlottable, boolean>,
       [click, clickTether]: IBehavior<ISlottable, PointerEvent>
-    ) => {
-      const $button = $element('button')(
-        designSheet.btn,
+    ) => [
+      $container(
         clickTether(nodeEvent('pointerup')),
-        styleBehavior(map(disabled => (disabled ? { opacity: 0.4, pointerEvents: 'none' } : null), disabled)),
-
-        attrBehavior(map(disabled => ({ disabled }), disabled)),
-
+        styleBehavior(map(d => (d ? { opacity: 0.4, pointerEvents: 'none' } : null), disabled)),
+        attrBehavior(map(d => ({ disabled: d }), disabled)),
         styleBehavior(
           map(active => (active ? { borderColor: pallete.primary } : null), merge(focusStyle, dismissstyle))
         ),
-
         interactionTether(interactionOp),
-        dismissTether(dismissOp),
-        buttonOp
-      )
-
-      return [
-        $button($content),
-
-        {
-          click
-        }
-      ]
-    }
+        dismissTether(dismissOp)
+      )($content),
+      { click }
+    ]
   )

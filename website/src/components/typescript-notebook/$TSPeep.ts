@@ -3,7 +3,7 @@ import type { IBehavior } from 'aelea/stream-extended'
 import { $custom, $node, $text, component, type I$Slottable, motion, style, styleInline } from 'aelea/ui'
 import { $column, $row } from 'aelea/ui-components'
 import { pallete, theme } from 'aelea/ui-components-theme'
-import { $MonacoEditor, type ModelChangeBehavior } from '../$MonacoEditor'
+import { $defaultMonacoEditorContainer, $MonacoEditor, type ModelChangeBehavior } from '../$MonacoEditor'
 
 interface IMonaco {
   code: string
@@ -23,7 +23,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
             automaticLayout: true,
             theme: theme.name === 'light' ? 'vs-light' : 'vs-dark'
           },
-          containerStyle: { height: `${initalCodeBlockHeight}px` }
+          $container: $defaultMonacoEditorContainer(style({ height: `${initalCodeBlockHeight}px` }))
         })({
           change: changeTether()
         }),

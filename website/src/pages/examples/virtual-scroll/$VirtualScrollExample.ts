@@ -13,9 +13,18 @@ import {
   wait
 } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
-import { $node, $p, $text, component, style } from 'aelea/ui'
+import { $element, $node, $text, component, style } from 'aelea/ui'
 import type { ScrollRequest, ScrollResponse } from 'aelea/ui-components'
-import { $card, $column, $row, $seperator, $TextField, $VirtualScroll, spacing } from 'aelea/ui-components'
+import {
+  $card,
+  $column,
+  $defaultTextFieldContainer,
+  $row,
+  $seperator,
+  $TextField,
+  $VirtualScroll,
+  spacing
+} from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 
 function filterArrayByText(array: string[], filter: string) {
@@ -40,7 +49,7 @@ export const $VirtualScrollExample = component(
     const delayWithInitial = merge(initialDelayResponse, delayResponse)
 
     let i = 0
-    const $item = $p(style({ padding: '3px 10px' }))
+    const $item = $element('p')(style({ padding: '3px 10px' }))
 
     const stubbedData = Array(TOTAL_ITEMS)
       .fill(null)
@@ -86,7 +95,7 @@ export const $VirtualScrollExample = component(
             label: 'Filter',
             value: empty,
             hint: 'Remove items that do not match the filter; debounce changes by 300ms to prevent spamming.',
-            containerOp: style({ flex: 1 })
+            $container: $defaultTextFieldContainer(style({ flex: 1 }))
           })({
             change: filterTether()
           }),
@@ -94,7 +103,7 @@ export const $VirtualScrollExample = component(
             label: 'Delay Response(ms)',
             value: initialDelayResponse,
             hint: 'Emulate datasource latency; shows stubbed items while waiting.',
-            containerOp: style({ flex: 1 })
+            $container: $defaultTextFieldContainer(style({ flex: 1 }))
           })({
             change: delayResponseTether(map(Number))
           })

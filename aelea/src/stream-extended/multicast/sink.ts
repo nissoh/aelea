@@ -1,4 +1,4 @@
-import type { ISink, ITime } from '@/stream'
+import type { ISink, ITime } from '../../stream/index.js'
 import { tryEnd, tryEvent } from '../utils.js'
 
 /**

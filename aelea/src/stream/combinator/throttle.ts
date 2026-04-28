@@ -25,7 +25,7 @@ class Throttle<T> implements IStream<T> {
 export const throttle: IThrottleCurry = curry2((period, source) => new Throttle(period, source))
 
 class ThrottleSink<T> extends PipeSink<T> {
-  lastTime = 0
+  lastTime = Number.NEGATIVE_INFINITY
 
   constructor(
     readonly interval: ITime,

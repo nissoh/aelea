@@ -1,5 +1,6 @@
 import type * as CSS from 'csstype'
-import type { IOps, IScheduler, IStream, ITask, SettableDisposable } from '@/stream'
+import type { IOps, IScheduler, IStream, ITask } from '../stream/index.js'
+import type { SettableDisposable } from '../stream/utils/SettableDisposable.js'
 
 export type IStyleCSS = CSS.Properties
 
@@ -12,12 +13,25 @@ export interface ITextNode {
   value: string | IStream<string> | null
 }
 
+/**
+ * Minimal shape an aelea node factory populates. `element` holds an opaque
+ * element descriptor the renderer materializes at mount. `disposable` is
+ * per-instance lifecycle — set by the renderer to "remove this element";
+ * fired by upstream stream teardown (e.g. `until`, `joinMap`'s `endInner`
+ * on each concurrent inner, outer disposal) so segments that emit many
+ * concurrent children (`joinMap(makeItem, list$)`) get per-child removal.
+ */
 export interface ISlottable<TElement = unknown> {
   element: TElement
   disposable: SettableDisposable
 }
 
-export type ISlotChild<TElement = unknown> = ITextNode | ISlottable<TElement>
+/**
+ * A slot may emit `null` to request unmounting of any current content without
+ * ending the outer slot stream. Used by router.match / router.contains to
+ * clear content when a predicate flips false while keeping the stream alive.
+ */
+export type ISlotChild<TElement = unknown> = ITextNode | ISlottable<TElement> | null
 
 export interface INode<TElement = unknown> extends ISlottable<TElement> {
   $segments: I$Slottable<TElement>[]

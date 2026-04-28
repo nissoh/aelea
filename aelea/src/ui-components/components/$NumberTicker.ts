@@ -10,11 +10,11 @@ import {
   skipRepeatsWith,
   start,
   switchLatest
-} from '@/stream'
-import { multicast } from '@/stream-extended'
-import { pallete } from '@/ui-components-theme'
-import type { IStyleCSS } from '@/ui-renderer-dom'
-import { $node, $text, style, styleBehavior } from '@/ui-renderer-dom'
+} from '../../stream/index.js'
+import { multicast } from '../../stream-extended/index.js'
+import { pallete } from '../../ui-components-theme/index.js'
+import type { IStyleCSS } from '../../ui-renderer-dom/index.js'
+import { $node, $text, style, styleBehavior } from '../../ui-renderer-dom/index.js'
 
 export const sumFromZeroOp = reduce((current: number, x: number) => current + x, 0)
 

@@ -1,42 +1,25 @@
-import type { Route } from 'aelea/router'
-import type { IBehavior } from 'aelea/stream-extended'
 import { $element, $node, $text, attr, component, style, stylePseudo } from 'aelea/ui'
 import { $icon, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 import { $Link } from '../components/$Link'
 import { $github } from '../elements/$icons'
+import { routeSchema } from '../route'
 
-interface MainMenu {
-  parentRoute: Route
-}
-
-export default ({ parentRoute }: MainMenu) =>
-  component(([routeChange, routeChangeTether]: IBehavior<string, string>) => {
-    const guideRoute = parentRoute.create({ fragment: 'guide', title: 'Guide' })
-    const examplesRoute = parentRoute.create({
-      fragment: 'examples',
-      title: 'Examples'
-    })
-
+export default () =>
+  component(() => {
     const $seperator = $node(style({ color: pallete.foreground, pointerEvents: 'none' }))($text('|'))
 
     return [
       $row(spacing.small, style({ alignItems: 'center', placeContent: 'center' }))(
         $Link({
           $content: $text("Developer's Guide"),
-          url: '/p/guide',
-          route: guideRoute
-        })({
-          click: routeChangeTether()
-        }),
+          route: routeSchema.pages.guide
+        })({}),
         $seperator,
         $Link({
           $content: $text('Examples'),
-          url: '/p/examples/theme',
-          route: examplesRoute
-        })({
-          click: routeChangeTether()
-        }),
+          route: routeSchema.pages.examples.theme
+        })({}),
         $seperator,
 
         $element('a')(
@@ -44,8 +27,6 @@ export default ({ parentRoute }: MainMenu) =>
           style({ padding: '0 4px', display: 'flex' }),
           attr({ href: 'https://github.com/nissoh/aelea' })
         )($icon({ $content: $github, width: '25px', viewBox: '0 0 1024 1024' }))
-      ),
-
-      { routeChange }
+      )
     ]
   })

@@ -1,6 +1,6 @@
-import { combine, constant, empty, type IStream, map, merge, op, start, switchMap } from '@/stream'
-import { type IBehavior, multicast } from '@/stream-extended'
-import { colorAlpha, pallete } from '@/ui-components-theme'
+import { combine, constant, empty, type IStream, map, merge, op, start, switchMap } from '../../../stream/index.js'
+import { type IBehavior, multicast } from '../../../stream-extended/index.js'
+import { colorAlpha, pallete } from '../../../ui-components-theme/index.js'
 import {
   $node,
   component,
@@ -12,7 +12,7 @@ import {
   style,
   styleBehavior,
   styleInline
-} from '@/ui-renderer-dom'
+} from '../../../ui-renderer-dom/index.js'
 import { $column } from '../../elements/$elements.js'
 import { isDesktopScreen } from '../../utils/screenUtils.js'
 

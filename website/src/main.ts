@@ -5,5 +5,5 @@ import $Website from './pages/$Website'
 
 render({
   rootAttachment: document.querySelector('html')!,
-  $rootNode: $Website({ baseRoute: '' })({})
+  $rootNode: $Website()({})
 })

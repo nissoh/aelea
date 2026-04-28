@@ -11,18 +11,15 @@
   "scripts": {
     "dev": "bun vite",
     "build": "vite build",
-    "tsc:check": "bun run bunx tsc -p tsconfig.json --noEmit",
+    "tsc:check": "tsgo -p tsconfig.json --noEmit",
     "preview": "bun vite preview",
-    "clean": "bun run clean:rimraf && tsc -build --clean",
-    "clean:rimraf": "rimraf dist && tsc -build --clean"
+    "clean": "rm -rf dist && tsgo -b --clean"
   },
   "dependencies": {
-    "aelea": "workspace:*",
-    "csstype": "3.2.3"
+    "aelea": "workspace:*"
   },
   "devDependencies": {
-    "rimraf": "6.1.2",
     "monaco-editor": "0.55.1",
-    "vite": "7.2.4"
+    "vite": "8.0.10"
   }
 }

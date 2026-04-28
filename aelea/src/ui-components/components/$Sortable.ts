@@ -11,10 +11,18 @@ import {
   start,
   switchLatest,
   until
-} from '@/stream'
-import { behavior, type IBehavior, multicast } from '@/stream-extended'
-import type { I$Node, ISlottable } from '@/ui-renderer-dom'
-import { component, fromEventTarget, motion, nodeEvent, style, styleBehavior, styleInline } from '@/ui-renderer-dom'
+} from '../../stream/index.js'
+import { behavior, type IBehavior, multicast } from '../../stream-extended/index.js'
+import type { I$Node, ISlottable } from '../../ui-renderer-dom/index.js'
+import {
+  component,
+  fromEventTarget,
+  motion,
+  nodeEvent,
+  style,
+  styleBehavior,
+  styleInline
+} from '../../ui-renderer-dom/index.js'
 import { $column, $row } from '../elements/$elements.js'
 import { layoutSheet } from '../style/layoutSheet.js'
 

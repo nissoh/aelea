@@ -1,15 +1,16 @@
 {
   "npm.packageManager": "bun",
+  "workbench.editor.enablePreview": true,
   "npm.scriptRunner": "bun",
   "files.exclude": {
     "**/.git": true,
-    "**/.DS_Store": true,
+    "**/.DS_Store": true
   },
   "search.exclude": {
     "**/node_modules": true,
     "**/bun.lock": true,
     "**/dist": true
   },
-  "typescript.tsdk": "node_modules/typescript/lib",
+  "js/ts.experimental.useTsgo": true,
   "editor.tabSize": 2
 }

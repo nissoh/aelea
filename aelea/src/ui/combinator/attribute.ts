@@ -1,20 +1,18 @@
-import type { IStream } from '@/stream'
-import { curry2, map } from '@/stream'
+import type { IStream } from '../../stream/index.js'
+import { curry2, map } from '../../stream/index.js'
 import type { I$Node, IAttributeProperties } from '../types.js'
 
 export const attr: IAttributeCurry = curry2((attrs, ns) =>
   map(node => {
-    node.attributes = { ...node.attributes, ...attrs }
-
+    Object.assign(node.attributes, attrs)
     return node
   }, ns)
 )
 
 export const attrBehavior: IAttributeBehaviorCurry = curry2((attrs, node) => {
-  return map(node => {
-    node.attributesBehavior = [...node.attributesBehavior, attrs]
-
-    return node
+  return map(n => {
+    n.attributesBehavior.push(attrs)
+    return n
   }, node)
 })
 

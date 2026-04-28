@@ -1,5 +1,5 @@
-import { o } from '@/stream'
-import { style } from '@/ui-renderer-dom'
+import { o } from '../../stream/index.js'
+import { style } from '../../ui-renderer-dom/index.js'
 
 const stretch = style({
   position: 'absolute',

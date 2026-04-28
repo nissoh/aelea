@@ -6,7 +6,7 @@ import { pallete, type Theme, theme } from 'aelea/ui-components-theme'
 import { setTheme } from 'aelea/ui-components-theme-browser'
 
 export const $Picker = (themeList: Theme[]) =>
-  component(([changeThemeEffect, changeThemeEffectTether]: IBehavior<ISlottable, Theme>) => {
+  component(([changeThemeEffect, changeThemeEffectTether]: IBehavior<ISlottable<Node>, Theme>) => {
     const currentTheme = start(theme, changeThemeEffect)
 
     return [

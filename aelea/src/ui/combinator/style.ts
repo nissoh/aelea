@@ -1,5 +1,5 @@
 import type { Pseudos } from 'csstype'
-import { curry2, curry3, type IStream, map } from '@/stream'
+import { curry2, curry3, type IStream, map } from '../../stream/index.js'
 import type { I$Node, IStyleCSS } from '../types.js'
 
 export interface IStyleCurry {
@@ -35,7 +35,7 @@ export interface IStyleInlineCurry {
 export const styleInline: IStyleInlineCurry = curry2(
   <TElement>(style: IStream<IStyleCSS>, $node: I$Node<TElement>): I$Node<TElement> =>
     map(node => {
-      node.styleInline = [...node.styleInline, style]
+      node.styleInline.push(style)
       return node
     }, $node)
 )
@@ -43,7 +43,7 @@ export const styleInline: IStyleInlineCurry = curry2(
 export const style: IStyleCurry = curry2(
   <TElement>(styleInput: IStyleCSS, source: I$Node<TElement>): I$Node<TElement> => {
     return map(node => {
-      node.style = { ...node.style, ...styleInput }
+      Object.assign(node.style, styleInput)
       return node
     }, source)
   }
@@ -56,23 +56,12 @@ export const stylePseudo: IStylePseudoCurry = curry3(
     source: I$Node<TElement>
   ): I$Node<TElement> => {
     return map(node => {
-      const nextPseudo = [...node.stylePseudo]
-      const idx = nextPseudo.findIndex(entry => entry.class === pseudoClass)
-
-      if (idx >= 0) {
-        nextPseudo[idx] = {
-          class: pseudoClass,
-          style: { ...nextPseudo[idx].style, ...styleInput }
-        }
+      const existing = node.stylePseudo.find(entry => entry.class === pseudoClass)
+      if (existing) {
+        Object.assign(existing.style, styleInput)
       } else {
-        nextPseudo.push({
-          class: pseudoClass,
-          style: { ...styleInput }
-        })
+        node.stylePseudo.push({ class: pseudoClass, style: { ...styleInput } })
       }
-
-      node.stylePseudo = nextPseudo
-
       return node
     }, source)
   }
@@ -80,6 +69,9 @@ export const stylePseudo: IStylePseudoCurry = curry3(
 
 export const styleBehavior: IStyleBehaviorCurry = curry2(
   <TElement>(style: IStream<IStyleCSS | null>, $node: I$Node<TElement>): I$Node<TElement> => {
-    return map(node => ({ ...node, styleBehavior: [...node.styleBehavior, style] }), $node)
+    return map(node => {
+      node.styleBehavior.push(style)
+      return node
+    }, $node)
   }
 )

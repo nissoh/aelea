@@ -11,12 +11,21 @@ export const disposeWith = <TArgs extends readonly unknown[]>(
 })
 
 /**
- * Create a Disposable that disposes both provided disposables
+ * Create a Disposable that disposes both provided disposables.
+ * If the first throws, the second is still disposed; the first error is rethrown.
  */
 export const disposeBoth = (d1: Disposable, d2: Disposable): Disposable => ({
   [Symbol.dispose]: () => {
-    d1[Symbol.dispose]()
+    let caught: unknown
+    let threw = false
+    try {
+      d1[Symbol.dispose]()
+    } catch (e) {
+      caught = e
+      threw = true
+    }
     d2[Symbol.dispose]()
+    if (threw) throw caught
   }
 })
 
@@ -46,7 +55,19 @@ export function toDisposable(value: any): Disposable {
 
 export const disposeAll = (disposables: Iterable<Disposable>): Disposable =>
   disposeWith(() => {
-    for (const d of disposables) d[Symbol.dispose]()
+    let firstError: unknown
+    let threw = false
+    for (const d of disposables) {
+      try {
+        d[Symbol.dispose]()
+      } catch (e) {
+        if (!threw) {
+          firstError = e
+          threw = true
+        }
+      }
+    }
+    if (threw) throw firstError
   })
 
 export const disposeNone: Disposable = {

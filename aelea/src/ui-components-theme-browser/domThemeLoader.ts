@@ -12,7 +12,7 @@ export function readDomTheme() {
   const configStyleId = 'aelea-theme-config'
   // get the <style id="aelea-theme-config"> node
   const configNode = document.querySelector<HTMLStyleElement>(`style#${configStyleId}`)
-  if (!configNode || !configNode.sheet) {
+  if (!configNode?.sheet) {
     throw new Error(`CRITICAL: <style id="${configStyleId}"> not found or missing sheet. Cannot discover themes.`)
   }
   // now you have your CSSStyleSheet directly

@@ -1,5 +1,5 @@
-import type { ITime } from '@/stream'
-import { disposeNone, disposeWith, type IScheduler, type ISink, type IStream } from '@/stream'
+import type { ITime } from '../../stream/index.js'
+import { disposeNone, disposeWith, type IScheduler, type ISink, type IStream } from '../../stream/index.js'
 import { append, remove } from '../utils.js'
 import { MulticastSink } from './sink.js'
 

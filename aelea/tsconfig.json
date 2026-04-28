@@ -1,37 +1,14 @@
 {
   "extends": "../tsconfig.base.json",
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "compilerOptions": {
-    "lib": [
-      "ESNext",
-      "DOM"
-    ],
+    "lib": ["ESNext", "DOM"],
     "outDir": "dist/esm",
     "rootDir": "./src",
     "declaration": true,
-    "declarationDir": "dist/types",
-    "baseUrl": ".",
-    "paths": {
-      "@/ui": [
-        "src/ui/index.ts"
-      ],
-      "@/stream": [
-        "src/stream/index.ts"
-      ],
-      "@/stream-extended": [
-        "src/stream-extended/index.ts"
-      ],
-      "@/ui-components-theme": [
-        "src/ui-components-theme/index.ts"
-      ],
-      "@/ui-renderer-dom": [
-        "src/ui-renderer-dom/index.ts"
-      ],
-      "@/ui-renderer-manifest": [
-        "src/ui-renderer-manifest/index.ts"
-      ]
-    }
+    "declarationDir": "dist/types"
+    // Intentionally no `paths` aliases: tsc does not rewrite them at emit,
+    // so `@/stream` etc. would ship to dist as-is and break bundlers
+    // consuming aelea. Use relative imports across `src/`.
   }
 }

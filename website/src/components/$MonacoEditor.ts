@@ -1,6 +1,6 @@
 import { combine, delay, filter, fromPromise, merge, nowWith, skipRepeatsWith, switchMap, tap } from 'aelea/stream'
 import { fetchJson, fromCallback, type IBehavior } from 'aelea/stream-extended'
-import { $wrapNativeElement, component, type INode, type IStyleCSS, style } from 'aelea/ui'
+import { $node, $wrapNativeElement, component, type INode, type INodeCompose, style } from 'aelea/ui'
 import { observer } from 'aelea/ui-components'
 import type * as monaco from 'monaco-editor'
 
@@ -279,7 +279,7 @@ async function loadAeleaPackageLocally() {
       export declare const theme: any
     `
 
-    const routerTypes = `
+    const uiRouterTypes = `
       export declare function resolveUrl(...args: any[]): any
     `
 
@@ -295,7 +295,7 @@ async function loadAeleaPackageLocally() {
             './ui': './ui/index.js',
             './ui-components': './ui-components/index.js',
             './ui-components-theme': './ui-components-theme/index.js',
-            './router': './router/index.js'
+            './ui-router': './ui-router/index.js'
           }
         }),
         hash: '',
@@ -338,10 +338,10 @@ async function loadAeleaPackageLocally() {
         time: new Date().toISOString()
       },
       {
-        name: '/router/index.d.ts',
-        content: routerTypes,
+        name: '/ui-router/index.d.ts',
+        content: uiRouterTypes,
         hash: '',
-        size: routerTypes.length,
+        size: uiRouterTypes.length,
         time: new Date().toISOString()
       }
     ]
@@ -416,15 +416,24 @@ export interface ModelChangeBehavior {
 
 let monacoEntryFileId = 0
 
+// `display: flex` is load-bearing — the wrapped editor uses `flex: 1` to fill.
+// Override via `$defaultMonacoEditorContainer(style({ height: '200px' }))` etc.
+export const $defaultMonacoEditorContainer = $node(style({ display: 'flex', flexDirection: 'column', flex: 1 }))
+
 export interface IMonacoEditorProps {
   code: string
   config?: monaco.editor.IStandaloneEditorConstructionOptions
   override?: monaco.editor.IEditorOverrideServices
-  containerStyle?: IStyleCSS
+  $container?: INodeCompose<HTMLElement>
 }
 
-export const $MonacoEditor = ({ code, config, override, containerStyle = { flex: 1 } }: IMonacoEditorProps) =>
-  component(([change, changeTether]: IBehavior<INode, ModelChangeBehavior>) => {
+export const $MonacoEditor = ({
+  code,
+  config,
+  override,
+  $container = $defaultMonacoEditorContainer
+}: IMonacoEditorProps) =>
+  component(([change, changeTether]: IBehavior<INode<HTMLElement>, ModelChangeBehavior>) => {
     const editorload = fromPromise(loadMonacoTSEditor())
 
     return [
@@ -483,7 +492,7 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
         )
 
         const $editor = $wrapNativeElement(editorElement)(
-          style({ flexDirection: 'column', ...containerStyle }),
+          style({ flex: 1 }),
           changeTether(
             tap(x => {
               return x
@@ -540,7 +549,7 @@ export const $MonacoEditor = ({ code, config, override, containerStyle = { flex:
           )
         )()
 
-        return $editor
+        return $container($editor)
       }, editorload),
       { change }
     ]

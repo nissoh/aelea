@@ -8,8 +8,15 @@ on:
       - 'aelea/**'
       - '.github/workflows/release.yml'
       - 'package.json'
-      - 'bun.lockb'
+      - 'bun.lock'
   workflow_dispatch:
+
+# Don't cancel in-progress publishes — aborting mid-release can leave npm /
+# the registry in inconsistent state. Latest run still queues, but only one
+# release pipeline runs at a time.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 env:
   IMAGE: ghcr.io/nissoh/aelea
@@ -17,6 +24,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         shell: bash
@@ -27,7 +36,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.3.1
+          bun-version: 1.3.11
 
       - name: Cache bun
         uses: actions/cache@v4
@@ -37,22 +46,29 @@ jobs:
             node_modules
             aelea/node_modules
             website/node_modules
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock', '**/bun.lockb') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
       - name: Install
         run: bun install --frozen-lockfile
 
-      - name: Lint and Build
-        run: |
-          bun run biome:check
-          bun run build
+      - name: Lint
+        run: bun run lint
+
+      - name: Test
+        run: bun run --cwd aelea test
+
+      - name: Build
+        run: bun run build
 
   release:
     needs: build
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     defaults:
       run:
         shell: bash
@@ -63,7 +79,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.3.1
+          bun-version: 1.3.11
 
       - name: Restore bun cache
         uses: actions/cache@v4
@@ -73,7 +89,7 @@ jobs:
             node_modules
             aelea/node_modules
             website/node_modules
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock', '**/bun.lockb') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
@@ -98,7 +114,7 @@ jobs:
     defaults:
       run:
         shell: bash
-    
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -119,7 +135,7 @@ jobs:
           docker push $IMAGE:latest
           docker push $IMAGE:$VERSION
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-      
+
       - name: Publish Summary
         run: |
           echo "${{ env.IMAGE }}:${{ env.VERSION }}" >> $GITHUB_STEP_SUMMARY

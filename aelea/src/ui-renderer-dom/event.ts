@@ -1,6 +1,6 @@
-import { curry2, disposeWith, type IStream, isStream } from '@/stream'
-import { fromCallback, stream } from '@/stream-extended'
-import type { I$Slottable } from './types.js'
+import { curry2, disposeWith, type IStream, isStream } from '../stream/index.js'
+import { fromCallback, stream } from '../stream-extended/index.js'
+import type { I$Slottable } from '../ui/types.js'
 
 type EventMapFor<T> = T extends Window
   ? WindowEventMap
@@ -46,41 +46,64 @@ export function fromEventTarget<T extends EventTarget, K extends keyof EventMapF
   })
 }
 
-type INodeEventDescriptor<T extends Node = Node> = {
-  $node: I$Slottable<T>
+/**
+ * Descriptor form for `nodeEvent` when the caller needs extra options.
+ * Accepts any slottable because the renderer-agnostic `INode` carries an
+ * element descriptor, not a Node; `nodeEvent` walks to the real DOM node
+ * at runtime via the `native` descriptor field or the materialized
+ * element that the renderer writes back during mount.
+ */
+type INodeEventDescriptor = {
+  $node: I$Slottable
   options?: boolean | AddEventListenerOptions
 }
 
 export interface INodeEventCurry {
-  <T extends Node, K extends keyof EventMapFor<T> & string>(
+  <K extends keyof GlobalEventHandlersEventMap & string>(
     eventType: K,
-    descriptor: I$Slottable<T> | INodeEventDescriptor<T>
-  ): IStream<EventMapFor<T>[K]>
-  <T extends Node, K extends keyof EventMapFor<T> & string>(
+    descriptor: I$Slottable | INodeEventDescriptor
+  ): IStream<GlobalEventHandlersEventMap[K]>
+  <K extends keyof GlobalEventHandlersEventMap & string>(
     eventType: K
-  ): (descriptor: I$Slottable<T> | INodeEventDescriptor<T>) => IStream<EventMapFor<T>[K]>
+  ): (descriptor: I$Slottable | INodeEventDescriptor) => IStream<GlobalEventHandlersEventMap[K]>
+}
+
+// Walk from an aelea `INode` (or a raw element) to something we can attach
+// an event listener on. The renderer-agnostic `INode.element` is an
+// `IElementDescriptor`; the DOM renderer stores the materialized element
+// in `descriptor.native` at mount, and `$wrapNativeElement` sets it at
+// construction. Either path yields a real DOM Element we can bind events to.
+function resolveEventTarget(value: unknown): EventTarget | null {
+  if (value === null || value === undefined) return null
+  if (typeof (value as EventTarget).addEventListener === 'function') return value as EventTarget
+  const el = (value as { element?: unknown }).element
+  if (el && typeof (el as EventTarget).addEventListener === 'function') return el as EventTarget
+  const native = (el as { native?: unknown })?.native ?? (value as { native?: unknown }).native
+  if (native && typeof (native as EventTarget).addEventListener === 'function') return native as EventTarget
+  return null
 }
 
 export const nodeEvent: INodeEventCurry = curry2((eventType, descriptor) => {
   const target$ = isStream(descriptor) ? descriptor : descriptor.$node
+  const options = isStream(descriptor) ? undefined : descriptor.options
 
   return stream((sink, scheduler) => {
     let detach: Disposable | null = null
 
     const disposable = target$.run(
       {
-        event(_time: number, node: any) {
+        event(_time: number, node: unknown) {
           detach?.[Symbol.dispose]?.()
-          const target = (node as any)?.element ?? node
-          if (!target?.addEventListener) return
+          const target = resolveEventTarget(node)
+          if (target === null) return
 
           const handler = (ev: Event) => {
-            sink.event(scheduler.time(), ev as any)
+            sink.event(scheduler.time(), ev as never)
           }
 
-          target.addEventListener(eventType, handler as EventListener, (descriptor as any).options)
+          target.addEventListener(eventType, handler, options)
           detach = disposeWith(() => {
-            target.removeEventListener(eventType, handler as EventListener, (descriptor as any).options)
+            target.removeEventListener(eventType, handler, options)
           })
         },
         error(time: number, err: unknown) {

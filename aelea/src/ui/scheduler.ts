@@ -38,39 +38,25 @@ class DomScheduler implements I$Scheduler {
   private asapTasks: ITask[] = []
   private paintTasks: ITask[] = []
   private asapScheduled = false
-  private asapCancelled = false
   private paintScheduled = false
   private readonly initialTime = perfNow()
   private readonly initialWallClockTime = Date.now()
 
+  // Drain any pending asap tasks before a delayed task fires. No
+  // cancellation flag needed — flushAsapTasks is idempotent: if the
+  // scheduled microtask fires after we've already drained here, it
+  // simply finds an empty queue and returns. The `asapScheduled` flag
+  // gates re-entry.
   runDelayedTask = (task: ITask): void => {
-    // First flush any pending asap tasks
-    if (this.asapScheduled) {
-      // Cancel the pending microtask and flush synchronously
-      this.asapCancelled = true
-      this.asapScheduled = false
-      const tasks = this.asapTasks
-      this.asapTasks = []
-
-      for (let i = 0; i < tasks.length; i++) tasks[i].run(this.time())
-    }
+    if (this.asapScheduled) this.flushAsapTasks()
     task.run(this.time())
   }
 
   flushAsapTasks = (): void => {
-    // Check if this flush was cancelled
-    if (this.asapCancelled) {
-      this.asapCancelled = false
-      return
-    }
-
-    // Check if already flushed (defensive programming)
     if (!this.asapScheduled) return
-
     this.asapScheduled = false
     const tasks = this.asapTasks
     this.asapTasks = []
-
     for (let i = 0; i < tasks.length; i++) tasks[i].run(this.time())
   }
 
@@ -120,4 +106,58 @@ class DomScheduler implements I$Scheduler {
 
 export function createDomScheduler(): I$Scheduler {
   return new DomScheduler()
+}
+
+/**
+ * Headless scheduler for environments without a real compositor (Node,
+ * Bun, image-generation pipelines). `paint` resolves on the same
+ * microtask queue as `asap` — no `requestAnimationFrame` dependency,
+ * no global polyfills.
+ */
+class HeadlessScheduler implements I$Scheduler {
+  private asapTasks: ITask[] = []
+  private asapScheduled = false
+  private readonly initialTime = perfNow()
+  private readonly initialWallClockTime = Date.now()
+
+  private flushAsapTasks = (): void => {
+    if (!this.asapScheduled) return
+    this.asapScheduled = false
+    const tasks = this.asapTasks
+    this.asapTasks = []
+    for (let i = 0; i < tasks.length; i++) tasks[i].run(this.time())
+  }
+
+  asap(task: ITask): Disposable {
+    this.asapTasks.push(task)
+    if (!this.asapScheduled) {
+      this.asapScheduled = true
+      queue(this.flushAsapTasks)
+    }
+    return task
+  }
+
+  delay(task: ITask, delay: ITime): Disposable {
+    setTimeout(() => task.run(this.time()), delay)
+    return task
+  }
+
+  // No paint phase — headless environments don't benefit from deferring
+  // writes to the next frame. Fall through to asap so timing contracts
+  // that expect eventual execution still hold.
+  paint(task: ITask): Disposable {
+    return this.asap(task)
+  }
+
+  time(): ITime {
+    return perfNow() - this.initialTime
+  }
+
+  dayTime(): ITime {
+    return this.initialWallClockTime + this.time()
+  }
+}
+
+export function createHeadlessScheduler(): I$Scheduler {
+  return new HeadlessScheduler()
 }

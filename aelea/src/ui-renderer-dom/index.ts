@@ -1,5 +1,26 @@
+/**
+ * Aelea DOM renderer — browser-target entry point.
+ *
+ *   import { $element, $text, component, style } from 'aelea/ui'
+ *   import { render, nodeEvent } from 'aelea/dom'
+ *
+ *   render({ rootAttachment: document.body, $rootNode: $App })
+ *
+ * Factories (`$element`, `$text`, `$svg`, `$custom`, `$node`,
+ * `$wrapNativeElement`) are renderer-agnostic and live in `aelea/ui`;
+ * this module only exposes DOM-specific bindings (`render`, event
+ * helpers, stylesheet helpers). The agnostic surface is re-exported
+ * below as a convenience for consumers that prefer a single import
+ * origin.
+ */
+
 export {
+  $custom,
+  $element,
+  $node,
+  $svg,
   $text,
+  $wrapNativeElement,
   attr,
   attrBehavior,
   component,
@@ -12,29 +33,22 @@ export {
   styleBehavior,
   styleInline,
   stylePseudo
-} from '@/ui'
-export { createStylePseudoRule, createStyleRule, render } from './dom.js'
-export { fromEventTarget, nodeEvent } from './event.js'
-export { $custom, $element, $node, $svg, $wrapNativeElement } from './factories.js'
+} from '../ui/index.js'
 export type {
   I$Node,
-  I$NodeDom,
   I$Op,
-  I$OpDom,
-  I$SchedulerDom,
+  I$Scheduler,
   I$Slottable,
-  I$SlottableDom,
+  I$Text,
   IAttributeProperties,
-  IComponentBehaviorDom,
+  IComponentBehavior,
   INode,
   INodeCompose,
-  INodeComposeDom,
-  INodeDom,
-  INodeElement,
-  INodeElementDom,
-  IOutputTethersDom,
+  IOutputTethers,
+  ISlotChild,
   ISlottable,
-  ISlottableDom,
   IStyleCSS,
   ITextNode
-} from './types.js'
+} from '../ui/types.js'
+export { createStylePseudoRule, createStyleRule, type INodeElementDom, type IRenderConfig, render } from './dom.js'
+export { fromEventTarget, nodeEvent } from './event.js'

@@ -1,50 +1,22 @@
-import * as router from 'aelea/router'
-import { $RouterAnchor } from 'aelea/router'
-import { map, merge, start } from 'aelea/stream'
-import { type IBehavior, multicast } from 'aelea/stream-extended'
-import { $element, $text, component, fromEventTarget, style } from 'aelea/ui'
+import { op } from 'aelea/stream'
+import { $element, $text, component, style } from 'aelea/ui'
 import { $column, $icon, $row, designSheet, spacing } from 'aelea/ui-components'
 import { pallete, themeList } from 'aelea/ui-components-theme'
+import { $Link, commitTitle, contains, match } from 'aelea/ui-router'
 import { $Picker } from '../components/$ThemePicker'
 import { fadeIn } from '../components/transitions/enter'
 import { $aeleaLogo } from '../elements/$icons'
+import { routeSchema } from '../route'
 import $MainMenu from './$MainMenu'
 import $Examples from './examples/$Examples'
 import $Guide from './guide/$Guide'
 
-const popStateEvent = fromEventTarget(window, 'popstate')
-
-const requestRouteChange = start(document.location, popStateEvent)
-const locationChange = map(location => {
-  return location
-}, requestRouteChange)
-
-interface Website {
-  baseRoute: string
-}
-
-export default ({ baseRoute }: Website) =>
-  component(([routeChanges, linkClickTether]: IBehavior<string, string>) => {
-    const changes = merge(locationChange, multicast(routeChanges))
-    const fragmentsChange = map(() => {
-      const trailingSlash = /\/$/
-      const relativeUrl = location.href.replace(trailingSlash, '').split(document.baseURI.replace(trailingSlash, ''))[1]
-      const frags = relativeUrl.split('/')
-      frags.splice(0, 1, baseRoute)
-      return frags
-    }, changes)
-
-    const rootRoute = router.create({
-      fragment: baseRoute,
-      title: 'aelea',
-      fragmentsChange
-    })
-    const pagesRoute = rootRoute.create({ fragment: 'p', title: 'aelea' })
-    const guideRoute = pagesRoute.create({ fragment: 'guide', title: 'Guide' })
-    const examplesRoute = pagesRoute.create({
-      fragment: 'examples',
-      title: 'Examples'
-    })
+export default () =>
+  component(() => {
+    const rootRoute = routeSchema
+    const pagesRoute = routeSchema.pages
+    const guideRoute = routeSchema.pages.guide
+    const examplesRoute = routeSchema.pages.examples
 
     return [
       $column(
@@ -52,54 +24,51 @@ export default ({ baseRoute }: Website) =>
         designSheet.customScroll,
         style({
           backgroundColor: pallete.background,
-          fontFamily: `'Nunito', Fira Code`,
+          fontFamily: `'Nunito', 'Fira Code', system-ui, sans-serif`,
           backgroundImage: `radial-gradient(at center center, ${pallete.horizon} 50vh, ${pallete.background})`
         })
       )(
-        router.match(rootRoute)(
-          $row(
-            style({
-              flex: 1,
-              minHeight: '100%',
-              alignContent: 'center',
-              alignItems: 'center',
-              placeContent: 'center',
-              textAlign: 'center',
-              padding: '0 30px'
-            })
-          )(
-            fadeIn(
-              $column(style({ alignItems: 'center', maxWidth: '550px' }), spacing.big)(
-                $RouterAnchor({
-                  url: '/',
-                  route: rootRoute,
-                  $anchor: $element('a')(
-                    $icon({
-                      $content: style({ fill: pallete.message }, $aeleaLogo),
-                      width: '237px',
-                      height: '115px',
-                      viewBox: '0 0 147 90'
-                    })
-                  )
-                })({
-                  click: linkClickTether()
-                }),
-                $column(spacing.small)(
-                  $text(`"aelea", is a UI Framework for reactive event programming`),
-                  $text(
-                    'It helps you write composable and performant building blocks by composing functional event streams'
-                  )
-                ),
+        match(rootRoute)(
+          commitTitle('aelea')(
+            $row(
+              style({
+                flex: 1,
+                minHeight: '100%',
+                alignContent: 'center',
+                alignItems: 'center',
+                placeContent: 'center',
+                textAlign: 'center',
+                padding: '0 30px'
+              })
+            )(
+              fadeIn(
+                $column(style({ alignItems: 'center', maxWidth: '550px' }), spacing.big)(
+                  $Link({
+                    route: rootRoute,
+                    $anchor: $element('a')(
+                      $icon({
+                        $content: style({ fill: pallete.message }, $aeleaLogo),
+                        width: '237px',
+                        height: '115px',
+                        viewBox: '0 0 147 90'
+                      })
+                    )
+                  })({ click: op }),
+                  $column(spacing.small)(
+                    $text(`"aelea", is a UI Framework for reactive event programming`),
+                    $text(
+                      'It helps you write composable and performant building blocks by composing functional event streams'
+                    )
+                  ),
 
-                $MainMenu({ parentRoute: pagesRoute })({
-                  routeChange: linkClickTether()
-                })
+                  $MainMenu()({})
+                )
               )
             )
           )
         ),
 
-        router.contains(pagesRoute)(
+        contains(pagesRoute)(
           $column(
             spacing.big,
             style({
@@ -110,7 +79,8 @@ export default ({ baseRoute }: Website) =>
             })
           )(
             $row(style({ placeContent: 'space-between', padding: '0 15px' }))(
-              $RouterAnchor({
+              $Link({
+                route: rootRoute,
                 $anchor: $element('a')(
                   $icon({
                     $content: $aeleaLogo,
@@ -119,22 +89,12 @@ export default ({ baseRoute }: Website) =>
                     height: '115px',
                     viewBox: '0 0 147 90'
                   })
-                ),
-                url: '/',
-                route: rootRoute
-              })({
-                click: linkClickTether()
-              }),
-              $MainMenu({ parentRoute: pagesRoute })({
-                routeChange: linkClickTether()
-              })
+                )
+              })({ click: op }),
+              $MainMenu()({})
             ),
-            router.match(guideRoute)($Guide()({})),
-            router.contains(examplesRoute)(
-              $Examples({ router: examplesRoute })({
-                routeChanges: linkClickTether()
-              })
-            )
+            match(guideRoute)(commitTitle('Guide')($Guide()({}))),
+            contains(examplesRoute)($Examples()({}))
           )
         ),
 

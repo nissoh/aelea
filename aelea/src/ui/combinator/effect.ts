@@ -1,4 +1,4 @@
-import { curry2, curry3, map } from '@/stream'
+import { curry2, curry3, map } from '../../stream/index.js'
 import type { I$Node, I$Scheduler, INode } from '../types.js'
 
 export interface IEffectPropCurry {
@@ -8,8 +8,8 @@ export interface IEffectPropCurry {
 
 export const effectProp: IEffectPropCurry = curry3((prop: string, source: any, node: I$Node): I$Node => {
   return map((n: INode) => {
-    const propBehavior = [...(n.propBehavior ?? []), { key: prop, value: source }]
-    return { ...n, propBehavior }
+    n.propBehavior.push({ key: prop, value: source })
+    return n
   }, node)
 })
 
@@ -17,8 +17,8 @@ export const effectProp: IEffectPropCurry = curry3((prop: string, source: any, n
 export const effectRun = curry2(
   (apply: (element: unknown, scheduler: I$Scheduler) => Disposable | void, node: I$Node): I$Node => {
     return map((n: INode) => {
-      const propBehavior = [...(n.propBehavior ?? []), { key: '__run__', value: apply as any }]
-      return { ...n, propBehavior }
+      n.propBehavior.push({ key: '__run__', value: apply as any })
+      return n
     }, node)
   }
 )

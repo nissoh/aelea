@@ -56,8 +56,13 @@ class JoinSink<A, B> implements ISink<A>, Disposable {
     try {
       const innerSink = new InnerSink(this, this.sink)
       const innerStream = this.f(value)
-      innerSink.disposable = innerStream.run(innerSink, this.scheduler)
       this.current.push(innerSink)
+      const d = innerStream.run(innerSink, this.scheduler)
+      if (innerSink.disposed) {
+        d[Symbol.dispose]()
+      } else {
+        innerSink.disposable = d
+      }
     } catch (err) {
       this.sink.error(time, err)
     }
@@ -105,6 +110,7 @@ class JoinSink<A, B> implements ISink<A>, Disposable {
 
 class InnerSink<A> implements ISink<A>, Disposable {
   disposable: Disposable = disposeNone
+  disposed = false
 
   constructor(
     readonly parentJoin: JoinSink<any, A>,
@@ -124,8 +130,10 @@ class InnerSink<A> implements ISink<A>, Disposable {
   }
 
   [Symbol.dispose](): void {
+    if (this.disposed) return
+    this.disposed = true
     const d = this.disposable
-    this.disposable = disposeNone // Clear before disposing to prevent circular disposal
+    this.disposable = disposeNone
     d[Symbol.dispose]()
   }
 }

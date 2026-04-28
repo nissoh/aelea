@@ -1,6 +1,6 @@
-import { o } from '@/stream'
-import { pallete } from '@/ui-components-theme'
-import { style, stylePseudo } from '@/ui-renderer-dom'
+import { o } from '../../stream/index.js'
+import { pallete } from '../../ui-components-theme/index.js'
+import { style, stylePseudo } from '../../ui-renderer-dom/index.js'
 
 export const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
 
@@ -29,6 +29,7 @@ const customScroll = isFirefox
 const control = o(
   text,
   style({
+    backgroundColor: 'transparent',
     border: '2px solid transparent',
     color: pallete.message,
     outline: 'none',

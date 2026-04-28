@@ -21,10 +21,10 @@ class ContinueWith<A, B> implements IStream<A | B> {
   ) {}
 
   run(sink: ISink<A | B>, scheduler: IScheduler): Disposable {
-    const continuwSinkDisposable = new ContinueWithSink(sink, scheduler, this.f)
-    const sourceDisposable = this.source.run(continuwSinkDisposable, scheduler)
+    const continueSinkDisposable = new ContinueWithSink(sink, scheduler, this.f)
+    const sourceDisposable = this.source.run(continueSinkDisposable, scheduler)
 
-    return disposeBoth(sourceDisposable, continuwSinkDisposable)
+    return disposeBoth(sourceDisposable, continueSinkDisposable)
   }
 }
 

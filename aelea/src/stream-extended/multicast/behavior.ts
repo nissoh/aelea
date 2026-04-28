@@ -1,4 +1,12 @@
-import { disposeAll, disposeWith, type IOps, type IScheduler, type ISink, type IStream, op } from '@/stream'
+import {
+  disposeAll,
+  disposeWith,
+  type IOps,
+  type IScheduler,
+  type ISink,
+  type IStream,
+  op
+} from '../../stream/index.js'
 import type { IBehavior, IComposeBehavior } from '../types.js'
 import { tether } from './tether.js'
 

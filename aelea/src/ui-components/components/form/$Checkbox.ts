@@ -1,8 +1,17 @@
-import { map, merge } from '@/stream'
-import type { IBehavior } from '@/stream-extended'
-import { pallete } from '@/ui-components-theme'
-import type { ISlottable } from '@/ui-renderer-dom'
-import { $element, $node, attr, attrBehavior, component, nodeEvent, style, styleBehavior } from '@/ui-renderer-dom'
+import { map, merge } from '../../../stream/index.js'
+import type { IBehavior } from '../../../stream-extended/index.js'
+import { pallete } from '../../../ui-components-theme/index.js'
+import type { ISlottable } from '../../../ui-renderer-dom/index.js'
+import {
+  $element,
+  $node,
+  attr,
+  attrBehavior,
+  component,
+  nodeEvent,
+  style,
+  styleBehavior
+} from '../../../ui-renderer-dom/index.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 import { dismissOp, interactionOp } from './form.js'
 import type { Input } from './types.js'

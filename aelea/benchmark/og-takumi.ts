@@ -1,20 +1,22 @@
 /**
- * Generate an OG-style image with @takumi-rs/image-response (no browser).
- * Run: bun run benchmark/og-takumi.ts
- * Output: og-takumi.webp
+ * Rasterize an aelea component tree to an OG-card .webp via the takumi
+ * renderer, no browser needed.
+ *
+ * The component is built with renderer-agnostic factories from `aelea/ui`.
+ * The DOM renderer and the takumi renderer accept the same tree — the
+ * choice is just which `render…` helper you call.
+ *
+ * Run:    bun run benchmark/og-takumi.ts
+ * Output: benchmark/og-takumi.webp
  */
 
 import { writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { ImageResponse } from '@takumi-rs/image-response'
-import { attr } from '../src/ui/combinator/attribute.js'
-import { style } from '../src/ui/index.js'
-import { createDomScheduler } from '../src/ui/scheduler.js'
-import { $element, $text, manifestFromNode } from '../src/ui-renderer-manifest/index.js'
-import { manifestToReact } from '../src/ui-renderer-manifest-react/index.js'
+import { $element, $text, attr, style } from '../src/ui/index.js'
+import { renderToImage } from '../src/ui-renderer-takumi/index.js'
 
-const width = 1200
-const height = 630
+const pixelSrc =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/xcAAgMBgAjeRGkAAAAASUVORK5CYII='
 
 const cardStyle = style({
   width: '1000px',
@@ -35,25 +37,7 @@ const imageStyle = style({
   height: '180px',
   borderRadius: '16px',
   border: '1px solid rgba(255,255,255,0.14)',
-  backgroundColor: '#f2555a',
-  backgroundImage: 'linear-gradient(135deg, #ff6a6a, #f2555a)'
-})
-
-const textColumnStyle = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '12px'
-})
-
-const titleStyle = style({
-  fontSize: '56px',
-  fontWeight: 700
-})
-
-const subtitleStyle = style({
-  fontSize: '26px',
-  color: 'rgba(232,240,255,0.78)',
-  maxWidth: '640px'
+  backgroundColor: '#f2555a'
 })
 
 const rootStyle = style({
@@ -70,46 +54,22 @@ const rootStyle = style({
 
 const $App = $element('div')(rootStyle)(
   $element('div')(cardStyle)(
-    $element('img')(
-      imageStyle,
-      attr({
-        src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/xcAAgMBgAjeRGkAAAAASUVORK5CYII=',
-        width: 180,
-        height: 180
-      })
-    )(),
-    $element('div')(textColumnStyle)(
-      $element('div')(titleStyle)($text('Aelea UI')),
-      $element('div')(subtitleStyle)($text('Streams → DOM → shareable images'))
+    $element('img')(imageStyle, attr({ src: pixelSrc, width: 180, height: 180 }))(),
+    $element('div')(style({ display: 'flex', flexDirection: 'column', gap: '12px' }))(
+      $element('div')(style({ fontSize: '56px', fontWeight: 700 }))($text('Aelea UI')),
+      $element('div')(style({ fontSize: '26px', color: 'rgba(232,240,255,0.78)', maxWidth: '640px' }))(
+        $text('Streams → takumi → shareable images')
+      )
     )
   )
 )
 
-const manifest = await new Promise(resolve => {
-  const scheduler = createDomScheduler()
-  const disp = manifestFromNode($App, scheduler).run(
-    {
-      event(_time, m) {
-        resolve(m)
-        disp?.[Symbol.dispose]?.()
-      },
-      error(_time, err) {
-        throw err
-      }
-    },
-    scheduler
-  )
-})
-
-const tree = manifestToReact(manifest)
-
-const response = new ImageResponse(tree, {
-  width,
-  height,
+const bytes = await renderToImage($App, {
+  width: 1200,
+  height: 630,
   format: 'webp'
 })
 
-const arrayBuffer = await response.arrayBuffer()
 const outPath = resolve(process.cwd(), 'benchmark/og-takumi.webp')
-writeFileSync(outPath, Buffer.from(arrayBuffer))
-console.log('OG image saved to', outPath)
+writeFileSync(outPath, bytes)
+console.log(`OG image saved to ${outPath} (${bytes.byteLength} bytes)`)

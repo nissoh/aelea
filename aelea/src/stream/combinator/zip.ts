@@ -157,7 +157,7 @@ class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
 
   ended(): boolean {
     for (let i = 0; i < this.buffers.length; i++) {
-      if (this.buffers[i].isEmpty() && !this.sinks[i].ended) {
+      if (this.buffers[i].isEmpty() && this.sinks[i].ended) {
         return true
       }
     }

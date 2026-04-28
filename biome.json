@@ -47,7 +47,8 @@
         "noAssignInExpressions": "off",
         "noConfusingVoidType": "off",
         "noExplicitAny": "off",
-        "noRedeclare": "off"
+        "noRedeclare": "off",
+        "useIterableCallbackReturn": "off"
       },
       "performance": {
         "noAccumulatingSpread": "off"

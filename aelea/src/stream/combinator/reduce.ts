@@ -8,7 +8,7 @@ import { PipeSink } from '../utils/sink.js'
  * Accumulate values from a stream
  *
  * stream:       -1-2-3->
- * reduce(+, 0): 0-1-3-6->
+ * reduce(+, 0): 01-3-6->
  */
 export const reduce: IReduceCurry = curry3((f, seed, s) => new Reduce(f, seed, s))
 

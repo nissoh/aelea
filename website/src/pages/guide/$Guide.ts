@@ -1,4 +1,4 @@
-import { $node, $p, $text, attr, component, style } from 'aelea/ui'
+import { $element, $node, $text, attr, component, style } from 'aelea/ui'
 import { $column, spacing } from 'aelea/ui-components'
 import { $Example } from '../../components/$Example'
 import $TSPeep from '../../components/typescript-notebook/$TSPeep'
@@ -22,7 +22,7 @@ export default () =>
             $text(' knowledge helps, but you can learn by editing the snippets below.')
           ),
 
-          $p($text('1) Render text with a factory:')),
+          $element('p')($text('1) Render text with a factory:')),
           $TSPeep({
             readOnly: false,
             code: `import { $text } from 'aelea/ui'
@@ -30,7 +30,7 @@ export default () =>
 export default $text('Hello Aelea')`
           })({}),
 
-          $p($text('2) Compose elements and styles:')),
+          $element('p')($text('2) Compose elements and styles:')),
           $TSPeep({
             readOnly: false,
             code: `import { $element, $text, style } from 'aelea/ui'
@@ -44,7 +44,7 @@ export default $box(
 )`
           })({}),
 
-          $p($text('3) Minimal counter component with behaviors:')),
+          $element('p')($text('3) Minimal counter component with behaviors:')),
           $TSPeep({
             readOnly: false,
             code: `import { map, constant, reduce, merge } from 'aelea/stream'

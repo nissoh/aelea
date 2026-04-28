@@ -1,6 +1,6 @@
-import { type IOps, op } from '@/stream'
-import type { I$Node, INode } from '@/ui-renderer-dom'
-import { $svg, attr, style } from '@/ui-renderer-dom'
+import { type IOps, op } from '../../stream/index.js'
+import type { I$Node, INode } from '../../ui-renderer-dom/index.js'
+import { $svg, attr, style } from '../../ui-renderer-dom/index.js'
 
 interface Icon {
   /**  in pixels */

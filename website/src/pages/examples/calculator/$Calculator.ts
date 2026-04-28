@@ -1,7 +1,7 @@
 import { combine, empty, map, o, start } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $node, $text, attr, component, style } from 'aelea/ui'
-import { $column, $Field, $NumberTicker, $row, spacing } from 'aelea/ui-components'
+import { $column, $defaultFieldContainer, $Field, $NumberTicker, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
 
 const extractValue = o(
@@ -19,16 +19,16 @@ const $plus = $node(
   })
 )
 
-const placeholderZero = attr({ placeholder: '0' })
+const $placeholderField = $defaultFieldContainer(attr({ placeholder: '0' }))
 export default component(([n1, n1Tether]: IBehavior<string, number>, [n2, n2Tether]: IBehavior<string, number>) => [
   $column(spacing.small)(
     $row(
       $plus($text('+')),
       $column(spacing.tiny)(
-        $Field({ value: empty, inputOp: placeholderZero })({
+        $Field({ value: empty, $container: $placeholderField })({
           change: n1Tether(extractValue)
         }),
-        $Field({ value: empty, inputOp: placeholderZero })({
+        $Field({ value: empty, $container: $placeholderField })({
           change: n2Tether(extractValue)
         })
       )

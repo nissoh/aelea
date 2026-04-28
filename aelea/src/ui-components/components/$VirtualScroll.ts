@@ -12,13 +12,14 @@ import {
   skip,
   start,
   switchLatest
-} from '@/stream'
-import { type IBehavior, multicast } from '@/stream-extended'
-import { pallete } from '@/ui-components-theme'
-import type { I$Node, INode } from '@/ui-renderer-dom'
-import { $custom, $node, $text, component, style } from '@/ui-renderer-dom'
+} from '../../stream/index.js'
+import { type IBehavior, multicast } from '../../stream-extended/index.js'
+import { pallete } from '../../ui-components-theme/index.js'
+import type { I$Node, INode } from '../../ui-renderer-dom/index.js'
+import { $custom, $node, $text, component, style } from '../../ui-renderer-dom/index.js'
 import { $column } from '../elements/$elements.js'
 import { designSheet } from '../style/designSheet.js'
+import { observer } from '../utils/elementObservers.js'
 
 export type ScrollRequest = number
 
@@ -41,7 +42,7 @@ export interface QuantumScroll {
 const $defaultLoader = $node(style({ color: pallete.foreground, padding: '3px 10px' }))($text('Loading...'))
 
 export const $VirtualScroll = ({ dataSource, containerOps = op, $loader = $defaultLoader }: QuantumScroll) =>
-  component(([intersecting, intersectingTether]: IBehavior<INode, IntersectionObserverEntry>) => {
+  component(([intersecting, intersectingTether]: IBehavior<INode<HTMLElement>, IntersectionObserverEntry[]>) => {
     const multicastDatasource = multicast(dataSource)
 
     const scrollReuqestWithInitial: IStream<ScrollRequest> = skip(
@@ -51,10 +52,11 @@ export const $VirtualScroll = ({ dataSource, containerOps = op, $loader = $defau
 
     const $container = $column(designSheet.customScroll, style({ overflow: 'auto' }), containerOps)
 
+    // Each visibility-into-view event = "fetch next page". Filter to entering events only;
+    // exits would double-trigger.
     const intersectedLoader = intersectingTether(
-      // TODO: reintroduce a typed intersection helper; keeping a placeholder no-op for now
-      map(() => null as any),
-      filter(() => false)
+      observer.intersection(),
+      filter(entries => entries[0]?.isIntersecting === true)
     )
 
     const $observer = $custom('observer')(intersectedLoader)()

@@ -18,12 +18,13 @@ class AwaitPromises<T> implements IStream<T> {
 /**
  * Turn a Stream of promises into a Stream containing the promises' values.
  * Event order is always preserved, regardless of promise fulfillment order.
+ * Resolved values flush immediately once earlier promises settle.
  *
  * promise p:             ---1
  * promise q:             ------2
  * promise r:             -3
  * stream:                -p---q---r->
- * awaitPromises(stream): ---1--2--3->
+ * awaitPromises(stream): ---1--23--->
  */
 export const awaitPromises = <T>(s: IStream<Promise<T>>): IStream<T> => new AwaitPromises(s)
 

@@ -1,22 +1,29 @@
-import type { IOps } from '@/stream'
-import { combine, constant, empty, map, merge, o, start } from '@/stream'
-import type { IBehavior } from '@/stream-extended'
-import { multicast } from '@/stream-extended'
-import { pallete } from '@/ui-components-theme'
-import type { INode, ISlottable, IStyleCSS } from '@/ui-renderer-dom'
-import { $element, component, effectProp, nodeEvent, style, styleBehavior } from '@/ui-renderer-dom'
+import { combine, constant, empty, map, merge, o, start } from '../../../stream/index.js'
+import type { IBehavior } from '../../../stream-extended/index.js'
+import { multicast } from '../../../stream-extended/index.js'
+import { pallete } from '../../../ui-components-theme/index.js'
+import type { ISlottable } from '../../../ui-renderer-dom/index.js'
+import {
+  $element,
+  component,
+  effectProp,
+  type INodeCompose,
+  nodeEvent,
+  styleBehavior
+} from '../../../ui-renderer-dom/index.js'
 import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'
 import type { Input, InputType } from './types.js'
 
+export const $defaultFieldContainer = $element('input')(designSheet.input)
+
 export interface Field extends Input<string | number> {
   type?: InputType
   name?: string
-  fieldStyle?: IStyleCSS
-  inputOp?: IOps<INode>
+  $container?: INodeCompose<HTMLInputElement>
 }
 
-export const $Field = ({ value = empty, fieldStyle = {}, validation = constant(null), inputOp = o() }: Field) =>
+export const $Field = ({ value = empty, validation = constant(null), $container = $defaultFieldContainer }: Field) =>
   component(
     (
       [focusStyle, interactionTether]: IBehavior<ISlottable<HTMLInputElement>, boolean>,
@@ -29,45 +36,24 @@ export const $Field = ({ value = empty, fieldStyle = {}, validation = constant(n
       const focus = merge(focusStyle, dismissstyle)
       const state = combine({ focus, alert })
 
-      const $input = $element('input')
       return [
-        $input(
-          designSheet.input,
-          style(fieldStyle),
-
+        $container(
           changeTether(
             nodeEvent('input'),
-            map(inputEv => {
-              if (inputEv.target instanceof HTMLInputElement) {
-                const text = inputEv.target.value
-                return text || ''
-              }
-              return ''
-            })
+            map(inputEv => (inputEv.target instanceof HTMLInputElement ? inputEv.target.value || '' : ''))
           ),
-
-          inputOp,
-
           styleBehavior(
             map(({ focus, alert }) => {
-              if (alert) {
-                return { borderBottom: `2px solid ${pallete.negative}` }
-              }
-
+              if (alert) return { borderBottom: `2px solid ${pallete.negative}` }
               return focus ? { borderBottom: `2px solid ${pallete.primary}` } : null
             }, state)
           ),
-
           interactionTether(interactionOp),
           dismissTether(dismissOp),
           blurTether(nodeEvent('blur')),
           effectProp('value', value)
         )(),
-
-        {
-          change,
-          blur
-        }
+        { change, blur }
       ]
     }
   )

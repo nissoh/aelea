@@ -1,7 +1,7 @@
-import { type IStream, map, merge, switchLatest } from '@/stream'
-import type { IBehavior } from '@/stream-extended'
-import type { I$Slottable } from '@/ui-renderer-dom'
-import { $node, component, nodeEvent } from '@/ui-renderer-dom'
+import { type IStream, map, merge, switchLatest } from '../../stream/index.js'
+import type { IBehavior } from '../../stream-extended/index.js'
+import type { I$Slottable } from '../../ui-renderer-dom/index.js'
+import { $node, component, nodeEvent } from '../../ui-renderer-dom/index.js'
 
 export interface Tab {
   content: I$Slottable

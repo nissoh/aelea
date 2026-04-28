@@ -13,14 +13,13 @@ import { createNodeScheduler } from './NodeScheduler.js'
  * if you need a specific implementation.
  */
 export function createDefaultScheduler(): IScheduler {
-  // Check if we're in Node.js environment
-  if (
-    typeof globalThis !== 'undefined' &&
-    typeof globalThis.process !== 'undefined' &&
-    typeof globalThis.process.versions !== 'undefined' &&
-    typeof globalThis.process.versions.node !== 'undefined' &&
-    typeof setImmediate === 'function'
-  ) {
+  // Check if we're in Node.js environment.
+  // setImmediate is the Node-only signal; guard via globalThis indexing so the check
+  // compiles without @types/node.
+  const g = globalThis as unknown as Record<string, unknown>
+  const process = g.process as { versions?: { node?: string } } | undefined
+
+  if (process?.versions?.node !== undefined && typeof g.setImmediate === 'function') {
     return createNodeScheduler()
   }
 

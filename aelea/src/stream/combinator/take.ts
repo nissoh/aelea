@@ -1,4 +1,5 @@
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
+import { disposeNone } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
@@ -12,7 +13,15 @@ class Take<T> implements IStream<T> {
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    return this.source.run(new TakeSink(this.n, sink), scheduler)
+    const takeSink = new TakeSink(this.n, sink)
+    const d = this.source.run(takeSink, scheduler)
+    // If the source already satisfied the take synchronously in run(), dispose now.
+    if (takeSink.done) {
+      d[Symbol.dispose]()
+      return disposeNone
+    }
+    takeSink.upstream = d
+    return d
   }
 }
 
@@ -34,6 +43,8 @@ export interface ITakeCurry {
 
 class TakeSink<T> extends PipeSink<T> {
   taken = 0
+  done = false
+  upstream: Disposable = disposeNone
 
   constructor(
     readonly n: number,
@@ -43,24 +54,27 @@ class TakeSink<T> extends PipeSink<T> {
   }
 
   event(time: ITime, value: T) {
-    if (this.taken < this.n) {
-      this.sink.event(time, value)
-      this.taken++
+    if (this.done) return
+    this.sink.event(time, value)
+    this.taken++
 
-      if (this.taken === this.n) {
-        this.end(time)
-      }
-    }
+    if (this.taken === this.n) this.finish(time)
   }
 
-  error(time: ITime, error: any) {
-    if (this.taken < this.n) {
-      this.sink.error(time, error)
-      this.taken++
+  error(time: ITime, error: unknown) {
+    if (this.done) return
+    this.sink.error(time, error)
+    this.taken++
 
-      if (this.taken === this.n) {
-        this.end(time)
-      }
-    }
+    if (this.taken === this.n) this.finish(time)
+  }
+
+  private finish(time: ITime): void {
+    this.done = true
+    this.sink.end(time)
+    // upstream is disposeNone if finish happens during source's run() —
+    // Take.run will dispose the returned handle itself.
+    this.upstream[Symbol.dispose]()
+    this.upstream = disposeNone
   }
 }

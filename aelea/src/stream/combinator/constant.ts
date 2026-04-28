@@ -16,7 +16,7 @@ export const constant: IConstantCurry = curry2((value, stream) => map(() => valu
  * Prepend a value to the beginning of a stream
  *
  * stream:   -x-y-z->
- * start(a): a-x-y-z->
+ * start(a): ax-y-z->
  */
 export const start: IStartCurry = curry2((value, stream) => merge(just(value), stream))
 

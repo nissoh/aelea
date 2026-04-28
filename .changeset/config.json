@@ -4,14 +4,14 @@
     "@changesets/changelog-github",
     {
       "repo": "nissoh/aelea",
-      "baseBranches": ["main"]
+      "baseBranches": ["master"]
     }
   ],
   "commit": false,
   "fixed": [],
   "linked": [],
   "access": "restricted",
-  "baseBranch": "main",
+  "baseBranch": "master",
   "updateInternalDependencies": "patch",
   "ignore": []
 }

@@ -1,40 +1,17 @@
 {
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "sourceMap": true,
-    "target": "ES2020",
-    "lib": [
-      "ES2022",
-      "DOM"
-    ],
-    "types": [
-      "vite/client"
-    ],
+    // Vite bundler mode — override base NodeNext resolution and composite output.
+    "composite": false,
     "module": "ESNext",
-    /* Bundler mode */
     "moduleResolution": "bundler",
-    "moduleDetection": "force",
-    "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
-    /* Linting */
-    "strict": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noEmit": true,
     "isolatedModules": true,
-    "skipLibCheck": true,
-    /* Path Aliases */
-    "paths": {}
+    "noEmit": true,
+    "lib": ["ES2023", "DOM"],
+    "types": ["vite/client"]
   },
-  "references": [
-    {
-      "path": "../aelea"
-    }
-  ],
-  "include": [
-    "./src",
-  ],
-  "exclude": [
-    "**/dist"
-  ]
+  "references": [{ "path": "../aelea" }],
+  "include": ["./src"],
+  "exclude": ["**/dist"]
 }

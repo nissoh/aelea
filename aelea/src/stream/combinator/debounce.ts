@@ -22,7 +22,7 @@ class Debounce<T> implements IStream<T> {
  * Wait for a pause in values before emitting the latest one
  *
  * stream:      -a-b-c-d-------e-f-------g->
- * debounce(3): ---------d---------f-------g->
+ * debounce(3): ----------d---------f--------g->
  */
 export const debounce: IDebounceCurry = curry2((period, source) => new Debounce(period, source))
 
@@ -36,9 +36,14 @@ class DebounceSink<T> implements ISink<T>, Disposable {
     readonly interval: ITime
   ) {}
 
-  event(time: ITime, value: T): void {
+  event(_time: ITime, value: T): void {
     this.clearTimer()
-    this.pendingValue = { value }
+    // Reuse the wrapper across events — only allocate on first event of the
+    // stream's lifetime, mutate `.value` thereafter. `this.timer !== null`
+    // is the true "has unflushed value" sentinel; pendingValue may stay
+    // populated past an emission.
+    if (this.pendingValue === null) this.pendingValue = { value }
+    else this.pendingValue.value = value
     this.timer = this.scheduler.delay(propagateRunEventTask(this.sink, emitDebounced, this), this.interval)
   }
 
@@ -48,11 +53,10 @@ class DebounceSink<T> implements ISink<T>, Disposable {
   }
 
   end(time: ITime): void {
-    // Emit pending value if any
-    if (this.timer !== null && this.pendingValue !== null) {
+    // Emit pending value if any (timer not yet fired).
+    if (this.timer !== null) {
       this.clearTimer()
-      this.sink.event(time, this.pendingValue.value)
-      this.pendingValue = null
+      this.sink.event(time, (this.pendingValue as { value: T }).value)
     }
     this.sink.end(time)
   }
@@ -71,11 +75,12 @@ class DebounceSink<T> implements ISink<T>, Disposable {
 }
 
 function emitDebounced<T>(time: ITime, sink: ISink<T>, debounceSink: DebounceSink<T>): void {
+  // The wrapper persists across emissions; `timer = null` is the "flushed"
+  // signal that `end()` keys off of.
+  debounceSink.timer = null
   if (debounceSink.pendingValue !== null) {
     sink.event(time, debounceSink.pendingValue.value)
-    debounceSink.pendingValue = null
   }
-  debounceSink.timer = null
 }
 
 export interface IDebounceCurry {

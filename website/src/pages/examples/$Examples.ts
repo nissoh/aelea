@@ -1,15 +1,15 @@
-import { match, type Route } from 'aelea/router'
 import { type IBehavior, state } from 'aelea/stream-extended'
 import { $node, $text, component, style } from 'aelea/ui'
 import { $column, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
+import { commitTitle, match } from 'aelea/ui-router'
 import { $Example } from '../../components/$Example'
 import { $Link } from '../../components/$Link'
 import { fadeIn } from '../../components/transitions/enter'
+import { routeSchema } from '../../route'
 import $Calculator from './calculator/$Calculator'
 import { $CountCounters } from './count-counters/$CountCounters'
 import $DragList from './dragList/$DragList'
-// import $DragList from './dragList/$DragList'
 import { $PopoverExample } from './overlay/$PopoverExample'
 import { $TableExample } from './table/$TableExample'
 import { $Theme } from './theme/$Theme'
@@ -18,43 +18,9 @@ import { createTodo } from './todo-app/$CreateTodo'
 import $TodoApp from './todo-app/$TodoApp'
 import { $VirtualScrollExample } from './virtual-scroll/$VirtualScrollExample'
 
-interface Website {
-  router: Route
-}
-
-export default ({ router }: Website) =>
-  component(([routeChanges, linkClickTether]: IBehavior<string, string>) => {
-    const dragAngDropRoute = router.create({
-      fragment: 'drag-and-sort',
-      title: 'Drag N Drop'
-    })
-    const todoAppRoute = router.create({
-      fragment: 'todo-app',
-      title: 'Todo App'
-    })
-    const countCountersRoute = router.create({
-      fragment: 'count-counters',
-      title: 'Count Counters'
-    })
-    const virtualScrollRoute = router.create({
-      fragment: 'virtual-scroll',
-      title: 'Virtual Scroll'
-    })
-    const calculatorRoute = router.create({
-      fragment: 'calculator',
-      title: 'Calculator'
-    })
-    const tableRoute = router.create({ fragment: 'table', title: 'Table' })
-    // const autocompleteRoute = router.create({ fragment: 'autocomplete', title: 'Autocomplete' })
-    const popoverRoute = router.create({
-      fragment: 'popover',
-      title: 'Popover'
-    })
-    const toastRoute = router.create({
-      fragment: 'toast-queue',
-      title: 'Toast Queue'
-    })
-    const themeRoute = router.create({ fragment: 'theme', title: 'Theme' })
+export default () =>
+  component(() => {
+    const examples = routeSchema.pages.examples
 
     return [
       $row(spacing.big, style({ placeContent: 'center', flex: 1 }))(
@@ -66,76 +32,19 @@ export default ({ router }: Website) =>
             $column(spacing.big, style({ whiteSpace: 'nowrap' }))(
               $column(spacing.tiny)(
                 $node(style({ color: pallete.foreground, fontSize: '75%' }))($text('Demos')),
-                $Link({
-                  $content: $text('Theme'),
-                  url: '/p/examples/theme',
-                  route: themeRoute
-                })({
-                  click: linkClickTether()
-                }),
-                $Link({
-                  $content: $text('Drag And Sort'),
-                  url: '/p/examples/drag-and-sort',
-                  route: dragAngDropRoute
-                })({
-                  click: linkClickTether()
-                }),
-                $Link({
-                  $content: $text('Count Counters'),
-                  url: '/p/examples/count-counters',
-                  route: countCountersRoute
-                })({
-                  click: linkClickTether()
-                }),
-                $Link({
-                  $content: $text('Todo App'),
-                  url: '/p/examples/todo-app',
-                  route: todoAppRoute
-                })({
-                  click: linkClickTether()
-                }),
-                $Link({
-                  $content: $text('Calculator'),
-                  url: '/p/examples/calculator',
-                  route: calculatorRoute
-                })({
-                  click: linkClickTether()
-                })
+                $Link({ $content: $text('Theme'), route: examples.theme })({}),
+                $Link({ $content: $text('Drag And Sort'), route: examples.dragAndSort })({}),
+                $Link({ $content: $text('Count Counters'), route: examples.countCounters })({}),
+                $Link({ $content: $text('Todo App'), route: examples.todoApp })({}),
+                $Link({ $content: $text('Calculator'), route: examples.calculator })({})
               ),
 
               $column(spacing.tiny)(
                 $node(style({ color: pallete.foreground, fontSize: '75%' }))($text('UI Components')),
-                // $Link({ $content: $text('Autocomplete'), url: '/p/examples/autocomplete', route: autocompleteRoute })({
-                //   click: sampleLinkClick()
-                // }),
-                $Link({
-                  $content: $text('Virtual Scroll'),
-                  url: '/p/examples/virtual-scroll',
-                  route: virtualScrollRoute
-                })({
-                  click: linkClickTether()
-                }),
-                $Link({
-                  $content: $text('Popover'),
-                  url: '/p/examples/popover',
-                  route: popoverRoute
-                })({
-                  click: linkClickTether()
-                }),
-                $Link({
-                  $content: $text('Table'),
-                  url: '/p/examples/table',
-                  route: tableRoute
-                })({
-                  click: linkClickTether()
-                }),
-                $Link({
-                  $content: $text('Toast Queue'),
-                  url: '/p/examples/toast-queue',
-                  route: toastRoute
-                })({
-                  click: linkClickTether()
-                })
+                $Link({ $content: $text('Virtual Scroll'), route: examples.virtualScroll })({}),
+                $Link({ $content: $text('Popover'), route: examples.popover })({}),
+                $Link({ $content: $text('Table'), route: examples.table })({}),
+                $Link({ $content: $text('Toast Queue'), route: examples.toastQueue })({})
               )
             )
           )
@@ -144,63 +53,69 @@ export default ({ router }: Website) =>
         $node(),
 
         $column(style({ flex: 2 }))(
-          match(themeRoute)($Example({ file: 'src/components/$Table.ts' })($column($Theme({})))({})),
-
-          match(dragAngDropRoute)($Example({ file: 'src/components/$DragSort.ts' })($DragList({}))({})),
-
-          // $container(
-          //   match(autocompleteRoute)(
-          //     $Example({ file: 'src/components/$DragSort.ts' })(
-          //       $AutocompleteExample({})
-          //     )({})
-          //   )
-          // ),
-
-          match(popoverRoute)($Example({ file: 'src/components/$DragSort.ts' })($PopoverExample({}))({})),
-
-          match(tableRoute)($Example({ file: 'src/components/$Table.ts' })($column($TableExample({})))({})),
-
-          match(calculatorRoute)($Example({ file: 'src/components/$Calculator.ts' })($Calculator({}))({})),
-
-          match(virtualScrollRoute)(
-            $Example({ file: 'src/components/$QuantumList.ts' })($VirtualScrollExample({}))({})
+          match(examples.theme)(
+            commitTitle('Theme')($Example({ file: 'src/components/$Table.ts' })($column($Theme({})))({}))
           ),
 
-          match(toastRoute)($Example({ file: 'src/components/$ToastQueue.ts' })($ToastQueue({}))({})),
+          match(examples.dragAndSort)(
+            commitTitle('Drag N Drop')($Example({ file: 'src/components/$DragSort.ts' })($DragList({}))({}))
+          ),
 
-          match(countCountersRoute)(
-            fadeIn(
-              component(([changeCounterList, changeCounterListTether]: IBehavior<number[]>) => {
-                const counterList = state(changeCounterList, [0])
+          match(examples.popover)(
+            commitTitle('Popover')($Example({ file: 'src/components/$DragSort.ts' })($PopoverExample({}))({}))
+          ),
 
-                return [
-                  $column(
-                    spacing.big,
-                    style({ flex: 1 })
-                  )(
-                    $CountCounters({ counterList })({
-                      changeCounterList: changeCounterListTether()
-                    })
-                  )
-                ]
-              })({})
+          match(examples.table)(
+            commitTitle('Table')($Example({ file: 'src/components/$Table.ts' })($column($TableExample({})))({}))
+          ),
+
+          match(examples.calculator)(
+            commitTitle('Calculator')($Example({ file: 'src/components/$Calculator.ts' })($Calculator({}))({}))
+          ),
+
+          match(examples.virtualScroll)(
+            commitTitle('Virtual Scroll')(
+              $Example({ file: 'src/components/$QuantumList.ts' })($VirtualScrollExample({}))({})
             )
           ),
 
-          match(todoAppRoute)(
-            $Example({ file: 'src/components/todo-app/$TodoApp.ts' })(
-              $TodoApp(
-                Array(1e2)
-                  .fill(null)
-                  .map((_, i) => createTodo(`t-${i + 1}`))
+          match(examples.toastQueue)(
+            commitTitle('Toast Queue')($Example({ file: 'src/components/$ToastQueue.ts' })($ToastQueue({}))({}))
+          ),
+
+          match(examples.countCounters)(
+            commitTitle('Count Counters')(
+              fadeIn(
+                component(([changeCounterList, changeCounterListTether]: IBehavior<number[]>) => {
+                  const counterList = state(changeCounterList, [0])
+
+                  return [
+                    $column(
+                      spacing.big,
+                      style({ flex: 1 })
+                    )(
+                      $CountCounters({ counterList })({
+                        changeCounterList: changeCounterListTether()
+                      })
+                    )
+                  ]
+                })({})
+              )
+            )
+          ),
+
+          match(examples.todoApp)(
+            commitTitle('Todo App')(
+              $Example({ file: 'src/components/todo-app/$TodoApp.ts' })(
+                $TodoApp(
+                  Array(1e2)
+                    .fill(null)
+                    .map((_, i) => createTodo(`t-${i + 1}`))
+                )({})
               )({})
-            )({})
+            )
           )
         )
-      ),
-
-      {
-        routeChanges
-      }
+      )
     ]
   })

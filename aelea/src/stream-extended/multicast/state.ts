@@ -6,7 +6,7 @@ import {
   type ITime,
   PipeSink,
   propagateRunEventTask
-} from '@/stream'
+} from '../../stream/index.js'
 import { multicast } from './multicast.js'
 
 /**

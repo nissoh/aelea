@@ -6,16 +6,17 @@ import { type IndexedValue, IndexSink } from '../utils/sink.js'
 import { map } from './map.js'
 
 /**
- * Combine latest values from multiple streams whenever any stream emits
+ * Combine latest values from multiple streams whenever any stream emits.
+ * Waits until every input has produced at least one value before the first
+ * output; subsequent inputs trigger a new combined emission.
  *
  * streamA:    -1---2|
- * streamB:    ---a---b-c---->
- * combineMap: ---A-B-C-D---->
- *                | | | |
- *                | | | +-- [2,c]
- *                | | +-- [2,b]
- *                | +-- [2,a]
- *                +-- [1,a]
+ * streamB:    ---a---b-c->
+ * combineMap: ---A-B-C-D->
+ *   where A = [1, a]
+ *         B = [2, a]
+ *         C = [2, b]
+ *         D = [2, c]
  */
 export function combineMap<T extends readonly unknown[], R>(
   f: (...args: T) => R,
@@ -24,21 +25,23 @@ export function combineMap<T extends readonly unknown[], R>(
   const l = sources.length
 
   if (l === 0) return empty
-  if (l === 1) return map(f as any, sources[0])
+  if (l === 1) {
+    const single = f as unknown as (v: T[number]) => R
+    return map(single, sources[0] as IStream<T[number]>)
+  }
 
   return new CombineMap(f, sources)
 }
 
 /**
- * Combine multiple streams into an object stream
+ * Combine multiple streams into an object stream keyed by the input map.
  *
  * temperature: -a-b-c->
  * humidity:    -x-y-z->
  * combine:     -A-B-C->
- *               | | |
- *               | | +-- {temp:b,humidity:y}
- *               | +-- {temp:b,humidity:x}
- *               +-- {temp:a,humidity:x}
+ *   where A = { temperature: a, humidity: x }
+ *         B = { temperature: b, humidity: x }
+ *         C = { temperature: b, humidity: y }
  */
 export function combine<A>(
   state: {

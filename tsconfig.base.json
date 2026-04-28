@@ -1,58 +1,35 @@
 {
-  // This tsconfig file contains the shared config for the build (tsconfig.build.json) and type checking (tsconfig.json) config.
+  // Shared config consumed by every package tsconfig.
   "include": [],
   "compilerOptions": {
-    // Incremental builds
-    // NOTE: Enabling incremental builds speeds up `tsc`. Keep in mind though that it does not reliably bust the cache when the `tsconfig.json` file changes.
-    "incremental": true,
-    // tsBuildInfoFile configured per package to avoid conflicts
+    "composite": true,
     "sourceMap": true,
-    // Performance optimizations for IntelliSense
-    "disableSourceOfProjectReferenceRedirect": true,
     "disableSolutionSearching": true,
-    // Type checking
     "strict": true,
-    "alwaysStrict": true, // Always parse in strict mode
-    "noFallthroughCasesInSwitch": true, // Not enabled by default in `strict` mode.
-    "noImplicitReturns": true, // Not enabled by default in `strict` mode.
-    "useUnknownInCatchVariables": true, // Enabled (strict default)
-    // Functional programming strictness
-    // "noUncheckedIndexedAccess": true, // TODO: Enable for safer array/object access
-    "noUnusedLocals": false, // Cleaner functional code
-    "noUnusedParameters": false, // Cleaner functional code
-    "allowUnusedLabels": false, // No unused labels
-    "allowUnreachableCode": false, // No dead code
-    "exactOptionalPropertyTypes": false, // Disabled - conflicts with optional stream properties
-    // "noPropertyAccessFromIndexSignature": true, // Conflicts with biome linter preferences
-    // JavaScript support
+    "alwaysStrict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "useUnknownInCatchVariables": true,
+    // TODO: enable noUncheckedIndexedAccess for safer array/object access.
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "exactOptionalPropertyTypes": false,
     "allowJs": false,
     "checkJs": false,
-    "composite": true,
-    // Interop constraints
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": false,
     "forceConsistentCasingInFileNames": true,
     "verbatimModuleSyntax": true,
     "resolveJsonModule": true,
-    "resolvePackageJsonExports": true, // Respect package.json "exports" field
-    "resolvePackageJsonImports": true, // Respect package.json "imports" field
-    // Focus on pure TypeScript modules
-    // Language and environment
+    "resolvePackageJsonExports": true,
+    "resolvePackageJsonImports": true,
     "moduleResolution": "NodeNext",
     "module": "NodeNext",
-    "target": "ES2023", // Use specific ES version for consistent output
-    "lib": [
-      "ES2023", // Core ES2023 features
-      "ES2023.Array", // Array methods like toSorted, toReversed
-      "ES2023.Collection", // WeakMap/WeakSet improvements
-      "ESNext.Disposable" // using/await using syntax
-    ],
-    "moduleDetection": "force", // Treat all files as modules
-    // Skip type checking for node modules
+    "target": "ES2023",
+    "lib": ["ES2023", "ES2023.Array", "ES2023.Collection", "ESNext.Disposable"],
+    "moduleDetection": "force",
     "skipLibCheck": true
   },
-  "exclude": [
-    "**/node_modules",
-    "**/dist"
-  ]
+  "exclude": ["**/node_modules", "**/dist"]
 }
