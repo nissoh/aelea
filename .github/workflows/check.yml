@@ -44,6 +44,11 @@ jobs:
       - name: Biome
         run: bun run biome:check
 
+      # Build aelea first so the website's tsc:check can resolve `aelea/*`
+      # imports through the published exports map (which points at dist/).
+      - name: Build aelea
+        run: bun run aelea:build
+
       - name: TypeScript
         run: bun run tsc:check
 

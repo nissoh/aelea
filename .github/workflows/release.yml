@@ -53,14 +53,19 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
+      # Build aelea first so the website's tsc:check (run inside `bun run lint`)
+      # can resolve `aelea/*` imports through the published exports map.
+      - name: Build aelea
+        run: bun run aelea:build
+
       - name: Lint
         run: bun run lint
 
       - name: Test
         run: bun run --cwd aelea test
 
-      - name: Build
-        run: bun run build
+      - name: Build website
+        run: bun run website:build
 
   release:
     needs: build
