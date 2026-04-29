@@ -120,7 +120,11 @@ jobs:
           umask 077
           trap 'rm -f .npmrc' EXIT
           echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
-          bun publish --access public
+          # `bun publish` doesn't reliably read .npmrc in CI runners (works
+          # locally on 1.3.13 but fails on ubuntu-latest with "missing
+          # authentication"). `npm publish` honors the same file format and
+          # is pre-installed on the runner.
+          npm publish --access public
 
   deploy:
     needs: [build, release]
