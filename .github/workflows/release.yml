@@ -20,6 +20,10 @@ concurrency:
 
 env:
   IMAGE: ghcr.io/nissoh/aelea
+  # Run actions/checkout, actions/cache, etc. on Node.js 24. Defaults to
+  # Node.js 24 starting 2026-06-02; setting this flips the switch early
+  # and silences the deprecation warning.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
@@ -100,30 +104,28 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
-      # Build aelea so `bun publish` packs `dist/` (per package.json's `files`).
+      # Build aelea so the publish step packs `dist/` (per package.json's `files`).
       - name: Build aelea
         run: bun run aelea:build
+
+      # Sets up ~/.npmrc with `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}`
+      # so npm publish reads the token from env at run-time. Most reliable
+      # auth pattern in GitHub Actions; manual .npmrc writes proved flaky.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: https://registry.npmjs.org
 
       # Idempotent: skips if aelea/package.json's version already matches npm.
       # Bump via `cd aelea && bun pm version <patch|minor|major>` then push.
       - name: Publish to npm
         working-directory: aelea
         env:
-          NPM_TOKEN: ${{ secrets.NPM_AUTH }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH }}
         run: |
           LOCAL=$(jq -r .version package.json)
           REMOTE=$(curl -sf https://registry.npmjs.org/aelea | jq -r '."dist-tags".latest')
           [ "$LOCAL" = "$REMOTE" ] && { echo "aelea@$LOCAL already published"; exit 0; }
-          # Write the auth file with restrictive perms; trap ensures cleanup
-          # on success, failure, or signal — the token never persists past
-          # this step.
-          umask 077
-          trap 'rm -f .npmrc' EXIT
-          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
-          # `bun publish` doesn't reliably read .npmrc in CI runners (works
-          # locally on 1.3.13 but fails on ubuntu-latest with "missing
-          # authentication"). `npm publish` honors the same file format and
-          # is pre-installed on the runner.
           npm publish --access public
 
   deploy:

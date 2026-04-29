@@ -13,6 +13,12 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # Run actions/checkout, actions/cache, etc. on Node.js 24. Defaults to
+  # Node.js 24 starting 2026-06-02; setting this flips the switch early
+  # and silences the deprecation warning.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
