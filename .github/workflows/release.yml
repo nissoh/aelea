@@ -11,9 +11,9 @@ on:
       - 'bun.lock'
   workflow_dispatch:
 
-# Don't cancel in-progress publishes — aborting mid-release can leave npm /
-# the registry in inconsistent state. Latest run still queues, but only one
-# release pipeline runs at a time.
+# Don't cancel in-progress publishes — aborting mid-release can leave npm
+# in inconsistent state. Latest run still queues, but only one release
+# pipeline runs at a time.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -72,8 +72,7 @@ jobs:
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
     defaults:
       run:
         shell: bash
@@ -101,14 +100,22 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
-      - name: Release packages
-        uses: changesets/action@v1
-        with:
-          version: bun run changeset:version
-          publish: bun run changeset:publish
+      # Build aelea so `bun publish` packs `dist/` (per package.json's `files`).
+      - name: Build aelea
+        run: bun run aelea:build
+
+      # Idempotent: skips if aelea/package.json's version already matches npm.
+      # Bump via `cd aelea && bun pm version <patch|minor|major>` then push.
+      - name: Publish to npm
+        working-directory: aelea
         env:
           NPM_TOKEN: ${{ secrets.NPM_AUTH }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LOCAL=$(jq -r .version package.json)
+          REMOTE=$(curl -sf https://registry.npmjs.org/aelea | jq -r '."dist-tags".latest')
+          [ "$LOCAL" = "$REMOTE" ] && { echo "aelea@$LOCAL already published"; exit 0; }
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+          bun publish --access public
 
   deploy:
     needs: [build, release]
