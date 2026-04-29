@@ -6,8 +6,8 @@ export const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > 
 
 const text = style({
   fontFamily: 'inherit',
-  fontWeight: 100,
-  fontSize: '1.15rem'
+  fontWeight: 300,
+  fontSize: '1rem'
 })
 
 const customScroll = isFirefox

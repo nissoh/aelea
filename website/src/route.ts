@@ -11,6 +11,7 @@ export const routeSchema = createRouteSchema({
         examples: {
           fragment: 'examples',
           children: {
+            controllers: { fragment: 'controllers', title: 'Controllers' },
             theme: { fragment: 'theme', title: 'Theme' },
             dragAndSort: { fragment: 'drag-and-sort', title: 'Drag N Drop' },
             countCounters: { fragment: 'count-counters', title: 'Count Counters' },

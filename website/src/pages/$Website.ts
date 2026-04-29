@@ -1,8 +1,7 @@
-import { op } from 'aelea/stream'
-import { $element, $text, component, style } from 'aelea/ui'
+import { $text, component, style } from 'aelea/ui'
 import { $column, $icon, $row, designSheet, spacing } from 'aelea/ui-components'
 import { pallete, themeList } from 'aelea/ui-components-theme'
-import { $Link, commitTitle, contains, match } from 'aelea/ui-router'
+import { $defaultAnchor, $Link, commitTitle, contains, match } from 'aelea/ui-router'
 import { $Picker } from '../components/$ThemePicker'
 import { fadeIn } from '../components/transitions/enter'
 import { $aeleaLogo } from '../elements/$icons'
@@ -24,7 +23,7 @@ export default () =>
         designSheet.customScroll,
         style({
           backgroundColor: pallete.background,
-          fontFamily: `'Nunito', 'Fira Code', system-ui, sans-serif`,
+          fontFamily: `'Fira Code', system-ui, monospace`,
           backgroundImage: `radial-gradient(at center center, ${pallete.horizon} 50vh, ${pallete.background})`
         })
       )(
@@ -45,15 +44,14 @@ export default () =>
                 $column(style({ alignItems: 'center', maxWidth: '550px' }), spacing.big)(
                   $Link({
                     route: rootRoute,
-                    $anchor: $element('a')(
-                      $icon({
-                        $content: style({ fill: pallete.message }, $aeleaLogo),
-                        width: '237px',
-                        height: '115px',
-                        viewBox: '0 0 147 90'
-                      })
-                    )
-                  })({ click: op }),
+                    $anchor: $defaultAnchor(style({ display: 'block' })),
+                    $content: $icon({
+                      $content: style({ fill: pallete.message }, $aeleaLogo),
+                      width: '237px',
+                      height: '115px',
+                      viewBox: '0 0 147 90'
+                    })
+                  })({}),
                   $column(spacing.small)(
                     $text(`"aelea", is a UI Framework for reactive event programming`),
                     $text(
@@ -81,16 +79,15 @@ export default () =>
             $row(style({ placeContent: 'space-between', padding: '0 15px' }))(
               $Link({
                 route: rootRoute,
-                $anchor: $element('a')(
-                  $icon({
-                    $content: $aeleaLogo,
-                    fill: pallete.message,
-                    width: '137px',
-                    height: '115px',
-                    viewBox: '0 0 147 90'
-                  })
-                )
-              })({ click: op }),
+                $anchor: $defaultAnchor(style({ display: 'inline-flex', alignItems: 'center' })),
+                $content: $icon({
+                  $content: $aeleaLogo,
+                  fill: pallete.message,
+                  width: '137px',
+                  height: '115px',
+                  viewBox: '0 0 147 90'
+                })
+              })({}),
               $MainMenu()({})
             ),
             match(guideRoute)(commitTitle('Guide')($Guide()({}))),

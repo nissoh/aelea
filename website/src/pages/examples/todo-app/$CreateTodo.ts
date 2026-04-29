@@ -1,7 +1,7 @@
 import { constant, map, merge, sampleMap, start } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $text, component, style } from 'aelea/ui'
-import { $Button, $Field, $row } from 'aelea/ui-components'
+import { $Button, $Input, $row } from 'aelea/ui-components'
 
 let iid = 0
 
@@ -33,7 +33,7 @@ export default component(
 
     return [
       $row(style({ flex: 1 }))(
-        $Field({ value })({
+        $Input({ value })({
           change: inputChangeTether()
         }),
         $Button({ $content: $text('add'), disabled })({

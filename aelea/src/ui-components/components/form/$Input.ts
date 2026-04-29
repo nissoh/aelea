@@ -15,15 +15,15 @@ import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'
 import type { Input, InputType } from './types.js'
 
-export const $defaultFieldContainer = $element('input')(designSheet.input)
+export const $defaultInputContainer = $element('input')(designSheet.input)
 
-export interface Field extends Input<string | number> {
+export interface IInput extends Input<string | number> {
   type?: InputType
   name?: string
   $container?: INodeCompose<HTMLInputElement>
 }
 
-export const $Field = ({ value = empty, validation = constant(null), $container = $defaultFieldContainer }: Field) =>
+export const $Input = ({ value = empty, validation = constant(null), $container = $defaultInputContainer }: IInput) =>
   component(
     (
       [focusStyle, interactionTether]: IBehavior<ISlottable<HTMLInputElement>, boolean>,

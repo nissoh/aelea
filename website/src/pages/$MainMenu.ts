@@ -1,7 +1,7 @@
 import { $element, $node, $text, attr, component, style, stylePseudo } from 'aelea/ui'
 import { $icon, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
-import { $Link } from '../components/$Link'
+import { $Link } from 'aelea/ui-router'
 import { $github } from '../elements/$icons'
 import { routeSchema } from '../route'
 
@@ -14,6 +14,11 @@ export default () =>
         $Link({
           $content: $text("Developer's Guide"),
           route: routeSchema.pages.guide
+        })({}),
+        $seperator,
+        $Link({
+          $content: $text('Controllers'),
+          route: routeSchema.pages.examples.controllers
         })({}),
         $seperator,
         $Link({

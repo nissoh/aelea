@@ -2,12 +2,12 @@ import { type IBehavior, state } from 'aelea/stream-extended'
 import { $node, $text, component, style } from 'aelea/ui'
 import { $column, $row, spacing } from 'aelea/ui-components'
 import { pallete } from 'aelea/ui-components-theme'
-import { commitTitle, match } from 'aelea/ui-router'
+import { $Link, commitTitle, match } from 'aelea/ui-router'
 import { $Example } from '../../components/$Example'
-import { $Link } from '../../components/$Link'
 import { fadeIn } from '../../components/transitions/enter'
 import { routeSchema } from '../../route'
 import $Calculator from './calculator/$Calculator'
+import { $Controllers } from './controllers/$Controllers'
 import { $CountCounters } from './count-counters/$CountCounters'
 import $DragList from './dragList/$DragList'
 import { $PopoverExample } from './overlay/$PopoverExample'
@@ -41,6 +41,7 @@ export default () =>
 
               $column(spacing.tiny)(
                 $node(style({ color: pallete.foreground, fontSize: '75%' }))($text('UI Components')),
+                $Link({ $content: $text('Controllers'), route: examples.controllers })({}),
                 $Link({ $content: $text('Virtual Scroll'), route: examples.virtualScroll })({}),
                 $Link({ $content: $text('Popover'), route: examples.popover })({}),
                 $Link({ $content: $text('Table'), route: examples.table })({}),
@@ -53,35 +54,21 @@ export default () =>
         $node(),
 
         $column(style({ flex: 2 }))(
-          match(examples.theme)(
-            commitTitle('Theme')($Example({ file: 'src/components/$Table.ts' })($column($Theme({})))({}))
-          ),
+          match(examples.controllers)(commitTitle('Controllers')($Example($Controllers({}))({}))),
 
-          match(examples.dragAndSort)(
-            commitTitle('Drag N Drop')($Example({ file: 'src/components/$DragSort.ts' })($DragList({}))({}))
-          ),
+          match(examples.theme)(commitTitle('Theme')($Example($column($Theme({})))({}))),
 
-          match(examples.popover)(
-            commitTitle('Popover')($Example({ file: 'src/components/$DragSort.ts' })($PopoverExample({}))({}))
-          ),
+          match(examples.dragAndSort)(commitTitle('Drag N Drop')($Example($DragList({}))({}))),
 
-          match(examples.table)(
-            commitTitle('Table')($Example({ file: 'src/components/$Table.ts' })($column($TableExample({})))({}))
-          ),
+          match(examples.popover)(commitTitle('Popover')($Example($PopoverExample({}))({}))),
 
-          match(examples.calculator)(
-            commitTitle('Calculator')($Example({ file: 'src/components/$Calculator.ts' })($Calculator({}))({}))
-          ),
+          match(examples.table)(commitTitle('Table')($Example($column($TableExample({})))({}))),
 
-          match(examples.virtualScroll)(
-            commitTitle('Virtual Scroll')(
-              $Example({ file: 'src/components/$QuantumList.ts' })($VirtualScrollExample({}))({})
-            )
-          ),
+          match(examples.calculator)(commitTitle('Calculator')($Example($Calculator({}))({}))),
 
-          match(examples.toastQueue)(
-            commitTitle('Toast Queue')($Example({ file: 'src/components/$ToastQueue.ts' })($ToastQueue({}))({}))
-          ),
+          match(examples.virtualScroll)(commitTitle('Virtual Scroll')($Example($VirtualScrollExample({}))({}))),
+
+          match(examples.toastQueue)(commitTitle('Toast Queue')($Example($ToastQueue({}))({}))),
 
           match(examples.countCounters)(
             commitTitle('Count Counters')(
@@ -106,7 +93,7 @@ export default () =>
 
           match(examples.todoApp)(
             commitTitle('Todo App')(
-              $Example({ file: 'src/components/todo-app/$TodoApp.ts' })(
+              $Example(
                 $TodoApp(
                   Array(1e2)
                     .fill(null)

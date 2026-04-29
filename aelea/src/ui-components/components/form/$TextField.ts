@@ -3,23 +3,28 @@ import { empty, just, map, merge, never, op, sample, skipRepeats, switchLatest }
 import type { IBehavior } from '../../../stream-extended/index.js'
 import { multicast } from '../../../stream-extended/index.js'
 import { pallete } from '../../../ui-components-theme/index.js'
-import { $node, $text, component, type INodeCompose, style } from '../../../ui-renderer-dom/index.js'
+import { $element, $node, $text, component, type INodeCompose, style } from '../../../ui-renderer-dom/index.js'
 import { $row } from '../../elements/$elements.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 import { spacing } from '../../style/spacing.js'
-import { $Field, type Field } from './$Field.js'
-import { $label } from './form.js'
+import { $Input, type IInput } from './$Input.js'
 
-export const $defaultTextFieldContainer = $row(style({ alignItems: 'flex-start' }))
-
-// Inner row holding label + input. `cursor: pointer` so clicking the label focuses the input.
-export const $defaultTextFieldLabelRow = $row(
-  layoutSheet.flex,
-  spacing.small,
-  style({ alignSelf: 'flex-end', cursor: 'pointer', paddingBottom: '1px' })
+// $container IS the label element. Defaults to a styled <label> so clicking
+// it focuses the inner input; override with any INodeCompose for fully
+// custom outer markup (different tag, layout, theming).
+export const $defaultTextFieldContainer = $element('label')(
+  layoutSheet.column,
+  spacing.tiny,
+  style({ color: pallete.foreground, alignItems: 'flex-start' })
 )
 
-export interface TextField extends Field {
+// Inner row holding the label text + input.
+export const $defaultTextFieldLabelRow = $row(
+  spacing.small,
+  style({ alignSelf: 'stretch', alignItems: 'baseline', cursor: 'pointer', paddingBottom: '1px' })
+)
+
+export interface TextField extends IInput {
   label: string
   hint?: string
   $container?: INodeCompose
@@ -51,16 +56,14 @@ export const $TextField = (config: TextField) =>
 
       return [
         $container(
-          $label(layoutSheet.flex, spacing.tiny)(
-            $labelRow(
-              $text(config.label),
-              $Field({ ...config, validation: multicastValidation })({
-                change: valueTether(),
-                blur: blurTether()
-              })
-            ),
-            $message
-          )
+          $labelRow(
+            $text(config.label),
+            $Input({ ...config, validation: multicastValidation })({
+              change: valueTether(),
+              blur: blurTether()
+            })
+          ),
+          $message
         ),
         { change }
       ]

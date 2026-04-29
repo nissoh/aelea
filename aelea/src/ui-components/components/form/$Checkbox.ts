@@ -5,20 +5,47 @@ import type { ISlottable } from '../../../ui-renderer-dom/index.js'
 import {
   $element,
   $node,
+  $text,
   attr,
   attrBehavior,
   component,
+  type INodeCompose,
   nodeEvent,
   style,
   styleBehavior
 } from '../../../ui-renderer-dom/index.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
+import { spacing } from '../../style/spacing.js'
 import { dismissOp, interactionOp } from './form.js'
 import type { Input } from './types.js'
 
-export interface Checkbox extends Input<boolean> {}
+export const $defaultCheckboxLabel = $element('label')(
+  spacing.small,
+  style({
+    display: 'inline-flex',
+    alignItems: 'center',
+    cursor: 'pointer',
+    userSelect: 'none'
+  })
+)
 
-export const $Checkbox = ({ value }: Checkbox) =>
+export const $defaultCheckboxBox = $node(
+  style({
+    position: 'relative',
+    width: '18px',
+    height: '18px',
+    border: `2px solid ${pallete.message}`,
+    flexShrink: 0
+  })
+)
+
+export interface Checkbox extends Input<boolean> {
+  label?: string
+  $container?: INodeCompose<HTMLLabelElement>
+  $box?: INodeCompose<HTMLElement>
+}
+
+export const $Checkbox = ({ value, label, $container = $defaultCheckboxLabel, $box = $defaultCheckboxBox }: Checkbox) =>
   component(
     (
       [focusStyle, interactionTether]: IBehavior<ISlottable<HTMLInputElement>, boolean>,
@@ -27,7 +54,7 @@ export const $Checkbox = ({ value }: Checkbox) =>
     ) => {
       const $overlay = $node(
         layoutSheet.stretch,
-        style({ flex: 1, margin: '3px' }),
+        style({ margin: '3px' }),
         styleBehavior(map(ch => (ch ? { backgroundColor: pallete.message } : null), value))
       )
 
@@ -50,24 +77,12 @@ export const $Checkbox = ({ value }: Checkbox) =>
         dismissTether(dismissOp)
       )
 
-      const $container = $node(
+      const $boxNode = $box(
         styleBehavior(
           map(active => (active ? { borderColor: pallete.primary } : null), merge(focusStyle, dismissstyle))
-        ),
-        style({
-          position: 'relative',
-          width: '18px',
-          height: '18px',
-          border: `2px solid ${pallete.message}`
-        })
-      )
+        )
+      )($overlay(), $checkInput())
 
-      return [
-        $container(
-          $overlay(), //
-          $checkInput()
-        ),
-        { check }
-      ]
+      return [label === undefined ? $boxNode : $container($boxNode, $text(label)), { check }]
     }
   )

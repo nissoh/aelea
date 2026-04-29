@@ -11,7 +11,7 @@ export default () =>
         spacing.big,
         style({ flex: 1, alignItems: 'center' })
       )(
-        $Example({ file: 'src/components/$Guide.ts' })(
+        $Example(
           $node(
             $text('Aelea uses composable streams for UI. Basics: '),
             $anchor(

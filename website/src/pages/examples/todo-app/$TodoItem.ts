@@ -1,7 +1,7 @@
 import { type IStream, just, o } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { component, style } from 'aelea/ui'
-import { $Checkbox, $Field, $row, spacing } from 'aelea/ui-components'
+import { $Checkbox, $Input, $row, spacing } from 'aelea/ui-components'
 import { $TrashBtn } from '../../../elements/$common'
 import type { Todo } from './$CreateTodo'
 
@@ -24,7 +24,7 @@ export default ({ todo, completed }: TodoItem) =>
           $Checkbox({ value: completed })({
             check: completeTether()
           }),
-          $Field({ value: just(todo.text) })({
+          $Input({ value: just(todo.text) })({
             change: textTether()
           }),
           $TrashBtn({
