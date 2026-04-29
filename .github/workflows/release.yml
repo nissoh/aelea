@@ -114,8 +114,11 @@ jobs:
           LOCAL=$(jq -r .version package.json)
           REMOTE=$(curl -sf https://registry.npmjs.org/aelea | jq -r '."dist-tags".latest')
           [ "$LOCAL" = "$REMOTE" ] && { echo "aelea@$LOCAL already published"; exit 0; }
-          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+          # bun publish reads .npmrc from CWD before $HOME/.npmrc; writing it
+          # in the working directory is the most reliable form.
+          printf 'registry=https://registry.npmjs.org/\n//registry.npmjs.org/:_authToken=%s\n' "$NPM_TOKEN" > .npmrc
           bun publish --access public
+          rm .npmrc
 
   deploy:
     needs: [build, release]
