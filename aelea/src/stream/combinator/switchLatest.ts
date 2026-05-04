@@ -90,7 +90,7 @@ class SwitchSink<T> implements ISink<IStream<T>>, Disposable {
     }
   }
 
-  error(time: ITime, error: any): void {
+  error(time: ITime, error: unknown): void {
     this.sink.error(time, error)
   }
 
@@ -125,7 +125,7 @@ class InnerSink<T> implements ISink<T> {
     this.sink.event(time, value)
   }
 
-  error(time: ITime, error: any): void {
+  error(time: ITime, error: unknown): void {
     this.sink.error(time, error)
   }
 

@@ -5,7 +5,7 @@ export abstract class PipeSink<I, O = I> implements ISink<I> {
 
   abstract event(time: ITime, value: I): void
 
-  error(time: ITime, e: any): void {
+  error(time: ITime, e: unknown): void {
     this.sink.error(time, e)
   }
 

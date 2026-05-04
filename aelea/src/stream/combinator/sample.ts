@@ -68,7 +68,7 @@ class SampleSink<A, B, C> implements ISink<B>, Disposable {
     }
   }
 
-  error(time: ITime, error: any): void {
+  error(time: ITime, error: unknown): void {
     this.sink.error(time, error)
   }
 
@@ -94,7 +94,7 @@ class ValueSink<A> implements ISink<A> {
     }
   }
 
-  error(time: ITime, error: any): void {
+  error(time: ITime, error: unknown): void {
     this.parent.sink.error(time, error)
   }
 

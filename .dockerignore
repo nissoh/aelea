@@ -1,8 +1,18 @@
-node_modules
-website/node_modules
-dist
-website/dist
+**/node_modules
+**/dist
+**/*.tsbuildinfo
 .git
 .github
+.vscode
+.cursor
+.claude
 .DS_Store
 *.log
+
+# Test / benchmark artifacts not needed for production build.
+aelea/test
+aelea/benchmark
+
+# Docs / repo metadata.
+**/*.md
+AGENTS.md

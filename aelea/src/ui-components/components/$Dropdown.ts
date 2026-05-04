@@ -16,7 +16,7 @@ import {
   toStream
 } from '../../stream/index.js'
 import type { IBehavior } from '../../stream-extended/index.js'
-import { colorAlpha, pallete } from '../../ui-components-theme/index.js'
+import { colorShade, palette } from '../../ui-components-theme/index.js'
 import {
   $node,
   $text,
@@ -45,8 +45,8 @@ export const $defaultOptionContainer = $row(
     padding: '12px 20px',
     width: '100%'
   }),
-  stylePseudo(':not(:last-child)', { borderBottom: `1px solid ${pallete.horizon}` }),
-  stylePseudo(':hover', { backgroundColor: pallete.horizon })
+  stylePseudo(':not(:last-child)', { borderBottom: `1px solid ${palette.horizon}` }),
+  stylePseudo(':hover', { backgroundColor: palette.horizon })
 )
 
 export const $defaultDropListContainer = $column(
@@ -54,8 +54,8 @@ export const $defaultDropListContainer = $column(
     whiteSpace: 'pre-wrap',
     maxWidth: '600px',
     userSelect: 'text',
-    background: pallete.background,
-    boxShadow: `${colorAlpha(pallete.message, 0.14)} 0px 4px 20px 8px, ${colorAlpha(pallete.message, 0.1)} 0px 1px 3px 1px`,
+    background: palette.background,
+    boxShadow: `${colorShade(palette.message, 14)} 0px 4px 20px 8px, ${colorShade(palette.message, 10)} 0px 1px 3px 1px`,
     borderRadius: '8px',
     fontWeight: 'normal',
     overflow: 'hidden'
@@ -80,7 +80,7 @@ export const $defaultDropdownAnchor = $row(
     padding: '8px 14px',
     cursor: 'pointer'
   })
-)($text('Select…'), $node(style({ color: pallete.foreground }))($text('▾')))
+)($text('Select…'), $node(style({ color: palette.foreground }))($text('▾')))
 
 export interface IDropdown<T> {
   optionList: IStream<readonly T[]> | readonly T[]

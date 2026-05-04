@@ -41,8 +41,8 @@ class FromWebSocket<I, O> implements IStream<O> {
       url,
       delayTimeout = 5000,
       createWebsocket = () => new globalThis.WebSocket(url),
-      serializer = this.options.serializer ?? JSON.stringify,
-      deserializer = this.options.deserializer ?? JSON.parse
+      serializer = JSON.stringify,
+      deserializer = JSON.parse
     } = this.options
 
     let socket: WebSocket
@@ -71,7 +71,10 @@ class FromWebSocket<I, O> implements IStream<O> {
     const onError = (error: Event) => {
       if (disposed) return
 
-      const errorMessage = error instanceof ErrorEvent ? error.message : `WebSocket error: ${error.type}`
+      const errorMessage =
+        typeof ErrorEvent !== 'undefined' && error instanceof ErrorEvent
+          ? error.message
+          : `WebSocket error: ${error.type}`
       cleanup()
 
       scheduler.asap(propagateErrorEndTask(sink, new Error(`WebSocket connection error: ${errorMessage}`)))
@@ -83,7 +86,7 @@ class FromWebSocket<I, O> implements IStream<O> {
       try {
         sink.event(scheduler.time(), deserializer(msg.data))
       } catch (parseError) {
-        // Emit error but don't close the connection - bad message shouldn't kill the stream
+        // sink.error is applicative — surface the bad frame without tearing the connection down.
         sink.error(scheduler.time(), new Error(`Parse error: ${parseError}`))
       }
     }
@@ -93,19 +96,15 @@ class FromWebSocket<I, O> implements IStream<O> {
 
       clearTimeout(timeoutId)
 
-      if (this.input && !disposed) {
-        sendInputEffect = tap((value: I) => {
-          if (disposed || socket.readyState !== WebSocket.OPEN) return
+      sendInputEffect = tap((value: I) => {
+        if (disposed || socket.readyState !== WebSocket.OPEN) return
 
-          try {
-            const serialized = serializer(value)
-            socket.send(serialized)
-          } catch (sendError) {
-            // Emit error but don't close the connection
-            sink.error(scheduler.time(), new Error(`WebSocket send error: ${sendError}`))
-          }
-        }, this.input).run(nullSink, scheduler)
-      }
+        try {
+          socket.send(serializer(value))
+        } catch (sendError) {
+          sink.error(scheduler.time(), new Error(`WebSocket send error: ${sendError}`))
+        }
+      }, this.input).run(nullSink, scheduler)
     }
 
     const onClose = (event: CloseEvent): void => {
@@ -146,7 +145,7 @@ class FromWebSocket<I, O> implements IStream<O> {
       sendInputEffect[Symbol.dispose]()
 
       if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
-        socket.close()
+        socket.close(1000, 'client disposed')
       }
     }
 

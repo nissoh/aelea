@@ -1,6 +1,6 @@
 import { map, merge, never } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
-import { pallete } from '../../../ui-components-theme/index.js'
+import { palette } from '../../../ui-components-theme/index.js'
 import type { I$Slottable, ISlottable } from '../../../ui-renderer-dom/index.js'
 import {
   $element,
@@ -33,7 +33,7 @@ export const $Button = ({ disabled = never, $content, $container = $defaultButto
         styleBehavior(map(d => (d ? { opacity: 0.4, pointerEvents: 'none' } : null), disabled)),
         attrBehavior(map(d => ({ disabled: d }), disabled)),
         styleBehavior(
-          map(active => (active ? { borderColor: pallete.primary } : null), merge(focusStyle, dismissstyle))
+          map(active => (active ? { borderColor: palette.primary } : null), merge(focusStyle, dismissstyle))
         ),
         interactionTether(interactionOp),
         dismissTether(dismissOp)

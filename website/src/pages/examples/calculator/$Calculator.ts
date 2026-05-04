@@ -2,7 +2,7 @@ import { combine, empty, map, o, start } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $node, $text, attr, component, style } from 'aelea/ui'
 import { $column, $defaultInputContainer, $Input, $NumberTicker, $row, spacing } from 'aelea/ui-components'
-import { pallete } from 'aelea/ui-components-theme'
+import { palette } from 'aelea/ui-components-theme'
 
 const extractValue = o(
   map((str: string) => Number(str)),
@@ -14,7 +14,7 @@ const $plus = $node(
     justifyContent: 'center',
     alignItems: 'center',
     width: '36px',
-    color: pallete.foreground,
+    color: palette.foreground,
     display: 'flex'
   })
 )

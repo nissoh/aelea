@@ -10,7 +10,7 @@ Aelea is a reactive/functional UI library: components are pure functions wiring 
 - `src/ui-components` — reusable atoms (`$Button`, `$Table`, layout helpers, form fields).
 - `src/ui-components-theme` / `-browser` — palette + theme loader.
 - `src/ui-renderer-dom` — DOM renderer; `src/ui-renderer-takumi` — server-side image renderer.
-- `src/router` — stream-based router.
+- `src/ui-router` — stream-based router.
 - `dist/` — generated ESM + d.ts. Never edit; produced by `bun run build`.
 - `benchmark/` — perf harnesses (`bun run bench:combinators` etc.).
 
@@ -40,7 +40,7 @@ export const $Component = (config: IConfig) =>
       return [
         $column(spacing.default)(
           $element('button')(
-            style({ color: pallete.message }),
+            style({ color: palette.message }),
             clickTether(nodeEvent('click'))
           )($text('Save'))
         ),
@@ -74,7 +74,7 @@ Element factories return `INodeCompose`; decorators compose onto them by call. D
 ```ts
 $element('button')(
   style({ padding: '8px 12px' }),
-  stylePseudo(':hover', { background: pallete.foreground }),
+  stylePseudo(':hover', { background: palette.foreground }),
   styleBehavior(map(d => d ? { opacity: 0.5 } : null, isDisabled)),
   attrBehavior(map(d => ({ disabled: d ? '' : null }), isDisabled)),
   clickTether(nodeEvent('click'))
@@ -92,7 +92,7 @@ $element('button')(
 [submit, submitTether]: IBehavior<PointerEvent, Data>  // event → transform → Data
 
 clickTether()                                          // PointerEvent flows through
-submitTether(map(() => buildPayload()), awaitPromises) // chain transforms in the tether
+submitTether(map(() => buildPayload()), switchMap(p => save(p))) // chain transforms in the tether
 ```
 
 ## Stream Composition
@@ -220,13 +220,16 @@ Avoid returning `empty` while loading — the row disappears and pops back, caus
 From `aelea/`:
 
 ```bash
-bun run build       # clean dist + tsc -b
-bun run tsc:check   # type-only
+bun run build               # clean dist + tsc -b
+bun run tsc:check           # type-only
+bun test                    # unit tests in test/
 bun run bench:combinators
 bun run bench:characteristics
+bun run bench:takumi
+bun run bench:headless
 ```
 
-There is no test runner; rely on `tsc:check` and targeted benches. Place repros next to the module or under `benchmark/`.
+Tests live in `test/` (`core`, `promise`, `recover`); benches in `benchmark/`. Coverage is partial — many combinators have no dedicated tests, so still rely on `tsc:check` for the type-level contract and add tests when fixing semantic bugs.
 
 ## Gotchas
 
@@ -236,8 +239,11 @@ There is no test runner; rely on `tsc:check` and targeted benches. Place repros 
 4. **Multicast any derived stream with more than one subscriber.** A bare `map(fn, combine(...))` reused in three places creates three independent subscriptions; without an upstream replay step, consumers can diverge (one receives an emission, another doesn't). Wrap shared derivations in `multicast`.
 5. **Cache async calls with `Map<key, Promise<T>>` + `multicast`** to avoid duplicate network requests when multiple subscribers race the same input.
 6. **Prefer `switchMap(async x => …)` over `switchLatest(map(fromPromise, …))`** — fewer allocations, clearer semantics, and proper cancellation on re-emission.
-7. **Don't render stub values for pending async data.** Reserve the slot with a placeholder; `0` / `''` looks real and misleads users. Push the fallback into a dedicated intermediate primitive rather than `?? 0n` at the render site.
-8. **Element composition is not stream composition.** `$row(...)($text(...))` composes directly; `op()` is for stream operators.
+7. **`awaitPromises` is FIFO, not switch-latest.** Every incoming promise is chained behind every previous one on a single queue, so a stale slow promise *blocks* fresh fast ones, then emits its stale value before them. Right for "preserve emission order across async work" (paginated fetches, log streams). Wrong for "latest-wins" state queries — use `switchMap(async p => p, …)` instead, which disposes the prior inner and drops stale settles on the floor.
+8. **`fromPromise` cannot cancel work.** Disposal only suppresses post-dispose emission; the underlying request keeps running. For real cancellation, the producer must accept an `AbortSignal` — there is no way to retrofit it onto an already-running `Promise<T>`.
+9. **Don't render stub values for pending async data.** Reserve the slot with a placeholder (`$intermediatePromise` from `ui-components` is the house primitive); `0` / `''` looks real and misleads users. Push the fallback into a dedicated intermediate primitive rather than `?? 0n` at the render site.
+10. **Element composition is not stream composition.** `$row(...)($text(...))` composes directly; `op()` is for stream operators.
+11. **`backdrop-filter` is trapped by ancestor stacking contexts.** A page-level `transform` (e.g. from `motion`/`fadeIn`) confines the filter to that wrapper's interior, so it can't dim the page. For modal dimmers, use element-level `opacity` over an opaque palette color (`palette.foreground`) instead.
 
 ## Commits & PRs
 

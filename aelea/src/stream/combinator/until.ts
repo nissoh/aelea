@@ -82,7 +82,7 @@ class UntilSink implements ISink<unknown> {
     this.sink.end(time)
   }
 
-  error(time: ITime, e: any): void {
+  error(time: ITime, e: unknown): void {
     this.sink.error(time, e)
   }
 
@@ -123,7 +123,7 @@ class LowerBoundSink<A> implements ISink<unknown>, Disposable {
     this[Symbol.dispose]()
   }
 
-  error(time: ITime, e: any): void {
+  error(time: ITime, e: unknown): void {
     this.sink.error(time, e)
   }
 

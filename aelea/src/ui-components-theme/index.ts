@@ -1,12 +1,11 @@
-export * from './color.js'
-export { colorAlpha, convertHexToRGBA } from './color.js'
+export { colorShade } from './color.js'
 export * from './globalState.js'
-export { pallete, theme, themeList, writeTheme } from './globalState.js'
+export { palette, theme, themeList, writeTheme } from './globalState.js'
 export type {
   Action,
   Attention,
   Landscape,
-  Pallete,
+  Palette,
   Story,
   Theme
 } from './types.js'

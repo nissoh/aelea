@@ -2,7 +2,7 @@ import type { IStream } from '../../../stream/index.js'
 import { empty, just, map, merge, never, op, sample, skipRepeats, switchLatest } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
 import { multicast } from '../../../stream-extended/index.js'
-import { pallete } from '../../../ui-components-theme/index.js'
+import { palette } from '../../../ui-components-theme/index.js'
 import { $element, $node, $text, component, type INodeCompose, style } from '../../../ui-renderer-dom/index.js'
 import { $row } from '../../elements/$elements.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
@@ -15,7 +15,7 @@ import { $Input, type IInput } from './$Input.js'
 export const $defaultTextFieldContainer = $element('label')(
   layoutSheet.column,
   spacing.tiny,
-  style({ color: pallete.foreground, alignItems: 'flex-start' })
+  style({ color: palette.foreground, alignItems: 'flex-start' })
 )
 
 // Inner row holding the label text + input.
@@ -46,7 +46,7 @@ export const $TextField = (config: TextField) =>
 
       const $alert = map(msg => {
         if (msg) {
-          const negativeStyle = style({ color: pallete.negative })
+          const negativeStyle = style({ color: palette.negative })
           return negativeStyle($messageLabel($text(msg)) as any)
         }
         return hint ? $messageLabel($text(hint)) : empty

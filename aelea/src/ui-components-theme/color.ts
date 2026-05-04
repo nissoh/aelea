@@ -1,29 +1,29 @@
-export function convertHexToRGBA(hexCode: string, opacity = 1) {
-  let hex = hexCode.replace('#', '')
-
-  if (hex.length === 3) {
-    hex = `${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`
+/**
+ * Lerp a color between the theme's background-blending pole and the input,
+ * emitted as a CSS `color-mix()` expression.
+ *
+ *   intensity = 0   → fully `var(--shade-pole)` (white on light themes,
+ *                     black on dark themes)
+ *   intensity = 100 → input color, unchanged
+ *   intensity = 25  → 25% of the input's prominence above the pole
+ *
+ * Theme reactivity is delegated to CSS: `--shade-pole` is defined per-theme,
+ * so the same returned string yields different visuals when the body class
+ * swaps. Works with hex, rgb, named-color, and `var(--…)` inputs.
+ *
+ * Examples (computed by the browser):
+ *   colorShade('var(--message)', 25)  on dark  → ~rgb(64,64,64)   (75% less white)
+ *   colorShade('var(--message)', 25)  on light → ~rgb(191,191,191) (75% less black)
+ *   colorShade('#FF0000', 25)         on dark  → ~rgb(64,0,0)     (dark red)
+ *   colorShade('#FF0000', 25)         on light → ~rgb(255,191,191) (soft pink)
+ *
+ * Requires a `--shade-pole` CSS variable defined per theme (white on light,
+ * black on dark) and `color-mix()` browser support (Chrome 111+, Firefox 113+,
+ * Safari 16.2+).
+ */
+export function colorShade(color: string, intensity: number): string {
+  if (intensity < 0 || intensity > 100) {
+    throw new RangeError(`colorShade: intensity must be in [0, 100], got ${intensity}`)
   }
-
-  const r = Number.parseInt(hex.substring(0, 2), 16)
-  const g = Number.parseInt(hex.substring(2, 4), 16)
-  const b = Number.parseInt(hex.substring(4, 6), 16)
-
-  return `rgba(${r},${g},${b},${opacity / 100})`
-}
-
-const validRGB = /rgba\((\s*\d+\s*,){3}[\d.]+\)/
-
-export function colorAlpha(color: string, opacity: number): string {
-  const isRgb = validRGB.test(color)
-
-  if (isRgb) {
-    return color.replace(/[^,]+(?=\))/, String(opacity))
-  }
-  if (color.startsWith('#')) {
-    return colorAlpha(convertHexToRGBA(color), opacity)
-  }
-
-  console.error('Color has to be either hex or rgb[a]')
-  return color
+  return `color-mix(in srgb, ${color} ${intensity}%, var(--shade-pole))`
 }

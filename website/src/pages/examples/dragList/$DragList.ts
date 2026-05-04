@@ -1,7 +1,7 @@
 import type { IBehavior } from 'aelea/stream-extended'
 import { $text, component, type I$Node, style } from 'aelea/ui'
 import { $card, $row, $Sortable, designSheet, layoutSheet } from 'aelea/ui-components'
-import { pallete } from 'aelea/ui-components-theme'
+import { palette } from 'aelea/ui-components-theme'
 
 export default component(([_, orderTether]: IBehavior<I$Node[]>) => {
   const $list = Array(4)
@@ -11,7 +11,7 @@ export default component(([_, orderTether]: IBehavior<I$Node[]>) => {
         layoutSheet.flex,
         designSheet.elevation2,
         style({
-          backgroundColor: pallete.background,
+          backgroundColor: palette.background,
           placeContent: 'center',
           height: '90px',
           alignItems: 'center'

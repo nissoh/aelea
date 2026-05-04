@@ -64,7 +64,7 @@ class MergeSink<A> implements ISink<IndexedValue<A | undefined>> {
     }
   }
 
-  error(time: ITime, err: any): void {
+  error(time: ITime, err: unknown): void {
     this.sink.error(time, err)
   }
 

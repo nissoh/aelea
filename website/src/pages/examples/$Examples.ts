@@ -1,7 +1,7 @@
 import { type IBehavior, state } from 'aelea/stream-extended'
 import { $node, $text, component, style } from 'aelea/ui'
 import { $column, $row, spacing } from 'aelea/ui-components'
-import { pallete } from 'aelea/ui-components-theme'
+import { palette } from 'aelea/ui-components-theme'
 import { $Link, commitTitle, match } from 'aelea/ui-router'
 import { $Example } from '../../components/$Example'
 import { fadeIn } from '../../components/transitions/enter'
@@ -11,12 +11,12 @@ import { $Controllers } from './controllers/$Controllers'
 import { $CountCounters } from './count-counters/$CountCounters'
 import $DragList from './dragList/$DragList'
 import { $PopoverExample } from './overlay/$PopoverExample'
+import { $QuantumScrollExample } from './quantum-scroll/$QuantumScrollExample'
 import { $TableExample } from './table/$TableExample'
 import { $Theme } from './theme/$Theme'
 import { $ToastQueue } from './toast-queue/$ToastQueue'
 import { createTodo } from './todo-app/$CreateTodo'
 import $TodoApp from './todo-app/$TodoApp'
-import { $VirtualScrollExample } from './virtual-scroll/$VirtualScrollExample'
 
 export default () =>
   component(() => {
@@ -31,7 +31,7 @@ export default () =>
           )(
             $column(spacing.big, style({ whiteSpace: 'nowrap' }))(
               $column(spacing.tiny)(
-                $node(style({ color: pallete.foreground, fontSize: '75%' }))($text('Demos')),
+                $node(style({ color: palette.foreground, fontSize: '75%' }))($text('Demos')),
                 $Link({ $content: $text('Theme'), route: examples.theme })({}),
                 $Link({ $content: $text('Drag And Sort'), route: examples.dragAndSort })({}),
                 $Link({ $content: $text('Count Counters'), route: examples.countCounters })({}),
@@ -40,9 +40,8 @@ export default () =>
               ),
 
               $column(spacing.tiny)(
-                $node(style({ color: pallete.foreground, fontSize: '75%' }))($text('UI Components')),
-                $Link({ $content: $text('Controllers'), route: examples.controllers })({}),
-                $Link({ $content: $text('Virtual Scroll'), route: examples.virtualScroll })({}),
+                $node(style({ color: palette.foreground, fontSize: '75%' }))($text('UI Components')),
+                $Link({ $content: $text('Quantum Scroll'), route: examples.quantumScroll })({}),
                 $Link({ $content: $text('Popover'), route: examples.popover })({}),
                 $Link({ $content: $text('Table'), route: examples.table })({}),
                 $Link({ $content: $text('Toast Queue'), route: examples.toastQueue })({})
@@ -66,7 +65,7 @@ export default () =>
 
           match(examples.calculator)(commitTitle('Calculator')($Example($Calculator({}))({}))),
 
-          match(examples.virtualScroll)(commitTitle('Virtual Scroll')($Example($VirtualScrollExample({}))({}))),
+          match(examples.quantumScroll)(commitTitle('Quantum Scroll')($Example($QuantumScrollExample({}))({}))),
 
           match(examples.toastQueue)(commitTitle('Toast Queue')($Example($ToastQueue({}))({}))),
 

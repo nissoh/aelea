@@ -1,49 +1,37 @@
-import {
-  constant,
-  debounce,
-  empty,
-  type IStream,
-  join,
-  just,
-  map,
-  merge,
-  sampleMap,
-  start,
-  switchLatest,
-  wait
-} from 'aelea/stream'
+import { debounce, empty, type IStream, just, map, merge, sampleMap, start, switchLatest } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $element, $node, $text, component, style } from 'aelea/ui'
-import type { ScrollRequest, ScrollResponse } from 'aelea/ui-components'
 import {
   $card,
   $column,
   $defaultTextFieldContainer,
+  $QuantumScroll,
   $row,
-  $seperator,
+  $separator,
   $TextField,
-  $VirtualScroll,
+  type IPageRequest,
+  type IQuantumScrollPage,
   spacing
 } from 'aelea/ui-components'
-import { pallete } from 'aelea/ui-components-theme'
+import { palette } from 'aelea/ui-components-theme'
+
+const PAGE_SIZE = 25
+const TOTAL_ITEMS = 1000
+
+const $label = (label: string, value: IStream<string> | string) =>
+  $row(spacing.small)($node(style({ color: palette.foreground }))($text(label)), $text(value))
 
 function filterArrayByText(array: string[], filter: string) {
   const filterLowercase = filter.toLocaleLowerCase()
   return array.filter(id => id.indexOf(filterLowercase) > -1)
 }
 
-const $label = (label: string, value: IStream<string> | string) =>
-  $row(spacing.small)($node(style({ color: pallete.foreground }))($text(label)), $text(value))
-
-export const $VirtualScrollExample = component(
+export const $QuantumScrollExample = component(
   (
-    [scrollRequest, scrollRequestTether]: IBehavior<ScrollRequest, ScrollRequest>,
+    [scrollRequest, scrollRequestTether]: IBehavior<IPageRequest, IPageRequest>,
     [delayResponse, delayResponseTether]: IBehavior<string, number>,
     [filter, filterTether]: IBehavior<string, string>
   ) => {
-    const PAGE_SIZE = 25
-    const TOTAL_ITEMS = 1000
-
     const formatNumber = Intl.NumberFormat().format
     const initialDelayResponse = just(1600)
     const delayWithInitial = merge(initialDelayResponse, delayResponse)
@@ -55,26 +43,25 @@ export const $VirtualScrollExample = component(
       .fill(null)
       .map(() => `item: ${Math.random().toString(36).substring(7)} ${formatNumber(++i)}`)
 
-    const dataSourceFilter = (filter: string) =>
-      join(
-        sampleMap(
-          (delay, requestNumber): IStream<ScrollResponse> => {
-            const pageStart = requestNumber * PAGE_SIZE
-            const pageEnd = pageStart + PAGE_SIZE
-            const filteredItems = filterArrayByText(stubbedData, filter)
-            const $items = filteredItems.slice(pageStart, pageEnd).map(id => {
-              return $item($text(id))
-            })
+    const initialRequest: IPageRequest = { offset: 0, pageSize: PAGE_SIZE }
+    const requestWithInitial = start(initialRequest, scrollRequest)
 
-            return constant({ $items: $items, offset: 0, pageSize: PAGE_SIZE }, wait(delay))
-          },
-          delayWithInitial,
-          scrollRequest
-        )
+    const dataSourceFilter = (filter: string): IStream<Promise<IQuantumScrollPage>> =>
+      sampleMap(
+        (delay, request): Promise<IQuantumScrollPage> => {
+          const filteredItems = filterArrayByText(stubbedData, filter)
+          const slice = filteredItems.slice(request.offset, request.offset + request.pageSize)
+          const $items = slice.map(id => $item($text(id)))
+          const page: IQuantumScrollPage = { $items, offset: request.offset, pageSize: request.pageSize }
+          return new Promise(resolve => setTimeout(() => resolve(page), delay))
+        },
+        delayWithInitial,
+        requestWithInitial
       )
 
     const filterText = start('', filter)
     const debouncedFilterText = debounce(300, filterText)
+    const currentPageLabel = map(req => String(Math.floor(req.offset / req.pageSize) + 1), requestWithInitial)
 
     return [
       $column(spacing.big)(
@@ -82,10 +69,7 @@ export const $VirtualScrollExample = component(
           'High performance dynamically loaded list based on Intersection Observer Web API. This example shows a common paginated, REST-like fetch that loads pages asynchronously.'
         ),
         $row(spacing.big)(
-          $label(
-            'Page: ',
-            map(l => String(l), scrollRequest)
-          ),
+          $label('Page: ', currentPageLabel),
           $label('Page Size:', String(PAGE_SIZE)),
           $label('Total Items:', String(TOTAL_ITEMS))
         ),
@@ -109,17 +93,17 @@ export const $VirtualScrollExample = component(
           })
         ),
 
-        $seperator,
+        $separator,
 
         $card(style({ padding: 0 }))(
           switchLatest(
             map(
               searchText =>
-                $VirtualScroll({
+                $QuantumScroll({
                   dataSource: dataSourceFilter(searchText),
-                  containerOps: style({ padding: '8px', maxHeight: '400px' })
+                  $container: $column(spacing.default, style({ padding: '8px', maxHeight: '400px', overflow: 'auto' }))
                 })({
-                  scrollIndex: scrollRequestTether()
+                  scrollRequest: scrollRequestTether()
                 }),
               debouncedFilterText
             )

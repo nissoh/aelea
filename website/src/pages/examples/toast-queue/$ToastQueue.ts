@@ -2,7 +2,7 @@ import { type IStream, map, merge, reduce, switchLatest } from 'aelea/stream'
 import { behavior, type IBehavior } from 'aelea/stream-extended'
 import { $text, component, style } from 'aelea/ui'
 import { $Button, $card, $column, $row, spacing } from 'aelea/ui-components'
-import { pallete } from 'aelea/ui-components-theme'
+import { palette } from 'aelea/ui-components-theme'
 
 type ToastKind = 'info' | 'success' | 'warn'
 
@@ -13,9 +13,9 @@ interface Toast {
 }
 
 const kindPalette: Record<ToastKind, string> = {
-  info: pallete.message,
-  success: pallete.positive,
-  warn: pallete.negative
+  info: palette.message,
+  success: palette.positive,
+  warn: palette.negative
 }
 
 const randomId = () => Math.random().toString(36).slice(2, 8)
@@ -98,14 +98,14 @@ export const $ToastQueue = component(
           map(
             list =>
               list.length === 0
-                ? $card(style({ padding: '12px', color: pallete.foreground }))($text('No toasts yet.'))
+                ? $card(style({ padding: '12px', color: palette.foreground }))($text('No toasts yet.'))
                 : $column(spacing.small)(
                     ...list.map(toast =>
                       $card(
                         style({
                           borderLeft: `4px solid ${kindPalette[toast.kind]}`,
                           padding: '10px 14px',
-                          backgroundColor: pallete.background
+                          backgroundColor: palette.background
                         })
                       )(
                         $row(style({ alignItems: 'center', placeContent: 'space-between', gap: '12px' }))(

@@ -1,7 +1,7 @@
 import { type IStream, merge, sampleMap } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $text, component, style } from 'aelea/ui'
-import { $Button, $column, $NumberTicker, $row, spacing } from 'aelea/ui-components'
+import { $Button, $column, $defaultNumberTickerSlot, $NumberTicker, $row, spacing } from 'aelea/ui-components'
 
 export const $Counter = (value: IStream<number>) =>
   component(
@@ -22,9 +22,7 @@ export const $Counter = (value: IStream<number>) =>
 
           $NumberTicker({
             value: value,
-            textStyle: {
-              fontSize: '30px'
-            }
+            $slot: $defaultNumberTickerSlot(style({ fontSize: '30px' }))
           })
         ),
 

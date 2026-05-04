@@ -270,12 +270,12 @@ async function loadAeleaPackageLocally() {
       export declare function $TextField(...args: any[]): any
       export declare function $Popover(...args: any[]): any
       export declare const spacing: any
-      export declare const pallete: any
+      export declare const palette: any
       export declare const theme: any
     `
 
     const uiComponentsThemeTypes = `
-      export declare const pallete: any
+      export declare const palette: any
       export declare const theme: any
     `
 

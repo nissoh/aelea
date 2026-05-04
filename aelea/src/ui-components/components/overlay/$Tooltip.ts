@@ -10,7 +10,7 @@ import {
   switchMap
 } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
-import { colorAlpha, pallete } from '../../../ui-components-theme/index.js'
+import { colorShade, palette } from '../../../ui-components-theme/index.js'
 import {
   component,
   fromEventTarget,
@@ -37,8 +37,8 @@ export const $defaultTooltipDropContainer = $column(
     whiteSpace: 'pre-wrap',
     maxWidth: '600px',
     userSelect: 'text',
-    background: pallete.background,
-    boxShadow: `${colorAlpha(pallete.message, 0.14)} 0px 4px 20px 8px, ${colorAlpha(pallete.message, 0.1)} 0px 1px 3px 1px`,
+    background: palette.background,
+    boxShadow: `${colorShade(palette.message, 14)} 0px 4px 20px 8px, ${colorShade(palette.message, 10)} 0px 1px 3px 1px`,
     padding: '16px',
     minWidth: '300px',
     borderRadius: '8px'

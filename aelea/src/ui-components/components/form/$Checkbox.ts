@@ -1,6 +1,6 @@
 import { map, merge } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
-import { pallete } from '../../../ui-components-theme/index.js'
+import { palette } from '../../../ui-components-theme/index.js'
 import type { ISlottable } from '../../../ui-renderer-dom/index.js'
 import {
   $element,
@@ -34,7 +34,7 @@ export const $defaultCheckboxBox = $node(
     position: 'relative',
     width: '18px',
     height: '18px',
-    border: `2px solid ${pallete.message}`,
+    border: `2px solid ${palette.message}`,
     flexShrink: 0
   })
 )
@@ -48,14 +48,14 @@ export interface Checkbox extends Input<boolean> {
 export const $Checkbox = ({ value, label, $container = $defaultCheckboxLabel, $box = $defaultCheckboxBox }: Checkbox) =>
   component(
     (
-      [focusStyle, interactionTether]: IBehavior<ISlottable<HTMLInputElement>, boolean>,
-      [dismissstyle, dismissTether]: IBehavior<ISlottable<HTMLInputElement>, boolean>,
+      [focusStyle, interactionTether]: IBehavior<ISlottable<HTMLElement>, boolean>,
+      [dismissstyle, dismissTether]: IBehavior<ISlottable<HTMLElement>, boolean>,
       [check, checkTether]: IBehavior<ISlottable<HTMLInputElement>, boolean>
     ) => {
       const $overlay = $node(
         layoutSheet.stretch,
         style({ margin: '3px' }),
-        styleBehavior(map(ch => (ch ? { backgroundColor: pallete.message } : null), value))
+        styleBehavior(map(ch => (ch ? { backgroundColor: palette.message } : null), value))
       )
 
       const $checkInput = $element('input')(
@@ -79,10 +79,17 @@ export const $Checkbox = ({ value, label, $container = $defaultCheckboxLabel, $b
 
       const $boxNode = $box(
         styleBehavior(
-          map(active => (active ? { borderColor: pallete.primary } : null), merge(focusStyle, dismissstyle))
+          map(active => (active ? { borderColor: palette.primary } : null), merge(focusStyle, dismissstyle))
         )
       )($overlay(), $checkInput())
 
-      return [label === undefined ? $boxNode : $container($boxNode, $text(label)), { check }]
+      // Wire hover tethers to the label too so hovering the text portion also
+      // highlights the box border (not just hovering the box/input).
+      return [
+        label === undefined
+          ? $boxNode
+          : $container(interactionTether(interactionOp), dismissTether(dismissOp))($boxNode, $text(label)),
+        { check }
+      ]
     }
   )

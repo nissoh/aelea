@@ -1,6 +1,6 @@
 import type { IOps } from '../../../stream/index.js'
 import { constant, filter, merge } from '../../../stream/index.js'
-import { pallete } from '../../../ui-components-theme/index.js'
+import { palette } from '../../../ui-components-theme/index.js'
 import type { ISlottable } from '../../../ui-renderer-dom/index.js'
 import { $element, nodeEvent, style } from '../../../ui-renderer-dom/index.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
@@ -18,4 +18,4 @@ export const dismissOp: IOps<ISlottable, boolean> = source => {
 
 export const $form = $element('form')(layoutSheet.column)
 
-export const $label = $element('label')(layoutSheet.column, style({ color: pallete.foreground }))
+export const $label = $element('label')(layoutSheet.column, style({ color: palette.foreground }))

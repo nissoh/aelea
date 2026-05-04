@@ -41,7 +41,7 @@ class ContinueWithSink<A, B> implements ISink<A>, Disposable {
     this.sink.event(time, value)
   }
 
-  error(time: ITime, error: any): void {
+  error(time: ITime, error: unknown): void {
     this.sink.error(time, error)
   }
 

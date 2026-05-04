@@ -2,7 +2,7 @@ import { constant, just, reduce } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $text, component, style } from 'aelea/ui'
 import { $Button, $column, $Popover, $row, $TextField, spacing } from 'aelea/ui-components'
-import { pallete } from 'aelea/ui-components-theme'
+import { palette } from 'aelea/ui-components-theme'
 import { $Counter } from '../count-counters/$Counter'
 
 export function hexAlpha(color: string, opacity: number): string {
@@ -48,8 +48,8 @@ export const $PopoverExample = component(
           $open: $$popContentCard,
           $target: $column(
             style({
-              backgroundColor: pallete.background,
-              border: `1px solid ${pallete.horizon}`,
+              backgroundColor: palette.background,
+              border: `1px solid ${palette.horizon}`,
               padding: '30px'
             })
           )(
@@ -68,8 +68,8 @@ export const $PopoverExample = component(
         $Popover({
           $target: $column(
             style({
-              backgroundColor: pallete.background,
-              border: `1px solid ${pallete.horizon}`,
+              backgroundColor: palette.background,
+              border: `1px solid ${palette.horizon}`,
               padding: '30px'
             })
           )(

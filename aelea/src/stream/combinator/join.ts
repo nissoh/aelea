@@ -73,7 +73,7 @@ class JoinSink<A, B> implements ISink<A>, Disposable {
     this.checkEnd(time)
   }
 
-  error(time: ITime, e: any): void {
+  error(time: ITime, e: unknown): void {
     // Don't set active = false - allow stream to continue after error
     this.sink.error(time, e)
   }
@@ -125,7 +125,7 @@ class InnerSink<A> implements ISink<A>, Disposable {
     this.parentJoin.endInner(time, this)
   }
 
-  error(time: ITime, e: any): void {
+  error(time: ITime, e: unknown): void {
     this.parentJoin.error(time, e)
   }
 

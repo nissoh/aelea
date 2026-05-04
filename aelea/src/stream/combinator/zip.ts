@@ -144,7 +144,7 @@ class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
     }
   }
 
-  error(time: ITime, e: any): void {
+  error(time: ITime, e: unknown): void {
     this.sink.error(time, e)
   }
 

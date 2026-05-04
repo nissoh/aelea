@@ -1,6 +1,9 @@
+import { just, merge, tap } from 'aelea/stream'
+import type { IBehavior } from 'aelea/stream-extended'
 import { $text, component, style } from 'aelea/ui'
 import { $column, $icon, $row, designSheet, spacing } from 'aelea/ui-components'
-import { pallete, themeList } from 'aelea/ui-components-theme'
+import { palette, type Theme, theme, themeList } from 'aelea/ui-components-theme'
+import { setTheme } from 'aelea/ui-components-theme-browser'
 import { $defaultAnchor, $Link, commitTitle, contains, match } from 'aelea/ui-router'
 import { $Picker } from '../components/$ThemePicker'
 import { fadeIn } from '../components/transitions/enter'
@@ -11,20 +14,26 @@ import $Examples from './examples/$Examples'
 import $Guide from './guide/$Guide'
 
 export default () =>
-  component(() => {
+  component(([changeTheme, changeThemeTether]: IBehavior<Theme>) => {
     const rootRoute = routeSchema
     const pagesRoute = routeSchema.pages
     const guideRoute = routeSchema.pages.guide
     const examplesRoute = routeSchema.pages.examples
+
+    // Active theme as a stream — boots from the global mutable record, then
+    // updates whenever the picker emits a change. Reload tears the page down
+    // before any post-change render matters, but the merge keeps the stream
+    // semantics correct in case reload ever goes away.
+    const currentTheme = merge(just(theme), changeTheme)
 
     return [
       $column(
         designSheet.main,
         designSheet.customScroll,
         style({
-          backgroundColor: pallete.background,
+          backgroundColor: palette.background,
           fontFamily: `'Fira Code', system-ui, monospace`,
-          backgroundImage: `radial-gradient(at center center, ${pallete.horizon} 50vh, ${pallete.background})`
+          backgroundImage: `radial-gradient(at center center, ${palette.horizon} 50vh, ${palette.background})`
         })
       )(
         match(rootRoute)(
@@ -46,7 +55,7 @@ export default () =>
                     route: rootRoute,
                     $anchor: $defaultAnchor(style({ display: 'block' })),
                     $content: $icon({
-                      $content: style({ fill: pallete.message }, $aeleaLogo),
+                      $content: style({ fill: palette.message }, $aeleaLogo),
                       width: '237px',
                       height: '115px',
                       viewBox: '0 0 147 90'
@@ -82,7 +91,7 @@ export default () =>
                 $anchor: $defaultAnchor(style({ display: 'inline-flex', alignItems: 'center' })),
                 $content: $icon({
                   $content: $aeleaLogo,
-                  fill: pallete.message,
+                  fill: palette.message,
                   width: '137px',
                   height: '115px',
                   viewBox: '0 0 147 90'
@@ -95,7 +104,14 @@ export default () =>
           )
         ),
 
-        $Picker(themeList)({})
+        $Picker({ themeList, currentTheme })({
+          change: changeThemeTether(
+            tap(t => {
+              setTheme(themeList, t)
+              window.location.reload()
+            })
+          )
+        })
       )
     ]
   })

@@ -1,5 +1,5 @@
 import { o } from '../../stream/index.js'
-import { pallete } from '../../ui-components-theme/index.js'
+import { palette } from '../../ui-components-theme/index.js'
 import { style, stylePseudo } from '../../ui-renderer-dom/index.js'
 
 export const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
@@ -11,13 +11,13 @@ const text = style({
 })
 
 const customScroll = isFirefox
-  ? style({ scrollbarColor: `${pallete.foreground} transparent` })
+  ? style({ scrollbarColor: `${palette.foreground} transparent` })
   : o(
       stylePseudo('::-webkit-scrollbar-thumb:hover', {
-        backgroundColor: pallete.primary
+        backgroundColor: palette.primary
       }),
       stylePseudo('::-webkit-scrollbar-thumb', {
-        backgroundColor: pallete.foreground
+        backgroundColor: palette.foreground
       }),
       stylePseudo('::-webkit-scrollbar', {
         backgroundColor: 'transparent',
@@ -31,7 +31,7 @@ const control = o(
   style({
     backgroundColor: 'transparent',
     border: '2px solid transparent',
-    color: pallete.message,
+    color: palette.message,
     outline: 'none',
     flexShrink: 0
   })
@@ -41,10 +41,10 @@ const main = o(
   text,
   style({
     height: '100vh',
-    color: pallete.message,
-    fill: pallete.message,
+    color: palette.message,
+    fill: palette.message,
     overflowY: 'scroll',
-    backgroundColor: pallete.background,
+    backgroundColor: palette.background,
     margin: '0',
     scrollbarColor: 'auto',
     scrollbarWidth: 'thin',
@@ -60,14 +60,14 @@ const input = o(
     width: '100%',
     backgroundColor: 'transparent',
     border: 'none',
-    borderBottom: `2px solid ${pallete.message}`,
+    borderBottom: `2px solid ${palette.message}`,
     paddingBottom: '2px',
     flex: 1,
     padding: 0,
     marginTop: '2px'
   }),
   stylePseudo('::placeholder', {
-    color: pallete.foreground
+    color: palette.foreground
   })
 )
 
@@ -76,15 +76,15 @@ const btn = o(
   style({
     cursor: 'pointer',
     backgroundColor: 'transparent',
-    border: `2px solid ${pallete.message}`,
-    color: pallete.message,
+    border: `2px solid ${palette.message}`,
+    color: palette.message,
     padding: '5px 15px',
     display: 'flex',
     alignItems: 'center'
   })
 )
 
-export const elevation1 = style({ border: `1px solid ${pallete.horizon}` })
+export const elevation1 = style({ border: `1px solid ${palette.horizon}` })
 export const elevation2 = style({
   boxShadow: '0px 1px 1px rgba(0, 0, 0, 0.14), 0px 2px 1px rgba(0, 0, 0, 0.12), 0px 1px 3px rgba(0, 0, 0, 0.2)'
 })

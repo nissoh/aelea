@@ -2,14 +2,14 @@ import { combineMap, empty, fromIterable, joinMap, merge, switchLatest, take, un
 import { behavior, type IBehavior, state } from 'aelea/stream-extended'
 import { $element, $text, component, style } from 'aelea/ui'
 import { $Checkbox, $column, $row, spacing } from 'aelea/ui-components'
-import { pallete } from 'aelea/ui-components-theme'
+import { palette } from 'aelea/ui-components-theme'
 import type { Todo } from './$CreateTodo'
 import $CreateTodo from './$CreateTodo'
 import $TodoItem from './$TodoItem'
 
 export const $label = $element('label')(
   style({ display: 'flex', flexDirection: 'row' }),
-  style({ cursor: 'pointer', alignItems: 'center', color: pallete.foreground })
+  style({ cursor: 'pointer', alignItems: 'center', color: palette.foreground })
 )
 
 export default (todos: Todo[]) =>

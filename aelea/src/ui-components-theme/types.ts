@@ -19,9 +19,9 @@ export type Attention = {
   indeterminate: string
 }
 
-export type Pallete = Attention & Landscape & Story & Action
+export type Palette = Attention & Landscape & Story & Action
 
 export type Theme = {
   name: string
-  pallete: Pallete
+  palette: Palette
 }

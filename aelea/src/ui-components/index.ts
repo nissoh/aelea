@@ -6,18 +6,37 @@ export {
   $defaultOptionContainer,
   type IDropdown
 } from './components/$Dropdown.js'
-export { $NumberTicker } from './components/$NumberTicker.js'
+export {
+  $alertTooltip,
+  $intermediatePromise,
+  $spinner,
+  classifyError,
+  type I$IntermediatePromise,
+  type IClassifiedError
+} from './components/$IntermediateDisplay.js'
+export {
+  $defaultNumberTickerContainer,
+  $defaultNumberTickerSlot,
+  $NumberTicker
+} from './components/$NumberTicker.js'
+export {
+  $defaultVScrollContainer,
+  $QuantumScroll,
+  type IPageRequest,
+  type IQuantumScroll,
+  type IQuantumScrollPage
+} from './components/$QuantumScroll.js'
 export { $Sortable } from './components/$Sortable.js'
-export type { IPageRequest, ISortBy, TablePageResponse } from './components/$Table.js'
-export { $caretDown, $Table } from './components/$Table.js'
+export type { ISortBy, TableColumn, TableOption, TablePageResponse } from './components/$Table.js'
+export {
+  $caretDown,
+  $defaultTableCell,
+  $defaultTableContainer,
+  $defaultTableHeaderCell,
+  $defaultTableRowContainer,
+  $Table
+} from './components/$Table.js'
 export { $Tabs } from './components/$Tabs.js'
-export type {
-  IScrollPagableReponse,
-  QuantumScroll,
-  ScrollRequest,
-  ScrollResponse
-} from './components/$VirtualScroll.js'
-export { $VirtualScroll } from './components/$VirtualScroll.js'
 export type { IButton } from './components/form/$Button.js'
 export { $Button, $defaultButtonContainer } from './components/form/$Button.js'
 export { $ButtonIcon } from './components/form/$ButtonIcon.js'
@@ -37,11 +56,10 @@ export {
   $Tooltip,
   type ITooltip
 } from './components/overlay/$Tooltip.js'
-export { $card, $column, $row, $seperator } from './elements/$elements.js'
+export { $card, $column, $row, $separator } from './elements/$elements.js'
 export { $icon } from './elements/$icon.js'
 export { designSheet } from './style/designSheet.js'
 export { layoutSheet } from './style/layoutSheet.js'
 export { spacing } from './style/spacing.js'
 export { observer } from './utils/elementObservers.js'
 export { isDesktopScreen, isMobileScreen } from './utils/screenUtils.js'
-// export { createLocalStorageChain } from './utils/state.js'

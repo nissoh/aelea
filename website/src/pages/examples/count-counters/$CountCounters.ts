@@ -1,8 +1,8 @@
 import { constant, type IStream, map, merge, sampleMap, skipRepeats, skipRepeatsWith, switchMap } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $node, $text, component, style } from 'aelea/ui'
-import { $Button, $column, $row, $seperator, spacing } from 'aelea/ui-components'
-import { pallete } from 'aelea/ui-components-theme'
+import { $Button, $column, $row, $separator, spacing } from 'aelea/ui-components'
+import { palette } from 'aelea/ui-components-theme'
 import { $TrashBtn } from '../../../elements/$common'
 import { $Counter } from './$Counter'
 
@@ -29,11 +29,11 @@ export const $CountCounters = ({ counterList }: CountCounters) =>
           // Header with stats and add button
           $row(style({ placeContent: 'space-between', alignItems: 'center' }), spacing.default)(
             $row(spacing.small)(
-              $node(style({ color: pallete.foreground }))($text('Counters: ')),
+              $node(style({ color: palette.foreground }))($text('Counters: ')),
               $text(map(String, counterCount))
             ),
             $row(spacing.small)(
-              $node(style({ color: pallete.foreground }))($text('Sum: ')),
+              $node(style({ color: palette.foreground }))($text('Sum: ')),
               $text(map(String, totalSum))
             ),
             $Button({
@@ -50,7 +50,7 @@ export const $CountCounters = ({ counterList }: CountCounters) =>
                 const value = counterLens(index)
 
                 return [
-                  $seperator,
+                  $separator,
                   $row(style({ alignItems: 'center' }), spacing.big)(
                     $TrashBtn({
                       click: removeCounterTether(constant(index))

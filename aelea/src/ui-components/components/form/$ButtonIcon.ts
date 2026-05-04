@@ -1,6 +1,6 @@
 import { map, merge, never } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
-import { colorAlpha, pallete } from '../../../ui-components-theme/index.js'
+import { colorShade, palette } from '../../../ui-components-theme/index.js'
 import type { I$Slottable, ISlottable } from '../../../ui-renderer-dom/index.js'
 import {
   $element,
@@ -19,8 +19,8 @@ export const $defaultButtonIconContainer = $element('button')(
   designSheet.control,
   style({
     cursor: 'pointer',
-    fill: pallete.message,
-    border: `1px solid ${colorAlpha(pallete.message, 0.25)}`,
+    fill: palette.message,
+    border: `1px solid ${colorShade(palette.message, 25)}`,
     borderRadius: '50%',
     width: '40px',
     height: '40px',
@@ -49,7 +49,7 @@ export const $ButtonIcon = ({ $content, disabled = never, $container = $defaultB
         styleBehavior(map(d => (d ? { opacity: 0.4, pointerEvents: 'none' } : null), disabled)),
         attrBehavior(map(d => ({ disabled: d }), disabled)),
         styleBehavior(
-          map(active => (active ? { borderColor: pallete.primary } : null), merge(focusStyle, dismissstyle))
+          map(active => (active ? { borderColor: palette.primary } : null), merge(focusStyle, dismissstyle))
         ),
         interactionTether(interactionOp),
         dismissTether(dismissOp)

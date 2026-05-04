@@ -1,6 +1,6 @@
 import { $element, style, stylePseudo } from 'aelea/ui'
 import { $ButtonIcon, $icon } from 'aelea/ui-components'
-import { pallete } from 'aelea/ui-components-theme'
+import { palette } from 'aelea/ui-components-theme'
 import { $trash } from './$icons'
 
 export const $TrashBtn = $ButtonIcon({
@@ -8,9 +8,9 @@ export const $TrashBtn = $ButtonIcon({
 })
 
 export const $anchor = $element('a')(
-  stylePseudo(':hover', { color: pallete.primary }),
+  stylePseudo(':hover', { color: palette.primary }),
   style({
     cursor: 'pointer',
-    color: pallete.message
+    color: palette.message
   })
 )

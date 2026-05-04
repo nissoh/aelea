@@ -16,14 +16,14 @@ import {
   $Tooltip,
   spacing
 } from 'aelea/ui-components'
-import { pallete } from 'aelea/ui-components-theme'
+import { palette } from 'aelea/ui-components-theme'
 import { $trash } from '../../../elements/$icons'
 
 const $sectionTitle = $node(
-  style({ color: pallete.foreground, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' })
+  style({ color: palette.foreground, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' })
 )
 
-const $valueLabel = $node(style({ color: pallete.foreground, fontSize: '0.85rem' }))
+const $valueLabel = $node(style({ color: palette.foreground, fontSize: '0.85rem' }))
 
 const $section = (title: string, ...children: ReturnType<typeof $row>[]) =>
   $column(spacing.default, style({ minWidth: '320px' }))($sectionTitle($text(title)), ...children)
@@ -137,7 +137,7 @@ export const $Controllers = component(
                 $anchor: $node(
                   style({
                     padding: '8px 14px',
-                    border: `1px solid ${pallete.horizon}`,
+                    border: `1px solid ${palette.horizon}`,
                     borderRadius: '6px'
                   })
                 )($text('Hover me')),
@@ -157,13 +157,13 @@ export const $Controllers = component(
           style({
             marginTop: '12px',
             padding: '12px 16px',
-            borderTop: `1px solid ${pallete.horizon}`,
-            color: pallete.foreground,
+            borderTop: `1px solid ${palette.horizon}`,
+            color: palette.foreground,
             fontSize: '0.85rem'
           })
         )(
           $text('Live event log'),
-          $node(style({ color: pallete.message }))(
+          $node(style({ color: palette.message }))(
             $text(
               start(
                 'waiting…',

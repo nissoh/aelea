@@ -1,4 +1,4 @@
-import { pallete } from '../../ui-components-theme/index.js'
+import { palette } from '../../ui-components-theme/index.js'
 import { $custom, $node, style } from '../../ui-renderer-dom/index.js'
 import { elevation2 } from '../style/designSheet.js'
 import { layoutSheet } from '../style/layoutSheet.js'
@@ -10,14 +10,14 @@ export const $card = $column(
   elevation2,
   style({
     padding: '16px',
-    backgroundColor: pallete.background
+    backgroundColor: palette.background
   })
 )
 
-export const $seperator = $node(
+export const $separator = $node(
   style({
     minHeight: '1px',
     minWidth: '1px',
-    background: pallete.foreground
+    background: palette.foreground
   })
 )()

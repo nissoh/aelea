@@ -2,7 +2,7 @@ import { debounce, empty, fromIterable, map, op, start, switchLatest, switchMap 
 import type { IBehavior } from 'aelea/stream-extended'
 import { $custom, $node, $text, component, type I$Slottable, motion, style, styleInline } from 'aelea/ui'
 import { $column, $row } from 'aelea/ui-components'
-import { pallete, theme } from 'aelea/ui-components-theme'
+import { palette, theme } from 'aelea/ui-components-theme'
 import { $defaultMonacoEditorContainer, $MonacoEditor, type ModelChangeBehavior } from '../$MonacoEditor'
 
 interface IMonaco {
@@ -27,14 +27,14 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
         })({
           change: changeTether()
         }),
-        $row(style({ backgroundColor: pallete.background, minHeight: '30px' }))(
+        $row(style({ backgroundColor: palette.background, minHeight: '30px' }))(
           $row(style({ width: '2px', backgroundColor: 'rgb(43 52 55)' }))(
             $row(
               styleInline(
                 map(({ semanticDiagnostics, syntacticDiagnostics }) => {
                   return {
                     backgroundColor:
-                      semanticDiagnostics.length || syntacticDiagnostics.length ? pallete.negative : pallete.foreground
+                      semanticDiagnostics.length || syntacticDiagnostics.length ? palette.negative : palette.foreground
                   }
                 }, change)
               ),
@@ -48,7 +48,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                   )
                 )
               ),
-              style({ flex: 1, backgroundColor: pallete.foreground })
+              style({ flex: 1, backgroundColor: palette.foreground })
             )()
           ),
 
@@ -104,7 +104,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                     const value: I$Slottable = esModule.default ?? empty
                     return value
                   } catch (err: any) {
-                    return $row(style({ gap: '8px', color: pallete.foreground }))(
+                    return $row(style({ gap: '8px', color: palette.foreground }))(
                       $text('TypeScript service unavailable.'),
                       $text(err?.message ? `(${err.message})` : '')
                     )
@@ -112,7 +112,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                 }
               ),
               start(
-                $node(style({ color: pallete.foreground, fontSize: '75%' }))($text('Preparing TypeScript service...'))
+                $node(style({ color: palette.foreground, fontSize: '75%' }))($text('Preparing TypeScript service...'))
               ),
               switchLatest
             )

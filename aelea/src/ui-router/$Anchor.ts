@@ -1,6 +1,6 @@
 import { constant, map, merge, nowWith, start } from '../stream/index.js'
 import type { IBehavior } from '../stream-extended/index.js'
-import { pallete } from '../ui-components-theme/index.js'
+import { palette } from '../ui-components-theme/index.js'
 import type { I$Slottable, INode, INodeCompose, IStyleCSS } from '../ui-renderer-dom/index.js'
 import {
   $element,
@@ -26,13 +26,13 @@ export interface IAnchor {
 
 export const $defaultAnchor = $element('a')(
   style({
-    color: pallete.message,
+    color: palette.message,
     cursor: 'pointer',
     transition: 'color 120ms ease-out'
   }),
-  stylePseudo(':hover', { color: pallete.primary }),
+  stylePseudo(':hover', { color: palette.primary }),
   stylePseudo(':focus-visible', {
-    outline: `2px solid ${pallete.primary}`,
+    outline: `2px solid ${palette.primary}`,
     outlineOffset: '2px',
     borderRadius: '2px'
   })
@@ -60,7 +60,7 @@ export const $Link = ({ route, $content, params, $anchor = $defaultAnchor }: IAn
           nowWith(() => onclick)
         ),
         styleBehavior(
-          map((isActive): IStyleCSS | null => (isActive ? { color: pallete.primary, cursor: 'default' } : null), active)
+          map((isActive): IStyleCSS | null => (isActive ? { color: palette.primary, cursor: 'default' } : null), active)
         ),
         focusTether($node => {
           const focusOn = constant(true, merge(nodeEvent('focus', $node), nodeEvent('pointerenter', $node)))

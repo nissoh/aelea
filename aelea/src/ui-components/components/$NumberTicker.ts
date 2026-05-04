@@ -12,9 +12,10 @@ import {
   switchLatest
 } from '../../stream/index.js'
 import { multicast } from '../../stream-extended/index.js'
-import { pallete } from '../../ui-components-theme/index.js'
-import type { IStyleCSS } from '../../ui-renderer-dom/index.js'
+import { palette } from '../../ui-components-theme/index.js'
+import type { INodeCompose, IStyleCSS } from '../../ui-renderer-dom/index.js'
 import { $node, $text, style, styleBehavior } from '../../ui-renderer-dom/index.js'
+import { $row } from '../elements/$elements.js'
 
 export const sumFromZeroOp = reduce((current: number, x: number) => current + x, 0)
 
@@ -23,107 +24,93 @@ enum Direction {
   DECREMENT
 }
 
-type CountState = {
+interface CountState {
   dir: Direction | null
   change: number
-  pos: number
   changeStr: string
+  affectedUpTo: number
 }
 
 export interface NumberConfig {
   value: IStream<number>
   incrementColor?: string
   decrementColor?: string
-  textStyle?: IStyleCSS
-  slots?: number // can be deprecated
+  slots?: number
   parser?: (value: number) => string
+  $container?: INodeCompose
+  $slot?: INodeCompose
 }
+
+export const $defaultNumberTickerContainer = $row(style({ justifyContent: 'flex-end' }))
+
+export const $defaultNumberTickerSlot = $node(
+  style({
+    fontVariantNumeric: 'tabular-nums',
+    transition: 'ease-out .25s color'
+  })
+)
+
+const charAt = (str: string, slot: number): string => str[str.length - 1 - slot] ?? ''
+
 export const $NumberTicker = ({
   value,
-  incrementColor = pallete.positive,
-  decrementColor = pallete.negative,
-  textStyle = {},
+  incrementColor = palette.positive,
+  decrementColor = palette.negative,
   slots = 10,
-  parser = (n: number) => n.toLocaleString()
+  parser = (n: number) => n.toLocaleString(),
+  $container = $defaultNumberTickerContainer,
+  $slot = $defaultNumberTickerSlot
 }: NumberConfig) => {
   const incrementMulticast = op(
     value,
     reduce(
       (seed: CountState | null, change: number): CountState => {
         const changeStr = parser(change)
-
-        if (seed === null) {
-          return { change, dir: null, pos: changeStr.length, changeStr }
-        }
-
+        if (seed === null) return { dir: null, change, changeStr, affectedUpTo: -1 }
         const dir = change > seed.change ? Direction.INCREMENT : Direction.DECREMENT
-        const currentStr = parser(seed.change)
-
-        // Find the position where strings differ
-        let pos = 0
-        const minLen = Math.min(currentStr.length, changeStr.length)
-        while (pos < minLen && currentStr[pos] === changeStr[pos]) {
-          pos++
+        const prevStr = seed.changeStr
+        const maxLen = Math.max(changeStr.length, prevStr.length)
+        let affectedUpTo = -1
+        for (let i = 0; i < maxLen; i++) {
+          if (charAt(changeStr, i) !== charAt(prevStr, i)) affectedUpTo = i
         }
-
-        return { change, dir, pos, changeStr }
+        return { dir, change, changeStr, affectedUpTo }
       },
       null as CountState | null
     ),
-    filterNull<CountState>,
-    skipRepeats,
+    filterNull,
+    skipRepeatsWith((a, b) => a.change === b.change),
     multicast
   )
 
-  const styledTextTransition = style({
-    fontVariantNumeric: 'tabular-nums',
-    transition: 'ease-out .25s color',
-    ...textStyle
-  })
+  const resetStyle: IStream<IStyleCSS> = just({})
+  const decayStyle: IStream<IStyleCSS> = delay(1000, resetStyle)
 
-  return $node(
-    ...Array(slots)
-      .fill(undefined)
-      .map((_, slot) => {
-        return $node(
-          styledTextTransition,
-          styleBehavior(
-            op(
-              incrementMulticast,
-              skipRepeatsWith((x, y) => x.changeStr[slot] === y.changeStr[slot] && slot < (y.pos ?? 0)),
-              map(state => {
-                if (!state) return just({})
-
-                const { pos = 0, dir } = state
-                const resetStyle = just({})
-                const decayColor = delay(1000, resetStyle)
-
-                // If this slot is before the change position, just reset
-                if (slot < pos) {
-                  return resetStyle
-                }
-
-                // If no direction (initial state), return reset
-                if (dir === null || dir === undefined) {
-                  return resetStyle
-                }
-
-                // Apply color and then decay
-                const color = dir === Direction.INCREMENT ? incrementColor : decrementColor
-                return start({ color }, decayColor)
-              }),
-              switchLatest
-            )
-          )
-        )(
-          $text(
-            op(
-              incrementMulticast,
-              map(state => state?.changeStr[slot] ?? ''),
-              skipRepeats
-            )
-          )
+  const $slotAt = (slot: number) =>
+    $slot(
+      styleBehavior(
+        op(
+          incrementMulticast,
+          skipRepeatsWith((a, b) => a.affectedUpTo < slot && b.affectedUpTo < slot),
+          map(state => {
+            if (state.dir === null || state.affectedUpTo < slot) return resetStyle
+            const color = state.dir === Direction.INCREMENT ? incrementColor : decrementColor
+            return start({ color }, decayStyle)
+          }),
+          switchLatest
         )
-      })
-  )
+      )
+    )(
+      $text(
+        op(
+          incrementMulticast,
+          map(state => charAt(state.changeStr, slot)),
+          skipRepeats
+        )
+      )
+    )
+
+  const $slots = Array.from({ length: slots }, (_, slot) => $slotAt(slot)).reverse()
+
+  return $container(...$slots)
 }

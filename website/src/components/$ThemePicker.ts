@@ -1,14 +1,16 @@
-import { op, sampleMap, start } from 'aelea/stream'
+import { type IStream, op, sampleMap } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $svg, attr, component, type ISlottable, nodeEvent, style, stylePseudo } from 'aelea/ui'
 import { $icon } from 'aelea/ui-components'
-import { pallete, type Theme, theme } from 'aelea/ui-components-theme'
-import { setTheme } from 'aelea/ui-components-theme-browser'
+import { palette, type Theme } from 'aelea/ui-components-theme'
 
-export const $Picker = (themeList: Theme[]) =>
-  component(([changeThemeEffect, changeThemeEffectTether]: IBehavior<ISlottable<Node>, Theme>) => {
-    const currentTheme = start(theme, changeThemeEffect)
+export interface IThemePicker {
+  themeList: Theme[]
+  currentTheme: IStream<Theme>
+}
 
+export const $Picker = ({ themeList, currentTheme }: IThemePicker) =>
+  component(([change, changeTether]: IBehavior<ISlottable<Node>, Theme>) => {
     return [
       op(
         $icon({
@@ -24,17 +26,15 @@ export const $Picker = (themeList: Theme[]) =>
           top: '15px',
           cursor: 'pointer'
         }),
-        stylePseudo(':hover', { fill: pallete.primary }),
-        changeThemeEffectTether(
+        stylePseudo(':hover', { fill: palette.primary }),
+        changeTether(
           nodeEvent('click'),
           sampleMap(current => {
-            const toIdx = (themeList.indexOf(current) + 1) % themeList.length
-            const toTheme = themeList[toIdx]
-
-            setTheme(themeList, toTheme)
-            return toTheme
+            const idx = themeList.findIndex(t => t.name === current.name)
+            return themeList[(idx + 1) % themeList.length]
           }, currentTheme)
         )
-      )
+      ),
+      { change }
     ]
   })

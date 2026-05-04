@@ -1,7 +1,7 @@
 import { combine, constant, empty, map, merge, o, start } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
 import { multicast } from '../../../stream-extended/index.js'
-import { pallete } from '../../../ui-components-theme/index.js'
+import { palette } from '../../../ui-components-theme/index.js'
 import type { ISlottable } from '../../../ui-renderer-dom/index.js'
 import {
   $element,
@@ -44,8 +44,8 @@ export const $Input = ({ value = empty, validation = constant(null), $container 
           ),
           styleBehavior(
             map(({ focus, alert }) => {
-              if (alert) return { borderBottom: `2px solid ${pallete.negative}` }
-              return focus ? { borderBottom: `2px solid ${pallete.primary}` } : null
+              if (alert) return { borderBottom: `2px solid ${palette.negative}` }
+              return focus ? { borderBottom: `2px solid ${palette.primary}` } : null
             }, state)
           ),
           interactionTether(interactionOp),
