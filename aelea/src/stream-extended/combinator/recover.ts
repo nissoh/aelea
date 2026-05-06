@@ -1,4 +1,4 @@
-import { at, constant, continueWith, curry2, type IStream, switchLatest } from '../stream/index.js'
+import { at, constant, continueWith, curry2, type IStream, switchLatest } from '../../stream/index.js'
 
 export interface IRecoverConfig<T> {
   /** Minimum interval between retries, in ms. Default 10 seconds. */

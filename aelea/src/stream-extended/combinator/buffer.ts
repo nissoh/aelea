@@ -6,8 +6,8 @@ import {
   type IStream,
   type ITime,
   propagateRunEventTask
-} from '../stream/index.js'
-import { curry2 } from '../stream/utils/function.js'
+} from '../../stream/index.js'
+import { curry2 } from '../../stream/utils/function.js'
 
 interface IBufferEvents {
   interval: ITime

@@ -1,5 +1,125 @@
 # aelea
 
+## 4.4.0
+
+### Minor Changes
+
+#### `$Dialog` — generic anchor-tracked top-layer surface
+
+New component in `aelea/ui-components/components/overlay/$Dialog`. Mounts arbitrary content in the browser top layer (via the HTML Popover API), positioned relative to a target element, with per-frame repositioning while open. The shared primitive that `$Popover`, `$Tooltip`, and `$Dropdown` now delegate to.
+
+```ts
+import { $Dialog, type IDialogPosition } from 'aelea/ui-components'
+
+const position: IDialogPosition = (anchorEl, contentEl) => {
+  const rect = anchorEl.getBoundingClientRect()
+  return { top: `${rect.bottom + 8}px`, left: `${rect.left}px` }
+}
+
+$Dialog({
+  $anchor: $myButton,
+  $content: map(open => (open ? $myPanel : null), isOpenStream),
+  position
+})
+```
+
+API:
+
+- `$anchor: I$Node` — the target element. `$Dialog` attaches an `IntersectionObserver` for element-handle delivery to `position`.
+- `$content: IStream<I$Node | null>` — single signal: emit a node to open with that body, emit `null` to close. Body is captured directly via switchMap closure, so there's no race between `isOpen` propagation and content delivery (a regression that bit the intermediate refactor).
+- `position: (anchorEl, contentEl) => IStyleCSS` — called every animation frame while open. Receives both element refs so positioning can read anchor rect and content size for clamping/flipping.
+- `$container?` / `$contentContainer?` — element wrappers, both default to `$node`.
+
+Backdrop, dismiss state machines, hover detection, click-outside handling — all stay in the wrapper components. `$Dialog` is purely the top-layer + positioning primitive.
+
+#### `showPopover` helper exported
+
+Helper for safely calling `el.showPopover()` with capability detection and `:popover-open` cleanup. Exported from `aelea/ui-components` for components that need to put their own elements in the top layer (`$Popover` uses it for the backdrop).
+
+```ts
+import { showPopover } from 'aelea/ui-components'
+
+$node(
+  attr({ popover: 'manual' }),
+  effectRun(showPopover)
+)()
+```
+
+Returns `void` on engines without the API (graceful no-op) or a `Disposable` whose `[Symbol.dispose]` calls `hidePopover()` if the element is still `:popover-open` at unmount.
+
+### Patch Changes
+
+#### `$Tooltip` and `$Dropdown` now escape transform-trapped containing blocks
+
+Both components used `position: fixed` directly, which becomes anchored to the nearest ancestor with `transform` / `filter` / `perspective` / `backdrop-filter` / `contain: paint` / `will-change: transform` instead of the viewport. Tooltips and dropdowns inside `fadeIn(...)`-style page transitions or any animated wrapper would land at the mid-animation rect of the wrapper, not the actual anchor. The bug class fixed for `$Popover` in 4.3.2 was silently affecting both other components too.
+
+Now both go through `$Dialog`, which uses HTML Popover API top-layer placement. Top-layer elements have the viewport as their containing block regardless of CSS ancestry, so position computations land where they're expected.
+
+#### `$Tooltip` and `$Dropdown` reposition every frame while open
+
+Previously updated on `scroll` / `resize` only. Now both follow their anchor through CSS transitions, JS-driven transforms, parent motion, and any other source uniformly via `requestAnimationFrame`. The diff-and-clear styleInline applier (4.3.0) skips `setProperty` calls when the computed position matches the prior frame, so static-anchor cost is bounded to one `getBoundingClientRect` per frame plus zero DOM writes.
+
+#### Internal: `Z_TARGET_ELEVATED` and `tooltip z-index 5160` removed
+
+Top-layer elements stack above all non-top-layer elements regardless of `z-index`. The elevation constants were dead weight under the new architecture; removed.
+
+## 4.3.2
+
+### Patch Changes
+
+#### `$Popover` no longer trapped by transformed ancestors
+
+The 4.3.1 rAF fix recomputed positions every frame but couldn't cancel out the underlying CSS bug: a `position: fixed` element whose ancestor has `transform` / `filter` / `perspective` / `backdrop-filter` / `contain: paint` / `will-change: transform` becomes anchored to that ancestor's box rather than the viewport. So `$Popover` opened during a `fadeIn(translate(...))` route transition wrote viewport-correct coordinates into a fixed element whose origin was the transforming wrapper — popover stayed offset by the wrapper's transform until the animation completed.
+
+Fix uses the HTML Popover API: both content and overlay get `popover="manual"` and call `showPopover()` post-mount via `effectRun`. Top-layer elements have the viewport as their containing block regardless of CSS ancestry, so `position: fixed` resolves correctly. The rAF tick from 4.3.1 stays — it's now actually doing something useful (tracking the target through any kind of motion).
+
+Browser requirement: Chromium 114+, Safari 17+, Firefox 125+. The implementation is a graceful no-op (`effectRun` callback returns early) on older engines that lack `showPopover`.
+
+`$container` children reordered: overlay declared before content so it enters the top layer first — top-layer stacking is enter-order, not z-index. `Z_OVERLAY` and `Z_CONTENT` constants removed (unused once both elements are in the top layer); target's `Z_TARGET_ELEVATED` retained as documentary scaffolding even though it can't beat top-layer stacking — visible only during the brief mount-but-not-yet-shown window.
+
+#### `effectRun` is now functional
+
+The placeholder `effectRun` decorator from `aelea/ui` previously had no renderer consumer (documented as "no-op placeholder" in the 4.1.0 changelog). The DOM renderer now recognizes `__run__` entries in `propBehavior` and invokes the callback with the element and scheduler post-mount via `scheduler.asap`, so the element is guaranteed attached to its parent by the time the callback fires.
+
+```ts
+$node(
+  effectRun((el, scheduler) => {
+    el.showPopover()
+    return disposeWith(() => el.hidePopover())
+  })
+)()
+```
+
+The returned `Disposable | void` is run on unmount, so any imperative DOM-API lifecycle (`showPopover`/`hidePopover`, native event listeners that need explicit teardown, third-party widget mount/dispose pairs) can be expressed directly without falling back to a custom mutator.
+
+## 4.3.1
+
+### Patch Changes
+
+#### `$Popover` content stays glued to the target during transforms / animations
+
+`$Popover` previously recomputed its content position only on `scroll`, `resize`, and IntersectionObserver threshold crossings. None of these fire while an ancestor is in a CSS transition or animation that uses `transform` / `opacity`, so a popover opened during a route fade-in or page-mount slide would land at the target's mid-animation rect and stay there until the user scrolled.
+
+Fix gates a `requestAnimationFrame` ticker on `isOpen` and merges it into the existing `updateEvents` stream:
+
+```ts
+const tickWhileOpen = switchMap(open => (open ? animationFrame() : empty), isOpen)
+
+const updateEvents = merge(
+  fromEventTarget(window, 'scroll', { capture: true }),
+  fromEventTarget(window, 'resize'),
+  tickWhileOpen
+)
+```
+
+While the popover is open, every animation frame triggers a `getBoundingClientRect` and a `styleInline` submit. The submit goes through `makePaintWriter`, so it coalesces to one DOM write per frame, and the post-4.3.0 diff-and-clear applier short-circuits when the computed position matches the prior frame's. Closed popovers pay zero cost — `switchMap` disposes the rAF subscription on `isOpen` flipping false.
+
+Subsumes scroll, resize, layout shift, CSS transitions/animations, JS-driven transforms, and parent-driven motion uniformly. The IntersectionObserver tether is left in place — it still serves as the popover's element-handle delivery for the `getBoundingClientRect` call site, and removing it would be unrelated churn.
+
+#### New `animationFrame()` source
+
+Exported from `aelea/stream-extended` alongside `fromCallback` / `fromPromise`. Returns an `IStream<DOMHighResTimeStamp>` that emits on each `requestAnimationFrame` tick and cancels via `cancelAnimationFrame` on dispose. Useful for any reactive position-tracking that needs to follow CSS-driven motion without an event-listener anchor — not DOM-element-bound, so it lives next to the other generic stream sources rather than in `ui-components/elementObservers`.
+
 ## 4.3.0
 
 ### Minor Changes

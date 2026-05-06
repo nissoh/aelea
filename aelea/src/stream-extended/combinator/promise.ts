@@ -1,4 +1,4 @@
-import { disposeBoth, type IScheduler, type ISink, type IStream, type ITime } from '../stream/index.js'
+import { disposeBoth, type IScheduler, type ISink, type IStream, type ITime } from '../../stream/index.js'
 
 export enum PromiseStatus {
   DONE,

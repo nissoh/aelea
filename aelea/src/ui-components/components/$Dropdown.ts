@@ -1,7 +1,5 @@
 import {
-  combine,
   constant,
-  empty,
   type IOps,
   type IStream,
   just,
@@ -29,13 +27,12 @@ import {
   type INodeCompose,
   nodeEvent,
   style,
-  styleInline,
   stylePseudo
 } from '../../ui-renderer-dom/index.js'
 import { $column, $row } from '../elements/$elements.js'
 import { designSheet } from '../style/designSheet.js'
 import { spacing } from '../style/spacing.js'
-import { observer } from '../utils/elementObservers.js'
+import { $Dialog, type IDialogPosition } from './overlay/$Dialog.js'
 
 export const $defaultOptionContainer = $row(
   spacing.small,
@@ -85,9 +82,7 @@ export const $defaultDropdownAnchor = $row(
 export interface IDropdown<T> {
   optionList: IStream<readonly T[]> | readonly T[]
   $anchor?: I$Node
-
   closeOnSelect?: boolean
-
   $$option?: IOps<T, I$Slottable>
   $container?: INodeCompose
   $dropListContainer?: INodeCompose
@@ -95,6 +90,18 @@ export interface IDropdown<T> {
 }
 
 const stopPropagation = (ev: MouseEvent) => ev.stopPropagation()
+
+const dropdownPosition: IDialogPosition = aEl => {
+  const rect = aEl.getBoundingClientRect()
+  const bottomSpace = window.innerHeight - rect.bottom
+  const goDown = bottomSpace > rect.bottom
+  return {
+    top: `${goDown ? rect.bottom + 5 : rect.top - 5}px`,
+    left: `${rect.left}px`,
+    minWidth: `${rect.width}px`,
+    transform: goDown ? 'none' : 'translateY(-100%)'
+  }
+}
 
 export function $Dropdown<T>({
   $anchor = $defaultDropdownAnchor,
@@ -108,63 +115,39 @@ export function $Dropdown<T>({
   return component(
     (
       [select, selectTether]: IBehavior<INode<HTMLElement>, T>,
-      [openMenu, openMenuTether]: IBehavior<INode<HTMLElement>, PointerEvent>,
-      [targetIntersection, targetIntersectionTether]: IBehavior<INode<HTMLElement>, IntersectionObserverEntry[]>
+      [openMenu, openMenuTether]: IBehavior<INode<HTMLElement>, PointerEvent>
     ) => {
-      // Toggle on container click; the panel stops propagation so only
-      // anchor/empty-area clicks reach the container handler.
       const toggle = constant<'toggle'>('toggle', openMenu)
-
-      // After each open, the very next window click is "outside" — the
-      // panel's stopPropagation guarantees panel-internal clicks never
-      // reach window. skip(1) drops the opening click itself.
       const outsideClose = switchLatest(map(() => take(1, skip(1, fromEventTarget(window, 'click'))), openMenu))
-
       const close = constant<false>(false, closeOnSelect ? merge(outsideClose, select) : outsideClose)
-
       const isOpen: IStream<boolean> = reduce((open, ev) => (ev === 'toggle' ? !open : ev), false, merge(toggle, close))
 
-      return [
-        $container(openMenuTether(nodeEvent('click')), targetIntersectionTether(observer.intersection()))(
-          switchMap(
-            params => {
-              if (!params.isOpen) return empty
+      const $dropdownContainer = $container(openMenuTether(nodeEvent('click')))
+      const $dropListWithStop = $dropListContainer(
+        effectProp(
+          'onclick',
+          nowWith(() => stopPropagation)
+        )
+      )
 
-              return $dropListContainer(
-                effectProp(
-                  'onclick',
-                  nowWith(() => stopPropagation)
-                ),
-                styleInline(
-                  map(([targetRect]) => {
-                    const { bottom, width: targetWidth } = targetRect.boundingClientRect
-                    const bottomSpace = window.innerHeight - bottom
-                    const goDown = bottomSpace > bottom
-
-                    return {
-                      [goDown ? 'top' : 'bottom']: 'calc(100% + 5px)',
-                      left: '0',
-                      minWidth: `${targetWidth}px`,
-                      visibility: 'visible'
-                    }
-                  }, targetIntersection)
-                ),
-                style({
-                  zIndex: 60,
-                  visibility: 'hidden',
-                  position: 'absolute'
-                })
-              )(
-                ...params.list.map(opt =>
-                  $optionContainer(selectTether(nodeEvent('click'), constant(opt)))(switchLatest($$option(just(opt))))
-                )
-              )
-            },
-            combine({ isOpen, list: toStream(optionList) })
+      const $optionListContent = switchMap(
+        list =>
+          $node(
+            ...list.map(opt =>
+              $optionContainer(selectTether(nodeEvent('click'), constant(opt)))(switchLatest($$option(just(opt))))
+            )
           ),
-          $anchor
-        ),
+        toStream(optionList)
+      )
 
+      return [
+        $Dialog({
+          $container: $dropdownContainer,
+          $anchor,
+          $content: map(open => (open ? $optionListContent : null), isOpen),
+          position: dropdownPosition,
+          $contentContainer: $dropListWithStop
+        }),
         { select, isOpen }
       ]
     }

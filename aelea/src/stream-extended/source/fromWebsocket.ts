@@ -9,8 +9,8 @@ import {
   nullSink,
   propagateEndTask,
   tap
-} from '../stream/index.js'
-import { propagateErrorEndTask } from '../stream/scheduler/PropagateTask.js'
+} from '../../stream/index.js'
+import { propagateErrorEndTask } from '../../stream/scheduler/PropagateTask.js'
 
 type WebSocketOptions<I, O> = {
   url: string

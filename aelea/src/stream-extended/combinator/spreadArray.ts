@@ -1,5 +1,5 @@
-import type { IScheduler, ISink, IStream, ITime } from '../stream/index.js'
-import { PipeSink } from '../stream/utils/sink.js'
+import type { IScheduler, ISink, IStream, ITime } from '../../stream/index.js'
+import { PipeSink } from '../../stream/utils/sink.js'
 
 /**
  * Spreads a stream of arrays into a stream of individual elements

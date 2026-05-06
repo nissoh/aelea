@@ -243,6 +243,28 @@ function mountNodeOrText(
       : (() => {
           const disposables: Disposable[] = []
           for (const { key, value } of node.propBehavior) {
+            if (key === '__run__') {
+              const apply = value as unknown as (el: INodeElementDom, scheduler: I$Scheduler) => Disposable | void
+              let disp: Disposable | undefined
+              const task: ITask = {
+                active: true,
+                run() {
+                  if (!task.active) return
+                  const r = apply(element, env.scheduler)
+                  if (r) disp = r
+                },
+                error() {
+                  task.active = false
+                },
+                [Symbol.dispose]() {
+                  task.active = false
+                  if (disp) disp[Symbol.dispose]()
+                }
+              }
+              env.scheduler.asap(task)
+              disposables.push(task)
+              continue
+            }
             const { submit, task } = makePaintWriter<unknown>(env.scheduler, v => {
               ;(element as any)[key] = v
             })

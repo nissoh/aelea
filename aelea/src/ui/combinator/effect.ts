@@ -26,7 +26,6 @@ export const effectProp = ((prop: string, source?: IStream<unknown>, node?: I$No
   return makeMutator(mutate)
 }) as IEffectPropCurry
 
-// No-op placeholder; not consumed by any current renderer.
 export const effectRun = ((apply: (element: unknown, scheduler: I$Scheduler) => Disposable | void, node?: I$Node) => {
   const entry = { key: '__run__', value: apply as unknown as IStream<unknown> }
   const mutate = (n: INode) => {

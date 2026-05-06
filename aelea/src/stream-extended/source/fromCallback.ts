@@ -1,6 +1,6 @@
-import { propagateErrorEndTask } from '../stream/scheduler/PropagateTask.js'
-import type { IScheduler, ISink, IStream } from '../stream/types.js'
-import { toDisposable } from '../stream/utils/disposable.js'
+import { propagateErrorEndTask } from '../../stream/scheduler/PropagateTask.js'
+import type { IScheduler, ISink, IStream } from '../../stream/types.js'
+import { toDisposable } from '../../stream/utils/disposable.js'
 
 /**
  * Stream that creates values from a callback-based API

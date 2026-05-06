@@ -1,4 +1,4 @@
-import type { IScheduler, ISink, IStream } from '../stream/index.js'
+import type { IScheduler, ISink, IStream } from '../../stream/index.js'
 
 type ICreateStream<T> = (sink: ISink<T>, scheduler: IScheduler) => Disposable
 

@@ -47,6 +47,12 @@ export { $defaultTextFieldContainer, $defaultTextFieldLabelRow, $TextField } fro
 export type { Control, Input } from './components/form/types.js'
 export { InputType } from './components/form/types.js'
 export {
+  $Dialog,
+  type IDialog,
+  type IDialogPosition,
+  showPopover
+} from './components/overlay/$Dialog.js'
+export {
   $defaultPopoverContentContainer,
   $Popover
 } from './components/overlay/$Popover.js'
