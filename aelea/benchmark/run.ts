@@ -7,18 +7,20 @@ import { type ISuiteSummary, printGrandSummary, printReport } from './lib/report
 import { runSuite } from './lib/suite.js'
 import combinators from './suites/combinators.js'
 import mapFilterReduce from './suites/map-filter-reduce.js'
+import renderStatic from './suites/render-static.js'
 import scan from './suites/scan.js'
 import scheduler from './suites/scheduler.js'
 import switchSuite from './suites/switch.js'
 import switchLatest from './suites/switch-latest.js'
 
-const ALL = [mapFilterReduce, scan, switchSuite, switchLatest, combinators, scheduler]
+const ALL = [mapFilterReduce, scan, switchSuite, switchLatest, combinators, scheduler, renderStatic]
 
 const args = process.argv.slice(2)
 const quick = args.includes('--quick')
 const filters = args.filter(a => !a.startsWith('--'))
 
-const selected = filters.length === 0 ? ALL : ALL.filter(s => filters.some(f => s.title.toLowerCase().includes(f.toLowerCase())))
+const selected =
+  filters.length === 0 ? ALL : ALL.filter(s => filters.some(f => s.title.toLowerCase().includes(f.toLowerCase())))
 
 if (selected.length === 0) {
   console.error(`no suites matched: ${filters.join(', ')}`)

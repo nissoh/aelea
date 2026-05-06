@@ -2,7 +2,8 @@
 
 Performance benchmarks comparing aelea's stream primitives against
 [`@most/core`](https://github.com/mostjs/core), plus internal A/B suites
-(scheduler before/after) and headless renderer smoke tests.
+(scheduler before/after, UI render variants) and headless renderer smoke
+tests.
 
 ## Layout
 
@@ -10,7 +11,8 @@ Performance benchmarks comparing aelea's stream primitives against
 benchmark/
 ├── run.ts              # entry — runs all suites, prints unified report
 ├── lib/
-│   ├── runtime.ts      # shared scheduler + sink for both libs
+│   ├── runtime.ts      # shared scheduler + sink for stream suites
+│   ├── dom-env.ts      # happy-dom install + sync scheduler for render suites
 │   ├── suite.ts        # ISuite type + runner
 │   └── report.ts       # grouped table renderer with delta vs baseline
 ├── suites/             # individual benchmarks
@@ -19,11 +21,27 @@ benchmark/
 │   ├── switch.ts
 │   ├── switch-latest.ts
 │   ├── combinators.ts
-│   └── scheduler.ts
+│   ├── scheduler.ts
+│   └── render-static.ts   # mount/dispose roundtrip — vanilla DOM vs aelea
 └── render/             # headless renderer artifacts (not benchmarks)
     ├── og-takumi.ts
     └── headless-render.ts
 ```
+
+## Render benchmarks
+
+UI-render suites (`render-*.ts`) target the DOM renderer's overhead in a
+deterministic headless environment:
+
+- `lib/dom-env.ts` installs happy-dom globals once and exposes a synchronous
+  scheduler so renders complete inside a single tinybench iteration without
+  microtask drains.
+- Each scenario pairs a `vanilla DOM` baseline (raw `createElement` /
+  `appendChild`) against `@aelea` (`render({ ... })`). Differences are pure
+  framework overhead; happy-dom's cost cancels.
+- Adding a new variant (e.g. an alternative renderer pass): copy
+  `render-static.ts`, drop in the new `fn`, list it alongside the existing
+  variants in the same `group`. The reporter renders deltas automatically.
 
 ## Run
 

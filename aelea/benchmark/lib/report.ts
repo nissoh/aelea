@@ -1,5 +1,5 @@
 import type { Bench, Statistics, Task } from 'tinybench'
-import { type IBenchTask, type ISuite, parseTaskName, taskName } from './suite.js'
+import { type IBenchTask, type ISuite, taskName } from './suite.js'
 
 const useColor = !process.env.NO_COLOR && (process.stdout as { isTTY?: boolean }).isTTY === true
 
@@ -134,9 +134,10 @@ function deltaCell(row: IRow): string {
   return gray(`◇ ${fmt} parity`)
 }
 
+const ansiPattern = new RegExp(`${String.fromCharCode(0x1b)}\\[[0-9;]*m`, 'g')
+
 function pad(s: string, width: number, align: 'left' | 'right' = 'left'): string {
-  // strip ANSI for length calc
-  const visible = s.replace(/\x1b\[[0-9;]*m/g, '')
+  const visible = s.replace(ansiPattern, '')
   const need = Math.max(0, width - visible.length)
   return align === 'left' ? s + ' '.repeat(need) : ' '.repeat(need) + s
 }
@@ -251,7 +252,7 @@ export function printGrandSummary(summaries: ISuiteSummary[], elapsedMs: number)
   for (const s of summaries) {
     const best = s.bestDelta
     const worst = s.worstDelta
-    const totals = `${s.taskCount} tasks` + (s.groupCount > 1 ? ` · ${s.groupCount} groups` : '')
+    const totals = `${s.taskCount} tasks${s.groupCount > 1 ? ` · ${s.groupCount} groups` : ''}`
     let delta = dim('no comparison')
     if (best !== null && worst !== null) {
       if (best > 1.05 && worst >= 0.95) delta = green(`▲ ${best.toFixed(2)}× best`)

@@ -15,6 +15,7 @@
     "bench:switch-latest": "bun run benchmark/suites/switch-latest.ts",
     "bench:combinators": "bun run benchmark/suites/combinators.ts",
     "bench:scheduler": "bun run benchmark/suites/scheduler.ts",
+    "bench:render-static": "bun run benchmark/suites/render-static.ts",
     "render:og": "bun run benchmark/render/og-takumi.ts",
     "render:headless": "bun run benchmark/render/headless-render.ts"
   },
@@ -70,6 +71,7 @@
     "@most/scheduler": "1.3.0",
     "@takumi-rs/core": "^1.1.2",
     "bun-types": "^1.3.13",
+    "happy-dom": "^15.11.6",
     "tinybench": "^6.0.0"
   },
   "publishConfig": {

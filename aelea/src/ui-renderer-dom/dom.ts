@@ -299,9 +299,7 @@ function mountNodeOrText(
         })()
 
   const slotSets: Set<SlotEntry>[] = node.$segments.map(() => new Set())
-  const segmentDisposables = node.$segments.map((seg, segIdx) =>
-    renderSegmentSlot(seg, element, slotSets, segIdx, env)
-  )
+  const segmentDisposables = node.$segments.map((seg, segIdx) => renderSegmentSlot(seg, element, slotSets, segIdx, env))
 
   const childDisposables = disposeAll([styleInlineDisp, styleClass, attrBeh, propDisp, ...segmentDisposables])
 
