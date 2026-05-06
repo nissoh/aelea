@@ -1,6 +1,6 @@
 import { type IStream, switchMap } from '../../stream/index.js'
 import { PromiseStatus, promiseState } from '../../stream-extended/index.js'
-import { palette } from '../../ui-components-theme/index.js'
+import { palette, text } from '../../ui-components-theme/index.js'
 import { $custom, $svg, $text, attr, type I$Node, style } from '../../ui-renderer-dom/index.js'
 import { spacing } from '../style/spacing.js'
 
@@ -62,7 +62,7 @@ export const $alertTooltip = $custom('alert')(
     color: palette.negative,
     border: `1px solid ${palette.negative}`,
     background: palette.background,
-    fontSize: '13px'
+    fontSize: text.sm
   })
 )
 

@@ -1,7 +1,7 @@
 import { type IBehavior, state } from 'aelea/stream-extended'
 import { $node, $text, component, style } from 'aelea/ui'
 import { $column, $row, spacing } from 'aelea/ui-components'
-import { palette } from 'aelea/ui-components-theme'
+import { palette, text } from 'aelea/ui-components-theme'
 import { $Link, commitTitle, match } from 'aelea/ui-router'
 import { $Example } from '../../components/$Example'
 import { fadeIn } from '../../components/transitions/enter'
@@ -31,7 +31,7 @@ export default () =>
           )(
             $column(spacing.big, style({ whiteSpace: 'nowrap' }))(
               $column(spacing.tiny)(
-                $node(style({ color: palette.foreground, fontSize: '75%' }))($text('Demos')),
+                $node(style({ color: palette.foreground, fontSize: text.xs }))($text('Demos')),
                 $Link({ $content: $text('Theme'), route: examples.theme })({}),
                 $Link({ $content: $text('Drag And Sort'), route: examples.dragAndSort })({}),
                 $Link({ $content: $text('Count Counters'), route: examples.countCounters })({}),
@@ -40,7 +40,7 @@ export default () =>
               ),
 
               $column(spacing.tiny)(
-                $node(style({ color: palette.foreground, fontSize: '75%' }))($text('UI Components')),
+                $node(style({ color: palette.foreground, fontSize: text.xs }))($text('UI Components')),
                 $Link({ $content: $text('Quantum Scroll'), route: examples.quantumScroll })({}),
                 $Link({ $content: $text('Popover'), route: examples.popover })({}),
                 $Link({ $content: $text('Table'), route: examples.table })({}),

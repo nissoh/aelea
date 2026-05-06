@@ -1,13 +1,13 @@
 import { o } from '../../stream/index.js'
-import { palette } from '../../ui-components-theme/index.js'
+import { palette, text } from '../../ui-components-theme/index.js'
 import { style, stylePseudo } from '../../ui-renderer-dom/index.js'
 
 export const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
 
-const text = style({
+const baseText = style({
   fontFamily: 'inherit',
   fontWeight: 300,
-  fontSize: '1rem'
+  fontSize: text.base
 })
 
 const customScroll = isFirefox
@@ -27,7 +27,7 @@ const customScroll = isFirefox
     )
 
 const control = o(
-  text,
+  baseText,
   style({
     backgroundColor: 'transparent',
     border: '2px solid transparent',
@@ -38,7 +38,7 @@ const control = o(
 )
 
 const main = o(
-  text,
+  baseText,
   style({
     height: '100vh',
     color: palette.message,
@@ -104,7 +104,7 @@ export const elevation12 = style({
 export const designSheet = {
   main,
   customScroll,
-  text,
+  text: baseText,
   input,
   btn,
   control,

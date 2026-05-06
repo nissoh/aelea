@@ -2,7 +2,7 @@ import type { IStream } from '../../../stream/index.js'
 import { empty, just, map, merge, never, op, sample, skipRepeats, switchLatest } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
 import { multicast } from '../../../stream-extended/index.js'
-import { palette } from '../../../ui-components-theme/index.js'
+import { palette, text } from '../../../ui-components-theme/index.js'
 import { $element, $node, $text, component, type INodeCompose, style } from '../../../ui-renderer-dom/index.js'
 import { $row } from '../../elements/$elements.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
@@ -41,7 +41,7 @@ export const $TextField = (config: TextField) =>
         : undefined
       const validation: IStream<string | null> = multicastValidation ? skipRepeats(multicastValidation(change)) : never
 
-      const $messageLabel = $node(style({ fontSize: '75%', width: '100%' }))
+      const $messageLabel = $node(style({ fontSize: text.xs, width: '100%' }))
       const $hint = hint ? just($messageLabel($text(hint))) : never
 
       const $alert = map(msg => {

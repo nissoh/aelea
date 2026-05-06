@@ -2,7 +2,7 @@ import { debounce, empty, fromIterable, map, op, start, switchLatest, switchMap 
 import type { IBehavior } from 'aelea/stream-extended'
 import { $custom, $node, $text, component, type I$Slottable, motion, style, styleInline } from 'aelea/ui'
 import { $column, $row } from 'aelea/ui-components'
-import { palette, theme } from 'aelea/ui-components-theme'
+import { palette, text, theme } from 'aelea/ui-components-theme'
 import { $defaultMonacoEditorContainer, $MonacoEditor, type ModelChangeBehavior } from '../$MonacoEditor'
 
 interface IMonaco {
@@ -80,7 +80,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                               ? diagnostic.messageText
                               : diagnostic.messageText?.messageText || 'Unknown error'
 
-                          return $row(style({ gap: '8px', fontSize: '14px' }))(
+                          return $row(style({ gap: '8px', fontSize: text.sm }))(
                             $text(`${severity} [Line ${line}]: ${message}`)
                           )
                         })
@@ -112,7 +112,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                 }
               ),
               start(
-                $node(style({ color: palette.foreground, fontSize: '75%' }))($text('Preparing TypeScript service...'))
+                $node(style({ color: palette.foreground, fontSize: text.xs }))($text('Preparing TypeScript service...'))
               ),
               switchLatest
             )

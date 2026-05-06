@@ -17,14 +17,14 @@ import {
   $Tooltip,
   spacing
 } from 'aelea/ui-components'
-import { palette } from 'aelea/ui-components-theme'
+import { palette, text } from 'aelea/ui-components-theme'
 import { $trash } from '../../../elements/$icons'
 
 const $sectionTitle = $node(
-  style({ color: palette.foreground, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' })
+  style({ color: palette.foreground, fontSize: text.sm, textTransform: 'uppercase', letterSpacing: '0.05em' })
 )
 
-const $valueLabel = $node(style({ color: palette.foreground, fontSize: '0.85rem' }))
+const $valueLabel = $node(style({ color: palette.foreground, fontSize: text.sm }))
 
 const $section = (title: string, ...children: ReturnType<typeof $row>[]) =>
   $column(spacing.default, style({ minWidth: '320px' }))($sectionTitle($text(title)), ...children)
@@ -142,7 +142,7 @@ export const $Controllers = component(
                 $open: constant(
                   $column(spacing.default, style({ minWidth: '200px' }))(
                     $node(style({ color: palette.message, fontWeight: 'bold' }))($text('Confirm delete?')),
-                    $node(style({ color: palette.foreground, fontSize: '0.85rem' }))(
+                    $node(style({ color: palette.foreground, fontSize: text.sm }))(
                       $text('Click outside to dismiss this popover.')
                     )
                   ),
@@ -185,7 +185,7 @@ export const $Controllers = component(
             padding: '12px 16px',
             borderTop: `1px solid ${palette.horizon}`,
             color: palette.foreground,
-            fontSize: '0.85rem'
+            fontSize: text.sm
           })
         )(
           $text('Live event log'),

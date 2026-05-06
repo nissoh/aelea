@@ -1,5 +1,46 @@
 # aelea
 
+## 4.3.0
+
+### Minor Changes
+
+#### Typography scale primitive (`text`)
+
+New `text` const exported from `aelea/ui-components-theme`, parallel to `palette`. Seven semantic font-size steps, each a CSS-variable string with a baked-in fallback so the framework default works with no app-side wiring:
+
+```ts
+import { text } from 'aelea/ui-components-theme'
+
+style({ fontSize: text.base }) // 'var(--text-base, 1rem)'
+style({ fontSize: text.sm })   // 'var(--text-sm, 0.875rem)'
+```
+
+Steps: `xs` (0.75rem), `sm` (0.875rem), `base` (1rem), `lg` (1.125rem), `xl` (1.25rem), `xxl` (1.5rem), `display` (2.25rem). Apps override per-step in any cascade-compatible scope:
+
+```css
+:root             { --text-base: 14px }
+html.compact      { --text-sm: 0.75rem }
+body.large-text   { --text-base: 1.125rem }
+```
+
+Typography is intentionally **not** part of the `Theme` shape and the DOM theme loader is unchanged — density / a11y modes belong on independent body classes that compose with theme switching via plain CSS cascade, not on the JS theme record. The `--shade-pole` machinery and `writeTheme` are untouched.
+
+`TextStep` type (`'xs' | 'sm' | 'base' | 'lg' | 'xl' | 'xxl' | 'display'`) exported alongside.
+
+The `aelea/ui-components` design sheet now uses `text.base` for the system base font-size. The public `designSheet.text` mutator (a `style({ fontFamily, fontWeight, fontSize })` group) keeps the same shape; only the internal binding name changed.
+
+### Patch Changes
+
+#### `styleInline` no longer leaks properties across emissions
+
+`styleInline(stream)` previously wrote new keys via `setProperty` on each emission but never cleared keys absent from later emissions. A stream that emitted `{ background: 'red' }` then `{}` would leave `background: red` glued to the inline style forever instead of cascading back to the static class rule.
+
+Fix routes `styleInline` through `makeReactiveStyleApplier` — the same per-channel diff-and-clear applier that `styleBehavior` already used. Each `styleInline(...)` channel now tracks the keys it set on the prior emission and clears the ones absent from the next.
+
+The takumi renderer's `styleInline` / `styleBehavior` paths got a parallel fix via a new per-channel applier — necessary because the takumi `styleState` is shared with static styles, so a channel can only safely clear keys it itself set previously, not arbitrary keys missing from the new emission.
+
+This was the workaround that previously forced authors to repeat every property across every branch (`disabled ? { bg, cursor } : { bg, cursor }`) instead of writing partial overlays (`disabled ? { bg, cursor } : {}`). The latter shape now works as expected.
+
 ## 4.1.0
 
 ### Minor Changes

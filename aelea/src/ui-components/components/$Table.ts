@@ -14,7 +14,7 @@ import {
   switchMap
 } from '../../stream/index.js'
 import type { IBehavior } from '../../stream-extended/index.js'
-import { colorShade, palette } from '../../ui-components-theme/index.js'
+import { colorShade, palette, text } from '../../ui-components-theme/index.js'
 import {
   $node,
   $svg,
@@ -86,7 +86,7 @@ export const $defaultTableCell = $row(
   spacing.small,
   style({ padding: '6px 0', display: 'flex', minWidth: 0, alignItems: 'center', overflowWrap: 'break-word' })
 )
-export const $defaultTableHeaderCell = $defaultTableCell(style({ color: palette.foreground, fontSize: '.8rem' }))
+export const $defaultTableHeaderCell = $defaultTableCell(style({ color: palette.foreground, fontSize: text.sm }))
 export const $defaultTableRowContainer = $node(isDesktopScreen ? spacing.big : spacing.default)
 export const $defaultTableContainer = $column(spacing.default, style({ flex: 1 }))
 
