@@ -21,13 +21,21 @@ export interface IndexedValue<A> {
 }
 
 export class IndexSink<A> implements ISink<A> {
-  ended = false
+  // Fields assigned in the constructor body so the emit defines a packed
+  // hidden class on first construction, instead of the per-field Object.
+  // defineProperty path triggered by class-field declarations under
+  // useDefineForClassFields. Hot path for combine/zip/merge subscription.
+  readonly sink: ISink<IndexedValue<A | undefined>>
+  index: number
+  ended: boolean
   value: A | undefined
 
-  constructor(
-    readonly sink: ISink<IndexedValue<A | undefined>>,
-    public index: number
-  ) {}
+  constructor(sink: ISink<IndexedValue<A | undefined>>, index: number) {
+    this.sink = sink
+    this.index = index
+    this.ended = false
+    this.value = undefined
+  }
 
   event(time: ITime, x: A): void {
     if (this.ended) {

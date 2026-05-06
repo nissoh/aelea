@@ -43,7 +43,6 @@ let styleSheet: CSSStyleSheet | null = null
 function ensureStyleSheet(): CSSStyleSheet | null {
   if (styleSheet) return styleSheet
   if (typeof document === 'undefined') return null
-  // Headless / shim environments expose a partial `document` — feature-detect.
   if (typeof document.getElementById !== 'function' || typeof document.createElement !== 'function') return null
   let tag = document.getElementById(STYLE_TAG_ID) as HTMLStyleElement | null
   if (!tag) {
@@ -85,7 +84,6 @@ function styleCacheKey(style: IStyleCSS, pseudo: string | null): string {
 }
 
 const ruleCache = new Map<string, string>()
-// Object-identity short-circuit before the content-key compute.
 const ruleObjectCache = new WeakMap<object, Map<string | null, string>>()
 
 export function createStyleRule(style: IStyleCSS, pseudo: string | null = null): string | null {
@@ -136,8 +134,6 @@ function applyInlineStyle(style: IStyleCSS, element: INodeElementDom) {
   }
 }
 
-// Coalesce reactive writes onto the scheduler's paint phase — bursts of
-// emissions in one event-loop tick collapse to one commit per writer.
 function makePaintWriter<V>(scheduler: I$Scheduler, apply: (value: V) => void) {
   let pendingValue: V | undefined
   let hasPending = false
@@ -186,30 +182,32 @@ function applyStaticStyle(node: INode<INodeElementDom>, element: INodeElementDom
         continue
       }
     }
-    // Pseudo entries require a stylesheet; silently dropped on inline-only paths.
     if (entry.pseudo === null) applyInlineStyle(entry.style, element)
   }
 }
 
 function makeReactiveStyleApplier(element: INodeElementDom) {
   const el = element as any
-  const prevKeys = new Set<string>()
-  const scratch = new Map<string, unknown>()
+  let prev = new Map<string, string | null>()
+  let scratch = new Map<string, string | null>()
   return (styleObj: IStyleCSS | null) => {
     if (!el?.style?.setProperty) return
     scratch.clear()
     const next = styleObj ?? {}
-    for (const k in next) scratch.set(toKebab(k), (next as any)[k])
-    // Remove keys that were set last tick but aren't in this emission — the
-    // browser cascades back to the static class rule.
-    for (const k of prevKeys) {
+    for (const k in next) {
+      const raw = (next as any)[k]
+      scratch.set(toKebab(k), raw == null ? null : typeof raw === 'string' ? raw : String(raw))
+    }
+    for (const k of prev.keys()) {
       if (!scratch.has(k)) el.style.removeProperty(k)
     }
     for (const [k, v] of scratch) {
-      el.style.setProperty(k, v == null ? null : typeof v === 'string' ? v : String(v))
+      if (prev.get(k) === v) continue
+      el.style.setProperty(k, v)
     }
-    prevKeys.clear()
-    for (const k of scratch.keys()) prevKeys.add(k)
+    const tmp = prev
+    prev = scratch
+    scratch = tmp
   }
 }
 
@@ -260,9 +258,8 @@ function mountNodeOrText(
       : (() => {
           const disposables: Disposable[] = []
           for (const sb of node.styleInline) {
-            const { submit, task } = makePaintWriter<IStyleCSS | null>(env.scheduler, styleObj => {
-              applyInlineStyle(styleObj ?? {}, element)
-            })
+            const apply = makeReactiveStyleApplier(element)
+            const { submit, task } = makePaintWriter<IStyleCSS | null>(env.scheduler, apply)
             const subDisp = op(sb, tap(submit)).run(nullSink, env.scheduler)
             disposables.push(subDisp, task)
           }
@@ -301,47 +298,27 @@ function mountNodeOrText(
           return disposeAll(disposables)
         })()
 
-  // Reserve a placeholder comment node per segment up front; each slot mounts
-  // its element BEFORE its placeholder. This pins DOM order to declaration
-  // order regardless of which segment's stream emits first (async sources,
-  // switchLatest swaps, etc.).
-  const segmentDisposables = node.$segments.map(seg => {
-    const placeholder = document.createComment('')
-    element.insertBefore(placeholder, null)
-    return renderSlotAt(seg, element, placeholder, env)
-  })
+  const slotSets: Set<SlotEntry>[] = node.$segments.map(() => new Set())
+  const segmentDisposables = node.$segments.map((seg, segIdx) =>
+    renderSegmentSlot(seg, element, slotSets, segIdx, env)
+  )
 
   const childDisposables = disposeAll([styleInlineDisp, styleClass, attrBeh, propDisp, ...segmentDisposables])
 
   return { el: element, childDisposables }
 }
 
-// Mount into the slot position marked by `anchor` (a comment node): each
-// mounted element is inserted BEFORE the anchor, so the anchor acts as the
-// trailing marker of the segment. On unmount the anchor stays in place, so
-// re-emits drop into the same position.
-function renderSlotAt(
+type SlotEntry = { el: Node; cleanup: Disposable }
+
+function runSlot(
   $slot: I$Slottable,
   parent: Element,
-  anchor: Node,
+  mounted: Set<SlotEntry>,
+  insert: (el: Node) => void,
   env: { scheduler: I$Scheduler; onError: (err: unknown) => void }
 ): Disposable {
-  // Append-semantics: each slot emission mounts a new child at this
-  // slot's position (before `anchor`). A child's own `SettableDisposable`
-  // (set on `INode.disposable` by `createNode`) fires when upstream tears
-  // its subscription down — e.g. `joinMap`'s `endInner` after
-  // `until(remove)` ends a concurrent inner, or the outer slot disposing.
-  // Firing the disposable removes just that child from the DOM, leaving
-  // siblings from the same segment intact.
-  //
-  // `null` slot emissions (router.match unmount sentinel) drop ALL
-  // current children of this slot at once.
-  const mounted = new Set<{ el: Node; cleanup: Disposable }>()
-
   const unmountAll = () => {
-    for (const m of mounted) {
-      m.cleanup[Symbol.dispose]()
-    }
+    for (const m of mounted) m.cleanup[Symbol.dispose]()
     mounted.clear()
   }
 
@@ -353,7 +330,7 @@ function renderSlotAt(
           return
         }
         const m = mountNodeOrText(nodeOrText, env)
-        const entry = { el: m.el, cleanup: disposeNone }
+        const entry: SlotEntry = { el: m.el, cleanup: disposeNone }
         const remove = () => {
           if (!mounted.has(entry)) return
           mounted.delete(entry)
@@ -361,19 +338,14 @@ function renderSlotAt(
           if (entry.el.parentNode === parent) parent.removeChild(entry.el)
         }
         entry.cleanup = disposeWith(remove)
+        insert(entry.el)
         mounted.add(entry)
-        parent.insertBefore(entry.el, anchor)
 
-        // If the mounted child is an INode, hook its per-instance
-        // disposable: firing it (via upstream teardown) runs `remove`.
         const slottable = nodeOrText as { disposable?: { set?: (d: Disposable) => void } }
         if (slottable.disposable && typeof slottable.disposable.set === 'function') {
           try {
             slottable.disposable.set(entry.cleanup)
-          } catch {
-            // SettableDisposable throws if already set — ignore so a single
-            // INode shared across subscriptions doesn't crash the renderer.
-          }
+          } catch {}
         }
       },
       error(_t, err) {
@@ -387,30 +359,49 @@ function renderSlotAt(
   return disposeWith(() => {
     slotDisposable[Symbol.dispose]()
     unmountAll()
-    if (anchor.parentNode === parent) parent.removeChild(anchor)
   })
 }
 
-// Root-level slot: create a trailing anchor and route through renderSlotAt so
-// the mount API surface is uniform (insertBefore only, no appendChild).
-function renderSlot(
+function renderSegmentSlot(
+  $slot: I$Slottable,
+  parent: Element,
+  slotSets: Set<SlotEntry>[],
+  segIdx: number,
+  env: { scheduler: I$Scheduler; onError: (err: unknown) => void }
+): Disposable {
+  const mounted = slotSets[segIdx]
+  return runSlot(
+    $slot,
+    parent,
+    mounted,
+    el => {
+      let insertAt = mounted.size
+      for (let i = 0; i < segIdx; i++) insertAt += slotSets[i].size
+      parent.insertBefore(el, parent.childNodes[insertAt] ?? null)
+    },
+    env
+  )
+}
+
+function renderRootSlot(
   $slot: I$Slottable,
   parent: Element,
   env: { scheduler: I$Scheduler; onError: (err: unknown) => void }
 ): Disposable {
   const anchor = document.createComment('')
   parent.insertBefore(anchor, null)
-  return renderSlotAt($slot, parent, anchor, env)
+  const mounted = new Set<SlotEntry>()
+  const inner = runSlot($slot, parent, mounted, el => parent.insertBefore(el, anchor), env)
+  return disposeWith(() => {
+    inner[Symbol.dispose]()
+    if (anchor.parentNode === parent) parent.removeChild(anchor)
+  })
 }
 
 export interface IRenderConfig {
   rootAttachment: Element
   $rootNode: I$Node
   scheduler?: I$Scheduler
-  /**
-   * Called on any error from the node stream or its descendants. Defaults to
-   * `console.error`. Use to forward render errors into app telemetry.
-   */
   onError?: (err: unknown) => void
 }
 
@@ -420,7 +411,7 @@ export function render(config: IRenderConfig): Disposable {
     onError: config.onError ?? ((err: unknown) => console.error('[aelea] render error', err))
   }
 
-  const disposable = renderSlot(config.$rootNode as any, config.rootAttachment, env)
+  const disposable = renderRootSlot(config.$rootNode as any, config.rootAttachment, env)
 
   return {
     [Symbol.dispose]() {

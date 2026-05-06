@@ -1,19 +1,12 @@
-/**
- * Rasterize an aelea component tree to an OG-card .webp via the takumi
- * renderer, no browser needed.
- *
- * The component is built with renderer-agnostic factories from `aelea/ui`.
- * The DOM renderer and the takumi renderer accept the same tree — the
- * choice is just which `render…` helper you call.
- *
- * Run:    bun run benchmark/og-takumi.ts
- * Output: benchmark/og-takumi.webp
- */
+// Rasterize an aelea component tree to an OG-card .webp via the takumi renderer.
+//
+// Run:    bun run benchmark/render/og-takumi.ts
+// Output: benchmark/render/og-takumi.webp
 
 import { writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { $element, $text, attr, style } from '../src/ui/index.js'
-import { renderToImage } from '../src/ui-renderer-takumi/index.js'
+import { $element, $text, attr, style } from '../../src/ui/index.js'
+import { renderToImage } from '../../src/ui-renderer-takumi/index.js'
 
 const pixelSrc =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/xcAAgMBgAjeRGkAAAAASUVORK5CYII='
@@ -70,6 +63,6 @@ const bytes = await renderToImage($App, {
   format: 'webp'
 })
 
-const outPath = resolve(process.cwd(), 'benchmark/og-takumi.webp')
+const outPath = resolve(import.meta.dir, 'og-takumi.webp')
 writeFileSync(outPath, bytes)
 console.log(`OG image saved to ${outPath} (${bytes.byteLength} bytes)`)

@@ -1,15 +1,15 @@
 import * as MC from '@most/core'
 import * as MS from '@most/scheduler'
-import { createDefaultScheduler, type ISink, type IStream } from '../src/stream/index.js'
+import { createDefaultScheduler, type ISink, type IStream } from '../../src/stream/index.js'
 
-// Create schedulers ONCE and reuse
+// @most/types isn't a direct dep — re-derive Stream<A> via ReturnType so we
+// don't need a transitive type import.
+type MostStream<A> = ReturnType<typeof MC.newStream<A>>
+
 const aeleaScheduler = createDefaultScheduler()
 const mostScheduler = MS.newDefaultScheduler()
 
-/**
- * @most/core helper to create streams from arrays
- */
-export const fromArrayM = <A>(arr: readonly A[]) =>
+export const fromArrayM = <A>(arr: readonly A[]): MostStream<A> =>
   MC.newStream<A>((sink, s) =>
     MS.asap(
       {
@@ -26,7 +26,6 @@ export const fromArrayM = <A>(arr: readonly A[]) =>
     )
   )
 
-// Optimized sink - reusable
 class RunStreamSink implements ISink<any> {
   result: any
   resolve!: (value: any) => void
@@ -38,35 +37,27 @@ class RunStreamSink implements ISink<any> {
     this.reject = reject
   }
 
-  event(time: number, value: any): void {
+  event(_time: number, value: any): void {
     this.result = value
   }
 
-  error(time: number, error: any): void {
+  error(_time: number, error: any): void {
     this.reject(error)
   }
 
-  end(time: number): void {
+  end(_time: number): void {
     this.resolve(this.result)
   }
 }
 
-// Reuse sink instance
 const reusableSink = new RunStreamSink()
 
-/**
- * Run an Aelea stream with reused scheduler and sink
- */
-export const runStream = <T>(stream: IStream<T>): Promise<T> => {
-  return new Promise<T>((resolve, reject) => {
+export const runStream = <T>(stream: IStream<T>): Promise<T> =>
+  new Promise<T>((resolve, reject) => {
     reusableSink.reset(resolve, reject)
     stream.run(reusableSink, aeleaScheduler)
   })
-}
 
-/**
- * Run a @most/core stream with reused scheduler
- */
 export const runMost = <T>(stream: any): Promise<T> => {
   let result: T
   const captured = MC.tap((x: T) => {

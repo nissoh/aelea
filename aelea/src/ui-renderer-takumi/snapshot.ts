@@ -42,6 +42,26 @@ function mergeStyle(into: Record<string, string>, styleObject: IStyleCSS | null)
   return into
 }
 
+function makeChannelStyleApplier(styleState: Record<string, string>) {
+  let prevKeys = new Set<string>()
+  return (styleObject: IStyleCSS | null) => {
+    const next = styleObject ?? {}
+    const nextKeys = new Set<string>()
+    for (const [key, value] of Object.entries(next)) {
+      if (value === null || value === undefined) {
+        delete styleState[key]
+      } else {
+        styleState[key] = String(value)
+        nextKeys.add(key)
+      }
+    }
+    for (const key of prevKeys) {
+      if (!nextKeys.has(key)) delete styleState[key]
+    }
+    prevKeys = nextKeys
+  }
+}
+
 function mergeAttributes(into: Record<string, string>, attrs: IAttributeProperties<unknown> | null) {
   if (!attrs) return into
   for (const [key, value] of Object.entries(attrs)) {
@@ -192,28 +212,30 @@ function observeNode(node: INode, env: ISnapshotEnv, push: (node: INode) => void
   const behaviorDisposables: Disposable[] = []
 
   if (node.styleInline.length) {
-    const inlineStreams = node.styleInline.map(sb =>
-      op(
+    const inlineStreams = node.styleInline.map(sb => {
+      const apply = makeChannelStyleApplier(styleState)
+      return op(
         sb,
         tap(styleObj => {
-          mergeStyle(styleState, styleObj as IStyleCSS | null)
+          apply(styleObj as IStyleCSS | null)
           scheduleEmit()
         })
       )
-    )
+    })
     behaviorDisposables.push(merge(...inlineStreams).run(nullSink, env.scheduler))
   }
 
   if (node.styleBehavior.length) {
-    const streams = node.styleBehavior.map(sb =>
-      op(
+    const streams = node.styleBehavior.map(sb => {
+      const apply = makeChannelStyleApplier(styleState)
+      return op(
         sb,
         tap(styleObj => {
-          mergeStyle(styleState, styleObj as IStyleCSS | null)
+          apply(styleObj as IStyleCSS | null)
           scheduleEmit()
         })
       )
-    )
+    })
     behaviorDisposables.push(merge(...streams).run(nullSink, env.scheduler))
   }
 

@@ -12,12 +12,10 @@ class Merge<T> implements IStream<T> {
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
     const l = this.sourceList.length
     const disposables = new Array<Disposable>(l)
-    const sinks: ISink<unknown>[] = new Array(l)
     const mergeSink = new MergeSink(sink, disposables, l)
 
-    for (let indexSink: IndexSink<any>, i = 0; i < l; ++i) {
-      indexSink = sinks[i] = new IndexSink(mergeSink, i)
-      disposables[i] = this.sourceList[i].run(indexSink, scheduler)
+    for (let i = 0; i < l; ++i) {
+      disposables[i] = this.sourceList[i].run(new IndexSink(mergeSink, i), scheduler)
     }
 
     return disposeAll(disposables)

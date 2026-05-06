@@ -2,6 +2,7 @@ import { just } from '../source/just.js'
 import { empty } from '../source/void.js'
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
+import { invoke } from '../utils/function.js'
 import { Queue } from '../utils/Queue.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
 import { map } from './map.js'
@@ -118,7 +119,7 @@ class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
     }
 
     const buffers = this.buffers
-    const buffer = buffers[indexedValue.index]
+    const buffer = buffers[i]
 
     buffer.push(indexedValue.value)
 
@@ -128,12 +129,12 @@ class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
       }
 
       const values = this.values
-      for (let i = 0; i < this.buffers.length; i++) {
-        values[i] = this.buffers[i].shift()!
+      const len = this.buffers.length
+      for (let j = 0; j < len; j++) {
+        values[j] = buffers[j].shift()!
       }
       try {
-        const result = this.f(...values)
-        this.sink.event(time, result)
+        this.sink.event(time, invoke(this.f, values))
       } catch (error) {
         this.sink.error(time, error)
       }

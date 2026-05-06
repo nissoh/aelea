@@ -2,6 +2,7 @@ import { just } from '../source/just.js'
 import { empty } from '../source/void.js'
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
+import { invoke } from '../utils/function.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
 import { map } from './map.js'
 
@@ -138,7 +139,7 @@ class CombineMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
 
     this.values[i] = indexedValue.value
     if (this.awaiting === 0) {
-      this.sink.event(time, this.f(...this.values))
+      this.sink.event(time, invoke(this.f, this.values))
     }
   }
 

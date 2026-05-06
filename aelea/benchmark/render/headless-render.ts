@@ -1,17 +1,12 @@
-/**
- * Headless smoke test — proves the aelea component tree renders without
- * a browser by routing through the takumi renderer. Replaces the prior
- * hand-rolled HeadlessDocument shim with the real Node path.
- *
- * Tree is built with renderer-agnostic factories from `aelea/ui`; only
- * the render call is renderer-specific.
- *
- * Run: bun run benchmark/headless-render.ts
- * Output: benchmark/headless-render.webp
- */
+// Headless smoke render — proves the aelea component tree rasterizes via the
+// takumi renderer without a browser. Renderer-agnostic factories from
+// `aelea/ui`; only `renderToImage` is renderer-specific.
+//
+// Run:    bun run benchmark/render/headless-render.ts
+// Output: benchmark/render/headless-render.webp
 
-import { $element, $text, style } from '../src/ui/index.js'
-import { renderToImage } from '../src/ui-renderer-takumi/index.js'
+import { $element, $text, style } from '../../src/ui/index.js'
+import { renderToImage } from '../../src/ui-renderer-takumi/index.js'
 
 const $App = $element('div')(
   style({

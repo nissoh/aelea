@@ -1,16 +1,22 @@
 {
   "name": "aelea",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "type": "module",
   "scripts": {
     "build": "bun run build:clean && tsgo -b",
     "build:clean": "rm -rf dist",
     "tsc:check": "tsgo -p tsconfig.json --noEmit",
     "test": "bun test test/",
-    "bench:combinators": "bun run benchmark/combinators.ts",
-    "bench:characteristics": "bun run benchmark/combinator-characteristics.ts",
-    "bench:takumi": "bun run benchmark/og-takumi.ts",
-    "bench:headless": "bun run benchmark/headless-render.ts"
+    "bench": "bun run benchmark/run.ts",
+    "bench:quick": "bun run benchmark/run.ts -- --quick",
+    "bench:map-filter-reduce": "bun run benchmark/suites/map-filter-reduce.ts",
+    "bench:scan": "bun run benchmark/suites/scan.ts",
+    "bench:switch": "bun run benchmark/suites/switch.ts",
+    "bench:switch-latest": "bun run benchmark/suites/switch-latest.ts",
+    "bench:combinators": "bun run benchmark/suites/combinators.ts",
+    "bench:scheduler": "bun run benchmark/suites/scheduler.ts",
+    "render:og": "bun run benchmark/render/og-takumi.ts",
+    "render:headless": "bun run benchmark/render/headless-render.ts"
   },
   "license": "MIT",
   "author": "Nissan Hanina <nissanhanina@gmail.com>",
