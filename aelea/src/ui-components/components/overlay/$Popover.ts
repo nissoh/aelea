@@ -29,14 +29,11 @@ import { $column } from '../../elements/$elements.js'
 import { observer } from '../../utils/elementObservers.js'
 import { isDesktopScreen } from '../../utils/screenUtils.js'
 
-// Stacking: overlay below the elevated target, content above both. Numbers are
-// arbitrary but the strict ordering must hold for hit-testing to work right.
+// Strict ordering required for hit-testing: overlay < elevated target < content.
 const Z_OVERLAY = 2321
 const Z_TARGET_ELEVATED = 2345
 const Z_CONTENT = 3456
 
-// Above this many px of space below the target, prefer down; otherwise compare
-// to top space and flip if there's more room above.
 const PREFER_DOWN_THRESHOLD_PX = 200
 
 export const $defaultPopoverContentContainer = $column(
@@ -46,8 +43,6 @@ export const $defaultPopoverContentContainer = $column(
     borderRadius: '24px',
     border: `1px solid ${colorShade(palette.foreground, 15)}`,
     boxShadow: `0 0 10px 0 ${colorShade(palette.background, 50)}`,
-    // Caps width so transform-based centering can't overflow the viewport;
-    // host can override.
     maxWidth: 'calc(100vw - 20px)'
   })
 )
@@ -76,17 +71,13 @@ export const $Popover = ({
     ) => {
       const dismissEvent = merge(overlayClick, dismiss)
 
-      // Capture-phase so scroll on any nested scrollable triggers reposition
-      // (scroll doesn't bubble).
+      // Capture-phase so scroll on nested scrollables triggers reposition.
       const updateEvents = merge(
         fromEventTarget(window, 'scroll', { capture: true }),
         fromEventTarget(window, 'resize')
       )
 
       const openContent = multicast(merge($open, constant(null, dismissEvent)))
-      // Multicast + skipRepeats so two consumers (target z-index + overlay
-      // mount) share one subscription, and a fresh `$open` emission while
-      // already-open doesn't re-trigger them.
       const isOpen = multicast(skipRepeats(map(content => content !== null, openContent)))
 
       const $targetWithZIndex = op(
@@ -116,16 +107,10 @@ export const $Popover = ({
       const $content = switchMap($body => {
         if (!$body) return empty
 
-        // Position against the target rect only; never measure the content.
-        // Centering uses `transform: translateX(-50%)` so the popover's own
-        // width is irrelevant — avoids the "stuck visibility: hidden" race
-        // that happens when IntersectionObserver doesn't re-fire after the
-        // content grows from 0 to its laid-out width.
-        //
-        // Static `visibility: hidden` keeps the first paint blank so the user
-        // never sees the content at the default `position: fixed` (top-left)
-        // location. The first styleInline emission flips it to `visible` at
-        // the computed coords — no two-step jump.
+        // Centering via `transform: translateX(-50%)` lets us position from
+        // the target rect alone — no content-width measurement. Static
+        // `visibility: hidden` keeps the first paint at fixed (0,0)
+        // invisible until styleInline computes the real coords.
         return $contentContainer(
           style({ position: 'fixed', zIndex: Z_CONTENT, visibility: 'hidden' }),
           styleInline(

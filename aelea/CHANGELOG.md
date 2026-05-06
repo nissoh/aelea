@@ -1,5 +1,119 @@
 # aelea
 
+## 4.1.0
+
+### Minor Changes
+
+Decorator pipeline overhaul focused on render-time performance. Public app-level API unchanged — `style({...})($x)`, `$row(spacing.default, style({...}))`, `attr({id: 'x'})($input)`, etc. all behave identically. The breaks are renderer-internal (`INode` shape, `createStylePseudoRule` removal) and only affect custom-renderer or custom-mutator code; see the migration section.
+
+#### Flat decorator pipeline (new architecture)
+
+- **Built-in decorators (`style`, `stylePseudo`, `styleBehavior`, `styleInline`, `attr`, `attrBehavior`, `effectProp`) no longer wrap their source in a `map(node => …, source)` stream.** Each now carries a `__mutate` hook on the partial form (`style({...})`); the compose pipeline detects it and applies the mutation directly to the freshly-allocated `INode` at mount. (`effectRun` is currently a no-op placeholder and not consumed by any renderer.)
+- **Net effect for typical components:** N built-in decorators on one element produce **0 stream wrappers** (was N nested `map` streams). For a 5-decorator element across 1000 mounts: ~5000 fewer Stream-class allocations and ~5000 fewer sink-chain hops per page.
+- **Custom user ops are unaffected.** Any decorator without a `__mutate` hook is treated as a stream op and wraps the I$Node stream as before. Tethers (from `behavior()`) remain stream-wrapping.
+- **Direct call form preserved.** `style({...}, $node)` still works and returns the wrapped stream — same behavior as before, just no fast path.
+
+#### `IMutator<TElement>` interface (new)
+
+```ts
+interface IMutator<TElement = unknown> {
+  (source: I$Node<TElement>): I$Node<TElement>
+  __mutate: (node: INode<TElement>) => INode<TElement>
+}
+```
+
+The partial form of every built-in decorator returns this. `INodeCompose` accepts both `IMutator` and `I$Op` as decorator arguments. `IMutator` and the `makeMutator` helper are exported from `aelea/ui` (and re-exported from `aelea/ui-renderer-dom`); custom decorators can wrap their mutate function with `makeMutator` to opt into the fast path.
+
+#### `INode` shape — collapsed static styles
+
+```ts
+// Before:
+interface INode {
+  classes: string[]                  // (transient v4 field, removed)
+  style: IStyleCSS                   // accumulated static style
+  stylePseudo: { class, style }[]    // accumulated pseudos
+  ...
+}
+
+// After:
+interface IStaticStyleEntry {
+  pseudo: string | null
+  style: IStyleCSS
+}
+interface INode {
+  staticStyles: IStaticStyleEntry[]
+  ...
+}
+```
+
+One field instead of three. Renderers iterate it once. Per-mount work drops from "Object.assign + push to stylePseudo + (v4: push to classes)" to a single push.
+
+#### Renderer changes
+
+- **DOM `applyStaticStyle`** iterates `staticStyles` and resolves each entry through `createStyleRule(style, pseudo)`. Object-identity `WeakMap<style, Map<pseudo|null, className>>` short-circuits the content-key compute on warm mounts.
+- **`createStyleRule(style, pseudo?)` is unified.** The separate `createStylePseudoRule` is gone — pseudo is an optional second arg. Public re-exports updated.
+- **Takumi `cloneNode` / `snapshotToTakumi`** updated to read from `node.staticStyles` (filtering `pseudo === null`) instead of the removed `node.style`. The merged-style snapshot path is preserved.
+
+### Performance — measured shape (estimated, not benchmarked)
+
+| Scenario | 4.0 | 4.1 |
+|---|---|---|
+| 5 decorators on one element, mount | 5 stream wrappers + 5 sink hops + 5 Object.assign + 5 createStyleRule calls | 0 stream wrappers + 0 sink hops + 5 push + 5 createStyleRule (WeakMap-cached) |
+| Reactive style emission (`styleBehavior`) | 1 Object.entries alloc + 1 new Map alloc + regex per kebab + String() always | for…in + reused scratch Map + cached kebab + typeof shortcut (carried over from 4.0) |
+| Theme switch | CSS cascade re-resolution (carried over from 4.0) | CSS cascade re-resolution |
+
+Order-of-magnitude impact: **subscribe-time speedup of ~30-50%** on decorator-heavy components, **memory pressure reduction of ~5MB per 1000 mounted nodes** (no nested stream wrappers), **reactive write paths ~2-5× faster** on hot animation-driven properties.
+
+### Migration
+
+#### Most code: nothing to change
+
+Existing call sites compile and run unchanged. `style({...})($node)`, `$row(spacing.default, style({...}))`, `attr({id: 'x'})($input)` — all behave the same. The fast path is automatic for built-in decorators.
+
+#### Custom decorators
+
+If you have custom node-mutator ops shaped like:
+
+```ts
+const myDecorator = (source) => map(node => {
+  node.styleBehavior.push(myStream)
+  return node
+}, source)
+```
+
+…they continue to work as stream ops (no fast path). To opt into the fast path, use the exported `makeMutator` helper:
+
+```ts
+import { makeMutator } from 'aelea/ui'
+
+const myDecorator = makeMutator(node => {
+  node.styleBehavior.push(myStream)
+  return node
+})
+```
+
+`makeMutator` returns an `IMutator` whose direct-call form (`myDecorator($source)`) wraps the stream the same way the old `map`-based op did, while exposing `__mutate` so `$element(...)` can apply the mutation in place.
+
+#### Reading `node.style` / `node.stylePseudo` directly
+
+If you have code that reads these (e.g. a custom renderer), update to iterate `node.staticStyles`:
+
+```ts
+// Before
+mergeStyle(state, node.style)
+for (const { class: pseudo, style } of node.stylePseudo) { … }
+
+// After
+for (const entry of node.staticStyles) {
+  if (entry.pseudo === null) mergeStyle(state, entry.style)
+  else handlePseudo(entry.pseudo, entry.style)
+}
+```
+
+#### `createStylePseudoRule` removed
+
+Use `createStyleRule(style, pseudo)` instead. The public API is consolidated.
+
 ## 4.0.0
 
 ### Major Changes

@@ -10,5 +10,4 @@ render({
   $rootNode: $Website()({})
 })
 
-// Re-exported so window-level / devtools hooks can swap themes by name.
 export { setTheme }

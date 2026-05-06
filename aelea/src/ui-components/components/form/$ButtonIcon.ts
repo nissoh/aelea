@@ -22,7 +22,7 @@ export const $defaultButtonIconContainer = $element('button')(
     fill: palette.message,
     border: `1px solid ${colorShade(palette.message, 25)}`,
     borderRadius: '50%',
-    width: '40px',
+    aspectRatio: '1 / 1',
     height: '40px',
     padding: '0',
     display: 'flex',

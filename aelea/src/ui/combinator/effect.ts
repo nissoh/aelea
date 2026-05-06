@@ -1,24 +1,38 @@
-import { curry2, curry3, map } from '../../stream/index.js'
-import type { I$Node, I$Scheduler, INode } from '../types.js'
+import { type IStream, map } from '../../stream/index.js'
+import type { I$Node, I$Scheduler, IMutator, INode } from '../types.js'
+import { makeMutator } from './mutator.js'
 
 export interface IEffectPropCurry {
-  (prop: string, source: any, node: I$Node): I$Node
-  (prop: string, source: any): (node: I$Node) => I$Node
+  (prop: string, source: IStream<unknown>, node: I$Node): I$Node
+  (prop: string, source: IStream<unknown>): IMutator
+  (prop: string): (source: IStream<unknown>) => IMutator
 }
 
-export const effectProp: IEffectPropCurry = curry3((prop: string, source: any, node: I$Node): I$Node => {
-  return map((n: INode) => {
-    n.propBehavior.push({ key: prop, value: source })
-    return n
-  }, node)
-})
+export interface IEffectRunCurry {
+  (apply: (element: unknown, scheduler: I$Scheduler) => Disposable | void, node: I$Node): I$Node
+  (apply: (element: unknown, scheduler: I$Scheduler) => Disposable | void): IMutator
+}
 
-// No-op placeholder to keep API surface compatible; prop-based behaviors should be used instead.
-export const effectRun = curry2(
-  (apply: (element: unknown, scheduler: I$Scheduler) => Disposable | void, node: I$Node): I$Node => {
-    return map((n: INode) => {
-      n.propBehavior.push({ key: '__run__', value: apply as any })
-      return n
-    }, node)
+export const effectProp = ((prop: string, source?: IStream<unknown>, node?: I$Node) => {
+  if (source === undefined) {
+    return ((nextSource: IStream<unknown>, nextNode?: I$Node) => (effectProp as any)(prop, nextSource, nextNode)) as any
   }
-)
+  const entry = { key: prop, value: source }
+  const mutate = (n: INode) => {
+    n.propBehavior.push(entry)
+    return n
+  }
+  if (node !== undefined) return map(mutate, node)
+  return makeMutator(mutate)
+}) as IEffectPropCurry
+
+// No-op placeholder; not consumed by any current renderer.
+export const effectRun = ((apply: (element: unknown, scheduler: I$Scheduler) => Disposable | void, node?: I$Node) => {
+  const entry = { key: '__run__', value: apply as unknown as IStream<unknown> }
+  const mutate = (n: INode) => {
+    n.propBehavior.push(entry)
+    return n
+  }
+  if (node !== undefined) return map(mutate, node)
+  return makeMutator(mutate)
+}) as IEffectRunCurry

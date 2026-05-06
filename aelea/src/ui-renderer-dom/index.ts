@@ -28,6 +28,7 @@ export {
   createNode,
   effectProp,
   effectRun,
+  makeMutator,
   motion,
   style,
   styleBehavior,
@@ -42,13 +43,15 @@ export type {
   I$Text,
   IAttributeProperties,
   IComponentBehavior,
+  IMutator,
   INode,
   INodeCompose,
   IOutputTethers,
   ISlotChild,
   ISlottable,
+  IStaticStyleEntry,
   IStyleCSS,
   ITextNode
 } from '../ui/types.js'
-export { createStylePseudoRule, createStyleRule, type INodeElementDom, type IRenderConfig, render } from './dom.js'
+export { createStyleRule, type INodeElementDom, type IRenderConfig, render } from './dom.js'
 export { fromEventTarget, nodeEvent } from './event.js'

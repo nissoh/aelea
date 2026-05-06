@@ -20,10 +20,6 @@ export default () =>
     const guideRoute = routeSchema.pages.guide
     const examplesRoute = routeSchema.pages.examples
 
-    // Active theme as a stream — boots from the global mutable record, then
-    // updates whenever the picker emits a change. Reload tears the page down
-    // before any post-change render matters, but the merge keeps the stream
-    // semantics correct in case reload ever goes away.
     const currentTheme = merge(just(theme), changeTheme)
 
     return [

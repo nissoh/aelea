@@ -60,9 +60,13 @@ function cloneNode(
   attrs: Record<string, string>,
   children: Array<INode | string | null>
 ): INode {
+  // Project merged static + reactive style state into a single entry on the
+  // snapshot — downstream `project.ts` reads it as the resolved style for
+  // this node at this snapshot tick.
+  const staticStyles = Object.keys(style).length > 0 ? [{ pseudo: null, style: style as IStyleCSS }] : []
   return {
     ...node,
-    style,
+    staticStyles,
     attributes: attrs,
     // Drop null slots (unmount sentinels) from the emitted snapshot — they
     // are a lifecycle signal, not content to serialize.
@@ -178,7 +182,9 @@ function observeNode(node: INode, env: ISnapshotEnv, push: (node: INode) => void
     push(cloned)
   }
 
-  if (typeof node.style === 'object') mergeStyle(styleState, node.style as IStyleCSS)
+  for (const entry of node.staticStyles) {
+    if (entry.pseudo === null) mergeStyle(styleState, entry.style)
+  }
   if (typeof node.attributes === 'object' && Object.keys(node.attributes).length) {
     mergeAttributes(attrState, node.attributes as IAttributeProperties<unknown>)
   }

@@ -4,7 +4,7 @@ import type { Palette, Theme } from '../ui-components-theme/types.js'
 const localStorageKey = '__AELEA_THEME__'
 const configStyleId = 'aelea-theme-config'
 
-const PALETTE_ROLES: ReadonlyArray<keyof Palette> = [
+const PALETTE_ROLES: readonly (keyof Palette)[] = [
   'primary',
   'message',
   'background',
@@ -16,9 +16,8 @@ const PALETTE_ROLES: ReadonlyArray<keyof Palette> = [
   'indeterminate'
 ]
 
-// Reads a CSS custom property off a style rule via the legacy CSSOM API
-// (`rule.style.getPropertyValue`). The Typed CSSOM `rule.styleMap` would be
-// terser, but Firefox doesn't ship it (and Safari only got it in 17.4).
+// Legacy CSSOM (`rule.style`) instead of Typed CSSOM (`rule.styleMap`):
+// Firefox doesn't ship styleMap, Safari only got it in 17.4.
 function parseCSSStyleValue(rule: CSSStyleRule, key: string): string | undefined {
   const raw = rule.style.getPropertyValue(key)
   if (raw === '') return undefined

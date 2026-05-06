@@ -21,9 +21,8 @@ export const classifyError = (err: unknown): IClassifiedError => {
   }
 }
 
-// Self-contained SVG spinner — uses SMIL `<animateTransform>` so we don't have
-// to reach into the renderer's stylesheet to inject `@keyframes`. SMIL is
-// supported in every browser aelea targets.
+// SMIL `<animateTransform>` instead of CSS `@keyframes` — avoids reaching
+// into the renderer's stylesheet for a global rule.
 export const $spinner: I$Node = $svg('svg')(
   attr({ viewBox: '0 0 24 24', width: '24', height: '24' }),
   style({ display: 'inline-block', color: palette.message })

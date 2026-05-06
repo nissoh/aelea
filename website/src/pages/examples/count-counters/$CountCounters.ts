@@ -17,7 +17,6 @@ export const $CountCounters = ({ counterList }: CountCounters) =>
       [removeCounter, removeCounterTether]: IBehavior<PointerEvent, number>,
       [updateCounter, updateCounterTether]: IBehavior<number, { index: number; value: number }>
     ) => {
-      // Derived state
       const totalSum = map(list => list.reduce((sum, val) => sum + val, 0), counterList)
       const counterCount = map(list => list.length, counterList)
 
@@ -26,7 +25,6 @@ export const $CountCounters = ({ counterList }: CountCounters) =>
 
       return [
         $column(spacing.default)(
-          // Header with stats and add button
           $row(style({ placeContent: 'space-between', alignItems: 'center' }), spacing.default)(
             $row(spacing.small)(
               $node(style({ color: palette.foreground }))($text('Counters: ')),
@@ -43,7 +41,6 @@ export const $CountCounters = ({ counterList }: CountCounters) =>
             })
           ),
 
-          // Counter list - only re-render when length changes
           switchMap(list => {
             return $column(spacing.default)(
               ...list.flatMap((_, index) => {
@@ -65,16 +62,10 @@ export const $CountCounters = ({ counterList }: CountCounters) =>
           }, listLens)
         ),
 
-        // Output: merged list updates
         {
           changeCounterList: merge(
-            // Add new counter with initial value 0
             sampleMap(list => [...list, 0], counterList, addCounter),
-
-            // Remove counter at index
             sampleMap((list, index) => list.filter((_, i) => i !== index), counterList, removeCounter),
-
-            // Update counter value at index
             sampleMap(
               (list, { index, value }) => {
                 const newList = [...list]

@@ -67,7 +67,11 @@ function getTag(element: unknown): string {
 export function snapshotToTakumi(node: INode): TakumiNode {
   const tag = getTag(node.element)
   const attrs = (node.attributes ?? {}) as Record<string, unknown>
-  const style = nonEmptyStyle(node.style)
+  const merged: Record<string, unknown> = {}
+  for (const entry of node.staticStyles) {
+    if (entry.pseudo === null) Object.assign(merged, entry.style)
+  }
+  const style = nonEmptyStyle(merged as IStyleCSS)
 
   if (tag === 'img' && typeof attrs.src === 'string') {
     const image: TakumiImageNode = { type: 'image', src: attrs.src }

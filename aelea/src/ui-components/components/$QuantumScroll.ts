@@ -59,9 +59,9 @@ export const $QuantumScroll = ({
             const hasMore = itemCount > 0 && itemCount === response.pageSize
 
             if (isFirstPage && itemCount === 0) return $emptyMessage
-            // Non-first empty page: server told us we're past the end. Don't
-            // re-mount the sentinel — its previous fire will have been
-            // cancelled by `until(scrollRequest, ...)` already.
+            // Non-first empty page: past the end of the dataset. Don't
+            // re-mount the sentinel — `until(scrollRequest, ...)` already
+            // cancelled its prior fire.
             if (itemCount === 0) return empty
             if (!hasMore) return merge(...response.$items)
 

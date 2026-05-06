@@ -75,8 +75,10 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+    # `contents: write` lets the GitHub release step create the matching
+    # `vX.Y.Z` tag + Release entry via the bundled `GITHUB_TOKEN`.
     permissions:
-      contents: read
+      contents: write
     defaults:
       run:
         shell: bash
@@ -118,15 +120,49 @@ jobs:
 
       # Idempotent: skips if aelea/package.json's version already matches npm.
       # Bump via `cd aelea && bun pm version <patch|minor|major>` then push.
+      # Sets `published` + `version` outputs so the next step can branch on
+      # whether publish actually ran (vs the no-op skip path).
       - name: Publish to npm
+        id: publish
         working-directory: aelea
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH }}
         run: |
           LOCAL=$(jq -r .version package.json)
           REMOTE=$(curl -sf https://registry.npmjs.org/aelea | jq -r '."dist-tags".latest')
-          [ "$LOCAL" = "$REMOTE" ] && { echo "aelea@$LOCAL already published"; exit 0; }
+          echo "version=$LOCAL" >> "$GITHUB_OUTPUT"
+          if [ "$LOCAL" = "$REMOTE" ]; then
+            echo "aelea@$LOCAL already published"
+            echo "published=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           npm publish --access public
+          echo "published=true" >> "$GITHUB_OUTPUT"
+
+      # Tags the release commit and creates a GitHub Release with the matching
+      # CHANGELOG section as the body. `gh release create` creates the tag
+      # itself, so no separate `git tag && git push` step is needed.
+      - name: Create GitHub release
+        if: steps.publish.outputs.published == 'true'
+        working-directory: aelea
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.publish.outputs.version }}"
+          # Slice the CHANGELOG section between `## $VERSION` and the next
+          # top-level `## ` heading; falls back to a one-liner if absent.
+          awk -v ver="$VERSION" '
+            $0 == "## " ver { found=1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md > /tmp/release-notes.md
+          if [ ! -s /tmp/release-notes.md ]; then
+            echo "Release v$VERSION" > /tmp/release-notes.md
+          fi
+          gh release create "v$VERSION" \
+            --title "aelea v$VERSION" \
+            --notes-file /tmp/release-notes.md \
+            --target "$GITHUB_SHA"
 
   deploy:
     needs: [build, release]

@@ -18,83 +18,70 @@ function emitNode<T>(time: ITime, sink: ISink<T>, value: T): void {
   sink.event(time, value)
 }
 
-/**
- * Lower-level factory: given an element builder, return an `INodeCompose`
- * that collects children + ops and emits an `INode` on subscribe. Most
- * consumers should reach for `$element` / `$svg` / `$custom` / `$node`
- * / `$wrapNativeElement` instead — which call `createNode` with the
- * appropriate environment-aware builder.
- */
+type Mutator<TElement> = (node: INode<TElement>) => INode<TElement>
+
+const EMPTY_SEGMENTS: readonly I$Slottable<unknown>[] = [never as I$Slottable<unknown>]
+
 export function createNode<TElement>(
   createElement: () => TElement,
-  postOp: I$Op<TElement> = x => x
+  mutators: Mutator<TElement>[] = [],
+  streamOps: I$Op<TElement>[] = []
 ): INodeCompose<TElement> {
   const nodeComposeFn = (...input: (I$Op<unknown> | I$Slottable<unknown>)[]): INodeCompose | I$Node => {
     if (input.some(isFunction)) {
-      const ops = input as I$Op<TElement>[]
-      const composedOps = [postOp, ...ops].reduce((acc, fn) => (x: I$Node<TElement>) => fn(acc(x)))
-
-      return createNode(createElement, composedOps)
+      const newMutators = mutators.slice()
+      const newStreamOps = streamOps.slice()
+      // Once a streamOp has been seen, all subsequent decorators must wrap as
+      // streamOps too so emission order matches source order.
+      let inStreamPhase = newStreamOps.length > 0
+      for (const op of input as I$Op<TElement>[]) {
+        const mut = (op as unknown as { __mutate?: Mutator<TElement> }).__mutate
+        if (typeof mut === 'function' && !inStreamPhase) {
+          newMutators.push(mut)
+        } else {
+          newStreamOps.push(op)
+          inStreamPhase = true
+        }
+      }
+      return createNode(createElement, newMutators, newStreamOps)
     }
 
-    const $segments = input.length ? (input as I$Slottable<TElement>[]) : [never as I$Slottable<TElement>]
-    // The element descriptor is created per-subscription so placing the
-    // same compose in multiple segments yields independent mounts (each
-    // gets its own DOM element). A `nodeEvent` op tethers off the same
-    // subscription — both sides see the same fresh descriptor, so the
-    // renderer's write to `.native` is visible to the event binder.
-    const $branch = stream((sink, scheduler) => {
+    const $segments =
+      input.length > 0 ? (input as I$Slottable<TElement>[]) : (EMPTY_SEGMENTS as unknown as I$Slottable<TElement>[])
+    // Element descriptor created per-subscription so the same compose placed
+    // in multiple segments yields independent mounts. A `nodeEvent` op sees
+    // the same fresh descriptor since both share the subscription.
+    const $branch = stream<INode<TElement>>((sink, scheduler) => {
       const nodeDisposable = new SettableDisposable()
       const nodeState: INode<TElement> = {
         element: createElement(),
         disposable: nodeDisposable,
         $segments,
+        staticStyles: [],
         styleBehavior: [],
         styleInline: [],
         propBehavior: [],
-        style: {},
         attributesBehavior: [],
-        attributes: {},
-        stylePseudo: []
+        attributes: {}
       }
 
-      const nodeTask = scheduler.asap(propagateRunEventTask(sink, emitNode, nodeState))
+      for (let i = 0; i < mutators.length; i++) mutators[i](nodeState)
 
-      // Return a disposable that fires both — the asap task (in case the
-      // emit hasn't happened yet) AND the node's per-instance disposable
-      // (so the renderer's "remove this element" hook runs on upstream
-      // teardown, e.g. joinMap's endInner after `until(remove)` fires).
+      const nodeTask = scheduler.asap(propagateRunEventTask(sink, emitNode, nodeState))
+      // Both disposables fire — the asap task (in case the emit hasn't
+      // happened yet) AND the per-instance disposable (so the renderer's
+      // "remove this element" hook runs on upstream teardown).
       return disposeBoth(nodeTask, nodeDisposable)
     })
 
-    return postOp($branch)
+    let result: I$Node<TElement> = $branch
+    for (let i = 0; i < streamOps.length; i++) result = streamOps[i](result)
+    return result
   }
 
   return nodeComposeFn as INodeCompose<TElement>
 }
 
-/**
- * Opaque element descriptor carried on `INode.element`. Aelea node
- * factories produce these; each renderer (DOM, takumi, manifest…)
- * interprets them at mount time — `aelea/ui` itself contains no DOM
- * feature-detection:
- *
- *  - DOM renderer:    `document.createElement(tag)` (or `NS(namespace, tag)`)
- *                     at mount, writes the real element back to `.native`
- *                     so downstream DOM helpers (`nodeEvent`) can
- *                     reach it via the shared descriptor.
- *  - Takumi renderer: reads `tag` directly to project to
- *                     `container` / `image` nodes.
- *  - `$wrapNativeElement` pre-populates `.native` so the DOM renderer
- *    reuses an existing element instead of creating a fresh one.
- *
- * The static type on the `INodeCompose` return is the native shape
- * (`HTMLInputElement`, `SVGRectElement`, …) because ui-components that
- * expect `ISlottable<HTMLInputElement>` rely on per-tag narrowing.
- * Runtime value is the descriptor; users never read `.element` directly
- * — they bind reactive styles / attrs / event tethers that flow through
- * streams, and the renderer resolves descriptor → real element there.
- */
 export interface IElementDescriptor {
   tag: string
   namespace: 'html' | 'svg'
@@ -102,40 +89,26 @@ export interface IElementDescriptor {
   native?: unknown
 }
 
-/**
- * HTML tag factory. The `INodeCompose` return is typed per tag
- * (`HTMLInputElement` for `'input'`, etc.) so downstream combinators
- * narrow correctly; at runtime it's a descriptor that the renderer
- * materializes. No DOM access happens here — the factory is pure.
- */
 export function $element<K extends keyof HTMLElementTagNameMap>(tag: K): INodeCompose<HTMLElementTagNameMap[K]>
 export function $element(tag?: string): INodeCompose<HTMLElement>
 export function $element(tag = 'div') {
   return createNode(() => ({ tag, namespace: 'html' }) as unknown as HTMLElement)
 }
 
-/** SVG-namespaced factory; the renderer uses `createElementNS` if rendering to a DOM. */
 export function $svg<K extends keyof SVGElementTagNameMap>(tag: K): INodeCompose<SVGElementTagNameMap[K]>
 export function $svg(tag: string): INodeCompose<SVGElement>
 export function $svg(tag: string) {
   return createNode(() => ({ tag, namespace: 'svg' }) as unknown as SVGElement)
 }
 
-/** Custom / non-standard tag name — HTML-namespaced, no type narrowing. */
 export function $custom(tag: string): INodeCompose<HTMLElement> {
   return createNode(() => ({ tag, namespace: 'html' }) as unknown as HTMLElement)
 }
 
-/** Convenience alias for `$element('div')`. */
 export const $node: INodeCompose<HTMLElement | SVGElement> = createNode<HTMLElement | SVGElement>(
   () => ({ tag: 'div', namespace: 'html' }) as unknown as HTMLElement
 )
 
-/**
- * Wrap a pre-existing native element so renderers target it directly.
- * The descriptor carries `native` so the DOM renderer skips creating
- * a fresh element; non-DOM renderers can still read `tag` / `namespace`.
- */
 export function $wrapNativeElement<T extends Element = Element>(element: T): INodeCompose<T> {
   const descriptor: IElementDescriptor = {
     tag: (typeof element.tagName === 'string' && element.tagName.toLowerCase()) || 'div',
@@ -155,12 +128,10 @@ export const $text = (...textSourceList: (IStream<string> | string)[]): I$Text =
         return scheduler.asap(propagateRunEventTask(sink, emitNode, manifest))
       })
     }
-    // Reactive source: wrap in `state` so the renderer's later subscription
-    // replays the most recent value. Prime it eagerly here so our slot
-    // registers in shared multicasts at the same sync tick as sibling
-    // `styleBehavior` / sibling-text subscriptions — if we waited for the
-    // asap manifest-emit, we'd join the multicast sinkList *after* its
-    // first emission, and late subscribers miss it by design.
+    // Wrap reactive source in `state` and prime it eagerly so this slot
+    // registers in shared multicasts on the same sync tick as sibling
+    // styleBehavior / sibling-text subscriptions — late subscribers would
+    // otherwise miss the first emission.
     const cached = state(source)
     return stream<ITextNode>((sink, scheduler) => {
       const primeSub = cached.run(nullSink, scheduler)

@@ -1,4 +1,4 @@
-import { just, map, merge, reduce, start } from 'aelea/stream'
+import { constant, just, map, merge, reduce, start } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
 import { $node, $text, component, style } from 'aelea/ui'
 import {
@@ -10,6 +10,7 @@ import {
   $defaultSliderThumb,
   $Input,
   $icon,
+  $Popover,
   $row,
   $Slider,
   $TextField,
@@ -36,10 +37,12 @@ export const $Controllers = component(
     [slide, slideTether]: IBehavior<number, number>,
     [inputChange, inputChangeTether]: IBehavior<string, string>,
     [textFieldChange, textFieldChangeTether]: IBehavior<string, string>,
-    [pickFruit, pickFruitTether]: IBehavior<string, string>
+    [pickFruit, pickFruitTether]: IBehavior<string, string>,
+    [popOpen, popOpenTether]: IBehavior<PointerEvent, PointerEvent>
   ) => {
     const buttonCount = reduce((n: number) => n + 1, 0, buttonClick)
     const iconCount = reduce((n: number) => n + 1, 0, iconClick)
+    const popCount = reduce((n: number) => n + 1, 0, popOpen)
     const checkState = start(false, check)
     const sliderValue = start(0.5, slide)
     const inputValue = start('', inputChange)
@@ -128,6 +131,29 @@ export const $Controllers = component(
           ),
 
           $section(
+            'Popover',
+            $row(spacing.default, style({ alignItems: 'center' }))(
+              $Popover({
+                $target: $ButtonIcon({
+                  $content: $icon({ $content: $trash, width: '24px', viewBox: '0 0 24 24' })
+                })({
+                  click: popOpenTether()
+                }),
+                $open: constant(
+                  $column(spacing.default, style({ minWidth: '200px' }))(
+                    $node(style({ color: palette.message, fontWeight: 'bold' }))($text('Confirm delete?')),
+                    $node(style({ color: palette.foreground, fontSize: '0.85rem' }))(
+                      $text('Click outside to dismiss this popover.')
+                    )
+                  ),
+                  popOpen
+                )
+              })({}),
+              $valueLabel($text(map(n => `opened: ${n}`, start(0, popCount))))
+            )
+          ),
+
+          $section(
             'Tooltip',
             $row(
               spacing.default,
@@ -174,7 +200,8 @@ export const $Controllers = component(
                   map(v => `slider → ${v.toFixed(2)}`, slide),
                   map(v => `input → "${v}"`, inputChange),
                   map(v => `text field → "${v}"`, textFieldChange),
-                  map(v => `dropdown → ${v}`, pickFruit)
+                  map(v => `dropdown → ${v}`, pickFruit),
+                  map(() => 'popover opened', popOpen)
                 )
               )
             )
