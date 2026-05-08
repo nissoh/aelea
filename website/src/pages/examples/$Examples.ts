@@ -73,7 +73,7 @@ export default () =>
             commitTitle('Count Counters')(
               fadeIn(
                 component(([changeCounterList, changeCounterListTether]: IBehavior<number[]>) => {
-                  const counterList = state(changeCounterList, [0])
+                  const counterList = state([0], changeCounterList)
 
                   return [
                     $column(

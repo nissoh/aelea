@@ -1,26 +1,22 @@
-import { map, merge, never } from '../../../stream/index.js'
+import { never } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
-import { colorShade, palette } from '../../../ui-components-theme/index.js'
+import { colorWeight, palette, text } from '../../../ui-components-theme/index.js'
 import type { I$Slottable, ISlottable } from '../../../ui-renderer-dom/index.js'
-import {
-  $element,
-  attrBehavior,
-  component,
-  type INodeCompose,
-  nodeEvent,
-  style,
-  styleBehavior
-} from '../../../ui-renderer-dom/index.js'
-import { designSheet } from '../../style/designSheet.js'
-import { dismissOp, interactionOp } from './form.js'
+import { $element, component, type INodeCompose, nodeEvent, style } from '../../../ui-renderer-dom/index.js'
+import { disabledOp, dismissOp, focusOutlineOp, interactionOp } from './form.js'
 import type { Control } from './types.js'
 
 export const $defaultButtonIconContainer = $element('button')(
-  designSheet.control,
   style({
-    cursor: 'pointer',
+    fontFamily: 'inherit',
+    fontWeight: 300,
+    fontSize: text.base,
+    color: palette.message,
     fill: palette.message,
-    border: `1px solid ${colorShade(palette.message, 25)}`,
+    backgroundColor: 'transparent',
+    border: `1px solid ${colorWeight(palette.message, 25)}`,
+    outline: 'none',
+    cursor: 'pointer',
     borderRadius: '50%',
     aspectRatio: '1 / 1',
     height: '40px',
@@ -46,11 +42,8 @@ export const $ButtonIcon = ({ $content, disabled = never, $container = $defaultB
     ) => [
       $container(
         clickTether(nodeEvent('pointerup')),
-        styleBehavior(map(d => (d ? { opacity: 0.4, pointerEvents: 'none' } : null), disabled)),
-        attrBehavior(map(d => ({ disabled: d }), disabled)),
-        styleBehavior(
-          map(active => (active ? { borderColor: palette.primary } : null), merge(focusStyle, dismissstyle))
-        ),
+        disabledOp(disabled),
+        focusOutlineOp(focusStyle, dismissstyle),
         interactionTether(interactionOp),
         dismissTether(dismissOp)
       )($content),

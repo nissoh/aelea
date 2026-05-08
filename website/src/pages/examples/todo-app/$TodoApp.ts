@@ -18,7 +18,7 @@ export default (todos: Todo[]) =>
       [newTodo, createTodoTether]: IBehavior<Todo, Todo>,
       [showCompletedList, showCompletedListTether]: IBehavior<boolean, boolean>
     ) => {
-      const showCompleteState = state(showCompletedList, false)
+      const showCompleteState = state(false, showCompletedList)
 
       return [
         $column(spacing.big)(
@@ -40,7 +40,7 @@ export default (todos: Todo[]) =>
                 const [remove, removeTether] = behavior<MouseEvent, MouseEvent>()
                 const [completed, completedTether] = behavior<boolean, boolean>()
 
-                const todoCompleted = state(completed, todo.completed)
+                const todoCompleted = state(todo.completed, completed)
 
                 return until(remove)(
                   switchLatest(

@@ -9,10 +9,15 @@ import {
 } from '../../stream/index.js'
 import { multicast } from './multicast.js'
 
+export interface IStateCurry {
+  <T>(initialState: T | undefined, source: IStream<T>): IStream<T>
+  <T>(initialState: T | undefined): (source: IStream<T>) => IStream<T>
+}
+
 /**
  * Create a multicast stream that remembers its latest value
  *
- * Without initialState:
+ * Without initialState (undefined):
  * stream:        -1-2-3--->
  * subscriber1:   -1-2-3--->
  * subscriber2:      2-3--->
@@ -22,7 +27,13 @@ import { multicast } from './multicast.js'
  * subscriber1:   01-2-3--->
  * subscriber2:    1-2-3--->
  */
-export const state = <T>(source: IStream<T>, initialState?: T): IStream<T> => new State(multicast(source), initialState)
+export const state: IStateCurry = ((...args: unknown[]) => {
+  if (args.length >= 2) {
+    return new State(multicast(args[1] as IStream<unknown>), args[0])
+  }
+  const initial = args[0]
+  return (source: IStream<unknown>) => new State(multicast(source), initial)
+}) as IStateCurry
 
 export class State<A> implements IStream<A> {
   latestValue?: { value: A }

@@ -1,6 +1,8 @@
-export function colorShade(color: string, intensity: number): string {
-  if (intensity < 0 || intensity > 100) {
-    throw new RangeError(`colorShade: intensity must be in [0, 100], got ${intensity}`)
+export function colorWeight(color: string, weight: number): string {
+  if (weight < 0 || weight > 100) {
+    throw new RangeError(`colorWeight: weight must be in [0, 100], got ${weight}`)
   }
-  return `color-mix(in srgb, ${color} ${intensity}%, var(--shade-pole))`
+  return `color-mix(in srgb, ${color} ${weight}%, var(--shade-pole))`
 }
+
+export const colorShade = colorWeight

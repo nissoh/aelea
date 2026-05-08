@@ -44,14 +44,16 @@ export { $Checkbox, $defaultCheckboxBox, $defaultCheckboxLabel } from './compone
 export { $defaultInputContainer, $Input } from './components/form/$Input.js'
 export { $defaultSliderContainer, $defaultSliderThumb, $Slider } from './components/form/$Slider.js'
 export { $defaultTextFieldContainer, $defaultTextFieldLabelRow, $TextField } from './components/form/$TextField.js'
+export {
+  $form,
+  $label,
+  disabledOp,
+  dismissOp,
+  focusOutlineOp,
+  interactionOp
+} from './components/form/form.js'
 export type { Control, Input } from './components/form/types.js'
 export { InputType } from './components/form/types.js'
-export {
-  $Dialog,
-  type IDialog,
-  type IDialogPosition,
-  showPopover
-} from './components/overlay/$Dialog.js'
 export {
   $defaultPopoverContentContainer,
   $Popover

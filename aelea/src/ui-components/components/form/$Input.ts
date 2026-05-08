@@ -1,7 +1,7 @@
 import { combine, constant, empty, map, merge, o, start } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
 import { multicast } from '../../../stream-extended/index.js'
-import { palette } from '../../../ui-components-theme/index.js'
+import { palette, text } from '../../../ui-components-theme/index.js'
 import type { ISlottable } from '../../../ui-renderer-dom/index.js'
 import {
   $element,
@@ -9,13 +9,32 @@ import {
   effectProp,
   type INodeCompose,
   nodeEvent,
-  styleBehavior
+  style,
+  styleBehavior,
+  stylePseudo
 } from '../../../ui-renderer-dom/index.js'
-import { designSheet } from '../../style/designSheet.js'
 import { dismissOp, interactionOp } from './form.js'
 import type { Input, InputType } from './types.js'
 
-export const $defaultInputContainer = $element('input')(designSheet.input)
+export const $defaultInputContainer = $element('input')(
+  style({
+    fontFamily: 'inherit',
+    fontWeight: 300,
+    fontSize: text.base,
+    color: palette.message,
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderBottom: `2px solid ${palette.message}`,
+    outline: 'none',
+    minWidth: '25px',
+    width: '100%',
+    flex: 1,
+    flexShrink: 0,
+    padding: 0,
+    marginTop: '2px'
+  }),
+  stylePseudo('::placeholder', { color: palette.foreground })
+)
 
 export interface IInput extends Input<string | number> {
   type?: InputType

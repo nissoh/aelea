@@ -1,8 +1,8 @@
-import type { IOps } from '../../../stream/index.js'
-import { constant, filter, merge } from '../../../stream/index.js'
+import type { IOps, IStream } from '../../../stream/index.js'
+import { constant, filter, map, merge } from '../../../stream/index.js'
 import { palette } from '../../../ui-components-theme/index.js'
-import type { ISlottable } from '../../../ui-renderer-dom/index.js'
-import { $element, nodeEvent, style } from '../../../ui-renderer-dom/index.js'
+import type { IMutator, INode, ISlottable } from '../../../ui-renderer-dom/index.js'
+import { $element, makeMutator, nodeEvent, style, styleBehavior } from '../../../ui-renderer-dom/index.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 
 export const interactionOp: IOps<ISlottable, boolean> = source =>
@@ -15,6 +15,16 @@ export const dismissOp: IOps<ISlottable, boolean> = source => {
     filter(ev => document.activeElement !== ev.target, events)
   )
 }
+
+export const disabledOp = (disabled: IStream<boolean>): IMutator =>
+  makeMutator((node: INode) => {
+    node.styleBehavior.push(map(d => (d ? { opacity: 0.4, pointerEvents: 'none' } : null), disabled))
+    node.attributesBehavior.push(map(d => ({ disabled: d }), disabled))
+    return node
+  })
+
+export const focusOutlineOp = (focus: IStream<boolean>, dismiss: IStream<boolean>): IMutator =>
+  styleBehavior(map(active => (active ? { borderColor: palette.primary } : null), merge(focus, dismiss)))
 
 export const $form = $element('form')(layoutSheet.column)
 

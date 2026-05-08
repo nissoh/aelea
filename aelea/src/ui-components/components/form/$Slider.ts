@@ -15,7 +15,7 @@ import {
   styleInline,
   stylePseudo
 } from '../../../ui/index.js'
-import { colorShade, palette } from '../../../ui-components-theme/index.js'
+import { colorWeight, palette } from '../../../ui-components-theme/index.js'
 import type { Input } from './types.js'
 
 export interface ISliderParams extends Input<number> {
@@ -46,7 +46,7 @@ export const $defaultSliderThumb = $node(
     height: '18px',
     borderRadius: '50%',
     background: palette.background,
-    border: `1.5px solid ${colorShade(palette.foreground, 50)}`,
+    border: `1.5px solid ${colorWeight(palette.foreground, 50)}`,
     boxSizing: 'border-box'
   })
 )()
@@ -58,8 +58,8 @@ export const $Slider = ({
   step = 0.01,
   orientation = 'horizontal',
   disabled = just(false),
-  color = just(colorShade(palette.foreground, 50)),
-  trackColor = just(colorShade(palette.foreground, 15)),
+  color = just(colorWeight(palette.foreground, 50)),
+  trackColor = just(colorWeight(palette.foreground, 40)),
   ariaLabel,
   $thumb,
   $container = $defaultSliderContainer

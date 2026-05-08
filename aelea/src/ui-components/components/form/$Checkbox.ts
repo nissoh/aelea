@@ -1,4 +1,4 @@
-import { map, merge } from '../../../stream/index.js'
+import { map } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
 import { palette } from '../../../ui-components-theme/index.js'
 import type { ISlottable } from '../../../ui-renderer-dom/index.js'
@@ -16,7 +16,7 @@ import {
 } from '../../../ui-renderer-dom/index.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 import { spacing } from '../../style/spacing.js'
-import { dismissOp, interactionOp } from './form.js'
+import { dismissOp, focusOutlineOp, interactionOp } from './form.js'
 import type { Input } from './types.js'
 
 export const $defaultCheckboxLabel = $element('label')(
@@ -77,11 +77,7 @@ export const $Checkbox = ({ value, label, $container = $defaultCheckboxLabel, $b
         dismissTether(dismissOp)
       )
 
-      const $boxNode = $box(
-        styleBehavior(
-          map(active => (active ? { borderColor: palette.primary } : null), merge(focusStyle, dismissstyle))
-        )
-      )($overlay(), $checkInput())
+      const $boxNode = $box(focusOutlineOp(focusStyle, dismissstyle))($overlay(), $checkInput())
 
       // Wire hover tethers to the label too so hovering the text portion also
       // highlights the box border (not just hovering the box/input).

@@ -1,4 +1,4 @@
-export { colorShade } from './color.js'
+export { colorShade, colorWeight } from './color.js'
 export * from './globalState.js'
 export { palette, theme, themeList, writeTheme } from './globalState.js'
 export type {

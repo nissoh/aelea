@@ -56,7 +56,7 @@ export const buildRouteTree = (
   root: Route
   child: (parentFragments: readonly Fragment[]) => (config: RouteConfig) => Route
 } => {
-  const sharedPath = state(skipRepeatsWith(samePath, config.fragmentsChange))
+  const sharedPath = state(undefined, skipRepeatsWith(samePath, config.fragmentsChange))
   const root = buildRoute(sharedPath, [], { fragment: config.fragment })
   return {
     root,

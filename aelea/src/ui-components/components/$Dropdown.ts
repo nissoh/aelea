@@ -1,25 +1,31 @@
 import {
+  combine,
   constant,
+  empty,
   type IOps,
   type IStream,
   just,
   map,
   merge,
   nowWith,
+  op,
   reduce,
   skip,
+  start,
   switchLatest,
   switchMap,
   take,
   toStream
 } from '../../stream/index.js'
-import type { IBehavior } from '../../stream-extended/index.js'
-import { colorShade, palette } from '../../ui-components-theme/index.js'
+import { animationFrame, type IBehavior } from '../../stream-extended/index.js'
+import { colorWeight, palette, text } from '../../ui-components-theme/index.js'
 import {
   $node,
   $text,
+  attr,
   component,
   effectProp,
+  effectRun,
   fromEventTarget,
   type I$Node,
   type I$Slottable,
@@ -27,12 +33,13 @@ import {
   type INodeCompose,
   nodeEvent,
   style,
+  styleInline,
   stylePseudo
 } from '../../ui-renderer-dom/index.js'
 import { $column, $row } from '../elements/$elements.js'
-import { designSheet } from '../style/designSheet.js'
 import { spacing } from '../style/spacing.js'
-import { $Dialog, type IDialogPosition } from './overlay/$Dialog.js'
+import { observer } from '../utils/elementObservers.js'
+import { showPopover } from '../utils/popover.js'
 
 export const $defaultOptionContainer = $row(
   spacing.small,
@@ -52,7 +59,7 @@ export const $defaultDropListContainer = $column(
     maxWidth: '600px',
     userSelect: 'text',
     background: palette.background,
-    boxShadow: `${colorShade(palette.message, 14)} 0px 4px 20px 8px, ${colorShade(palette.message, 10)} 0px 1px 3px 1px`,
+    boxShadow: `${colorWeight(palette.message, 14)} 0px 4px 20px 8px, ${colorWeight(palette.message, 10)} 0px 1px 3px 1px`,
     borderRadius: '8px',
     fontWeight: 'normal',
     overflow: 'hidden'
@@ -71,11 +78,18 @@ export const $defaultDropdownContainer = $node(
 
 export const $defaultDropdownAnchor = $row(
   spacing.small,
-  designSheet.btn,
   style({
+    fontFamily: 'inherit',
+    fontWeight: 300,
+    fontSize: text.base,
+    color: palette.message,
+    backgroundColor: 'transparent',
+    border: `2px solid ${palette.message}`,
+    outline: 'none',
+    cursor: 'pointer',
     alignItems: 'center',
     padding: '8px 14px',
-    cursor: 'pointer'
+    flexShrink: 0
   })
 )($text('Select…'), $node(style({ color: palette.foreground }))($text('▾')))
 
@@ -91,18 +105,6 @@ export interface IDropdown<T> {
 
 const stopPropagation = (ev: MouseEvent) => ev.stopPropagation()
 
-const dropdownPosition: IDialogPosition = aEl => {
-  const rect = aEl.getBoundingClientRect()
-  const bottomSpace = window.innerHeight - rect.bottom
-  const goDown = bottomSpace > rect.bottom
-  return {
-    top: `${goDown ? rect.bottom + 5 : rect.top - 5}px`,
-    left: `${rect.left}px`,
-    minWidth: `${rect.width}px`,
-    transform: goDown ? 'none' : 'translateY(-100%)'
-  }
-}
-
 export function $Dropdown<T>({
   $anchor = $defaultDropdownAnchor,
   optionList,
@@ -115,41 +117,79 @@ export function $Dropdown<T>({
   return component(
     (
       [select, selectTether]: IBehavior<INode<HTMLElement>, T>,
-      [openMenu, openMenuTether]: IBehavior<INode<HTMLElement>, PointerEvent>
+      [openMenu, openMenuTether]: IBehavior<INode<HTMLElement>, PointerEvent>,
+      [anchorEntry, anchorTether]: IBehavior<INode<HTMLElement>, IntersectionObserverEntry[]>,
+      [contentEntry, contentTether]: IBehavior<INode<HTMLElement>, IntersectionObserverEntry[]>
     ) => {
       const toggle = constant<'toggle'>('toggle', openMenu)
       const outsideClose = switchLatest(map(() => take(1, skip(1, fromEventTarget(window, 'click'))), openMenu))
       const close = constant<false>(false, closeOnSelect ? merge(outsideClose, select) : outsideClose)
       const isOpen: IStream<boolean> = reduce((open, ev) => (ev === 'toggle' ? !open : ev), false, merge(toggle, close))
 
-      const $dropdownContainer = $container(openMenuTether(nodeEvent('click')))
-      const $dropListWithStop = $dropListContainer(
-        effectProp(
-          'onclick',
-          nowWith(() => stopPropagation)
-        )
+      const reposition = merge(
+        fromEventTarget(window, 'scroll', { capture: true }),
+        fromEventTarget(window, 'resize'),
+        animationFrame()
       )
 
-      const $optionListContent = switchMap(
-        list =>
-          $node(
-            ...list.map(opt =>
-              $optionContainer(selectTether(nodeEvent('click'), constant(opt)))(switchLatest($$option(just(opt))))
-            )
+      const $observedAnchor = op(
+        $anchor,
+        anchorTether(observer.intersection() as IOps<INode<HTMLElement>, IntersectionObserverEntry[]>)
+      )
+
+      const $list = switchMap(open => {
+        if (!open) return empty
+        return $dropListContainer(
+          attr({ popover: 'manual' }),
+          style({
+            position: 'fixed',
+            visibility: 'hidden',
+            border: 'none',
+            margin: 0,
+            color: 'inherit'
+          }),
+          effectProp(
+            'onclick',
+            nowWith(() => stopPropagation)
           ),
-        toStream(optionList)
-      )
+          effectRun(showPopover),
+          contentTether(observer.intersection() as IOps<INode<HTMLElement>, IntersectionObserverEntry[]>),
+          styleInline(
+            map(
+              ({ aEntry, cEntry }) => {
+                const aEl = aEntry[0]?.target as HTMLElement | undefined
+                const cEl = cEntry[0]?.target as HTMLElement | undefined
+                if (!aEl || !cEl) return {}
+                const rect = aEl.getBoundingClientRect()
+                const bottomSpace = window.innerHeight - rect.bottom
+                const goDown = bottomSpace > rect.bottom
+                return {
+                  top: `${goDown ? rect.bottom + 5 : rect.top - 5}px`,
+                  left: `${rect.left}px`,
+                  minWidth: `${rect.width}px`,
+                  transform: goDown ? 'none' : 'translateY(-100%)',
+                  visibility: 'visible'
+                }
+              },
+              combine({ aEntry: anchorEntry, cEntry: contentEntry, _: start(null, reposition) })
+            )
+          )
+        )(
+          switchMap(
+            list =>
+              $node(
+                ...list.map(opt =>
+                  $optionContainer(selectTether(nodeEvent('click'), constant(opt)))(switchLatest($$option(just(opt))))
+                )
+              ),
+            toStream(optionList)
+          )
+        )
+      }, isOpen)
 
-      return [
-        $Dialog({
-          $container: $dropdownContainer,
-          $anchor,
-          $content: map(open => (open ? $optionListContent : null), isOpen),
-          position: dropdownPosition,
-          $contentContainer: $dropListWithStop
-        }),
-        { select, isOpen }
-      ]
+      const $dropdownContainer = $container(openMenuTether(nodeEvent('click')))
+
+      return [$dropdownContainer($observedAnchor, $list), { select, isOpen }]
     }
   )
 }

@@ -14,7 +14,7 @@ import {
   switchMap
 } from '../../stream/index.js'
 import type { IBehavior } from '../../stream-extended/index.js'
-import { colorShade, palette, text } from '../../ui-components-theme/index.js'
+import { colorWeight, palette, text } from '../../ui-components-theme/index.js'
 import {
   $node,
   $svg,
@@ -142,7 +142,7 @@ export const $Table = <T, FilterState = never>({
                 fill:
                   current.selector === selector && current.direction === direction
                     ? palette.message
-                    : colorShade(palette.message, 25)
+                    : colorWeight(palette.message, 25)
               }),
             sortBy
           )
@@ -166,7 +166,7 @@ export const $Table = <T, FilterState = never>({
                     style({
                       borderRadius: '50%',
                       padding: '6px',
-                      border: `1px solid ${colorShade(palette.message, current.selector === colSortBy ? 25 : 7)}`
+                      border: `1px solid ${colorWeight(palette.message, current.selector === colSortBy ? 25 : 7)}`
                     })
                   )($sortArrow(colSortBy, 'asc'), $sortArrow(colSortBy, 'desc')),
                 sortBy

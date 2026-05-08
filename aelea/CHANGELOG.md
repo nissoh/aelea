@@ -1,63 +1,96 @@
 # aelea
 
+## 4.5.0
+
+### Minor Changes
+
+#### `state` is now curried, with flipped argument order
+
+`state` follows the same curry idiom as the rest of the combinator surface (`recover`, `constant`, `take`, etc.) — config first, source last:
+
+```ts
+state(initialState, source)        // direct
+state(initialState)(source)        // curried
+```
+
+The previous `(source, initialState?)` order is replaced. The `initialState` parameter is now required (callers must pass `undefined` explicitly when there is no initial value) — TypeScript overload resolution can't reliably distinguish a stream-only call from a curried-with-stream-as-initial-value call, so the optional form is gone.
+
+Migration:
+
+```ts
+state(source)                      → state(undefined, source)
+state(source, 0)                   → state(0, source)
+```
+
 ## 4.4.0
 
 ### Minor Changes
 
-#### `$Dialog` — generic anchor-tracked top-layer surface
+#### `colorShade` → `colorWeight`
 
-New component in `aelea/ui-components/components/overlay/$Dialog`. Mounts arbitrary content in the browser top layer (via the HTML Popover API), positioned relative to a target element, with per-frame repositioning while open. The shared primitive that `$Popover`, `$Tooltip`, and `$Dropdown` now delegate to.
+The theme function `colorShade(color, intensity)` is renamed to `colorWeight(color, weight)`. The old name was misleading because the function flips direction based on theme — `intensity = 50` produces a *lighter* color in light themes (mixing toward white via `--shade-pole`) and a *darker* color in dark themes. "Shade" implies one-directional darkening.
+
+`colorWeight` reframes the parameter as **prominence weight** — low values blend toward the theme's background pole (de-emphasized), high values stay closer to the input color (emphasized). Symmetric across themes.
 
 ```ts
-import { $Dialog, type IDialogPosition } from 'aelea/ui-components'
+import { colorWeight, palette } from 'aelea/ui-components-theme'
 
-const position: IDialogPosition = (anchorEl, contentEl) => {
-  const rect = anchorEl.getBoundingClientRect()
-  return { top: `${rect.bottom + 8}px`, left: `${rect.left}px` }
-}
-
-$Dialog({
-  $anchor: $myButton,
-  $content: map(open => (open ? $myPanel : null), isOpenStream),
-  position
+style({
+  border: `1px solid ${colorWeight(palette.foreground, 50)}`,
+  background: colorWeight(palette.background, 80)
 })
 ```
 
-API:
-
-- `$anchor: I$Node` — the target element. `$Dialog` attaches an `IntersectionObserver` for element-handle delivery to `position`.
-- `$content: IStream<I$Node | null>` — single signal: emit a node to open with that body, emit `null` to close. Body is captured directly via switchMap closure, so there's no race between `isOpen` propagation and content delivery (a regression that bit the intermediate refactor).
-- `position: (anchorEl, contentEl) => IStyleCSS` — called every animation frame while open. Receives both element refs so positioning can read anchor rect and content size for clamping/flipping.
-- `$container?` / `$contentContainer?` — element wrappers, both default to `$node`.
-
-Backdrop, dismiss state machines, hover detection, click-outside handling — all stay in the wrapper components. `$Dialog` is purely the top-layer + positioning primitive.
-
-#### `showPopover` helper exported
-
-Helper for safely calling `el.showPopover()` with capability detection and `:popover-open` cleanup. Exported from `aelea/ui-components` for components that need to put their own elements in the top layer (`$Popover` uses it for the backdrop).
-
-```ts
-import { showPopover } from 'aelea/ui-components'
-
-$node(
-  attr({ popover: 'manual' }),
-  effectRun(showPopover)
-)()
-```
-
-Returns `void` on engines without the API (graceful no-op) or a `Disposable` whose `[Symbol.dispose]` calls `hidePopover()` if the element is still `:popover-open` at unmount.
+`colorShade` is still exported as a back-compat alias (`export const colorShade = colorWeight`). Migrate at your own pace; the alias will be removed in a future major release.
 
 ### Patch Changes
 
-#### `$Tooltip` and `$Dropdown` now escape transform-trapped containing blocks
+#### Form interaction helpers exposed: `disabledOp`, `focusOutlineOp`
 
-Both components used `position: fixed` directly, which becomes anchored to the nearest ancestor with `transform` / `filter` / `perspective` / `backdrop-filter` / `contain: paint` / `will-change: transform` instead of the viewport. Tooltips and dropdowns inside `fadeIn(...)`-style page transitions or any animated wrapper would land at the mid-animation rect of the wrapper, not the actual anchor. The bug class fixed for `$Popover` in 4.3.2 was silently affecting both other components too.
+Two patterns were duplicated 4× across form components: the disabled-state pair (`styleBehavior(opacity 0.4) + attrBehavior(disabled attr)`) and the focus border highlight (`styleBehavior(merge(focus, dismiss) → borderColor: primary`). Both are now exposed from `aelea/ui-components` alongside the existing `interactionOp` / `dismissOp`:
 
-Now both go through `$Dialog`, which uses HTML Popover API top-layer placement. Top-layer elements have the viewport as their containing block regardless of CSS ancestry, so position computations land where they're expected.
+```ts
+import { disabledOp, dismissOp, focusOutlineOp, interactionOp } from 'aelea/ui-components'
+
+$myButton(
+  disabledOp(disabled),
+  focusOutlineOp(focusStyle, dismissstyle),
+  interactionTether(interactionOp),
+  dismissTether(dismissOp)
+)($content)
+```
+
+`disabledOp` returns a single `IMutator` that pushes both the style and attribute streams to the same node (uses `makeMutator` internally). `focusOutlineOp` is a thin wrapper around the `styleBehavior(merge(...))` pattern. Aelea's stock $Button, $ButtonIcon, $Checkbox now use them; $Input is left inline because its focus styling combines with validation alert state on a different border property and didn't fit the helper.
+
+Also re-exports `$form`, `$label`, `interactionOp`, `dismissOp` from the package index — previously only reachable via deep imports. Useful for app authors building their own design system on aelea's interaction primitives without picking up the stock styled defaults.
+
+#### `designSheet` trimmed to genuine page-level utilities
+
+`designSheet.btn`, `designSheet.input`, `designSheet.control`, `designSheet.text`, and unused elevations (`elevation1`, `elevation3`, `elevation4`, `elevation6`, `elevation12`) are removed. The form-control and base-text styles are inlined into each component's own default container ($defaultButtonContainer, $defaultInputContainer, $defaultButtonIconContainer, $defaultDropdownAnchor) — components are now self-contained with their styling, no shared internal style hierarchy.
+
+`designSheet` retains the three things app authors actually use: `main` (full-page reset with palette + scrollbar), `customScroll` (cross-browser scrollbar palette), and `elevation2` (the one shadow tier that had real consumers). Existing imports of `designSheet.main` / `designSheet.customScroll` / `designSheet.elevation2` continue to work.
+
+If you imported any of the removed members directly, copy the equivalent inline styles from the component default that previously pulled them in (e.g. for the old `designSheet.btn`, see `$defaultButtonContainer` in `$Button.ts`).
+
+Also fixes a vestigial bug in the input default: `paddingBottom: '2px'` was being clobbered by a later `padding: 0` in the same declaration block (CSS shorthand-after-longhand wipe). Dead code, removed during inlining.
+
+#### `$Tooltip` and `$Dropdown` escape transform-trapped containing blocks
+
+Both components used `position: fixed` directly, which becomes anchored to the nearest ancestor with `transform` / `filter` / `perspective` / `backdrop-filter` / `contain: paint` / `will-change: transform` instead of the viewport. Tooltips and dropdowns inside `fadeIn(...)`-style page transitions or any animated wrapper would land at the mid-animation rect of the wrapper, not the actual anchor. Same bug class as 4.3.2's popover fix; was silently affecting tooltip/dropdown too.
+
+Both now use the HTML Popover API (`popover="manual"` attribute + `showPopover()` post-mount via `effectRun`). Top-layer elements have the viewport as their containing block regardless of CSS ancestry, so position computations land where they're expected. Implementation is graceful no-op (`effectRun` callback returns early) on engines without the API — Chromium 114+, Safari 17+, Firefox 125+ required for the fix to take effect.
 
 #### `$Tooltip` and `$Dropdown` reposition every frame while open
 
-Previously updated on `scroll` / `resize` only. Now both follow their anchor through CSS transitions, JS-driven transforms, parent motion, and any other source uniformly via `requestAnimationFrame`. The diff-and-clear styleInline applier (4.3.0) skips `setProperty` calls when the computed position matches the prior frame, so static-anchor cost is bounded to one `getBoundingClientRect` per frame plus zero DOM writes.
+Previously updated on `scroll` / `resize` only. Both now follow their anchor through CSS transitions, JS-driven transforms, parent motion, and any other source uniformly via `requestAnimationFrame`. The diff-and-clear styleInline applier (4.3.0) skips `setProperty` calls when the computed position matches the prior frame, so static-anchor cost is bounded to one `getBoundingClientRect` per frame plus zero DOM writes.
+
+#### UA-stylesheet leakage on `[popover]` content
+
+Same UA-stylesheet-leak class as 4.3.2's popover content fix: `[popover]` elements get `color: CanvasText`, `border: solid`, and `overflow: auto` from the user agent. Popover and tooltip content now reset to `color: inherit` / `border: none` / `overflow: visible`. Dropdown sets `overflow: hidden` explicitly on its own container (intentional rounded-corner clip) so its overflow override is left intact.
+
+#### `$Popover` anchor remains visible (and interactable) above the backdrop
+
+In versions before 4.3.2 the popover anchor was lifted above the backdrop via `Z_TARGET_ELEVATED` to spotlight the tethered anchor area. The 4.3.2 top-layer rewrite invalidated that approach (top-layer elements ignore document z-index), so the anchor disappeared behind the dim layer. Restored by giving the backdrop a `clip-path` cutout matching the anchor's bounding rect, recomputed every reposition tick. The cutout also passes pointer events through to the anchor, so anchor clicks remain functional while the popover is open — same UX as the original z-index lift.
 
 #### Internal: `Z_TARGET_ELEVATED` and `tooltip z-index 5160` removed
 
