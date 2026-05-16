@@ -128,11 +128,7 @@ export const $text = (...textSourceList: (IStream<string> | string)[]): I$Text =
         return scheduler.asap(propagateRunEventTask(sink, emitNode, manifest))
       })
     }
-    // Wrap reactive source in `state` and prime it eagerly so this slot
-    // registers in shared multicasts on the same sync tick as sibling
-    // styleBehavior / sibling-text subscriptions — late subscribers would
-    // otherwise miss the first emission.
-    const cached = state(undefined, source)
+    const cached = state()(source)
     return stream<ITextNode>((sink, scheduler) => {
       const primeSub = cached.run(nullSink, scheduler)
       const manifest: ITextNode = { kind: 'text', value: cached }

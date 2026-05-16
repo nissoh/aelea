@@ -133,9 +133,11 @@ const account = merge(changeAccount, op(connection, map(toAccount)))
 ```ts
 just(false)                       // emit once, immediate, for constants
 state(initial, stream)            // cache last value for late subscribers
-state(undefined, stream)          // no initial value; identical to multicast-with-replay
 op(stream, state())               // curried, no initial value (use state(0) for typed initial)
+state()(stream)                   // same as above, direct
 ```
+
+`state(undefined, source)` is a type error by design — pass `undefined` only in the curried position. With a source in hand, use `state()(source)` (no initial) or `state(value, source)` (seeded).
 
 Use `state()` when:
 - multiple subscribers consume the same value (avoid duplicate work),

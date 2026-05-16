@@ -1,5 +1,68 @@
 # aelea
 
+## 4.5.2
+
+### Patch Changes
+
+#### `state(I)` widens the output type to `IStream<T | I>`
+
+Building on 4.5.1's `state(undefined)` fix, the curried form now widens correctly for any non-`undefined` literal initial state. Previously `state(null)` inferred `T = null` and produced `IStream<null>`, which collided with whatever stream type was flowing through the pipeline:
+
+```ts
+// before 4.5.2 — type error: IStream<ChainTokenBalance[]> not assignable to IStream<null>
+op(just(balancesFuture), awaitPromises, state(null))
+
+// 4.5.2 — initial type joins the source type
+const q: IStream<ChainTokenBalance[] | null> = op(
+  just(balancesFuture),
+  awaitPromises,
+  state(null)
+)
+```
+
+The overloads now infer the initial state as a separate generic `I` and produce `IStream<T | I>`, so:
+
+```ts
+state(0, numStream)         // IStream<number>          (0 subsumed by number)
+state(null, numStream)      // IStream<number | null>
+state('loading', numStream) // IStream<number | 'loading'>
+```
+
+#### `state(undefined, source)` is now a type error
+
+`undefined` is the "no initial state" sentinel and only makes sense in the curried position where the source isn't yet in hand. With a source already available, the call is redundant — `state()(source)` (or `state(undefined)(source)`) expresses the same thing and reads more clearly.
+
+The 2-arg overload now constrains its initial state to `{} | null`, which excludes `undefined`:
+
+```ts
+state(undefined)            // ok — polymorphic identity-shaped multicast-with-replay
+state(undefined)(source)    // ok — applied form
+op(source, state())         // ok — pipeline form (recommended)
+state(undefined, source)    // ✗ type error — use state()(source) instead
+```
+
+Migration: replace any `state(undefined, source)` call with `state()(source)` (or `state(undefined)(source)`). Runtime semantics are identical.
+
+## 4.5.1
+
+### Patch Changes
+
+#### `state(undefined)` infers polymorphically inside `op()` pipelines
+
+`state(undefined)` previously produced `(source: IStream<unknown>) => IStream<unknown>` because `T` had nothing to anchor against, breaking common pipeline shapes like `op(promise, fromPromise, state(undefined))` where the upstream type should flow through unchanged.
+
+The curried form now resolves to a polymorphic `<T>(source: IStream<T>) => IStream<T>`, instantiated by the call-site context. Same runtime behavior (no initial value cached; multicast with replay on subsequent emissions), correct inference:
+
+```ts
+const config: IStream<IHomeRouterConfig> = op(
+  loadConfig(sql) as Promise<IHomeRouterConfig>,
+  fromPromise,
+  state(undefined)
+)
+```
+
+Also covers the zero-arg form (`state()`) and `state(undefined, source)`. Typed-initial forms (`state(0)`, `state(0, source)`) unchanged.
+
 ## 4.5.0
 
 ### Minor Changes
