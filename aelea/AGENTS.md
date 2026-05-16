@@ -132,7 +132,9 @@ const account = merge(changeAccount, op(connection, map(toAccount)))
 
 ```ts
 just(false)                       // emit once, immediate, for constants
-state(stream, initial)            // cache last value for late subscribers
+state(initial, stream)            // cache last value for late subscribers
+state(undefined, stream)          // no initial value; identical to multicast-with-replay
+op(stream, state())               // curried, no initial value (use state(0) for typed initial)
 ```
 
 Use `state()` when:
@@ -150,7 +152,7 @@ One pattern covers parent/child communication: **state down as a stream prop, ch
 
 const account = merge(
   changeAccount,
-  op(connection, map(toAccount), state)
+  op(connection, map(toAccount), state())
 )
 
 $Child({ account })({ changeAccount: changeAccountTether() })
@@ -220,22 +222,22 @@ Avoid returning `empty` while loading — the row disappears and pops back, caus
 From `aelea/`:
 
 ```bash
-bun run build               # clean dist + tsc -b
+bun run build               # clean dist + tsgo -b
 bun run tsc:check           # type-only
 bun test                    # unit tests in test/
+bun run bench:quick         # all suites, reduced sample size
 bun run bench:combinators
-bun run bench:characteristics
-bun run bench:takumi
-bun run bench:headless
+bun run bench:scheduler
+bun run bench:render-static
 ```
 
-Tests live in `test/` (`core`, `promise`, `recover`); benches in `benchmark/`. Coverage is partial — many combinators have no dedicated tests, so still rely on `tsc:check` for the type-level contract and add tests when fixing semantic bugs.
+Available bench suites (under `bench:`): `map-filter-reduce`, `scan`, `switch`, `switch-latest`, `combinators`, `scheduler`, `render-static`. Tests live in `test/` as flat files (`core.test.ts`, `promise.test.ts`, `recover.test.ts`); benches in `benchmark/`. Coverage is partial — many combinators have no dedicated tests, so still rely on `tsc:check` for the type-level contract and add tests when fixing semantic bugs.
 
 ## Gotchas
 
 1. **Streams created inside `switchMap` reset on re-emission.** Define persistent streams at the parent and reference them inside.
 2. **`constant(0n, click)` resets synchronously.** If sampling on the same event, derive a separate stream without the reset.
-3. **`combine()` will not emit until every source has fired.** If one source is async, gate it through `state(stream, initial)` or it will block the whole combine.
+3. **`combine()` will not emit until every source has fired.** If one source is async, gate it through `state(initial, stream)` or it will block the whole combine.
 4. **Multicast any derived stream with more than one subscriber.** A bare `map(fn, combine(...))` reused in three places creates three independent subscriptions; without an upstream replay step, consumers can diverge (one receives an emission, another doesn't). Wrap shared derivations in `multicast`.
 5. **Cache async calls with `Map<key, Promise<T>>` + `multicast`** to avoid duplicate network requests when multiple subscribers race the same input.
 6. **Prefer `switchMap(async x => …)` over `switchLatest(map(fromPromise, …))`** — fewer allocations, clearer semantics, and proper cancellation on re-emission.

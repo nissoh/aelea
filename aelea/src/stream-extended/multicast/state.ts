@@ -10,8 +10,10 @@ import {
 import { multicast } from './multicast.js'
 
 export interface IStateCurry {
-  <T>(initialState: T | undefined, source: IStream<T>): IStream<T>
-  <T>(initialState: T | undefined): (source: IStream<T>) => IStream<T>
+  (initialState?: undefined): <T>(source: IStream<T>) => IStream<T>
+  <T>(initialState: undefined, source: IStream<T>): IStream<T>
+  <T>(initialState: T, source: IStream<T>): IStream<T>
+  <T>(initialState: T): (source: IStream<T>) => IStream<T>
 }
 
 /**
