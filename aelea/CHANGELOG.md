@@ -1,5 +1,19 @@
 # aelea
 
+## 4.5.3
+
+### Patch Changes
+
+#### Disposal race in `continueWith`, `switchLatest`, and `join` (incl. `joinMap`, `joinConcurrentlyMap`, `joinMapConcurrently`, `recover`)
+
+Three sinks that subscribe new streams inside their `event` / `end` handlers were missing a hard "disposed" guard. When an upstream source emitted multiple sink calls in one synchronous frame (the canonical case is `fromPromise`, which calls `sink.event` immediately followed by `sink.end` — but any `just` / `at` / multi-event sync source qualifies) and a downstream `take(n)` / manual dispose / `until` synchronously disposed the chain from inside the first call, the *next* sink call would still execute and spawn fresh work into an already-disposed sink chain. The work had no reachable disposable, so it leaked.
+
+The worst case was `continueWith` — and by extension `recover` and any self-referential periodic combinator (`periodicRun`-style) built on it: the new iteration's `continueWith.end` would spawn yet another iteration, recursing indefinitely. `take(1)` on a recovering polling stream leaked an undisposed polling loop per subscription.
+
+Fix: each affected sink now carries a `disposed = false` flag set in `[Symbol.dispose]()` and early-returns from `event` / `end` when set. `[Symbol.dispose]` is also idempotent (early-returns if already disposed) to keep double-dispose paths cheap. No behavior change for the well-behaved subscribe-emit-dispose sequence; only the post-dispose stragglers are now ignored.
+
+Affected files: `stream/combinator/continueWith.ts`, `stream/combinator/switchLatest.ts`, `stream/combinator/join.ts`.
+
 ## 4.5.2
 
 ### Patch Changes

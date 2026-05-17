@@ -34,6 +34,7 @@ class JoinMapConcurrently<A, B> implements IStream<B> {
 
 class JoinSink<A, B> implements ISink<A>, Disposable {
   sourceEnded = false
+  disposed = false
   readonly current: InnerSink<B>[] = []
   readonly pending: A[] = []
 
@@ -45,6 +46,7 @@ class JoinSink<A, B> implements ISink<A>, Disposable {
   ) {}
 
   event(time: ITime, x: A): void {
+    if (this.disposed) return
     if (this.current.length < this.concurrency) {
       this.startInner(time, x)
     } else {
@@ -69,6 +71,7 @@ class JoinSink<A, B> implements ISink<A>, Disposable {
   }
 
   end(time: ITime): void {
+    if (this.disposed) return
     this.sourceEnded = true
     this.checkEnd(time)
   }
@@ -99,10 +102,12 @@ class JoinSink<A, B> implements ISink<A>, Disposable {
   }
 
   [Symbol.dispose](): void {
+    if (this.disposed) return
+    this.disposed = true
     this.sourceEnded = true
     this.pending.length = 0
-    const current = this.current.slice() // Copy array
-    this.current.length = 0 // Clear before disposing
+    const current = this.current.slice()
+    this.current.length = 0
 
     for (let i = 0; i < current.length; i++) current[i][Symbol.dispose]()
   }

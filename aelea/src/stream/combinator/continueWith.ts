@@ -30,6 +30,7 @@ class ContinueWith<A, B> implements IStream<A | B> {
 
 class ContinueWithSink<A, B> implements ISink<A>, Disposable {
   disposable: Disposable = disposeNone
+  disposed = false
 
   constructor(
     readonly sink: ISink<A | B>,
@@ -46,6 +47,7 @@ class ContinueWithSink<A, B> implements ISink<A>, Disposable {
   }
 
   end(time: ITime): void {
+    if (this.disposed) return
     try {
       const nextStream = this.f(time)
       this.disposable = nextStream.run(this.sink, this.scheduler)
@@ -55,10 +57,11 @@ class ContinueWithSink<A, B> implements ISink<A>, Disposable {
   }
 
   [Symbol.dispose](): void {
-    if (this.disposable === disposeNone) return
+    if (this.disposed) return
+    this.disposed = true
 
     const d = this.disposable
-    this.disposable = disposeNone // Prevent circular disposal
+    this.disposable = disposeNone
     d[Symbol.dispose]()
   }
 }

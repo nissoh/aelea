@@ -68,6 +68,7 @@ export interface ISwitchMapCurry {
 class SwitchSink<T> implements ISink<IStream<T>>, Disposable {
   sourceEnded = false
   innerActive = false
+  disposed = false
   innerDisposable: Disposable = disposeNone
   innerSink: InnerSink<T>
 
@@ -79,13 +80,13 @@ class SwitchSink<T> implements ISink<IStream<T>>, Disposable {
   }
 
   event(_time: ITime, inner: IStream<T>): void {
+    if (this.disposed) return
     this.disposeInner()
     this.innerActive = true
     const d = inner.run(this.innerSink, this.scheduler)
     if (this.innerActive) {
       this.innerDisposable = d
     } else {
-      // Inner ended synchronously during run(); drop the returned handle.
       d[Symbol.dispose]()
     }
   }
@@ -95,13 +96,14 @@ class SwitchSink<T> implements ISink<IStream<T>>, Disposable {
   }
 
   end(time: ITime): void {
+    if (this.disposed) return
     this.sourceEnded = true
-
-    // Only end if no inner stream is active; otherwise ride inner until completion.
     if (!this.innerActive) this.sink.end(time)
   }
 
   [Symbol.dispose](): void {
+    if (this.disposed) return
+    this.disposed = true
     this.innerActive = false
     this.disposeInner()
   }
