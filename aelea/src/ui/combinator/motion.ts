@@ -9,7 +9,7 @@ import {
 } from '../../stream/index.js'
 import type { I$Scheduler } from '../types.js'
 
-interface MotionConfig {
+export interface MotionConfig {
   stiffness: number
   damping: number
   precision: number

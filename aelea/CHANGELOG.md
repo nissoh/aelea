@@ -1,5 +1,60 @@
 # aelea
 
+## 4.5.5
+
+### Minor Changes
+
+#### `$Slider` renders the state props it already accepts
+
+`$Slider` previously accepted `disabled: IStream<boolean>` and wired it to the underlying `<input>` (correct keyboard/pointer behavior), but left the visual treatment to the consumer. Every consumer ended up overriding `$thumb` and `trackColor` just to render the disabled state the component already knows about. Same inverted dependency direction — component owns the prop, consumer owns the look.
+
+This release flips the responsibility: when `$Slider` accepts a state stream, it renders that state by default. Custom `$thumb` overrides keep working — consumers that want a fully custom visual still own it.
+
+##### `motion?: Partial<MotionConfig> | false` (default `MOTION_NO_WOBBLE`)
+
+Spring physics on the thumb position is now built in with **snap-first** semantics: the first emission of `value` lands instantly, subsequent emissions spring from current position to new target. This fixes the long-standing "thumb animates from 0 to the initial position on mount" bug — `value` typically emits a placeholder before upstream sources resolve, and naive `motion(config, value)` would treat the placeholder as the initial position and animate away from it.
+
+Pass `motion: false` to opt out and snap on every emission. Pass a partial config (`{ stiffness: 200 }` etc.) to tune.
+
+```ts
+$Slider({ value })                        // default MOTION_NO_WOBBLE spring
+$Slider({ value, motion: MOTION_STIFF })  // tighter spring
+$Slider({ value, motion: false })         // no animation
+```
+
+Motion applies only to the thumb position computation; the native `<input>`'s `value` attribute still receives the raw stream so drag events don't get a feedback loop through the spring.
+
+##### `error?: IStream<boolean>` (new, default `just(false)`)
+
+Drives a `palette.negative` tint on the default thumb's border. Forms can hand `$Slider` their existing per-field validation stream directly instead of wrapping the component.
+
+##### Default thumb now state-aware
+
+When `$thumb` isn't provided, `$Slider` uses an internal default that reads `disabled` + `error`:
+- Idle: existing look (`palette.background` fill, `colorWeight(palette.foreground, 50)` border)
+- Disabled: transparent fill, muted border (`colorWeight(palette.foreground, 25)`)
+- Error: border switches to `palette.negative`
+
+Exported `$defaultSliderThumb` const is unchanged — still a basic non-state-aware starter for consumers composing their own thumb.
+
+##### Default `trackColor` reacts to `disabled`
+
+`trackColor`'s default switches between `colorWeight(palette.foreground, 40)` (normal) and `colorWeight(palette.foreground, 20)` (disabled). Explicit `trackColor` override still wins.
+
+##### Native input + container `cursor: not-allowed` when disabled
+
+The native `<input>` overlay's cursor and the `$container`'s cursor both react to `disabled` so the disabled state reads correctly during hover.
+
+##### Exports
+
+`MotionConfig` is now exported from `aelea/ui` (was previously an unexported interface inside `motion.ts`).
+
+##### Migration
+
+If your app wraps `$Slider`'s value with `motion(config, value)` (or the `merge(take(1), motion(config, skip(1)))` snap-first dance), drop the wrapping and pass `value` raw. Pass `motion: false` if you want the prior no-animation behavior.
+
+If you override `$thumb` to render `disabled` / `error` visuals manually, your override still works unchanged. If you only wrapped `$thumb` to react to `disabled`, you can drop the override and let the default render it.
+
 ## 4.5.4
 
 ### Patch Changes

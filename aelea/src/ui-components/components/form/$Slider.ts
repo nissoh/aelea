@@ -1,5 +1,5 @@
-import { combine, empty, type IStream, just, map } from '../../../stream/index.js'
-import type { IBehavior } from '../../../stream-extended/index.js'
+import { combine, type IStream, just, map, merge, skip, take } from '../../../stream/index.js'
+import { type IBehavior, multicast } from '../../../stream-extended/index.js'
 import {
   $element,
   $node,
@@ -10,8 +10,12 @@ import {
   type I$Node,
   type INode,
   type INodeCompose,
+  motion,
+  type MotionConfig,
+  MOTION_NO_WOBBLE,
   nodeEvent,
   style,
+  styleBehavior,
   styleInline,
   stylePseudo
 } from '../../../ui/index.js'
@@ -24,6 +28,8 @@ export interface ISliderParams extends Input<number> {
   step?: number
   orientation?: 'horizontal' | 'vertical'
   disabled?: IStream<boolean>
+  error?: IStream<boolean>
+  motion?: Partial<MotionConfig> | false
   color?: IStream<string>
   trackColor?: IStream<string>
   ariaLabel?: string
@@ -58,8 +64,10 @@ export const $Slider = ({
   step = 0.01,
   orientation = 'horizontal',
   disabled = just(false),
+  error = just(false),
+  motion: motionCfg = MOTION_NO_WOBBLE,
   color = just(colorWeight(palette.foreground, 50)),
-  trackColor = just(colorWeight(palette.foreground, 40)),
+  trackColor = map(d => (d ? colorWeight(palette.foreground, 20) : colorWeight(palette.foreground, 40)), disabled),
   ariaLabel,
   $thumb,
   $container = $defaultSliderContainer
@@ -67,10 +75,14 @@ export const $Slider = ({
   component(([change, changeTether]: IBehavior<INode<HTMLInputElement>, number>) => {
     const isVertical = orientation === 'vertical'
 
+    const valueMc = multicast(value)
+    const displayValue: IStream<number> =
+      motionCfg === false ? valueMc : merge(take(1, valueMc), motion(motionCfg, skip(1, valueMc)))
+
     const valuePercent: IStream<number> = map(p => {
       const range = p.max - p.min || 1
       return Math.max(0, Math.min(1, (p.value - p.min) / range))
-    }, combine({ value, min, max }))
+    }, combine({ value: displayValue, min, max }))
 
     const $track = $node(
       style({
@@ -101,23 +113,42 @@ export const $Slider = ({
       )
     )()
 
-    const $thumbVisual: I$Node = $thumb
-      ? $node(
-          style({
-            position: 'absolute',
-            pointerEvents: 'none'
+    const $stateThumb: I$Node = $node(
+      style({
+        display: 'block',
+        width: '18px',
+        height: '18px',
+        borderRadius: '50%',
+        boxSizing: 'border-box'
+      }),
+      styleBehavior(
+        map(
+          p => ({
+            background: p.d ? 'transparent' : palette.background,
+            border: `1.5px solid ${p.e ? palette.negative : colorWeight(palette.foreground, p.d ? 25 : 50)}`
           }),
-          styleInline(
-            map(
-              pct =>
-                isVertical
-                  ? { top: `${pct * 100}%`, left: '50%', transform: 'translate(-50%, -50%)' }
-                  : { left: `${pct * 100}%`, top: '50%', transform: 'translate(-50%, -50%)' },
-              valuePercent
-            )
-          )
-        )($thumb)
-      : empty
+          combine({ d: disabled, e: error })
+        )
+      )
+    )()
+
+    const effectiveThumb = $thumb ?? $stateThumb
+
+    const $thumbVisual: I$Node = $node(
+      style({
+        position: 'absolute',
+        pointerEvents: 'none'
+      }),
+      styleInline(
+        map(
+          pct =>
+            isVertical
+              ? { top: `${pct * 100}%`, left: '50%', transform: 'translate(-50%, -50%)' }
+              : { left: `${pct * 100}%`, top: '50%', transform: 'translate(-50%, -50%)' },
+          valuePercent
+        )
+      )
+    )(effectiveThumb)
 
     const $nativeInput = $element('input')(
       attr({
@@ -138,9 +169,10 @@ export const $Slider = ({
         ...(isVertical ? { writingMode: 'vertical-lr' } : {})
       }),
       stylePseudo(':active', { cursor: 'grabbing' }),
+      styleBehavior(map(d => (d ? { cursor: 'not-allowed' } : null), disabled)),
       attrBehavior(map(p => ({ min: String(p.min), max: String(p.max) }), combine({ min, max }))),
       effectProp('disabled', disabled),
-      effectProp('value', map(String, value)),
+      effectProp('value', map(String, valueMc)),
       changeTether(
         nodeEvent('input'),
         map(ev => {
@@ -150,5 +182,13 @@ export const $Slider = ({
       )
     )()
 
-    return [$container($track, $fill, $thumbVisual, $nativeInput), { change }]
+    return [
+      $container(styleBehavior(map(d => (d ? { cursor: 'not-allowed' } : null), disabled)))(
+        $track,
+        $fill,
+        $thumbVisual,
+        $nativeInput
+      ),
+      { change }
+    ]
   })
