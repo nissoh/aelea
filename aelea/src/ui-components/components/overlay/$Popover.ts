@@ -53,7 +53,7 @@ export const $defaultPopoverContentContainer = $column(
     padding: isDesktopScreen ? '28px' : '16px',
     borderRadius: '24px',
     border: `1px solid ${colorWeight(palette.foreground, 15)}`,
-    boxShadow: `0 0 10px 0 ${colorWeight(palette.background, 50)}`,
+    boxShadow: `0 0 10px 0 ${palette.shadow}`,
     maxWidth: 'calc(100vw - 20px)'
   })
 )

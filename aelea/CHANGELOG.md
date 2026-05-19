@@ -1,5 +1,28 @@
 # aelea
 
+## 4.5.4
+
+### Patch Changes
+
+#### Shadow color is now theme-invariant — new `palette.shadow` token
+
+`$Popover`, `$Dropdown`, and `$Tooltip` derived their `boxShadow` color from `colorWeight(palette.background, …)` and `colorWeight(palette.message, …)`, which couples shadow polarity to theme polarity. The result:
+
+- **`$Popover`** rendered a near-white halo in light theme (background ≈ white, weighted toward `--shade-pole = white` → fully white) — the shadow disappeared into the surface or read as a glow ring.
+- **`$Dropdown` / `$Tooltip`** had the opposite bug — fine in light, washed out in dark — because `palette.message` is the inverse of `palette.background`.
+
+Shadows simulate cast-light occlusion and should stay dark with alpha regardless of theme. Introduced a dedicated `palette.shadow` token:
+
+```ts
+palette.shadow // 'var(--shadow, rgba(0, 0, 0, 0.25))'
+```
+
+The CSS-var fallback (`rgba(0, 0, 0, 0.25)`) means apps that don't define `--shadow` per theme still get a sensible theme-invariant value. Apps that want per-theme tuning can define `--shadow` in their theme stylesheets the same way they already define `--foreground`, `--background`, `--shade-pole`, etc.
+
+The new field is exposed via the `Effect` type group (`shadow?: string`) and intersected into `Palette`. Field is **optional** — existing app-side `Theme` records that don't set `shadow` keep typechecking, and aelea's runtime `palette` const always carries the var reference regardless of what apps pass to `writeTheme`.
+
+Migration: nothing required. Apps that want darker/lighter shadows than the default can set `--shadow: rgba(0, 0, 0, 0.4)` (or any literal) in their theme stylesheet. Consumers that previously copied the buggy `colorWeight(palette.background, 50)` / `colorWeight(palette.message, 14)` patterns into their own containers can switch to `palette.shadow`.
+
 ## 4.5.3
 
 ### Patch Changes

@@ -13,7 +13,7 @@ import {
   switchMap
 } from '../../../stream/index.js'
 import { animationFrame, type IBehavior } from '../../../stream-extended/index.js'
-import { colorWeight, palette } from '../../../ui-components-theme/index.js'
+import { palette } from '../../../ui-components-theme/index.js'
 import {
   attr,
   component,
@@ -43,7 +43,7 @@ export const $defaultTooltipDropContainer = $column(
     maxWidth: '600px',
     userSelect: 'text',
     background: palette.background,
-    boxShadow: `${colorWeight(palette.message, 14)} 0px 4px 20px 8px, ${colorWeight(palette.message, 10)} 0px 1px 3px 1px`,
+    boxShadow: `${palette.shadow} 0px 4px 20px 8px, ${palette.shadow} 0px 1px 3px 1px`,
     padding: '16px',
     minWidth: '300px',
     borderRadius: '8px'

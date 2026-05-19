@@ -9,7 +9,8 @@ export const palette = {
   primary: 'var(--primary)',
   positive: 'var(--positive)',
   negative: 'var(--negative)',
-  indeterminate: 'var(--indeterminate)'
+  indeterminate: 'var(--indeterminate)',
+  shadow: 'var(--shadow, rgba(0, 0, 0, 0.25))'
 }
 
 export const text = {

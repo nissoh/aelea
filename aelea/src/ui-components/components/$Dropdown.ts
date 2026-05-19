@@ -18,7 +18,7 @@ import {
   toStream
 } from '../../stream/index.js'
 import { animationFrame, type IBehavior } from '../../stream-extended/index.js'
-import { colorWeight, palette, text } from '../../ui-components-theme/index.js'
+import { palette, text } from '../../ui-components-theme/index.js'
 import {
   $node,
   $text,
@@ -59,7 +59,7 @@ export const $defaultDropListContainer = $column(
     maxWidth: '600px',
     userSelect: 'text',
     background: palette.background,
-    boxShadow: `${colorWeight(palette.message, 14)} 0px 4px 20px 8px, ${colorWeight(palette.message, 10)} 0px 1px 3px 1px`,
+    boxShadow: `${palette.shadow} 0px 4px 20px 8px, ${palette.shadow} 0px 1px 3px 1px`,
     borderRadius: '8px',
     fontWeight: 'normal',
     overflow: 'hidden'

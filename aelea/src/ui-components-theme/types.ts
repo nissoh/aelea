@@ -19,7 +19,11 @@ export type Attention = {
   indeterminate: string
 }
 
-export type Palette = Attention & Landscape & Story & Action
+export type Effect = {
+  shadow?: string
+}
+
+export type Palette = Attention & Landscape & Story & Action & Effect
 
 export type Theme = {
   name: string
