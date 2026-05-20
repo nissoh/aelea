@@ -1,23 +1,30 @@
-import { type IOps, op } from '../../stream/index.js'
+import { type IOps, type IStream, map, o } from '../../stream/index.js'
+import { isStream } from '../../stream/utils/common.js'
 import type { I$Node, INode } from '../../ui-renderer-dom/index.js'
-import { $svg, attr, style } from '../../ui-renderer-dom/index.js'
+import { $svg, attr, style, styleBehavior } from '../../ui-renderer-dom/index.js'
 
 interface Icon {
-  /**  in pixels */
+  size?: string
   width?: string
   height?: string
   viewBox?: string
-  fill?: string
-
+  fill?: string | IStream<string>
   $content: I$Node
   svgOps?: IOps<INode<SVGSVGElement>>
 }
 
 export const $icon = ({
   $content,
-  width = '24px',
-  height = width,
-  viewBox = `0 0 ${Number.parseInt(width, 10)} ${Number.parseInt(height, 10)}`,
+  size,
+  width = size ?? '24px',
+  height = size,
+  viewBox = '0 0 32 32',
   fill = 'inherit',
-  svgOps = op
-}: Icon) => $svg('svg')(attr({ viewBox, fill }), style({ width, height }), svgOps)($content)
+  svgOps = o()
+}: Icon) =>
+  $svg('svg')(
+    attr({ viewBox }),
+    style({ width, ...(height ? { height } : { aspectRatio: '1 / 1' }) }),
+    isStream(fill) ? styleBehavior(map(f => ({ fill: f }), fill)) : style({ fill }),
+    svgOps
+  )($content)
