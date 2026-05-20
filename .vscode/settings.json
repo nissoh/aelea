@@ -1,6 +1,7 @@
 {
   "npm.packageManager": "bun",
   "workbench.editor.enablePreview": true,
+  "workbench.editor.enablePreviewFromQuickOpen": true,
   "npm.scriptRunner": "bun",
   "files.exclude": {
     "**/.git": true,

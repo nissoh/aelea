@@ -4,6 +4,7 @@ import { $node, $text, component, style } from 'aelea/ui'
 import {
   $Button,
   $ButtonIcon,
+  $ButtonToggle,
   $Checkbox,
   $column,
   $Dropdown,
@@ -29,6 +30,8 @@ const $valueLabel = $node(style({ color: palette.foreground, fontSize: text.sm }
 const $section = (title: string, ...children: ReturnType<typeof $row>[]) =>
   $column(spacing.default, style({ minWidth: '320px' }))($sectionTitle($text(title)), ...children)
 
+type Mode = 'active' | 'disabled'
+
 export const $Controllers = component(
   (
     [buttonClick, buttonClickTether]: IBehavior<PointerEvent, PointerEvent>,
@@ -38,7 +41,8 @@ export const $Controllers = component(
     [inputChange, inputChangeTether]: IBehavior<string, string>,
     [textFieldChange, textFieldChangeTether]: IBehavior<string, string>,
     [pickFruit, pickFruitTether]: IBehavior<string, string>,
-    [popOpen, popOpenTether]: IBehavior<PointerEvent, PointerEvent>
+    [popOpen, popOpenTether]: IBehavior<PointerEvent, PointerEvent>,
+    [modeChange, modeTether]: IBehavior<Mode, Mode>
   ) => {
     const buttonCount = reduce((n: number) => n + 1, 0, buttonClick)
     const iconCount = reduce((n: number) => n + 1, 0, iconClick)
@@ -48,16 +52,35 @@ export const $Controllers = component(
     const inputValue = start('', inputChange)
     const textFieldValue = start('', textFieldChange)
     const pickedFruit = start('—', pickFruit)
+    const mode = start('active' as Mode, modeChange)
+    const isDisabled = map(m => m === 'disabled', mode)
 
     const fruits = ['Apple', 'Banana', 'Cherry', 'Durian', 'Elderberry'] as const
 
     return [
       $column(spacing.big, style({ padding: '24px', flex: 1 }))(
+        $section(
+          'Mode',
+          $row(
+            spacing.default,
+            style({ alignItems: 'center' })
+          )(
+            $node(style({ minWidth: '220px' }))(
+              $ButtonToggle({
+                optionList: ['active', 'disabled'] as Mode[],
+                value: mode
+              })({
+                select: modeTether()
+              })
+            )
+          )
+        ),
+
         $row(spacing.big, style({ flexWrap: 'wrap' }))(
           $section(
             'Button',
             $row(spacing.default, style({ alignItems: 'center' }))(
-              $Button({ $content: $text('Click me') })({
+              $Button({ $content: $text('Click me'), disabled: isDisabled })({
                 click: buttonClickTether()
               }),
               $valueLabel($text(map(n => `clicks: ${n}`, start(0, buttonCount))))
@@ -67,7 +90,10 @@ export const $Controllers = component(
           $section(
             'ButtonIcon',
             $row(spacing.default, style({ alignItems: 'center' }))(
-              $ButtonIcon({ $content: $icon({ $content: $trash, width: '24px', viewBox: '0 0 24 24' }) })({
+              $ButtonIcon({
+                $content: $icon({ $content: $trash, width: '24px', viewBox: '0 0 24 24' }),
+                disabled: isDisabled
+              })({
                 click: iconClickTether()
               }),
               $valueLabel($text(map(n => `clicks: ${n}`, start(0, iconCount))))
@@ -77,7 +103,7 @@ export const $Controllers = component(
           $section(
             'Checkbox',
             $row(spacing.default, style({ alignItems: 'center' }))(
-              $Checkbox({ value: checkState, label: 'Accept terms' })({
+              $Checkbox({ value: checkState, label: 'Accept terms', disabled: isDisabled })({
                 check: checkTether()
               }),
               $valueLabel($text(map(v => `checked: ${v}`, checkState)))
@@ -93,7 +119,8 @@ export const $Controllers = component(
                   min: just(0),
                   max: just(1),
                   step: 0.01,
-                  $thumb: $defaultSliderThumb
+                  $thumb: $defaultSliderThumb,
+                  disabled: isDisabled
                 })({
                   change: slideTether()
                 })
@@ -105,7 +132,7 @@ export const $Controllers = component(
           $section(
             'Input',
             $row(spacing.default, style({ alignItems: 'center' }))(
-              $Input({ value: just('') })({
+              $Input({ value: just(''), disabled: isDisabled })({
                 change: inputChangeTether()
               }),
               $valueLabel($text(map(v => `"${v}"`, inputValue)))
@@ -114,7 +141,7 @@ export const $Controllers = component(
 
           $section(
             'TextField',
-            $TextField({ label: 'Username', value: just(''), hint: 'Letters and numbers' })({
+            $TextField({ label: 'Username', value: just(''), hint: 'Letters and numbers', disabled: isDisabled })({
               change: textFieldChangeTether()
             }),
             $valueLabel($text(map(v => `"${v}"`, textFieldValue)))
@@ -123,7 +150,7 @@ export const $Controllers = component(
           $section(
             'Dropdown',
             $row(spacing.default, style({ alignItems: 'center' }))(
-              $Dropdown({ optionList: fruits })({
+              $Dropdown({ optionList: fruits, disabled: isDisabled })({
                 select: pickFruitTether()
               }),
               $valueLabel($text(map(v => `selected: ${v}`, pickedFruit)))
@@ -139,6 +166,7 @@ export const $Controllers = component(
                 })({
                   click: popOpenTether()
                 }),
+                disabled: isDisabled,
                 $open: constant(
                   $column(spacing.default, style({ minWidth: '200px' }))(
                     $node(style({ color: palette.message, fontWeight: 'bold' }))($text('Confirm delete?')),

@@ -1,4 +1,4 @@
-import { combine, constant, empty, map, merge, o, start } from '../../../stream/index.js'
+import { combine, constant, empty, map, merge, never, o, start } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
 import { multicast } from '../../../stream-extended/index.js'
 import { palette, text } from '../../../ui-components-theme/index.js'
@@ -13,7 +13,7 @@ import {
   styleBehavior,
   stylePseudo
 } from '../../../ui-renderer-dom/index.js'
-import { dismissOp, interactionOp } from './form.js'
+import { disabledOp, dismissOp, interactionOp } from './form.js'
 import type { Input, InputType } from './types.js'
 
 export const $defaultInputContainer = $element('input')(
@@ -42,7 +42,12 @@ export interface IInput extends Input<string | number> {
   $container?: INodeCompose<HTMLInputElement>
 }
 
-export const $Input = ({ value = empty, validation = constant(null), $container = $defaultInputContainer }: IInput) =>
+export const $Input = ({
+  value = empty,
+  disabled = never,
+  validation = constant(null),
+  $container = $defaultInputContainer
+}: IInput) =>
   component(
     (
       [focusStyle, interactionTether]: IBehavior<ISlottable<HTMLInputElement>, boolean>,
@@ -67,6 +72,7 @@ export const $Input = ({ value = empty, validation = constant(null), $container 
               return focus ? { borderBottom: `2px solid ${palette.primary}` } : null
             }, state)
           ),
+          disabledOp(disabled),
           interactionTether(interactionOp),
           dismissTether(dismissOp),
           blurTether(nodeEvent('blur')),

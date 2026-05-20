@@ -1,5 +1,153 @@
 # aelea
 
+## 4.6.0
+
+### Minor Changes
+
+#### Folder rename: `components/form/` → `components/controllers/`
+
+The form-element directory was renamed to `controllers/`. `$Dropdown` (previously at `components/$Dropdown.ts`) also moved into `components/controllers/`. Public exports via `aelea/ui-components` are unchanged — only deep relative imports break. None of these paths are exposed via the package's `exports` field, so this is internal-only for typical consumers.
+
+#### `$FormField` — label-rooted wrapper with parent-owned validation/hint slot
+
+New form primitive at `aelea/ui-components`. The `<label>` is the root so clicks anywhere on the field (label text, control, message row) focus the inner control via the browser's default label-association behavior. Three reserved slots:
+
+```ts
+$FormField({
+  $control: $Input({ value }),
+  label: 'Email',                             // string or IStream<string>
+  validation: validationStream,               // IStream<string | null>
+  hint: hintStream                            // IStream<string>
+})
+```
+
+- `validation` (truthy) renders in `palette.negative`; falsy falls through to `hint` (rendered in `palette.foreground`); both empty renders an invisible row.
+- The message row reserves `min-height: 1.25rem` so layout doesn't jump as `validation` toggles.
+- Validation logic stays at the call site — `$FormField` only renders. Parent computes `IStream<string | null>` via whatever rules it owns and passes it down.
+
+Exports: `$FormField`, `$defaultFormFieldContainer`, `$defaultFormFieldLabel`, `$defaultFormFieldMessage`, and `IFormField` type.
+
+Doesn't conflict with `$Input.validation` (which is a `IOps<T, string | null>` validator that drives the inline border-color tint). Consumers can use both: `$Input.validation` for the on-change border tint, `$FormField.validation` for the message row below.
+
+#### `Control.disabled` widened to `IStream<boolean | Promise<unknown>>`
+
+Previously every "submit a transaction" / "submit a form" call site wrapped `$Button` just to disable-while-busy. A `pending?: IStream<Promise<unknown>>` parallel prop was considered but rejected — splits state across two props that mean the same thing ("this control is currently blocked from input").
+
+Collapsed to a single richer prop. `Control.disabled` now accepts either a `boolean` (explicit) or a `Promise<unknown>` (block while in-flight). The widening cascades to every component extending `Control` (`$Button`, `$ButtonIcon`, `$Slider`, `$Checkbox`, `$Input`, `$TextField`).
+
+```ts
+$Button({ $content: $text('Save'), disabled: isInvalid })          // boolean
+$Button({ $content: $text('Submit'), disabled: txQuery })          // IStream<Promise<TxReceipt>>
+$Slider({ value, disabled: isComputing })                          // same shape, all primitives
+```
+
+Implementation hoisted to shared helpers in `form.ts`:
+
+```ts
+export type DisabledState = boolean | PromiseState<unknown>
+export const resolveDisabledState: (s: IStream<boolean | Promise<unknown>>) => IStream<DisabledState>
+export const isDisabled: (s: DisabledState) => boolean
+```
+
+`disabledOp` now consumes the wider type, internally `switchMap`s `Promise → promiseState`, and renders the differentiated state:
+
+- Boolean-disabled (`true`) → `opacity: 0.4` + `cursor: not-allowed` + `pointer-events: none` + `disabled` attr.
+- Promise-pending → `cursor: wait` + `pointer-events: none` + `disabled` attr (no dim — control looks "busy", not "off").
+- Promise settled (DONE or ERROR) → re-enables; the resolved value is ignored, only `PromiseStatus` is read.
+
+`$Button` now uses `disabledOp(disabled)` directly (no inline mutator) and continues to extend `Control`. `$ButtonIcon` is unchanged at the source level (transparently benefits via `disabledOp`). `$Slider` was refactored to derive `state` / `isDisabledStream` / `cursorStream` via `multicast(resolveDisabledState(disabled))` at the top of its body, threaded through the existing `combine`/`styleBehavior`/`effectProp` uses — the same dual-cursor visual (`wait` for pending, `not-allowed` for boolean-disabled) carries over to the slider's container and native input overlay. `$Slider`'s previous local `disabled?: IStream<boolean>` redeclaration was removed so it inherits the widened type from `Control`.
+
+`$Checkbox`, `$Input`, and `$TextField` are now also wired up:
+- `$Input` applies `disabledOp(disabled)` to its native input (the visible root — dim + cursor + attr all land on the same element).
+- `$Checkbox` applies `disabledStyleOp(disabled)` to the outer surface (label container when label present, box otherwise) so `pointer-events: none` cascades through the entire field and the hover/focus interaction tethers can't fire while disabled. `effectProp('disabled', isDisabledStream)` lands the attribute on the invisible native input. The box's focus-border styleBehavior is gated by `combine({ active, d: isDisabledStream })` so the primary-color hover ring doesn't persist if disable kicks in while the cursor is over the field.
+- `$TextField` applies `disabledStyleOp(config.disabled ?? never)` to the label container so label text + hint + the inner `$Input` all dim together.
+
+A new export `disabledStyleOp` (visual-only sibling of `disabledOp`, no `disabled` attribute push) was added to `controllers/form.ts` for cases like `$Checkbox` where the disabled-attribute target differs from the visual target.
+
+#### `$Popover` — `disabled` prop, force-close on disable
+
+`$Popover` now extends `Control`. `disabledOp(disabled)` is applied to the outer `$container`, which holds the anchor, backdrop, and content — `pointer-events: none` cascades through all three, so opening the popover by clicking the anchor is blocked while disabled.
+
+The `dismissEvent` stream now also merges `filter(d => d, isDisabledStream)`, so if the popover is already open when disable transitions to `true`, it auto-closes. The resolved value of the promise (if `disabled` is a promise) is ignored — only `PromiseStatus.PENDING` matters.
+
+#### `$ButtonToggle` (new) — semantic buttons + a11y attributes
+
+Segmented-control primitive — a horizontal row of buttons where the currently-selected option is visually inset:
+
+```ts
+$ButtonToggle({
+  optionList: ['A', 'B', 'C'],
+  value: selectedStream,
+  $$option: map(opt => $text(opt))            // optional renderer
+})
+```
+
+- `$defaultButtonToggleBtn` is `<button type="button">` (not `<row>`) — proper keyboard focus + `:focus-visible` semantics + screen-reader announcement.
+- `attrBehavior` per button writes `aria-pressed="true|false"` from `value === opt`, so screen readers announce the active option.
+- `$defaultButtonToggleContainer` sets `role="group"`.
+- Accepts `disabled` via `Control` inheritance; `disabledOp(disabled)` is applied to the container.
+
+Selected option visual: `boxShadow: 0px 0px 0 1px ${palette.primary} inset` + `pointer-events: none` (re-clicking the active item is a no-op). Other options render in `palette.foreground`. Exports: `$ButtonToggle`, `$defaultButtonToggleBtn`, `$defaultButtonToggleContainer`, `IButtonToggle<T>`.
+
+Plugs into the same state-as-prop pattern used elsewhere: parent owns `value: IStream<T>`, child emits `select: IStream<T>`. Parent merges `select` into its own store to drive the next `value`.
+
+#### `Control` is the canonical source of `disabled` across all primitives
+
+`IButton`, `IButtonIcon`, `IButtonToggle<T>`, `ISliderParams`, `Checkbox`, `IInput`, `TextField`, `IDropdown<T>`, and `IPopover` all inherit `disabled?: IStream<boolean | Promise<unknown>>` from `Control`. No component carries an ad-hoc local declaration anymore. Adding new disable-able primitives is a one-line `extends Control`.
+
+#### `$Dropdown` — `disabled` prop + `<button>` anchor
+
+`$Dropdown` now accepts `disabled?: IStream<boolean | Promise<unknown>>` (same shape as the rest). `$defaultDropdownAnchor` switched from `$row` (a `<row>` custom element) to a `<button type="button">` so the `disabled` attribute and `:focus-visible` semantics are correct for keyboard accessibility and screen readers. `disabledOp(disabled)` is applied to the dropdown container — blocks pointer events (which kills the open-menu click handler) and dims the anchor. The `disabled` attribute lands on the container `<div>`, which is HTML-meaningless but inert.
+
+Consumers that pass a custom `$anchor` are responsible for their own a11y semantics; the container-level pointer-events block still prevents the menu from opening either way.
+
+#### `$ButtonToggle` (new)
+
+Segmented-control primitive — a horizontal row of buttons where the currently-selected option is visually inset:
+
+```ts
+$ButtonToggle({
+  optionList: ['A', 'B', 'C'],
+  value: selectedStream,
+  $$option: map(opt => $text(opt))            // optional renderer
+})
+```
+
+Selected option gets `boxShadow: 0px 0px 0 1px ${palette.primary} inset` + `pointer-events: none` (re-clicking the active item is a no-op); other options render in `palette.foreground`. Exports: `$ButtonToggle`, `$defaultButtonToggleBtn`, `$defaultButtonToggleContainer`, `IButtonToggle<T>`.
+
+Plugs into the same state-as-prop pattern used elsewhere: parent owns `value: IStream<T>`, child emits `select: IStream<T>`. Parent merges `select` into its own store to drive the next `value`.
+
+#### `palette.interaction` tokens + applied across button/dropdown defaults
+
+New theme entry alongside `palette` and `text`:
+
+```ts
+import { interaction } from 'aelea/ui-components-theme'
+
+interaction.hoverFilter   // 'var(--interaction-hover-filter, brightness(1.1))'
+interaction.activeFilter  // 'var(--interaction-active-filter, brightness(0.9))'
+```
+
+Single source of truth for hover / active visual feedback. CSS-var fallback means apps without overrides still get sensible defaults; apps that want per-theme tuning can define `--interaction-hover-filter` / `--interaction-active-filter` in their theme stylesheets.
+
+Applied as `:hover` / `:active` filter pseudos on `$defaultButtonContainer`, `$defaultButtonIconContainer`, and `$defaultDropdownAnchor`. Skipped where existing visual feedback already covered it (`$Anchor` color shift, `$Checkbox` focus outline, `$Dropdown` option-row `:hover` background), where hover can't fire (`$Slider` thumb has `pointer-events: none` from the native input overlay), or where there's no built-in style to extend (`$Tabs`, `$Input`).
+
+Transition-timing tokens were considered and rejected — animation belongs in the `motion()` combinator at the JS layer, not in a CSS transition string.
+
+### Patch Changes
+
+#### `$defaultAnchor` no longer fades its hover color transition
+
+Removed `transition: 'color 120ms ease-out'` from `$defaultAnchor`'s default style. Hover color now snaps instantly. Consumers that wanted the fade can compose it back via their own `$anchor` override.
+
+#### `state(I, source)` type uses `NonNullable<unknown>` instead of `{}`
+
+The strict typing introduced in 4.5.2 (`<I extends {} | null, T>`) used `{}` as the "any non-undefined value" idiom, which biome flags as `noBannedTypes`. Replaced with `NonNullable<unknown> | null` — identical semantics, doesn't trip the lint rule lexically.
+
+#### Biome formatter sweep on `$Slider.ts`
+
+`$Slider.ts` shipped in 4.5.5 with import-ordering and formatter mismatches. Auto-fixed.
+
 ## 4.5.5
 
 ### Minor Changes

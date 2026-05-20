@@ -8,6 +8,7 @@ import { $row } from '../../elements/$elements.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 import { spacing } from '../../style/spacing.js'
 import { $Input, type IInput } from './$Input.js'
+import { disabledStyleOp } from './form.js'
 
 // $container IS the label element. Defaults to a styled <label> so clicking
 // it focuses the inner input; override with any INodeCompose for fully
@@ -55,7 +56,7 @@ export const $TextField = (config: TextField) =>
       const $message = switchLatest(merge($hint, $alert))
 
       return [
-        $container(
+        $container(disabledStyleOp(config.disabled ?? never))(
           $labelRow(
             $text(config.label),
             $Input({ ...config, validation: multicastValidation })({

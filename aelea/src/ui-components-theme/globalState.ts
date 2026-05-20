@@ -25,6 +25,13 @@ export const text = {
 
 export type TextStep = keyof typeof text
 
+export const interaction = {
+  hoverFilter: 'var(--interaction-hover-filter, brightness(1.1))',
+  activeFilter: 'var(--interaction-active-filter, brightness(0.9))'
+} as const
+
+export type InteractionToken = keyof typeof interaction
+
 export const theme: Theme = {
   name: 'default',
   palette: palette

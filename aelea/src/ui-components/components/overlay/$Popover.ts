@@ -2,10 +2,12 @@ import {
   combine,
   constant,
   empty,
+  filter,
   type IOps,
   type IStream,
   map,
   merge,
+  never,
   op,
   skipRepeats,
   start,
@@ -30,6 +32,8 @@ import { $column } from '../../elements/$elements.js'
 import { observer } from '../../utils/elementObservers.js'
 import { showPopover } from '../../utils/popover.js'
 import { isDesktopScreen } from '../../utils/screenUtils.js'
+import { disabledOp, isDisabled, resolveDisabledState } from '../controllers/form.js'
+import type { Control } from '../controllers/types.js'
 
 const showOverlay = (el: unknown): Disposable | void => {
   const dispose = showPopover(el)
@@ -58,7 +62,7 @@ export const $defaultPopoverContentContainer = $column(
   })
 )
 
-interface IPopover {
+interface IPopover extends Control {
   $open: IStream<I$Node>
   $target: I$Node
   dismiss?: IStream<unknown>
@@ -73,6 +77,7 @@ export const $Popover = ({
   $contentContainer = $defaultPopoverContentContainer,
   $container = $node,
   dismiss = empty,
+  disabled = never,
   spacing = 10
 }: IPopover) =>
   component(
@@ -81,7 +86,9 @@ export const $Popover = ({
       [anchorEntry, anchorTether]: IBehavior<INode<HTMLElement>, IntersectionObserverEntry[]>,
       [contentEntry, contentTether]: IBehavior<INode<HTMLElement>, IntersectionObserverEntry[]>
     ) => {
-      const dismissEvent = merge(overlayClick, dismiss)
+      const isDisabledStream = multicast(map(isDisabled, resolveDisabledState(disabled)))
+      const closeOnDisable = filter(d => d, isDisabledStream)
+      const dismissEvent = merge(overlayClick, dismiss, closeOnDisable)
       const openContent = multicast(merge($open, constant(null, dismissEvent)))
       const isOpen = multicast(skipRepeats(map(c => c !== null, openContent)))
 
@@ -168,6 +175,6 @@ export const $Popover = ({
         )($body)
       }, openContent)
 
-      return [$container($observedAnchor, $backdrop, $content), { dismiss: dismissEvent }]
+      return [$container(disabledOp(disabled))($observedAnchor, $backdrop, $content), { dismiss: dismissEvent }]
     }
   )

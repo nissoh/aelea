@@ -11,7 +11,7 @@ import { multicast } from './multicast.js'
 
 export interface IStateCurry {
   (initialState?: undefined): <T>(source: IStream<T>) => IStream<T>
-  <I extends {} | null, T>(initialState: I, source: IStream<T>): IStream<T | I>
+  <I extends NonNullable<unknown> | null, T>(initialState: I, source: IStream<T>): IStream<T | I>
   <I>(initialState: I): <T>(source: IStream<T>) => IStream<T | I>
 }
 

@@ -7,6 +7,7 @@ import {
   just,
   map,
   merge,
+  never,
   nowWith,
   op,
   reduce,
@@ -16,10 +17,11 @@ import {
   switchMap,
   take,
   toStream
-} from '../../stream/index.js'
-import { animationFrame, type IBehavior } from '../../stream-extended/index.js'
-import { palette, text } from '../../ui-components-theme/index.js'
+} from '../../../stream/index.js'
+import { animationFrame, type IBehavior } from '../../../stream-extended/index.js'
+import { interaction, palette, text } from '../../../ui-components-theme/index.js'
 import {
+  $element,
   $node,
   $text,
   attr,
@@ -35,11 +37,14 @@ import {
   style,
   styleInline,
   stylePseudo
-} from '../../ui-renderer-dom/index.js'
-import { $column, $row } from '../elements/$elements.js'
-import { spacing } from '../style/spacing.js'
-import { observer } from '../utils/elementObservers.js'
-import { showPopover } from '../utils/popover.js'
+} from '../../../ui-renderer-dom/index.js'
+import { $column, $row } from '../../elements/$elements.js'
+import { layoutSheet } from '../../style/layoutSheet.js'
+import { spacing } from '../../style/spacing.js'
+import { observer } from '../../utils/elementObservers.js'
+import { showPopover } from '../../utils/popover.js'
+import { disabledOp } from './form.js'
+import type { Control } from './types.js'
 
 export const $defaultOptionContainer = $row(
   spacing.small,
@@ -76,8 +81,10 @@ export const $defaultDropdownContainer = $node(
   })
 )
 
-export const $defaultDropdownAnchor = $row(
+export const $defaultDropdownAnchor = $element('button')(
+  layoutSheet.row,
   spacing.small,
+  attr({ type: 'button' }),
   style({
     fontFamily: 'inherit',
     fontWeight: 300,
@@ -90,10 +97,12 @@ export const $defaultDropdownAnchor = $row(
     alignItems: 'center',
     padding: '8px 14px',
     flexShrink: 0
-  })
+  }),
+  stylePseudo(':hover', { filter: interaction.hoverFilter }),
+  stylePseudo(':active', { filter: interaction.activeFilter })
 )($text('Select…'), $node(style({ color: palette.foreground }))($text('▾')))
 
-export interface IDropdown<T> {
+export interface IDropdown<T> extends Control {
   optionList: IStream<readonly T[]> | readonly T[]
   $anchor?: I$Node
   closeOnSelect?: boolean
@@ -108,6 +117,7 @@ const stopPropagation = (ev: MouseEvent) => ev.stopPropagation()
 export function $Dropdown<T>({
   $anchor = $defaultDropdownAnchor,
   optionList,
+  disabled = never,
   closeOnSelect = true,
   $container = $defaultDropdownContainer,
   $dropListContainer = $defaultDropListContainer,
@@ -187,7 +197,7 @@ export function $Dropdown<T>({
         )
       }, isOpen)
 
-      const $dropdownContainer = $container(openMenuTether(nodeEvent('click')))
+      const $dropdownContainer = $container(disabledOp(disabled), openMenuTether(nodeEvent('click')))
 
       return [$dropdownContainer($observedAnchor, $list), { select, isOpen }]
     }

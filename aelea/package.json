@@ -1,6 +1,6 @@
 {
   "name": "aelea",
-  "version": "4.5.5",
+  "version": "4.6.0",
   "type": "module",
   "scripts": {
     "build": "bun run build:clean && tsgo -b",

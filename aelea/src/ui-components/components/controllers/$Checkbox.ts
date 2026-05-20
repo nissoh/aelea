@@ -1,5 +1,5 @@
-import { map } from '../../../stream/index.js'
-import type { IBehavior } from '../../../stream-extended/index.js'
+import { combine, map, merge, never, start } from '../../../stream/index.js'
+import { type IBehavior, multicast } from '../../../stream-extended/index.js'
 import { palette } from '../../../ui-components-theme/index.js'
 import type { ISlottable } from '../../../ui-renderer-dom/index.js'
 import {
@@ -9,6 +9,7 @@ import {
   attr,
   attrBehavior,
   component,
+  effectProp,
   type INodeCompose,
   nodeEvent,
   style,
@@ -16,7 +17,7 @@ import {
 } from '../../../ui-renderer-dom/index.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 import { spacing } from '../../style/spacing.js'
-import { dismissOp, focusOutlineOp, interactionOp } from './form.js'
+import { disabledStyleOp, dismissOp, interactionOp, isDisabled, resolveDisabledState } from './form.js'
 import type { Input } from './types.js'
 
 export const $defaultCheckboxLabel = $element('label')(
@@ -45,13 +46,28 @@ export interface Checkbox extends Input<boolean> {
   $box?: INodeCompose<HTMLElement>
 }
 
-export const $Checkbox = ({ value, label, $container = $defaultCheckboxLabel, $box = $defaultCheckboxBox }: Checkbox) =>
+export const $Checkbox = ({
+  value,
+  disabled = never,
+  label,
+  $container = $defaultCheckboxLabel,
+  $box = $defaultCheckboxBox
+}: Checkbox) =>
   component(
     (
       [focusStyle, interactionTether]: IBehavior<ISlottable<HTMLElement>, boolean>,
       [dismissstyle, dismissTether]: IBehavior<ISlottable<HTMLElement>, boolean>,
       [check, checkTether]: IBehavior<ISlottable<HTMLInputElement>, boolean>
     ) => {
+      const isDisabledStream = multicast(map(isDisabled, resolveDisabledState(disabled)))
+
+      const focusBorder = styleBehavior(
+        map(
+          p => (!p.d && p.active ? { borderColor: palette.primary } : null),
+          combine({ active: start(false, merge(focusStyle, dismissstyle)), d: isDisabledStream })
+        )
+      )
+
       const $overlay = $node(
         layoutSheet.stretch,
         style({ margin: '3px' }),
@@ -73,18 +89,19 @@ export const $Checkbox = ({ value, label, $container = $defaultCheckboxLabel, $b
         ),
         attr({ type: 'checkbox' }),
         attrBehavior(map(checked => ({ checked: checked ? true : null }), value)),
+        effectProp('disabled', isDisabledStream),
         interactionTether(interactionOp),
         dismissTether(dismissOp)
       )
 
-      const $boxNode = $box(focusOutlineOp(focusStyle, dismissstyle))($overlay(), $checkInput())
-
-      // Wire hover tethers to the label too so hovering the text portion also
-      // highlights the box border (not just hovering the box/input).
       return [
         label === undefined
-          ? $boxNode
-          : $container(interactionTether(interactionOp), dismissTether(dismissOp))($boxNode, $text(label)),
+          ? $box(disabledStyleOp(disabled), focusBorder)($overlay(), $checkInput())
+          : $container(
+              disabledStyleOp(disabled),
+              interactionTether(interactionOp),
+              dismissTether(dismissOp)
+            )($box(focusBorder)($overlay(), $checkInput()), $text(label)),
         { check }
       ]
     }

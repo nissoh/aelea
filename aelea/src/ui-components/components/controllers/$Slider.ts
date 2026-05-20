@@ -1,5 +1,5 @@
 import { combine, type IStream, just, map, merge, skip, take } from '../../../stream/index.js'
-import { type IBehavior, multicast } from '../../../stream-extended/index.js'
+import { type IBehavior, multicast, PromiseStatus } from '../../../stream-extended/index.js'
 import {
   $element,
   $node,
@@ -10,9 +10,9 @@ import {
   type I$Node,
   type INode,
   type INodeCompose,
-  motion,
-  type MotionConfig,
   MOTION_NO_WOBBLE,
+  type MotionConfig,
+  motion,
   nodeEvent,
   style,
   styleBehavior,
@@ -20,6 +20,7 @@ import {
   stylePseudo
 } from '../../../ui/index.js'
 import { colorWeight, palette } from '../../../ui-components-theme/index.js'
+import { isDisabled, resolveDisabledState } from './form.js'
 import type { Input } from './types.js'
 
 export interface ISliderParams extends Input<number> {
@@ -27,7 +28,6 @@ export interface ISliderParams extends Input<number> {
   max?: IStream<number>
   step?: number
   orientation?: 'horizontal' | 'vertical'
-  disabled?: IStream<boolean>
   error?: IStream<boolean>
   motion?: Partial<MotionConfig> | false
   color?: IStream<string>
@@ -67,7 +67,7 @@ export const $Slider = ({
   error = just(false),
   motion: motionCfg = MOTION_NO_WOBBLE,
   color = just(colorWeight(palette.foreground, 50)),
-  trackColor = map(d => (d ? colorWeight(palette.foreground, 20) : colorWeight(palette.foreground, 40)), disabled),
+  trackColor,
   ariaLabel,
   $thumb,
   $container = $defaultSliderContainer
@@ -75,14 +75,30 @@ export const $Slider = ({
   component(([change, changeTether]: IBehavior<INode<HTMLInputElement>, number>) => {
     const isVertical = orientation === 'vertical'
 
+    const state = multicast(resolveDisabledState(disabled))
+    const isDisabledStream: IStream<boolean> = multicast(map(isDisabled, state))
+    const cursorStream = multicast(
+      map(s => {
+        if (typeof s === 'boolean') return s ? { cursor: 'not-allowed' } : null
+        return s.status === PromiseStatus.PENDING ? { cursor: 'wait' } : null
+      }, state)
+    )
+
+    const resolvedTrackColor =
+      trackColor ??
+      map(d => (d ? colorWeight(palette.foreground, 20) : colorWeight(palette.foreground, 40)), isDisabledStream)
+
     const valueMc = multicast(value)
     const displayValue: IStream<number> =
       motionCfg === false ? valueMc : merge(take(1, valueMc), motion(motionCfg, skip(1, valueMc)))
 
-    const valuePercent: IStream<number> = map(p => {
-      const range = p.max - p.min || 1
-      return Math.max(0, Math.min(1, (p.value - p.min) / range))
-    }, combine({ value: displayValue, min, max }))
+    const valuePercent: IStream<number> = map(
+      p => {
+        const range = p.max - p.min || 1
+        return Math.max(0, Math.min(1, (p.value - p.min) / range))
+      },
+      combine({ value: displayValue, min, max })
+    )
 
     const $track = $node(
       style({
@@ -91,7 +107,7 @@ export const $Slider = ({
           ? { top: '0', bottom: '0', left: '50%', width: '1px', transform: 'translateX(-50%)' }
           : { left: '0', right: '0', top: '50%', height: '1px', transform: 'translateY(-50%)' })
       }),
-      styleInline(map(c => ({ background: c }), trackColor))
+      styleInline(map(c => ({ background: c }), resolvedTrackColor))
     )()
 
     const $fill = $node(
@@ -127,7 +143,7 @@ export const $Slider = ({
             background: p.d ? 'transparent' : palette.background,
             border: `1.5px solid ${p.e ? palette.negative : colorWeight(palette.foreground, p.d ? 25 : 50)}`
           }),
-          combine({ d: disabled, e: error })
+          combine({ d: isDisabledStream, e: error })
         )
       )
     )()
@@ -169,9 +185,9 @@ export const $Slider = ({
         ...(isVertical ? { writingMode: 'vertical-lr' } : {})
       }),
       stylePseudo(':active', { cursor: 'grabbing' }),
-      styleBehavior(map(d => (d ? { cursor: 'not-allowed' } : null), disabled)),
+      styleBehavior(cursorStream),
       attrBehavior(map(p => ({ min: String(p.min), max: String(p.max) }), combine({ min, max }))),
-      effectProp('disabled', disabled),
+      effectProp('disabled', isDisabledStream),
       effectProp('value', map(String, valueMc)),
       changeTether(
         nodeEvent('input'),
@@ -182,13 +198,5 @@ export const $Slider = ({
       )
     )()
 
-    return [
-      $container(styleBehavior(map(d => (d ? { cursor: 'not-allowed' } : null), disabled)))(
-        $track,
-        $fill,
-        $thumbVisual,
-        $nativeInput
-      ),
-      { change }
-    ]
+    return [$container(styleBehavior(cursorStream))($track, $fill, $thumbVisual, $nativeInput), { change }]
   })

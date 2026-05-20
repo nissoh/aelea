@@ -27,8 +27,7 @@ export interface IAnchor {
 export const $defaultAnchor = $element('a')(
   style({
     color: palette.message,
-    cursor: 'pointer',
-    transition: 'color 120ms ease-out'
+    cursor: 'pointer'
   }),
   stylePseudo(':hover', { color: palette.primary }),
   stylePseudo(':focus-visible', {
