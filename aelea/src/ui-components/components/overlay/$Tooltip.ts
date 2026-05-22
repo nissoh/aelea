@@ -30,7 +30,7 @@ import { $column, $row } from '../../elements/$elements.js'
 import { observer } from '../../utils/elementObservers.js'
 import { showPopover } from '../../utils/popover.js'
 
-export interface ITooltip {
+export interface I$Tooltip {
   $anchor: I$Node
   $content: I$Node
   $container?: INodeCompose
@@ -59,7 +59,7 @@ export const $Tooltip = ({
   $content,
   $container = $defaultTooltipContainer,
   $dropContainer = $defaultTooltipDropContainer
-}: ITooltip) =>
+}: I$Tooltip) =>
   component(
     (
       [hover, hoverTether]: IBehavior<INode<HTMLElement>, boolean>,

@@ -7,7 +7,7 @@ import { $element, $node, $text, component, type INodeCompose, style } from '../
 import { $row } from '../../elements/$elements.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 import { spacing } from '../../style/spacing.js'
-import { $Input, type IInput } from './$Input.js'
+import { $Input, type I$Input } from './$Input.js'
 import { disabledStyleOp } from './form.js'
 
 // $container IS the label element. Defaults to a styled <label> so clicking
@@ -25,14 +25,14 @@ export const $defaultTextFieldLabelRow = $row(
   style({ alignSelf: 'stretch', alignItems: 'baseline', cursor: 'pointer', paddingBottom: '1px' })
 )
 
-export interface TextField extends IInput {
+export interface I$TextField extends I$Input {
   label: string
   hint?: string
   $container?: INodeCompose
   $labelRow?: INodeCompose
 }
 
-export const $TextField = (config: TextField) =>
+export const $TextField = (config: I$TextField) =>
   component(
     ([change, valueTether]: IBehavior<string, string>, [blur, blurTether]: IBehavior<FocusEvent, FocusEvent>) => {
       const { hint, $container = $defaultTextFieldContainer, $labelRow = $defaultTextFieldLabelRow } = config

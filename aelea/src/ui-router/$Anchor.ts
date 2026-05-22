@@ -17,7 +17,7 @@ import { href, type RouteNode, type RouteSpec } from './manifest.js'
 import { isContaining } from './resolveUrl.js'
 import type { Route } from './types.js'
 
-export interface IAnchor {
+export interface I$Link {
   route: Route
   $content: I$Slottable
   params?: Record<string, string>
@@ -37,7 +37,7 @@ export const $defaultAnchor = $element('a')(
   })
 )
 
-export const $Link = ({ route, $content, params, $anchor = $defaultAnchor }: IAnchor) => {
+export const $Link = ({ route, $content, params, $anchor = $defaultAnchor }: I$Link) => {
   const url = href(route as RouteNode<RouteSpec>, params as never)
   const active = isContaining(route)
 

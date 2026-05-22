@@ -11,7 +11,7 @@ import {
 } from '../../../ui-renderer-dom/index.js'
 import { spacing } from '../../style/spacing.js'
 
-export interface IFormField {
+export interface I$FormField {
   $control: I$Slottable
   label?: string | IStream<string>
   validation?: IStream<string | null>
@@ -66,7 +66,7 @@ export const $FormField = ({
   validation,
   hint,
   $container = $defaultFormFieldContainer
-}: IFormField): I$Slottable => {
+}: I$FormField): I$Slottable => {
   const $labelSlot = label ? $defaultFormFieldLabel($text(label)) : $defaultFormFieldLabel()
   const $messageSlot = buildMessageSlot(validation, hint)
 

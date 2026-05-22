@@ -3,7 +3,7 @@ import { isStream } from '../../stream/utils/common.js'
 import type { I$Node, INode } from '../../ui-renderer-dom/index.js'
 import { $svg, attr, style, styleBehavior } from '../../ui-renderer-dom/index.js'
 
-interface Icon {
+export interface I$Icon {
   size?: string
   width?: string
   height?: string
@@ -21,7 +21,7 @@ export const $icon = ({
   viewBox = '0 0 32 32',
   fill = 'inherit',
   svgOps = o()
-}: Icon) =>
+}: I$Icon) =>
   $svg('svg')(
     attr({ viewBox }),
     style({ width, ...(height ? { height } : { aspectRatio: '1 / 1' }) }),

@@ -26,7 +26,7 @@ export interface IPageRequest {
   pageSize: number
 }
 
-export interface IQuantumScroll {
+export interface I$QuantumScroll {
   dataSource: IStream<Promise<IQuantumScrollPage>>
   $container?: INodeCompose
   $loader?: I$Node
@@ -46,7 +46,7 @@ export const $QuantumScroll = ({
   $loader = $spinner,
   $$fail,
   insertAscending = false
-}: IQuantumScroll) =>
+}: I$QuantumScroll) =>
   component(([scrollRequest, scrollRequestTether]: IBehavior<ISlottable<Node>, IPageRequest>) => {
     const $orientedContainer = insertAscending ? $container(style({ flexDirection: 'column-reverse' })) : $container
 

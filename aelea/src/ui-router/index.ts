@@ -1,4 +1,4 @@
-export type { IAnchor } from './$Anchor.js'
+export type { I$Link } from './$Anchor.js'
 export { $defaultAnchor, $Link } from './$Anchor.js'
 export { commitTitle, fragmentsFromLocation, locationChange, pushUrl, replaceUrl } from './location.js'
 export type { ParamsOf, RouteNode, RouteSpec } from './manifest.js'

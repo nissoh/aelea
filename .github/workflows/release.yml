@@ -114,6 +114,14 @@ jobs:
       # Bump via `cd aelea && bun pm version <patch|minor|major>` then push.
       # Sets `published` + `version` outputs so the next step can branch on
       # whether publish actually ran (vs the no-op skip path).
+      #
+      # aelea ships as the UNSCOPED `aelea` package (owner: mission-andromeda).
+      # secrets.NPM_AUTH must be a Granular Access Token with ALL of:
+      #   - Permissions: Read and write (not read-only)
+      #   - Packages: the single package `aelea` (no `@` scope entry)
+      #   - Security: "Bypass two-factor authentication (2FA)" checked
+      # Missing any → 403/404 at publish. Token is passed via NPM_CONFIG_TOKEN
+      # env (not a workspace-child .npmrc — npm/bun silently ignore those).
       - name: Publish to npm
         id: publish
         working-directory: aelea

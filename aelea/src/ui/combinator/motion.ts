@@ -19,6 +19,7 @@ export const MOTION_NO_WOBBLE = { stiffness: 170, damping: 26, precision: 0.01 }
 export const MOTION_GENTLE = { stiffness: 120, damping: 14, precision: 0.01 }
 export const MOTION_WOBBLY = { stiffness: 180, damping: 12, precision: 0.01 }
 export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
+export const MOTION_SNAP = { stiffness: 800, damping: 80, precision: 0.01 }
 
 /**
  * Animates value changes using spring physics
@@ -91,6 +92,12 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
     if (this.animating) return
 
     this.sink.end(time)
+  }
+
+  [Symbol.dispose](): void {
+    this.active = false
+    this.pendingTask?.[Symbol.dispose]()
+    this.pendingTask = null
   }
 
   runIfActive(time: ITime): void {

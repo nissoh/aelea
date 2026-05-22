@@ -32,7 +32,7 @@ import { $column, $row } from '../elements/$elements.js'
 import { $icon } from '../elements/$icon.js'
 import { spacing } from '../style/spacing.js'
 import { isDesktopScreen } from '../utils/screenUtils.js'
-import { $defaultVScrollContainer, $QuantumScroll, type IPageRequest, type IQuantumScroll } from './$QuantumScroll.js'
+import { $defaultVScrollContainer, $QuantumScroll, type I$QuantumScroll, type IPageRequest } from './$QuantumScroll.js'
 
 export interface TablePageResponse<T> extends IPageRequest {
   page: T[]
@@ -47,7 +47,7 @@ export interface TableOption<T, FilterState = never> {
   columns: TableColumn<T>[]
   dataSource: IStream<Promise<TablePageResponse<T> | T[]>> | T[]
 
-  scrollConfig?: Omit<IQuantumScroll, 'dataSource'>
+  scrollConfig?: Omit<I$QuantumScroll, 'dataSource'>
 
   $between?: I$Node
   $rowCallback?: IOps<T, INodeCompose>

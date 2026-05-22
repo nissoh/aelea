@@ -1,6 +1,72 @@
 # aelea
 
-## 4.6.0
+## 4.7.0
+
+### Minor Changes
+
+#### `I$Name` config-type convention (breaking for typed imports of six names)
+
+A component's props/config interface is now named `I$Name` to match its `$Name` function — `$Button(props: I$Button)`, `$Dropdown<T>(props: I$Dropdown<T>)`. Precedent: `I$IntermediatePromise` was already in this shape. The `$` ties the type to the `$function` it configures so the pair reads as one symbol with two halves.
+
+Public type renames (consumers importing these by name must update; mechanical find/replace):
+
+| Old (4.6.0) | New (4.7.0) |
+|---|---|
+| `IButton` | `I$Button` |
+| `IDropdown<T>` | `I$Dropdown<T>` |
+| `IButtonToggle<T>` | `I$ButtonToggle<T>` |
+| `IFormField` | `I$FormField` |
+| `ITooltip` | `I$Tooltip` |
+| `IQuantumScroll` | `I$QuantumScroll` |
+| `IAnchor` | `I$Link` (matches `$Link`) |
+
+Also renamed internally + now publicly re-exported from `aelea/ui-components` (previously not on the barrel — additive only): `I$ButtonIcon` (was `IButtonIcon`), `I$Checkbox` (was `Checkbox`), `I$Input` (was `IInput`), `I$Slider` (was `ISliderParams`), `I$TextField` (was `TextField`), `I$Popover` (was un-exported `IPopover`), `I$NumberTicker` (was `NumberConfig`), `I$Tabs` (was `Tabs`), `I$Icon` (was un-exported `Icon`). The `Tab` data type (a single tab item, not the `$Tabs` props) stays as-is.
+
+Out of scope (kept as-is): `Control`, `Input<T>`, `DisabledState`, `IPageRequest`, `IQuantumScrollPage`, `TablePageResponse`, `ISortBy`, `TableOption`, `TableColumn`, `Tab`, `Route`, `RouteSpec`, `RouteNode`, `Fragment`, `Path` — these are data/option/base types, not the props of a `$function`.
+
+#### `switchPromises` — named latest-wins promise-stream flatten
+
+```ts
+export const switchPromises = <T>(source: IStream<Promise<T>>): IStream<T> =>
+  switchLatest(map(fromPromise, source))
+```
+
+Equivalent to `switchMap(p => p, src)`; named for discoverability of the "I already have `IStream<Promise<T>>`, flatten latest-wins" case. Disposes the prior `fromPromise` inner on each new emission, so stale settles are dropped — the opposite of `awaitPromises` (FIFO). Companion to the existing `switchMap(async x => fetch(x))` for the "have a value, want to fetch latest" case.
+
+Exported from `aelea/stream`.
+
+#### `MOTION_SNAP` preset + `$Slider` default flipped
+
+New preset in `aelea/ui`:
+
+```ts
+export const MOTION_SNAP = { stiffness: 800, damping: 80, precision: 0.01 }
+```
+
+Strong t=0 kick (`acceleration = stiffness · distance`) with an overdamped settle (ratio ≈ 1.4) — no overshoot, pronounced eased tail. `$Slider`'s `motion` default changed from `MOTION_NO_WOBBLE` (170/26, critically damped) to `MOTION_SNAP`. Consumers wanting the prior feel pass `motion: MOTION_NO_WOBBLE` explicitly, or `motion: false` to disable.
+
+Damping ceiling note: the integrator treats damping explicitly with `dt = 1/60`, so stability needs `damping · dt < 2` → `damping < 120`. `MOTION_SNAP` at 80 uses ~67% of the headroom. Configs with `damping ≳ 120` would diverge.
+
+### Patch Changes
+
+#### `MotionSink.[Symbol.dispose]` cancels the in-flight frame eagerly
+
+`MotionSink` extended `PropagateTask`, whose `[Symbol.dispose]` sets `active = false`. Behaviorally that already prevents the scheduled frame from running new work, but the scheduler held a pending timer for up to ~16ms post-dispose. The override now also calls `this.pendingTask?.[Symbol.dispose]()` so the timer cancels immediately. No semantic change (the `active` gate was always correct); just zero trailing dead timers.
+
+#### `$icon` — `size` shorthand, reactive `fill`, corrected `viewBox` default
+
+```ts
+$icon({ $content: $trash, size: '20px' })                 // sets width + height
+$icon({ $content: $trash, width: '24px' })                // height falls through to aspectRatio: '1 / 1'
+$icon({ $content: $trash, fill: colorStream })            // reactive fill via styleBehavior
+$icon({ $content: $trash, fill: palette.message })        // literal fill via style
+```
+
+`size?: string` shorthand sets both width and height. When no `size` and no `height`, `aspectRatio: '1 / 1'` keeps the SVG square as it scales. `fill` accepts `string | IStream<string>` — streams go through `styleBehavior(map(f => ({ fill: f }), …))`, literals through static `style({ fill })`. The previous `viewBox` default was derived from `parseInt(width)`/`parseInt(height)` which conflated CSS-length units (e.g. `"24px"`) with SVG viewBox coordinates; replaced with a fixed `'0 0 32 32'`. The previous `svgOps = op` default was the `op` function reference itself (a latent bug; the `()` invocation was missing); now correctly `svgOps = o()` (empty composition). Type now exported as `I$Icon`.
+
+#### `aelea/ui-components` barrel broadened
+
+Now also re-exports `disabledStyleOp`, `resolveDisabledState`, `isDisabled`, `DisabledState` from `controllers/form.ts` (previously only `disabledOp` / `dismissOp` / `focusOutlineOp` / `interactionOp` were public). The 4.6.0 `disabled` convention referenced `disabledStyleOp` as a usable helper but didn't expose it — that gap is fixed. Several per-component config types not previously on the barrel are now public too (see the rename table above) — additive only.
 
 ### Minor Changes
 

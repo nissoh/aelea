@@ -20,7 +20,7 @@ import { layoutSheet } from '../../style/layoutSheet.js'
 import { disabledOp } from './form.js'
 import type { Control } from './types.js'
 
-export interface IButtonToggle<T> extends Control {
+export interface I$ButtonToggle<T> extends Control {
   optionList: T[]
   value: IStream<T>
   $container?: INodeCompose
@@ -68,7 +68,7 @@ export const $ButtonToggle = <T>({
   $$option = map((o: T) => $node($text(String(o)))),
   $button = $defaultButtonToggleBtn,
   $container = $defaultButtonToggleContainer
-}: IButtonToggle<T>) =>
+}: I$ButtonToggle<T>) =>
   component(([select, sampleSelect]: IBehavior<INode<HTMLButtonElement>, T>) => [
     $container(disabledOp(disabled))(
       ...optionList.map(opt =>

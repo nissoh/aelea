@@ -1,6 +1,6 @@
 {
   "name": "aelea",
-  "version": "4.6.0",
+  "version": "4.7.0",
   "type": "module",
   "scripts": {
     "build": "bun run build:clean && tsgo -b",
@@ -22,8 +22,7 @@
   "license": "MIT",
   "author": "Nissan Hanina <nissanhanina@gmail.com>",
   "files": [
-    "dist",
-    "AGENTS.md"
+    "dist"
   ],
   "exports": {
     "./stream": {

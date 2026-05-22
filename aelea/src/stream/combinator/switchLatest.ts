@@ -65,6 +65,8 @@ export interface ISwitchMapCurry {
   <T, R>(cb: (t: T) => IStreamOrPromise<R>): (s: IStream<T>) => IStream<R>
 }
 
+export const switchPromises = <T>(source: IStream<Promise<T>>): IStream<T> => switchLatest(map(fromPromise, source))
+
 class SwitchSink<T> implements ISink<IStream<T>>, Disposable {
   sourceEnded = false
   innerActive = false

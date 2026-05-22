@@ -62,7 +62,7 @@ export const $defaultPopoverContentContainer = $column(
   })
 )
 
-interface IPopover extends Control {
+export interface I$Popover extends Control {
   $open: IStream<I$Node>
   $target: I$Node
   dismiss?: IStream<unknown>
@@ -79,7 +79,7 @@ export const $Popover = ({
   dismiss = empty,
   disabled = never,
   spacing = 10
-}: IPopover) =>
+}: I$Popover) =>
   component(
     (
       [overlayClick, overlayClickTether]: IBehavior<INode, false>,

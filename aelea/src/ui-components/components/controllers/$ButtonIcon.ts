@@ -37,12 +37,12 @@ export const $defaultButtonIconContainer = $element('button')(
   stylePseudo(':active', { filter: interaction.activeFilter })
 )
 
-export interface IButtonIcon extends Control {
+export interface I$ButtonIcon extends Control {
   $content: I$Slottable
   $container?: INodeCompose<HTMLButtonElement>
 }
 
-export const $ButtonIcon = ({ $content, disabled = never, $container = $defaultButtonIconContainer }: IButtonIcon) =>
+export const $ButtonIcon = ({ $content, disabled = never, $container = $defaultButtonIconContainer }: I$ButtonIcon) =>
   component(
     (
       [focusStyle, interactionTether]: IBehavior<ISlottable<HTMLButtonElement>, boolean>,

@@ -36,7 +36,7 @@ export const $defaultInputContainer = $element('input')(
   stylePseudo('::placeholder', { color: palette.foreground })
 )
 
-export interface IInput extends Input<string | number> {
+export interface I$Input extends Input<string | number> {
   type?: InputType
   name?: string
   $container?: INodeCompose<HTMLInputElement>
@@ -47,7 +47,7 @@ export const $Input = ({
   disabled = never,
   validation = constant(null),
   $container = $defaultInputContainer
-}: IInput) =>
+}: I$Input) =>
   component(
     (
       [focusStyle, interactionTether]: IBehavior<ISlottable<HTMLInputElement>, boolean>,

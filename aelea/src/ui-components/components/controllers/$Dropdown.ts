@@ -102,7 +102,7 @@ export const $defaultDropdownAnchor = $element('button')(
   stylePseudo(':active', { filter: interaction.activeFilter })
 )($text('Select…'), $node(style({ color: palette.foreground }))($text('▾')))
 
-export interface IDropdown<T> extends Control {
+export interface I$Dropdown<T> extends Control {
   optionList: IStream<readonly T[]> | readonly T[]
   $anchor?: I$Node
   closeOnSelect?: boolean
@@ -123,7 +123,7 @@ export function $Dropdown<T>({
   $dropListContainer = $defaultDropListContainer,
   $$option = map((o: T) => $node($text(String(o)))),
   $optionContainer = $defaultOptionContainer
-}: IDropdown<T>) {
+}: I$Dropdown<T>) {
   return component(
     (
       [select, selectTether]: IBehavior<INode<HTMLElement>, T>,

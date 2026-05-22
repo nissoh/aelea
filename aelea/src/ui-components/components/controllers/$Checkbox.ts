@@ -40,7 +40,7 @@ export const $defaultCheckboxBox = $node(
   })
 )
 
-export interface Checkbox extends Input<boolean> {
+export interface I$Checkbox extends Input<boolean> {
   label?: string
   $container?: INodeCompose<HTMLLabelElement>
   $box?: INodeCompose<HTMLElement>
@@ -52,7 +52,7 @@ export const $Checkbox = ({
   label,
   $container = $defaultCheckboxLabel,
   $box = $defaultCheckboxBox
-}: Checkbox) =>
+}: I$Checkbox) =>
   component(
     (
       [focusStyle, interactionTether]: IBehavior<ISlottable<HTMLElement>, boolean>,

@@ -31,7 +31,7 @@ interface CountState {
   affectedUpTo: number
 }
 
-export interface NumberConfig {
+export interface I$NumberTicker {
   value: IStream<number>
   incrementColor?: string
   decrementColor?: string
@@ -60,7 +60,7 @@ export const $NumberTicker = ({
   parser = (n: number) => n.toLocaleString(),
   $container = $defaultNumberTickerContainer,
   $slot = $defaultNumberTickerSlot
-}: NumberConfig) => {
+}: I$NumberTicker) => {
   const incrementMulticast = op(
     value,
     reduce(

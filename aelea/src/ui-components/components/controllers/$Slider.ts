@@ -10,7 +10,7 @@ import {
   type I$Node,
   type INode,
   type INodeCompose,
-  MOTION_NO_WOBBLE,
+  MOTION_SNAP,
   type MotionConfig,
   motion,
   nodeEvent,
@@ -23,7 +23,7 @@ import { colorWeight, palette } from '../../../ui-components-theme/index.js'
 import { isDisabled, resolveDisabledState } from './form.js'
 import type { Input } from './types.js'
 
-export interface ISliderParams extends Input<number> {
+export interface I$Slider extends Input<number> {
   min?: IStream<number>
   max?: IStream<number>
   step?: number
@@ -65,13 +65,13 @@ export const $Slider = ({
   orientation = 'horizontal',
   disabled = just(false),
   error = just(false),
-  motion: motionCfg = MOTION_NO_WOBBLE,
+  motion: motionCfg = MOTION_SNAP,
   color = just(colorWeight(palette.foreground, 50)),
   trackColor,
   ariaLabel,
   $thumb,
   $container = $defaultSliderContainer
-}: ISliderParams) =>
+}: I$Slider) =>
   component(([change, changeTether]: IBehavior<INode<HTMLInputElement>, number>) => {
     const isVertical = orientation === 'vertical'
 

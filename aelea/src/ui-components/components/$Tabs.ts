@@ -8,12 +8,12 @@ export interface Tab {
   head: I$Slottable
 }
 
-export interface Tabs {
+export interface I$Tabs {
   selected: IStream<Tab>
   tabs: Tab[]
 }
 
-export const $Tabs = (config: Tabs) => {
+export const $Tabs = (config: I$Tabs) => {
   return component(([clickTab, clickTabTether]: IBehavior<any, Tab>) => {
     return [
       merge(
