@@ -34,9 +34,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      - uses: actions/checkout@v5
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -83,9 +81,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      - uses: actions/checkout@v5
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -179,9 +175,7 @@ jobs:
         shell: bash
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      - uses: actions/checkout@v5
 
       - name: Compute version tag
         run: echo "VERSION=v$(date +%Y%m%d)-${GITHUB_SHA::7}" >> $GITHUB_ENV
