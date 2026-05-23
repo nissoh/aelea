@@ -1,5 +1,23 @@
 # aelea
 
+## 4.7.2
+
+### Patch Changes
+
+#### `$Popover` no longer clips off-screen on edge-anchored or top-of-viewport positioning
+
+Two positioning bugs in the content placement of `$Popover`:
+
+**Horizontal — content cut off near viewport edges.** The previous logic was `left: clamp(spacing, centerX, 100vw - spacing)` + `transform: translate(-50%, …)`. The clamp constrained the *center point* of the popover, not its edges; the `translate(-50%)` then shoved half the content past the viewport edge whenever the anchor sat near a screen border. With a wide popover and a left-aligned anchor, half the content ended up clipped off the left side.
+
+Now we measure `cEl.getBoundingClientRect().width`, compute the *desired left edge* (`centerX − width/2`), and clamp that to `[spacing, viewportWidth − width − spacing]`. Horizontal `translate(-50%)` is dropped — the final left edge is resolved directly. Anchor centered → content visually centered (same as before). Anchor near an edge → content slides inward and sits flush against `spacing`px from the viewport edge. The content container's own `maxWidth: 'calc(100vw - 20px)'` keeps the clamp range non-degenerate when `spacing ≤ 10`.
+
+**Vertical — magic-number bias against flipping up.** The previous rule was `goDown = bottomSpace > 200 || bottomSpace > aRect.top`. The `> 200` threshold biased toward "go down" whenever the space below was at least 200px, **even when the space above was larger**. Anchors near the top of the viewport with limited room below kept going down and overflowing, instead of correctly flipping up.
+
+Now: `spaceBelow = innerHeight − aRect.bottom`; `spaceAbove = aRect.top`; `goDown = spaceBelow >= spaceAbove`. Pick the side with more room; ties prefer down. No magic threshold.
+
+Combined, the popover stays inside the viewport in every position — anchored to corners, edges, top, bottom, or center. The repositioning runs every animation frame (via the existing `animationFrame()` merge), so the clamps stay correct as the anchor moves through CSS transitions, scroll, or parent motion.
+
 ## 4.7.1
 
 ### Patch Changes

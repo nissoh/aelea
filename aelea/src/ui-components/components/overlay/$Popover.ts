@@ -158,14 +158,19 @@ export const $Popover = ({
                 const aEl = aEntry[0]?.target as HTMLElement | undefined
                 const cEl = cEntry[0]?.target as HTMLElement | undefined
                 if (!aEl || !cEl) return {}
-                const rect = aEl.getBoundingClientRect()
-                const bottomSpace = window.innerHeight - rect.bottom
-                const goDown = bottomSpace > 200 || bottomSpace > rect.top
-                const centerX = rect.left + rect.width / 2
+                const aRect = aEl.getBoundingClientRect()
+                const cRect = cEl.getBoundingClientRect()
+                const spaceBelow = window.innerHeight - aRect.bottom
+                const spaceAbove = aRect.top
+                const goDown = spaceBelow >= spaceAbove
+                const centerX = aRect.left + aRect.width / 2
+                const desiredLeft = centerX - cRect.width / 2
+                const maxLeft = window.innerWidth - cRect.width - spacing
+                const left = Math.max(spacing, Math.min(desiredLeft, maxLeft))
                 return {
-                  top: `${goDown ? rect.bottom + spacing : rect.top - spacing}px`,
-                  left: `clamp(${spacing}px, ${centerX}px, calc(100vw - ${spacing}px))`,
-                  transform: `translate(-50%, ${goDown ? '0' : '-100%'})`,
+                  top: `${goDown ? aRect.bottom + spacing : aRect.top - spacing}px`,
+                  left: `${left}px`,
+                  transform: `translate(0, ${goDown ? '0' : '-100%'})`,
                   visibility: 'visible'
                 }
               },
