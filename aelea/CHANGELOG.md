@@ -1,5 +1,28 @@
 # aelea
 
+## 4.7.1
+
+### Patch Changes
+
+#### `MotionSink.[Symbol.dispose]` recursion fix
+
+The 4.7.0 motion-dispose override had a self-recursion bug. The scheduler's `delay(task, ms)` returns `task` itself (not a wrapper — see `BrowserScheduler.delay`), so for `MotionSink` — which schedules itself via `scheduler.delay(this, …)` — `this.pendingTask === this`. The override called `this.pendingTask[Symbol.dispose]()` which dispatched right back into `MotionSink[Symbol.dispose]`, where `pendingTask` was still set, looping forever.
+
+Fixed with the standard null-before-dispose pattern (same one `continueWith.ts` already uses): capture the task into a local, null the field first, then dispose. The recursive entry sees `this.pendingTask === null`, hits the guard, and exits.
+
+```ts
+[Symbol.dispose](): void {
+  this.active = false
+  if (this.pendingTask) {
+    const t = this.pendingTask
+    this.pendingTask = null
+    t[Symbol.dispose]()
+  }
+}
+```
+
+Audited every other site that stores a `Disposable` it later disposes (`continueWith`, `switchLatest`, `join`, `multicast`, `debounce`, `delay`, `buffer`, `awaitPromises`, `periodic`) — none have the same recursion class. `motion.ts` was the only sink that both schedules itself (`scheduler.delay(this, …)`) **and** has a custom `[Symbol.dispose]` that re-disposes its stored task field. `periodic.ts` schedules itself too but discards the reschedule's return value, relying on the inherited `active` gate, which is incidentally safe given the scheduler's "return task as the Disposable" convention.
+
 ## 4.7.0
 
 ### Minor Changes

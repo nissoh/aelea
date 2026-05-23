@@ -96,8 +96,11 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
 
   [Symbol.dispose](): void {
     this.active = false
-    this.pendingTask?.[Symbol.dispose]()
-    this.pendingTask = null
+    if (this.pendingTask) {
+      const t = this.pendingTask
+      this.pendingTask = null
+      t[Symbol.dispose]()
+    }
   }
 
   runIfActive(time: ITime): void {
