@@ -1,5 +1,78 @@
 # aelea
 
+## 4.8.0
+
+### Minor Changes
+
+#### `$Popover` enter animation — snap-style ease
+
+`$Popover` now animates on open: backdrop fades in (opacity `0 → 1`) and the content panel fades + scales (`opacity 0 → 1`, `scale(0.96) → scale(1)`). Both transitions run for 220ms on `cubic-bezier(0.22, 1, 0.36, 1)` (easeOutQuint) — a CSS approximation of the overdamped `MOTION_SNAP` spring (stiffness 800, damping 80, damping ratio ≈1.4): fast initial movement, long slow tail, no overshoot.
+
+`transformOrigin` follows the flip direction — `center top` when the popover opens downward, `center bottom` when it flips up — so the scale always grows out of the anchor edge, not from the panel's geometric center.
+
+Two side fixes that fell out of switching from `translate(0, -100%)` to a true `scale()`:
+
+- Up-flip top position changed from `aRect.top - spacing` to `aRect.top - spacing - cRect.height`. The previous form relied on the `-100%` translate to undo its own offset; with translate gone, the explicit height subtraction is what places the panel above the anchor.
+- The legacy `translate(0, -100%)` y-axis hack is gone. Positioning is fully resolved through `top`/`left` + `transform: scale(1)`.
+
+#### `Input.validation` is now `IStream<string | null>` (breaking)
+
+`Input.validation` (the shared shape used by `$Input`, `$TextField`, and `$FormField`) changed from `IOps<T, string | null>` to `IStream<string | null>`:
+
+```ts
+// before
+interface Input<T> { validation?: IOps<T, string | null> }
+
+// after
+interface Input<T> { validation?: IStream<string | null> }
+```
+
+Previously the controller owned the wiring: it piped the input's `change` stream through your operator, sampled the result at `blur`, and multicast it. Callers passed a *function* and the controller decided *when* it ran. Now callers pass a *stream* and own the timing.
+
+Migration: build the validation stream yourself with whatever source and gating you want, then pass it in.
+
+```ts
+// before — controller owned change + blur sampling
+$TextField({ validation: src => map(validateEmail, src) })
+
+// after — caller owns the full pipeline
+const change = state('')
+const blur  = state<FocusEvent | null>(null)
+const validation = op(
+  combine({ value: change, _: blur }),
+  map(({ value }) => validateEmail(value))
+)
+$TextField({ validation })({ change: changeTether(), blur: blurTether() })
+```
+
+This unlocks validation sources that aren't tied to the input's own change stream — form-level cross-field rules, async/server validation, validation that fires on submit rather than on blur — without the controller having to grow a configuration knob for each case.
+
+`$Input`'s `validation` default also changed from `constant(null)` to `never`: no more spurious initial `null` emission for callers who never set validation.
+
+#### `$TextField` exposes `blur` in its output
+
+`$TextField`'s component output is now `{ change, blur }` instead of `{ change }`. The `blur` behavior was already tethered internally; it's just returned now so consumers can gate validation (or anything else) on blur from outside the component. Required for the validation migration above, since the controller no longer samples blur on the caller's behalf.
+
+#### `$FormField` gains a `disabled` prop
+
+`I$FormField` now extends `Control` and accepts `disabled?: IStream<DisabledState>`. When disabled, the form field container tints to `colorWeight(palette.foreground, 30)` with `cursor: not-allowed`, covering the label and message slots. The inner `$control` is still responsible for its own disabled behavior — the field-level prop is purely visual scaffolding around it.
+
+`$TextField` was updated to use the same field-level tint instead of delegating to the inner input's `disabledStyleOp`, so the label row dims along with the input.
+
+### Patch Changes
+
+#### Controllers: shared state migrated from `multicast` to `state()`
+
+`$Checkbox`, `$Slider`, `$Input`, `$TextField`, `$FormField` were rewritten to share derived streams (`disabled`, `value`, validation/message state) through `state()` instead of `multicast()`. `multicast` has no replay — subscribers that attach after the source has emitted wait for the next event. `state()` replays the most recent value to late subscribers, which matches what these controllers actually need: every internal consumer (border styles, cursor styles, attribute behaviors) attaches at component-mount time and expects the current value immediately.
+
+Pipelines were also rewritten from the legacy `o(...operators)` + apply form to `op(source, ...operators)`, which reads top-to-bottom and avoids the partially-applied combinator dance.
+
+No public API change beyond what's listed above — purely an internal correctness/readability pass.
+
+#### `$Slider`: `color` is now optional and derives from disabled state when omitted
+
+`$Slider.color` was a required-with-default (`just(colorWeight(palette.foreground, 50))`); it's now optional, and when omitted the fill color tracks the disabled state — `foreground 30` when disabled, `foreground 50` otherwise. Existing callers that pass `color` explicitly are unaffected. Callers that relied on the previous default get an additional disabled-aware behavior for free.
+
 ## 4.7.2
 
 ### Patch Changes

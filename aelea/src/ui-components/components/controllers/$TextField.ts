@@ -1,25 +1,27 @@
-import type { IStream } from '../../../stream/index.js'
-import { empty, just, map, merge, never, op, sample, skipRepeats, switchLatest } from '../../../stream/index.js'
+import { empty, just, map, merge, never, op, switchLatest } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
-import { multicast } from '../../../stream-extended/index.js'
-import { palette, text } from '../../../ui-components-theme/index.js'
-import { $element, $node, $text, component, type INodeCompose, style } from '../../../ui-renderer-dom/index.js'
+import { colorWeight, palette, text } from '../../../ui-components-theme/index.js'
+import {
+  $element,
+  $node,
+  $text,
+  component,
+  type INodeCompose,
+  style,
+  styleBehavior
+} from '../../../ui-renderer-dom/index.js'
 import { $row } from '../../elements/$elements.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 import { spacing } from '../../style/spacing.js'
 import { $Input, type I$Input } from './$Input.js'
-import { disabledStyleOp } from './form.js'
+import { isDisabled, resolveDisabledState } from './form.js'
 
-// $container IS the label element. Defaults to a styled <label> so clicking
-// it focuses the inner input; override with any INodeCompose for fully
-// custom outer markup (different tag, layout, theming).
 export const $defaultTextFieldContainer = $element('label')(
   layoutSheet.column,
   spacing.tiny,
   style({ color: palette.foreground, alignItems: 'flex-start' })
 )
 
-// Inner row holding the label text + input.
 export const $defaultTextFieldLabelRow = $row(
   spacing.small,
   style({ alignSelf: 'stretch', alignItems: 'baseline', cursor: 'pointer', paddingBottom: '1px' })
@@ -36,37 +38,39 @@ export const $TextField = (config: I$TextField) =>
   component(
     ([change, valueTether]: IBehavior<string, string>, [blur, blurTether]: IBehavior<FocusEvent, FocusEvent>) => {
       const { hint, $container = $defaultTextFieldContainer, $labelRow = $defaultTextFieldLabelRow } = config
-
-      const multicastValidation = config.validation
-        ? (src: any) => op(src, config.validation!, (s: any) => sample(s, blur), multicast)
-        : undefined
-      const validation: IStream<string | null> = multicastValidation ? skipRepeats(multicastValidation(change)) : never
+      const validation = config.validation ?? never
 
       const $messageLabel = $node(style({ fontSize: text.xs, width: '100%' }))
       const $hint = hint ? just($messageLabel($text(hint))) : never
-
-      const $alert = map(msg => {
-        if (msg) {
-          const negativeStyle = style({ color: palette.negative })
-          return negativeStyle($messageLabel($text(msg)) as any)
-        }
-        return hint ? $messageLabel($text(hint)) : empty
-      }, validation)
-
+      const $alert = op(
+        validation,
+        map(msg => {
+          if (msg) return $messageLabel(style({ color: palette.negative }))($text(msg))
+          return hint ? $messageLabel($text(hint)) : empty
+        })
+      )
       const $message = switchLatest(merge($hint, $alert))
 
+      const disabledTint = styleBehavior(
+        op(
+          config.disabled ?? never,
+          resolveDisabledState,
+          map(s => (isDisabled(s) ? { color: colorWeight(palette.foreground, 30), cursor: 'not-allowed' } : null))
+        )
+      )
+
       return [
-        $container(disabledStyleOp(config.disabled ?? never))(
+        $container(disabledTint)(
           $labelRow(
             $text(config.label),
-            $Input({ ...config, validation: multicastValidation })({
+            $Input(config)({
               change: valueTether(),
               blur: blurTether()
             })
           ),
           $message
         ),
-        { change }
+        { change, blur }
       ]
     }
   )

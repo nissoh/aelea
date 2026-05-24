@@ -1,6 +1,5 @@
-import { combine, constant, empty, map, merge, never, o, start } from '../../../stream/index.js'
+import { combine, empty, map, merge, never, op, start } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
-import { multicast } from '../../../stream-extended/index.js'
 import { palette, text } from '../../../ui-components-theme/index.js'
 import type { ISlottable } from '../../../ui-renderer-dom/index.js'
 import {
@@ -45,7 +44,7 @@ export interface I$Input extends Input<string | number> {
 export const $Input = ({
   value = empty,
   disabled = never,
-  validation = constant(null),
+  validation = never,
   $container = $defaultInputContainer
 }: I$Input) =>
   component(
@@ -55,10 +54,10 @@ export const $Input = ({
       [blur, blurTether]: IBehavior<ISlottable<HTMLInputElement>, FocusEvent>,
       [change, changeTether]: IBehavior<ISlottable<HTMLInputElement>, string>
     ) => {
-      const multicastValidation = o(validation, start(''), multicast)
-      const alert = multicastValidation(change)
-      const focus = merge(focusStyle, dismissstyle)
-      const state = combine({ focus, alert })
+      const fieldState = combine({
+        focus: start(false, merge(focusStyle, dismissstyle)),
+        alert: start(null as string | null, validation)
+      })
 
       return [
         $container(
@@ -67,10 +66,13 @@ export const $Input = ({
             map(inputEv => (inputEv.target instanceof HTMLInputElement ? inputEv.target.value || '' : ''))
           ),
           styleBehavior(
-            map(({ focus, alert }) => {
-              if (alert) return { borderBottom: `2px solid ${palette.negative}` }
-              return focus ? { borderBottom: `2px solid ${palette.primary}` } : null
-            }, state)
+            op(
+              fieldState,
+              map(p => {
+                if (p.alert) return { borderBottom: `2px solid ${palette.negative}` }
+                return p.focus ? { borderBottom: `2px solid ${palette.primary}` } : null
+              })
+            )
           ),
           disabledOp(disabled),
           interactionTether(interactionOp),

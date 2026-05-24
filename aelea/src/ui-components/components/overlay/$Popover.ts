@@ -116,7 +116,9 @@ export const $Popover = ({
                   backgroundColor: `color-mix(in srgb, ${palette.horizon} 85%, transparent)`,
                   border: 'none',
                   margin: 0,
-                  padding: 0
+                  padding: 0,
+                  opacity: '0',
+                  transition: 'opacity 220ms cubic-bezier(0.22, 1, 0.36, 1)'
                 }),
                 styleInline(
                   map(
@@ -125,6 +127,7 @@ export const $Popover = ({
                       if (!aEl) return {}
                       const r = aEl.getBoundingClientRect()
                       return {
+                        opacity: '1',
                         clipPath: `polygon(0 0, 100vw 0, 100vw 100vh, 0 100vh, 0 0, ${r.left}px ${r.top}px, ${r.left}px ${r.bottom}px, ${r.right}px ${r.bottom}px, ${r.right}px ${r.top}px, ${r.left}px ${r.top}px, 0 0)`
                       }
                     },
@@ -145,6 +148,10 @@ export const $Popover = ({
           style({
             position: 'fixed',
             visibility: 'hidden',
+            opacity: '0',
+            transform: 'scale(0.96)',
+            transformOrigin: 'center top',
+            transition: 'opacity 220ms cubic-bezier(0.22, 1, 0.36, 1), transform 220ms cubic-bezier(0.22, 1, 0.36, 1)',
             border: 'none',
             margin: 0,
             color: 'inherit',
@@ -168,9 +175,11 @@ export const $Popover = ({
                 const maxLeft = window.innerWidth - cRect.width - spacing
                 const left = Math.max(spacing, Math.min(desiredLeft, maxLeft))
                 return {
-                  top: `${goDown ? aRect.bottom + spacing : aRect.top - spacing}px`,
+                  top: `${goDown ? aRect.bottom + spacing : aRect.top - spacing - cRect.height}px`,
                   left: `${left}px`,
-                  transform: `translate(0, ${goDown ? '0' : '-100%'})`,
+                  transform: 'scale(1)',
+                  transformOrigin: goDown ? 'center top' : 'center bottom',
+                  opacity: '1',
                   visibility: 'visible'
                 }
               },

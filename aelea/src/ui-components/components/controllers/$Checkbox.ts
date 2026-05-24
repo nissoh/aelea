@@ -1,5 +1,5 @@
-import { combine, map, merge, never, start } from '../../../stream/index.js'
-import { type IBehavior, multicast } from '../../../stream-extended/index.js'
+import { combine, type IStream, map, merge, never, op, start } from '../../../stream/index.js'
+import { type IBehavior, state } from '../../../stream-extended/index.js'
 import { palette } from '../../../ui-components-theme/index.js'
 import type { ISlottable } from '../../../ui-renderer-dom/index.js'
 import {
@@ -59,19 +59,25 @@ export const $Checkbox = ({
       [dismissstyle, dismissTether]: IBehavior<ISlottable<HTMLElement>, boolean>,
       [check, checkTether]: IBehavior<ISlottable<HTMLInputElement>, boolean>
     ) => {
-      const isDisabledStream = multicast(map(isDisabled, resolveDisabledState(disabled)))
+      const blocked: IStream<boolean> = op(disabled, resolveDisabledState, map(isDisabled), state())
+      const valueShared = op(value, state())
 
       const focusBorder = styleBehavior(
-        map(
-          p => (!p.d && p.active ? { borderColor: palette.primary } : null),
-          combine({ active: start(false, merge(focusStyle, dismissstyle)), d: isDisabledStream })
+        op(
+          combine({ active: start(false, merge(focusStyle, dismissstyle)), d: blocked }),
+          map(p => (!p.d && p.active ? { borderColor: palette.primary } : null))
         )
       )
 
       const $overlay = $node(
         layoutSheet.stretch,
         style({ margin: '3px' }),
-        styleBehavior(map(ch => (ch ? { backgroundColor: palette.message } : null), value))
+        styleBehavior(
+          op(
+            valueShared,
+            map(ch => (ch ? { backgroundColor: palette.message } : null))
+          )
+        )
       )
 
       const $checkInput = $element('input')(
@@ -85,11 +91,16 @@ export const $Checkbox = ({
         layoutSheet.stretch,
         checkTether(
           nodeEvent('change'),
-          map(evt => (<HTMLInputElement>evt.target).checked)
+          map(evt => (evt.target as HTMLInputElement).checked)
         ),
         attr({ type: 'checkbox' }),
-        attrBehavior(map(checked => ({ checked: checked ? true : null }), value)),
-        effectProp('disabled', isDisabledStream),
+        attrBehavior(
+          op(
+            valueShared,
+            map(checked => ({ checked: checked ? true : null }))
+          )
+        ),
+        effectProp('disabled', blocked),
         interactionTether(interactionOp),
         dismissTether(dismissOp)
       )

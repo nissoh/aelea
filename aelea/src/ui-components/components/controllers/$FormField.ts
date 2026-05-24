@@ -1,6 +1,6 @@
-import { combine, type IStream, just, map, switchLatest } from '../../../stream/index.js'
-import { multicast } from '../../../stream-extended/index.js'
-import { palette, text } from '../../../ui-components-theme/index.js'
+import { combine, type IStream, just, map, never, op } from '../../../stream/index.js'
+import { state } from '../../../stream-extended/index.js'
+import { colorWeight, palette, text } from '../../../ui-components-theme/index.js'
 import {
   $element,
   $text,
@@ -10,8 +10,10 @@ import {
   styleBehavior
 } from '../../../ui-renderer-dom/index.js'
 import { spacing } from '../../style/spacing.js'
+import { isDisabled, resolveDisabledState } from './form.js'
+import type { Control } from './types.js'
 
-export interface I$FormField {
+export interface I$FormField extends Control {
   $control: I$Slottable
   label?: string | IStream<string>
   validation?: IStream<string | null>
@@ -48,16 +50,28 @@ const buildMessageSlot = (
 ): I$Slottable => {
   if (!validation && !hint) return $defaultFormFieldMessage()
 
-  const state = multicast(
+  const messageState = state()(
     combine({
-      v: validation ?? just<string | null>(null),
+      v: validation ?? just(null as string | null),
       h: hint ?? just('')
     })
   )
 
   return $defaultFormFieldMessage(
-    styleBehavior(map(s => ({ color: s.v ? palette.negative : palette.foreground }), state))
-  )(switchLatest(map(s => $text(s.v ?? s.h ?? ''), state)))
+    styleBehavior(
+      op(
+        messageState,
+        map(s => ({ color: s.v ? palette.negative : palette.foreground }))
+      )
+    )
+  )(
+    $text(
+      op(
+        messageState,
+        map(s => s.v ?? s.h ?? '')
+      )
+    )
+  )
 }
 
 export const $FormField = ({
@@ -65,10 +79,19 @@ export const $FormField = ({
   label,
   validation,
   hint,
+  disabled = never,
   $container = $defaultFormFieldContainer
 }: I$FormField): I$Slottable => {
   const $labelSlot = label ? $defaultFormFieldLabel($text(label)) : $defaultFormFieldLabel()
   const $messageSlot = buildMessageSlot(validation, hint)
 
-  return $container($labelSlot, $control, $messageSlot)
+  const disabledTint = styleBehavior(
+    op(
+      disabled,
+      resolveDisabledState,
+      map(s => (isDisabled(s) ? { color: colorWeight(palette.foreground, 30), cursor: 'not-allowed' } : null))
+    )
+  )
+
+  return $container(disabledTint)($labelSlot, $control, $messageSlot)
 }

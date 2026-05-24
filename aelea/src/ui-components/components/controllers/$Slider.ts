@@ -1,5 +1,5 @@
-import { combine, type IStream, just, map, merge, skip, take } from '../../../stream/index.js'
-import { type IBehavior, multicast, PromiseStatus } from '../../../stream-extended/index.js'
+import { combine, type IStream, just, map, merge, op, skip, take } from '../../../stream/index.js'
+import { type IBehavior, PromiseStatus, state } from '../../../stream-extended/index.js'
 import {
   $element,
   $node,
@@ -66,7 +66,7 @@ export const $Slider = ({
   disabled = just(false),
   error = just(false),
   motion: motionCfg = MOTION_SNAP,
-  color = just(colorWeight(palette.foreground, 50)),
+  color,
   trackColor,
   ariaLabel,
   $thumb,
@@ -75,29 +75,40 @@ export const $Slider = ({
   component(([change, changeTether]: IBehavior<INode<HTMLInputElement>, number>) => {
     const isVertical = orientation === 'vertical'
 
-    const state = multicast(resolveDisabledState(disabled))
-    const isDisabledStream: IStream<boolean> = multicast(map(isDisabled, state))
-    const cursorStream = multicast(
+    const disabledState = op(disabled, resolveDisabledState, state())
+    const blocked: IStream<boolean> = op(disabledState, map(isDisabled), state())
+    const cursorStyle = op(
+      disabledState,
       map(s => {
         if (typeof s === 'boolean') return s ? { cursor: 'not-allowed' } : null
         return s.status === PromiseStatus.PENDING ? { cursor: 'wait' } : null
-      }, state)
+      }),
+      state()
     )
 
+    const resolvedColor =
+      color ??
+      op(
+        blocked,
+        map(d => (d ? colorWeight(palette.foreground, 30) : colorWeight(palette.foreground, 50)))
+      )
     const resolvedTrackColor =
       trackColor ??
-      map(d => (d ? colorWeight(palette.foreground, 20) : colorWeight(palette.foreground, 40)), isDisabledStream)
+      op(
+        blocked,
+        map(d => (d ? colorWeight(palette.foreground, 20) : colorWeight(palette.foreground, 40)))
+      )
 
-    const valueMc = multicast(value)
+    const valueShared = op(value, state())
     const displayValue: IStream<number> =
-      motionCfg === false ? valueMc : merge(take(1, valueMc), motion(motionCfg, skip(1, valueMc)))
+      motionCfg === false ? valueShared : merge(take(1, valueShared), motion(motionCfg, skip(1, valueShared)))
 
-    const valuePercent: IStream<number> = map(
-      p => {
+    const valuePercent: IStream<number> = op(
+      combine({ value: displayValue, min, max }),
+      map(p => {
         const range = p.max - p.min || 1
         return Math.max(0, Math.min(1, (p.value - p.min) / range))
-      },
-      combine({ value: displayValue, min, max })
+      })
     )
 
     const $track = $node(
@@ -107,7 +118,12 @@ export const $Slider = ({
           ? { top: '0', bottom: '0', left: '50%', width: '1px', transform: 'translateX(-50%)' }
           : { left: '0', right: '0', top: '50%', height: '1px', transform: 'translateY(-50%)' })
       }),
-      styleInline(map(c => ({ background: c }), resolvedTrackColor))
+      styleInline(
+        op(
+          resolvedTrackColor,
+          map(c => ({ background: c }))
+        )
+      )
     )()
 
     const $fill = $node(
@@ -119,17 +135,18 @@ export const $Slider = ({
           : { left: '0', top: '50%', height: '2px', transform: 'translateY(-50%)' })
       }),
       styleInline(
-        map(
-          p =>
+        op(
+          combine({ pct: valuePercent, color: resolvedColor }),
+          map(p =>
             isVertical
               ? { background: p.color, height: `${p.pct * 100}%` }
-              : { background: p.color, width: `${p.pct * 100}%` },
-          combine({ pct: valuePercent, color })
+              : { background: p.color, width: `${p.pct * 100}%` }
+          )
         )
       )
     )()
 
-    const $stateThumb: I$Node = $node(
+    const $stateThumb = $node(
       style({
         display: 'block',
         width: '18px',
@@ -138,30 +155,31 @@ export const $Slider = ({
         boxSizing: 'border-box'
       }),
       styleBehavior(
-        map(
-          p => ({
+        op(
+          combine({ d: blocked, e: error }),
+          map(p => ({
             background: p.d ? 'transparent' : palette.background,
             border: `1.5px solid ${p.e ? palette.negative : colorWeight(palette.foreground, p.d ? 25 : 50)}`
-          }),
-          combine({ d: isDisabledStream, e: error })
+          }))
         )
       )
     )()
 
     const effectiveThumb = $thumb ?? $stateThumb
 
-    const $thumbVisual: I$Node = $node(
+    const $thumbVisual = $node(
       style({
         position: 'absolute',
         pointerEvents: 'none'
       }),
       styleInline(
-        map(
-          pct =>
+        op(
+          valuePercent,
+          map(pct =>
             isVertical
               ? { top: `${pct * 100}%`, left: '50%', transform: 'translate(-50%, -50%)' }
-              : { left: `${pct * 100}%`, top: '50%', transform: 'translate(-50%, -50%)' },
-          valuePercent
+              : { left: `${pct * 100}%`, top: '50%', transform: 'translate(-50%, -50%)' }
+          )
         )
       )
     )(effectiveThumb)
@@ -185,10 +203,15 @@ export const $Slider = ({
         ...(isVertical ? { writingMode: 'vertical-lr' } : {})
       }),
       stylePseudo(':active', { cursor: 'grabbing' }),
-      styleBehavior(cursorStream),
-      attrBehavior(map(p => ({ min: String(p.min), max: String(p.max) }), combine({ min, max }))),
-      effectProp('disabled', isDisabledStream),
-      effectProp('value', map(String, valueMc)),
+      styleBehavior(cursorStyle),
+      attrBehavior(
+        op(
+          combine({ min, max }),
+          map(p => ({ min: String(p.min), max: String(p.max) }))
+        )
+      ),
+      effectProp('disabled', blocked),
+      effectProp('value', op(valueShared, map(String))),
       changeTether(
         nodeEvent('input'),
         map(ev => {
@@ -198,5 +221,5 @@ export const $Slider = ({
       )
     )()
 
-    return [$container(styleBehavior(cursorStream))($track, $fill, $thumbVisual, $nativeInput), { change }]
+    return [$container(styleBehavior(cursorStyle))($track, $fill, $thumbVisual, $nativeInput), { change }]
   })

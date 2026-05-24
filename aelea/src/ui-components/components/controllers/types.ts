@@ -1,4 +1,4 @@
-import type { IOps, IStream } from '../../../stream/index.js'
+import type { IStream } from '../../../stream/index.js'
 
 export enum InputType {
   TEXT = 'text',
@@ -20,5 +20,5 @@ export interface Control {
 
 export interface Input<T> extends Control {
   value: IStream<T>
-  validation?: IOps<T, string | null>
+  validation?: IStream<string | null>
 }
