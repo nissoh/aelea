@@ -67,6 +67,7 @@ export interface I$Popover extends Control {
   $target: I$Node
   dismiss?: IStream<unknown>
   spacing?: number
+  backdropFeather?: number
   $contentContainer?: INodeCompose
   $container?: INodeCompose
 }
@@ -78,7 +79,8 @@ export const $Popover = ({
   $container = $node,
   dismiss = empty,
   disabled = never,
-  spacing = 10
+  spacing = 10,
+  backdropFeather = 60
 }: I$Popover) =>
   component(
     (
@@ -113,7 +115,6 @@ export const $Popover = ({
                   inset: 0,
                   width: '100vw',
                   height: '100vh',
-                  backgroundColor: `color-mix(in srgb, ${palette.horizon} 85%, transparent)`,
                   border: 'none',
                   margin: 0,
                   padding: 0,
@@ -121,17 +122,26 @@ export const $Popover = ({
                   transition: 'opacity 220ms cubic-bezier(0.22, 1, 0.36, 1)'
                 }),
                 styleInline(
-                  map(
-                    ({ aEntry }) => {
-                      const aEl = aEntry[0]?.target as HTMLElement | undefined
+                  op(
+                    combine({ aEntry: anchorEntry, _: start(null, reposition) }),
+                    map(p => {
+                      const aEl = p.aEntry[0]?.target as HTMLElement | undefined
                       if (!aEl) return {}
                       const r = aEl.getBoundingClientRect()
+                      const cx = r.left + r.width / 2
+                      const cy = r.top + r.height / 2
+                      const bleed = 16
+                      const innerRx = r.width / 2 + bleed
+                      const innerRy = r.height / 2 + bleed
+                      const outerRx = innerRx + backdropFeather
+                      const outerRy = innerRy + backdropFeather
+                      const innerPct = (Math.max(innerRx / outerRx, innerRy / outerRy) * 100).toFixed(2)
+                      const dim = 'rgba(0, 0, 0, 0.6)'
                       return {
                         opacity: '1',
-                        clipPath: `polygon(0 0, 100vw 0, 100vw 100vh, 0 100vh, 0 0, ${r.left}px ${r.top}px, ${r.left}px ${r.bottom}px, ${r.right}px ${r.bottom}px, ${r.right}px ${r.top}px, ${r.left}px ${r.top}px, 0 0)`
+                        background: `radial-gradient(ellipse ${outerRx}px ${outerRy}px at ${cx}px ${cy}px, transparent ${innerPct}%, ${dim} 100%)`
                       }
-                    },
-                    combine({ aEntry: anchorEntry, _: start(null, reposition) })
+                    })
                   )
                 ),
                 effectRun(showOverlay),

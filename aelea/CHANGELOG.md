@@ -1,5 +1,27 @@
 # aelea
 
+## 4.9.0
+
+### Minor Changes
+
+#### `$Popover` backdrop — spotlight reveal around the anchor
+
+The popover backdrop previously cut a hard rectangular hole around the anchor using `clipPath: polygon(...)` — a sharp edge between the dim layer and the anchor area. It now uses a `radial-gradient` ellipse centered on the anchor: fully transparent through the anchor + a 16px bleed, feathered to dim over `backdropFeather` pixels, fully dim beyond. The ellipse radii follow the anchor's `width / 2` and `height / 2`, so the clear region matches the anchor's silhouette — wide buttons get a wide oval, tall anchors get a tall oval.
+
+The dim color is now `rgba(0, 0, 0, 0.6)` (was `color-mix(in srgb, palette.horizon 85%, transparent)`). In dark themes `palette.horizon` blends with the page background and produces no visible darkening; pure-black alpha works in any theme.
+
+```ts
+$Popover({ $open, $target, backdropFeather: 60 })   // default — soft halo
+$Popover({ $open, $target, backdropFeather: 4 })    // tight, near-sharp edge
+$Popover({ $open, $target, backdropFeather: 160 })  // very wide diffuse focus
+```
+
+The `clipPath` polygon and the base `backgroundColor` on the backdrop `$node` are both gone; the gradient (in `styleInline`) carries both the dim color and the reveal shape, repositioning on the same `scroll + resize + animationFrame` reposition stream.
+
+### New API
+
+- `I$Popover.backdropFeather?: number` — controls the radial gradient's falloff width in pixels (default `60`). Larger values produce a softer, wider halo; smaller values produce a sharper edge. Named to disambiguate from CSS `backdrop-filter: blur(...)` — this is a gradient feather, not a Gaussian blur.
+
 ## 4.8.0
 
 ### Minor Changes
