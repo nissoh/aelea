@@ -1,5 +1,15 @@
 # aelea
 
+## 4.9.1
+
+### Patch Changes
+
+#### `$Popover` backdrop — theme-tinted dim
+
+The backdrop dim is back to `color-mix(in srgb, ${palette.horizon} 85%, transparent)` (reverting the `rgba(0, 0, 0, 0.6)` from 4.9.0). The reveal now reads clearly even with the theme-tinted dim because it's the *radial gradient feather* (not the dim color's alpha) that does the visual focus work — the spotlight emerges from a transparent anchor area into a 85%-horizon backdrop over `backdropFeather` pixels.
+
+This keeps the backdrop in palette across themes — picking up whatever `palette.horizon` resolves to — instead of always being pure black.
+
 ## 4.9.0
 
 ### Minor Changes

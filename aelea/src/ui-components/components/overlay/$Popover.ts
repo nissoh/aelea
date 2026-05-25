@@ -136,7 +136,7 @@ export const $Popover = ({
                       const outerRx = innerRx + backdropFeather
                       const outerRy = innerRy + backdropFeather
                       const innerPct = (Math.max(innerRx / outerRx, innerRy / outerRy) * 100).toFixed(2)
-                      const dim = 'rgba(0, 0, 0, 0.6)'
+                      const dim = `color-mix(in srgb, ${palette.horizon} 85%, transparent)`
                       return {
                         opacity: '1',
                         background: `radial-gradient(ellipse ${outerRx}px ${outerRy}px at ${cx}px ${cy}px, transparent ${innerPct}%, ${dim} 100%)`
