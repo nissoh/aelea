@@ -1,5 +1,20 @@
 # aelea
 
+## 4.11.0
+
+### Minor Changes
+
+#### `$Popover` — configurable backdrop bleed
+
+The cutout's clear margin past the anchor (previously a hardcoded 16px) is now a `backdropBleed?: number` config (default `8` — tighter hug than 4.10.0's hardcoded value). Controls how much breathing room the anchor gets inside the transparent rounded rectangle before the dim color begins.
+
+```ts
+$Popover({ $open, $target, backdropBleed: 0 })   // cutout exactly hugs the anchor
+$Popover({ $open, $target, backdropBleed: 32 })  // generous padding around the anchor
+```
+
+Pairs with `backdropBorderRadius` from 4.10.0 — together they define the cutout's geometry. The default drop from 16 → 8 is a small visual change: popovers opened against existing anchors will show the dim closer to the anchor edge unless `backdropBleed: 16` is passed.
+
 ## 4.10.0
 
 ### Minor Changes

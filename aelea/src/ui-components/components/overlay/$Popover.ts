@@ -68,6 +68,7 @@ export interface I$Popover extends Control {
   dismiss?: IStream<unknown>
   spacing?: number
   backdropBorderRadius?: number
+  backdropBleed?: number
   $contentContainer?: INodeCompose
   $container?: INodeCompose
 }
@@ -80,7 +81,8 @@ export const $Popover = ({
   dismiss = empty,
   disabled = never,
   spacing = 10,
-  backdropBorderRadius = 12
+  backdropBorderRadius = 12,
+  backdropBleed = 8
 }: I$Popover) =>
   component(
     (
@@ -148,13 +150,12 @@ export const $Popover = ({
                 anchorRect,
                 map(r => {
                   if (!r) return {}
-                  const bleed = 16
                   const dim = `color-mix(in srgb, ${palette.horizon} 85%, transparent)`
                   return {
-                    top: `${r.top - bleed}px`,
-                    left: `${r.left - bleed}px`,
-                    width: `${r.width + bleed * 2}px`,
-                    height: `${r.height + bleed * 2}px`,
+                    top: `${r.top - backdropBleed}px`,
+                    left: `${r.left - backdropBleed}px`,
+                    width: `${r.width + backdropBleed * 2}px`,
+                    height: `${r.height + backdropBleed * 2}px`,
                     borderRadius: `${backdropBorderRadius}px`,
                     boxShadow: `0 0 0 9999px ${dim}`
                   }
