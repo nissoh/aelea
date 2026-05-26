@@ -13,7 +13,7 @@ import {
   start,
   switchMap
 } from '../../../stream/index.js'
-import { animationFrame, type IBehavior, multicast } from '../../../stream-extended/index.js'
+import { animationFrame, type IBehavior, multicast, state } from '../../../stream-extended/index.js'
 import { colorWeight, palette } from '../../../ui-components-theme/index.js'
 import {
   $node,
@@ -67,7 +67,7 @@ export interface I$Popover extends Control {
   $target: I$Node
   dismiss?: IStream<unknown>
   spacing?: number
-  backdropFeather?: number
+  backdropBorderRadius?: number
   $contentContainer?: INodeCompose
   $container?: INodeCompose
 }
@@ -80,7 +80,7 @@ export const $Popover = ({
   dismiss = empty,
   disabled = never,
   spacing = 10,
-  backdropFeather = 60
+  backdropBorderRadius = 12
 }: I$Popover) =>
   component(
     (
@@ -105,51 +105,65 @@ export const $Popover = ({
         anchorTether(observer.intersection() as IOps<INode<HTMLElement>, IntersectionObserverEntry[]>)
       )
 
-      const $backdrop = switchMap(
-        open =>
-          open
-            ? $node(
-                attr({ popover: 'manual' }),
-                style({
-                  position: 'fixed',
-                  inset: 0,
-                  width: '100vw',
-                  height: '100vh',
-                  border: 'none',
-                  margin: 0,
-                  padding: 0,
-                  opacity: '0',
-                  transition: 'opacity 220ms cubic-bezier(0.22, 1, 0.36, 1)'
-                }),
-                styleInline(
-                  op(
-                    combine({ aEntry: anchorEntry, _: start(null, reposition) }),
-                    map(p => {
-                      const aEl = p.aEntry[0]?.target as HTMLElement | undefined
-                      if (!aEl) return {}
-                      const r = aEl.getBoundingClientRect()
-                      const cx = r.left + r.width / 2
-                      const cy = r.top + r.height / 2
-                      const bleed = 16
-                      const innerRx = r.width / 2 + bleed
-                      const innerRy = r.height / 2 + bleed
-                      const outerRx = innerRx + backdropFeather
-                      const outerRy = innerRy + backdropFeather
-                      const innerPct = (Math.max(innerRx / outerRx, innerRy / outerRy) * 100).toFixed(2)
-                      const dim = `color-mix(in srgb, ${palette.horizon} 85%, transparent)`
-                      return {
-                        opacity: '1',
-                        background: `radial-gradient(ellipse ${outerRx}px ${outerRy}px at ${cx}px ${cy}px, transparent ${innerPct}%, ${dim} 100%)`
-                      }
-                    })
-                  )
-                ),
-                effectRun(showOverlay),
-                overlayClickTether(nodeEvent('click'), constant(false))
-              )()
-            : empty,
-        isOpen
-      )
+      const $backdrop = switchMap(open => {
+        if (!open) return empty
+        const anchorRect = op(
+          combine({ aEntry: anchorEntry, _: start(null, reposition) }),
+          map(p => {
+            const aEl = p.aEntry[0]?.target as HTMLElement | undefined
+            return aEl ? aEl.getBoundingClientRect() : null
+          }),
+          state()
+        )
+        return $node(
+          attr({ popover: 'manual' }),
+          style({
+            position: 'fixed',
+            inset: 0,
+            width: '100vw',
+            height: '100vh',
+            border: 'none',
+            margin: 0,
+            padding: 0,
+            background: 'transparent',
+            opacity: '0',
+            transition: 'opacity 220ms cubic-bezier(0.22, 1, 0.36, 1)'
+          }),
+          styleInline(
+            op(
+              anchorRect,
+              map(() => ({ opacity: '1' }))
+            )
+          ),
+          effectRun(showOverlay),
+          overlayClickTether(nodeEvent('click'), constant(false))
+        )(
+          $node(
+            style({
+              position: 'fixed',
+              pointerEvents: 'none'
+            }),
+            styleInline(
+              op(
+                anchorRect,
+                map(r => {
+                  if (!r) return {}
+                  const bleed = 16
+                  const dim = `color-mix(in srgb, ${palette.horizon} 85%, transparent)`
+                  return {
+                    top: `${r.top - bleed}px`,
+                    left: `${r.left - bleed}px`,
+                    width: `${r.width + bleed * 2}px`,
+                    height: `${r.height + bleed * 2}px`,
+                    borderRadius: `${backdropBorderRadius}px`,
+                    boxShadow: `0 0 0 9999px ${dim}`
+                  }
+                })
+              )
+            )
+          )()
+        )
+      }, isOpen)
 
       const $content = switchMap($body => {
         if (!$body) return empty

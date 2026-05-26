@@ -1,5 +1,29 @@
 # aelea
 
+## 4.10.0
+
+### Minor Changes
+
+#### `$Popover` backdrop — rectangle cutout with configurable border-radius (breaking)
+
+The backdrop reveal is now a hard-edged rounded rectangle sized to the anchor, replacing the radial-gradient ellipse from 4.9.x. The visual is produced by an inner `<div>` positioned at the anchor's bounding rect (plus a 16px bleed) with `border-radius` + a `box-shadow: 0 0 0 9999px ${dim}` spread — the shadow paints the dim color *outside* the rounded rectangle, the rectangle itself stays transparent. The outer viewport-spanning `<div>` keeps its job of capturing dismiss clicks; the inner has `pointer-events: none` so clicks on the cutout area still bubble up to the outer's handler.
+
+`anchorRect` is computed once per open and shared via `state()` — the outer's opacity fade-in and the inner's geometry both subscribe to the same source.
+
+**Breaking:** `I$Popover.backdropFeather` is removed. Replace with `backdropBorderRadius?: number` (default `12`).
+
+```ts
+// before (4.9.x)
+$Popover({ $open, $target, backdropFeather: 60 })
+
+// after (4.10.0)
+$Popover({ $open, $target, backdropBorderRadius: 12 })   // gentle rounded corners
+$Popover({ $open, $target, backdropBorderRadius: 0 })    // sharp rectangle
+$Popover({ $open, $target, backdropBorderRadius: 9999 }) // pill / full-round
+```
+
+The reveal now has a hard edge instead of a soft feather. If you want a softer halo back, the older radial-gradient approach is recoverable by overriding the backdrop shape via the (existing) `$container` slot — but the default is the cleaner rectangular cutout that matches typical anchor geometry.
+
 ## 4.9.1
 
 ### Patch Changes
