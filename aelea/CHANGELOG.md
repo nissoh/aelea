@@ -1,5 +1,13 @@
 # aelea
 
+## 4.11.1
+
+### Patch Changes
+
+#### `$Popover` — tighter default `backdropBleed`
+
+Default `backdropBleed` reduced from `8` → `6`. The cutout hugs the anchor a touch closer. Override via `backdropBleed: N` if you want more breathing room.
+
 ## 4.11.0
 
 ### Minor Changes

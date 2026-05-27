@@ -82,7 +82,7 @@ export const $Popover = ({
   disabled = never,
   spacing = 10,
   backdropBorderRadius = 12,
-  backdropBleed = 8
+  backdropBleed = 6
 }: I$Popover) =>
   component(
     (
