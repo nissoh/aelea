@@ -3,7 +3,6 @@ import { empty } from '../source/void.js'
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
 import { invoke } from '../utils/function.js'
-import { type IndexedValue, IndexSink } from '../utils/sink.js'
 import { map } from './map.js'
 
 /**
@@ -92,18 +91,22 @@ class CombineMap<T extends readonly unknown[], R> implements IStream<R> {
   run(sink: ISink<R>, scheduler: IScheduler): Disposable {
     const l = this.sources.length
     const disposables = new Array(l)
-    const mergeSink = new CombineMapSink(disposables, l, sink, this.f)
+    const combineSink = new CombineMapSink(disposables, l, sink, this.f)
 
     for (let i = 0; i < l; i++) {
-      const indexSink = new IndexSink(mergeSink, i)
-      disposables[i] = this.sources[i].run(indexSink, scheduler)
+      disposables[i] = this.sources[i].run(new CombineInnerSink(combineSink, i), scheduler)
     }
 
     return disposeAll(disposables)
   }
 }
 
-class CombineMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
+/**
+ * Holds the latest value per source. Inner sinks push `(index, value)` directly
+ * via `set`, so combine avoids the IndexSink/IndexedValue indirection on the hot
+ * path while keeping the per-index latest-value bookkeeping it needs.
+ */
+class CombineMapSink<O> {
   awaiting: number
   readonly values: any[]
   readonly hasValue: boolean[]
@@ -121,35 +124,41 @@ class CombineMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
     for (let i = 0; i < sinkCount; i++) this.hasValue[i] = false
   }
 
-  event(time: ITime, indexedValue: IndexedValue<I>): void {
-    const i = indexedValue.index
-
-    if (indexedValue.ended) {
-      this.disposables[i][Symbol.dispose]()
-      if (--this.activeCount === 0) {
-        this.sink.end(time)
-      }
-      return
-    }
-
+  set(time: ITime, i: number, value: unknown): void {
     if (this.awaiting > 0 && !this.hasValue[i]) {
       this.hasValue[i] = true
       this.awaiting--
     }
 
-    this.values[i] = indexedValue.value
+    this.values[i] = value
     if (this.awaiting === 0) {
       this.sink.event(time, invoke(this.f, this.values))
     }
   }
 
+  endOne(time: ITime, i: number): void {
+    this.disposables[i][Symbol.dispose]()
+    if (--this.activeCount === 0) {
+      this.sink.end(time)
+    }
+  }
+}
+
+class CombineInnerSink<I, O> implements ISink<I> {
+  constructor(
+    readonly parent: CombineMapSink<O>,
+    readonly index: number
+  ) {}
+
+  event(time: ITime, value: I): void {
+    this.parent.set(time, this.index, value)
+  }
+
   error(time: ITime, e: unknown): void {
-    this.sink.error(time, e)
+    this.parent.sink.error(time, e)
   }
 
   end(time: ITime): void {
-    // This should not be called directly as combineMap manages its own lifecycle
-    // through activeCount tracking
-    this.sink.end(time)
+    this.parent.endOne(time, this.index)
   }
 }

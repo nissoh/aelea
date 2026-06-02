@@ -1,0 +1,44 @@
+---
+# Akash SDL — Chicken Egg Chicken Installers (cecihelp → ceci.help). SINGLE service:
+# the form every working Akash web deploy uses. `REGISTRY=ghcr.io/you
+# publish/build-publish.sh` pins the image: digest below. Deploy this as its OWN
+# deployment in https://console.akash.network. Edit resources / pricing / domains
+# here; the script only rewrites the image: line.
+version: "2.0"
+
+services:
+  cecihelp:
+    image: ghcr.io/nissoh/cecihelp@sha256:15608bb8acad44ae0ef4256b82d5fc1cfc6f02d86ea95193c3212a391b7423f7
+    expose:
+      - port: 80
+        to:
+          - global: true
+        accept:
+          - ceci.help
+          - www.ceci.help
+
+profiles:
+  compute:
+    cecihelp:
+      resources:
+        cpu:
+          units: 0.25
+        memory:
+          size: 256Mi
+        storage:
+          size: 512Mi
+  placement:
+    akash:
+      signedBy:
+        anyOf:
+          - "akash1365yvmc4s7awdyj3n2sav7xfx76adc6dnmlx63"
+      pricing:
+        cecihelp:
+          denom: uact
+          amount: 10000
+
+deployment:
+  cecihelp:
+    akash:
+      profile: cecihelp
+      count: 1

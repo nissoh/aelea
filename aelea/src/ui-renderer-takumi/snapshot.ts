@@ -1,325 +1,348 @@
 /**
- * Observe an aelea `I$Node` subtree and emit resolved `INode` snapshots as
- * the tree mounts and behaviors populate. The snapshot is a plain object
- * tree — styles as `Record<string, string>`, children as `INode | string`,
- * no streams — ready to be projected to a concrete output shape (React,
- * `@takumi-rs/helpers`, server HTML, etc.).
+ * Observe an aelea `I$Node` subtree and resolve it into a plain
+ * `ResolvedNode` tree on demand — styles and attributes as string records,
+ * children as `ResolvedNode | string`, no streams. Renderer-agnostic: the
+ * resolved tree can be projected to takumi, React, server HTML, etc.
  *
- * Inlined from the prior `ui-renderer-manifest` package; lives alongside
- * the takumi-specific bits to keep the renderer self-contained.
+ * Design: the observer keeps *live* mutable state (per-channel style/attr
+ * maps, an ordered list of child tokens) and bumps a dirty signal as
+ * behaviors fire. It does **not** build a snapshot per event — `materialize`
+ * walks the live state once, when the caller asks. `renderToImage` settles
+ * the tree (deterministically, via the scheduler's idle signal) and then
+ * materializes a single time, so a burst of behavior emissions during mount
+ * costs O(emits) bookkeeping rather than O(emits × tree-size) clones.
  */
 
-import { disposeWith, merge, nullSink, op, tap } from '../stream/index.js'
+import { disposeWith, type IStream } from '../stream/index.js'
 import { stream } from '../stream-extended/index.js'
-import type {
-  I$Node,
-  I$Scheduler,
-  I$Slottable,
-  IAttributeProperties,
-  INode,
-  IStyleCSS,
-  ITextNode
-} from '../ui/index.js'
-import { createHeadlessScheduler } from '../ui/index.js'
+import type { I$Node, I$Scheduler, I$Slottable, IAttributeProperties, INode, ITextNode } from '../ui/index.js'
+import { createSettleScheduler } from './scheduler.js'
 
-interface ISnapshotEnv {
-  scheduler: I$Scheduler
+export interface ResolvedNode {
+  tag: string
+  style: Record<string, string>
+  attributes: Record<string, string>
+  children: Array<ResolvedNode | string>
 }
 
-function mergeStyle(into: Record<string, string>, styleObject: IStyleCSS | null) {
-  if (styleObject === null) {
-    for (const key of Object.keys(into)) delete into[key]
-    return into
+export interface IManifestObserver extends Disposable {
+  /** Walk current live state into a plain tree, or `null` if nothing mounted yet. */
+  materialize(): ResolvedNode | null
+}
+
+interface INodeObserver extends Disposable {
+  materialize(): ResolvedNode
+}
+
+interface IManifestHandlers {
+  onDirty(): void
+  onError(error: unknown): void
+}
+
+function getTag(element: unknown): string {
+  if (element !== null && typeof element === 'object') {
+    const tag = (element as { tag?: unknown }).tag
+    if (typeof tag === 'string') return tag
+    const tagName = (element as { tagName?: unknown }).tagName
+    if (typeof tagName === 'string') return tagName.toLowerCase()
   }
-  if (!styleObject) return into
-  for (const [key, value] of Object.entries(styleObject)) {
-    if (value === null || value === undefined) {
-      delete into[key]
-    } else {
-      into[key] = String(value)
-    }
+  return 'div'
+}
+
+/** Stringify a style/attribute object, dropping null/undefined entries. */
+function toStringRecord(source: Record<string, unknown> | null | undefined): Record<string, string> {
+  const out: Record<string, string> = {}
+  if (!source) return out
+  for (const key in source) {
+    const value = source[key]
+    if (value !== null && value !== undefined) out[key] = String(value)
   }
-  return into
+  return out
 }
 
-function makeChannelStyleApplier(styleState: Record<string, string>) {
-  let prevKeys = new Set<string>()
-  return (styleObject: IStyleCSS | null) => {
-    const next = styleObject ?? {}
-    const nextKeys = new Set<string>()
-    for (const [key, value] of Object.entries(next)) {
-      if (value === null || value === undefined) {
-        delete styleState[key]
-      } else {
-        styleState[key] = String(value)
-        nextKeys.add(key)
-      }
-    }
-    for (const key of prevKeys) {
-      if (!nextKeys.has(key)) delete styleState[key]
-    }
-    prevKeys = nextKeys
-  }
-}
-
-function mergeAttributes(into: Record<string, string>, attrs: IAttributeProperties<unknown> | null) {
-  if (!attrs) return into
-  for (const [key, value] of Object.entries(attrs)) {
-    if (value === undefined || value === null) {
-      delete into[key]
-    } else {
-      into[key] = String(value)
-    }
-  }
-  return into
-}
-
-function cloneNode(
-  node: INode,
-  style: Record<string, string>,
-  attrs: Record<string, string>,
-  children: Array<INode | string | null>
-): INode {
-  // Project merged static + reactive style state into a single entry on the
-  // snapshot — downstream `project.ts` reads it as the resolved style for
-  // this node at this snapshot tick.
-  const staticStyles = Object.keys(style).length > 0 ? [{ pseudo: null, style: style as IStyleCSS }] : []
-  return {
-    ...node,
-    staticStyles,
-    attributes: attrs,
-    // Drop null slots (unmount sentinels) from the emitted snapshot — they
-    // are a lifecycle signal, not content to serialize.
-    $segments: children.filter(c => c !== null) as any
-  }
-}
-
-/**
- * Callbacks a slot's parent registers so the slot can report append-
- * semantics child lifecycle: a mount appends, an update changes the
- * value in-place at the same insertion position, a remove drops just
- * that child, and a drop-all discards every child the slot has.
- */
-interface SlotHandler {
-  onMount(child: INode | string): ChildEntry
-  onDropAll(): void
-}
-
-interface ChildEntry {
-  update(child: INode | string): void
-  remove(): void
-}
-
-function observeSlot($slot: I$Slottable, env: ISnapshotEnv, handler: SlotHandler): Disposable {
-  return $slot.run(
+/** Run a stream purely for its side effects; errors are reported, not thrown. */
+function runForEach<T>(
+  source: IStream<T>,
+  scheduler: I$Scheduler,
+  onValue: (value: T) => void,
+  onError: (error: unknown) => void
+): Disposable {
+  return source.run(
     {
-      event(_time, node) {
-        if (node === null || node === undefined) {
-          handler.onDropAll()
-          return
-        }
-        if ('kind' in node && node.kind === 'text') {
-          const textNode = node as ITextNode
-          const initial = typeof textNode.value === 'string' ? textNode.value : ''
-          const entry = handler.onMount(initial)
-          if (textNode.value && typeof textNode.value !== 'string') {
-            op(
-              textNode.value,
-              tap(val => entry.update(val ?? ''))
-            ).run(nullSink, env.scheduler)
-          }
-        } else if ('$segments' in node) {
-          // observeNode publishes the initial snapshot via its own emit()
-          // and re-pushes whenever the tree updates. Each slot event from
-          // here is a NEW child entry — append-semantics.
-          const entry = handler.onMount(node as INode)
-          const inode = node as INode
-          const nodeObs = observeNode(inode, env, snap => entry.update(snap))
-          // When the INode's upstream subscription is torn down
-          // (joinMap.endInner after until(remove), outer dispose, …), the
-          // SettableDisposable on the INode fires. Hook removal to it.
-          try {
-            inode.disposable?.set?.(
-              disposeWith(() => {
-                entry.remove()
-                nodeObs[Symbol.dispose]()
-              })
-            )
-          } catch {
-            // Already set — the INode's disposable is shared across
-            // subscriptions; remove via nodeObs alone (outer dispose path
-            // still catches this entry on teardown).
-          }
-        }
+      event(_time, value) {
+        onValue(value)
       },
-      error(_time, err) {
-        console.error('[aelea] snapshot slot error', err)
+      error(_time, error) {
+        onError(error)
       },
       end() {}
     },
-    env.scheduler
+    scheduler
   ) as unknown as Disposable
 }
 
-type ChildToken = { value: INode | string }
+type ChildToken = { kind: 'text'; text: string } | { kind: 'node'; obs: INodeObserver }
 
-function observeNode(node: INode, env: ISnapshotEnv, push: (node: INode) => void): Disposable {
-  const styleState: Record<string, string> = {}
-  const attrState: Record<string, string> = {}
-  // Per-segment list of concurrent child entries, preserving declaration
-  // order across segments AND insertion order within each segment (so
-  // `joinMap(makeItem, list$)` accumulates children rather than
-  // replacing). Each entry is an identity-bearing token so `.update(next)`
-  // and `.remove()` target the specific child regardless of value equality.
-  const segmentChildren: ChildToken[][] = node.$segments.map(() => [])
+function observeSlot(
+  $slot: I$Slottable,
+  scheduler: I$Scheduler,
+  handlers: IManifestHandlers,
+  bucket: ChildToken[]
+): Disposable {
+  const childDisposables: Disposable[] = []
 
-  let scheduled = false
-  const scheduleEmit = () => {
-    if (scheduled) return
-    scheduled = true
-    const task = {
-      active: true,
-      run: () => {
-        if (!task.active) return
-        scheduled = false
-        emit()
-      },
-      error: () => {
-        task.active = false
-      },
-      [Symbol.dispose]() {
-        task.active = false
-      }
-    }
-    env.scheduler.paint(task as any)
-  }
+  const slotDisposable = $slot.run(
+    {
+      event(_time, node) {
+        if (node === null || node === undefined) {
+          // Unmount sentinel — the slot dropped all of its children.
+          if (bucket.length > 0) {
+            bucket.length = 0
+            handlers.onDirty()
+          }
+          return
+        }
 
-  const emit = () => {
-    // Flatten tokens → values, preserving segment + insertion order.
-    const flat: Array<INode | string | null> = []
-    for (const seg of segmentChildren) for (const t of seg) flat.push(t.value)
-    const cloned = cloneNode(node, { ...styleState }, { ...attrState }, flat)
-    push(cloned)
-  }
+        if ('kind' in node && node.kind === 'text') {
+          const textNode = node as ITextNode
+          const token: ChildToken = {
+            kind: 'text',
+            text: typeof textNode.value === 'string' ? textNode.value : ''
+          }
+          bucket.push(token)
+          handlers.onDirty()
+          if (textNode.value && typeof textNode.value !== 'string') {
+            childDisposables.push(
+              runForEach(
+                textNode.value,
+                scheduler,
+                value => {
+                  token.text = value ?? ''
+                  handlers.onDirty()
+                },
+                handlers.onError
+              )
+            )
+          }
+          return
+        }
 
-  for (const entry of node.staticStyles) {
-    if (entry.pseudo === null) mergeStyle(styleState, entry.style)
-  }
-  if (typeof node.attributes === 'object' && Object.keys(node.attributes).length) {
-    mergeAttributes(attrState, node.attributes as IAttributeProperties<unknown>)
-  }
+        if ('$segments' in node) {
+          const inode = node as INode
+          const childObs = observeNode(inode, scheduler, handlers)
+          const token: ChildToken = { kind: 'node', obs: childObs }
+          bucket.push(token)
+          childDisposables.push(childObs)
+          handlers.onDirty()
 
-  const behaviorDisposables: Disposable[] = []
-
-  if (node.styleInline.length) {
-    const inlineStreams = node.styleInline.map(sb => {
-      const apply = makeChannelStyleApplier(styleState)
-      return op(
-        sb,
-        tap(styleObj => {
-          apply(styleObj as IStyleCSS | null)
-          scheduleEmit()
-        })
-      )
-    })
-    behaviorDisposables.push(merge(...inlineStreams).run(nullSink, env.scheduler))
-  }
-
-  if (node.styleBehavior.length) {
-    const streams = node.styleBehavior.map(sb => {
-      const apply = makeChannelStyleApplier(styleState)
-      return op(
-        sb,
-        tap(styleObj => {
-          apply(styleObj as IStyleCSS | null)
-          scheduleEmit()
-        })
-      )
-    })
-    behaviorDisposables.push(merge(...streams).run(nullSink, env.scheduler))
-  }
-
-  if (node.attributesBehavior.length) {
-    const streams = node.attributesBehavior.map(attrs =>
-      op(
-        attrs,
-        tap(attr => {
-          mergeAttributes(attrState, attr as IAttributeProperties<unknown>)
-          scheduleEmit()
-        })
-      )
-    )
-    behaviorDisposables.push(merge(...streams).run(nullSink, env.scheduler))
-  }
-
-  const slotDisposables: Disposable[] = node.$segments.map(($slot, idx) => {
-    const bucket = segmentChildren[idx]
-    return observeSlot($slot, env, {
-      onMount(initial) {
-        const token: ChildToken = { value: initial }
-        bucket.push(token)
-        scheduleEmit()
-        return {
-          update(next) {
-            token.value = next
-            scheduleEmit()
-          },
-          remove() {
+          // When the child's upstream subscription tears down (e.g.
+          // joinMap.endInner after until(remove), or an outer dispose), the
+          // node's SettableDisposable fires — drop just this child then.
+          const removal = disposeWith(() => {
             const i = bucket.indexOf(token)
-            if (i !== -1) bucket.splice(i, 1)
-            scheduleEmit()
+            if (i !== -1) {
+              bucket.splice(i, 1)
+              handlers.onDirty()
+            }
+            childObs[Symbol.dispose]()
+          })
+          try {
+            inode.disposable?.set?.(removal)
+          } catch {
+            // Already set — the disposable is shared across subscriptions.
+            // The parent's dispose still tears this child down via
+            // childDisposables, so removal is covered.
           }
         }
       },
-      onDropAll() {
-        if (bucket.length === 0) return
-        bucket.length = 0
-        scheduleEmit()
-      }
-    })
-  })
-
-  emit()
+      error(_time, error) {
+        handlers.onError(error)
+      },
+      end() {}
+    },
+    scheduler
+  ) as unknown as Disposable
 
   return {
     [Symbol.dispose]() {
-      for (const d of behaviorDisposables) d?.[Symbol.dispose]?.()
-      for (const d of slotDisposables) d?.[Symbol.dispose]?.()
+      slotDisposable[Symbol.dispose]?.()
+      for (const d of childDisposables) d[Symbol.dispose]?.()
+    }
+  }
+}
+
+function observeNode(node: INode, scheduler: I$Scheduler, handlers: IManifestHandlers): INodeObserver {
+  const tag = getTag(node.element)
+
+  // Style is computed from independent layers so a channel that re-emits a
+  // partial object (or `null` to clear) only ever rewrites its own keys —
+  // it can't clobber a key another channel still owns. Merge order at
+  // materialize time is: static < inline < behavior.
+  const staticStyle: Record<string, string> = {}
+  for (const entry of node.staticStyles) {
+    if (entry.pseudo === null) Object.assign(staticStyle, toStringRecord(entry.style as Record<string, unknown>))
+  }
+  const inlineLayers: Record<string, string>[] = node.styleInline.map(() => ({}))
+  const behaviorLayers: Record<string, string>[] = node.styleBehavior.map(() => ({}))
+
+  const staticAttr = toStringRecord(node.attributes as Record<string, unknown>)
+  const attrLayers: Record<string, string>[] = node.attributesBehavior.map(() => ({}))
+
+  const segmentChildren: ChildToken[][] = node.$segments.map(() => [])
+
+  const disposables: Disposable[] = []
+  let disposed = false
+
+  node.styleInline.forEach((styleStream, i) => {
+    disposables.push(
+      runForEach(
+        styleStream,
+        scheduler,
+        styleObj => {
+          inlineLayers[i] = toStringRecord(styleObj as Record<string, unknown> | null)
+          handlers.onDirty()
+        },
+        handlers.onError
+      )
+    )
+  })
+
+  node.styleBehavior.forEach((styleStream, i) => {
+    disposables.push(
+      runForEach(
+        styleStream,
+        scheduler,
+        styleObj => {
+          behaviorLayers[i] = toStringRecord(styleObj as Record<string, unknown> | null)
+          handlers.onDirty()
+        },
+        handlers.onError
+      )
+    )
+  })
+
+  node.attributesBehavior.forEach((attrStream, i) => {
+    disposables.push(
+      runForEach(
+        attrStream,
+        scheduler,
+        attrs => {
+          attrLayers[i] = toStringRecord(attrs as IAttributeProperties<unknown> | null)
+          handlers.onDirty()
+        },
+        handlers.onError
+      )
+    )
+  })
+
+  node.$segments.forEach(($slot, idx) => {
+    disposables.push(observeSlot($slot, scheduler, handlers, segmentChildren[idx]))
+  })
+
+  return {
+    materialize(): ResolvedNode {
+      const style: Record<string, string> = { ...staticStyle }
+      for (const layer of inlineLayers) Object.assign(style, layer)
+      for (const layer of behaviorLayers) Object.assign(style, layer)
+
+      const attributes: Record<string, string> = { ...staticAttr }
+      for (const layer of attrLayers) Object.assign(attributes, layer)
+
+      const children: Array<ResolvedNode | string> = []
+      for (const segment of segmentChildren) {
+        for (const token of segment) {
+          if (token.kind === 'text') {
+            if (token.text.length > 0) children.push(token.text)
+          } else {
+            children.push(token.obs.materialize())
+          }
+        }
+      }
+
+      return { tag, style, attributes, children }
+    },
+    [Symbol.dispose]() {
+      if (disposed) return
+      disposed = true
+      for (const d of disposables) d[Symbol.dispose]?.()
     }
   }
 }
 
 /**
- * Stream of `INode` snapshots of `$node`. Emits once on mount, then again
- * on every paint-batched descendant update. Callers typically debounce to
- * a settle window and take the latest — `renderToImage` does this.
+ * Subscribe `$root` and expose a live observer over the resolved tree.
+ * Re-subscribes the whole tree if the root stream emits a new node.
  */
-export function snapshotStream($node: I$Node, scheduler: I$Scheduler = createHeadlessScheduler()) {
-  return stream<INode>((sink, _sched) => {
-    let rootObserver: Disposable | null = null
+export function observeManifest($root: I$Node, scheduler: I$Scheduler, handlers: IManifestHandlers): IManifestObserver {
+  let rootObserver: INodeObserver | null = null
+  let disposed = false
 
-    const nodeDisposable = $node.run(
-      {
-        event(_time, node) {
-          rootObserver?.[Symbol.dispose]?.()
-          rootObserver = observeNode(node, { scheduler }, manifest => {
-            sink.event(scheduler.time(), manifest)
-          })
-        },
-        error(_time, err) {
-          sink.error(scheduler.time(), err)
-        },
-        end() {
-          sink.end?.(scheduler.time())
-        }
+  const rootDisposable = $root.run(
+    {
+      event(_time, node) {
+        rootObserver?.[Symbol.dispose]()
+        rootObserver = observeNode(node as INode, scheduler, handlers)
+        handlers.onDirty()
       },
-      scheduler
-    ) as unknown as Disposable
+      error(_time, error) {
+        handlers.onError(error)
+      },
+      end() {}
+    },
+    scheduler
+  ) as unknown as Disposable
+
+  return {
+    materialize: () => (rootObserver === null ? null : rootObserver.materialize()),
+    [Symbol.dispose]() {
+      if (disposed) return
+      disposed = true
+      rootObserver?.[Symbol.dispose]()
+      rootDisposable[Symbol.dispose]?.()
+    }
+  }
+}
+
+/**
+ * Stream of `ResolvedNode` snapshots of `$node`. Emits a coalesced snapshot
+ * (one per microtask batch) on mount and on every subsequent change. Most
+ * callers want `renderToImage`, which settles deterministically and
+ * materializes once; this is for authors driving their own projection.
+ */
+export function snapshotStream($node: I$Node, scheduler: I$Scheduler = createSettleScheduler()): IStream<ResolvedNode> {
+  return stream<ResolvedNode>((sink, _scheduler) => {
+    let observer: IManifestObserver | null = null
+    let scheduled = false
+
+    const emit = () => {
+      scheduled = false
+      const resolved = observer?.materialize()
+      if (resolved) sink.event(scheduler.time(), resolved)
+    }
+
+    const scheduleEmit = () => {
+      if (scheduled) return
+      scheduled = true
+      scheduler.asap({
+        active: true,
+        run: emit,
+        error(_time: number, error: unknown) {
+          sink.error(scheduler.time(), error)
+        },
+        [Symbol.dispose]() {
+          scheduled = false
+        }
+      })
+    }
+
+    observer = observeManifest($node, scheduler, {
+      onDirty: scheduleEmit,
+      onError: error => sink.error(scheduler.time(), error)
+    })
 
     return {
       [Symbol.dispose]() {
-        rootObserver?.[Symbol.dispose]?.()
-        nodeDisposable?.[Symbol.dispose]?.()
+        observer?.[Symbol.dispose]()
       }
     }
   })

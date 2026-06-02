@@ -45,7 +45,7 @@ export const disabledOp = (disabled: IStream<boolean | Promise<unknown>>): IMuta
   const state = resolveDisabledState(disabled)
   return makeMutator((node: INode) => {
     node.styleBehavior.push(disabledStyleStream(state))
-    node.attributesBehavior.push(map(s => ({ disabled: isDisabled(s) }), state))
+    node.attributesBehavior.push(map(s => ({ disabled: isDisabled(s) ? '' : null }), state))
     return node
   })
 }

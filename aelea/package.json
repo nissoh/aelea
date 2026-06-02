@@ -1,6 +1,6 @@
 {
   "name": "aelea",
-  "version": "4.11.1",
+  "version": "4.12.0",
   "type": "module",
   "scripts": {
     "build": "bun run build:clean && tsgo -b",
@@ -68,10 +68,10 @@
   "devDependencies": {
     "@most/core": "1.6.1",
     "@most/scheduler": "1.3.0",
-    "@takumi-rs/core": "^1.1.2",
-    "bun-types": "^1.3.13",
-    "happy-dom": "^15.11.6",
-    "tinybench": "^6.0.0"
+    "@takumi-rs/core": "^1.6.0",
+    "bun-types": "^1.3.14",
+    "happy-dom": "^20.9.0",
+    "tinybench": "^6.0.2"
   },
   "publishConfig": {
     "access": "public"

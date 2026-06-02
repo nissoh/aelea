@@ -44,7 +44,7 @@ class BehaviorSource<T> implements IStream<T> {
     this.subscribers.push(subscriberInfo)
 
     return disposeWith(() => {
-      disposeAll(disposables)
+      disposeAll(disposables)[Symbol.dispose]()
       const index = this.subscribers.indexOf(subscriberInfo)
       if (index > -1) {
         this.subscribers.splice(index, 1)

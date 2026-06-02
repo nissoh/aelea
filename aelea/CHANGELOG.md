@@ -1,5 +1,29 @@
 # aelea
 
+## 4.12.0
+
+### Patch Changes
+
+#### `disabledOp` — `disabled: false` now clears the attribute
+
+`disabledOp` emitted a boolean `disabled` attribute, so an enabled state rendered as `disabled="false"`. Because `disabled` is an HTML *boolean* attribute (presence disables, value ignored), any control fed a `disabled` stream that emitted `false` stayed silently disabled. It now emits `''` when disabled and `null` when enabled (the "emit `null` to clear" convention), so the attribute is removed on `false`. Affects every controller using `disabledOp` (`$Button`, `$ButtonIcon`, `$Slider`, …) with a reactive `disabled` stream.
+
+#### Reactive core — behavior/tether teardown leak
+
+`behavior()` output subscriptions (including `nodeEvent` listeners wired through a component's output tethers) were not disposed on unsubscribe — `disposeAll(...)` was called without invoking its returned disposable. Component unmount now tears them down.
+
+### Minor Changes
+
+#### Takumi renderer — `ResolvedNode` pipeline + deterministic settle
+
+The server-side image renderer (`aelea/takumi`) materializes a tree once into a plain, renderer-agnostic `ResolvedNode`, then projects that to takumi nodes, with a live `observeManifest` observer and a deterministic `createSettleScheduler` (settles on the scheduler's `idle()` signal — microtask-scale, no fixed delay). New exports: `observeManifest`, `ResolvedNode`, `IManifestObserver`, `createSettleScheduler`, `ISettleScheduler`.
+
+**Breaking (low-level only):** `snapshotToTakumi` and `snapshotStream` now operate on `ResolvedNode` instead of `INode`. `renderToImage` is unchanged. `rendererOptions` is typed `Record<string, unknown>` (the installed `@takumi-rs/core` ≥ 1.6 no longer surfaces its option interfaces under NodeNext); supported `@takumi-rs/core` is now ≥ 1.6.
+
+#### Performance
+
+`merge` / `combine` reach `@most/core` parity — dedicated inner sinks drop the per-event `IndexSink` indirection. The DOM renderer's mount path is materially faster on large lists (~+35% on 1000 rows: a build-time node plan with no per-mount wrapper allocation, and O(n) slot insertion replacing the O(n²) index scan). Reactive style application is leaner (lazy single-map diff + reference short-circuit). Scheduler flushes share one timestamp per flush across all schedulers.
+
 ## 4.11.1
 
 ### Patch Changes

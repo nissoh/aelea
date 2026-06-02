@@ -1,12 +1,12 @@
 # Aelea Takumi Renderer
 
-Rasterize an aelea component tree to an image — `.webp` / `.png` / `.jpeg` / `.avif` — without a browser. Uses [`@takumi-rs/image-response`](https://www.npmjs.com/package/@takumi-rs/image-response) under the hood (Rust/native Go Yoga layout + Fontdue text + resvg SVG → bitmap).
+Rasterize an aelea component tree to an image — `.webp` / `.png` / `.jpeg` — without a browser. Goes straight through [`@takumi-rs/core`](https://www.npmjs.com/package/@takumi-rs/core)'s `Renderer` (native Yoga layout + text shaping + raster). No React round-trip, no `ImageResponse`.
 
 ## Quickstart
 
 ```ts
 import { style } from 'aelea/ui'
-import { $element, $text, $img, renderToImage } from 'aelea/takumi'
+import { $element, $text, renderToImage } from 'aelea/takumi'
 
 const $Card = $element('div')(
   style({
@@ -34,14 +34,16 @@ const bytes: Uint8Array = await renderToImage($Card, {
 
 The result is raw bytes — write to disk, return as a `Response`, stream to S3, whatever. `renderToImage` does not touch the filesystem.
 
-See `aelea/benchmark/og-takumi-v2.ts` for a runnable version.
+See `aelea/benchmark/render/og-takumi.ts` for a runnable version.
 
 ## How it works
 
-1. **Subscribe the aelea tree.** `manifestFromNode` walks the `IStream<INode>` tree with a `HeadlessScheduler` (no `requestAnimationFrame` — `paint` is a microtask). Behavior streams (`styleBehavior`, `attributesBehavior`, text streams, etc.) each populate the snapshot.
-2. **Settle.** `manifestFromNode` emits progressively — the first emit is an empty root, subsequent emits fill in as descendants mount and their behavior streams fire. `renderToImage` waits until the emit stream has been idle for `settleMs` (default 250ms), then takes the latest snapshot.
-3. **Project.** The settled snapshot is handed to `manifestToReact` (from `ui-renderer-manifest-react`), which produces React-element-shaped objects (`$$typeof: Symbol.for('react.element')`, …). That's what `ImageResponse` accepts.
-4. **Rasterize.** `new ImageResponse(tree, opts)` → `.arrayBuffer()` returns encoded bytes.
+1. **Subscribe.** `observeManifest` walks the `IStream<INode>` tree under a headless scheduler (no `requestAnimationFrame`). Behavior streams (`styleBehavior`, `attributesBehavior`, `$text(stream)`, slots) update *live* per-channel state — no snapshot is built per emit.
+2. **Settle (deterministically).** The default scheduler exposes an `idle()` signal that resolves the moment no microtask batch is queued and no `delay` timer is pending. `renderToImage` waits on it and a version check, so it finishes as soon as the tree's synchronous and timer-driven behaviors quiesce — typically microtask scale, ~1ms — not after a fixed wall-clock window. `settleMs` (default `0`) adds an extra quiet guard only for promise-driven data; `timeoutMs` (default `5000`) is the hard ceiling.
+3. **Materialize once.** The settled observer is walked a single time into a plain `ResolvedNode` tree (string styles/attrs, `ResolvedNode | string` children, no streams). Style is merged from independent layers — `static < inline < behavior` — so a channel re-emitting a partial object never clobbers another channel's keys.
+4. **Project + rasterize.** `snapshotToTakumi` maps the resolved tree to takumi's `container` / `text` / `image` nodes, then `renderer.render(tree, opts)` returns encoded bytes.
+
+A single default `Renderer` is created lazily and reused across calls, so font/image caches amortize across renders — ideal for a service streaming snapshots per request. Pass your own `renderer` for configured fonts/caches.
 
 ## API
 
@@ -49,14 +51,32 @@ See `aelea/benchmark/og-takumi-v2.ts` for a runnable version.
 interface RenderToImageOptions {
   width: number
   height: number
-  format?: 'webp' | 'png' | 'jpeg' | 'avif'
-  scheduler?: I$Scheduler
-  responseOptions?: /* passes through to ImageResponse: fonts, imageLoader, … */
-  settleMs?: number     // default 250
-  timeoutMs?: number    // default 5000 — hard ceiling on the whole call
+  format?: 'webp' | 'png' | 'jpeg' | 'ico' | 'raw'  // default 'webp'
+  devicePixelRatio?: number
+  quality?: number                 // jpeg quality 0–100
+  drawDebugBorder?: boolean
+  fetchedResources?: unknown[]     // pre-fetched image resources, passed to takumi
+  renderer?: Renderer              // configured @takumi-rs/core instance
+  rendererOptions?: ConstructorParameters<typeof Renderer>[0]  // first caller wins
+  scheduler?: I$Scheduler          // default: headless scheduler with idle()
+  settleMs?: number                // default 0 — extra quiet window after idle
+  timeoutMs?: number               // default 5000 — hard ceiling
+  signal?: AbortSignal
 }
 
 function renderToImage($root: I$Node, opts: RenderToImageOptions): Promise<Uint8Array>
+```
+
+Lower-level exports for authors driving their own projection:
+
+```ts
+import {
+  observeManifest,    // live observer: { materialize(): ResolvedNode | null, [Symbol.dispose]() }
+  snapshotStream,     // IStream<ResolvedNode> — coalesced snapshot per microtask batch
+  snapshotToTakumi,   // ResolvedNode -> TakumiNode
+  createSettleScheduler,
+  type ResolvedNode
+} from 'aelea/takumi'
 ```
 
 Factories:
@@ -66,46 +86,51 @@ Factories:
 | `$element(tag)` | any HTML tag | container |
 | `$node` | `div` | container |
 | `$custom(tag)` | any string | container |
-| `$svg(tag)` | svg element | container (takumi doesn't layout SVG as SVG; project to container) |
-| `$img()` + `attr({ src, width, height })` | `img` | image (takumi handles `<img>` specially — `src` is required) |
+| `$svg(tag)` | svg element | container (takumi doesn't layout SVG as SVG) |
+| `$element('img')` + `attr({ src, width, height })` | `img` | image (takumi handles `<img>` specially — `src` is required) |
 | `$text(value\|stream)` | — | text |
 
-Node-agnostic helpers from `aelea/ui` (`style`, `attr`, `attrBehavior`, `styleBehavior`, `component`, `motion`, …) all work unchanged.
+Node-agnostic helpers from `aelea/ui` (`style`, `attr`, `attrBehavior`, `styleBehavior`, `component`, …) all work unchanged.
 
 ## Fonts
 
-Takumi ships no default fonts. If your component uses text, pass fonts via `responseOptions`:
+Takumi ships no default fonts. If your component uses text, supply fonts via `rendererOptions` — they configure the shared renderer on first use:
 
 ```ts
 import { readFileSync } from 'node:fs'
 
-const inter = readFileSync('./fonts/Inter-Regular.ttf')
-
 await renderToImage($App, {
   width: 1200,
   height: 630,
-  responseOptions: {
-    fonts: [{ data: inter, name: 'Inter', weight: 400 }]
-  }
+  rendererOptions: { fonts: [readFileSync('./fonts/Inter-Regular.ttf')] }
 })
+```
+
+For per-call font sets or a persistent image cache, construct your own `Renderer` and pass it as `renderer`. Note: `@takumi-rs/core`'s ESM types don't currently surface the `Renderer` constructor under `NodeNext`, so the construction needs a cast until upstream ships resolvable types:
+
+```ts
+import { Renderer } from '@takumi-rs/core'
+import { readFileSync } from 'node:fs'
+
+const renderer = new (Renderer as unknown as new (opts?: unknown) => Renderer)({
+  fonts: [readFileSync('./fonts/Inter-Regular.ttf')]
+})
+
+await renderToImage($App, { width: 1200, height: 630, renderer })
 ```
 
 See [`@takumi-rs/core` docs](https://www.npmjs.com/package/@takumi-rs/core) for the full options.
 
 ## What works / doesn't
 
-**Works** — plain container layout, flex, fixed sizing, borders/border-radius, backgrounds (colors + gradients accepted as CSS strings), fonts, text shaping, images via `$img()(attr({src}))`.
+**Works** — container layout, flex, fixed sizing, borders/border-radius, backgrounds (colors + gradients as CSS strings), fonts, text shaping, images via `$element('img')(attr({ src }))`, reactive `styleBehavior` / `attributesBehavior` / `$text(stream)` (their settled value is captured).
 
-**Doesn't** — SVG shapes, CSS pseudos (`:hover` etc.), animations, anything needing event loops (motion springs, intervals). Those require a live renderer; this path is a snapshot-to-bitmap.
+**Doesn't** — SVG shapes, CSS pseudos (`:hover` etc. are dropped — static raster has no interaction), continuous animation. A finite timer/spring *is* awaited (the scheduler tracks `delay`), so its final resting value is captured; an unbounded animation loop runs until `timeoutMs`, then the latest frame is taken.
 
-**Tree settlement** — if your tree has async data that takes time to resolve (network fetches inside a `promiseState` stream), bump `settleMs` and `timeoutMs`. The settle logic takes the *last* emit in the quiet window, so delayed data does land if you wait long enough.
+**Async data** — `idle()` cannot see bare promises (`fromPromise` / `switchMap(async …)`) that resolve over the network, since they don't touch the scheduler. Resolve such data at the boundary before rendering (the aelea way), or bump `settleMs` to add a quiet window. Already-resolved promises re-enter via `asap` and are absorbed automatically.
 
-## Alternative: direct takumi-helper shapes
+## Performance notes
 
-`manifestToReact` produces React-shaped elements because `ImageResponse` expects React. If you're using a different takumi backend (a direct `@takumi-rs/core` `Renderer` instance), the `projectNode` export gives you `TakumiContainerNode | TakumiTextNode | TakumiImageNode` matching `@takumi-rs/helpers` shape:
-
-```ts
-import { projectNode } from 'aelea/takumi'
-// settledSnapshot is not exported today; roll your own via manifestFromNode
-// for the bypass-ImageResponse case.
-```
+- Settle is deterministic and microtask-scale (~1ms warm), not a fixed delay — per-render latency is dominated by the native rasterize, which is what you want for snapshot-per-request services.
+- The default `Renderer` is shared and lazily created; the first caller's `rendererOptions` win for the process lifetime. Pass an explicit `renderer` per call if you need different font sets.
+- The tree is materialized exactly once per render (after settle), so a burst of mount-time behavior emissions costs O(emits) bookkeeping, not O(emits × tree-size) clones.

@@ -48,29 +48,42 @@ export function createNode<TElement>(
 
     const $segments =
       input.length > 0 ? (input as I$Slottable<TElement>[]) : (EMPTY_SEGMENTS as unknown as I$Slottable<TElement>[])
-    // Element descriptor created per-subscription so the same compose placed
-    // in multiple segments yields independent mounts. A `nodeEvent` op sees
-    // the same fresh descriptor since both share the subscription.
+
+    const staticStyles: INode<TElement>['staticStyles'] = []
+    const styleBehavior: INode<TElement>['styleBehavior'] = []
+    const styleInline: INode<TElement>['styleInline'] = []
+    const propBehavior: INode<TElement>['propBehavior'] = []
+    const attributesBehavior: INode<TElement>['attributesBehavior'] = []
+    const attributes: INode<TElement>['attributes'] = {}
+    if (mutators.length > 0) {
+      const scratch: INode<TElement> = {
+        element: undefined as unknown as TElement,
+        disposable: undefined as unknown as SettableDisposable,
+        $segments,
+        staticStyles,
+        styleBehavior,
+        styleInline,
+        propBehavior,
+        attributesBehavior,
+        attributes
+      }
+      for (let i = 0; i < mutators.length; i++) mutators[i](scratch)
+    }
+
     const $branch = stream<INode<TElement>>((sink, scheduler) => {
       const nodeDisposable = new SettableDisposable()
       const nodeState: INode<TElement> = {
         element: createElement(),
         disposable: nodeDisposable,
         $segments,
-        staticStyles: [],
-        styleBehavior: [],
-        styleInline: [],
-        propBehavior: [],
-        attributesBehavior: [],
-        attributes: {}
+        staticStyles,
+        styleBehavior,
+        styleInline,
+        propBehavior,
+        attributesBehavior,
+        attributes
       }
-
-      for (let i = 0; i < mutators.length; i++) mutators[i](nodeState)
-
       const nodeTask = scheduler.asap(propagateRunEventTask(sink, emitNode, nodeState))
-      // Both disposables fire — the asap task (in case the emit hasn't
-      // happened yet) AND the per-instance disposable (so the renderer's
-      // "remove this element" hook runs on upstream teardown).
       return disposeBoth(nodeTask, nodeDisposable)
     })
 

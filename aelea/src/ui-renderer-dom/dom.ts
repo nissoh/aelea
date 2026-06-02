@@ -1,14 +1,4 @@
-import {
-  disposeAll,
-  disposeNone,
-  disposeWith,
-  type IStream,
-  type ITask,
-  type ITime,
-  nullSink,
-  op,
-  tap
-} from '../stream/index.js'
+import { disposeAll, disposeNone, disposeWith, type IStream, type ITask, type ITime } from '../stream/index.js'
 import type { IElementDescriptor } from '../ui/node.js'
 import { createDomScheduler } from '../ui/scheduler.js'
 import type {
@@ -188,27 +178,59 @@ function applyStaticStyle(node: INode<INodeElementDom>, element: INodeElementDom
 
 function makeReactiveStyleApplier(element: INodeElementDom) {
   const el = element as any
-  let prev = new Map<string, string | null>()
-  let scratch = new Map<string, string | null>()
+  let prev: Map<string, string> | null = null
+  let lastObj: IStyleCSS | null | undefined
   return (styleObj: IStyleCSS | null) => {
+    if (styleObj === lastObj) return
+    lastObj = styleObj
     if (!el?.style?.setProperty) return
-    scratch.clear()
     const next = styleObj ?? {}
-    for (const k in next) {
-      const raw = (next as any)[k]
-      scratch.set(toKebab(k), raw == null ? null : typeof raw === 'string' ? raw : String(raw))
+    if (prev === null) {
+      const applied = new Map<string, string>()
+      for (const k in next) {
+        const raw = (next as any)[k]
+        if (raw == null) continue
+        const v = typeof raw === 'string' ? raw : String(raw)
+        applied.set(k, v)
+        el.style.setProperty(toKebab(k), v)
+      }
+      prev = applied
+      return
     }
     for (const k of prev.keys()) {
-      if (!scratch.has(k)) el.style.removeProperty(k)
+      if ((next as any)[k] == null) {
+        el.style.removeProperty(toKebab(k))
+        prev.delete(k)
+      }
     }
-    for (const [k, v] of scratch) {
+    for (const k in next) {
+      const raw = (next as any)[k]
+      if (raw == null) continue
+      const v = typeof raw === 'string' ? raw : String(raw)
       if (prev.get(k) === v) continue
-      el.style.setProperty(k, v)
+      el.style.setProperty(toKebab(k), v)
+      prev.set(k, v)
     }
-    const tmp = prev
-    prev = scratch
-    scratch = tmp
   }
+}
+
+function runEffect<V>(
+  source: IStream<V>,
+  submit: (value: V) => void,
+  env: { scheduler: I$Scheduler; onError: (err: unknown) => void }
+): Disposable {
+  return source.run(
+    {
+      event(_time, value) {
+        submit(value)
+      },
+      error(_time, error) {
+        env.onError(error)
+      },
+      end() {}
+    },
+    env.scheduler
+  ) as unknown as Disposable
 }
 
 function mountNodeOrText(
@@ -226,7 +248,7 @@ function mountNodeOrText(
       const { submit, task } = makePaintWriter<string>(env.scheduler, val => {
         el.nodeValue = val ?? ''
       })
-      const subDisp = op(source as IStream<string>, tap(submit)).run(nullSink, env.scheduler)
+      const subDisp = runEffect(source as IStream<string>, submit, env)
       return { el, childDisposables: disposeAll([subDisp, task]) }
     }
     return { el, childDisposables: disposeNone }
@@ -268,7 +290,7 @@ function mountNodeOrText(
             const { submit, task } = makePaintWriter<unknown>(env.scheduler, v => {
               ;(element as any)[key] = v
             })
-            const subDisp = op(value, tap(submit)).run(nullSink, env.scheduler)
+            const subDisp = runEffect(value, submit, env)
             disposables.push(subDisp, task)
           }
           return disposeAll(disposables)
@@ -282,7 +304,7 @@ function mountNodeOrText(
           for (const sb of node.styleInline) {
             const apply = makeReactiveStyleApplier(element)
             const { submit, task } = makePaintWriter<IStyleCSS | null>(env.scheduler, apply)
-            const subDisp = op(sb, tap(submit)).run(nullSink, env.scheduler)
+            const subDisp = runEffect(sb, submit, env)
             disposables.push(subDisp, task)
           }
           return disposeAll(disposables)
@@ -296,7 +318,7 @@ function mountNodeOrText(
           for (const sb of node.styleBehavior) {
             const apply = makeReactiveStyleApplier(element)
             const { submit, task } = makePaintWriter<IStyleCSS | null>(env.scheduler, apply)
-            const subDisp = op(sb, tap(submit)).run(nullSink, env.scheduler)
+            const subDisp = runEffect(sb, submit, env)
             disposables.push(subDisp, task)
           }
           return disposeAll(disposables)
@@ -314,14 +336,17 @@ function mountNodeOrText(
                 applyAttributes(attr, element)
               }
             )
-            const subDisp = op(attrs, tap(submit)).run(nullSink, env.scheduler)
+            const subDisp = runEffect(attrs, submit, env)
             disposables.push(subDisp, task)
           }
           return disposeAll(disposables)
         })()
 
   const slotSets: Set<SlotEntry>[] = node.$segments.map(() => new Set())
-  const segmentDisposables = node.$segments.map((seg, segIdx) => renderSegmentSlot(seg, element, slotSets, segIdx, env))
+  const segCursor = { max: -1 }
+  const segmentDisposables = node.$segments.map((seg, segIdx) =>
+    renderSegmentSlot(seg, element, slotSets, segIdx, segCursor, env)
+  )
 
   const childDisposables = disposeAll([styleInlineDisp, styleClass, attrBeh, propDisp, ...segmentDisposables])
 
@@ -382,11 +407,25 @@ function runSlot(
   })
 }
 
+function firstNodeOf(set: Set<SlotEntry>): Node | null {
+  for (const e of set) return e.el
+  return null
+}
+
+function nextSiblingRef(slotSets: Set<SlotEntry>[], segIdx: number): Node | null {
+  for (let i = segIdx + 1; i < slotSets.length; i++) {
+    const ref = firstNodeOf(slotSets[i])
+    if (ref !== null) return ref
+  }
+  return null
+}
+
 function renderSegmentSlot(
   $slot: I$Slottable,
   parent: Element,
   slotSets: Set<SlotEntry>[],
   segIdx: number,
+  segCursor: { max: number },
   env: { scheduler: I$Scheduler; onError: (err: unknown) => void }
 ): Disposable {
   const mounted = slotSets[segIdx]
@@ -395,9 +434,12 @@ function renderSegmentSlot(
     parent,
     mounted,
     el => {
-      let insertAt = mounted.size
-      for (let i = 0; i < segIdx; i++) insertAt += slotSets[i].size
-      parent.insertBefore(el, parent.childNodes[insertAt] ?? null)
+      if (segIdx >= segCursor.max) {
+        segCursor.max = segIdx
+        parent.insertBefore(el, null)
+      } else {
+        parent.insertBefore(el, nextSiblingRef(slotSets, segIdx))
+      }
     },
     env
   )

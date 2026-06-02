@@ -34,6 +34,8 @@ const perfNow =
     ? () => globalThis.performance.now()
     : () => Date.now()
 
+const PAINT_DRAIN_GUARD = 100
+
 class DomScheduler implements I$Scheduler {
   private asapTasks: ITask[] = []
   private paintTasks: ITask[] = []
@@ -57,15 +59,24 @@ class DomScheduler implements I$Scheduler {
     this.asapScheduled = false
     const tasks = this.asapTasks
     this.asapTasks = []
-    for (let i = 0; i < tasks.length; i++) tasks[i].run(this.time())
+    const time = this.time()
+    for (let i = 0; i < tasks.length; i++) tasks[i].run(time)
   }
 
   flushPaintTasks = (): void => {
-    this.paintScheduled = false
-    const tasks = this.paintTasks
-    this.paintTasks = []
-
-    for (let i = 0; i < tasks.length; i++) tasks[i].run(this.time())
+    let passes = 0
+    while (this.paintTasks.length > 0 && passes < PAINT_DRAIN_GUARD) {
+      passes++
+      const tasks = this.paintTasks
+      this.paintTasks = []
+      const time = this.time()
+      for (let i = 0; i < tasks.length; i++) tasks[i].run(time)
+    }
+    if (this.paintTasks.length > 0) {
+      raf(this.flushPaintTasks)
+    } else {
+      this.paintScheduled = false
+    }
   }
 
   asap(task: ITask): Disposable {
@@ -125,7 +136,8 @@ class HeadlessScheduler implements I$Scheduler {
     this.asapScheduled = false
     const tasks = this.asapTasks
     this.asapTasks = []
-    for (let i = 0; i < tasks.length; i++) tasks[i].run(this.time())
+    const time = this.time()
+    for (let i = 0; i < tasks.length; i++) tasks[i].run(time)
   }
 
   asap(task: ITask): Disposable {

@@ -6,3 +6,10 @@ cache
 .claude/
 .DS_Store
 deploy-*.yml
+
+# generated render-benchmark artifacts (keep the .ts sources)
+aelea/benchmark/render/*
+!aelea/benchmark/render/*.ts
+
+# bun test snapshots
+aelea/test/__snapshots__/

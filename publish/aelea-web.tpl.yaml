@@ -1,0 +1,44 @@
+---
+# Akash SDL — aelea docs site (aelea-web → puppet.fund). SINGLE service: the form
+# every working Akash web deploy uses (multi-service-in-one-lease was the suspect).
+# `REGISTRY=ghcr.io/you publish/build-publish.sh` pins the image: digest below.
+# Deploy this as its OWN deployment in https://console.akash.network. Edit
+# resources / pricing / domains here; the script only rewrites the image: line.
+version: "2.0"
+
+services:
+  aelea-web:
+    image: ghcr.io/nissoh/aelea-website@sha256:0ee77ca72e064f98f9462b747dece3f8424cb3856e3b46685ffd07a841b3f055
+    expose:
+      - port: 80
+        to:
+          - global: true
+        accept:
+          - puppet.fund
+          - www.puppet.fund
+
+profiles:
+  compute:
+    aelea-web:
+      resources:
+        cpu:
+          units: 0.25
+        memory:
+          size: 256Mi
+        storage:
+          size: 512Mi
+  placement:
+    akash:
+      signedBy:
+        anyOf:
+          - "akash1365yvmc4s7awdyj3n2sav7xfx76adc6dnmlx63"
+      pricing:
+        aelea-web:
+          denom: uact
+          amount: 10000
+
+deployment:
+  aelea-web:
+    akash:
+      profile: aelea-web
+      count: 1

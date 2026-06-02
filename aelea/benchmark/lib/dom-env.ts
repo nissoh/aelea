@@ -8,6 +8,13 @@ export function installDom(): void {
   if (installed) return
   installed = true
   const win = new Window({ url: 'http://localhost' })
+  // happy-dom@20.9.0's selector/CSS parser references `window.SyntaxError`
+  // (and friends), which the Window leaves undefined under bun — crashing
+  // querySelector/insertRule even for valid selectors. Provide the host ctors.
+  const w = win as unknown as Record<string, unknown>
+  for (const k of ['SyntaxError', 'DOMException', 'TypeError', 'Error']) {
+    if (w[k] === undefined) w[k] = (globalThis as unknown as Record<string, unknown>)[k]
+  }
   const g = globalThis as any
   g.window = win
   g.document = win.document

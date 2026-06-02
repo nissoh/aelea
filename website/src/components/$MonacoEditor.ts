@@ -216,7 +216,36 @@ async function loadMonacoFromCDN() {
   })
 }
 
-async function loadAeleaPackageLocally() {
+async function loadAeleaPackageLocally(): Promise<PackageTree> {
+  const now = new Date().toISOString()
+  const sanitize = (content: string) => content.replace(/(} from '@)/g, `} from '%40`)
+  const toFiles = (types: Record<string, string>): PackageFile[] =>
+    Object.entries(types).map(([name, content]) => ({
+      name,
+      content: sanitize(content),
+      hash: '',
+      size: content.length,
+      time: now
+    }))
+
+  try {
+    const { aeleaVersion, aeleaTypes, csstypeTypes } = await import('virtual:aelea-types')
+    const files = toFiles(aeleaTypes)
+    if (files.length === 0) return aeleaStubTree()
+
+    const csstypeFiles = toFiles(csstypeTypes)
+    const dependencies: PackageTree[] = csstypeFiles.length
+      ? [{ name: 'csstype', version: '3.2.3', typings: 'index.d.ts', files: csstypeFiles, dependencies: [] }]
+      : []
+
+    return { name: 'aelea', version: aeleaVersion, typings: 'stream/index.d.ts', files, dependencies }
+  } catch (err) {
+    console.warn('Failed to load real aelea types, falling back to stubs', err)
+    return aeleaStubTree()
+  }
+}
+
+function aeleaStubTree(): PackageTree {
   // Load aelea package definition based on the actual package.json exports
   const version = '2.5.18'
 
@@ -384,7 +413,11 @@ async function initializeMonaco() {
   tsLang?.typescriptDefaults?.setCompilerOptions?.({
     ...(tsLang?.typescriptDefaults?.getCompilerOptions?.() ?? {}),
     module: tsLang?.ModuleKind?.ESNext,
-    moduleResolution: tsLang?.ModuleResolutionKind?.NodeJs
+    // Bundler resolution (TS enum value 100) maps the `.js` specifiers in aelea's real
+    // .d.ts re-exports (`export * from './combinator/index.js'`) onto their sibling `.d.ts`.
+    // Monaco's ModuleResolutionKind enum only names Classic/NodeJs, so pass the number; the
+    // underlying TS worker understands it.
+    moduleResolution: tsLang?.ModuleResolutionKind?.Bundler ?? 100
   })
 
   // Load codicon font from CDN

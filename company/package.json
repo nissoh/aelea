@@ -1,25 +1,19 @@
 {
-  "name": "website",
-  "version": "33.0.2",
+  "name": "company",
+  "version": "0.0.0",
   "license": "MIT",
   "type": "module",
   "private": true,
-  "files": [
-    ".dist"
-  ],
-  "sideEffects": true,
   "scripts": {
     "dev": "bun vite",
     "build": "vite build",
     "tsc:check": "tsgo -p tsconfig.json --noEmit",
-    "preview": "bun vite preview",
-    "clean": "rm -rf dist && tsgo -b --clean"
+    "preview": "bun vite preview"
   },
   "dependencies": {
     "aelea": "workspace:*"
   },
   "devDependencies": {
-    "monaco-editor": "0.55.1",
     "vite": "8.0.14"
   }
 }

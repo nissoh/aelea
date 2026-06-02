@@ -12,12 +12,18 @@
  *     { width: 600, height: 200 }
  *   )
  *
- * Authors can also build takumi trees directly (bypassing the aelea
- * subscription pipeline) by combining `snapshotStream` + `snapshotToTakumi`
- * and handing the node to their own `Renderer` instance.
+ * Settling is deterministic — `renderToImage` finishes the instant the
+ * tree's synchronous and timer-driven behaviors quiesce (via the scheduler's
+ * `idle()` signal), not after a fixed wall-clock delay. This keeps per-render
+ * latency at microtask scale for snapshot-per-request services.
+ *
+ * Authors can also build takumi trees directly (bypassing the rasterizer) by
+ * combining `snapshotStream` / `observeManifest` with `snapshotToTakumi`, and
+ * handing the node to their own `Renderer` instance.
  */
 
 export type { TakumiContainerNode, TakumiImageNode, TakumiNode, TakumiTextNode } from './project.js'
 export { snapshotToTakumi } from './project.js'
 export { type ImageFormat, type RenderToImageOptions, renderToImage } from './render.js'
-export { snapshotStream } from './snapshot.js'
+export { createSettleScheduler, type ISettleScheduler } from './scheduler.js'
+export { type IManifestObserver, observeManifest, type ResolvedNode, snapshotStream } from './snapshot.js'

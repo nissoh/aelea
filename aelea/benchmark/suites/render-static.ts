@@ -1,4 +1,5 @@
-import { $element, $text, render } from '../../src/ui/index.js'
+import { just } from '../../src/stream/index.js'
+import { $element, $text, attrBehavior, render, styleBehavior } from '../../src/ui/index.js'
 import { dropRoot, freshRoot, installDom, syncScheduler } from '../lib/dom-env.js'
 import { type IBenchTask, type ISuite, runAndPrint } from '../lib/suite.js'
 
@@ -105,6 +106,45 @@ function aeleaListLarge() {
   dropRoot(root)
 }
 
+// Reactive-node group: every node carries several reactive decorators
+// (two styleBehavior layers, one attrBehavior, dynamic $text). Exercises the
+// per-entry subscribe path (runEffect) and the dynamic-text prime, which the
+// purely-static cases above never touch. Sources are `just(...)` (settled),
+// so the @aelea side does equivalent final work to the vanilla baseline.
+const REACTIVE_SIZE = 100
+
+function vanillaReactive() {
+  const root = freshRoot()
+  const wrap = doc.createElement('div')
+  for (let i = 0; i < REACTIVE_SIZE; i++) {
+    const d = doc.createElement('div')
+    d.style.setProperty('color', 'red')
+    d.style.setProperty('opacity', '0.5')
+    d.setAttribute('data-i', String(i))
+    d.appendChild(doc.createTextNode(`row ${i}`))
+    wrap.appendChild(d)
+  }
+  root.appendChild(wrap)
+  dropRoot(root)
+}
+
+const $reactive = $element('div')(
+  ...Array.from({ length: REACTIVE_SIZE }, (_, i) =>
+    $element('div')(
+      styleBehavior(just({ color: 'red' })),
+      styleBehavior(just({ opacity: '0.5' })),
+      attrBehavior(just({ 'data-i': String(i) }))
+    )($text(just(`row ${i}`)))
+  )
+)
+
+function aeleaReactive() {
+  const root = freshRoot()
+  const disp = render({ rootAttachment: root, $rootNode: $reactive, scheduler: syncScheduler })
+  disp[Symbol.dispose]()
+  dropRoot(root)
+}
+
 function pair(group: string, baselineFn: () => unknown, aeleaFn: () => unknown): IBenchTask[] {
   return [
     { group, variant: 'vanilla DOM', baseline: true, fn: baselineFn },
@@ -116,7 +156,8 @@ const tasks: IBenchTask[] = [
   ...pair('static tree (4 nodes)', vanillaSmall, aeleaSmall),
   ...pair(`deep tree (${DEEP_LEVELS} levels)`, vanillaDeep, aeleaDeep),
   ...pair(`flat list (${LIST_SIZE} rows)`, vanillaList, aeleaList),
-  ...pair(`flat list (${LIST_LARGE} rows)`, vanillaListLarge, aeleaListLarge)
+  ...pair(`flat list (${LIST_LARGE} rows)`, vanillaListLarge, aeleaListLarge),
+  ...pair(`reactive nodes (${REACTIVE_SIZE})`, vanillaReactive, aeleaReactive)
 ]
 
 const suite: ISuite = {

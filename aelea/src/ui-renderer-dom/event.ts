@@ -89,12 +89,17 @@ export const nodeEvent: INodeEventCurry = curry2((eventType, descriptor) => {
 
   return stream((sink, scheduler) => {
     let detach: Disposable | null = null
+    let currentTarget: EventTarget | null = null
 
     const disposable = target$.run(
       {
         event(_time: number, node: unknown) {
-          detach?.[Symbol.dispose]?.()
           const target = resolveEventTarget(node)
+          if (target === currentTarget) return
+
+          detach?.[Symbol.dispose]?.()
+          detach = null
+          currentTarget = target
           if (target === null) return
 
           const handler = (ev: Event) => {

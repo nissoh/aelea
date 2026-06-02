@@ -1,7 +1,6 @@
 import { empty } from '../source/void.js'
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeAll } from '../utils/disposable.js'
-import { type IndexedValue, IndexSink } from '../utils/sink.js'
 
 /**
  * Stream that merges multiple streams into one, emitting values as they arrive
@@ -15,7 +14,7 @@ class Merge<T> implements IStream<T> {
     const mergeSink = new MergeSink(sink, disposables, l)
 
     for (let i = 0; i < l; ++i) {
-      disposables[i] = this.sourceList[i].run(new IndexSink(mergeSink, i), scheduler)
+      disposables[i] = this.sourceList[i].run(new MergeInnerSink(sink, mergeSink, i), scheduler)
     }
 
     return disposeAll(disposables)
@@ -40,26 +39,36 @@ export function merge<T extends readonly unknown[]>(
   return new Merge(sourceList as readonly IStream<T[number]>[])
 }
 
-class MergeSink<A> implements ISink<IndexedValue<A | undefined>> {
+/**
+ * Coordinates end/disposal across the merged sources. Values bypass this and
+ * flow straight from each MergeInnerSink to the downstream sink — merge needs
+ * no per-value index or latest-value bookkeeping (unlike combine/zip), so the
+ * IndexSink indirection is avoided on the hot path.
+ */
+class MergeSink<A> {
   constructor(
-    readonly sink: ISink<A | undefined>,
-    public disposables: Disposable[],
+    readonly sink: ISink<A>,
+    readonly disposables: Disposable[],
     public activeCount: number
   ) {}
 
-  event(time: ITime, indexValue: IndexedValue<A | undefined>): void {
-    if (indexValue.ended) {
-      this.dispose(time, indexValue.index)
-    } else {
-      this.sink.event(time, indexValue.value)
-    }
-  }
-
-  dispose(time: ITime, index: number): void {
+  endOne(time: ITime, index: number): void {
     this.disposables[index][Symbol.dispose]()
     if (--this.activeCount === 0) {
       this.sink.end(time)
     }
+  }
+}
+
+class MergeInnerSink<A> implements ISink<A> {
+  constructor(
+    readonly sink: ISink<A>,
+    readonly merge: MergeSink<A>,
+    readonly index: number
+  ) {}
+
+  event(time: ITime, value: A): void {
+    this.sink.event(time, value)
   }
 
   error(time: ITime, err: unknown): void {
@@ -67,9 +76,6 @@ class MergeSink<A> implements ISink<IndexedValue<A | undefined>> {
   }
 
   end(time: ITime): void {
-    // This should not be called directly as merge manages its own lifecycle
-    // through activeCount tracking
-    // If we reach here, it means all sources ended without errors
-    this.sink.end(time)
+    this.merge.endOne(time, this.index)
   }
 }
