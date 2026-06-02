@@ -115,7 +115,9 @@ describe('DOM render parity', () => {
     const root = freshRoot()
     const disp = render({ rootAttachment: root, $rootNode: $tree, scheduler: syncScheduler })
 
-    expect(dump(root)).toMatchSnapshot('mount')
+    expect(dump(root)).toBe(
+      '<div class="ae#0" id="root" role="group"><span data-n="1" style="color: red; opacity: 0.5;">"hello"</span><div><i>"seg-a"</i><b>"seg-b"</b></div><em>"on"</em></div><!---->'
+    )
     expect(root.querySelector('#root')).not.toBeNull()
     expect(root.querySelector('span')?.getAttribute('style')).toContain('color: red')
     expect(root.querySelector('span')?.textContent).toBe('hello')
@@ -126,7 +128,9 @@ describe('DOM render parity', () => {
     at.next({ 'data-n': 2 })
     toggle.next(false)
 
-    expect(dump(root)).toMatchSnapshot('after-updates')
+    expect(dump(root)).toBe(
+      '<div class="ae#0" id="root" role="group"><span data-n="2" style="color: blue;">"world"</span><div><i>"seg-a"</i><b>"seg-b"</b></div><s>"off"</s></div><!---->'
+    )
     expect(root.querySelector('span')?.textContent).toBe('world')
     expect(root.querySelector('span')?.getAttribute('style')).toContain('color: blue')
     expect(root.querySelector('span')?.getAttribute('style') ?? '').not.toContain('opacity')
@@ -295,7 +299,15 @@ describe('takumi resolved-tree parity', () => {
 
     const observer = observeManifest($tree, syncScheduler, { onDirty() {}, onError() {} })
     const resolved = observer.materialize()
-    expect(resolved).toMatchSnapshot('takumi-materialize')
+    expect(resolved).toEqual({
+      tag: 'div',
+      style: { display: 'flex' },
+      attributes: { id: 'card' },
+      children: [
+        { tag: 'span', style: { color: 'red' }, attributes: {}, children: ['hi'] },
+        { tag: 'p', style: {}, attributes: {}, children: ['static'] }
+      ]
+    })
     expect(resolved?.tag).toBe('div')
     observer[Symbol.dispose]()
   })
