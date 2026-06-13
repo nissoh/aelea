@@ -1,5 +1,26 @@
 # aelea
 
+## 4.13.0
+
+### Minor Changes
+
+#### `$Slider` — `from?: number` for deterministic mount animation
+
+`$Slider` previously decided whether to animate its initial value based on the *timing* of the value stream's emissions: it snapped to the first emission (`take(1)`) and only spring-animated subsequent ones (`skip(1)`). Whether the thumb animated to its initial value was therefore an accident of upstream async ordering — a slider fed by a `combine(...)` gated on a late fetch would have its leading rest value coalesced away and snap, while the same logical value emitted as a single event would also snap, and only a value stream that happened to lead with a rest value would animate.
+
+The new `from?: number` config makes the entrance animation an explicit, declared intent:
+
+```ts
+$Slider({ value: just(0.6), from: 0 })   // thumb renders at 0, springs to 0.6 on mount — always
+$Slider({ value: just(0.6) })            // snaps to 0.6 (unchanged default behavior)
+```
+
+When `from` is set, `displayValue` becomes `motion(motionCfg, merge(just(from), valueShared))`. The motion sink receives `from` as its first event (snaps there) and the first real value second (springs `from → value`), independent of how or when the value stream emits. This ordering is guaranteed: `merge` subscribes `just(from)` before `valueShared`, both schedule through the scheduler's FIFO asap queue, and `state` never replays synchronously during subscription — so `from` always lands first.
+
+`from` is visual-only: it drives the thumb position and fill width, never the native `<input>`'s `value` (which stays bound to the real value, so user-drag remains in sync). It has no effect when `motion: false` (there is no animation engine to spring from). Backward compatible — omitting `from` reproduces prior behavior exactly.
+
+Precondition: `from` must be a finite number. Passing `NaN`/`Infinity` makes the spring never settle (a general property of the motion combinator with non-finite targets), so derive it from a checked source.
+
 ## 4.12.0
 
 ### Patch Changes

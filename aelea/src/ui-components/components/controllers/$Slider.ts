@@ -30,6 +30,7 @@ export interface I$Slider extends Input<number> {
   orientation?: 'horizontal' | 'vertical'
   error?: IStream<boolean>
   motion?: Partial<MotionConfig> | false
+  from?: number
   color?: IStream<string>
   trackColor?: IStream<string>
   ariaLabel?: string
@@ -66,6 +67,7 @@ export const $Slider = ({
   disabled = just(false),
   error = just(false),
   motion: motionCfg = MOTION_SNAP,
+  from,
   color,
   trackColor,
   ariaLabel,
@@ -101,7 +103,11 @@ export const $Slider = ({
 
     const valueShared = op(value, state())
     const displayValue: IStream<number> =
-      motionCfg === false ? valueShared : merge(take(1, valueShared), motion(motionCfg, skip(1, valueShared)))
+      motionCfg === false
+        ? valueShared
+        : from !== undefined
+          ? motion(motionCfg, merge(just(from), valueShared))
+          : merge(take(1, valueShared), motion(motionCfg, skip(1, valueShared)))
 
     const valuePercent: IStream<number> = op(
       combine({ value: displayValue, min, max }),
