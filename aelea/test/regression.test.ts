@@ -19,7 +19,7 @@ import {
   sample,
   zip
 } from '../src/stream/index.js'
-import { multicast, promiseState, PromiseStatus, state, stream, tether } from '../src/stream-extended/index.js'
+import { multicast, PromiseStatus, promiseState, state, stream, tether } from '../src/stream-extended/index.js'
 import { createDomScheduler, createHeadlessScheduler } from '../src/ui/index.js'
 
 interface Capture<T> {
@@ -255,7 +255,12 @@ describe('synchronously-ending sources', () => {
 
   test('merge tolerates a source that ends inside run() and disposes its handle', async () => {
     let cleanups = 0
-    const { capture } = subscribe(merge(syncEnd<number>(() => cleanups++), just(1)))
+    const { capture } = subscribe(
+      merge(
+        syncEnd<number>(() => cleanups++),
+        just(1)
+      )
+    )
     await settle(20)
     expect(capture.values).toEqual([1])
     expect(capture.ended).toBe(true)
@@ -282,7 +287,12 @@ describe('async-ending source disposal', () => {
 
   test('merge disposes an async-ended source exactly once', async () => {
     let cleanups = 0
-    const { capture, dispose } = subscribe(merge(asyncEnd(() => cleanups++), just(1)))
+    const { capture, dispose } = subscribe(
+      merge(
+        asyncEnd(() => cleanups++),
+        just(1)
+      )
+    )
     await settle(30)
     expect(capture.ended).toBe(true)
     dispose()
@@ -292,7 +302,11 @@ describe('async-ending source disposal', () => {
   test('combineMap disposes an async-ended source exactly once', async () => {
     let cleanups = 0
     const { capture, dispose } = subscribe(
-      combineMap((a: number, b: number) => a + b, asyncEnd(() => cleanups++), just(1))
+      combineMap(
+        (a: number, b: number) => a + b,
+        asyncEnd(() => cleanups++),
+        just(1)
+      )
     )
     await settle(30)
     expect(capture.ended).toBe(true)

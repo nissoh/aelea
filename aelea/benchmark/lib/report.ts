@@ -58,7 +58,7 @@ function fmtCount(n: number): string {
 
 function statsOf(task: Task): { latency: Statistics; throughput: Statistics; runs: number } | null {
   const r = task.result
-  if (!r || r.state !== 'completed') return null
+  if (r?.state !== 'completed') return null
   return { latency: r.latency, throughput: r.throughput, runs: task.runs }
 }
 
