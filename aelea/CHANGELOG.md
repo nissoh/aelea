@@ -1,5 +1,29 @@
 # aelea
 
+## 4.13.1
+
+### Patch Changes
+
+#### Schedulers — disposal now cancels native timers
+
+`scheduler.delay` on every scheduler (browser, node, DOM, headless) previously discarded the `setTimeout` handle and returned the task — disposing a delayed task only deactivated it, leaving the armed native timer alive until it fired. Each stray timer retained its task→sink subscription graph, and on Node/Bun kept the process alive (a disposed `delay(60_000)` blocked exit for a full minute). All schedulers now return a disposable that clears the underlying timer. The `delay()` combinator stores its armed handles per pending event and `periodic` keeps ownership of its re-scheduled handle, so disposal cancels in-flight timers of whichever generation is armed; `debounce` and `bufferEvents` pick the fix up automatically. High-frequency debounced streams (e.g. mousemove) no longer accumulate one live timer per event.
+
+#### `state` / `tether` — late-subscriber replay is stale-proof
+
+The cached-value replay task captured a snapshot of the value at subscribe time. If an emission was already queued in the scheduler when a subscriber joined, the fresh value was delivered first and the stale snapshot replayed after it — the subscriber settled on outdated data. Replay now reads the cache at flush time, so a late subscriber always ends on the latest value. A disposed tether primary's cleared cache is no longer resurrected by an already-queued replay.
+
+#### `zip` — fresh object per emission
+
+`zip` mutated and re-emitted a single shared result object, so every emission aliased the same reference — buffering or caching zip output showed all past emissions mutated to the latest values. Each emission is now a fresh object (matching `combine`). Ended sources' subscriptions are also disposed eagerly instead of being retained until the whole zip tears down.
+
+#### `merge` / `combine` / `zip` — synchronous-end safety and single disposal
+
+A source that ended synchronously inside `run()` (possible with custom `stream(sink => …)` sources) crashed `merge`/`combine` with a TypeError on an unassigned disposable slot. All three combinators now handle it, and an ended source's handle is disposed exactly once — previously an async-ended source's cleanup could run a second time on subscription teardown, breaking non-idempotent teardowns.
+
+#### Error routing — applicative errors reach everyone
+
+Per the stream contract, `error()` is applicative (recoverable, non-terminal). Gaps where a throw escaped that model are closed: `combine`'s mapping callback now routes throws to `sink.error` (matching `map`/`filter`/`zip`) instead of unwinding the emitting source's stack; multicast error delivery reaches every subscriber even if one handler throws (the first failure rethrows after the loop); `fromPromise` and `promiseState` route downstream throws to `sink.error` instead of losing them as unhandled promise rejections, and always deliver `end`; `sample` disposes its values subscription exactly once.
+
 ## 4.13.0
 
 ### Minor Changes
