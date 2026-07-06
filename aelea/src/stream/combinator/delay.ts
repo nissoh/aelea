@@ -1,6 +1,6 @@
 import { PropagateTask, propagateEndTask } from '../scheduler/PropagateTask.js'
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
-import { disposeBoth } from '../utils/disposable.js'
+import { disposeBoth, disposeNone } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 import { PipeSink } from '../utils/sink.js'
 
@@ -40,10 +40,12 @@ class DelaySink<T> extends PipeSink<T> implements Disposable {
   event(_time: ITime, value: T): void {
     if (!this.active) return
     // One class instance per event instead of an `{ d }` literal + arrow
-    // closure pair: same alloc count, known hidden class, no closure context.
+    // closure pair: known hidden class, no closure context. `pending` holds
+    // the scheduler's handle (which cancels the native timer), not the task;
+    // the task keeps a back-reference for its own removal on fire.
     const task = new DelayedEventTask(this, value)
-    this.pending.add(task)
-    this.scheduler.delay(task, this.delay)
+    const scheduled = (task.scheduled = this.scheduler.delay(task, this.delay))
+    this.pending.add(scheduled)
   }
 
   override end(_time: ITime): void {
@@ -59,6 +61,8 @@ class DelaySink<T> extends PipeSink<T> implements Disposable {
 }
 
 class DelayedEventTask<T> extends PropagateTask<T> {
+  scheduled: Disposable = disposeNone
+
   constructor(
     readonly parent: DelaySink<T>,
     readonly value: T
@@ -67,7 +71,7 @@ class DelayedEventTask<T> extends PropagateTask<T> {
   }
 
   runIfActive(time: ITime): void {
-    this.parent.pending.delete(this)
+    this.parent.pending.delete(this.scheduled)
     this.sink.event(time, this.value)
   }
 }

@@ -1,7 +1,7 @@
 import { just } from '../source/just.js'
 import { empty } from '../source/void.js'
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
-import { disposeAll } from '../utils/disposable.js'
+import { disposeAll, disposeNone } from '../utils/disposable.js'
 import { invoke } from '../utils/function.js'
 import { Queue } from '../utils/Queue.js'
 import { type IndexedValue, IndexSink } from '../utils/sink.js'
@@ -20,10 +20,9 @@ class Zip<A> implements IStream<Readonly<A>> {
   }
 
   run(sink: ISink<Readonly<A>>, scheduler: IScheduler): Disposable {
-    const result = {} as A
-
     return zipMap(
       (...values) => {
+        const result = {} as A
         for (let i = 0; i < this.keys.length; i++) {
           result[this.keys[i]] = values[i]
         }
@@ -60,12 +59,18 @@ class ZipMap<T extends readonly unknown[], R> implements IStream<R> {
     const disposables = new Array(l)
     const sinks = new Array(l)
     const buffers = new Array(l)
-    const zipSink = new ZipMapSink(this.f, buffers, sinks, sink)
+    const zipSink = new ZipMapSink(this.f, buffers, sinks, disposables, sink)
 
     for (let i = 0; i < l; ++i) {
       buffers[i] = new Queue()
       const indexSink = (sinks[i] = new IndexSink(zipSink, i))
-      disposables[i] = this.sourceList[i].run(indexSink, scheduler)
+      const d = this.sourceList[i].run(indexSink, scheduler)
+      if (indexSink.ended) {
+        d[Symbol.dispose]()
+        disposables[i] = disposeNone
+      } else {
+        disposables[i] = d
+      }
     }
 
     return disposeAll(disposables)
@@ -102,6 +107,7 @@ class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
     readonly f: (...args: any[]) => O,
     readonly buffers: ArrayLike<Queue<I>>,
     readonly sinks: ArrayLike<IndexSink<I>>,
+    readonly disposables: Disposable[],
     readonly sink: ISink<O>
   ) {
     this.values = new Array(buffers.length)
@@ -111,6 +117,13 @@ class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
     const i = indexedValue.index
 
     if (indexedValue.ended) {
+      // Undefined during a synchronous end inside run() — ZipMap.run disposes
+      // the returned handle itself in that case.
+      const d = this.disposables[i]
+      if (d !== undefined) {
+        d[Symbol.dispose]()
+        this.disposables[i] = disposeNone
+      }
       const buffer = this.buffers[i]
       if (buffer.isEmpty()) {
         this.sink.end(time)

@@ -91,7 +91,13 @@ class PromiseStateSink<T> implements ISink<Promise<T>>, Disposable {
     if (this.disposed || promise !== this.latestPromise) return
     this.isPending = false
     const time = this.scheduler.time()
-    this.sink.event(time, { status: PromiseStatus.DONE, value })
+    // These handlers run in a bare promise callback with no rejection handler
+    // attached — a downstream throw would vanish as an unhandled rejection.
+    try {
+      this.sink.event(time, { status: PromiseStatus.DONE, value })
+    } catch (error) {
+      this.sink.error(time, error)
+    }
     if (this.sourceEnded) this.sink.end(time)
   }
 
@@ -99,7 +105,11 @@ class PromiseStateSink<T> implements ISink<Promise<T>>, Disposable {
     if (this.disposed || promise !== this.latestPromise) return
     this.isPending = false
     const time = this.scheduler.time()
-    this.sink.event(time, { status: PromiseStatus.ERROR, error })
+    try {
+      this.sink.event(time, { status: PromiseStatus.ERROR, error })
+    } catch (err) {
+      this.sink.error(time, err)
+    }
     if (this.sourceEnded) this.sink.end(time)
   }
 }

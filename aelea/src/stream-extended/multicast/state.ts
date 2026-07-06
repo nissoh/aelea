@@ -52,10 +52,13 @@ export class State<A> implements IStream<A> {
     // Subscribe to source with StateSink to capture future values
     const sourceDisposable = this.source.run(new StateSink(this, sink), scheduler)
 
-    // If we have a cached value, emit it asynchronously
+    // If we have a cached value, emit it asynchronously. Pass the box, not the
+    // value: an emission already queued at subscribe time may update the cache
+    // before this task flushes, and replaying the captured snapshot would
+    // deliver a stale value after the fresh one.
     const latestValue = this.latestValue
     if (latestValue !== undefined) {
-      const cachedDisposable = scheduler.asap(propagateRunEventTask(sink, emitState, latestValue.value))
+      const cachedDisposable = scheduler.asap(propagateRunEventTask(sink, emitState, latestValue))
       return disposeBoth(cachedDisposable, sourceDisposable)
     }
 
@@ -81,6 +84,6 @@ class StateSink<A> extends PipeSink<A> {
   }
 }
 
-function emitState<A>(time: ITime, sink: ISink<A>, value: A): void {
-  sink.event(time, value)
+function emitState<A>(time: ITime, sink: ISink<A>, latestValue: { value: A }): void {
+  sink.event(time, latestValue.value)
 }

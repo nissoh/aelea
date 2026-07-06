@@ -1,4 +1,5 @@
 import type { IScheduler, ITask, ITime } from '../types.js'
+import { DelayDisposable } from './DelayDisposable.js'
 
 // Minimal Node.js globals used by this scheduler, declared locally so @types/node
 // is not a required dependency.
@@ -39,8 +40,7 @@ export class NodeScheduler implements IScheduler {
   }
 
   delay(task: ITask, delay: ITime): Disposable {
-    setTimeout(this.runDelayedTask, delay, task)
-    return task
+    return new DelayDisposable(setTimeout(this.runDelayedTask, delay, task), task)
   }
 
   flushAsapTasks = (): void => {

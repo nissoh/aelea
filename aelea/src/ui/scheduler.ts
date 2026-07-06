@@ -1,4 +1,5 @@
 import type { ITask, ITime } from '../stream/index.js'
+import { DelayDisposable } from '../stream/scheduler/DelayDisposable.js'
 import type { I$Scheduler } from './types.js'
 
 /**
@@ -91,8 +92,7 @@ class DomScheduler implements I$Scheduler {
   }
 
   delay(task: ITask, delay: ITime): Disposable {
-    setTimeout(this.runDelayedTask, delay, task)
-    return task
+    return new DelayDisposable(setTimeout(this.runDelayedTask, delay, task), task)
   }
 
   paint(task: ITask): Disposable {
@@ -149,9 +149,12 @@ class HeadlessScheduler implements I$Scheduler {
     return task
   }
 
+  runDelayedTask = (task: ITask): void => {
+    task.run(this.time())
+  }
+
   delay(task: ITask, delay: ITime): Disposable {
-    setTimeout(() => task.run(this.time()), delay)
-    return task
+    return new DelayDisposable(setTimeout(this.runDelayedTask, delay, task), task)
   }
 
   // No paint phase — headless environments don't benefit from deferring

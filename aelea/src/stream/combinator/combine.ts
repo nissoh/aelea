@@ -1,7 +1,7 @@
 import { just } from '../source/just.js'
 import { empty } from '../source/void.js'
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
-import { disposeAll } from '../utils/disposable.js'
+import { disposeAll, disposeNone } from '../utils/disposable.js'
 import { invoke } from '../utils/function.js'
 import { map } from './map.js'
 
@@ -94,7 +94,16 @@ class CombineMap<T extends readonly unknown[], R> implements IStream<R> {
     const combineSink = new CombineMapSink(disposables, l, sink, this.f)
 
     for (let i = 0; i < l; i++) {
-      disposables[i] = this.sources[i].run(new CombineInnerSink(combineSink, i), scheduler)
+      const innerSink = new CombineInnerSink(combineSink, i)
+      const d = this.sources[i].run(innerSink, scheduler)
+      // A source that ended synchronously inside run() reached endOne before
+      // its disposable slot was assigned — dispose the handle here instead.
+      if (innerSink.ended) {
+        d[Symbol.dispose]()
+        disposables[i] = disposeNone
+      } else {
+        disposables[i] = d
+      }
     }
 
     return disposeAll(disposables)
@@ -132,12 +141,20 @@ class CombineMapSink<O> {
 
     this.values[i] = value
     if (this.awaiting === 0) {
-      this.sink.event(time, invoke(this.f, this.values))
+      try {
+        this.sink.event(time, invoke(this.f, this.values))
+      } catch (error) {
+        this.sink.error(time, error)
+      }
     }
   }
 
   endOne(time: ITime, i: number): void {
-    this.disposables[i][Symbol.dispose]()
+    const d = this.disposables[i]
+    if (d !== undefined) {
+      d[Symbol.dispose]()
+      this.disposables[i] = disposeNone
+    }
     if (--this.activeCount === 0) {
       this.sink.end(time)
     }
@@ -145,6 +162,8 @@ class CombineMapSink<O> {
 }
 
 class CombineInnerSink<I, O> implements ISink<I> {
+  ended = false
+
   constructor(
     readonly parent: CombineMapSink<O>,
     readonly index: number
@@ -159,6 +178,7 @@ class CombineInnerSink<I, O> implements ISink<I> {
   }
 
   end(time: ITime): void {
+    this.ended = true
     this.parent.endOne(time, this.index)
   }
 }

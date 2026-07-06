@@ -1,5 +1,5 @@
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
-import { disposeBoth } from '../utils/disposable.js'
+import { disposeBoth, disposeOnce } from '../utils/disposable.js'
 import { curry2, curry3 } from '../utils/function.js'
 
 /**
@@ -54,7 +54,9 @@ class SampleSink<A, B, C> implements ISink<B>, Disposable {
   ) {
     const valueSink = new ValueSink(this)
 
-    this.valuesDisposable = this.values.run(valueSink, scheduler)
+    // disposeOnce: end() disposes this and the outer disposeBoth disposes it
+    // again — the values source's cleanup must not run twice.
+    this.valuesDisposable = disposeOnce(this.values.run(valueSink, scheduler))
   }
 
   event(time: ITime, b: B): void {

@@ -1,4 +1,4 @@
-import { PropagateTask } from '../index.js'
+import { disposeNone, PropagateTask } from '../index.js'
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 
 /**
@@ -15,14 +15,20 @@ class Periodic implements IStream<ITime> {
   constructor(readonly interval: ITime) {}
 
   run(sink: ISink<ITime>, scheduler: IScheduler): Disposable {
-    return scheduler.delay(new PeriodicTask(sink, scheduler, this.interval), this.interval)
+    const task = new PeriodicTask(sink, scheduler, this.interval)
+    task.scheduled = scheduler.delay(task, this.interval)
+    return task
   }
 }
 
 /**
- * Self-scheduling periodic task that emits values at intervals
+ * Self-scheduling periodic task that emits values at intervals.
+ * The task owns its currently-armed scheduler handle so disposing the
+ * subscription cancels the in-flight timer of whichever generation is armed.
  */
 class PeriodicTask extends PropagateTask<ITime> {
+  scheduled: Disposable = disposeNone
+
   constructor(
     readonly sink: ISink<ITime>,
     readonly scheduler: IScheduler,
@@ -33,6 +39,15 @@ class PeriodicTask extends PropagateTask<ITime> {
 
   runIfActive(time: ITime): void {
     this.sink.event(time, time)
-    this.scheduler.delay(this, this.interval)
+    this.scheduled = this.scheduler.delay(this, this.interval)
+  }
+
+  override [Symbol.dispose](): void {
+    // Guarded: the scheduler handle disposes this task back.
+    if (!this.active) return
+    this.active = false
+    const scheduled = this.scheduled
+    this.scheduled = disposeNone
+    scheduled[Symbol.dispose]()
   }
 }

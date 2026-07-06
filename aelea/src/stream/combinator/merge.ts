@@ -1,6 +1,6 @@
 import { empty } from '../source/void.js'
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
-import { disposeAll } from '../utils/disposable.js'
+import { disposeAll, disposeNone } from '../utils/disposable.js'
 
 /**
  * Stream that merges multiple streams into one, emitting values as they arrive
@@ -14,7 +14,16 @@ class Merge<T> implements IStream<T> {
     const mergeSink = new MergeSink(sink, disposables, l)
 
     for (let i = 0; i < l; ++i) {
-      disposables[i] = this.sourceList[i].run(new MergeInnerSink(sink, mergeSink, i), scheduler)
+      const innerSink = new MergeInnerSink(sink, mergeSink, i)
+      const d = this.sourceList[i].run(innerSink, scheduler)
+      // A source that ended synchronously inside run() reached endOne before
+      // its disposable slot was assigned — dispose the handle here instead.
+      if (innerSink.ended) {
+        d[Symbol.dispose]()
+        disposables[i] = disposeNone
+      } else {
+        disposables[i] = d
+      }
     }
 
     return disposeAll(disposables)
@@ -53,7 +62,11 @@ class MergeSink<A> {
   ) {}
 
   endOne(time: ITime, index: number): void {
-    this.disposables[index][Symbol.dispose]()
+    const d = this.disposables[index]
+    if (d !== undefined) {
+      d[Symbol.dispose]()
+      this.disposables[index] = disposeNone
+    }
     if (--this.activeCount === 0) {
       this.sink.end(time)
     }
@@ -61,6 +74,8 @@ class MergeSink<A> {
 }
 
 class MergeInnerSink<A> implements ISink<A> {
+  ended = false
+
   constructor(
     readonly sink: ISink<A>,
     readonly merge: MergeSink<A>,
@@ -76,6 +91,7 @@ class MergeInnerSink<A> implements ISink<A> {
   }
 
   end(time: ITime): void {
+    this.ended = true
     this.merge.endOne(time, this.index)
   }
 }

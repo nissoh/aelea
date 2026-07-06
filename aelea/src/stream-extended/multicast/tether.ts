@@ -52,8 +52,14 @@ export const tether = <T>(source: IStream<T>): [IStream<T>, IStream<T>] => {
   return [new Primary(source, tetherStream), tetherStream]
 }
 
-function emitCachedValue<T>(time: ITime, sink: ISink<T>, value: T): void {
-  sink.event(time, value)
+function emitCachedValue<T>(time: ITime, sink: ISink<T>, primarySink: PrimarySink<T>): void {
+  // Read through the primary sink at flush time: its subscription may have
+  // been disposed (cache cleared — replay nothing) or updated since the task
+  // was queued, and the box captured at subscribe time could be orphaned.
+  const latestValue = primarySink.latestValue
+  if (latestValue !== undefined) {
+    sink.event(time, latestValue.value)
+  }
 }
 
 class PrimarySink<T> implements ISink<T> {
@@ -131,9 +137,7 @@ class Tether<T> extends MulticastSink<T> implements IStream<T> {
 
     for (const primarySink of this.primarySinkList) {
       if (primarySink.latestValue) {
-        const initialEventDisposable = scheduler.asap(
-          propagateRunEventTask(sink, emitCachedValue, primarySink.latestValue.value)
-        )
+        const initialEventDisposable = scheduler.asap(propagateRunEventTask(sink, emitCachedValue, primarySink))
         initialPrimaryDisposableList.push(initialEventDisposable)
       }
     }

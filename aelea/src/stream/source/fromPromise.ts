@@ -14,14 +14,24 @@ class FromPromise<T> implements IStream<T> {
       value => {
         if (disposed) return
         const time = scheduler.time()
-        sink.event(time, value)
-        sink.end(time)
+        // A downstream throw would otherwise vanish as an unhandled rejection;
+        // end is delivered in finally even if the error handler throws too.
+        try {
+          sink.event(time, value)
+        } catch (error) {
+          sink.error(time, error)
+        } finally {
+          sink.end(time)
+        }
       },
       error => {
         if (disposed) return
         const time = scheduler.time()
-        sink.error(time, error)
-        sink.end(time)
+        try {
+          sink.error(time, error)
+        } finally {
+          sink.end(time)
+        }
       }
     )
 

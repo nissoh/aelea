@@ -38,9 +38,21 @@ export abstract class MulticastSink<T> implements ISink<T> {
       return
     }
 
+    // A throwing error handler must not starve the remaining subscribers;
+    // deliver to all, then rethrow the first failure.
+    let caught: unknown
+    let threw = false
     for (let i = 0; i < l; i++) {
-      sl[i].error(time, error)
+      try {
+        sl[i].error(time, error)
+      } catch (e) {
+        if (!threw) {
+          caught = e
+          threw = true
+        }
+      }
     }
+    if (threw) throw caught
   }
 
   end(time: ITime): void {
