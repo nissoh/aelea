@@ -1,5 +1,13 @@
 # aelea
 
+## 4.13.3
+
+### Patch Changes
+
+#### `$Slider` — the thumb stays inside the container
+
+The thumb visual was centered on its track position (`translate(-50%)`), so at the extremes half the thumb overhung the container — a full-bleed slider (track spanning its layout box edge to edge) grew a horizontal scrollbar at 100%. The thumb now shifts by its own width times the percent, insetting its travel by exactly one thumb: flush at 0% and 100%, the same clamping native range inputs apply. Works for any custom `$thumb` size (no measurement), horizontal and vertical.
+
 ## 4.13.2
 
 ### Patch Changes

@@ -174,6 +174,10 @@ export const $Slider = ({
 
     const effectiveThumb = $thumb ?? $stateThumb
 
+    // The thumb shifts by its OWN width times the percent (not a fixed -50%), so its travel is inset by exactly one
+    // thumb: flush with the container at 0% and 100% instead of overhanging by half a thumb — an overhang that gave
+    // full-bleed sliders a horizontal scrollbar. Same clamping native range inputs apply, and it needs no thumb
+    // measurement, so custom $thumb sizes stay correct.
     const $thumbVisual = $node(
       style({
         position: 'absolute',
@@ -184,8 +188,8 @@ export const $Slider = ({
           valuePercent,
           map(pct =>
             isVertical
-              ? { top: `${pct * 100}%`, left: '50%', transform: 'translate(-50%, -50%)' }
-              : { left: `${pct * 100}%`, top: '50%', transform: 'translate(-50%, -50%)' }
+              ? { top: `${pct * 100}%`, left: '50%', transform: `translate(-50%, -${pct * 100}%)` }
+              : { left: `${pct * 100}%`, top: '50%', transform: `translate(-${pct * 100}%, -50%)` }
           )
         )
       )
