@@ -1,4 +1,4 @@
-import { combine, type IStream, just, map, merge, op, skip, take } from '../../../stream/index.js'
+import { combine, type IStream, just, map, merge, op } from '../../../stream/index.js'
 import { type IBehavior, PromiseStatus, state } from '../../../stream-extended/index.js'
 import {
   $element,
@@ -102,12 +102,13 @@ export const $Slider = ({
       )
 
     const valueShared = op(value, state())
+    // motion self-initializes by snapping to its first event and animating every one after, so the mount value
+    // renders instantly and the first user input already tweens. Skipping the first value into motion instead
+    // (the old take/skip choreography) made the FIRST input the spring's snap-init, eating its animation.
     const displayValue: IStream<number> =
       motionCfg === false
         ? valueShared
-        : from !== undefined
-          ? motion(motionCfg, merge(just(from), valueShared))
-          : merge(take(1, valueShared), motion(motionCfg, skip(1, valueShared)))
+        : motion(motionCfg, from !== undefined ? merge(just(from), valueShared) : valueShared)
 
     const valuePercent: IStream<number> = op(
       combine({ value: displayValue, min, max }),

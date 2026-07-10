@@ -1,5 +1,13 @@
 # aelea
 
+## 4.13.2
+
+### Patch Changes
+
+#### `$Slider` — the first user input animates
+
+Without `from`, the display stream fed `motion` through `merge(take(1, value), motion(cfg, skip(1, value)))`: the mount value bypassed the spring and the user's FIRST input became the spring's initialization event, which `motion` snaps by design — so the first drag/click jumped and only later inputs tweened. `motion` already renders its first event instantly and animates every one after, so the slider now feeds it the value stream directly (seeded with `from` when given). Mount still snaps; the first input animates.
+
 ## 4.13.1
 
 ### Patch Changes
