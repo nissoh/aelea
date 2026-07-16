@@ -14,8 +14,8 @@ services:
         to:
           - global: true
         accept:
-          - puppet.fund
-          - www.puppet.fund
+          - aelea.dev
+          - www.aelea.dev
 
 profiles:
   compute:
