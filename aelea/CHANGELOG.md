@@ -1,5 +1,25 @@
 # aelea
 
+## 4.14.0
+
+### Minor Changes
+
+#### Render engine overhaul — faster mounts, one error channel, inspectable commits
+
+The renderer core was rebuilt in ten reviewed steps. Static mount throughput improved 40–90% across the benchmark suite (flat 1000-row list: 0.31× → 0.58× of vanilla DOM) with byte-identical output, and the engine gained a real observability surface.
+
+**Performance.** Op-free element trees now carry a static brand the renderer mounts inline — no per-node stream subscription, no scheduled emission, no microtask turn per tree level. Reactive bindings fuse their sink, paint-coalescing mailbox, and DOM applier into a single object, and a per-tree Committer flushes every binding in one paint task per frame instead of one per binding. Disposing a subtree issues a single `removeChild` (a 1000-row list previously issued 1001). Childless nodes skip the segment machinery entirely.
+
+**Error hardening.** All schedulers guard every task: a throwing paint task previously froze every DOM write in the app permanently; now failures route to the task's error channel and the frame survives. One bad write cannot starve sibling bindings in a frame batch. UI schedulers expose `stats()` (queue depths, drain passes, guard trips, task errors).
+
+**Correctness fixes.** Attribute patches merge within a frame instead of silently dropping keys under coalescing. Decorators applied after a stream op no longer corrupt shared compose state across remounts. `switchLatest` over `$text` inners replaces instead of accumulating text nodes. Double-mounting a shared/cached view manifest is reported through `onError` (once per manifest) instead of silently corrupting the tree.
+
+**Stream algebra.** A tether now ends when its **last live contributor** ends — one completing primary (e.g. `take(1)` upstream of one mounted instance) no longer terminates a shared tether or behavior for every other consumer. Behavior consumers fan in through a termination-counting sink and receive `end` only when all samplers have ended, ending the events-after-end protocol violation. Sampler registration is revocable and follows the primary's subscription lifetime: remount-heavy apps (routing, `switchLatest` lists) no longer accumulate dead samplers on long-lived behaviors.
+
+**New APIs (additive).** `component.ports({ click: port<PointerEvent>() }, b => ...)` — a record-based component form with named behaviors, replacing the fragile `Function.length` arity contract (the positional form is unchanged). Tether/output key mismatches are reported with both key lists instead of throwing mid-mount or failing silently. `INode.mount` exposes a typed `MountPort` (`element()` / `onElement(cb)`), which `nodeEvent` now uses instead of duck-walking `element.native` (the write-back remains for one release). `render({ devtool: true })` returns a `devtool` handle with a commit `journal()` (seq/time/channel/value ring buffer) and a live `bindings()` registry.
+
+**Behavioral notes.** Anything relying on a single completing contributor ending a shared tether/behavior now waits for the rest. Components passed tether keys that match no output now report a descriptive error (the view still mounts). Static subtrees mount synchronously within their parent's pass; the root node keeps its scheduled emission, so `render()` still returns before DOM appears.
+
 ## 4.13.3
 
 ### Patch Changes
