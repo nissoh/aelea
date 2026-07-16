@@ -89,32 +89,59 @@ export const nodeEvent: INodeEventCurry = curry2((eventType, descriptor) => {
 
   return stream((sink, scheduler) => {
     let detach: Disposable | null = null
+    let portSub: Disposable | null = null
     let currentTarget: EventTarget | null = null
+
+    const attach = (target: EventTarget | null) => {
+      if (target === currentTarget) return
+
+      detach?.[Symbol.dispose]?.()
+      detach = null
+      currentTarget = target
+      if (target === null) return
+
+      const handler = (ev: Event) => {
+        sink.event(scheduler.time(), ev as never)
+      }
+
+      target.addEventListener(eventType, handler, options)
+      detach = disposeWith(() => {
+        target.removeEventListener(eventType, handler, options)
+      })
+    }
 
     const disposable = target$.run(
       {
         event(_time: number, node: unknown) {
-          const target = resolveEventTarget(node)
-          if (target === currentTarget) return
+          portSub?.[Symbol.dispose]?.()
+          portSub = null
 
-          detach?.[Symbol.dispose]?.()
-          detach = null
-          currentTarget = target
-          if (target === null) return
-
-          const handler = (ev: Event) => {
-            sink.event(scheduler.time(), ev as never)
+          // Prefer the typed mount handshake: the port fires at resolution
+          // (immediately when already mounted), removing the dependency on
+          // sink-delivery ordering and the `element.native` duck-walk.
+          const mount = (node as { mount?: { onElement?: (cb: (el: unknown) => void) => Disposable } })?.mount
+          if (mount && typeof mount.onElement === 'function') {
+            portSub = mount.onElement(el => {
+              attach(resolveEventTarget(el))
+            })
+            if (currentTarget === null) {
+              // Unresolved port (no renderer will resolve a directly-subscribed
+              // manifest): fall through to the legacy duck-walk, which still
+              // finds a pre-set native element ($wrapNativeElement).
+              const target = resolveEventTarget(node)
+              if (target !== null) attach(target)
+            }
+            return
           }
 
-          target.addEventListener(eventType, handler, options)
-          detach = disposeWith(() => {
-            target.removeEventListener(eventType, handler, options)
-          })
+          attach(resolveEventTarget(node))
         },
         error(time: number, err: unknown) {
           sink.error(time, err)
         },
         end(time: number) {
+          portSub?.[Symbol.dispose]?.()
+          portSub = null
           detach?.[Symbol.dispose]?.()
           sink.end(time)
         }
@@ -123,6 +150,7 @@ export const nodeEvent: INodeEventCurry = curry2((eventType, descriptor) => {
     )
 
     return disposeWith(() => {
+      portSub?.[Symbol.dispose]?.()
       detach?.[Symbol.dispose]?.()
       disposable?.[Symbol.dispose]?.()
     })

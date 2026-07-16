@@ -1,6 +1,26 @@
 import type { ITask, ITime } from '../stream/index.js'
 import { DelayDisposable } from '../stream/scheduler/DelayDisposable.js'
-import type { I$Scheduler } from './types.js'
+import type { I$Scheduler, ISchedulerStats } from './types.js'
+
+// One throwing task must not abort the rest of its batch nor wedge the
+// scheduled flag (a wedged paint flag freezes every DOM write app-wide).
+// Failures route to the task's own error channel; a double fault is
+// rethrown asynchronously so it still surfaces without killing the flush.
+function runTaskGuarded(task: ITask, time: ITime, counters: { taskErrors: number }): void {
+  try {
+    task.run(time)
+  } catch (err) {
+    counters.taskErrors++
+    try {
+      task.error(time, err)
+    } catch (err2) {
+      counters.taskErrors++
+      queue(() => {
+        throw err2
+      })
+    }
+  }
+}
 
 /**
  * Optimized browser scheduler for DOM operations
@@ -44,6 +64,9 @@ class DomScheduler implements I$Scheduler {
   private paintScheduled = false
   private readonly initialTime = perfNow()
   private readonly initialWallClockTime = Date.now()
+  private readonly counters = { taskErrors: 0 }
+  private drainPasses = 0
+  private guardTrips = 0
 
   // Drain any pending asap tasks before a delayed task fires. No
   // cancellation flag needed — flushAsapTasks is idempotent: if the
@@ -52,7 +75,7 @@ class DomScheduler implements I$Scheduler {
   // gates re-entry.
   runDelayedTask = (task: ITask): void => {
     if (this.asapScheduled) this.flushAsapTasks()
-    task.run(this.time())
+    runTaskGuarded(task, this.time(), this.counters)
   }
 
   flushAsapTasks = (): void => {
@@ -61,7 +84,7 @@ class DomScheduler implements I$Scheduler {
     const tasks = this.asapTasks
     this.asapTasks = []
     const time = this.time()
-    for (let i = 0; i < tasks.length; i++) tasks[i].run(time)
+    for (let i = 0; i < tasks.length; i++) runTaskGuarded(tasks[i], time, this.counters)
   }
 
   flushPaintTasks = (): void => {
@@ -71,12 +94,24 @@ class DomScheduler implements I$Scheduler {
       const tasks = this.paintTasks
       this.paintTasks = []
       const time = this.time()
-      for (let i = 0; i < tasks.length; i++) tasks[i].run(time)
+      for (let i = 0; i < tasks.length; i++) runTaskGuarded(tasks[i], time, this.counters)
     }
+    this.drainPasses += passes
     if (this.paintTasks.length > 0) {
+      this.guardTrips++
       raf(this.flushPaintTasks)
     } else {
       this.paintScheduled = false
+    }
+  }
+
+  stats(): ISchedulerStats {
+    return {
+      asapDepth: this.asapTasks.length,
+      paintDepth: this.paintTasks.length,
+      drainPasses: this.drainPasses,
+      guardTrips: this.guardTrips,
+      taskErrors: this.counters.taskErrors
     }
   }
 
@@ -130,6 +165,7 @@ class HeadlessScheduler implements I$Scheduler {
   private asapScheduled = false
   private readonly initialTime = perfNow()
   private readonly initialWallClockTime = Date.now()
+  private readonly counters = { taskErrors: 0 }
 
   private flushAsapTasks = (): void => {
     if (!this.asapScheduled) return
@@ -137,7 +173,17 @@ class HeadlessScheduler implements I$Scheduler {
     const tasks = this.asapTasks
     this.asapTasks = []
     const time = this.time()
-    for (let i = 0; i < tasks.length; i++) tasks[i].run(time)
+    for (let i = 0; i < tasks.length; i++) runTaskGuarded(tasks[i], time, this.counters)
+  }
+
+  stats(): ISchedulerStats {
+    return {
+      asapDepth: this.asapTasks.length,
+      paintDepth: 0,
+      drainPasses: 0,
+      guardTrips: 0,
+      taskErrors: this.counters.taskErrors
+    }
   }
 
   asap(task: ITask): Disposable {
@@ -150,7 +196,7 @@ class HeadlessScheduler implements I$Scheduler {
   }
 
   runDelayedTask = (task: ITask): void => {
-    task.run(this.time())
+    runTaskGuarded(task, this.time(), this.counters)
   }
 
   delay(task: ITask, delay: ITime): Disposable {

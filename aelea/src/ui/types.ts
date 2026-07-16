@@ -1,6 +1,7 @@
 import type * as CSS from 'csstype'
 import type { IOps, IScheduler, IStream, ITask } from '../stream/index.js'
 import type { SettableDisposable } from '../stream/utils/SettableDisposable.js'
+import type { IMountPort } from './mount.js'
 
 export type IStyleCSS = CSS.Properties
 
@@ -11,6 +12,7 @@ export type IAttributeProperties<T> = {
 export interface ITextNode {
   kind: 'text'
   value: string | IStream<string> | null
+  disposable?: SettableDisposable
 }
 
 export interface ISlottable<TElement = unknown> {
@@ -23,9 +25,11 @@ export type ISlotChild<TElement = unknown> = ITextNode | ISlottable<TElement> | 
 export interface IStaticStyleEntry {
   pseudo: string | null
   style: IStyleCSS
+  className?: string
 }
 
 export interface INode<TElement = unknown> extends ISlottable<TElement> {
+  mount: IMountPort<TElement>
   $segments: I$Slottable<TElement>[]
   staticStyles: IStaticStyleEntry[]
   styleBehavior: IStream<IStyleCSS | null>[]
@@ -54,8 +58,17 @@ export interface INodeCompose<TElement = any> {
 
 export type I$Text = IStream<ITextNode>
 
+export interface ISchedulerStats {
+  asapDepth: number
+  paintDepth: number
+  drainPasses: number
+  guardTrips: number
+  taskErrors: number
+}
+
 export interface I$Scheduler extends IScheduler {
   paint(task: ITask): Disposable
+  stats?(): ISchedulerStats
 }
 
 export type IOutputTethers<A> = { [P in keyof A]?: IOps<A[P], A[P]> }

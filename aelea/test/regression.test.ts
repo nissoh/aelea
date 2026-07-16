@@ -15,11 +15,20 @@ import {
   type ITime,
   just,
   merge,
+  nullSink,
   periodic,
   sample,
   zip
 } from '../src/stream/index.js'
-import { multicast, PromiseStatus, promiseState, state, stream, tether } from '../src/stream-extended/index.js'
+import {
+  behavior,
+  multicast,
+  PromiseStatus,
+  promiseState,
+  state,
+  stream,
+  tether
+} from '../src/stream-extended/index.js'
 import { createDomScheduler, createHeadlessScheduler } from '../src/ui/index.js'
 
 interface Capture<T> {
@@ -348,6 +357,37 @@ describe('applicative error routing', () => {
     expect(capture.values).toEqual([3])
   })
 
+  test('an error instance that completed fan-out once is not delivered twice', () => {
+    const scheduler = createDefaultScheduler()
+    let push: ISink<number> | undefined
+    const m = multicast(
+      stream<number>(sink => {
+        push = sink
+        return disposeNone
+      })
+    )
+
+    const seen: unknown[] = []
+    m.run(
+      {
+        event() {},
+        end() {},
+        error(_, e) {
+          seen.push(e)
+        }
+      },
+      scheduler
+    )
+
+    const boom = new Error('boom')
+    push!.error(0, boom)
+    // A guarded scheduler task's error channel can feed the rethrown error
+    // back sequentially — the second delivery of the same instance must no-op.
+    push!.error(0, boom)
+
+    expect(seen).toHaveLength(1)
+  })
+
   test('multicast delivers errors to every subscriber even if one handler throws', () => {
     const scheduler = createDefaultScheduler()
     let push: ISink<number> | undefined
@@ -426,6 +466,221 @@ describe('applicative error routing', () => {
   })
 })
 
+describe('tether/behavior termination algebra', () => {
+  const pushSource = () => {
+    const sinks: ISink<number>[] = []
+    const source = stream<number>(sink => {
+      sinks.push(sink)
+      return disposeNone
+    })
+    return { source, sinks }
+  }
+
+  test('one ended primary does not end the tether while others are live', () => {
+    const scheduler = createDefaultScheduler()
+    const { source, sinks } = pushSource()
+    const [primary, tethered] = tether(source)
+
+    const tetherCapture: Capture<number> = { values: [], ended: false, errors: [] }
+    tethered.run(captureSink(tetherCapture), scheduler)
+
+    const consume: Capture<number> = { values: [], ended: false, errors: [] }
+    primary.run(captureSink(consume), scheduler)
+    primary.run(captureSink(consume), scheduler)
+
+    sinks[0].event(0, 1)
+    sinks[0].end(0)
+    expect(tetherCapture.ended).toBe(false)
+
+    sinks[1].event(0, 2)
+    expect(tetherCapture.values).toEqual([1, 2])
+
+    sinks[1].end(0)
+    expect(tetherCapture.ended).toBe(true)
+  })
+
+  test('a disposed primary is cancellation, not completion', () => {
+    const scheduler = createDefaultScheduler()
+    const { source } = pushSource()
+    const [primary, tethered] = tether(source)
+
+    const tetherCapture: Capture<number> = { values: [], ended: false, errors: [] }
+    tethered.run(captureSink(tetherCapture), scheduler)
+
+    const d = primary.run(captureSink({ values: [], ended: false, errors: [] }), scheduler)
+    d[Symbol.dispose]()
+
+    expect(tetherCapture.ended).toBe(false)
+  })
+
+  test('a behavior consumer ends only after all samplers end', () => {
+    const scheduler = createDefaultScheduler()
+    const [out, compose] = behavior<number>()
+    const a = pushSource()
+    const b = pushSource()
+
+    const consumer: Capture<number> = { values: [], ended: false, errors: [] }
+    out.run(captureSink(consumer), scheduler)
+
+    const sA = compose()(a.source)
+    const sB = compose()(b.source)
+    sA.run(nullSink, scheduler)
+    sB.run(nullSink, scheduler)
+
+    a.sinks[0].event(0, 1)
+    a.sinks[0].end(0)
+    expect(consumer.ended).toBe(false)
+
+    b.sinks[0].event(0, 2)
+    expect(consumer.values).toEqual([1, 2])
+
+    b.sinks[0].end(0)
+    expect(consumer.ended).toBe(true)
+  })
+
+  test('unmounting a composed view revokes its sampler registration', () => {
+    const scheduler = createDefaultScheduler()
+    const [out, compose] = behavior<number>()
+    let probeRuns = 0
+    const probe = (s: IStream<number>): IStream<number> => ({
+      run(sink, sch) {
+        probeRuns++
+        return s.run(sink, sch)
+      }
+    })
+
+    // three remount generations, each fully unmounted again
+    for (let i = 0; i < 3; i++) {
+      const s0 = compose(probe)(stream<number>(() => disposeNone))
+      const d = s0.run(nullSink, scheduler)
+      d[Symbol.dispose]()
+    }
+    expect(probeRuns).toBe(0)
+
+    // a fresh consumer must not be wired to the dead samplers
+    out.run(nullSink, scheduler)
+    expect(probeRuns).toBe(0)
+
+    // positive control: a LIVE mount registers, and the existing consumer is
+    // hot-wired through the probe
+    const { source, sinks } = pushSource()
+    const live = compose(probe)(source)
+    live.run(nullSink, scheduler)
+    expect(probeRuns).toBe(1)
+
+    const consumer: Capture<number> = { values: [], ended: false, errors: [] }
+    out.run(captureSink(consumer), scheduler)
+    expect(probeRuns).toBe(2)
+
+    sinks[0].event(0, 7)
+    expect(consumer.values).toEqual([7])
+  })
+
+  test('an end arriving after disposal does not double-count the contributor', () => {
+    const scheduler = createDefaultScheduler()
+    const { source, sinks } = pushSource()
+    const [primary, tethered] = tether(source)
+
+    const tetherCapture: Capture<number> = { values: [], ended: false, errors: [] }
+    tethered.run(captureSink(tetherCapture), scheduler)
+
+    const dA = primary.run(captureSink({ values: [], ended: false, errors: [] }), scheduler)
+    primary.run(captureSink({ values: [], ended: false, errors: [] }), scheduler)
+
+    dA[Symbol.dispose]()
+    // contract-violating late end from the disposed subscription's source
+    sinks[0].end(0)
+    expect(tetherCapture.ended).toBe(false)
+
+    sinks[1].event(0, 5)
+    expect(tetherCapture.values).toEqual([5])
+
+    sinks[1].end(0)
+    expect(tetherCapture.ended).toBe(true)
+  })
+
+  test('double-disposing a primary subscription does not corrupt the live count', () => {
+    const scheduler = createDefaultScheduler()
+    const { source, sinks } = pushSource()
+    const [primary, tethered] = tether(source)
+
+    const tetherCapture: Capture<number> = { values: [], ended: false, errors: [] }
+    tethered.run(captureSink(tetherCapture), scheduler)
+
+    const dA = primary.run(captureSink({ values: [], ended: false, errors: [] }), scheduler)
+    primary.run(captureSink({ values: [], ended: false, errors: [] }), scheduler)
+
+    dA[Symbol.dispose]()
+    dA[Symbol.dispose]()
+    expect(tetherCapture.ended).toBe(false)
+
+    sinks[1].end(0)
+    expect(tetherCapture.ended).toBe(true)
+  })
+
+  test('double-disposing a composed mount does not desync sampler registration', () => {
+    const scheduler = createDefaultScheduler()
+    const [out, compose] = behavior<number>()
+
+    const consumer: Capture<number> = { values: [], ended: false, errors: [] }
+    out.run(captureSink(consumer), scheduler)
+
+    const a = pushSource()
+    const composed = compose()(a.source)
+    const d1 = composed.run(nullSink, scheduler)
+    d1[Symbol.dispose]()
+    d1[Symbol.dispose]()
+
+    // remount: the 0→1 registration edge must fire again
+    const b = pushSource()
+    // a fresh application simulating a remount generation
+    const composed2 = compose()(b.source)
+    composed2.run(nullSink, scheduler)
+    b.sinks[0].event(0, 9)
+    expect(consumer.values).toEqual([9])
+  })
+
+  test('a throwing source rolls back the registration and the contributor count', () => {
+    const scheduler = createDefaultScheduler()
+    const [out, compose] = behavior<number>()
+
+    let attempts = 0
+    const { source, sinks } = pushSource()
+    const flaky: IStream<number> = {
+      run(sink, sch) {
+        if (attempts++ === 0) throw new Error('subscribe failed')
+        return source.run(sink, sch)
+      }
+    }
+
+    const composed = compose()(flaky)
+    expect(() => composed.run(nullSink, scheduler)).toThrow('subscribe failed')
+
+    // rollback must leave the behavior consistent: the retry registers cleanly
+    const consumer: Capture<number> = { values: [], ended: false, errors: [] }
+    out.run(captureSink(consumer), scheduler)
+    composed.run(nullSink, scheduler)
+    sinks[0].event(0, 3)
+    expect(consumer.values).toEqual([3])
+    sinks[0].end(0)
+    expect(consumer.ended).toBe(true)
+  })
+
+  test('a consumer subscribed before any sampler exists is hot-wired on mount', () => {
+    const scheduler = createDefaultScheduler()
+    const [out, compose] = behavior<number>()
+
+    const consumer: Capture<number> = { values: [], ended: false, errors: [] }
+    out.run(captureSink(consumer), scheduler)
+
+    const { source, sinks } = pushSource()
+    compose()(source).run(nullSink, scheduler)
+
+    sinks[0].event(0, 42)
+    expect(consumer.values).toEqual([42])
+  })
+})
+
 describe('sample', () => {
   test('disposes the values subscription exactly once', async () => {
     const scheduler = createDefaultScheduler()
@@ -439,5 +694,32 @@ describe('sample', () => {
     expect(capture.ended).toBe(true)
     dispose()
     expect(cleanups).toBe(1)
+  })
+})
+
+describe('error feedback cycle', () => {
+  test('a fault re-entering a shared node through a feedback edge reports once instead of recursing', () => {
+    const scheduler = createDefaultScheduler()
+    let upstream: ISink<number> | null = null
+    const shared = multicast(
+      stream<number>(sink => {
+        upstream = sink
+        return disposeNone
+      })
+    )
+    const seen: unknown[] = []
+    const feedback: ISink<number> = {
+      event() {},
+      end() {},
+      error(time: ITime, e: unknown) {
+        seen.push(e)
+        upstream?.error(time, e as Error)
+      }
+    }
+
+    shared.run(feedback, scheduler)
+    const fault = new Error('502')
+    expect(() => upstream?.error(scheduler.time(), fault)).not.toThrow()
+    expect(seen).toEqual([fault])
   })
 })

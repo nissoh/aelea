@@ -1,54 +1,77 @@
-import {
-  disposeAll,
-  disposeWith,
-  type IOps,
-  type IScheduler,
-  type ISink,
-  type IStream,
-  op
-} from '../../stream/index.js'
+import { disposeWith, type IOps, type IScheduler, type ISink, type IStream, op } from '../../stream/index.js'
+import { stream } from '../source/stream.js'
 import type { IBehavior, IComposeBehavior } from '../types.js'
+import { type FanInContributor, FanInSink } from './sink.js'
 import { tether } from './tether.js'
 
+type IWire<T> = {
+  contributor: FanInContributor<T>
+  subscription: Disposable
+}
+
 type SubscriberInfo<T> = {
-  sink: ISink<T>
   scheduler: IScheduler
-  disposables: Disposable[]
+  fanIn: FanInSink<T>
+  wires: Map<IStream<T>, IWire<T>>
 }
 
 class BehaviorSource<T> implements IStream<T> {
   samplers: IStream<T>[] = []
   subscribers: SubscriberInfo<T>[] = []
 
-  sample(samplerSource: IStream<T>): void {
-    // Prevent duplicate streams
-    if (this.samplers.includes(samplerSource)) return
-
+  // Registration is revocable: disposing it removes the sampler and unwires
+  // it from every live subscriber, so remounted views do not accumulate dead
+  // samplers on a long-lived behavior.
+  sample(samplerSource: IStream<T>): Disposable {
     this.samplers.push(samplerSource)
 
     // Hot-wire to existing subscribers
-    for (const { sink, scheduler, disposables } of this.subscribers) {
-      disposables.push(samplerSource.run(sink, scheduler))
+    for (const subscriber of this.subscribers) {
+      this.wire(subscriber, samplerSource)
     }
+
+    return disposeWith(() => {
+      const i = this.samplers.indexOf(samplerSource)
+      if (i > -1) this.samplers.splice(i, 1)
+
+      for (const subscriber of this.subscribers) {
+        const wire = subscriber.wires.get(samplerSource)
+        if (wire) {
+          subscriber.wires.delete(samplerSource)
+          wire.subscription[Symbol.dispose]()
+          wire.contributor[Symbol.dispose]()
+        }
+      }
+    })
+  }
+
+  private wire(subscriber: SubscriberInfo<T>, samplerSource: IStream<T>): void {
+    if (subscriber.fanIn.closed || subscriber.wires.has(samplerSource)) return
+    const contributor = subscriber.fanIn.attach()
+    const subscription = samplerSource.run(contributor, subscriber.scheduler)
+    subscriber.wires.set(samplerSource, { contributor, subscription })
   }
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    const disposables: Disposable[] = []
+    // Fan-in: the consumer ends only when ALL its samplers have ended — one
+    // completing sampler no longer terminates a sink others still feed.
+    const subscriber: SubscriberInfo<T> = { scheduler, fanIn: new FanInSink(sink), wires: new Map() }
+    this.subscribers.push(subscriber)
 
-    // Subscribe to all samplers
     for (const sampler of this.samplers) {
-      disposables.push(sampler.run(sink, scheduler))
+      this.wire(subscriber, sampler)
     }
 
-    const subscriberInfo: SubscriberInfo<T> = { sink, scheduler, disposables }
-    this.subscribers.push(subscriberInfo)
-
     return disposeWith(() => {
-      disposeAll(disposables)[Symbol.dispose]()
-      const index = this.subscribers.indexOf(subscriberInfo)
+      const index = this.subscribers.indexOf(subscriber)
       if (index > -1) {
         this.subscribers.splice(index, 1)
       }
+      for (const wire of subscriber.wires.values()) {
+        wire.subscription[Symbol.dispose]()
+        wire.contributor[Symbol.dispose]()
+      }
+      subscriber.wires.clear()
     })
   }
 }
@@ -63,9 +86,40 @@ export function behavior<A, B = A>(): IBehavior<A, B> {
       // Apply operations with proper typing
       const transformed = (op as any)(s1, ...ops)
 
-      behaviorSource.sample(transformed)
+      // Registration follows the primary's subscription lifetime: the first
+      // mount registers the sampler, the last unmount revokes it. The count
+      // must survive double-disposal and a throwing source, or the 0→1
+      // registration edge desyncs permanently.
+      let subscriptions = 0
+      let registration: Disposable | null = null
 
-      return s0
+      const release = () => {
+        if (--subscriptions === 0 && registration !== null) {
+          const r = registration
+          registration = null
+          r[Symbol.dispose]()
+        }
+      }
+
+      return stream((sink, scheduler) => {
+        if (subscriptions++ === 0) {
+          registration = behaviorSource.sample(transformed)
+        }
+        let sourceSubscription: Disposable
+        try {
+          sourceSubscription = s0.run(sink, scheduler)
+        } catch (err) {
+          release()
+          throw err
+        }
+        let disposed = false
+        return disposeWith(() => {
+          if (disposed) return
+          disposed = true
+          sourceSubscription[Symbol.dispose]()
+          release()
+        })
+      })
     }
   }) as IComposeBehavior<A, B>
 

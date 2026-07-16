@@ -64,6 +64,13 @@ function emitCachedValue<T>(time: ITime, sink: ISink<T>, primarySink: PrimarySin
 
 class PrimarySink<T> implements ISink<T> {
   latestValue?: { value: T }
+  // Set by end() or disposal — the sink is inert afterwards, so a source
+  // violating the no-events-after-disposal contract cannot re-seed the
+  // replay cache or double-count the contributor.
+  dead = false
+  // The contributor has left liveContributors exactly once, whichever of
+  // end/disposal happens first.
+  countedOut = false
 
   constructor(
     readonly primary: Primary<T>,
@@ -72,6 +79,7 @@ class PrimarySink<T> implements ISink<T> {
   ) {}
 
   event(time: ITime, value: T): void {
+    if (this.dead) return
     this.primarySink.event(time, value)
 
     // Store latest value per-sink, not per-primary
@@ -85,11 +93,20 @@ class PrimarySink<T> implements ISink<T> {
   }
 
   end(time: ITime): void {
+    if (this.dead) return
+    this.dead = true
     this.primarySink.end(time)
-    this.tetherSink.end(time)
+    // One completing contributor must not terminate the tether while other
+    // live primaries still feed it — the tether ends when the LAST live
+    // contributor ends.
+    if (!this.countedOut) {
+      this.countedOut = true
+      this.tetherSink.contributorEnded(time)
+    }
   }
 
   error(time: ITime, err: Error): void {
+    if (this.dead) return
     this.primarySink.error(time, err)
     this.tetherSink.error(time, err)
   }
@@ -102,15 +119,36 @@ class Primary<T> implements IStream<T> {
   ) {}
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    // Each subscription gets its own PrimarySink
+    // Each subscription gets its own PrimarySink. The contributor is counted
+    // before the source runs so a synchronously-ending source decrements a
+    // count that includes itself; a throwing source rolls the count back.
     const primarySink = new PrimarySink(this, sink, this.tether)
-    const sourceDisposable = this.source.run(primarySink, scheduler)
+    this.tether.liveContributors++
+    let sourceDisposable: Disposable
+    try {
+      sourceDisposable = this.source.run(primarySink, scheduler)
+    } catch (err) {
+      primarySink.dead = true
+      if (!primarySink.countedOut) {
+        primarySink.countedOut = true
+        this.tether.liveContributors--
+      }
+      throw err
+    }
 
     this.tether.primarySinkList = append(this.tether.primarySinkList, primarySink)
 
     return disposeBoth(
       sourceDisposable,
       disposeWith(() => {
+        // Disposal is cancellation, not completion — leave without forwarding
+        // end (an ended contributor already counted itself out). Idempotent:
+        // a second dispose or a post-disposal end must not decrement again.
+        primarySink.dead = true
+        if (!primarySink.countedOut) {
+          primarySink.countedOut = true
+          this.tether.liveContributors--
+        }
         // Clear the sink's cached value
         primarySink.latestValue = undefined
         // Remove this primarySink from the tether's list to prevent memory leak
@@ -129,6 +167,13 @@ class Primary<T> implements IStream<T> {
  */
 class Tether<T> extends MulticastSink<T> implements IStream<T> {
   primarySinkList: readonly PrimarySink<T>[] = []
+  liveContributors = 0
+
+  contributorEnded(time: ITime): void {
+    if (--this.liveContributors === 0) {
+      this.end(time)
+    }
+  }
 
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
     this.sinkList = append(this.sinkList, sink)

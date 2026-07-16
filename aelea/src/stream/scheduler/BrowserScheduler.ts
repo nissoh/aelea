@@ -1,5 +1,6 @@
 import type { IScheduler, ITask, ITime } from '../types.js'
 import { DelayDisposable } from './DelayDisposable.js'
+import { runTaskGuarded } from './runTaskGuarded.js'
 
 /**
  * Browser-optimized scheduler implementation.
@@ -18,7 +19,7 @@ export class BrowserScheduler implements IScheduler {
   private readonly initialWallClockTime = Date.now()
 
   runDelayedTask = (task: ITask): void => {
-    task.run(this.time())
+    runTaskGuarded(task, this.time())
   }
 
   flushAsapTasks = (): void => {
@@ -31,7 +32,7 @@ export class BrowserScheduler implements IScheduler {
     if (tasks.length === 1) {
       const task = tasks[0]
       tasks.length = 0
-      task.run(this.time())
+      runTaskGuarded(task, this.time())
       return
     }
     // Multi-task path: swap in a recycled empty array so re-asaps during
@@ -39,7 +40,7 @@ export class BrowserScheduler implements IScheduler {
     this.asapTasks = this.recycled ?? []
     this.recycled = null
     const time = this.time()
-    for (let i = 0; i < tasks.length; i++) tasks[i].run(time)
+    for (let i = 0; i < tasks.length; i++) runTaskGuarded(tasks[i], time)
     tasks.length = 0
     this.recycled = tasks
   }

@@ -13,7 +13,14 @@
 // entry point alongside factories from a single origin. The renderer
 // choice is still `render(...)` (DOM) vs `renderToImage(...)` (takumi);
 // these re-exports just spare a second import statement.
-export { createStyleRule, type IRenderConfig, render } from '../ui-renderer-dom/dom.js'
+export {
+  createStyleRule,
+  type ICommitRecord,
+  type IRenderConfig,
+  type IRenderDevtool,
+  type IRenderResult,
+  render
+} from '../ui-renderer-dom/dom.js'
 export { fromEventTarget, nodeEvent } from '../ui-renderer-dom/event.js'
 export * from './combinator/attribute.js'
 export * from './combinator/component.js'
@@ -21,6 +28,7 @@ export * from './combinator/effect.js'
 export * from './combinator/motion.js'
 export { makeMutator } from './combinator/mutator.js'
 export * from './combinator/style.js'
+export { type IMountPort, MountPort } from './mount.js'
 export { $custom, $element, $node, $svg, $text, $wrapNativeElement, createNode } from './node.js'
 export { createDomScheduler, createHeadlessScheduler } from './scheduler.js'
 export type {

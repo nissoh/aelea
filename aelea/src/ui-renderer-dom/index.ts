@@ -53,5 +53,13 @@ export type {
   IStyleCSS,
   ITextNode
 } from '../ui/types.js'
-export { createStyleRule, type INodeElementDom, type IRenderConfig, render } from './dom.js'
+export {
+  createStyleRule,
+  type ICommitRecord,
+  type INodeElementDom,
+  type IRenderConfig,
+  type IRenderDevtool,
+  type IRenderResult,
+  render
+} from './dom.js'
 export { fromEventTarget, nodeEvent } from './event.js'

@@ -1,5 +1,6 @@
 import type { IScheduler, ITask, ITime } from '../types.js'
 import { DelayDisposable } from './DelayDisposable.js'
+import { runTaskGuarded } from './runTaskGuarded.js'
 
 // Minimal Node.js globals used by this scheduler, declared locally so @types/node
 // is not a required dependency.
@@ -50,13 +51,13 @@ export class NodeScheduler implements IScheduler {
     if (tasks.length === 1) {
       const task = tasks[0]
       tasks.length = 0
-      task.run(this.time())
+      runTaskGuarded(task, this.time())
       return
     }
     this.asapTasks = this.recycled ?? []
     this.recycled = null
     const time = this.time()
-    for (let i = 0; i < tasks.length; i++) tasks[i].run(time)
+    for (let i = 0; i < tasks.length; i++) runTaskGuarded(tasks[i], time)
     tasks.length = 0
     this.recycled = tasks
   }
@@ -68,7 +69,7 @@ export class NodeScheduler implements IScheduler {
       clearImmediate(this.asapImmediate)
       this.flushAsapTasks()
     }
-    task.run(this.time())
+    runTaskGuarded(task, this.time())
   }
 
   time(): ITime {

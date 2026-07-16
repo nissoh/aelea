@@ -1,6 +1,6 @@
-import { type IStream, map } from '../../stream/index.js'
+import type { IStream } from '../../stream/index.js'
 import type { I$Node, IAttributeProperties, IMutator, INode } from '../types.js'
-import { makeMutator } from './mutator.js'
+import { makeMutator, mutateOnEmit } from './mutator.js'
 
 export interface IAttributeCurry {
   <A, TElement>(attrs: IAttributeProperties<A>, node: I$Node<TElement>): I$Node<TElement>
@@ -17,7 +17,7 @@ export const attr = ((attrs: IAttributeProperties<unknown>, source?: I$Node) => 
     Object.assign(node.attributes, attrs)
     return node
   }
-  if (source !== undefined) return map(mutate, source)
+  if (source !== undefined) return mutateOnEmit(mutate, source)
   return makeMutator(mutate)
 }) as IAttributeCurry
 
@@ -26,6 +26,6 @@ export const attrBehavior = ((stream$: IStream<IAttributeProperties<unknown> | n
     node.attributesBehavior.push(stream$)
     return node
   }
-  if (source !== undefined) return map(mutate, source)
+  if (source !== undefined) return mutateOnEmit(mutate, source)
   return makeMutator(mutate)
 }) as IAttributeBehaviorCurry

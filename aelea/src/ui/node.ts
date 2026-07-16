@@ -1,4 +1,5 @@
 import {
+  disposeAll,
   disposeBoth,
   empty,
   type ISink,
@@ -12,6 +13,7 @@ import {
   SettableDisposable
 } from '../stream/index.js'
 import { state, stream } from '../stream-extended/index.js'
+import { MountPort } from './mount.js'
 import type { I$Node, I$Op, I$Slottable, I$Text, INode, INodeCompose, ITextNode } from './types.js'
 
 function emitNode<T>(time: ITime, sink: ISink<T>, value: T): void {
@@ -20,7 +22,25 @@ function emitNode<T>(time: ITime, sink: ISink<T>, value: T): void {
 
 type Mutator<TElement> = (node: INode<TElement>) => INode<TElement>
 
-const EMPTY_SEGMENTS: readonly I$Slottable<unknown>[] = [never as I$Slottable<unknown>]
+export const EMPTY_SEGMENTS: readonly I$Slottable<unknown>[] = [never as I$Slottable<unknown>]
+
+// Optimization hints, not different objects: an op-free compose result is a
+// fully functional node stream that ALSO carries its mount recipe, so a
+// renderer may materialize it inline without subscribing. Any other consumer
+// (switchLatest, multicast, ops) observes it as a plain stream.
+export const NODE_BRAND = Symbol('aelea/static-node')
+export const TEXT_BRAND = Symbol('aelea/static-text')
+
+export interface IStaticNodeBrand<TElement = unknown> {
+  createElement: () => TElement
+  $segments: I$Slottable<TElement>[]
+  staticStyles: INode<TElement>['staticStyles']
+  styleBehavior: INode<TElement>['styleBehavior']
+  styleInline: INode<TElement>['styleInline']
+  propBehavior: INode<TElement>['propBehavior']
+  attributesBehavior: INode<TElement>['attributesBehavior']
+  attributes: INode<TElement>['attributes']
+}
 
 export function createNode<TElement>(
   createElement: () => TElement,
@@ -59,6 +79,7 @@ export function createNode<TElement>(
       const scratch: INode<TElement> = {
         element: undefined as unknown as TElement,
         disposable: undefined as unknown as SettableDisposable,
+        mount: undefined as unknown as MountPort<TElement>,
         $segments,
         staticStyles,
         styleBehavior,
@@ -75,6 +96,7 @@ export function createNode<TElement>(
       const nodeState: INode<TElement> = {
         element: createElement(),
         disposable: nodeDisposable,
+        mount: new MountPort<TElement>(),
         $segments,
         staticStyles,
         styleBehavior,
@@ -89,6 +111,19 @@ export function createNode<TElement>(
 
     let result: I$Node<TElement> = $branch
     for (let i = 0; i < streamOps.length; i++) result = streamOps[i](result)
+    if (streamOps.length === 0) {
+      const brand: IStaticNodeBrand<TElement> = {
+        createElement,
+        $segments,
+        staticStyles,
+        styleBehavior,
+        styleInline,
+        propBehavior,
+        attributesBehavior,
+        attributes
+      }
+      ;(result as unknown as Record<symbol, unknown>)[NODE_BRAND] = brand
+    }
     return result
   }
 
@@ -134,19 +169,27 @@ export function $wrapNativeElement<T extends Element = Element>(element: T): INo
 export const $text = (...textSourceList: (IStream<string> | string)[]): I$Text => {
   if (textSourceList.length === 0) return empty
 
+  // Each subscription's manifest carries its own SettableDisposable so the
+  // renderer can hand back a targeted removal hook — disposing the text
+  // subscription (e.g. a switchLatest swap) then removes the mounted Text
+  // node instead of orphaning it.
   const streams = textSourceList.map(source => {
     if (typeof source === 'string') {
-      return stream<ITextNode>((sink, scheduler) => {
-        const manifest: ITextNode = { kind: 'text', value: source }
-        return scheduler.asap(propagateRunEventTask(sink, emitNode, manifest))
+      const $staticText = stream<ITextNode>((sink, scheduler) => {
+        const disposable = new SettableDisposable()
+        const manifest: ITextNode = { kind: 'text', value: source, disposable }
+        return disposeBoth(scheduler.asap(propagateRunEventTask(sink, emitNode, manifest)), disposable)
       })
+      ;($staticText as unknown as Record<symbol, unknown>)[TEXT_BRAND] = source
+      return $staticText
     }
     const cached = state()(source)
     return stream<ITextNode>((sink, scheduler) => {
       const primeSub = cached.run(nullSink, scheduler)
-      const manifest: ITextNode = { kind: 'text', value: cached }
+      const disposable = new SettableDisposable()
+      const manifest: ITextNode = { kind: 'text', value: cached, disposable }
       const emitTask = scheduler.asap(propagateRunEventTask(sink, emitNode, manifest))
-      return disposeBoth(emitTask, primeSub)
+      return disposeAll([emitTask, primeSub, disposable])
     })
   })
 

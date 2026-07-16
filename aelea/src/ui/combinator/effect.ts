@@ -1,6 +1,6 @@
-import { type IStream, map } from '../../stream/index.js'
+import type { IStream } from '../../stream/index.js'
 import type { I$Node, I$Scheduler, IMutator, INode } from '../types.js'
-import { makeMutator } from './mutator.js'
+import { makeMutator, mutateOnEmit } from './mutator.js'
 
 export interface IEffectPropCurry {
   (prop: string, source: IStream<unknown>, node: I$Node): I$Node
@@ -22,7 +22,7 @@ export const effectProp = ((prop: string, source?: IStream<unknown>, node?: I$No
     n.propBehavior.push(entry)
     return n
   }
-  if (node !== undefined) return map(mutate, node)
+  if (node !== undefined) return mutateOnEmit(mutate, node)
   return makeMutator(mutate)
 }) as IEffectPropCurry
 
@@ -32,6 +32,6 @@ export const effectRun = ((apply: (element: unknown, scheduler: I$Scheduler) => 
     n.propBehavior.push(entry)
     return n
   }
-  if (node !== undefined) return map(mutate, node)
+  if (node !== undefined) return mutateOnEmit(mutate, node)
   return makeMutator(mutate)
 }) as IEffectRunCurry

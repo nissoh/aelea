@@ -1,7 +1,7 @@
 import type { Pseudos } from 'csstype'
-import { type IStream, map } from '../../stream/index.js'
+import type { IStream } from '../../stream/index.js'
 import type { I$Node, IMutator, INode, IStaticStyleEntry, IStyleCSS } from '../types.js'
-import { makeMutator } from './mutator.js'
+import { makeMutator, mutateOnEmit } from './mutator.js'
 
 export interface IStyleCurry {
   <TElement>(styleInput: IStyleCSS, node: I$Node<TElement>): I$Node<TElement>
@@ -34,7 +34,7 @@ export const style = ((styleInput: IStyleCSS, source?: I$Node) => {
     node.staticStyles.push(entry)
     return node
   }
-  if (source !== undefined) return map(mutate, source)
+  if (source !== undefined) return mutateOnEmit(mutate, source)
   return makeMutator(mutate)
 }) as IStyleCurry
 
@@ -48,7 +48,7 @@ export const stylePseudo = ((pseudoClass: string, styleInput?: IStyleCSS, source
     node.staticStyles.push(entry)
     return node
   }
-  if (source !== undefined) return map(mutate, source)
+  if (source !== undefined) return mutateOnEmit(mutate, source)
   return makeMutator(mutate)
 }) as IStylePseudoCurry
 
@@ -57,7 +57,7 @@ export const styleBehavior = ((stream$: IStream<IStyleCSS | null>, source?: I$No
     node.styleBehavior.push(stream$)
     return node
   }
-  if (source !== undefined) return map(mutate, source)
+  if (source !== undefined) return mutateOnEmit(mutate, source)
   return makeMutator(mutate)
 }) as IStyleBehaviorCurry
 
@@ -66,6 +66,6 @@ export const styleInline = ((stream$: IStream<IStyleCSS>, source?: I$Node) => {
     node.styleInline.push(stream$)
     return node
   }
-  if (source !== undefined) return map(mutate, source)
+  if (source !== undefined) return mutateOnEmit(mutate, source)
   return makeMutator(mutate)
 }) as IStyleInlineCurry
