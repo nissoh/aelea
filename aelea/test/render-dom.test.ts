@@ -1,5 +1,5 @@
 // Renderer parity guard. Mounts a representative aelea tree (static styles,
-// reactive styleInline / styleBehavior, static + reactive attributes, a
+// reactive styleBehavior / styleBehavior, static + reactive attributes, a
 // multi-segment node, a switchLatest slot, dynamic $text, and a
 // component+tether) into happy-dom under the synchronous scheduler, then
 // snapshots:
@@ -26,8 +26,7 @@ import {
   nodeEvent,
   render,
   style,
-  styleBehavior,
-  styleInline
+  styleBehavior
 } from '../src/ui/index.js'
 import { disabledOp } from '../src/ui-components/components/controllers/form.js'
 import { observeManifest } from '../src/ui-renderer-takumi/snapshot.js'
@@ -105,7 +104,7 @@ describe('DOM render parity', () => {
     const toggle = subject(true)
 
     const $tree = $node(style({ display: 'flex', padding: '4px' }), attr({ id: 'root', role: 'group' }))(
-      $element('span')(styleInline(inline.source), styleBehavior(beh.source), attrBehavior(at.source))(
+      $element('span')(styleBehavior(inline.source), styleBehavior(beh.source), attrBehavior(at.source))(
         $text(text.source)
       ),
       $element('div')($element('i')($text('seg-a')), $element('b')($text('seg-b'))),
@@ -293,7 +292,7 @@ describe('takumi resolved-tree parity', () => {
   test('observeManifest materializes the same shape', () => {
     const text = subject('hi')
     const $tree = $node(style({ display: 'flex' }), attr({ id: 'card' }))(
-      $element('span')(styleInline(state({ color: 'red' } as IStyleCSS, neverEmit())))($text(text.source)),
+      $element('span')(styleBehavior(state({ color: 'red' } as IStyleCSS, neverEmit())))($text(text.source)),
       $element('p')($text('static'))
     )
 

@@ -1,14 +1,7 @@
 import { combine, type IStream, just, map, never, op } from '../../../stream/index.js'
 import { state } from '../../../stream-extended/index.js'
+import { $element, $text, type I$Slottable, type INodeCompose, style, styleBehavior } from '../../../ui/index.js'
 import { colorWeight, palette, text } from '../../../ui-components-theme/index.js'
-import {
-  $element,
-  $text,
-  type I$Slottable,
-  type INodeCompose,
-  style,
-  styleBehavior
-} from '../../../ui-renderer-dom/index.js'
 import { spacing } from '../../style/spacing.js'
 import { isDisabled, resolveDisabledState } from './form.js'
 import type { Control } from './types.js'

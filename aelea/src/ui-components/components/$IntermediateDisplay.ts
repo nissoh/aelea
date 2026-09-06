@@ -1,7 +1,7 @@
 import { type IStream, switchMap } from '../../stream/index.js'
 import { PromiseStatus, promiseState } from '../../stream-extended/index.js'
+import { $custom, $svg, $text, attr, type I$Node, style } from '../../ui/index.js'
 import { palette, text } from '../../ui-components-theme/index.js'
-import { $custom, $svg, $text, attr, type I$Node, style } from '../../ui-renderer-dom/index.js'
 import { spacing } from '../style/spacing.js'
 
 export interface IClassifiedError {

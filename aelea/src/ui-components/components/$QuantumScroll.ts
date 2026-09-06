@@ -9,7 +9,7 @@ import {
   type INodeCompose,
   type ISlottable,
   style
-} from '../../ui-renderer-dom/index.js'
+} from '../../ui/index.js'
 import { $column } from '../elements/$elements.js'
 import { spacing } from '../style/spacing.js'
 import { observer } from '../utils/elementObservers.js'

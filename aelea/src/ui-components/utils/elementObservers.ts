@@ -1,6 +1,15 @@
-import { constant, continueWith, filter, type IStream, map, o, switchLatest, until } from '../../stream/index.js'
+import {
+  constant,
+  continueWith,
+  filter,
+  type IStream,
+  never,
+  switchLatest,
+  switchMap,
+  until
+} from '../../stream/index.js'
 import { fromCallback } from '../../stream-extended/index.js'
-import type { ISlottable } from '../../ui/index.js'
+import { type ISlottable, onMounted } from '../../ui/index.js'
 import { fromEventTarget } from '../../ui-renderer-dom/event.js'
 
 const documentVisibilityChange = fromEventTarget(document, 'visibilitychange')
@@ -16,56 +25,41 @@ export const duringWindowActivity = <T>(source: IStream<T>) => {
   return activity
 }
 
-// `slottable.element` is the renderer-agnostic descriptor (`{ tag, namespace,
-// native? }`). The DOM renderer writes the materialized element to
-// `descriptor.native` at mount; PrimarySink delivers to the renderer first
-// and the tether second, so by the time this resolver runs `.native` is
-// populated. Pre-mount or non-DOM renderers fall through to `null`.
-const resolveDomElement = (value: unknown): Element | null => {
-  if (typeof Element === 'undefined' || value == null) return null
-  if (value instanceof Element) return value
-  const native = (value as { native?: unknown }).native
-  return native instanceof Element ? native : null
-}
+const observeElement =
+  <T>(observe: (element: Element) => IStream<T>) =>
+  (source: IStream<ISlottable>): IStream<T> =>
+    switchMap(
+      slottable =>
+        slottable.kind === 'node'
+          ? switchMap(el => (el instanceof Element ? observe(el) : never), onMounted(slottable.mount))
+          : never,
+      source
+    )
 
 export const intersection = (config: IntersectionObserverInit = {}) =>
-  o(
-    map(
-      (slottable: ISlottable<Node>): IStream<IntersectionObserverEntry[]> =>
-        fromCallback<IntersectionObserverEntry[], [IntersectionObserverEntry[]]>(
-          cb => {
-            const target = resolveDomElement(slottable.element)
-            if (target === null || typeof IntersectionObserver === 'undefined') {
-              return () => {}
-            }
-            const io = new IntersectionObserver(cb, config)
-            io.observe(target)
-            return () => io.disconnect()
-          },
-          entries => entries
-        )
-    ),
-    switchLatest
+  observeElement(target =>
+    fromCallback<IntersectionObserverEntry[], [IntersectionObserverEntry[]]>(
+      cb => {
+        if (typeof IntersectionObserver === 'undefined') return () => {}
+        const io = new IntersectionObserver(cb, config)
+        io.observe(target)
+        return () => io.disconnect()
+      },
+      entries => entries
+    )
   )
 
 export const resize = (config: ResizeObserverOptions = {}) =>
-  o(
-    map(
-      (slottable: ISlottable<Node>): IStream<ResizeObserverEntry[]> =>
-        fromCallback<ResizeObserverEntry[], [ResizeObserverEntry[]]>(
-          cb => {
-            const target = resolveDomElement(slottable.element)
-            if (target === null || typeof ResizeObserver === 'undefined') {
-              return () => {}
-            }
-            const ro = new ResizeObserver(cb)
-            ro.observe(target, config)
-            return () => ro.disconnect()
-          },
-          entries => entries
-        )
-    ),
-    switchLatest
+  observeElement(target =>
+    fromCallback<ResizeObserverEntry[], [ResizeObserverEntry[]]>(
+      cb => {
+        if (typeof ResizeObserver === 'undefined') return () => {}
+        const ro = new ResizeObserver(cb)
+        ro.observe(target, config)
+        return () => ro.disconnect()
+      },
+      entries => entries
+    )
   )
 
 export const observer = {

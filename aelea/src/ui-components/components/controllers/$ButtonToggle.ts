@@ -1,6 +1,5 @@
 import { constant, type IOps, type IStream, just, map, never, switchLatest } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
-import { colorShade, palette } from '../../../ui-components-theme/index.js'
 import {
   $element,
   $node,
@@ -15,7 +14,8 @@ import {
   style,
   styleBehavior,
   stylePseudo
-} from '../../../ui-renderer-dom/index.js'
+} from '../../../ui/index.js'
+import { colorShade, palette } from '../../../ui-components-theme/index.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 import { disabledOp } from './form.js'
 import type { Control } from './types.js'

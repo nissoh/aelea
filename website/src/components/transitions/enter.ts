@@ -1,6 +1,6 @@
 import { combineMap, continueWith, fromIterable, just } from 'aelea/stream'
 import type { I$Slottable } from 'aelea/ui'
-import { motion, styleInline } from 'aelea/ui'
+import { motion, styleBehavior } from 'aelea/ui'
 
 export function fadeIn($content: I$Slottable) {
   const fadeIn = motion({ stiffness: 70, damping: 26, precision: 3 }, fromIterable([0, 100]))
@@ -18,5 +18,5 @@ export function fadeIn($content: I$Slottable) {
     return just({ opacity: '', transform: '' })
   })
 
-  return styleInline(withEndAnimation(animation), $content)
+  return styleBehavior(withEndAnimation(animation), $content)
 }

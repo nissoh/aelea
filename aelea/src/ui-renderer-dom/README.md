@@ -1,149 +1,55 @@
-# Aelea DOM Rendering Engine
+# Aelea DOM Renderer
 
-Maps a tree of `IStream<INode>` (and `IStream<ITextNode>`) values into live DOM nodes whose lifecycle is tied to stream disposal. No virtual DOM, no diffing — mount/update/unmount is driven by stream events and the disposable chain.
+Maps a tree of node streams into live DOM whose lifetime is tied to stream disposal. No virtual DOM, no diffing: a child mounts when its stream emits and unmounts when that subscription is disposed.
 
-## The two-layer split
+## Two layers, one walk
 
-Rendering is split so the same component code can target different runtimes (live DOM, headless manifest → React-element snapshot, takumi → image bytes, and future Bun-native / custom renderers).
+`src/ui/` is renderer-agnostic: factories, decorators, the component contract, and `backend.ts`, which holds the **mount walk**. The walk is the single traversal of a node: create the element, apply static style and attributes, subscribe every reactive channel, run effects, and mount each segment. It knows nothing about the DOM; it asks an `IMountBackend` for elements, text nodes, sinks and insertion.
 
-### `src/ui/` — renderer-agnostic core
+`src/ui-renderer-dom/` supplies the browser backend and `render()`. `src/ui-renderer-takumi/` supplies an observer backend over plain records and rasterizes the result. Both renderers therefore share slot semantics, segment ordering, teardown, and reactive-channel semantics by construction; the parity tests only confirm it.
 
-| File | Provides | Purpose |
+## Recipe and instance
+
+A compose expression such as `$element('div')(style(…), attr(…))(children)` fixes a **recipe**: the element descriptor, static styles, static attributes, the reactive channel streams, effects, and the child segment streams. The recipe is built once and shared.
+
+Subscribing the compose result creates an **instance** per subscription: `{ kind: 'node', recipe, mount, disposable }`. `mount` is a `MountPort` that resolves to the element the renderer materializes; `onMounted(port)` exposes it as a stream, and `nodeEvent` and the element observers go through it. `disposable` is set by the renderer to the mounted entry, so disposing the subscription (a `switchLatest` swap, an `until`, an outer teardown) removes the child.
+
+An op-free compose result is also branded with its recipe, and a direct child with that brand mounts inline in the parent's pass with no subscription and no scheduled emission. Text children are branded with their source, string or stream, and mount the same way. Static children flatten into the parent: their bindings join the parent's disposable list and their elements go with the parent's, so only dynamic segments carry slot bookkeeping.
+
+## Slots
+
+A **slot** is one segment of a node, or the render root. A slot holds a set of live children in emission order. When its stream emits a node or text, the child mounts and is appended; when it emits `null`, every child in the slot unmounts; when the stream ends, the children stay until outer disposal. Replacement is disposal: a `switchLatest` over node streams disposes the previous inner, which fires its `disposable`, which removes its entry.
+
+Segments keep declaration order regardless of emission timing: an insert into a segment below the highest mounted segment lands before the first node of the next mounted segment.
+
+A manifest that reaches two slots (a `state`-wrapped node stream replayed into two places) mounts twice with two elements; the second `disposable.set` is reported once per manifest through `onError`, because only the first entry can be removed by that subscription.
+
+## Channels
+
+| Channel | Decorator | Semantics |
 |---|---|---|
-| `types.ts` | `INode`, `ISlottable`, `ITextNode`, `INodeCompose`, `I$Slottable`, `IOutputTethers`, `IComponentBehavior` | Shape of a UI tree. `INode<TElement>` is `{ element, $segments, style, styleBehavior, styleInline, stylePseudo, attributes, attributesBehavior, propBehavior }` — a renderer-agnostic description of "a thing to mount." `ISlotChild<T>` includes `null` as the unmount sentinel. |
-| `node.ts` | `createNode(createElement, postOp)`, `$text(…)` | The abstract factory. `createElement` produces the per-renderer element handle (HTMLElement, TakumiElement, plain object, …). `createNode` returns a curried `INodeCompose` that collects children + ops and emits an `INode` when subscribed. |
-| `scheduler.ts` | `createDomScheduler`, `createHeadlessScheduler` | DOM scheduler uses `requestAnimationFrame` for its `paint()` phase; headless scheduler has `paint === asap` for Node/Bun environments that don't benefit from frame-aligned writes. |
-| `combinator/` | `style`, `styleInline`, `styleBehavior`, `stylePseudo`, `attr`, `attrBehavior`, `effectProp`, `effectRun`, `motion`, `component` | Operators that transform an `IStream<INode>`. They mutate the `INode` contract fields in place (`node.style`, `node.styleBehavior[]`, …) — no whole-node spread, so ops are O(1). The renderer reads these fields. |
+| static style | `style`, `stylePseudo` | one cached class per distinct declaration set, minted into a shared stylesheet |
+| static attributes | `attr` | applied once at mount |
+| reactive style | `styleBehavior` | the stream **owns the keys of its latest emission**: keys missing from the next emission are removed, `null` removes them all, unchanged values are not rewritten. The previous emission is the record of ownership, so emitted objects are treated as immutable. One decorator per source. |
+| reactive attributes | `attrBehavior` | the same ownership rule |
+| property | `effectProp` | `element[key] = value` per emission |
+| effect | `effectRun` | runs once with the element after mount; a returned disposable runs on unmount |
+| text | `$text(stream)` | one persistent text node updated in place |
 
-Nothing here touches the DOM.
+The DOM backend coalesces every reactive write per frame: each binding keeps the latest value, a single committer flushes the whole frame's writes in one paint task, and each apply is guarded so one bad value neither kills its channel nor starves the others. `render({ devtool: true })` exposes the commit journal and live binding registry.
 
-### `src/ui-renderer-dom/` — DOM-specific renderer
+## Teardown
 
-| File | Provides | Purpose |
-|---|---|---|
-| `factories.ts` | `$element`, `$svg`, `$custom`, `$node`, `$wrapNativeElement` | DOM-backed `createNode` wrappers. `$element('div')` = `createNode(() => document.createElement('div'))`. |
-| `dom.ts` | `render({ rootAttachment, $rootNode, scheduler?, onError? })`, `createStyleRule`, `createStylePseudoRule` | The renderer. Walks an `INode`, creates real DOM nodes, wires subscriptions, routes dynamic writes through `scheduler.paint`. |
-| `event.ts` | `nodeEvent`, `fromEventTarget` | DOM-bound event helpers. `nodeEvent('click')` is an `IOps<ISlottable<Node>, MouseEvent>` used with tethers. |
-| `types.ts` | DOM-specialized aliases (`INodeDom`, `INodeElementDom`, …) | Same shapes as `src/ui/` with `TElement` pinned to `HTMLElement | SVGElement`. |
+Disposing a slot entry disposes its subtree first, so bindings and effect cleanups still see an attached element, then detaches the root element once; descendants inside a subtree being discarded skip their own `removeChild`.
 
-Other renderers of the same surface: `ui-renderer-manifest` (emits a stream of resolved INode snapshots), `ui-renderer-manifest-react` (projects a snapshot to React-element shape), `ui-renderer-takumi` (composes the former two + `ImageResponse` to produce image bytes from aelea components).
+## Schedulers
 
-## Lifecycle model
+All schedulers share one core (`stream/scheduler/core.ts`): a guarded asap queue, asap-before-delay ordering, and `idle()`, which resolves once no batch, timer or paint is outstanding.
 
-### Slot
+- `createDomScheduler()`: asap on the microtask queue for compute, DOM reads and tree creation; `paint` on `requestAnimationFrame` for writes, with same-frame cascade draining bounded per frame.
+- `createHeadlessScheduler()`: paint falls through to asap; used by takumi.
+- `createSyncScheduler()`: asap and paint run inline; a mount is complete when `render` returns. For tests and benchmarks.
 
-A "slot" is one spot in the tree, populated by a stream of child values. Each `INode.$segments[i]` is a slot, and `render`'s root is also a slot. A slot holds at most one mounted child at a time.
+## Custom renderers
 
-`renderSlotAt($slot, parent, anchor, env)` subscribes to `$slot` with a sink that:
-
-1. On `event(nodeOrText)`:
-   - disposes the previous mounted child's subscription chain and removes its DOM node from `parent`
-   - if the value is `null` (the unmount sentinel in `ISlotChild<T>`), stops — slot now has no content
-   - otherwise calls `mountNodeOrText(value, env)`, which creates the element, applies static style/attrs, subscribes to every stream in the `INode`'s behavior arrays (paint-batched), and recursively descends into each `$segment`
-   - inserts the new element *before* `anchor` (a comment node reserved at mount time for this slot's position)
-2. On `error(err)`: forwards to `env.onError`, default `console.error`. Can be routed into app telemetry via `render({ onError })`.
-3. On `end()`: no-op. Aelea's node factories (`$element`, `$text`) emit-once-don't-end, so end is rare; when it does happen (e.g. a user writes `just(node)` as a slot) we keep the mounted child alive until the outer disposable fires.
-4. On outer disposal (`Symbol.dispose` on the handle returned by `renderSlotAt`): disposes the slot subscription AND the current mount's disposables AND removes both the element and the anchor.
-
-This is the only unmount path besides re-emit: when the disposable representing the slot's subscription gets disposed from above (a parent slot re-emitting, which cascades disposal through its `childDisposables`), the slot's current mount tears down.
-
-### Segment order: anchor comments
-
-For a node with several `$segments`, each segment is an independent `I$Slottable` with its own emit timing. If one segment's stream emits synchronously and another emits asynchronously, a naive "append on first emit" would put DOM children in *emit* order — which almost always diverges from *declaration* order.
-
-The renderer reserves a placeholder comment node per segment at mount time, then each segment's `renderSlotAt` inserts its element *before* that anchor. Anchors are appended to `parent` in declaration order, so elements end up in declaration order regardless of which stream emits first. Unmounting a segment removes the element but leaves the anchor in place, so re-emits land in the same slot.
-
-### Per-node subscription fan-out
-
-Every `INode` can carry these stream-driven behaviors, each handled by the renderer as its own disposable merged into `childDisposables`:
-
-| Field | Effect on every emit |
-|---|---|
-| `propBehavior: { key, value }[]` | `(element as any)[key] = v` — direct property set (e.g., `value` on an `<input>`). Paint-batched. |
-| `styleInline: IStream<IStyleCSS>[]` | `element.style.setProperty(kebab(k), v)` per key — reactive inline styles (additive; never clears). Paint-batched. |
-| `styleBehavior: IStream<IStyleCSS\|null>[]` | tracks keys set last emission; on each new emission, removes prior keys that aren't in the new value (the browser cascades back to the class-based static rule, or nothing) and sets the new values. `null` reverts everything that stream owned. This is how "hover highlight" / "active state" are wired. Paint-batched. |
-| `attributesBehavior: IStream<IAttr>[]` | `element.setAttribute`/`removeAttribute` per key. Paint-batched. |
-| `stylePseudo` (static array, not a stream) | `createStylePseudoRule(':hover', …)` mints a cached CSS rule in the shared sheet and adds the returned class to the element |
-
-Static `node.style` goes through `createStyleRule` → cached class name, added to the element's `classList`. Static `node.attributes` are applied once during mount via `applyAttributes`.
-
-### Why slot disposal matters
-
-When a slot re-emits (e.g. `switchMap` swapping content, a list reducer producing a new item stream), if the renderer doesn't tear down the previous child:
-
-- Old DOM nodes accumulate as siblings instead of being replaced.
-- Old subscriptions keep firing into detached elements, wasting CPU and leaking memory.
-- `stylePseudo` rules are inserted into the shared sheet on every re-emit, so the sheet grows without bound and old `:hover` rules still match the (still-in-DOM) stale elements, producing "stuck hover" artifacts.
-
-`renderSlotAt` guards against all three by disposing `current` before mounting the new value. `stylePseudo` rules are additionally deduplicated: `createStylePseudoRule` keys on the sorted serialized style + pseudo, so identical rules from repeated mounts resolve to the same class.
-
-## Style handling: classes vs inline
-
-Static styles → cached CSS rules → classes. Reactive streams → inline `style.setProperty`. Cascade is the browser's.
-
-```
-element.style  (inline, lowest specificity cascade slot)
-  └ styleInline / styleBehavior stream updates land here
-element.classList
-  └ ae-N class minted by createStyleRule(node.style)     — static style
-  └ ae-M class minted by createStylePseudoRule(':hover', …) — static pseudo
-```
-
-Consequences:
-- Identical static styles across the tree share one rule — HTML is smaller, computed-style is shareable across like elements.
-- `styleBehavior` returning `null` removes its inline property → browser cascades back to the class rule automatically. No baseline tracking needed.
-- `style({ x })` + `styleBehavior(…{ x }…)` both set the same `x` cleanly: the class provides the default, the inline override takes precedence, clearing the inline restores the default.
-
-The rule cache is a `Map<canonicalKey, className>`. Keys are sorted `kebab-case:value;` strings so `{a:1,b:2}` and `{b:2,a:1}` hit the same slot.
-
-## Paint batching
-
-All dynamic writes (propBehavior, styleInline, styleBehavior, attributesBehavior, text-node updates from stream values) route through `makePaintWriter(scheduler, apply)`. Each writer holds a single `pending` value: multiple emissions within the same event-loop tick overwrite `pending`, and only one `apply` fires per paint frame. The underlying `scheduler.paint(task)` defers to `requestAnimationFrame` in the browser, to `queueMicrotask` under `createHeadlessScheduler`.
-
-Net effect: a stream that fires 20x per tick triggers 20 JS handlers but one layout/paint commit — no thrashing.
-
-## The `null` unmount sentinel
-
-`switchLatest(map(isMatch => isMatch ? ns : empty, routeMatch))` — the `empty` path internally ends, but the outer `switchLatest` output stream never emits anything, never ends. The downstream slot can't tell "I should unmount now" from "source is quiet."
-
-Solution: `null` is a first-class variant of `ISlotChild<T>`. `router.match` and `router.contains` emit `just(null)` on unmatch. `renderSlotAt` sees `null`, tears down `current`, leaves the anchor in place. Next `true` → new content lands in the same slot.
-
-Contract:
-- slot stream emits a node/text → mount (replaces any previous content)
-- slot stream emits `null` → unmount current, slot is empty
-- slot stream ends → keep last mount alive until outer disposal
-- outer disposal → tear down everything
-
-## Event lifecycle for tethers
-
-`nodeEvent('click')` is `IOps<ISlottable<Node>, MouseEvent>` that wraps `addEventListener` via `fromCallback`. Behavior pattern:
-
-```ts
-component(([click, clickTether]: IBehavior<ISlottable<Node>, MouseEvent>) => [
-  $element('button')(
-    clickTether(nodeEvent('click'))
-  )($text('click me'))
-])
-```
-
-The tether composes `nodeEvent('click')` onto the node's event pipeline, scheduled via the node's lifecycle. When the slot unmounts, the tether's subscription is torn down alongside the element's `childDisposables`.
-
-## Scheduler
-
-`createDomScheduler()` exposes:
-- `asap(task)` — `queueMicrotask`, for compute + DOM reads
-- `paint(task)` — `requestAnimationFrame`, for DOM writes (one frame, N writes)
-- `delay(task, ms)` — `setTimeout`; drains any pending `asap` queue first
-
-`createHeadlessScheduler()` — for Node / Bun / pipelines that don't have a real compositor. `paint` is a microtask; there's no raf polyfill of `globalThis` (the takumi renderer uses this).
-
-## Headless / alternate-renderer ergonomics
-
-The implicit DOM API used by the renderer: `document.createComment`, `document.createTextNode`, `Element.insertBefore`, `Element.removeChild`, `Element.setAttribute`, `Element.removeAttribute`, `Element.style.setProperty`, `Element.style.removeProperty`, `Element.classList.add`, `Element.classList.remove`. `document.createElement`, `document.getElementById`, and `document.head.appendChild` are needed if class-based static styles are used; `createStyleRule` returns `null` in their absence so styles fall back to inline writes.
-
-`aelea/benchmark/headless-render.ts` is a reference minimal shim that exercises this surface without a real DOM.
-
-## Known limitations
-
-- `stylePseudo` rules are cached but not deleted from the sheet. Over a long-running app with lots of distinct pseudo styles, the sheet grows without bound (bounded by the number of distinct serialized styles, not by mount count). Per-rule ref-counting + `sheet.deleteRule` is a followup if it matters.
-- SVG elements rely on the browser having `element.classList` and the namespace being handled at `createElement` time (the DOM `$svg` factory uses `document.createElementNS`). Takumi's renderer projects SVG → container; for real SVG rasterization, go through an `$img` data-URL.
+Implement `IMountBackend<Element, Text>` and call `mountRoot(new MountContext(backend), $root, host, insert)`. The takumi observer in `ui-renderer-takumi/snapshot.ts` is the smallest example.

@@ -13,16 +13,8 @@ import {
   until
 } from '../../stream/index.js'
 import { behavior, type IBehavior, multicast } from '../../stream-extended/index.js'
-import type { I$Node, ISlottable } from '../../ui-renderer-dom/index.js'
-import {
-  component,
-  fromEventTarget,
-  motion,
-  nodeEvent,
-  style,
-  styleBehavior,
-  styleInline
-} from '../../ui-renderer-dom/index.js'
+import type { I$Node, ISlottable } from '../../ui/index.js'
+import { component, fromEventTarget, motion, nodeEvent, style, styleBehavior } from '../../ui/index.js'
 import { $column, $row } from '../elements/$elements.js'
 import { layoutSheet } from '../style/layoutSheet.js'
 
@@ -167,7 +159,8 @@ export const $Sortable = <T extends I$Node>(config: DraggableList<T>) =>
               orderChangeTether()
             ),
 
-            styleInline(merge(applyTransformStyle, applyBoxShadowStyle)),
+            styleBehavior(applyTransformStyle),
+            styleBehavior(applyBoxShadowStyle),
 
             styleBehavior(map(x => ({ zIndex: x ? 1000 : 0 }), isDraggingStream))
           )($item)

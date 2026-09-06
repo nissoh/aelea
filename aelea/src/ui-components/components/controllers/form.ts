@@ -1,9 +1,9 @@
 import type { IOps, IStream } from '../../../stream/index.js'
 import { constant, filter, just, map, merge, switchMap } from '../../../stream/index.js'
 import { type PromiseState, PromiseStatus, promiseState } from '../../../stream-extended/index.js'
+import type { IMutator, IRecipe, ISlottable, IStyleCSS } from '../../../ui/index.js'
+import { $element, makeMutator, nodeEvent, style, styleBehavior } from '../../../ui/index.js'
 import { palette } from '../../../ui-components-theme/index.js'
-import type { IMutator, INode, ISlottable, IStyleCSS } from '../../../ui-renderer-dom/index.js'
-import { $element, makeMutator, nodeEvent, style, styleBehavior } from '../../../ui-renderer-dom/index.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 
 export const interactionOp: IOps<ISlottable, boolean> = source =>
@@ -35,18 +35,16 @@ const disabledStyleStream = (state: IStream<DisabledState>): IStream<IStyleCSS |
 
 export const disabledStyleOp = (disabled: IStream<boolean | Promise<unknown>>): IMutator => {
   const state = resolveDisabledState(disabled)
-  return makeMutator((node: INode) => {
-    node.styleBehavior.push(disabledStyleStream(state))
-    return node
+  return makeMutator((recipe: IRecipe) => {
+    recipe.styleBehavior.push(disabledStyleStream(state))
   })
 }
 
 export const disabledOp = (disabled: IStream<boolean | Promise<unknown>>): IMutator => {
   const state = resolveDisabledState(disabled)
-  return makeMutator((node: INode) => {
-    node.styleBehavior.push(disabledStyleStream(state))
-    node.attributesBehavior.push(map(s => ({ disabled: isDisabled(s) ? '' : null }), state))
-    return node
+  return makeMutator((recipe: IRecipe) => {
+    recipe.styleBehavior.push(disabledStyleStream(state))
+    recipe.attributesBehavior.push(map(s => ({ disabled: isDisabled(s) ? '' : null }), state))
   })
 }
 

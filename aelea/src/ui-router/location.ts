@@ -1,26 +1,26 @@
 import { type IStream, map, merge, start, tap } from '../stream/index.js'
-import { multicast } from '../stream-extended/index.js'
+import { multicast, stream } from '../stream-extended/index.js'
 import { fromEventTarget } from '../ui-renderer-dom/event.js'
 import type { PathEvent } from './types.js'
 
-// Programmatic-navigation broadcaster: `pushUrl` / `replaceUrl` dispatch onto
-// it so subscribers of `locationChange` see the change. We use a private
-// EventTarget instead of `window` so we don't pollute the global event bus.
 const broadcaster = new EventTarget()
 const PROGRAMMATIC = 'change' as const
-
-const programmaticChange: IStream<Event> = fromEventTarget(broadcaster, PROGRAMMATIC)
-const popStateChange: IStream<PopStateEvent> = fromEventTarget(window, 'popstate')
 
 /**
  * Stream of location changes. Replays the current `document.location` once
  * on subscribe (so the router synchronizes immediately), then re-emits on
- * browser back/forward (popstate) and after `pushUrl` / `replaceUrl`.
+ * browser back/forward (popstate) and after `pushUrl` / `replaceUrl`. The
+ * globals are read at subscription, so the module loads outside a browser.
  */
 export const locationChange: IStream<Location> = multicast(
-  start(
-    document.location,
-    map(() => document.location, merge(popStateChange, programmaticChange))
+  stream((sink, scheduler) =>
+    start(
+      document.location,
+      map(
+        () => document.location,
+        merge(fromEventTarget(window, 'popstate'), fromEventTarget(broadcaster, PROGRAMMATIC))
+      )
+    ).run(sink, scheduler)
   )
 )
 
@@ -49,9 +49,8 @@ export const replaceUrl = (url: string): void => {
 
 /**
  * Build a `PathEvent` stream rooted at `baseRoute` (the synthetic name for
- * the path under `document.baseURI`). Pass the result as `fragmentsChange`
- * to `router.create`. Strips query and hash; route fragments only see the
- * pathname.
+ * the path under `document.baseURI`). Strips query and hash; route fragments
+ * only see the pathname.
  */
 export const fragmentsFromLocation = (baseRoute: string): IStream<PathEvent> =>
   map(() => {
@@ -61,8 +60,6 @@ export const fragmentsFromLocation = (baseRoute: string): IStream<PathEvent> =>
     const rel = pathname.startsWith(basePath) ? pathname.slice(basePath.length) : pathname
     if (rel === '' || rel === '/') return [baseRoute]
     const frags = rel.split('/')
-    // The leading slash produces an empty first segment; replace it with the
-    // synthetic baseRoute so consumers see a uniform `[baseRoute, ...rest]`.
     frags[0] = baseRoute
     return frags
   }, locationChange)

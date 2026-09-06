@@ -7,7 +7,7 @@
 import { beforeAll, describe, expect, test } from 'bun:test'
 import { dropRoot, freshRoot, installDom, syncScheduler } from '../benchmark/lib/dom-env.js'
 import { disposeWith, type IStream, type ITask, map, merge, switchLatest } from '../src/stream/index.js'
-import { behavior, type IBehavior, multicast, state } from '../src/stream-extended/index.js'
+import { behavior, type IBehavior, state } from '../src/stream-extended/index.js'
 import type { I$Node, I$Slottable, IStyleCSS } from '../src/ui/index.js'
 import {
   $element,
@@ -21,11 +21,9 @@ import {
   effectRun,
   MountPort,
   nodeEvent,
-  port,
   render,
   style,
-  styleBehavior,
-  styleInline
+  styleBehavior
 } from '../src/ui/index.js'
 import { NODE_BRAND, TEXT_BRAND } from '../src/ui/node.js'
 
@@ -209,7 +207,7 @@ describe('real-DomScheduler mount parity', () => {
       attr({ 'data-kind': 'parity' }),
       styleBehavior(constantState<IStyleCSS>({ opacity: '0.5' }))
     )(
-      $element('span')(styleInline(constantState<IStyleCSS>({ color: 'red' })))($text('left')),
+      $element('span')(styleBehavior(constantState<IStyleCSS>({ color: 'red' })))($text('left')),
       $text(constantState('mid')),
       $element('em')($text('right'))
     )
@@ -232,8 +230,8 @@ describe('real-DomScheduler mount parity', () => {
   })
 })
 
-describe('attr patch semantics (F5)', () => {
-  test('two attr patches in the same frame both land', async () => {
+describe('attr ownership semantics', () => {
+  test('the latest emission in a frame defines the owned keys; dropped keys are removed', async () => {
     const scheduler = createDomScheduler()
     const root = freshRoot()
     const { source, next } = pushStream<Record<string, string>>()
@@ -249,8 +247,17 @@ describe('attr patch semantics (F5)', () => {
     await wait(60)
 
     const el = root.querySelector('div') as HTMLElement
-    expect(el.getAttribute('data-a')).toBe('1')
+    expect(el.getAttribute('data-a')).toBeNull()
     expect(el.getAttribute('data-b')).toBe('2')
+
+    next({ 'data-a': '3', 'data-b': '2' })
+    await wait(60)
+    expect(el.getAttribute('data-a')).toBe('3')
+
+    next(null as never)
+    await wait(60)
+    expect(el.hasAttribute('data-a')).toBe(false)
+    expect(el.hasAttribute('data-b')).toBe(false)
     disp[Symbol.dispose]()
     dropRoot(root)
   })
@@ -384,33 +391,7 @@ describe('nodeEvent on unmounted manifests', () => {
   })
 })
 
-describe('component.ports (step 8)', () => {
-  test('record-based ports flow events out through tethers', () => {
-    const root = freshRoot()
-    const clicks: unknown[] = []
-
-    const $Btn = component.ports({ click: port<PointerEvent>() }, (b: { click: IBehavior<PointerEvent> }) => {
-      const [click, clickTether] = b.click
-      return [$element('button')(clickTether(nodeEvent('click')))($text('go')), { click }]
-    })
-
-    const [out, outTether] = behavior<unknown>()
-    const consume = out.run({ event: (_t: number, v: unknown) => clicks.push(v), error() {}, end() {} }, syncScheduler)
-    const disp = render({
-      rootAttachment: root,
-      $rootNode: $element('div')($Btn({ click: outTether() })),
-      scheduler: syncScheduler
-    })
-
-    const btn = root.querySelector('button') as HTMLElement
-    btn.dispatchEvent(new (globalThis as any).window.Event('click', { bubbles: true }))
-    expect(clicks).toHaveLength(1)
-
-    consume[Symbol.dispose]()
-    disp[Symbol.dispose]()
-    dropRoot(root)
-  })
-
+describe('component output tethers', () => {
   test('a tether key with no matching output reports instead of throwing mid-mount', () => {
     const root = freshRoot()
     const errors: unknown[] = []
@@ -448,8 +429,9 @@ describe('static fast path (step 9)', () => {
 
     const staticText = $text('hi') as unknown as Record<symbol, unknown>
     expect(staticText[TEXT_BRAND]).toBe('hi')
-    const dynamicText = $text(constantState('hi')) as unknown as Record<symbol, unknown>
-    expect(dynamicText[TEXT_BRAND]).toBeUndefined()
+    const source = constantState('hi')
+    const dynamicText = $text(source) as unknown as Record<symbol, unknown>
+    expect(dynamicText[TEXT_BRAND]).toBe(source)
   })
 
   test('a branded subtree mounts inline and tears down through the same slot bookkeeping', () => {
@@ -513,7 +495,7 @@ describe('committer + devtool (step 10)', () => {
     const textSrc = pushStream<string>()
     const disp = render({
       rootAttachment: root,
-      $rootNode: $element('div')(styleInline(styleSrc.source as IStream<IStyleCSS | null>))($text(textSrc.source)),
+      $rootNode: $element('div')(styleBehavior(styleSrc.source as IStream<IStyleCSS | null>))($text(textSrc.source)),
       scheduler,
       devtool: true
     })
@@ -529,8 +511,8 @@ describe('committer + devtool (step 10)', () => {
     const journal = devtool?.journal() ?? []
     // two bindings dirtied → two commits (style coalesced to latest)
     expect(journal).toHaveLength(2)
-    expect(journal.map(j => j.channel).sort()).toEqual(['styleInline', 'text'])
-    expect(journal.find(j => j.channel === 'styleInline')?.value).toContain('blue')
+    expect(journal.map(j => j.channel).sort()).toEqual(['style', 'text'])
+    expect(journal.find(j => j.channel === 'style')?.value).toContain('blue')
 
     const bindings = devtool?.bindings()
     expect(bindings?.total).toBe(2)

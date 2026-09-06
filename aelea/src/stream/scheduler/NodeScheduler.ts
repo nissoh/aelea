@@ -1,86 +1,35 @@
-import type { IScheduler, ITask, ITime } from '../types.js'
-import { DelayDisposable } from './DelayDisposable.js'
-import { runTaskGuarded } from './runTaskGuarded.js'
+import type { IIdleScheduler, IScheduler } from '../types.js'
+import { SchedulerCore } from './core.js'
 
-// Minimal Node.js globals used by this scheduler, declared locally so @types/node
-// is not a required dependency.
 declare const setImmediate: (fn: (...args: unknown[]) => void, ...args: unknown[]) => ImmediateHandle
 declare const clearImmediate: (handle: ImmediateHandle) => void
 type ImmediateHandle = { readonly __immediate: true }
 
 /**
- * Node.js optimized scheduler implementation.
- *
- * Uses setImmediate for asap tasks. setImmediate fires in Node's "check"
- * phase, AFTER the "timers" phase — so a setTimeout(0) callback can fire
- * before a pending setImmediate. To preserve "asap before delay" ordering,
- * the timer callback first cancels and flushes any pending setImmediate.
- *
- * Implementation notes (metal):
- *  - asapTasks array is recycled across flushes to avoid per-flush
- *    allocation under high-frequency scheduling.
- *  - All tasks within a single flush share one logical timestamp so that
- *    "events scheduled in the same tick" agree on time().
+ * Flushes asap batches with setImmediate. setImmediate fires in Node's
+ * "check" phase, after the "timers" phase, so a delayed task cancels and
+ * drains the pending flush first to keep asap-before-delay ordering.
  */
-export class NodeScheduler implements IScheduler {
-  private asapTasks: ITask[] = []
-  private asapImmediate: ImmediateHandle | null = null
-  // One-slot free list for the previously-flushed array.
-  private recycled: ITask[] | null = null
-  private readonly initialTime = performance.now()
-  private readonly initialWallClockTime = Date.now()
+export class NodeScheduler extends SchedulerCore {
+  private immediate: ImmediateHandle | null = null
 
-  asap(task: ITask): Disposable {
-    this.asapTasks.push(task)
+  protected scheduleFlush(): void {
+    this.immediate = setImmediate(this.flushImmediate)
+  }
 
-    if (!this.asapImmediate) {
-      this.asapImmediate = setImmediate(this.flushAsapTasks)
+  protected override cancelFlush(): void {
+    if (this.immediate !== null) {
+      clearImmediate(this.immediate)
+      this.immediate = null
     }
-
-    return task
   }
 
-  delay(task: ITask, delay: ITime): Disposable {
-    return new DelayDisposable(setTimeout(this.runDelayedTask, delay, task), task)
-  }
-
-  flushAsapTasks = (): void => {
-    this.asapImmediate = null
-    const tasks = this.asapTasks
-    // Fast path: single-task flush (common case for one-shot pipelines).
-    if (tasks.length === 1) {
-      const task = tasks[0]
-      tasks.length = 0
-      runTaskGuarded(task, this.time())
-      return
-    }
-    this.asapTasks = this.recycled ?? []
-    this.recycled = null
-    const time = this.time()
-    for (let i = 0; i < tasks.length; i++) runTaskGuarded(tasks[i], time)
-    tasks.length = 0
-    this.recycled = tasks
-  }
-
-  runDelayedTask = (task: ITask): void => {
-    // Drain any pending setImmediate first to keep "asap before delay"
-    // ordering on Node, where the timers phase precedes the check phase.
-    if (this.asapImmediate) {
-      clearImmediate(this.asapImmediate)
-      this.flushAsapTasks()
-    }
-    runTaskGuarded(task, this.time())
-  }
-
-  time(): ITime {
-    return performance.now() - this.initialTime
-  }
-
-  dayTime(): ITime {
-    return this.initialWallClockTime + this.time()
+  private flushImmediate = (): void => {
+    this.immediate = null
+    this.flushAsapTasks()
   }
 }
 
-export function createNodeScheduler(): IScheduler {
+export function createNodeScheduler(): IScheduler & IIdleScheduler {
   return new NodeScheduler()
 }

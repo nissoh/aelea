@@ -1,6 +1,16 @@
-import { curry2, disposeWith, type IStream, isStream } from '../stream/index.js'
-import { fromCallback, stream } from '../stream-extended/index.js'
-import type { I$Slottable } from '../ui/types.js'
+import {
+  curry2,
+  disposeBoth,
+  disposeNone,
+  disposeWith,
+  type IScheduler,
+  type ISink,
+  type IStream,
+  type ITime,
+  isStream
+} from '../stream/index.js'
+import { fromCallback } from '../stream-extended/index.js'
+import type { I$Slottable, ISlotChild } from '../ui/types.js'
 
 type EventMapFor<T> = T extends Window
   ? WindowEventMap
@@ -46,13 +56,6 @@ export function fromEventTarget<T extends EventTarget, K extends keyof EventMapF
   })
 }
 
-/**
- * Descriptor form for `nodeEvent` when the caller needs extra options.
- * Accepts any slottable because the renderer-agnostic `INode` carries an
- * element descriptor, not a Node; `nodeEvent` walks to the real DOM node
- * at runtime via the `native` descriptor field or the materialized
- * element that the renderer writes back during mount.
- */
 type INodeEventDescriptor = {
   $node: I$Slottable
   options?: boolean | AddEventListenerOptions
@@ -68,93 +71,76 @@ export interface INodeEventCurry {
   ): (descriptor: I$Slottable | INodeEventDescriptor) => IStream<GlobalEventHandlersEventMap[K]>
 }
 
-// Walk from an aelea `INode` (or a raw element) to something we can attach
-// an event listener on. The renderer-agnostic `INode.element` is an
-// `IElementDescriptor`; the DOM renderer stores the materialized element
-// in `descriptor.native` at mount, and `$wrapNativeElement` sets it at
-// construction. Either path yields a real DOM Element we can bind events to.
-function resolveEventTarget(value: unknown): EventTarget | null {
-  if (value === null || value === undefined) return null
-  if (typeof (value as EventTarget).addEventListener === 'function') return value as EventTarget
-  const el = (value as { element?: unknown }).element
-  if (el && typeof (el as EventTarget).addEventListener === 'function') return el as EventTarget
-  const native = (el as { native?: unknown })?.native ?? (value as { native?: unknown }).native
-  if (native && typeof (native as EventTarget).addEventListener === 'function') return native as EventTarget
-  return null
-}
-
+/**
+ * Events of the element a node mounts to. Listens from the moment the mount
+ * port resolves, moves to the next node's element on re-emission, and
+ * detaches with the subscription. Text children never yield a target, and
+ * the node stream ending does not end the events.
+ */
 export const nodeEvent: INodeEventCurry = curry2((eventType, descriptor) => {
-  const target$ = isStream(descriptor) ? descriptor : descriptor.$node
+  const $node = isStream(descriptor) ? descriptor : descriptor.$node
   const options = isStream(descriptor) ? undefined : descriptor.options
-
-  return stream((sink, scheduler) => {
-    let detach: Disposable | null = null
-    let portSub: Disposable | null = null
-    let currentTarget: EventTarget | null = null
-
-    const attach = (target: EventTarget | null) => {
-      if (target === currentTarget) return
-
-      detach?.[Symbol.dispose]?.()
-      detach = null
-      currentTarget = target
-      if (target === null) return
-
-      const handler = (ev: Event) => {
-        sink.event(scheduler.time(), ev as never)
-      }
-
-      target.addEventListener(eventType, handler, options)
-      detach = disposeWith(() => {
-        target.removeEventListener(eventType, handler, options)
-      })
-    }
-
-    const disposable = target$.run(
-      {
-        event(_time: number, node: unknown) {
-          portSub?.[Symbol.dispose]?.()
-          portSub = null
-
-          // Prefer the typed mount handshake: the port fires at resolution
-          // (immediately when already mounted), removing the dependency on
-          // sink-delivery ordering and the `element.native` duck-walk.
-          const mount = (node as { mount?: { onElement?: (cb: (el: unknown) => void) => Disposable } })?.mount
-          if (mount && typeof mount.onElement === 'function') {
-            portSub = mount.onElement(el => {
-              attach(resolveEventTarget(el))
-            })
-            if (currentTarget === null) {
-              // Unresolved port (no renderer will resolve a directly-subscribed
-              // manifest): fall through to the legacy duck-walk, which still
-              // finds a pre-set native element ($wrapNativeElement).
-              const target = resolveEventTarget(node)
-              if (target !== null) attach(target)
-            }
-            return
-          }
-
-          attach(resolveEventTarget(node))
-        },
-        error(time: number, err: unknown) {
-          sink.error(time, err)
-        },
-        end(time: number) {
-          portSub?.[Symbol.dispose]?.()
-          portSub = null
-          detach?.[Symbol.dispose]?.()
-          sink.end(time)
-        }
-      },
-      scheduler
-    )
-
-    return disposeWith(() => {
-      portSub?.[Symbol.dispose]?.()
-      detach?.[Symbol.dispose]?.()
-      disposable?.[Symbol.dispose]?.()
-    })
-  })
+  return new NodeEvent($node, eventType, options)
 })
 
-// Custom listeners now belong in renderer code directly; no manifest hook needed.
+class NodeEvent implements IStream<Event> {
+  constructor(
+    readonly $node: I$Slottable,
+    readonly eventType: string,
+    readonly options: boolean | AddEventListenerOptions | undefined
+  ) {}
+
+  run(sink: ISink<Event>, scheduler: IScheduler): Disposable {
+    const listener = new NodeEventSink(sink, scheduler, this.eventType, this.options)
+    return disposeBoth(this.$node.run(listener, scheduler), listener)
+  }
+}
+
+class NodeEventSink implements ISink<ISlotChild>, Disposable {
+  private target: EventTarget | null = null
+  private port: Disposable = disposeNone
+
+  constructor(
+    readonly sink: ISink<Event>,
+    readonly scheduler: IScheduler,
+    readonly eventType: string,
+    readonly options: boolean | AddEventListenerOptions | undefined
+  ) {}
+
+  event(_time: ITime, child: ISlotChild): void {
+    this.port[Symbol.dispose]()
+    this.port = disposeNone
+    if (child !== null && child.kind === 'node') this.port = child.mount.onElement(this.attach)
+  }
+
+  error(time: ITime, err: unknown): void {
+    this.sink.error(time, err)
+  }
+
+  end(): void {}
+
+  [Symbol.dispose](): void {
+    this.port[Symbol.dispose]()
+    this.port = disposeNone
+    this.detach()
+  }
+
+  private attach = (element: unknown): void => {
+    this.detach()
+    if (element === null || typeof (element as EventTarget).addEventListener !== 'function') return
+    const target = element as EventTarget
+    target.addEventListener(this.eventType, this.listener, this.options)
+    this.target = target
+  }
+
+  private listener = (event: Event): void => {
+    this.sink.event(this.scheduler.time(), event)
+  }
+
+  private detach(): void {
+    const target = this.target
+    if (target === null) return
+    this.target = null
+    target.removeEventListener(this.eventType, this.listener, this.options)
+  }
+}

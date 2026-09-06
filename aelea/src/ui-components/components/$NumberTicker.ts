@@ -12,9 +12,9 @@ import {
   switchLatest
 } from '../../stream/index.js'
 import { multicast } from '../../stream-extended/index.js'
+import type { INodeCompose, IStyleCSS } from '../../ui/index.js'
+import { $node, $text, style, styleBehavior } from '../../ui/index.js'
 import { palette } from '../../ui-components-theme/index.js'
-import type { INodeCompose, IStyleCSS } from '../../ui-renderer-dom/index.js'
-import { $node, $text, style, styleBehavior } from '../../ui-renderer-dom/index.js'
 import { $row } from '../elements/$elements.js'
 
 export const sumFromZeroOp = reduce((current: number, x: number) => current + x, 0)

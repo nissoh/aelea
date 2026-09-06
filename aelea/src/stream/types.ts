@@ -27,16 +27,6 @@ export interface ISink<T> {
 
 /**
  * Scheduler interface for controlling the timing and execution of stream events.
- *
- * A scheduler is responsible for:
- * - Executing tasks at specific times or after delays
- * - Providing consistent time measurements across the stream
- * - Managing asynchronous task execution
- *
- * Different environments may implement schedulers differently:
- * - Browser: Uses setTimeout/requestAnimationFrame/queueMicrotask
- * - Node.js: Uses setTimeout/setImmediate/process.nextTick
- * - Test: May use virtual time for deterministic testing
  */
 export interface IScheduler {
   /** Delay a task by a specified amount of time */
@@ -61,3 +51,16 @@ export type Fn<T, R> = (a: T) => R
  * Stream transformation function
  */
 export type IOps<I, O = I> = Fn<IStream<I>, IStream<O>>
+
+export interface IIdleScheduler {
+  /** Resolves once no asap batch, delay timer or paint is outstanding */
+  idle(): Promise<void>
+}
+
+export interface ISchedulerStats {
+  asapDepth: number
+  paintDepth: number
+  drainPasses: number
+  guardTrips: number
+  taskErrors: number
+}

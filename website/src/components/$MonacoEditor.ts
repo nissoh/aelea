@@ -288,7 +288,6 @@ function aeleaStubTree(): PackageTree {
       export declare function $custom(...args: any[]): any
       export declare function nodeEvent(...args: any[]): any
       export declare function style(...args: any[]): any
-      export declare function styleInline(...args: any[]): any
       export declare function motion(...args: any[]): any
     `
 

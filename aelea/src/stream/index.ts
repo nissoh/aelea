@@ -3,8 +3,10 @@ export * from './scheduler/index.js'
 export * from './source/index.js'
 export type {
   Fn,
+  IIdleScheduler,
   IOps,
   IScheduler,
+  ISchedulerStats,
   ISink,
   IStream,
   ITask,

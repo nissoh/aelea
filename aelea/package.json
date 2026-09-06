@@ -68,7 +68,7 @@
   "devDependencies": {
     "@most/core": "1.6.1",
     "@most/scheduler": "1.3.0",
-    "@takumi-rs/core": "^1.6.0",
+    "@takumi-rs/core": "^2.13.5",
     "bun-types": "^1.3.14",
     "happy-dom": "^20.9.0",
     "tinybench": "^6.0.2"

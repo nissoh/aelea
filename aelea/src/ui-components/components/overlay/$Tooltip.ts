@@ -13,7 +13,6 @@ import {
   switchMap
 } from '../../../stream/index.js'
 import { animationFrame, type IBehavior } from '../../../stream-extended/index.js'
-import { palette } from '../../../ui-components-theme/index.js'
 import {
   attr,
   component,
@@ -24,8 +23,9 @@ import {
   type INodeCompose,
   nodeEvent,
   style,
-  styleInline
-} from '../../../ui-renderer-dom/index.js'
+  styleBehavior
+} from '../../../ui/index.js'
+import { palette } from '../../../ui-components-theme/index.js'
 import { $column, $row } from '../../elements/$elements.js'
 import { observer } from '../../utils/elementObservers.js'
 import { showPopover } from '../../utils/popover.js'
@@ -94,7 +94,7 @@ export const $Tooltip = ({
           }),
           effectRun(showPopover),
           contentTether(observer.intersection() as IOps<INode<HTMLElement>, IntersectionObserverEntry[]>),
-          styleInline(
+          styleBehavior(
             map(
               ({ aEntry, cEntry }) => {
                 const aEl = aEntry[0]?.target as HTMLElement | undefined

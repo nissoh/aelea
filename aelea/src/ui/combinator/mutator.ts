@@ -1,32 +1,37 @@
 import { map } from '../../stream/index.js'
-import type { I$Node, IMutator, INode } from '../types.js'
+import type { I$Node, IMutator, IRecipe } from '../types.js'
 
-export function makeMutator<TElement>(mutate: (node: INode<TElement>) => INode<TElement>): IMutator<TElement> {
+export function makeMutator<TElement>(mutate: (recipe: IRecipe<TElement>) => void): IMutator<TElement> {
   const op = ((source: I$Node<TElement>) => mutateOnEmit(mutate, source)) as IMutator<TElement>
   op.__mutate = mutate
   return op
 }
 
-// Per-emission application (post-stream-op decorators and the direct
-// `decorator(payload, $node)` form). The emitted node's channel containers are
-// shared by reference across every subscription of the same compose, so the
-// mutation must land on a per-emission copy — pushing into the shared arrays
-// accumulates duplicate entries once per subscription.
+/**
+ * Per-emission application, for a decorator that follows a stream op or the
+ * direct `decorator(payload, $node)` form. The recipe is shared by every
+ * instance of the compose, so the mutation lands on a per-emission copy.
+ */
 export function mutateOnEmit<TElement>(
-  mutate: (node: INode<TElement>) => INode<TElement>,
+  mutate: (recipe: IRecipe<TElement>) => void,
   source: I$Node<TElement>
 ): I$Node<TElement> {
-  return map(node => mutate(cloneChannels(node)), source)
+  return map(node => {
+    const recipe = cloneRecipe(node.recipe)
+    mutate(recipe)
+    return { ...node, recipe }
+  }, source)
 }
 
-function cloneChannels<TElement>(node: INode<TElement>): INode<TElement> {
+function cloneRecipe<TElement>(recipe: IRecipe<TElement>): IRecipe<TElement> {
   return {
-    ...node,
-    staticStyles: node.staticStyles.slice(),
-    styleBehavior: node.styleBehavior.slice(),
-    styleInline: node.styleInline.slice(),
-    propBehavior: node.propBehavior.slice(),
-    attributesBehavior: node.attributesBehavior.slice(),
-    attributes: { ...node.attributes }
+    element: recipe.element,
+    $segments: recipe.$segments,
+    staticStyles: recipe.staticStyles.slice(),
+    styleBehavior: recipe.styleBehavior.slice(),
+    attributes: { ...recipe.attributes },
+    attributesBehavior: recipe.attributesBehavior.slice(),
+    propBehavior: recipe.propBehavior.slice(),
+    effects: recipe.effects.slice()
   }
 }

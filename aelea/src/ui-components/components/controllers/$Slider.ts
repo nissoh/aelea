@@ -16,7 +16,6 @@ import {
   nodeEvent,
   style,
   styleBehavior,
-  styleInline,
   stylePseudo
 } from '../../../ui/index.js'
 import { colorWeight, palette } from '../../../ui-components-theme/index.js'
@@ -125,7 +124,7 @@ export const $Slider = ({
           ? { top: '0', bottom: '0', left: '50%', width: '1px', transform: 'translateX(-50%)' }
           : { left: '0', right: '0', top: '50%', height: '1px', transform: 'translateY(-50%)' })
       }),
-      styleInline(
+      styleBehavior(
         op(
           resolvedTrackColor,
           map(c => ({ background: c }))
@@ -141,7 +140,7 @@ export const $Slider = ({
           ? { top: '0', left: '50%', width: '2px', transform: 'translateX(-50%)' }
           : { left: '0', top: '50%', height: '2px', transform: 'translateY(-50%)' })
       }),
-      styleInline(
+      styleBehavior(
         op(
           combine({ pct: valuePercent, color: resolvedColor }),
           map(p =>
@@ -183,7 +182,7 @@ export const $Slider = ({
         position: 'absolute',
         pointerEvents: 'none'
       }),
-      styleInline(
+      styleBehavior(
         op(
           valuePercent,
           map(pct =>

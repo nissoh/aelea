@@ -1,7 +1,6 @@
 import { combine, empty, map, merge, never, op, start } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
-import { palette, text } from '../../../ui-components-theme/index.js'
-import type { ISlottable } from '../../../ui-renderer-dom/index.js'
+import type { ISlottable } from '../../../ui/index.js'
 import {
   $element,
   component,
@@ -11,7 +10,8 @@ import {
   style,
   styleBehavior,
   stylePseudo
-} from '../../../ui-renderer-dom/index.js'
+} from '../../../ui/index.js'
+import { palette, text } from '../../../ui-components-theme/index.js'
 import { disabledOp, dismissOp, interactionOp } from './form.js'
 import type { Input, InputType } from './types.js'
 

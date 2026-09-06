@@ -14,7 +14,6 @@ import {
   switchMap
 } from '../../stream/index.js'
 import type { IBehavior } from '../../stream-extended/index.js'
-import { colorWeight, palette, text } from '../../ui-components-theme/index.js'
 import {
   $node,
   $svg,
@@ -27,7 +26,8 @@ import {
   type ISlottable,
   nodeEvent,
   style
-} from '../../ui-renderer-dom/index.js'
+} from '../../ui/index.js'
+import { colorWeight, palette, text } from '../../ui-components-theme/index.js'
 import { $column, $row } from '../elements/$elements.js'
 import { $icon } from '../elements/$icon.js'
 import { spacing } from '../style/spacing.js'

@@ -9,7 +9,7 @@ import { $element, $text, attr, style } from '../../src/ui/index.js'
 import { renderToImage } from '../../src/ui-renderer-takumi/index.js'
 
 const pixelSrc =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/xcAAgMBgAjeRGkAAAAASUVORK5CYII='
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
 
 const cardStyle = style({
   width: '1000px',

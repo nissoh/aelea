@@ -19,7 +19,6 @@ import {
   toStream
 } from '../../../stream/index.js'
 import { animationFrame, type IBehavior } from '../../../stream-extended/index.js'
-import { interaction, palette, text } from '../../../ui-components-theme/index.js'
 import {
   $element,
   $node,
@@ -35,9 +34,10 @@ import {
   type INodeCompose,
   nodeEvent,
   style,
-  styleInline,
+  styleBehavior,
   stylePseudo
-} from '../../../ui-renderer-dom/index.js'
+} from '../../../ui/index.js'
+import { interaction, palette, text } from '../../../ui-components-theme/index.js'
 import { $column, $row } from '../../elements/$elements.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 import { spacing } from '../../style/spacing.js'
@@ -164,7 +164,7 @@ export function $Dropdown<T>({
           ),
           effectRun(showPopover),
           contentTether(observer.intersection() as IOps<INode<HTMLElement>, IntersectionObserverEntry[]>),
-          styleInline(
+          styleBehavior(
             map(
               ({ aEntry, cEntry }) => {
                 const aEl = aEntry[0]?.target as HTMLElement | undefined

@@ -1,6 +1,6 @@
 import type { Pseudos } from 'csstype'
 import type { IStream } from '../../stream/index.js'
-import type { I$Node, IMutator, INode, IStaticStyleEntry, IStyleCSS } from '../types.js'
+import type { I$Node, IMutator, IRecipe, IStaticStyleEntry, IStyleCSS } from '../types.js'
 import { makeMutator, mutateOnEmit } from './mutator.js'
 
 export interface IStyleCurry {
@@ -23,16 +23,13 @@ export interface IStyleBehaviorCurry {
   <TElement>(styleInput: IStream<IStyleCSS | null>): IMutator<TElement>
 }
 
-export interface IStyleInlineCurry {
-  <TElement>(style: IStream<IStyleCSS>, node: I$Node<TElement>): I$Node<TElement>
-  <TElement>(style: IStream<IStyleCSS>): IMutator<TElement>
-}
-
+/**
+ * Static style: one cached class rule per distinct declaration set.
+ */
 export const style = ((styleInput: IStyleCSS, source?: I$Node) => {
   const entry: IStaticStyleEntry = { pseudo: null, style: styleInput }
-  const mutate = (node: INode) => {
-    node.staticStyles.push(entry)
-    return node
+  const mutate = (recipe: IRecipe) => {
+    recipe.staticStyles.push(entry)
   }
   if (source !== undefined) return mutateOnEmit(mutate, source)
   return makeMutator(mutate)
@@ -44,28 +41,22 @@ export const stylePseudo = ((pseudoClass: string, styleInput?: IStyleCSS, source
       (stylePseudo as any)(pseudoClass, nextInput, nextSource)) as any
   }
   const entry: IStaticStyleEntry = { pseudo: pseudoClass, style: styleInput }
-  const mutate = (node: INode) => {
-    node.staticStyles.push(entry)
-    return node
+  const mutate = (recipe: IRecipe) => {
+    recipe.staticStyles.push(entry)
   }
   if (source !== undefined) return mutateOnEmit(mutate, source)
   return makeMutator(mutate)
 }) as IStylePseudoCurry
 
-export const styleBehavior = ((stream$: IStream<IStyleCSS | null>, source?: I$Node) => {
-  const mutate = (node: INode) => {
-    node.styleBehavior.push(stream$)
-    return node
+/**
+ * Reactive inline style. The stream owns the keys of its latest emission:
+ * keys it stops emitting are removed and `null` removes them all, so the
+ * browser cascades back to the static rule. One decorator per source.
+ */
+export const styleBehavior = ((source: IStream<IStyleCSS | null>, node?: I$Node) => {
+  const mutate = (recipe: IRecipe) => {
+    recipe.styleBehavior.push(source)
   }
-  if (source !== undefined) return mutateOnEmit(mutate, source)
+  if (node !== undefined) return mutateOnEmit(mutate, node)
   return makeMutator(mutate)
 }) as IStyleBehaviorCurry
-
-export const styleInline = ((stream$: IStream<IStyleCSS>, source?: I$Node) => {
-  const mutate = (node: INode) => {
-    node.styleInline.push(stream$)
-    return node
-  }
-  if (source !== undefined) return mutateOnEmit(mutate, source)
-  return makeMutator(mutate)
-}) as IStyleInlineCurry

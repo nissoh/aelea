@@ -1,6 +1,5 @@
 import { Window } from 'happy-dom'
-import type { ITask, ITime } from '../../src/stream/index.js'
-import type { I$Scheduler } from '../../src/ui/types.js'
+import { createSyncScheduler, type IUiScheduler } from '../../src/ui/index.js'
 
 let installed = false
 
@@ -27,37 +26,7 @@ export function installDom(): void {
   g.CSSStyleSheet = win.CSSStyleSheet
 }
 
-const perfNow = () => performance.now()
-
-class SyncScheduler implements I$Scheduler {
-  private readonly initialTime = perfNow()
-  private readonly initialWallClockTime = Date.now()
-
-  asap(task: ITask): Disposable {
-    task.run(this.time())
-    return task
-  }
-
-  delay(task: ITask, delay: ITime): Disposable {
-    setTimeout(() => task.run(this.time()), delay)
-    return task
-  }
-
-  paint(task: ITask): Disposable {
-    task.run(this.time())
-    return task
-  }
-
-  time(): ITime {
-    return perfNow() - this.initialTime
-  }
-
-  dayTime(): ITime {
-    return this.initialWallClockTime + this.time()
-  }
-}
-
-export const syncScheduler: I$Scheduler = new SyncScheduler()
+export const syncScheduler: IUiScheduler = createSyncScheduler()
 
 export function freshRoot(): HTMLElement {
   const doc = (globalThis as any).document as Document

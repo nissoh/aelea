@@ -1,17 +1,8 @@
 import { constant, map, merge, nowWith, start } from '../stream/index.js'
 import type { IBehavior } from '../stream-extended/index.js'
+import type { I$Slottable, INode, INodeCompose, IStyleCSS } from '../ui/index.js'
+import { $element, attr, component, effectProp, nodeEvent, style, styleBehavior, stylePseudo } from '../ui/index.js'
 import { palette } from '../ui-components-theme/index.js'
-import type { I$Slottable, INode, INodeCompose, IStyleCSS } from '../ui-renderer-dom/index.js'
-import {
-  $element,
-  attr,
-  component,
-  effectProp,
-  nodeEvent,
-  style,
-  styleBehavior,
-  stylePseudo
-} from '../ui-renderer-dom/index.js'
 import { pushUrl } from './location.js'
 import { href, type RouteNode, type RouteSpec } from './manifest.js'
 import { isContaining } from './resolveUrl.js'

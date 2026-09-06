@@ -1,5 +1,5 @@
 import type { IStream } from '../../stream/index.js'
-import type { I$Node, I$Scheduler, IMutator, INode } from '../types.js'
+import type { I$Node, IEffect, IMutator, IRecipe } from '../types.js'
 import { makeMutator, mutateOnEmit } from './mutator.js'
 
 export interface IEffectPropCurry {
@@ -9,28 +9,32 @@ export interface IEffectPropCurry {
 }
 
 export interface IEffectRunCurry {
-  (apply: (element: unknown, scheduler: I$Scheduler) => Disposable | void, node: I$Node): I$Node
-  (apply: (element: unknown, scheduler: I$Scheduler) => Disposable | void): IMutator
+  <TElement>(apply: IEffect<TElement>, node: I$Node<TElement>): I$Node<TElement>
+  <TElement>(apply: IEffect<TElement>): IMutator<TElement>
 }
 
+/**
+ * Write each emission to a property of the element (`value` on an input).
+ */
 export const effectProp = ((prop: string, source?: IStream<unknown>, node?: I$Node) => {
   if (source === undefined) {
     return ((nextSource: IStream<unknown>, nextNode?: I$Node) => (effectProp as any)(prop, nextSource, nextNode)) as any
   }
   const entry = { key: prop, value: source }
-  const mutate = (n: INode) => {
-    n.propBehavior.push(entry)
-    return n
+  const mutate = (recipe: IRecipe) => {
+    recipe.propBehavior.push(entry)
   }
   if (node !== undefined) return mutateOnEmit(mutate, node)
   return makeMutator(mutate)
 }) as IEffectPropCurry
 
-export const effectRun = ((apply: (element: unknown, scheduler: I$Scheduler) => Disposable | void, node?: I$Node) => {
-  const entry = { key: '__run__', value: apply as unknown as IStream<unknown> }
-  const mutate = (n: INode) => {
-    n.propBehavior.push(entry)
-    return n
+/**
+ * Run an imperative effect against the mounted element; a returned
+ * disposable runs on unmount.
+ */
+export const effectRun = ((apply: IEffect, node?: I$Node) => {
+  const mutate = (recipe: IRecipe) => {
+    recipe.effects.push(apply)
   }
   if (node !== undefined) return mutateOnEmit(mutate, node)
   return makeMutator(mutate)

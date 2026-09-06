@@ -1,7 +1,6 @@
 import { combine, type IStream, map, merge, never, op, start } from '../../../stream/index.js'
 import { type IBehavior, state } from '../../../stream-extended/index.js'
-import { palette } from '../../../ui-components-theme/index.js'
-import type { ISlottable } from '../../../ui-renderer-dom/index.js'
+import type { ISlottable } from '../../../ui/index.js'
 import {
   $element,
   $node,
@@ -14,7 +13,8 @@ import {
   nodeEvent,
   style,
   styleBehavior
-} from '../../../ui-renderer-dom/index.js'
+} from '../../../ui/index.js'
+import { palette } from '../../../ui-components-theme/index.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 import { spacing } from '../../style/spacing.js'
 import { disabledStyleOp, dismissOp, interactionOp, isDisabled, resolveDisabledState } from './form.js'

@@ -1,6 +1,6 @@
 import { debounce, empty, fromIterable, map, op, start, switchLatest, switchMap } from 'aelea/stream'
 import type { IBehavior } from 'aelea/stream-extended'
-import { $custom, $node, $text, component, type I$Slottable, motion, style, styleInline } from 'aelea/ui'
+import { $custom, $node, $text, component, type I$Slottable, motion, style, styleBehavior } from 'aelea/ui'
 import { $column, $row } from 'aelea/ui-components'
 import { palette, text, theme } from 'aelea/ui-components-theme'
 import { $defaultMonacoEditorContainer, $MonacoEditor, type ModelChangeBehavior } from '../$MonacoEditor'
@@ -30,7 +30,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
         $row(style({ backgroundColor: palette.background, minHeight: '30px' }))(
           $row(style({ width: '2px', backgroundColor: 'rgb(43 52 55)' }))(
             $row(
-              styleInline(
+              styleBehavior(
                 map(({ semanticDiagnostics, syntacticDiagnostics }) => {
                   return {
                     backgroundColor:
@@ -38,7 +38,7 @@ export default ({ code = '', readOnly = true }: IMonaco) =>
                   }
                 }, change)
               ),
-              styleInline(
+              styleBehavior(
                 map(
                   s => ({ height: `${s}%` }),
                   switchLatest(

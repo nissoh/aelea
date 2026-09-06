@@ -87,13 +87,13 @@ Before reaching for algorithmic changes, look for:
 - **Per-emission closures.** A `tap(x => …)` inside a hot stream allocates
   per inner subscription. Hoist if shape-stable.
 - **Per-task object literals.** `scheduler.asap({ run, error, [Symbol.dispose] })`
-  on every emission — see `PropagateTask`/`makePaintWriter` for the
+  on every emission — see `PropagateTask` and the DOM `BindingEffect` for the
   pre-allocated pattern.
 - **Per-iteration arrays from `Object.entries` / `Object.keys`.** In renderer
   appliers, prefer `for…in` over entries when you don't need the value type
   guarantee.
-- **Map/Set construction inside hot loops.** `makeReactiveStyleApplier` keeps
-  two reused Maps and swaps them — that's the shape to preserve.
+- **Map/Set construction inside hot loops.** `applyOwnedKeys` diffs the previous emission
+  against the next with no per-binding state — that's the shape to preserve.
 
 The `runStream` helper in `lib/runtime.ts` reuses a **single sink instance**
 across iterations. If a refactor breaks this fast path (e.g. by closing over
@@ -186,3 +186,21 @@ catches the cross-suite regression class that local benching misses.
 - Memory/heap snapshot capture per suite (`--heap-snapshot`); only useful
   if a delta looks suspiciously good and the agent wants to confirm
   allocation reduction.
+
+## Render-engine iteration notes (2026-09)
+
+- `render-static` now also covers `dynamic list (joinMap)`, `slot swaps` and
+  `component list (tethers)`, so the dynamic node path, slot teardown and the
+  behavior graph are measured, not just static mounts.
+- Static children flatten into the parent's disposable list (no slot entry,
+  set or closure per static child); that alone was 1.2–1.5× across every
+  render group. A dynamic node is one fused instance (node = port = handle)
+  plus its emission task; `nodeEvent` is a single purpose-built sink.
+- Against vanilla DOM under happy-dom: flat lists sit at 1.02–1.06×, the
+  deep tree at ~2× because it attaches a finished subtree once (happy-dom
+  walks it; real browsers prefer that pattern), the component list at ~2×
+  because each component builds its behavior/tether graph — that cost is in
+  `stream-extended`, not the renderer.
+- A/B against a frozen copy of `aelea/` (src + benchmark + test with a
+  symlinked node_modules) instead of git stash when the working tree holds
+  several uncommitted steps; the copy runs the same suites unchanged.

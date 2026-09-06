@@ -14,7 +14,6 @@ import {
   switchMap
 } from '../../../stream/index.js'
 import { animationFrame, type IBehavior, multicast, state } from '../../../stream-extended/index.js'
-import { colorWeight, palette } from '../../../ui-components-theme/index.js'
 import {
   $node,
   attr,
@@ -26,8 +25,9 @@ import {
   type INodeCompose,
   nodeEvent,
   style,
-  styleInline
-} from '../../../ui-renderer-dom/index.js'
+  styleBehavior
+} from '../../../ui/index.js'
+import { colorWeight, palette } from '../../../ui-components-theme/index.js'
 import { $column } from '../../elements/$elements.js'
 import { observer } from '../../utils/elementObservers.js'
 import { showPopover } from '../../utils/popover.js'
@@ -131,7 +131,7 @@ export const $Popover = ({
             opacity: '0',
             transition: 'opacity 220ms cubic-bezier(0.22, 1, 0.36, 1)'
           }),
-          styleInline(
+          styleBehavior(
             op(
               anchorRect,
               map(() => ({ opacity: '1' }))
@@ -145,7 +145,7 @@ export const $Popover = ({
               position: 'fixed',
               pointerEvents: 'none'
             }),
-            styleInline(
+            styleBehavior(
               op(
                 anchorRect,
                 map(r => {
@@ -184,7 +184,7 @@ export const $Popover = ({
           }),
           effectRun(showPopover),
           contentTether(observer.intersection() as IOps<INode<HTMLElement>, IntersectionObserverEntry[]>),
-          styleInline(
+          styleBehavior(
             map(
               ({ aEntry, cEntry }) => {
                 const aEl = aEntry[0]?.target as HTMLElement | undefined

@@ -1,7 +1,7 @@
 import { type IOps, type IStream, map, o } from '../../stream/index.js'
 import { isStream } from '../../stream/utils/common.js'
-import type { I$Node, INode } from '../../ui-renderer-dom/index.js'
-import { $svg, attr, style, styleBehavior } from '../../ui-renderer-dom/index.js'
+import type { I$Node, INode } from '../../ui/index.js'
+import { $svg, attr, style, styleBehavior } from '../../ui/index.js'
 
 export interface I$Icon {
   size?: string

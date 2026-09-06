@@ -1,37 +1,18 @@
-import { disposeAll, disposeNone, disposeWith, type ISink, type ITask, type ITime } from '../stream/index.js'
-import type { MountPort } from '../ui/mount.js'
-import { EMPTY_SEGMENTS, type IElementDescriptor, type IStaticNodeBrand, NODE_BRAND, TEXT_BRAND } from '../ui/node.js'
+import type { ITask, ITime } from '../stream/index.js'
+import {
+  applyOwnedKeys,
+  type IBindingSink,
+  type IMountBackend,
+  type IOwnedKeysWriter,
+  MountContext,
+  mountRoot
+} from '../ui/backend.js'
 import { createDomScheduler } from '../ui/scheduler.js'
-import type {
-  I$Node,
-  I$Scheduler,
-  I$Slottable,
-  IAttributeProperties,
-  INode,
-  ISlotChild,
-  IStyleCSS,
-  ITextNode
-} from '../ui/types.js'
+import type { I$Node, I$Scheduler, IAttributes, IEffect, IRecipe, IStaticStyleEntry, IStyleCSS } from '../ui/types.js'
 
 export type INodeElementDom = HTMLElement | SVGElement
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
-
-function materializeElement(node: INode): INodeElementDom {
-  const desc = node.element as unknown as IElementDescriptor | undefined
-  let el: INodeElementDom
-  if (desc && typeof desc === 'object' && desc.native) {
-    el = desc.native as INodeElementDom
-  } else {
-    const tag = desc?.tag ?? 'div'
-    el = desc?.namespace === 'svg' ? (document.createElementNS(SVG_NS, tag) as SVGElement) : document.createElement(tag)
-    // Legacy write-back, kept one release — nodeEvent's fallback duck-walk
-    // and external consumers still read it.
-    if (desc && typeof desc === 'object') desc.native = el
-  }
-  ;(node.mount as MountPort<INodeElementDom> | undefined)?.resolve?.(el)
-  return el
-}
 
 const STYLE_TAG_ID = '__aelea_style__'
 let ruleCounter = 0
@@ -59,6 +40,7 @@ const toKebab = (prop: string): string => {
   kebabCache.set(prop, out)
   return out
 }
+
 function styleToCss(style: IStyleCSS): string {
   let out = ''
   for (const k in style) {
@@ -83,6 +65,11 @@ function styleCacheKey(style: IStyleCSS, pseudo: string | null): string {
 const ruleCache = new Map<string, string>()
 const ruleObjectCache = new WeakMap<object, Map<string | null, string>>()
 
+/**
+ * One cached class per distinct static declaration set, minted into a shared
+ * stylesheet. Returns `null` where no stylesheet can exist, so callers fall
+ * back to inline writes.
+ */
 export function createStyleRule(style: IStyleCSS, pseudo: string | null = null): string | null {
   let perPseudo = ruleObjectCache.get(style)
   const ident = perPseudo?.get(pseudo)
@@ -111,18 +98,17 @@ export function createStyleRule(style: IStyleCSS, pseudo: string | null = null):
   return className
 }
 
-function applyAttributes(attrs: IAttributeProperties<unknown> | null | undefined, element: INodeElementDom) {
-  if (!attrs) return
+function applyAttributes(attrs: IAttributes, element: INodeElementDom): void {
   const el = element as Element
   if (!el.setAttribute) return
   for (const k in attrs) {
-    const v = (attrs as any)[k]
+    const v = attrs[k]
     if (v == null) el.removeAttribute(k)
     else el.setAttribute(k, typeof v === 'string' ? v : String(v))
   }
 }
 
-function applyInlineStyle(style: IStyleCSS, element: INodeElementDom) {
+function applyInlineStyle(style: IStyleCSS, element: INodeElementDom): void {
   const el = element as any
   if (!el?.style?.setProperty) return
   for (const k in style) {
@@ -131,22 +117,28 @@ function applyInlineStyle(style: IStyleCSS, element: INodeElementDom) {
   }
 }
 
-interface IRenderEnv {
-  scheduler: I$Scheduler
-  onError: (err: unknown) => void
-  committer: Committer
-  // Root element of the subtree currently being torn down. Descendant entries
-  // (checked by containment, so a re-entrant dispose of an UNRELATED entry is
-  // unaffected) skip their own removeChild — the root detaches once for the
-  // whole subtree.
-  discardingRoot: Node | null
-  // Manifests whose double-mount was already reported — shared/cached
-  // manifests (state()-replayed views) legitimately remount, so the protocol
-  // violation is reported once per manifest, not once per remount.
-  reportedRemounts: WeakSet<object> | null
+function applyStaticStyle(staticStyles: readonly IStaticStyleEntry[], element: INodeElementDom): void {
+  if (staticStyles.length === 0) return
+  const el = element as any
+  const hasClassList = !!el?.classList
+  for (let i = 0; i < staticStyles.length; i++) {
+    const entry = staticStyles[i]
+    if (hasClassList) {
+      let cls = entry.className
+      if (cls === undefined) {
+        const resolved = createStyleRule(entry.style, entry.pseudo)
+        if (resolved !== null) entry.className = cls = resolved
+      }
+      if (cls !== undefined) {
+        el.classList.add(cls)
+        continue
+      }
+    }
+    if (entry.pseudo === null) applyInlineStyle(entry.style, element)
+  }
 }
 
-type IBindingChannel = 'style' | 'styleInline' | 'attr' | 'prop' | 'text'
+type IBindingChannel = 'style' | 'attr' | 'prop' | 'text'
 
 export interface ICommitRecord {
   seq: number
@@ -162,19 +154,16 @@ export interface IRenderDevtool {
 
 const JOURNAL_CAPACITY = 500
 
-// The single commit point per render tree: bindings enqueue onto a dirty
-// list, ONE paint task flushes the whole frame's writes (previously one paint
-// task per binding per frame). Each apply is individually guarded so one bad
-// write cannot starve the rest of the frame, and the dev-mode journal and
-// binding registry hang off the one place every write already passes.
+/**
+ * The single commit point per render tree: bindings enqueue onto a dirty
+ * list and ONE paint task flushes the whole frame's writes. Each apply is
+ * guarded individually so one bad write cannot starve the rest of the frame.
+ */
 class Committer implements ITask {
   active = true
   private dirtyList: BindingEffect<unknown>[] = []
   private scheduled = false
 
-  // dev-mode surfaces (null unless render({ devtool: true })). The registry
-  // holds LIVE bindings only — disposed effects deregister so long devtool
-  // sessions don't pin unmounted elements.
   journal: ICommitRecord[] | null = null
   registry: Set<BindingEffect<unknown>> | null = null
   totalBindings = 0
@@ -205,10 +194,6 @@ class Committer implements ITask {
       try {
         effect.flush(time)
       } catch (err) {
-        // flush guards its own apply; only a throwing user onError reaches
-        // here — surface it without abandoning the rest of the batch (a
-        // dropped entry would keep dirty=false with the write lost, and any
-        // still-dirty entries would be frozen forever).
         queueMicrotask(() => {
           throw err
         })
@@ -247,47 +232,38 @@ function summarize(value: unknown): string {
   return String(value)
 }
 
-// One object per reactive binding: the stream sink, the paint-coalescing
-// mailbox, and the DOM applier fused into a single monomorphic class
-// (previously a sink literal + writer task + applier closure per binding).
-// Coalescing is last-write-wins per frame — except attrs, which are patches,
-// so pending patches merge (dropping an unflushed patch would lose keys, not
-// just intermediates).
-class BindingEffect<V> implements ISink<V> {
+/**
+ * One object per reactive binding: the stream sink, the paint-coalescing
+ * mailbox (last emission in a frame wins) and the applier. Style and
+ * attribute channels own the keys of their latest emission.
+ */
+class BindingEffect<V> implements IBindingSink<V> {
   active = true
   dirty = false
   private pending: V | undefined
   private hasPending = false
-  private prev: Map<string, string> | null = null
-  private lastObj: unknown
+  private prev: object | null = null
 
   constructor(
     readonly channel: IBindingChannel,
     readonly el: any,
-    readonly env: IRenderEnv,
+    readonly backend: DomBackend,
     readonly key: string | null = null
   ) {
-    if (env.committer.registry !== null) {
-      env.committer.totalBindings++
-      env.committer.registry.add(this as BindingEffect<unknown>)
+    const committer = backend.committer
+    if (committer.registry !== null) {
+      committer.totalBindings++
+      committer.registry.add(this as BindingEffect<unknown>)
     }
   }
 
   event(_time: ITime, value: V): void {
     if (!this.active) return
-    if (this.channel === 'attr') {
-      if (value == null) return
-      this.pending = this.hasPending ? (Object.assign({}, this.pending, value) as V) : value
-    } else {
-      this.pending = value
-    }
+    this.pending = value
     this.hasPending = true
-    this.env.committer.enqueue(this as BindingEffect<unknown>)
+    this.backend.committer.enqueue(this as BindingEffect<unknown>)
   }
 
-  // Called by the committer's frame flush. Each apply is guarded: the binding
-  // stays live — a bad value must not kill the channel for subsequent good
-  // values, nor starve the other bindings in the batch.
   flush(time: ITime): void {
     if (!this.active || !this.hasPending) return
     const value = this.pending as V
@@ -295,14 +271,14 @@ class BindingEffect<V> implements ISink<V> {
     this.hasPending = false
     try {
       this.apply(value)
-      this.env.committer.record(time, this.channel, value)
+      this.backend.committer.record(time, this.channel, value)
     } catch (err) {
-      this.env.onError(err)
+      this.backend.onError(err)
     }
   }
 
   error(_time: ITime, err: unknown): void {
-    this.env.onError(err)
+    this.backend.onError(err)
   }
 
   end(): void {}
@@ -311,7 +287,7 @@ class BindingEffect<V> implements ISink<V> {
     this.active = false
     this.pending = undefined
     this.hasPending = false
-    this.env.committer.registry?.delete(this as BindingEffect<unknown>)
+    this.backend.committer.registry?.delete(this as BindingEffect<unknown>)
   }
 
   private apply(value: V): void {
@@ -323,374 +299,145 @@ class BindingEffect<V> implements ISink<V> {
         this.el[this.key as string] = value
         return
       case 'attr':
-        applyAttributes(value as IAttributeProperties<unknown> | null, this.el)
+        if ((value as unknown) === this.prev) return
+        applyOwnedKeys(this.prev, value as IAttributes | null, attributeWriter, this.el)
+        this.prev = value as IAttributes | null
         return
       default:
-        this.applyStyle(value as unknown as IStyleCSS | null)
-    }
-  }
-
-  private applyStyle(styleObj: IStyleCSS | null): void {
-    if (styleObj === this.lastObj) return
-    this.lastObj = styleObj
-    const el = this.el
-    if (!el?.style?.setProperty) return
-    const next = styleObj ?? {}
-    if (this.prev === null) {
-      const applied = new Map<string, string>()
-      for (const k in next) {
-        const raw = (next as any)[k]
-        if (raw == null) continue
-        const v = typeof raw === 'string' ? raw : String(raw)
-        applied.set(k, v)
-        el.style.setProperty(toKebab(k), v)
-      }
-      this.prev = applied
-      return
-    }
-    for (const k of this.prev.keys()) {
-      if ((next as any)[k] == null) {
-        el.style.removeProperty(toKebab(k))
-        this.prev.delete(k)
-      }
-    }
-    for (const k in next) {
-      const raw = (next as any)[k]
-      if (raw == null) continue
-      const v = typeof raw === 'string' ? raw : String(raw)
-      if (this.prev.get(k) === v) continue
-      el.style.setProperty(toKebab(k), v)
-      this.prev.set(k, v)
+        if ((value as unknown) === this.prev) return
+        if (!this.el?.style?.setProperty) return
+        applyOwnedKeys(this.prev, value as IStyleCSS | null, styleWriter, this.el)
+        this.prev = value as IStyleCSS | null
     }
   }
 }
 
-function applyStaticStyle(staticStyles: INode<INodeElementDom>['staticStyles'], element: INodeElementDom) {
-  if (staticStyles.length === 0) return
-  const el = element as any
-  const hasClassList = !!el?.classList
-  for (let i = 0; i < staticStyles.length; i++) {
-    const entry = staticStyles[i]
-    if (hasClassList) {
-      // Entries are allocated once per style() call, so the resolved class
-      // name caches on the entry itself — one property load on every mount
-      // after the first instead of two cache probes.
-      let cls = entry.className
-      if (cls === undefined) {
-        const resolved = createStyleRule(entry.style, entry.pseudo)
-        if (resolved !== null) entry.className = cls = resolved
-      }
-      if (cls !== undefined) {
-        el.classList.add(cls)
-        continue
-      }
-    }
-    if (entry.pseudo === null) applyInlineStyle(entry.style, element)
+const attributeWriter: IOwnedKeysWriter<Element> = {
+  set(el, key, value) {
+    el.setAttribute(key, value)
+  },
+  remove(el, key) {
+    el.removeAttribute(key)
   }
 }
 
-// The reactive/segment surface shared by INode manifests and static-node
-// brands — both carry the same channel fields.
-type INodeChannels = Pick<
-  INode<INodeElementDom>,
-  '$segments' | 'styleBehavior' | 'styleInline' | 'propBehavior' | 'attributesBehavior'
->
-
-function mountNodeOrText(
-  nodeOrText: NonNullable<ISlotChild>,
-  env: IRenderEnv
-): { el: Node; childDisposables: Disposable } {
-  if ('kind' in nodeOrText && nodeOrText.kind === 'text') {
-    const el = document.createTextNode('')
-    const source = (nodeOrText as ITextNode).value
-    if (typeof source === 'string') {
-      el.nodeValue = source ?? ''
-      return { el, childDisposables: disposeNone }
-    }
-    if (source) {
-      const effect = new BindingEffect<string>('text', el, env)
-      const subDisp = source.run(effect, env.scheduler)
-      return { el, childDisposables: disposeAll([subDisp, effect]) }
-    }
-    return { el, childDisposables: disposeNone }
-  }
-
-  const node = nodeOrText as INode<INodeElementDom>
-  const element = materializeElement(node)
-  applyStaticStyle(node.staticStyles, element)
-  applyAttributes(node.attributes, element)
-
-  return { el: element, childDisposables: bindNodeChannels(node, element, env) }
-}
-
-// Mount an op-free branded node inline: no per-node stream subscription, no
-// SettableDisposable, no scheduled emission — the recipe materializes in the
-// same pass as its parent. Lifecycle is owned entirely by the enclosing slot
-// entry (nothing external can observe a branded node: op-free means no tether
-// ever sees it).
-function mountBrandedNode(
-  brand: IStaticNodeBrand<INodeElementDom>,
-  env: IRenderEnv
-): { el: Node; childDisposables: Disposable } {
-  const node: INode<INodeElementDom> = { element: brand.createElement() } as INode<INodeElementDom>
-  const element = materializeElement(node)
-  applyStaticStyle(brand.staticStyles, element)
-  applyAttributes(brand.attributes, element)
-  return { el: element, childDisposables: bindNodeChannels(brand as INodeChannels, element, env) }
-}
-
-function tryMountBranded($slot: I$Slottable, env: IRenderEnv): { el: Node; childDisposables: Disposable } | null {
-  const slot = $slot as unknown as Record<symbol, unknown>
-  const staticText = slot[TEXT_BRAND]
-  if (staticText !== undefined) {
-    const el = document.createTextNode('')
-    el.nodeValue = (staticText as string) ?? ''
-    return { el, childDisposables: disposeNone }
-  }
-  const brand = slot[NODE_BRAND] as IStaticNodeBrand<INodeElementDom> | undefined
-  if (brand === undefined) return null
-  return mountBrandedNode(brand, env)
-}
-
-function bindNodeChannels(node: INodeChannels, element: INodeElementDom, env: IRenderEnv): Disposable {
-  const disposables: Disposable[] = []
-  try {
-    return bindNodeChannelsInto(node, element, env, disposables)
-  } catch (err) {
-    // A throwing subscription mid-bind must not leak the already-started ones.
-    disposeAll(disposables)[Symbol.dispose]()
-    throw err
+const styleWriter: IOwnedKeysWriter<HTMLElement> = {
+  set(el, key, value) {
+    el.style.setProperty(toKebab(key), value)
+  },
+  remove(el, key) {
+    el.style.removeProperty(toKebab(key))
   }
 }
 
-function bindNodeChannelsInto(
-  node: INodeChannels,
-  element: INodeElementDom,
-  env: IRenderEnv,
-  disposables: Disposable[]
-): Disposable {
-  for (const { key, value } of node.propBehavior) {
-    if (key === '__run__') {
-      const apply = value as unknown as (el: INodeElementDom, scheduler: I$Scheduler) => Disposable | void
-      let disp: Disposable | undefined
-      const task: ITask = {
-        active: true,
-        run() {
-          if (!task.active) return
-          const r = apply(element, env.scheduler)
-          if (r) disp = r
-        },
-        error(_time, err) {
-          task.active = false
-          env.onError(err)
-        },
-        [Symbol.dispose]() {
-          task.active = false
-          if (disp) disp[Symbol.dispose]()
-        }
-      }
-      env.scheduler.asap(task)
-      disposables.push(task)
-      continue
-    }
-    const effect = new BindingEffect<unknown>('prop', element, env, key)
-    disposables.push(value.run(effect, env.scheduler), effect)
-  }
+class EffectTask implements ITask, Disposable {
+  active = true
+  private cleanup: Disposable | undefined
 
-  for (const sb of node.styleInline) {
-    const effect = new BindingEffect<IStyleCSS | null>('styleInline', element, env)
-    disposables.push(sb.run(effect, env.scheduler), effect)
-  }
-
-  for (const sb of node.styleBehavior) {
-    const effect = new BindingEffect<IStyleCSS | null>('style', element, env)
-    disposables.push(sb.run(effect, env.scheduler), effect)
-  }
-
-  for (const attrs of node.attributesBehavior) {
-    const effect = new BindingEffect<IAttributeProperties<unknown> | null | undefined>('attr', element, env)
-    disposables.push(attrs.run(effect, env.scheduler), effect)
-  }
-
-  // Childless nodes share the EMPTY_SEGMENTS singleton — skip the per-segment
-  // slot machinery (a Set, a cursor, a subscription to `never`) entirely.
-  if ((node.$segments as readonly unknown[]) !== EMPTY_SEGMENTS) {
-    const slotSets: Set<SlotEntry>[] = node.$segments.map(() => new Set())
-    const segCursor = { max: -1 }
-    for (let segIdx = 0; segIdx < node.$segments.length; segIdx++) {
-      disposables.push(renderSegmentSlot(node.$segments[segIdx], element, slotSets, segIdx, segCursor, env))
-    }
-  }
-
-  return disposables.length === 0 ? disposeNone : disposeAll(disposables)
-}
-
-// One mounted child: the DOM node plus its subtree's disposables, disposable
-// itself (this is what the manifest's SettableDisposable is set to). Removing
-// the own element happens only at the outermost entry of a teardown — while
-// `env.discarding` is set, descendants dispose subscriptions without touching
-// the already-detached DOM.
-class SlotEntry implements Disposable {
   constructor(
-    readonly el: Node,
-    readonly childDisposables: Disposable,
-    readonly parent: Element,
-    readonly mounted: Set<SlotEntry>,
-    readonly env: IRenderEnv
+    readonly el: INodeElementDom,
+    readonly apply: IEffect<INodeElementDom>,
+    readonly backend: DomBackend
   ) {}
 
+  run(): void {
+    if (!this.active) return
+    const result = this.apply(this.el, this.backend.scheduler)
+    if (result) this.cleanup = result
+  }
+
+  error(_time: ITime, err: unknown): void {
+    this.active = false
+    this.backend.onError(err)
+  }
+
   [Symbol.dispose](): void {
-    if (!this.mounted.has(this)) return
-    this.mounted.delete(this)
-    const env = this.env
+    this.active = false
+    this.cleanup?.[Symbol.dispose]()
+  }
+}
 
-    // Descendant of the subtree being torn down: subscriptions only, the
-    // discard root's single removeChild covers the DOM.
-    if (env.discardingRoot !== null && env.discardingRoot.contains(this.el)) {
-      this.childDisposables[Symbol.dispose]()
+/**
+ * The browser backend of the shared mount walk. Teardown of an attached
+ * subtree disposes the subtree first (bindings and effect cleanups still see
+ * an attached element) and detaches the root once; descendants skip their
+ * own removal via the containment check.
+ */
+class DomBackend implements IMountBackend<INodeElementDom, Text> {
+  private discardingRoot: Node | null = null
+
+  constructor(
+    readonly scheduler: I$Scheduler,
+    readonly onError: (err: unknown) => void,
+    readonly committer: Committer
+  ) {}
+
+  element(recipe: IRecipe<INodeElementDom>): INodeElementDom {
+    const descriptor = recipe.element
+    if (descriptor.native) return descriptor.native as INodeElementDom
+    return descriptor.namespace === 'svg'
+      ? (document.createElementNS(SVG_NS, descriptor.tag) as SVGElement)
+      : document.createElement(descriptor.tag)
+  }
+
+  text(value: string): Text {
+    return document.createTextNode(value)
+  }
+
+  textSink(text: Text): IBindingSink<string> {
+    return new BindingEffect<string>('text', text, this)
+  }
+
+  staticStyle(element: INodeElementDom, entries: readonly IStaticStyleEntry[]): void {
+    applyStaticStyle(entries, element)
+  }
+
+  staticAttributes(element: INodeElementDom, attributes: IAttributes): void {
+    applyAttributes(attributes, element)
+  }
+
+  styleSink(element: INodeElementDom): IBindingSink<IStyleCSS | null> {
+    return new BindingEffect<IStyleCSS | null>('style', element, this)
+  }
+
+  attributeSink(element: INodeElementDom): IBindingSink<IAttributes | null> {
+    return new BindingEffect<IAttributes | null>('attr', element, this)
+  }
+
+  propSink(element: INodeElementDom, key: string): IBindingSink<unknown> {
+    return new BindingEffect<unknown>('prop', element, this, key)
+  }
+
+  effect(element: INodeElementDom, apply: IEffect<INodeElementDom>): Disposable {
+    const task = new EffectTask(element, apply, this)
+    this.scheduler.asap(task)
+    return task
+  }
+
+  insert(parent: INodeElementDom, child: Node, before: Node | null): void {
+    if (before === null) parent.appendChild(child)
+    else parent.insertBefore(child, before)
+  }
+
+  unmount(parent: INodeElementDom, child: Node, subtree: Disposable): void {
+    const root = this.discardingRoot
+    if (root?.contains(child)) {
+      subtree[Symbol.dispose]()
       return
     }
-
-    // Outermost teardown of an attached entry: dispose the subtree first
-    // (bindings and cleanups still see an attached element, and descendants
-    // skip per-node removals via the containment check), then detach once.
-    if (env.discardingRoot === null && this.el.parentNode === this.parent) {
-      env.discardingRoot = this.el
+    if (root === null && child.parentNode === parent) {
+      this.discardingRoot = child
       try {
-        this.childDisposables[Symbol.dispose]()
+        subtree[Symbol.dispose]()
       } finally {
-        env.discardingRoot = null
+        this.discardingRoot = null
       }
-      if (this.el.parentNode === this.parent) {
-        this.parent.removeChild(this.el)
-      }
+      if (child.parentNode === parent) parent.removeChild(child)
       return
     }
-
-    // Reparented element, or an unrelated entry disposed re-entrantly during
-    // another subtree's cascade: per-entry removal, exactly the old contract.
-    this.childDisposables[Symbol.dispose]()
-    if (this.el.parentNode === this.parent) {
-      this.parent.removeChild(this.el)
-    }
+    subtree[Symbol.dispose]()
+    if (child.parentNode === parent) parent.removeChild(child)
   }
-}
-
-function runSlot(
-  $slot: I$Slottable,
-  parent: Element,
-  mounted: Set<SlotEntry>,
-  insert: (el: Node) => void,
-  env: IRenderEnv
-): Disposable {
-  const unmountAll = () => {
-    for (const m of mounted) m[Symbol.dispose]()
-    mounted.clear()
-  }
-
-  const slotDisposable = $slot.run(
-    {
-      event(_time, nodeOrText) {
-        if (nodeOrText === null || nodeOrText === undefined) {
-          unmountAll()
-          return
-        }
-        const m = mountNodeOrText(nodeOrText, env)
-        const entry = new SlotEntry(m.el, m.childDisposables, parent, mounted, env)
-        insert(entry.el)
-        mounted.add(entry)
-
-        const slottable = nodeOrText as { disposable?: { set?: (d: Disposable) => void } }
-        if (slottable.disposable && typeof slottable.disposable.set === 'function') {
-          try {
-            slottable.disposable.set(entry)
-          } catch (err) {
-            // A second set means this manifest value reached two mounts — a
-            // protocol violation that must surface, not vanish. Cached
-            // manifests remount legitimately, so report once per manifest.
-            const seen = (env.reportedRemounts ??= new WeakSet())
-            if (!seen.has(nodeOrText)) {
-              seen.add(nodeOrText)
-              env.onError(err)
-            }
-          }
-        }
-      },
-      error(_t, err) {
-        env.onError(err)
-      },
-      end() {}
-    },
-    env.scheduler
-  ) as unknown as Disposable
-
-  return disposeWith(() => {
-    slotDisposable[Symbol.dispose]()
-    unmountAll()
-  })
-}
-
-function firstNodeOf(set: Set<SlotEntry>): Node | null {
-  for (const e of set) return e.el
-  return null
-}
-
-function nextSiblingRef(slotSets: Set<SlotEntry>[], segIdx: number): Node | null {
-  for (let i = segIdx + 1; i < slotSets.length; i++) {
-    const ref = firstNodeOf(slotSets[i])
-    if (ref !== null) return ref
-  }
-  return null
-}
-
-function renderSegmentSlot(
-  $slot: I$Slottable,
-  parent: Element,
-  slotSets: Set<SlotEntry>[],
-  segIdx: number,
-  segCursor: { max: number },
-  env: IRenderEnv
-): Disposable {
-  const mounted = slotSets[segIdx]
-  const insert = (el: Node) => {
-    if (segIdx >= segCursor.max) {
-      segCursor.max = segIdx
-      parent.insertBefore(el, null)
-    } else {
-      parent.insertBefore(el, nextSiblingRef(slotSets, segIdx))
-    }
-  }
-
-  // Static fast path: an op-free branded child mounts inline in the parent's
-  // pass — no stream subscription, no scheduled emission. The entry rides the
-  // exact same slot bookkeeping, so ordering and teardown are unchanged. A
-  // throwing branded mount is isolated to its own segment (matching the task
-  // isolation the legacy async path gets from the scheduler guard).
-  try {
-    const branded = tryMountBranded($slot, env)
-    if (branded !== null) {
-      const entry = new SlotEntry(branded.el, branded.childDisposables, parent, mounted, env)
-      insert(entry.el)
-      mounted.add(entry)
-      return entry
-    }
-  } catch (err) {
-    env.onError(err)
-    return disposeNone
-  }
-
-  return runSlot($slot, parent, mounted, insert, env)
-}
-
-function renderRootSlot($slot: I$Slottable, parent: Element, env: IRenderEnv): Disposable {
-  const anchor = document.createComment('')
-  parent.insertBefore(anchor, null)
-  const mounted = new Set<SlotEntry>()
-  const inner = runSlot($slot, parent, mounted, el => parent.insertBefore(el, anchor), env)
-  return disposeWith(() => {
-    inner[Symbol.dispose]()
-    if (anchor.parentNode === parent) parent.removeChild(anchor)
-  })
 }
 
 export interface IRenderConfig {
@@ -709,25 +456,28 @@ export function render(config: IRenderConfig): IRenderResult {
   const scheduler = config.scheduler ?? createDomScheduler()
   const onError = config.onError ?? ((err: unknown) => console.error('[aelea] render error', err))
   const committer = new Committer(scheduler, onError)
-  const env: IRenderEnv = {
-    scheduler,
-    onError,
-    committer,
-    discardingRoot: null,
-    reportedRemounts: null
-  }
+  const backend = new DomBackend(scheduler, onError, committer)
 
   if (config.devtool) {
     committer.journal = []
     committer.registry = new Set()
   }
 
-  const disposable = renderRootSlot(config.$rootNode as any, config.rootAttachment, env)
+  const parent = config.rootAttachment as INodeElementDom
+  const anchor = document.createComment('')
+  parent.insertBefore(anchor, null)
+  const mounted = mountRoot(
+    new MountContext(backend),
+    config.$rootNode as I$Node<INodeElementDom>,
+    parent,
+    anchor as unknown as Text
+  )
 
   const result: IRenderResult = {
     [Symbol.dispose]() {
       committer[Symbol.dispose]()
-      disposable?.[Symbol.dispose]?.()
+      mounted[Symbol.dispose]()
+      if (anchor.parentNode === parent) parent.removeChild(anchor)
     }
   }
 

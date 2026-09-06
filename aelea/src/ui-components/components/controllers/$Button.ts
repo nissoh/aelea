@@ -1,15 +1,8 @@
 import { never } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
+import type { I$Slottable, ISlottable } from '../../../ui/index.js'
+import { $element, component, type INodeCompose, nodeEvent, style, stylePseudo } from '../../../ui/index.js'
 import { interaction, palette, text } from '../../../ui-components-theme/index.js'
-import type { I$Slottable, ISlottable } from '../../../ui-renderer-dom/index.js'
-import {
-  $element,
-  component,
-  type INodeCompose,
-  nodeEvent,
-  style,
-  stylePseudo
-} from '../../../ui-renderer-dom/index.js'
 import { disabledOp, dismissOp, focusOutlineOp, interactionOp } from './form.js'
 import type { Control } from './types.js'
 

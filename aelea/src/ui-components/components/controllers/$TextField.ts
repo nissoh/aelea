@@ -1,15 +1,7 @@
 import { empty, just, map, merge, never, op, switchLatest } from '../../../stream/index.js'
 import type { IBehavior } from '../../../stream-extended/index.js'
+import { $element, $node, $text, component, type INodeCompose, style, styleBehavior } from '../../../ui/index.js'
 import { colorWeight, palette, text } from '../../../ui-components-theme/index.js'
-import {
-  $element,
-  $node,
-  $text,
-  component,
-  type INodeCompose,
-  style,
-  styleBehavior
-} from '../../../ui-renderer-dom/index.js'
 import { $row } from '../../elements/$elements.js'
 import { layoutSheet } from '../../style/layoutSheet.js'
 import { spacing } from '../../style/spacing.js'

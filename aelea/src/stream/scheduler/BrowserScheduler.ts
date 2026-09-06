@@ -1,74 +1,19 @@
-import type { IScheduler, ITask, ITime } from '../types.js'
-import { DelayDisposable } from './DelayDisposable.js'
-import { runTaskGuarded } from './runTaskGuarded.js'
+import type { IIdleScheduler, IScheduler } from '../types.js'
+import { SchedulerCore } from './core.js'
+
+const queue: (fn: () => void) => void =
+  typeof queueMicrotask === 'function' ? queueMicrotask : fn => Promise.resolve().then(fn)
 
 /**
- * Browser-optimized scheduler implementation.
- *
- * Uses queueMicrotask for asap tasks and maintains its own clock starting
- * from instantiation. Each scheduler instance tracks time from 0,
- * independent of when it was created.
+ * Flushes asap batches on the microtask queue. Each scheduler instance
+ * tracks time from 0 at instantiation.
  */
-export class BrowserScheduler implements IScheduler {
-  private asapTasks: ITask[] = []
-  private asapScheduled = false
-  // One-slot free list: holds the previously-flushed array so the next
-  // flush can reuse it instead of allocating fresh.
-  private recycled: ITask[] | null = null
-  private readonly initialTime = performance.now()
-  private readonly initialWallClockTime = Date.now()
-
-  runDelayedTask = (task: ITask): void => {
-    runTaskGuarded(task, this.time())
-  }
-
-  flushAsapTasks = (): void => {
-    this.asapScheduled = false
-    const tasks = this.asapTasks
-    // Fast path: single-task flush (the common case for one-shot pipelines).
-    // Skip the recycled-array shuffle entirely. Clear length BEFORE running
-    // so a re-asap during run() lands in this same array but is queued for
-    // the NEXT microtask (asapScheduled is already false → fresh schedule).
-    if (tasks.length === 1) {
-      const task = tasks[0]
-      tasks.length = 0
-      runTaskGuarded(task, this.time())
-      return
-    }
-    // Multi-task path: swap in a recycled empty array so re-asaps during
-    // the loop are queued to the next tick (preserving prior semantics).
-    this.asapTasks = this.recycled ?? []
-    this.recycled = null
-    const time = this.time()
-    for (let i = 0; i < tasks.length; i++) runTaskGuarded(tasks[i], time)
-    tasks.length = 0
-    this.recycled = tasks
-  }
-
-  asap(task: ITask): Disposable {
-    this.asapTasks.push(task)
-
-    if (!this.asapScheduled) {
-      this.asapScheduled = true
-      queueMicrotask(this.flushAsapTasks)
-    }
-
-    return task
-  }
-
-  delay(task: ITask, delay: ITime): Disposable {
-    return new DelayDisposable(setTimeout(this.runDelayedTask, delay, task), task)
-  }
-
-  time(): ITime {
-    return performance.now() - this.initialTime
-  }
-
-  dayTime(): ITime {
-    return this.initialWallClockTime + this.time()
+export class BrowserScheduler extends SchedulerCore {
+  protected scheduleFlush(): void {
+    queue(this.flushAsapTasks)
   }
 }
 
-export function createBrowserScheduler(): IScheduler {
+export function createBrowserScheduler(): IScheduler & IIdleScheduler {
   return new BrowserScheduler()
 }

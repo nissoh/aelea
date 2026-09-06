@@ -1,31 +1,34 @@
 import type { IStream } from '../../stream/index.js'
-import type { I$Node, IAttributeProperties, IMutator, INode } from '../types.js'
+import type { I$Node, IAttributes, IMutator, IRecipe } from '../types.js'
 import { makeMutator, mutateOnEmit } from './mutator.js'
 
 export interface IAttributeCurry {
-  <A, TElement>(attrs: IAttributeProperties<A>, node: I$Node<TElement>): I$Node<TElement>
-  <A, TElement>(attrs: IAttributeProperties<A>): IMutator<TElement>
+  <TElement>(attrs: IAttributes, node: I$Node<TElement>): I$Node<TElement>
+  <TElement>(attrs: IAttributes): IMutator<TElement>
 }
 
 export interface IAttributeBehaviorCurry {
-  <A, TElement>(stream$: IStream<IAttributeProperties<A> | null>, node: I$Node<TElement>): I$Node<TElement>
-  <A, TElement>(stream$: IStream<IAttributeProperties<A> | null>): IMutator<TElement>
+  <TElement>(source: IStream<IAttributes | null>, node: I$Node<TElement>): I$Node<TElement>
+  <TElement>(source: IStream<IAttributes | null>): IMutator<TElement>
 }
 
-export const attr = ((attrs: IAttributeProperties<unknown>, source?: I$Node) => {
-  const mutate = (node: INode) => {
-    Object.assign(node.attributes, attrs)
-    return node
+export const attr = ((attrs: IAttributes, source?: I$Node) => {
+  const mutate = (recipe: IRecipe) => {
+    Object.assign(recipe.attributes, attrs)
   }
   if (source !== undefined) return mutateOnEmit(mutate, source)
   return makeMutator(mutate)
 }) as IAttributeCurry
 
-export const attrBehavior = ((stream$: IStream<IAttributeProperties<unknown> | null>, source?: I$Node) => {
-  const mutate = (node: INode) => {
-    node.attributesBehavior.push(stream$)
-    return node
+/**
+ * Reactive attributes with the same ownership rule as `styleBehavior`: the
+ * stream owns the keys of its latest emission, a missing or `null` key is
+ * removed, `null` removes them all.
+ */
+export const attrBehavior = ((source: IStream<IAttributes | null>, node?: I$Node) => {
+  const mutate = (recipe: IRecipe) => {
+    recipe.attributesBehavior.push(source)
   }
-  if (source !== undefined) return mutateOnEmit(mutate, source)
+  if (node !== undefined) return mutateOnEmit(mutate, node)
   return makeMutator(mutate)
 }) as IAttributeBehaviorCurry

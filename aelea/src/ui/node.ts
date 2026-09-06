@@ -1,49 +1,129 @@
 import {
-  disposeAll,
-  disposeBoth,
+  disposeNone,
   empty,
+  type IScheduler,
   type ISink,
   type IStream,
   type ITime,
   isFunction,
   merge,
-  never,
-  nullSink,
-  propagateRunEventTask,
-  SettableDisposable
+  propagateRunEventTask
 } from '../stream/index.js'
-import { state, stream } from '../stream-extended/index.js'
 import { MountPort } from './mount.js'
-import type { I$Node, I$Op, I$Slottable, I$Text, INode, INodeCompose, ITextNode } from './types.js'
+import type {
+  I$Node,
+  I$Op,
+  I$Slottable,
+  I$Text,
+  IElementDescriptor,
+  IInstanceHandle,
+  INode,
+  INodeCompose,
+  IRecipe,
+  ITextNode
+} from './types.js'
 
 function emitNode<T>(time: ITime, sink: ISink<T>, value: T): void {
   sink.event(time, value)
 }
 
-type Mutator<TElement> = (node: INode<TElement>) => INode<TElement>
+type Mutator<TElement> = (recipe: IRecipe<TElement>) => void
 
-export const EMPTY_SEGMENTS: readonly I$Slottable<unknown>[] = [never as I$Slottable<unknown>]
-
-// Optimization hints, not different objects: an op-free compose result is a
-// fully functional node stream that ALSO carries its mount recipe, so a
-// renderer may materialize it inline without subscribing. Any other consumer
-// (switchLatest, multicast, ops) observes it as a plain stream.
+/**
+ * Optimization hints, not different objects: an op-free compose result is a
+ * fully functional node stream that ALSO carries its recipe, so a renderer may
+ * materialize it inline without subscribing. Any other consumer observes it as
+ * a plain stream. `NODE_BRAND` holds the `IRecipe`; `TEXT_BRAND` holds the
+ * text source (`string | IStream<string>`).
+ */
 export const NODE_BRAND = Symbol('aelea/static-node')
 export const TEXT_BRAND = Symbol('aelea/static-text')
 
-export interface IStaticNodeBrand<TElement = unknown> {
-  createElement: () => TElement
-  $segments: I$Slottable<TElement>[]
-  staticStyles: INode<TElement>['staticStyles']
-  styleBehavior: INode<TElement>['styleBehavior']
-  styleInline: INode<TElement>['styleInline']
-  propBehavior: INode<TElement>['propBehavior']
-  attributesBehavior: INode<TElement>['attributesBehavior']
-  attributes: INode<TElement>['attributes']
+/**
+ * One subscription's node: its own mount port and its own removal handle,
+ * so a dynamic node costs the instance and its emission task and nothing else.
+ */
+class NodeInstance<TElement> extends MountPort<TElement> implements INode<TElement>, IInstanceHandle {
+  readonly kind = 'node' as const
+  readonly mount: NodeInstance<TElement> = this
+  readonly disposable: NodeInstance<TElement> = this
+  task: Disposable = disposeNone
+  private entry: Disposable | null = null
+  private disposed = false
+
+  constructor(readonly recipe: IRecipe<TElement>) {
+    super()
+  }
+
+  set(disposable: Disposable): void {
+    if (this.entry !== null) throw new Error('Disposable already set')
+    this.entry = disposable
+    if (this.disposed) disposable[Symbol.dispose]()
+  }
+
+  [Symbol.dispose](): void {
+    if (this.disposed) return
+    this.disposed = true
+    this.task[Symbol.dispose]()
+    const entry = this.entry
+    if (entry !== null) {
+      this.entry = null
+      entry[Symbol.dispose]()
+    }
+  }
+}
+
+class TextInstance implements ITextNode, IInstanceHandle {
+  readonly kind = 'text' as const
+  readonly disposable: TextInstance = this
+  task: Disposable = disposeNone
+  private entry: Disposable | null = null
+  private disposed = false
+
+  constructor(readonly value: string | IStream<string>) {}
+
+  set(disposable: Disposable): void {
+    if (this.entry !== null) throw new Error('Disposable already set')
+    this.entry = disposable
+    if (this.disposed) disposable[Symbol.dispose]()
+  }
+
+  [Symbol.dispose](): void {
+    if (this.disposed) return
+    this.disposed = true
+    this.task[Symbol.dispose]()
+    const entry = this.entry
+    if (entry !== null) {
+      this.entry = null
+      entry[Symbol.dispose]()
+    }
+  }
+}
+
+class NodeBranch<TElement> implements I$Node<TElement> {
+  constructor(readonly recipe: IRecipe<TElement>) {}
+
+  run(sink: ISink<INode<TElement>>, scheduler: IScheduler): Disposable {
+    const node = new NodeInstance(this.recipe)
+    const native = this.recipe.element.native
+    if (native !== undefined) node.resolve(native as TElement)
+    node.task = scheduler.asap(propagateRunEventTask(sink, emitNode, node))
+    return node
+  }
+}
+
+class TextBranch implements I$Text {
+  constructor(readonly value: string | IStream<string>) {}
+
+  run(sink: ISink<ITextNode>, scheduler: IScheduler): Disposable {
+    const text = new TextInstance(this.value)
+    text.task = scheduler.asap(propagateRunEventTask(sink, emitNode, text))
+    return text
+  }
 }
 
 export function createNode<TElement>(
-  createElement: () => TElement,
+  element: IElementDescriptor,
   mutators: Mutator<TElement>[] = [],
   streamOps: I$Op<TElement>[] = []
 ): INodeCompose<TElement> {
@@ -51,8 +131,6 @@ export function createNode<TElement>(
     if (input.some(isFunction)) {
       const newMutators = mutators.slice()
       const newStreamOps = streamOps.slice()
-      // Once a streamOp has been seen, all subsequent decorators must wrap as
-      // streamOps too so emission order matches source order.
       let inStreamPhase = newStreamOps.length > 0
       for (const op of input as I$Op<TElement>[]) {
         const mut = (op as unknown as { __mutate?: Mutator<TElement> }).__mutate
@@ -63,66 +141,25 @@ export function createNode<TElement>(
           inStreamPhase = true
         }
       }
-      return createNode(createElement, newMutators, newStreamOps)
+      return createNode(element, newMutators, newStreamOps)
     }
 
-    const $segments =
-      input.length > 0 ? (input as I$Slottable<TElement>[]) : (EMPTY_SEGMENTS as unknown as I$Slottable<TElement>[])
-
-    const staticStyles: INode<TElement>['staticStyles'] = []
-    const styleBehavior: INode<TElement>['styleBehavior'] = []
-    const styleInline: INode<TElement>['styleInline'] = []
-    const propBehavior: INode<TElement>['propBehavior'] = []
-    const attributesBehavior: INode<TElement>['attributesBehavior'] = []
-    const attributes: INode<TElement>['attributes'] = {}
-    if (mutators.length > 0) {
-      const scratch: INode<TElement> = {
-        element: undefined as unknown as TElement,
-        disposable: undefined as unknown as SettableDisposable,
-        mount: undefined as unknown as MountPort<TElement>,
-        $segments,
-        staticStyles,
-        styleBehavior,
-        styleInline,
-        propBehavior,
-        attributesBehavior,
-        attributes
-      }
-      for (let i = 0; i < mutators.length; i++) mutators[i](scratch)
+    const recipe: IRecipe<TElement> = {
+      element,
+      $segments: input as I$Slottable<TElement>[],
+      staticStyles: [],
+      styleBehavior: [],
+      attributes: {},
+      attributesBehavior: [],
+      propBehavior: [],
+      effects: []
     }
+    for (let i = 0; i < mutators.length; i++) mutators[i](recipe)
 
-    const $branch = stream<INode<TElement>>((sink, scheduler) => {
-      const nodeDisposable = new SettableDisposable()
-      const nodeState: INode<TElement> = {
-        element: createElement(),
-        disposable: nodeDisposable,
-        mount: new MountPort<TElement>(),
-        $segments,
-        staticStyles,
-        styleBehavior,
-        styleInline,
-        propBehavior,
-        attributesBehavior,
-        attributes
-      }
-      const nodeTask = scheduler.asap(propagateRunEventTask(sink, emitNode, nodeState))
-      return disposeBoth(nodeTask, nodeDisposable)
-    })
-
-    let result: I$Node<TElement> = $branch
+    let result: I$Node<TElement> = new NodeBranch(recipe)
     for (let i = 0; i < streamOps.length; i++) result = streamOps[i](result)
     if (streamOps.length === 0) {
-      const brand: IStaticNodeBrand<TElement> = {
-        createElement,
-        $segments,
-        staticStyles,
-        styleBehavior,
-        styleInline,
-        propBehavior,
-        attributesBehavior,
-        attributes
-      }
-      ;(result as unknown as Record<symbol, unknown>)[NODE_BRAND] = brand
+      ;(result as unknown as Record<symbol, unknown>)[NODE_BRAND] = recipe
     }
     return result
   }
@@ -130,67 +167,47 @@ export function createNode<TElement>(
   return nodeComposeFn as INodeCompose<TElement>
 }
 
-export interface IElementDescriptor {
-  tag: string
-  namespace: 'html' | 'svg'
-  /** Filled in by the renderer on mount, or pre-set by `$wrapNativeElement`. */
-  native?: unknown
-}
-
 export function $element<K extends keyof HTMLElementTagNameMap>(tag: K): INodeCompose<HTMLElementTagNameMap[K]>
 export function $element(tag?: string): INodeCompose<HTMLElement>
 export function $element(tag = 'div') {
-  return createNode(() => ({ tag, namespace: 'html' }) as unknown as HTMLElement)
+  return createNode<HTMLElement>({ tag, namespace: 'html' })
 }
 
 export function $svg<K extends keyof SVGElementTagNameMap>(tag: K): INodeCompose<SVGElementTagNameMap[K]>
 export function $svg(tag: string): INodeCompose<SVGElement>
 export function $svg(tag: string) {
-  return createNode(() => ({ tag, namespace: 'svg' }) as unknown as SVGElement)
+  return createNode<SVGElement>({ tag, namespace: 'svg' })
 }
 
 export function $custom(tag: string): INodeCompose<HTMLElement> {
-  return createNode(() => ({ tag, namespace: 'html' }) as unknown as HTMLElement)
+  return createNode<HTMLElement>({ tag, namespace: 'html' })
 }
 
-export const $node: INodeCompose<HTMLElement | SVGElement> = createNode<HTMLElement | SVGElement>(
-  () => ({ tag: 'div', namespace: 'html' }) as unknown as HTMLElement
-)
+export const $node: INodeCompose<HTMLElement | SVGElement> = createNode<HTMLElement | SVGElement>({
+  tag: 'div',
+  namespace: 'html'
+})
 
 export function $wrapNativeElement<T extends Element = Element>(element: T): INodeCompose<T> {
-  const descriptor: IElementDescriptor = {
+  return createNode<T>({
     tag: (typeof element.tagName === 'string' && element.tagName.toLowerCase()) || 'div',
     namespace: 'html',
     native: element
-  }
-  return createNode<T>(() => descriptor as unknown as T)
+  })
 }
 
+/**
+ * A text child. A string mounts inline; a stream binds its emissions to one
+ * persistent text node. Each subscription carries its own removal handle so
+ * a switch over text nodes replaces instead of accumulating.
+ */
 export const $text = (...textSourceList: (IStream<string> | string)[]): I$Text => {
   if (textSourceList.length === 0) return empty
 
-  // Each subscription's manifest carries its own SettableDisposable so the
-  // renderer can hand back a targeted removal hook — disposing the text
-  // subscription (e.g. a switchLatest swap) then removes the mounted Text
-  // node instead of orphaning it.
   const streams = textSourceList.map(source => {
-    if (typeof source === 'string') {
-      const $staticText = stream<ITextNode>((sink, scheduler) => {
-        const disposable = new SettableDisposable()
-        const manifest: ITextNode = { kind: 'text', value: source, disposable }
-        return disposeBoth(scheduler.asap(propagateRunEventTask(sink, emitNode, manifest)), disposable)
-      })
-      ;($staticText as unknown as Record<symbol, unknown>)[TEXT_BRAND] = source
-      return $staticText
-    }
-    const cached = state()(source)
-    return stream<ITextNode>((sink, scheduler) => {
-      const primeSub = cached.run(nullSink, scheduler)
-      const disposable = new SettableDisposable()
-      const manifest: ITextNode = { kind: 'text', value: cached, disposable }
-      const emitTask = scheduler.asap(propagateRunEventTask(sink, emitNode, manifest))
-      return disposeAll([emitTask, primeSub, disposable])
-    })
+    const $branch = new TextBranch(source)
+    ;($branch as unknown as Record<symbol, unknown>)[TEXT_BRAND] = source
+    return $branch as I$Text
   })
 
   return streams.length === 1 ? streams[0] : merge(...streams)

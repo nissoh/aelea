@@ -1,6 +1,6 @@
 import { o } from '../../stream/index.js'
+import { style, stylePseudo } from '../../ui/index.js'
 import { palette, text } from '../../ui-components-theme/index.js'
-import { style, stylePseudo } from '../../ui-renderer-dom/index.js'
 
 export const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
 

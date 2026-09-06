@@ -1,58 +1,8 @@
 /**
- * Aelea DOM renderer — browser-target entry point.
- *
- *   import { $element, $text, component, style } from 'aelea/ui'
- *   import { render, nodeEvent } from 'aelea/dom'
- *
- *   render({ rootAttachment: document.body, $rootNode: $App })
- *
- * Factories (`$element`, `$text`, `$svg`, `$custom`, `$node`,
- * `$wrapNativeElement`) are renderer-agnostic and live in `aelea/ui`;
- * this module only exposes DOM-specific bindings (`render`, event
- * helpers, stylesheet helpers). The agnostic surface is re-exported
- * below as a convenience for consumers that prefer a single import
- * origin.
+ * The browser renderer. Factories, decorators and the component contract
+ * live in `aelea/ui`, which also re-exports this module for single-origin
+ * imports; import from here only for renderer-level work.
  */
-
-export {
-  $custom,
-  $element,
-  $node,
-  $svg,
-  $text,
-  $wrapNativeElement,
-  attr,
-  attrBehavior,
-  component,
-  createDomScheduler,
-  createNode,
-  effectProp,
-  effectRun,
-  makeMutator,
-  motion,
-  style,
-  styleBehavior,
-  styleInline,
-  stylePseudo
-} from '../ui/index.js'
-export type {
-  I$Node,
-  I$Op,
-  I$Scheduler,
-  I$Slottable,
-  I$Text,
-  IAttributeProperties,
-  IComponentBehavior,
-  IMutator,
-  INode,
-  INodeCompose,
-  IOutputTethers,
-  ISlotChild,
-  ISlottable,
-  IStaticStyleEntry,
-  IStyleCSS,
-  ITextNode
-} from '../ui/types.js'
 export {
   createStyleRule,
   type ICommitRecord,
