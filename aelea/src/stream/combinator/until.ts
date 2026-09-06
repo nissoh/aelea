@@ -1,9 +1,7 @@
 import { empty, never } from '../source/void.js'
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
-import { disposeBoth } from '../utils/disposable.js'
+import { disposeNone } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
-import { SettableDisposable } from '../utils/SettableDisposable.js'
-import { PipeSink } from '../utils/sink.js'
 import { join } from './join.js'
 
 /**
@@ -47,14 +45,72 @@ class Until<A> implements IStream<A> {
   ) {}
 
   run(sink: ISink<A>, scheduler: IScheduler): Disposable {
-    const disposable = new SettableDisposable()
-
-    const d1 = this.source.run(sink, scheduler)
-    const d2 = this.signal.run(new UntilSink(sink, disposable), scheduler)
-    disposable.set(disposeBoth(d1, d2))
-
-    return disposable
+    const untilSink = new UntilSink(sink)
+    const source = this.source.run(untilSink, scheduler)
+    if (untilSink.done) {
+      source[Symbol.dispose]()
+      return disposeNone
+    }
+    untilSink.source = source
+    const signal = this.signal.run(new SignalSink(untilSink), scheduler)
+    if (untilSink.done) {
+      signal[Symbol.dispose]()
+    } else {
+      untilSink.signal = signal
+    }
+    return untilSink
   }
+}
+
+class UntilSink<A> implements ISink<A>, Disposable {
+  done = false
+  source: Disposable = disposeNone
+  signal: Disposable = disposeNone
+
+  constructor(readonly sink: ISink<A>) {}
+
+  event(time: ITime, x: A): void {
+    if (!this.done) this.sink.event(time, x)
+  }
+
+  error(time: ITime, e: unknown): void {
+    if (!this.done) this.sink.error(time, e)
+  }
+
+  end(time: ITime): void {
+    if (this.done) return
+    this.done = true
+    this.release()
+    this.sink.end(time)
+  }
+
+  release(): void {
+    const source = this.source
+    const signal = this.signal
+    this.source = disposeNone
+    this.signal = disposeNone
+    source[Symbol.dispose]()
+    signal[Symbol.dispose]()
+  }
+
+  [Symbol.dispose](): void {
+    this.done = true
+    this.release()
+  }
+}
+
+class SignalSink implements ISink<unknown> {
+  constructor(readonly parent: UntilSink<unknown>) {}
+
+  event(time: ITime): void {
+    this.parent.end(time)
+  }
+
+  error(time: ITime, e: unknown): void {
+    this.parent.error(time, e)
+  }
+
+  end(): void {}
 }
 
 class Since<A> implements IStream<A> {
@@ -64,76 +120,79 @@ class Since<A> implements IStream<A> {
   ) {}
 
   run(sink: ISink<A>, scheduler: IScheduler): Disposable {
-    const min = new LowerBoundSink(this.signal, sink, scheduler)
-    const sourceDisposable = this.source.run(new SinceSink(min, sink), scheduler)
-
-    return disposeBoth(min, sourceDisposable)
+    const sinceSink = new SinceSink(sink)
+    const source = this.source.run(sinceSink, scheduler)
+    if (sinceSink.done) {
+      source[Symbol.dispose]()
+      return disposeNone
+    }
+    sinceSink.source = source
+    const signal = this.signal.run(new LowerBoundSink(sinceSink), scheduler)
+    if (sinceSink.allow || sinceSink.done) {
+      signal[Symbol.dispose]()
+    } else {
+      sinceSink.signal = signal
+    }
+    return sinceSink
   }
 }
 
-class UntilSink implements ISink<unknown> {
-  constructor(
-    readonly sink: ISink<any>,
-    readonly disposable: Disposable
-  ) {}
+class SinceSink<A> implements ISink<A>, Disposable {
+  allow = false
+  done = false
+  source: Disposable = disposeNone
+  signal: Disposable = disposeNone
 
-  event(time: ITime): void {
-    this.disposable[Symbol.dispose]()
+  constructor(readonly sink: ISink<A>) {}
+
+  event(time: ITime, x: A): void {
+    if (this.allow && !this.done) this.sink.event(time, x)
+  }
+
+  error(time: ITime, e: unknown): void {
+    if (!this.done) this.sink.error(time, e)
+  }
+
+  end(time: ITime): void {
+    if (this.done) return
+    this.done = true
+    this.releaseSignal()
     this.sink.end(time)
   }
 
-  error(time: ITime, e: unknown): void {
-    this.sink.error(time, e)
-  }
-
-  end(time: ITime): void {
-    // Don't end main stream if signal ends
-  }
-}
-
-class SinceSink<A> extends PipeSink<A> {
-  constructor(
-    readonly min: LowerBoundSink<A>,
-    sink: ISink<A>
-  ) {
-    super(sink)
-  }
-
-  event(time: ITime, x: A): void {
-    if (this.min.allow) {
-      this.sink.event(time, x)
-    }
-  }
-}
-
-class LowerBoundSink<A> implements ISink<unknown>, Disposable {
-  allow = false
-  disposable: Disposable
-
-  constructor(
-    signal: IStream<unknown>,
-    readonly sink: ISink<A>,
-    scheduler: IScheduler
-  ) {
-    this.disposable = signal.run(this, scheduler)
-  }
-
-  event(time: ITime): void {
+  open(): void {
+    if (this.done) return
     this.allow = true
-    this[Symbol.dispose]()
+    this.releaseSignal()
   }
 
-  error(time: ITime, e: unknown): void {
-    this.sink.error(time, e)
-  }
-
-  end(time: ITime): void {
-    // Don't propagate end from signal
+  releaseSignal(): void {
+    const signal = this.signal
+    this.signal = disposeNone
+    signal[Symbol.dispose]()
   }
 
   [Symbol.dispose](): void {
-    this.disposable[Symbol.dispose]()
+    this.done = true
+    this.releaseSignal()
+    const source = this.source
+    this.source = disposeNone
+    source[Symbol.dispose]()
   }
+}
+
+class LowerBoundSink implements ISink<unknown> {
+  constructor(readonly parent: SinceSink<unknown>) {}
+
+  event(): void {
+    this.parent.open()
+  }
+
+  error(time: ITime, e: unknown): void {
+    this.parent.error(time, e)
+  }
+
+  end(): void {}
 }
 
 export interface IUntilCurry {

@@ -10,18 +10,16 @@ export type {
   ITask,
   ITime
 } from './types.js'
-export { isFunction, isStream, maybeOps, nullSink, toStream } from './utils/common.js'
+export { isFunction, isStream, nullSink, toStream } from './utils/common.js'
 export {
   disposeAll,
   disposeBoth,
   disposeNone,
   disposeOnce,
   disposeWith,
-  isDisposable,
-  toDisposable,
-  tryDispose
+  toDisposable
 } from './utils/disposable.js'
-export type { Curried2, Curried3, Curried4 } from './utils/function.js'
-export { curry2, curry3, curry4, o, op } from './utils/function.js'
+export type { Curried2, Curried3 } from './utils/function.js'
+export { curry2, curry3, o, op } from './utils/function.js'
 export { SettableDisposable } from './utils/SettableDisposable.js'
-export { PipeSink } from './utils/sink.js'
+export { PipeSink, reportUncaught, tryEnd, tryError, tryEvent } from './utils/sink.js'

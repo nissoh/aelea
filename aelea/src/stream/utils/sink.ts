@@ -14,50 +14,36 @@ export abstract class PipeSink<I, O = I> implements ISink<I> {
   }
 }
 
-export interface IndexedValue<A> {
-  readonly index: number
-  readonly value: A
-  readonly ended: boolean
+export function tryEvent<T>(sink: ISink<T>, time: ITime, value: T): void {
+  try {
+    sink.event(time, value)
+  } catch (error) {
+    sink.error(time, error)
+  }
 }
 
-export class IndexSink<A> implements ISink<A> {
-  // Fields assigned in the constructor body so the emit defines a packed
-  // hidden class on first construction, instead of the per-field Object.
-  // defineProperty path triggered by class-field declarations under
-  // useDefineForClassFields. Hot path for combine/zip/merge subscription.
-  readonly sink: ISink<IndexedValue<A | undefined>>
-  index: number
-  ended: boolean
-  value: A | undefined
-
-  constructor(sink: ISink<IndexedValue<A | undefined>>, index: number) {
-    this.sink = sink
-    this.index = index
-    this.ended = false
-    this.value = undefined
+export function tryError(sink: ISink<unknown>, time: ITime, error: unknown): void {
+  try {
+    sink.error(time, error)
+  } catch (fault) {
+    reportUncaught(fault)
   }
+}
 
-  event(time: ITime, x: A): void {
-    if (this.ended) {
-      this.sink.error(time, new Error('Cannot send events to ended sink'))
-      return
-    }
-
-    this.value = x
-    this.sink.event(time, this)
+export function tryEnd(sink: ISink<unknown>, time: ITime): void {
+  try {
+    sink.end(time)
+  } catch (fault) {
+    reportUncaught(fault)
   }
+}
 
-  end(time: ITime): void {
-    if (this.ended) {
-      this.sink.error(time, new Error('Cannot end an ended sink'))
-      return
-    }
-
-    this.ended = true
-    this.sink.event(time, this)
+export function reportUncaught(error: unknown): void {
+  if (typeof reportError === 'function') {
+    reportError(error)
+    return
   }
-
-  error(time: ITime, error: unknown): void {
-    this.sink.error(time, error)
-  }
+  queueMicrotask(() => {
+    throw error
+  })
 }

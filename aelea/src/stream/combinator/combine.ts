@@ -110,11 +110,6 @@ class CombineMap<T extends readonly unknown[], R> implements IStream<R> {
   }
 }
 
-/**
- * Holds the latest value per source. Inner sinks push `(index, value)` directly
- * via `set`, so combine avoids the IndexSink/IndexedValue indirection on the hot
- * path while keeping the per-index latest-value bookkeeping it needs.
- */
 class CombineMapSink<O> {
   awaiting: number
   readonly values: any[]

@@ -1,5 +1,4 @@
 export * from './combinator/index.js'
-export * from './fetch.js'
 export * from './multicast/index.js'
 export * from './source/index.js'
 export * from './types.js'

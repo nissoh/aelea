@@ -1,8 +1,9 @@
 import { combine, delay, filter, fromPromise, merge, nowWith, skipRepeatsWith, switchMap, tap } from 'aelea/stream'
-import { fetchJson, fromCallback, type IBehavior } from 'aelea/stream-extended'
+import { fromCallback, type IBehavior } from 'aelea/stream-extended'
 import { $node, $wrapNativeElement, component, type INode, type INodeCompose, style } from 'aelea/ui'
 import { observer } from 'aelea/ui-components'
 import type * as monaco from 'monaco-editor'
+import { fetchJson } from '../fetchJson.js'
 
 // Monaco will be loaded dynamically from CDN
 declare global {

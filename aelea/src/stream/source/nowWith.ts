@@ -1,5 +1,6 @@
 import { propagateRunEventTask } from '../scheduler/PropagateTask.js'
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
+import { tryEvent } from '../utils/sink.js'
 
 /**
  * Emit a single value computed from time, then end
@@ -17,10 +18,14 @@ class NowWith<T> implements IStream<T> {
 }
 
 function emitNowWith<T>(time: ITime, sink: ISink<T>, fn: (time: ITime) => T) {
+  let value: T
   try {
-    sink.event(time, fn(time))
+    value = fn(time)
   } catch (err) {
     sink.error(time, err)
+    sink.end(time)
+    return
   }
+  tryEvent(sink, time, value)
   sink.end(time)
 }

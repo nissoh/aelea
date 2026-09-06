@@ -4,9 +4,6 @@ import { disposeBoth, disposeNone } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 import { map } from './map.js'
 
-/**
- * Stream that switches to the latest inner stream, disposing the previous one
- */
 class SwitchLatest<T> implements IStream<T> {
   constructor(readonly source: IStream<IStream<T>>) {}
 
@@ -29,7 +26,8 @@ class SwitchLatest<T> implements IStream<T> {
  * - The source stream (stream of streams) is still active, OR
  * - The latest inner stream is still active
  *
- * It only ends when both have ended.
+ * It only ends when both have ended. An inner that fails to start is an
+ * applicative error: the output reports it and awaits the next inner.
  */
 export const switchLatest = <T>(source: IStream<IStream<T>>): IStream<T> => new SwitchLatest(source)
 
@@ -46,11 +44,6 @@ export const switchMap: ISwitchMapCurry = curry2((cb, s) => {
   return switchLatest(
     map(cbParam => {
       const cbRes = cb(cbParam)
-      // Inline isStream check: skips the function call and the slow `'in'`
-      // operator from utils/common.isStream. `cbRes != null` excludes
-      // null/undefined (whose property access would throw); `typeof .run`
-      // excludes primitives (autoboxed access returns undefined) and
-      // Promises (which expose `.then` but not `.run`).
       return cbRes != null && typeof (cbRes as { run?: unknown }).run === 'function'
         ? (cbRes as IStream<unknown>)
         : fromPromise(cbRes as Promise<unknown>)
@@ -81,11 +74,18 @@ class SwitchSink<T> implements ISink<IStream<T>>, Disposable {
     this.innerSink = new InnerSink(this, sink)
   }
 
-  event(_time: ITime, inner: IStream<T>): void {
+  event(time: ITime, inner: IStream<T>): void {
     if (this.disposed) return
     this.disposeInner()
     this.innerActive = true
-    const d = inner.run(this.innerSink, this.scheduler)
+    let d: Disposable
+    try {
+      d = inner.run(this.innerSink, this.scheduler)
+    } catch (error) {
+      this.innerActive = false
+      this.sink.error(time, error)
+      return
+    }
     if (this.innerActive) {
       this.innerDisposable = d
     } else {
@@ -135,8 +135,7 @@ class InnerSink<T> implements ISink<T> {
 
   end(time: ITime): void {
     this.parent.innerActive = false
-    this.parent.innerDisposable = disposeNone
-    // End the output only if the source stream has already ended
+    this.parent.disposeInner()
     if (this.parent.sourceEnded) {
       this.sink.end(time)
     }

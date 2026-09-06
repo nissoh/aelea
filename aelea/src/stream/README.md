@@ -53,17 +53,25 @@ Here, A, B, C, D, E are single-character references with their actual array valu
 
 ### Error Handling
 
-This library distinguishes between **stream failures** and **application errors**:
+This library distinguishes between **application errors** and **stream failures**:
 
-- **Application error**: Recoverable error. Sources should catch and transform to events when possible
-- **Stream failure**: Cannot produce more events. Sources should call `error()` then `end()`
+- **Application error**: Recoverable. `error()` is applicative: it reports and the stream continues. A combinator whose user function throws, a source whose one value fails to decode, and a consumer whose `event` handler throws all report this way.
+- **Stream failure**: The producer cannot produce more events. It calls `error()` then `end()`.
+
+A consumer that throws from its own `error()` or `end()` handler has no in-band channel left; the fault is reported out of band through the host's uncaught-exception path (`reportError` where available) and never fed back into the pipeline.
 
 ### Stream Lifecycle
 
 - **event**: Normal data events
-- **error**: Error events (non-terminal by default)
+- **error**: Error events (non-terminal)
 - **end**: Stream completion (terminal - no more events)
-- **dispose**: Resource cleanup (terminal - no more events - no furthur sink feedback)
+- **dispose**: Resource cleanup (terminal - no more events - no further sink feedback)
+
+### Resource Release
+
+`end` is self-cleaning: a stream releases every subscription and timer it holds at the moment it forwards `end`. A consumer never has to dispose a subscription that has ended, and a stream that ended synchronously inside `run` hands back an already-released handle.
+
+A shared stream (`multicast`, `state`, `tether`) is one shared run of its source. Disposal of the last subscriber cancels that run and a later subscriber starts a fresh one. The source ending closes the shared stream for good: late subscribers receive `end` (after the replayed value, for `state`).
 
 ## Stream Contract
 
@@ -71,12 +79,13 @@ This library distinguishes between **stream failures** and **application errors*
 - A source MUST NOT emit events after calling `end()`
 - A source MUST NOT call `end()` more than once
 - A source MAY emit multiple `error()` events (for application/recoverable errors)
-- A source SHOULD call `error()` followed by `end()` for stream failures (unrecoverable errors where no more events can be produced)
+- A source MUST call `error()` followed by `end()` for stream failures (unrecoverable errors where no more events can be produced)
 - A source MUST NOT emit any events after being disposed
+- A source MUST release everything it holds when it calls `end()`
 
 ### Sink Responsibilities
 - A sink MUST handle multiple `error()` calls gracefully
-- A sink MUST handle `dispose()` being called at any time
+- A sink MUST tolerate its subscription being disposed at any time
 - A sink SHOULD NOT assume the source follows the contract perfectly
 - A sink MUST NOT call any source methods after being disposed
 

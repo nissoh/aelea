@@ -4,81 +4,51 @@ import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeAll, disposeNone } from '../utils/disposable.js'
 import { invoke } from '../utils/function.js'
 import { Queue } from '../utils/Queue.js'
-import { type IndexedValue, IndexSink } from '../utils/sink.js'
 import { map } from './map.js'
 
 /**
- * Stream that combines values from multiple streams into an object in lockstep
+ * Combine values from multiple streams into an object in lockstep
+ *
+ * x:   -1---2---3------>
+ * y:   ---a---b---c---->
+ * zip: ---A---B---C---->
+ *   where A = { x: 1, y: a }
+ *         B = { x: 2, y: b }
+ *         C = { x: 3, y: c }
  */
-class Zip<A> implements IStream<Readonly<A>> {
-  readonly keys: (keyof A)[]
-  readonly sources: IStream<any>[]
-
-  constructor(state: { [P in keyof A]: IStream<A[P]> }) {
-    this.keys = Object.keys(state) as (keyof A)[]
-    this.sources = Object.values(state) as IStream<any>[]
-  }
-
-  run(sink: ISink<Readonly<A>>, scheduler: IScheduler): Disposable {
-    return zipMap(
-      (...values) => {
-        const result = {} as A
-        for (let i = 0; i < this.keys.length; i++) {
-          result[this.keys[i]] = values[i]
-        }
-        return result as Readonly<A>
-      },
-      ...this.sources
-    ).run(sink, scheduler)
-  }
-}
-
 export function zip<A>(
   state: {
     [P in keyof A]: IStream<A[P]>
   }
 ): IStream<Readonly<A>> {
-  const sources = Object.values(state)
+  const keys = Object.keys(state) as (keyof A)[]
 
-  if (sources.length === 0) return just({} as A)
+  if (keys.length === 0) return just({} as A)
 
-  return new Zip(state)
+  return new Zip(keys, Object.values(state) as IStream<any>[])
 }
 
-/**
- * Stream that combines values from multiple streams using a mapping function in lockstep
- */
-class ZipMap<T extends readonly unknown[], R> implements IStream<R> {
-  constructor(
-    readonly f: (...args: T) => R,
-    readonly sourceList: [...{ [K in keyof T]: IStream<T[K]> }]
-  ) {}
+class Zip<A> implements IStream<Readonly<A>> {
+  readonly zipMap: ZipMap<any[], Readonly<A>>
 
-  run(sink: ISink<R>, scheduler: IScheduler): Disposable {
-    const l = this.sourceList.length
-    const disposables = new Array(l)
-    const sinks = new Array(l)
-    const buffers = new Array(l)
-    const zipSink = new ZipMapSink(this.f, buffers, sinks, disposables, sink)
-
-    for (let i = 0; i < l; ++i) {
-      buffers[i] = new Queue()
-      const indexSink = (sinks[i] = new IndexSink(zipSink, i))
-      const d = this.sourceList[i].run(indexSink, scheduler)
-      if (indexSink.ended) {
-        d[Symbol.dispose]()
-        disposables[i] = disposeNone
-      } else {
-        disposables[i] = d
+  constructor(keys: (keyof A)[], sources: IStream<any>[]) {
+    this.zipMap = new ZipMap((...values: any[]) => {
+      const result = {} as A
+      for (let i = 0; i < keys.length; i++) {
+        result[keys[i]] = values[i]
       }
-    }
+      return result as Readonly<A>
+    }, sources)
+  }
 
-    return disposeAll(disposables)
+  run(sink: ISink<Readonly<A>>, scheduler: IScheduler): Disposable {
+    return this.zipMap.run(sink, scheduler)
   }
 }
 
 /**
- * Combine values from multiple streams in lockstep
+ * Combine values from multiple streams in lockstep. Ends as soon as one
+ * source has ended with nothing left to pair.
  *
  * streamA: -1---2---3------>
  * streamB: ---a---b---c---->
@@ -100,90 +70,124 @@ export function zipMap<T extends readonly unknown[], R>(
   return new ZipMap(f, sourceList)
 }
 
-class ZipMapSink<I, O> implements ISink<IndexedValue<I | undefined>> {
-  private readonly values: any[]
+class ZipMap<T extends readonly unknown[], R> implements IStream<R> {
+  constructor(
+    readonly f: (...args: T) => R,
+    readonly sources: [...{ [K in keyof T]: IStream<T[K]> }]
+  ) {}
+
+  run(sink: ISink<R>, scheduler: IScheduler): Disposable {
+    const l = this.sources.length
+    const disposables = new Array<Disposable>(l)
+    const zipSink = new ZipMapSink(disposables, l, sink, this.f)
+
+    for (let i = 0; i < l; i++) {
+      if (zipSink.ended) {
+        disposables[i] = disposeNone
+        continue
+      }
+      const innerSink = new ZipInnerSink(zipSink, i)
+      const d = this.sources[i].run(innerSink, scheduler)
+      if (innerSink.ended || zipSink.ended) {
+        d[Symbol.dispose]()
+        disposables[i] = disposeNone
+      } else {
+        disposables[i] = d
+      }
+    }
+
+    return disposeAll(disposables)
+  }
+}
+
+class ZipMapSink<O> {
+  readonly buffers: Queue<unknown>[]
+  readonly values: unknown[]
+  readonly sourceEnded: boolean[]
+  ended = false
 
   constructor(
-    readonly f: (...args: any[]) => O,
-    readonly buffers: ArrayLike<Queue<I>>,
-    readonly sinks: ArrayLike<IndexSink<I>>,
     readonly disposables: Disposable[],
-    readonly sink: ISink<O>
+    sinkCount: number,
+    readonly sink: ISink<O>,
+    readonly f: (...args: any[]) => O
   ) {
-    this.values = new Array(buffers.length)
+    this.buffers = new Array(sinkCount)
+    this.values = new Array(sinkCount)
+    this.sourceEnded = new Array(sinkCount)
+    for (let i = 0; i < sinkCount; i++) {
+      this.buffers[i] = new Queue()
+      this.sourceEnded[i] = false
+    }
   }
 
-  event(time: ITime, indexedValue: IndexedValue<I>): void {
-    const i = indexedValue.index
-
-    if (indexedValue.ended) {
-      // Undefined during a synchronous end inside run() — ZipMap.run disposes
-      // the returned handle itself in that case.
-      const d = this.disposables[i]
-      if (d !== undefined) {
-        d[Symbol.dispose]()
-        this.disposables[i] = disposeNone
-      }
-      const buffer = this.buffers[i]
-      if (buffer.isEmpty()) {
-        this.sink.end(time)
-      }
-      return
-    }
-
+  set(time: ITime, i: number, value: unknown): void {
+    if (this.ended) return
     const buffers = this.buffers
     const buffer = buffers[i]
+    buffer.push(value)
+    if (buffer.length() !== 1) return
 
-    buffer.push(indexedValue.value)
-
-    if (buffer.length() === 1) {
-      if (!this.ready()) {
+    const l = buffers.length
+    for (let j = 0; j < l; j++) {
+      if (buffers[j].isEmpty()) return
+    }
+    for (let j = 0; j < l; j++) {
+      this.values[j] = buffers[j].shift()
+    }
+    try {
+      this.sink.event(time, invoke(this.f, this.values))
+    } catch (error) {
+      this.sink.error(time, error)
+    }
+    for (let j = 0; j < l; j++) {
+      if (this.sourceEnded[j] && buffers[j].isEmpty()) {
+        this.finish(time)
         return
       }
-
-      const values = this.values
-      const len = this.buffers.length
-      for (let j = 0; j < len; j++) {
-        values[j] = buffers[j].shift()!
-      }
-      try {
-        this.sink.event(time, invoke(this.f, values))
-      } catch (error) {
-        this.sink.error(time, error)
-      }
-
-      if (this.ended()) {
-        this.sink.end(time)
-      }
     }
+  }
+
+  endOne(time: ITime, i: number): void {
+    if (this.ended) return
+    this.release(i)
+    this.sourceEnded[i] = true
+    if (this.buffers[i].isEmpty()) this.finish(time)
+  }
+
+  release(i: number): void {
+    const d = this.disposables[i]
+    if (d !== undefined) {
+      this.disposables[i] = disposeNone
+      d[Symbol.dispose]()
+    }
+  }
+
+  finish(time: ITime): void {
+    this.ended = true
+    for (let i = 0; i < this.disposables.length; i++) this.release(i)
+    this.sink.end(time)
+  }
+}
+
+class ZipInnerSink<I, O> implements ISink<I> {
+  ended = false
+
+  constructor(
+    readonly parent: ZipMapSink<O>,
+    readonly index: number
+  ) {}
+
+  event(time: ITime, value: I): void {
+    this.parent.set(time, this.index, value)
   }
 
   error(time: ITime, e: unknown): void {
-    this.sink.error(time, e)
+    if (!this.parent.ended) this.parent.sink.error(time, e)
   }
 
   end(time: ITime): void {
-    // This should not be called directly as zipMap manages its own lifecycle
-    // through activeCount tracking
-    // If we reach here, it means all sources ended without errors
-    this.sink.end(time)
-  }
-
-  ended(): boolean {
-    for (let i = 0; i < this.buffers.length; i++) {
-      if (this.buffers[i].isEmpty() && this.sinks[i].ended) {
-        return true
-      }
-    }
-    return false
-  }
-
-  ready(): boolean {
-    for (let i = 0; i < this.buffers.length; i++) {
-      if (this.buffers[i].isEmpty()) {
-        return false
-      }
-    }
-    return true
+    this.ended = true
+    this.parent.endOne(time, this.index)
   }
 }

@@ -3,9 +3,6 @@ import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 
-/**
- * Stream that waits for a pause in values before emitting the latest one
- */
 class Debounce<T> implements IStream<T> {
   constructor(
     readonly interval: ITime,
@@ -19,7 +16,8 @@ class Debounce<T> implements IStream<T> {
 }
 
 /**
- * Wait for a pause in values before emitting the latest one
+ * Wait for a pause in values before emitting the latest one. Errors are
+ * applicative and pass through without disturbing the pending value.
  *
  * stream:      -a-b-c-d-------e-f-------g->
  * debounce(3): ----------d---------f--------g->
@@ -38,22 +36,16 @@ class DebounceSink<T> implements ISink<T>, Disposable {
 
   event(_time: ITime, value: T): void {
     this.clearTimer()
-    // Reuse the wrapper across events — only allocate on first event of the
-    // stream's lifetime, mutate `.value` thereafter. `this.timer !== null`
-    // is the true "has unflushed value" sentinel; pendingValue may stay
-    // populated past an emission.
     if (this.pendingValue === null) this.pendingValue = { value }
     else this.pendingValue.value = value
     this.timer = this.scheduler.delay(propagateRunEventTask(this.sink, emitDebounced, this), this.interval)
   }
 
-  error(time: ITime, e: Error): void {
-    this.clearTimer()
+  error(time: ITime, e: unknown): void {
     this.sink.error(time, e)
   }
 
   end(time: ITime): void {
-    // Emit pending value if any (timer not yet fired).
     if (this.timer !== null) {
       this.clearTimer()
       this.sink.event(time, (this.pendingValue as { value: T }).value)
@@ -68,15 +60,13 @@ class DebounceSink<T> implements ISink<T>, Disposable {
   clearTimer(): void {
     if (this.timer !== null) {
       const t = this.timer
-      this.timer = null // Clear before disposing to prevent circular disposal
+      this.timer = null
       t[Symbol.dispose]()
     }
   }
 }
 
 function emitDebounced<T>(time: ITime, sink: ISink<T>, debounceSink: DebounceSink<T>): void {
-  // The wrapper persists across emissions; `timer = null` is the "flushed"
-  // signal that `end()` keys off of.
   debounceSink.timer = null
   if (debounceSink.pendingValue !== null) {
     sink.event(time, debounceSink.pendingValue.value)

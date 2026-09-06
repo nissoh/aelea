@@ -209,32 +209,6 @@ export function curry3<A, B, C, D>(f: (a: A, b: B, c: C) => D): Curried3<A, B, C
   return curried as any
 }
 
-export interface Curried4<A, B, C, D, E> {
-  (): Curried4<A, B, C, D, E>
-  (a: A): Curried3<B, C, D, E>
-  (a: A, b: B): Curried2<C, D, E>
-  (a: A, b: B, c: C): (d: D) => E
-  (a: A, b: B, c: C, d: D): E
-}
-
-export function curry4<A, B, C, D, E>(f: (a: A, b: B, c: C, d: D) => E): Curried4<A, B, C, D, E> {
-  function curried(...args: [] | [A] | [A, B] | [A, B, C] | [A, B, C, D]): any {
-    switch (args.length) {
-      case 0:
-        return curried
-      case 1:
-        return curry3((b: B, c: C, d: D) => f(args[0], b, c, d))
-      case 2:
-        return curry2((c: C, d: D) => f(args[0], args[1], c, d))
-      case 3:
-        return (d: D) => f(args[0], args[1], args[2], d)
-      default:
-        return f(args[0], args[1], args[2], args[3])
-    }
-  }
-  return curried as any
-}
-
 /**
  * Function composition operator.
  * Composes functions from left to right for later application.

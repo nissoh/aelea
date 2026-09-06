@@ -1,9 +1,5 @@
 import type { ISink, ITask, ITime } from '../types.js'
 
-export function runTask(time: ITime, task: ITask): void {
-  task.run(time)
-}
-
 export const propagateRunEventTask = <TSinkValue, TValue>(
   sink: ISink<TSinkValue>,
   run: (time: ITime, sink: ISink<TSinkValue>, value: TValue) => void,
@@ -17,7 +13,7 @@ export const propagateEndTask = (sink: ISink<any>) => new PropagateEndTask(sink)
 
 export const propagateErrorEndTask = (sink: ISink<unknown>, error: unknown) => new PropagateErrorEndTask(sink, error)
 
-export abstract class PropagateTask<T> implements ITask, Disposable {
+export abstract class PropagateTask<T> implements ITask {
   active = true
 
   constructor(readonly sink: ISink<T>) {}
@@ -32,7 +28,7 @@ export abstract class PropagateTask<T> implements ITask, Disposable {
     if (this.active) this.runIfActive(time)
   }
 
-  error(time: ITime, e: Error): void {
+  error(time: ITime, e: unknown): void {
     this.sink.error(time, e)
   }
 }

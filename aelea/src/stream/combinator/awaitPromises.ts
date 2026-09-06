@@ -1,9 +1,7 @@
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeBoth } from '../utils/disposable.js'
+import { reportUncaught, tryEvent } from '../utils/sink.js'
 
-/**
- * Stream that transforms a stream of promises into a stream of their values
- */
 class AwaitPromises<T> implements IStream<T> {
   constructor(readonly source: IStream<Promise<T>>) {}
 
@@ -17,8 +15,9 @@ class AwaitPromises<T> implements IStream<T> {
 
 /**
  * Turn a Stream of promises into a Stream containing the promises' values.
- * Event order is always preserved, regardless of promise fulfillment order.
- * Resolved values flush immediately once earlier promises settle.
+ * Source order is preserved for values, errors and end alike, regardless of
+ * settlement order. A rejection is applicative: it is reported in its slot
+ * and the queue continues.
  *
  * promise p:             ---1
  * promise q:             ------2
@@ -30,8 +29,6 @@ export const awaitPromises = <T>(s: IStream<Promise<T>>): IStream<T> => new Awai
 
 class AwaitPromisesSink<T> implements ISink<Promise<T>>, Disposable {
   queue: Promise<unknown> = Promise.resolve()
-  sourceEnded = false
-  ended = false
   disposed = false
 
   constructor(
@@ -39,50 +36,31 @@ class AwaitPromisesSink<T> implements ISink<Promise<T>>, Disposable {
     readonly scheduler: IScheduler
   ) {}
 
-  event(time: ITime, promise: Promise<T>) {
+  event(_time: ITime, promise: Promise<T>): void {
     if (this.disposed) return
-
-    this.queue = this.queue.then(() => promise.then(this.eventBound)).catch(this.errorBound)
+    this.queue = this.queue.then(() => promise.then(this.settle, this.reject)).catch(reportUncaught)
   }
 
-  end(time: ITime) {
+  error(_time: ITime, error: unknown): void {
     if (this.disposed) return
-
-    this.sourceEnded = true
-    // Queue the end event - it will only execute after all pending promises resolve
-    this.queue = this.queue.then(this.endBound).catch(this.errorBound)
+    this.queue = this.queue.then(() => this.reject(error)).catch(reportUncaught)
   }
 
-  error(time: ITime, error: unknown): void {
+  end(_time: ITime): void {
     if (this.disposed) return
-
-    this.sink.error(time, error)
+    this.queue = this.queue.then(this.finish).catch(reportUncaught)
   }
 
-  // Pre-create closures to avoid creating them per event
-  eventBound = (value: T): void => {
-    if (!this.disposed) {
-      this.sink.event(this.scheduler.time(), value)
-    }
+  settle = (value: T): void => {
+    if (!this.disposed) tryEvent(this.sink, this.scheduler.time(), value)
   }
 
-  endBound = (): void => {
-    if (!this.disposed && !this.ended) {
-      this.ended = true
-      this.sink.end(this.scheduler.time())
-    }
+  reject = (error: unknown): void => {
+    if (!this.disposed) this.sink.error(this.scheduler.time(), error)
   }
 
-  errorBound = (error: unknown): void => {
-    if (!this.disposed) {
-      const time = this.scheduler.time()
-      this.sink.error(time, error)
-      // Only end if the source has ended and we haven't ended yet
-      if (this.sourceEnded && !this.ended) {
-        this.ended = true
-        this.sink.end(time)
-      }
-    }
+  finish = (): void => {
+    if (!this.disposed) this.sink.end(this.scheduler.time())
   };
 
   [Symbol.dispose](): void {

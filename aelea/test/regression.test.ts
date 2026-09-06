@@ -357,7 +357,7 @@ describe('applicative error routing', () => {
     expect(capture.values).toEqual([3])
   })
 
-  test('an error instance that completed fan-out once is not delivered twice', () => {
+  test('the same error instance emitted in separate ticks is delivered each time', async () => {
     const scheduler = createDefaultScheduler()
     let push: ISink<number> | undefined
     const m = multicast(
@@ -381,14 +381,13 @@ describe('applicative error routing', () => {
 
     const boom = new Error('boom')
     push!.error(0, boom)
-    // A guarded scheduler task's error channel can feed the rethrown error
-    // back sequentially — the second delivery of the same instance must no-op.
-    push!.error(0, boom)
+    await settle()
+    push!.error(1, boom)
 
-    expect(seen).toHaveLength(1)
+    expect(seen).toEqual([boom, boom])
   })
 
-  test('multicast delivers errors to every subscriber even if one handler throws', () => {
+  test('multicast delivers errors to every subscriber and reports a throwing handler out of band', () => {
     const scheduler = createDefaultScheduler()
     let push: ISink<number> | undefined
     const m = multicast(
@@ -411,9 +410,18 @@ describe('applicative error routing', () => {
     const second: Capture<number> = { values: [], ended: false, errors: [] }
     m.run(captureSink(second), scheduler)
 
-    expect(() => push!.error(0, new Error('source error'))).toThrow('handler boom')
+    const faults: unknown[] = []
+    const original = (globalThis as any).reportError
+    ;(globalThis as any).reportError = (e: unknown) => faults.push(e)
+    try {
+      expect(() => push!.error(0, new Error('source error'))).not.toThrow()
+    } finally {
+      ;(globalThis as any).reportError = original
+    }
     expect(second.errors).toHaveLength(1)
     expect((second.errors[0] as Error).message).toBe('source error')
+    expect(faults).toHaveLength(1)
+    expect((faults[0] as Error).message).toBe('handler boom')
   })
 
   test('fromPromise routes a downstream throw to sink.error and still ends', async () => {

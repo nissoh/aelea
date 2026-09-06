@@ -27,6 +27,9 @@ export interface IStateCurry {
  * stream:        -1-2-3--->
  * subscriber1:   01-2-3--->
  * subscriber2:    1-2-3--->
+ *
+ * Once the source has ended, a late subscriber receives the final value and
+ * then end.
  */
 export const state: IStateCurry = ((...args: unknown[]) => {
   if (args.length >= 2) {
@@ -49,20 +52,13 @@ export class State<A> implements IStream<A> {
   }
 
   run(sink: ISink<A>, scheduler: IScheduler): Disposable {
-    // Subscribe to source with StateSink to capture future values
-    const sourceDisposable = this.source.run(new StateSink(this, sink), scheduler)
-
-    // If we have a cached value, emit it asynchronously. Pass the box, not the
-    // value: an emission already queued at subscribe time may update the cache
-    // before this task flushes, and replaying the captured snapshot would
-    // deliver a stale value after the fresh one.
     const latestValue = this.latestValue
-    if (latestValue !== undefined) {
-      const cachedDisposable = scheduler.asap(propagateRunEventTask(sink, emitState, latestValue))
-      return disposeBoth(cachedDisposable, sourceDisposable)
+    if (latestValue === undefined) {
+      return this.source.run(new StateSink(this, sink), scheduler)
     }
 
-    return sourceDisposable
+    const replay = scheduler.asap(propagateRunEventTask(sink, emitState, latestValue))
+    return disposeBoth(replay, this.source.run(new StateSink(this, sink), scheduler))
   }
 }
 

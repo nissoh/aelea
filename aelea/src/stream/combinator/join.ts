@@ -1,23 +1,33 @@
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
 import { disposeBoth, disposeNone } from '../utils/disposable.js'
-import { curry2, curry3, op } from '../utils/function.js'
+import { curry2, curry3 } from '../utils/function.js'
 
-export const join = <A>(stream: IStream<IStream<A>>): IStream<A> =>
-  joinConcurrentlyMap(Number.POSITIVE_INFINITY, stream)
+const identity = <T>(x: T): T => x
+
+/**
+ * Flatten a stream of streams, running every inner concurrently
+ *
+ * stream of streams: -A--B--|
+ *           A:       -a-b---c|
+ *           B:          -d-e-|
+ * join:              -a-b-d-e-c|
+ */
+export const join = <A>(stream: IStream<IStream<A>>): IStream<A> => joinConcurrently(Number.POSITIVE_INFINITY, stream)
 
 export const joinMap: IJoinMapCurry = curry2((f, source) => joinMapConcurrently(f, Number.POSITIVE_INFINITY, source))
 
-export const joinConcurrentlyMap: IMergeConcurrentlyMapCurry = curry2((concurrency, stream) =>
-  joinMapConcurrently(op, concurrency, stream)
+/**
+ * Flatten a stream of streams, running at most `concurrency` inners at once;
+ * further inners queue until a running one ends
+ */
+export const joinConcurrently: IJoinConcurrentlyCurry = curry2((concurrency, stream) =>
+  joinMapConcurrently(identity, concurrency, stream)
 )
 
-export const joinMapConcurrently: IMergeMapConcurrentlyCurry = curry3(
+export const joinMapConcurrently: IJoinMapConcurrentlyCurry = curry3(
   (f, concurrency, source) => new JoinMapConcurrently(f, concurrency, source)
 )
 
-/**
- * Stream that flattens a stream of streams with concurrency control
- */
 class JoinMapConcurrently<A, B> implements IStream<B> {
   constructor(
     readonly f: (a: A) => IStream<B>,
@@ -34,6 +44,7 @@ class JoinMapConcurrently<A, B> implements IStream<B> {
 
 class JoinSink<A, B> implements ISink<A>, Disposable {
   sourceEnded = false
+  ended = false
   disposed = false
   readonly current: InnerSink<B>[] = []
   readonly pending: A[] = []
@@ -46,7 +57,7 @@ class JoinSink<A, B> implements ISink<A>, Disposable {
   ) {}
 
   event(time: ITime, x: A): void {
-    if (this.disposed) return
+    if (this.disposed || this.ended) return
     if (this.current.length < this.concurrency) {
       this.startInner(time, x)
     } else {
@@ -55,56 +66,53 @@ class JoinSink<A, B> implements ISink<A>, Disposable {
   }
 
   startInner(time: ITime, value: A): void {
+    const innerSink = new InnerSink(this, this.sink)
+    let d: Disposable
     try {
-      const innerSink = new InnerSink(this, this.sink)
-      const innerStream = this.f(value)
+      d = this.f(value).run(innerSink, this.scheduler)
+    } catch (error) {
+      this.sink.error(time, error)
+      return
+    }
+    if (innerSink.disposed) {
+      d[Symbol.dispose]()
+    } else {
+      innerSink.disposable = d
       this.current.push(innerSink)
-      const d = innerStream.run(innerSink, this.scheduler)
-      if (innerSink.disposed) {
-        d[Symbol.dispose]()
-      } else {
-        innerSink.disposable = d
-      }
-    } catch (err) {
-      this.sink.error(time, err)
     }
   }
 
   end(time: ITime): void {
-    if (this.disposed) return
+    if (this.disposed || this.ended) return
     this.sourceEnded = true
-    this.checkEnd(time)
+    if (this.current.length === 0) this.finish(time)
   }
 
   error(time: ITime, e: unknown): void {
-    // Don't set active = false - allow stream to continue after error
+    if (this.disposed) return
     this.sink.error(time, e)
   }
 
   endInner(time: ITime, inner: InnerSink<B>): void {
+    if (this.disposed || this.ended) return
     const i = this.current.indexOf(inner)
-    if (i >= 0) {
-      this.current.splice(i, 1)
-    }
+    if (i >= 0) this.current.splice(i, 1)
     inner[Symbol.dispose]()
 
-    if (this.pending.length > 0) {
+    while (this.pending.length > 0 && this.current.length < this.concurrency) {
       this.startInner(time, this.pending.shift()!)
-    } else if (this.sourceEnded && this.current.length === 0) {
-      this.sink.end(time)
     }
+    if (this.sourceEnded && this.current.length === 0) this.finish(time)
   }
 
-  checkEnd(time: ITime): void {
-    if (this.current.length === 0) {
-      this.sink.end(time)
-    }
+  finish(time: ITime): void {
+    this.ended = true
+    this.sink.end(time)
   }
 
   [Symbol.dispose](): void {
     if (this.disposed) return
     this.disposed = true
-    this.sourceEnded = true
     this.pending.length = 0
     const current = this.current.slice()
     this.current.length = 0
@@ -148,12 +156,12 @@ export interface IJoinMapCurry {
   <A, B>(f: (a: A) => IStream<B>): (source: IStream<A>) => IStream<B>
 }
 
-export interface IMergeConcurrentlyMapCurry {
+export interface IJoinConcurrentlyCurry {
   <A>(concurrency: number, stream: IStream<IStream<A>>): IStream<A>
   <A>(concurrency: number): (stream: IStream<IStream<A>>) => IStream<A>
 }
 
-export interface IMergeMapConcurrentlyCurry {
+export interface IJoinMapConcurrentlyCurry {
   <A, B>(f: (a: A) => IStream<B>, concurrency: number, stream: IStream<A>): IStream<B>
   <A, B>(f: (a: A) => IStream<B>, concurrency: number): (stream: IStream<A>) => IStream<B>
   <A, B>(f: (a: A) => IStream<B>): (concurrency: number) => (stream: IStream<A>) => IStream<B>

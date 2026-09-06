@@ -1,21 +1,3 @@
-import type { ISink, ITime } from '../stream/index.js'
-
-export function tryEvent<T>(sink: ISink<T>, time: ITime, value: T): void {
-  try {
-    sink.event(time, value)
-  } catch (e: unknown) {
-    sink.error(time, e)
-  }
-}
-
-export function tryEnd(sink: ISink<unknown>, time: ITime): void {
-  try {
-    sink.end(time)
-  } catch (e: unknown) {
-    sink.error(time, e)
-  }
-}
-
 /**
  * Immutably append an element to an array
  * Optimized for small arrays (common case for multicast)
@@ -23,7 +5,6 @@ export function tryEnd(sink: ISink<unknown>, time: ITime): void {
 export function append<T>(array: readonly T[], element: T): readonly T[] {
   const len = array.length
 
-  // Optimize for common cases (0-3 elements)
   switch (len) {
     case 0:
       return [element]
@@ -35,7 +16,6 @@ export function append<T>(array: readonly T[], element: T): readonly T[] {
       return [array[0], array[1], array[2], element]
   }
 
-  // For 4+ elements, manual copy is most predictable
   const result = new Array(len + 1)
   for (let i = 0; i < len; i++) {
     result[i] = array[i]
@@ -52,7 +32,6 @@ export function remove<T>(array: readonly T[], index: number): readonly T[] {
   const len = array.length
   if (index < 0 || index >= len) return array
 
-  // Optimize for common cases (1-4 elements)
   switch (len) {
     case 1:
       return []
@@ -70,7 +49,6 @@ export function remove<T>(array: readonly T[], index: number): readonly T[] {
             : [array[0], array[1], array[2]]
   }
 
-  // For 5+ elements, manual copy for predictable performance
   const result = new Array(len - 1)
   for (let i = 0; i < index; i++) {
     result[i] = array[i]

@@ -1,8 +1,10 @@
 import type { IScheduler, ISink, IStream } from '../types.js'
 import { disposeWith } from '../utils/disposable.js'
+import { tryEvent } from '../utils/sink.js'
 
 /**
- * Stream that emits the resolved value of a promise
+ * Stream that emits the resolved value of a promise, then ends.
+ * A rejection is a stream failure: error then end.
  */
 class FromPromise<T> implements IStream<T> {
   constructor(readonly promise: Promise<T>) {}
@@ -14,12 +16,8 @@ class FromPromise<T> implements IStream<T> {
       value => {
         if (disposed) return
         const time = scheduler.time()
-        // A downstream throw would otherwise vanish as an unhandled rejection;
-        // end is delivered in finally even if the error handler throws too.
         try {
-          sink.event(time, value)
-        } catch (error) {
-          sink.error(time, error)
+          tryEvent(sink, time, value)
         } finally {
           sink.end(time)
         }

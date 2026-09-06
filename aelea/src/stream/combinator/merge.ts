@@ -48,12 +48,6 @@ export function merge<T extends readonly unknown[]>(
   return new Merge(sourceList as readonly IStream<T[number]>[])
 }
 
-/**
- * Coordinates end/disposal across the merged sources. Values bypass this and
- * flow straight from each MergeInnerSink to the downstream sink — merge needs
- * no per-value index or latest-value bookkeeping (unlike combine/zip), so the
- * IndexSink indirection is avoided on the hot path.
- */
 class MergeSink<A> {
   constructor(
     readonly sink: ISink<A>,

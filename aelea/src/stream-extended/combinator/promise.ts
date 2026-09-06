@@ -1,4 +1,4 @@
-import { disposeBoth, type IScheduler, type ISink, type IStream, type ITime } from '../../stream/index.js'
+import { disposeBoth, type IScheduler, type ISink, type IStream, type ITime, tryEvent } from '../../stream/index.js'
 
 export enum PromiseStatus {
   DONE,
@@ -11,9 +11,6 @@ export type PromiseStatePending = { status: PromiseStatus.PENDING }
 export type PromiseStateError = { status: PromiseStatus.ERROR; error: unknown }
 export type PromiseState<T> = PromiseStateDone<T> | PromiseStatePending | PromiseStateError
 
-// PENDING carries no per-event data, so a single shared instance suffices
-// across every sink and every fresh wave — saves an allocation each time a
-// previously-empty sink receives a new in-flight promise.
 const PENDING_STATE: PromiseStatePending = { status: PromiseStatus.PENDING }
 
 /**
@@ -58,15 +55,9 @@ class PromiseStateSink<T> implements ISink<Promise<T>>, Disposable {
       this.sink.event(time, PENDING_STATE)
     }
 
-    // The 2 arrow closures here are the structural floor for `.then(onFul,
-    // onRej)`: each handler needs the per-event `promise` to perform the
-    // identity check at settle time. We trim downstream cost by deferring
-    // the `{ status, value }` allocation into the methods themselves so
-    // stale settlements (the common case under bursty sources) allocate
-    // nothing.
     promise.then(
-      value => this.onResolve(promise, value),
-      error => this.onReject(promise, error)
+      value => this.settle(promise, { status: PromiseStatus.DONE, value }),
+      error => this.settle(promise, { status: PromiseStatus.ERROR, error })
     )
   }
 
@@ -81,35 +72,14 @@ class PromiseStateSink<T> implements ISink<Promise<T>>, Disposable {
 
   [Symbol.dispose](): void {
     this.disposed = true
-    // Promises can't be cancelled, so any in-flight `.then` callbacks will
-    // still run. Clearing `latestPromise` makes them fail the identity
-    // check and emit nothing post-dispose.
     this.latestPromise = null
   }
 
-  private onResolve(promise: Promise<T>, value: T): void {
+  private settle(promise: Promise<T>, result: PromiseState<T>): void {
     if (this.disposed || promise !== this.latestPromise) return
     this.isPending = false
     const time = this.scheduler.time()
-    // These handlers run in a bare promise callback with no rejection handler
-    // attached — a downstream throw would vanish as an unhandled rejection.
-    try {
-      this.sink.event(time, { status: PromiseStatus.DONE, value })
-    } catch (error) {
-      this.sink.error(time, error)
-    }
-    if (this.sourceEnded) this.sink.end(time)
-  }
-
-  private onReject(promise: Promise<T>, error: unknown): void {
-    if (this.disposed || promise !== this.latestPromise) return
-    this.isPending = false
-    const time = this.scheduler.time()
-    try {
-      this.sink.event(time, { status: PromiseStatus.ERROR, error })
-    } catch (err) {
-      this.sink.error(time, err)
-    }
+    tryEvent(this.sink, time, result)
     if (this.sourceEnded) this.sink.end(time)
   }
 }

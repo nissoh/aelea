@@ -1,10 +1,5 @@
 import { just } from '../source/just.js'
 import type { IOps, ISink, IStream } from '../types.js'
-import { op } from './function.js'
-
-export function maybeOps<A, B>(a?: IOps<A, B>) {
-  return a ? a : op
-}
 
 export function toStream<T>(maybeStream: T | IStream<T>): IStream<T> {
   return isStream(maybeStream) ? maybeStream : just(maybeStream)

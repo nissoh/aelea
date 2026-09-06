@@ -1,9 +1,10 @@
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
-import { disposeBoth, disposeNone } from '../utils/disposable.js'
+import { disposeNone } from '../utils/disposable.js'
 import { curry2 } from '../utils/function.js'
 
 /**
- * When stream ends, continue with values from another stream
+ * When stream ends, continue with values from another stream. A continuation
+ * that cannot be produced is a stream failure: error then end.
  *
  * streamA:         -a-b-c|
  * streamB:               -x-y-z->
@@ -11,9 +12,6 @@ import { curry2 } from '../utils/function.js'
  */
 export const continueWith: IContinueWithCurry = curry2((f, s) => new ContinueWith(f, s))
 
-/**
- * Stream that continues with values from another stream when the first ends
- */
 class ContinueWith<A, B> implements IStream<A | B> {
   constructor(
     readonly f: (time: ITime) => IStream<B>,
@@ -21,15 +19,21 @@ class ContinueWith<A, B> implements IStream<A | B> {
   ) {}
 
   run(sink: ISink<A | B>, scheduler: IScheduler): Disposable {
-    const continueSinkDisposable = new ContinueWithSink(sink, scheduler, this.f)
-    const sourceDisposable = this.source.run(continueSinkDisposable, scheduler)
-
-    return disposeBoth(sourceDisposable, continueSinkDisposable)
+    const continueSink = new ContinueWithSink(sink, scheduler, this.f)
+    const source = this.source.run(continueSink, scheduler)
+    if (continueSink.sourceEnded) {
+      source[Symbol.dispose]()
+    } else {
+      continueSink.source = source
+    }
+    return continueSink
   }
 }
 
 class ContinueWithSink<A, B> implements ISink<A>, Disposable {
-  disposable: Disposable = disposeNone
+  source: Disposable = disposeNone
+  next: Disposable = disposeNone
+  sourceEnded = false
   disposed = false
 
   constructor(
@@ -47,22 +51,28 @@ class ContinueWithSink<A, B> implements ISink<A>, Disposable {
   }
 
   end(time: ITime): void {
-    if (this.disposed) return
+    if (this.disposed || this.sourceEnded) return
+    this.sourceEnded = true
+    const source = this.source
+    this.source = disposeNone
+    source[Symbol.dispose]()
     try {
-      const nextStream = this.f(time)
-      this.disposable = nextStream.run(this.sink, this.scheduler)
+      this.next = this.f(time).run(this.sink, this.scheduler)
     } catch (error) {
       this.sink.error(time, error)
+      this.sink.end(time)
     }
   }
 
   [Symbol.dispose](): void {
     if (this.disposed) return
     this.disposed = true
-
-    const d = this.disposable
-    this.disposable = disposeNone
-    d[Symbol.dispose]()
+    const source = this.source
+    const next = this.next
+    this.source = disposeNone
+    this.next = disposeNone
+    source[Symbol.dispose]()
+    next[Symbol.dispose]()
   }
 }
 

@@ -1,4 +1,5 @@
 import type { ITask, ITime } from '../types.js'
+import { reportUncaught } from '../utils/sink.js'
 
 export function runTaskGuarded(task: ITask, time: ITime): void {
   try {
@@ -6,10 +7,8 @@ export function runTaskGuarded(task: ITask, time: ITime): void {
   } catch (err) {
     try {
       task.error(time, err)
-    } catch (err2) {
-      queueMicrotask(() => {
-        throw err2
-      })
+    } catch (fault) {
+      reportUncaught(fault)
     }
   }
 }

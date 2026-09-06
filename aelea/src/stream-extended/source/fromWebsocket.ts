@@ -8,7 +8,8 @@ import {
   type ITime,
   nullSink,
   propagateEndTask,
-  tap
+  tap,
+  tryEvent
 } from '../../stream/index.js'
 import { propagateErrorEndTask } from '../../stream/scheduler/PropagateTask.js'
 
@@ -83,12 +84,15 @@ class FromWebSocket<I, O> implements IStream<O> {
     const onMessage = (msg: MessageEvent) => {
       if (disposed) return
 
+      const time = scheduler.time()
+      let data: O
       try {
-        sink.event(scheduler.time(), deserializer(msg.data))
+        data = deserializer(msg.data)
       } catch (parseError) {
-        // sink.error is applicative — surface the bad frame without tearing the connection down.
-        sink.error(scheduler.time(), new Error(`Parse error: ${parseError}`))
+        sink.error(time, new Error(`Parse error: ${parseError}`))
+        return
       }
+      tryEvent(sink, time, data)
     }
 
     const onOpen = () => {

@@ -1,5 +1,6 @@
 import { propagateRunTask } from '../scheduler/PropagateTask.js'
 import type { IScheduler, ISink, IStream, ITime } from '../types.js'
+import { tryEvent } from '../utils/sink.js'
 
 /**
  * Emits the current time after a delay, then ends
@@ -14,12 +15,12 @@ class Wait implements IStream<ITime> {
   constructor(readonly delay: ITime) {}
 
   run(sink: ISink<ITime>, scheduler: IScheduler): Disposable {
-    const task = propagateRunTask(sink, emit)
+    const task = propagateRunTask(sink, emitTime)
     return this.delay > 0 ? scheduler.delay(task, this.delay) : scheduler.asap(task)
   }
 }
 
-function emit(time: ITime, sink: ISink<ITime>) {
-  sink.event(time, time)
+export function emitTime(time: ITime, sink: ISink<ITime>) {
+  tryEvent(sink, time, time)
   sink.end(time)
 }

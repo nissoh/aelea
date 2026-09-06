@@ -1,5 +1,3 @@
-import type { ISink, ITime } from '../types.js'
-
 /**
  * Create a Disposable that disposes the provided value using a dispose function
  */
@@ -29,7 +27,7 @@ export const disposeBoth = (d1: Disposable, d2: Disposable): Disposable => ({
   }
 })
 
-export function isDisposable(value: any): value is Disposable {
+function isDisposable(value: any): value is Disposable {
   return value && typeof value[Symbol.dispose] === 'function'
 }
 
@@ -92,15 +90,5 @@ class DisposeOnce implements Disposable {
         this.disposable = undefined
       }
     }
-  }
-}
-
-// Try to dispose the disposable.  If it throws, send
-// the error to sink.error with the provided Time value
-export const tryDispose = (time: ITime, disposable: Disposable, sink: ISink<unknown>): void => {
-  try {
-    disposable[Symbol.dispose]()
-  } catch (e) {
-    sink.error(time, e)
   }
 }

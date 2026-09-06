@@ -1,10 +1,8 @@
 import { propagateErrorEndTask } from '../../stream/scheduler/PropagateTask.js'
 import type { IScheduler, ISink, IStream } from '../../stream/types.js'
 import { toDisposable } from '../../stream/utils/disposable.js'
+import { tryEvent } from '../../stream/utils/sink.js'
 
-/**
- * Stream that creates values from a callback-based API
- */
 class FromCallback<T, FnArgs extends any[] = T[]> implements IStream<T> {
   constructor(
     readonly callbackFunction: (cb: (...args: FnArgs) => any) => any,
@@ -15,12 +13,15 @@ class FromCallback<T, FnArgs extends any[] = T[]> implements IStream<T> {
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
     try {
       const maybeDisposable = this.callbackFunction.call(this.context, (...args: FnArgs) => {
+        const time = scheduler.time()
+        let value: T
         try {
-          const value = this.mapFn(...args)
-          sink.event(scheduler.time(), value)
+          value = this.mapFn(...args)
         } catch (error) {
-          sink.error(scheduler.time(), error)
+          sink.error(time, error)
+          return
         }
+        tryEvent(sink, time, value)
       })
 
       return toDisposable(maybeDisposable)
@@ -35,6 +36,7 @@ class FromCallback<T, FnArgs extends any[] = T[]> implements IStream<T> {
  *
  * The callback function is invoked once and can emit multiple values over time.
  * Returns disposable/cleanup function if provided by the callback setup.
+ * A setup that throws is a stream failure: error then end.
  *
  * Example with DOM events:
  * setup:    addEventListener('click', cb)

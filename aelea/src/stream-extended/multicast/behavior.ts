@@ -1,4 +1,12 @@
-import { disposeWith, type IOps, type IScheduler, type ISink, type IStream, op } from '../../stream/index.js'
+import {
+  disposeWith,
+  type IOps,
+  type IScheduler,
+  type ISink,
+  type IStream,
+  type ITime,
+  op
+} from '../../stream/index.js'
 import { stream } from '../source/stream.js'
 import type { IBehavior, IComposeBehavior } from '../types.js'
 import { type FanInContributor, FanInSink } from './sink.js'
@@ -19,13 +27,9 @@ class BehaviorSource<T> implements IStream<T> {
   samplers: IStream<T>[] = []
   subscribers: SubscriberInfo<T>[] = []
 
-  // Registration is revocable: disposing it removes the sampler and unwires
-  // it from every live subscriber, so remounted views do not accumulate dead
-  // samplers on a long-lived behavior.
   sample(samplerSource: IStream<T>): Disposable {
     this.samplers.push(samplerSource)
 
-    // Hot-wire to existing subscribers
     for (const subscriber of this.subscribers) {
       this.wire(subscriber, samplerSource)
     }
@@ -49,30 +53,56 @@ class BehaviorSource<T> implements IStream<T> {
     if (subscriber.fanIn.closed || subscriber.wires.has(samplerSource)) return
     const contributor = subscriber.fanIn.attach()
     const subscription = samplerSource.run(contributor, subscriber.scheduler)
+    if (subscriber.fanIn.closed) {
+      subscription[Symbol.dispose]()
+      return
+    }
     subscriber.wires.set(samplerSource, { contributor, subscription })
   }
 
+  private release(subscriber: SubscriberInfo<T>): void {
+    const index = this.subscribers.indexOf(subscriber)
+    if (index > -1) this.subscribers.splice(index, 1)
+    for (const wire of subscriber.wires.values()) {
+      wire.subscription[Symbol.dispose]()
+      wire.contributor[Symbol.dispose]()
+    }
+    subscriber.wires.clear()
+  }
+
   run(sink: ISink<T>, scheduler: IScheduler): Disposable {
-    // Fan-in: the consumer ends only when ALL its samplers have ended — one
-    // completing sampler no longer terminates a sink others still feed.
-    const subscriber: SubscriberInfo<T> = { scheduler, fanIn: new FanInSink(sink), wires: new Map() }
+    const subscriber: SubscriberInfo<T> = {
+      scheduler,
+      fanIn: new FanInSink(new ReleaseOnEnd(sink, () => this.release(subscriber))),
+      wires: new Map()
+    }
     this.subscribers.push(subscriber)
 
     for (const sampler of this.samplers) {
       this.wire(subscriber, sampler)
     }
 
-    return disposeWith(() => {
-      const index = this.subscribers.indexOf(subscriber)
-      if (index > -1) {
-        this.subscribers.splice(index, 1)
-      }
-      for (const wire of subscriber.wires.values()) {
-        wire.subscription[Symbol.dispose]()
-        wire.contributor[Symbol.dispose]()
-      }
-      subscriber.wires.clear()
-    })
+    return disposeWith(() => this.release(subscriber))
+  }
+}
+
+class ReleaseOnEnd<T> implements ISink<T> {
+  constructor(
+    readonly sink: ISink<T>,
+    readonly release: () => void
+  ) {}
+
+  event(time: ITime, value: T): void {
+    this.sink.event(time, value)
+  }
+
+  error(time: ITime, error: unknown): void {
+    this.sink.error(time, error)
+  }
+
+  end(time: ITime): void {
+    this.release()
+    this.sink.end(time)
   }
 }
 
@@ -83,13 +113,8 @@ export function behavior<A, B = A>(): IBehavior<A, B> {
     return (source: IStream<A>): IStream<A> => {
       const [s0, s1] = tether(source)
 
-      // Apply operations with proper typing
       const transformed = (op as any)(s1, ...ops)
 
-      // Registration follows the primary's subscription lifetime: the first
-      // mount registers the sampler, the last unmount revokes it. The count
-      // must survive double-disposal and a throwing source, or the 0→1
-      // registration edge desyncs permanently.
       let subscriptions = 0
       let registration: Disposable | null = null
 
@@ -123,6 +148,5 @@ export function behavior<A, B = A>(): IBehavior<A, B> {
     }
   }) as IComposeBehavior<A, B>
 
-  // Return behavior source (outputs O) and compose function
   return [behaviorSource, compose]
 }

@@ -6,6 +6,5 @@ export {
   propagateEndTask,
   propagateErrorEndTask,
   propagateRunEventTask,
-  propagateRunTask,
-  runTask
+  propagateRunTask
 } from './PropagateTask.js'

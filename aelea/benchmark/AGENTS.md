@@ -99,6 +99,26 @@ The `runStream` helper in `lib/runtime.ts` reuses a **single sink instance**
 across iterations. If a refactor breaks this fast path (e.g. by closing over
 sink state from outside), bench numbers crater immediately. Watch for it.
 
+## Two cheap-looking constructs that are not
+
+Both measured on `map · filter · reduce :: @aelea` (1M elements) while
+re-shaping `ReduceSink` (2026-09); each alone cost ~25% and together ~60%.
+
+- **A local assigned inside `try` and read after it.**
+  `let next; try { next = f(acc, x) } catch {…}; this.acc = next` costs
+  ~0.85 ms per million events over `try { this.acc = f(this.acc, x) }`.
+  Assign the field inside the `try`.
+- **A tiny per-event method call.** `this.emitSeed(time)` whose body is a
+  two-line guard costs ~0.7 ms per million events over the same guard
+  inlined at the call site. Keep the method for cold paths (`error`, `end`,
+  the seed task) and inline it in `event`.
+
+And a measurement trap: a full `bun run bench` carries ±10% JIT-order noise
+on sub-µs groups — `@most/core merge × 2` moved 1.3 → 2.2 µs between two full
+runs with no code change. A regression that only shows in the full run and
+not in the standalone suite (`bun run benchmark/suites/<suite>.ts`, A/B
+interleaved) is noise.
+
 ## Commit conventions
 
 One refactor, one commit. Commit message body must include:
