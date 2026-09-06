@@ -1,5 +1,15 @@
 # aelea
 
+## 5.0.1
+
+### Patch Changes
+
+#### Errors never cross a tether
+
+A state folded from a child's change output, where that output derives from the state through an async combinator, cycled a single error forever under 5.0: the error went down to the child, came back up the tether into the fold, and re-entered the shared root after its synchronous re-entrancy guard had reset. 4.14 bounded this with a per-error-instance memo that 5.0 removed on purpose.
+
+The tether now carries productions only. An error on a primary's source is reported on the primary's own path and never on the tether, and a component reports an error in producing one of its outputs on its own error channel (the render error path) instead of dropping it. Every fault surfaces exactly once and a change edge can no longer carry an upstream fault back into the state it derived from.
+
 ## 5.0.0
 
 ### Major Changes
