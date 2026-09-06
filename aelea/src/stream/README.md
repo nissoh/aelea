@@ -75,6 +75,10 @@ A shared stream (`multicast`, `state`, `tether`) is one shared run of its source
 
 
 
+### Errors never cross a tether
+
+A tether carries what its primaries produce. An error on a primary's source is reported on the primary's own path and never on the tether: a change edge that also carried upstream faults would feed a state's error back into the state it derived from and cycle it forever. A component reports an error in producing one of its outputs on its own error channel (the render error path), so every fault surfaces exactly once.
+
 ## Stream Contract
 
 ### Source Responsibilities
