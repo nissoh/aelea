@@ -13,10 +13,13 @@ import {
   type IStream,
   joinConcurrently,
   just,
+  merge,
+  never,
   nowWith,
   nullSink,
   periodic,
   reduce,
+  sampleMap,
   since,
   switchLatest,
   until,
@@ -413,5 +416,48 @@ describe('applicative errors and terminal failures', () => {
     src.push().end(0)
     await settle(40)
     expect(log).toEqual(['value:1', 'error', 'value:2', 'end'])
+  })
+})
+
+describe('errors never cross a tether', () => {
+  test('a state fed back by a tethered async derivation of itself delivers a seeded error once', async () => {
+    const scheduler = createDefaultScheduler()
+    const seed = pushSource<number>()
+    const [change, changeTether] = behavior<number>()
+    const root = state(
+      0,
+      reduce((acc: number, x: number) => acc + x, 0, merge(seed.source, change))
+    )
+    const childOutput = awaitPromises(sampleMap((v: number) => Promise.resolve(v), root, never))
+    const primary = changeTether()(childOutput)
+
+    const rootSeen = capture<number>()
+    const primarySeen = capture<number>()
+    root.run(sinkOf(rootSeen), scheduler)
+    primary.run(sinkOf(primarySeen), scheduler)
+    await settle()
+
+    seed.push().error(0, new Error('seed'))
+    await settle(50)
+
+    expect(rootSeen.errors).toHaveLength(1)
+    expect(primarySeen.errors).toHaveLength(1)
+  })
+
+  test('an error on the primary source reaches the primary sink, not the tether', () => {
+    const scheduler = createDefaultScheduler()
+    const src = pushSource<number>()
+    const [primary, tethered] = tether(src.source)
+    const p = capture<number>()
+    const t = capture<number>()
+    primary.run(sinkOf(p), scheduler)
+    tethered.run(sinkOf(t), scheduler)
+
+    src.push().event(0, 1)
+    src.push().error(0, new Error('upstream'))
+    expect(p.values).toEqual([1])
+    expect(t.values).toEqual([1])
+    expect(p.errors).toHaveLength(1)
+    expect(t.errors).toHaveLength(0)
   })
 })

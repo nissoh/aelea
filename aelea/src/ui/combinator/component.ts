@@ -21,7 +21,9 @@ class Component<T> implements IStream<ISlottable> {
     const outputSink: ISink<unknown> = {
       event() {},
       end() {},
-      error() {}
+      error(time, err) {
+        sink.error(time, err)
+      }
     }
 
     for (const k in this.outputTethers) {
@@ -49,8 +51,9 @@ class Component<T> implements IStream<ISlottable> {
 /**
  * A component is a function of behaviors, one per declared parameter, that
  * returns its view and the outputs a parent can tether. Output pipelines run
- * for their side effect; their errors already reach the behavior consumers
- * through the tether side, so the primary sink drops them.
+ * for their side effect: values reach the parent through the tether, while
+ * an error in producing an output is reported on the component's own error
+ * channel (the render error path), never on the change edge.
  */
 export const component: IComponentFn = createCallback => outputTethers =>
   new Component(() => {

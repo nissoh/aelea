@@ -37,7 +37,11 @@ import { MulticastSink } from './sink.js'
  *
  * Key behaviors:
  * - Primary stream: Unicast (each subscriber gets independent source subscription)
- * - Tether stream: Multicast that aggregates events from ALL primary subscriptions
+ * - Tether stream: Multicast that aggregates the VALUES of ALL primary
+ *   subscriptions. A tether carries productions only: an error on a primary's
+ *   source is reported on the primary's own path and never crosses to the
+ *   tether, otherwise a change edge would carry an upstream fault back into
+ *   the state it derived from and cycle it forever
  * - Tether ends when the last live primary ends; disposal of a primary is
  *   cancellation, not completion
  * - Once ended the tether is closed: late subscribers receive end
@@ -90,7 +94,6 @@ class PrimarySink<T> implements ISink<T> {
   error(time: ITime, err: unknown): void {
     if (this.dead) return
     this.primarySink.error(time, err)
-    this.tether.error(time, err)
   }
 
   detach(): void {

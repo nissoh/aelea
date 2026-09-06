@@ -73,6 +73,8 @@ A consumer that throws from its own `error()` or `end()` handler has no in-band 
 
 A shared stream (`multicast`, `state`, `tether`) is one shared run of its source. Disposal of the last subscriber cancels that run and a later subscriber starts a fresh one. The source ending closes the shared stream for good: late subscribers receive `end` (after the replayed value, for `state`).
 
+
+
 ## Stream Contract
 
 ### Source Responsibilities
