@@ -1,5 +1,33 @@
 # aelea
 
+## 5.0.0
+
+### Major Changes
+
+#### Stream core — release on end, closed shared streams, applicative error routing
+
+Every stream releases what it holds the moment it forwards `end`: `switchLatest` disposes an ended inner, `until`/`since` release their signal, `continueWith` releases the ended source, `zip` ends once and releases its siblings, `tether` clears ended primaries, and a behavior drops its wires when its fan-in closes. A shared stream (`multicast`, `state`, `tether`) is one shared run of its source: disposing the last subscriber cancels it and a later subscriber restarts it, but the source **ending closes it** — late subscribers receive `end` (after the replayed value for `state`) instead of a silent re-run of the source, and a throwing first run rolls back so the next subscriber starts it.
+
+The applicative-versus-terminal rule is uniform. One-shot sources report a consumer throw on the error channel and still end; `fromIterable` resumes after a consumer throw and fails terminally on an iterator throw; `debounce` keeps its pending value across an error; `awaitPromises` queues errors in source order; `reduce` always emits its seed first; `at` treats a past target as due. A subscriber that throws from its own `error` or `end` handler is reported out of band through `reportUncaught` (`reportError` where available) and never fed back into the pipeline, which also removes the per-instance error memo that swallowed legitimate re-emissions. `switchLatest` and `join` recover from an inner that fails to start.
+
+**Breaking.** `joinConcurrentlyMap` is `joinConcurrently`; `curry4`, `isDisposable`, `tryDispose`, `maybeOps` and `runTask` are gone; `fetchJson` left the stream package. `tryEvent`, `tryError`, `tryEnd` and `reportUncaught` are exported.
+
+#### UI core — one way to the element, one mount walk, one channel semantic
+
+A node is now `{ kind, recipe, mount, disposable }`: the recipe is the immutable compose-time record shared by every instance and by the static brand; `mount` is the port that resolves to the element (`onMounted(node.mount)` as a stream); `disposable` is the removal handle. The descriptor write-back and every duck-walk to `element.native` are gone — `nodeEvent`, the element observers and `$wrapNativeElement` go through the port, and a shared manifest mounted in two slots yields two elements instead of stealing one.
+
+The traversal of a node lives once in `ui/backend.ts`; the browser renderer and the takumi observer are backends of it, so slot semantics, segment ordering, teardown and reactive-channel precedence are shared by construction. Static children flatten into their parent (no slot bookkeeping, torn down with the parent's element) and a dynamic node is one fused instance plus its emission task; `nodeEvent` is a single purpose-built sink. Mount throughput improved 1.2–1.5× across every render shape on top of the 4.14 engine, and flat lists now sit within 2–6% of vanilla DOM.
+
+Every reactive channel has one rule: it **owns the keys of its latest emission** — keys it stops emitting are removed, `null` removes them all, the previous emission is the record of ownership (emitted objects are treated as immutable). This replaces the three earlier semantics. Dynamic `$text` binds in the parent's mount pass, so a shared source is no longer missed by text slots. `effectRun` has its own channel. All schedulers are configurations of one guarded core with asap-before-delay ordering and `idle()`; `createSyncScheduler` mounts inline for tests.
+
+**Breaking.** `styleInline` is removed (use `styleBehavior`, one decorator per source); `attrBehavior` follows the ownership rule, so in-frame patches no longer merge and `null` clears; `component.ports` is removed (the positional form is arity-driven: declare every behavior positionally); `INode.element` and `.native` are gone; `makeMutator` callbacks receive the recipe; `aelea/ui-renderer-dom` exports the renderer only (`render`, `nodeEvent`, `fromEventTarget`, `createStyleRule`) and `aelea/ui` remains the app entry; the router reads `window` at subscription time.
+
+#### Takumi renderer — `@takumi-rs/core` 2
+
+The renderer targets takumi 2 with its real types. Every takumi render option passes straight through (`fonts`, `images`, `css`, `lossless`, `dithering`, `fontFamilies`, `lang`, `signal`, …), `signal` also cancels the settle wait, `renderToSvg` and `settle` are exported, and containers carry their `tagName`. The tree mounts through the shared walk into a live-record observer and settles on the headless scheduler's `idle()`; a throwing task no longer drops its batch or hangs the render.
+
+**Breaking.** `fetchedResources` is takumi's `images`; `createSettleScheduler` and `ISettleScheduler` are gone (`createHeadlessScheduler` has `idle()`); with no `format` the output is PNG, takumi's default.
+
 ## 4.14.0
 
 ### Minor Changes
