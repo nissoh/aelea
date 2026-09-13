@@ -1,5 +1,17 @@
 # aelea
 
+## 5.0.2
+
+### Patch Changes
+
+#### `motion` stays stable when the host is throttled
+
+5.0 integrated springs with the real elapsed time, clamped to 1/30s. Explicit integration of a spring is only stable below `2 / damping` seconds, so a stiff preset diverged the moment timers were throttled: `MOTION_SNAP` (damping 80, used by `$Slider`) is unstable above 25ms, and a hidden tab hands out 1000ms, sending values to ~1e144. Springs now integrate in fixed 1/60s steps and consume the real elapsed time, so they keep their tuned feel and wall-clock duration at any callback rate and cannot diverge. Catch-up is capped at one second of simulated time per tick, so an animation started in a hidden tab finishes on the first throttled tick instead of sitting half-way.
+
+#### `$ButtonToggle` — selected outline uses the message colour
+
+The selected option's inset outline changes from `palette.primary` to `palette.message`.
+
 ## 5.0.1
 
 ### Patch Changes
