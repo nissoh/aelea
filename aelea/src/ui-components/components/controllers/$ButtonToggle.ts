@@ -79,7 +79,7 @@ export const $ButtonToggle = <T>({
             map(
               selectedOpt =>
                 selectedOpt === opt
-                  ? { boxShadow: `0px 0px 0 1px ${palette.primary} inset`, pointerEvents: 'none' }
+                  ? { boxShadow: `0px 0px 0 1px ${palette.message} inset`, pointerEvents: 'none' }
                   : { color: palette.foreground },
               value
             )
