@@ -20,15 +20,27 @@ export const MOTION_WOBBLY = { stiffness: 180, damping: 12, precision: 0.01 }
 export const MOTION_STIFF = { stiffness: 210, damping: 20, precision: 0.01 }
 export const MOTION_SNAP = { stiffness: 800, damping: 80, precision: 0.01 }
 
-const FRAME_MS = 1000 / 60
-const MAX_STEP_S = 1 / 30
+const STEP_MS = 1000 / 60
+const STEP_S = STEP_MS / 1000
+
+// A hidden tab throttles timers to a second or more, and a busy frame can
+// arrive just as late. Simulate at most this much per tick: enough that a UI
+// spring finishes within the first throttled tick — so it is settled, not
+// half-way, when the tab is looked at again — without turning a long absence
+// into an unbounded burst of integration.
+const MAX_CATCHUP_MS = 1000
 
 /**
- * Animates value changes with spring physics. Steps on a frame-length delay,
- * which means "the next frame" on every scheduler (paint tasks scheduled
- * during a paint flush run in the same frame by contract, so they cannot
- * step an animation). Integration uses the real elapsed time, clamped, so a
- * late frame does not launch the spring.
+ * Animates value changes with spring physics, stepping on a frame-length
+ * delay (paint tasks scheduled during a paint flush run in the same frame by
+ * contract, so they cannot step an animation).
+ *
+ * Integration runs in fixed 1/60s steps and consumes the real elapsed time,
+ * so the spring keeps its tuned feel and its wall-clock duration whatever
+ * rate the host calls back at. The step is fixed because explicit
+ * integration of a spring is only stable below `2 / damping` seconds:
+ * `MOTION_SNAP` (damping 80) diverges above 25ms, which a throttled
+ * background tab hands out routinely.
  */
 export const motion: IMotionCurry = curry2(
   (config: Partial<MotionConfig>, position: IStream<number>): IStream<number> => {
@@ -56,7 +68,8 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
   animating = false
   initialized = false
   sourceEnded = false
-  lastTime = -1
+  lastTime = 0
+  accumulator = 0
   pendingTask: Disposable | null = null
 
   constructor(
@@ -80,11 +93,12 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
 
     this.animating = true
     this.lastTime = time
+    this.accumulator = 0
     this.schedule()
   }
 
   schedule(): void {
-    this.pendingTask = this.scheduler.delay(this, FRAME_MS)
+    this.pendingTask = this.scheduler.delay(this, STEP_MS)
   }
 
   error(time: ITime, err: unknown): void {
@@ -110,30 +124,34 @@ class MotionSink extends PropagateTask<number> implements ISink<number> {
 
   runIfActive(time: ITime): void {
     this.pendingTask = null
-    const dt = Math.min(Math.max(time - this.lastTime, 0) / 1000, MAX_STEP_S) || FRAME_MS / 1000
+    this.accumulator = Math.min(this.accumulator + Math.max(time - this.lastTime, 0), MAX_CATCHUP_MS)
     this.lastTime = time
 
-    const delta = this.target - this.position
+    const config = this.config
+    let stepped = false
 
-    if (Math.abs(this.velocity) < this.config.precision && Math.abs(delta) < this.config.precision) {
-      this.position = this.target
-      this.velocity = 0
-      this.animating = false
+    while (this.accumulator >= STEP_MS) {
+      this.accumulator -= STEP_MS
+      const delta = this.target - this.position
 
-      this.sink.event(time, this.target)
+      if (Math.abs(this.velocity) < config.precision && Math.abs(delta) < config.precision) {
+        this.position = this.target
+        this.velocity = 0
+        this.animating = false
+        this.accumulator = 0
 
-      if (this.sourceEnded) {
-        this.sink.end(time)
+        this.sink.event(time, this.target)
+
+        if (this.sourceEnded) this.sink.end(time)
+        return
       }
-      return
+
+      this.velocity += (config.stiffness * delta - config.damping * this.velocity) * STEP_S
+      this.position += this.velocity * STEP_S
+      stepped = true
     }
 
-    const acceleration = this.config.stiffness * delta - this.config.damping * this.velocity
-
-    this.velocity += acceleration * dt
-    this.position += this.velocity * dt
-
-    this.sink.event(time, this.position)
+    if (stepped) this.sink.event(time, this.position)
 
     this.schedule()
   }

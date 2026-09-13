@@ -4,7 +4,17 @@
 
 import { beforeAll, describe, expect, test } from 'bun:test'
 import { dropRoot, freshRoot, installDom, syncScheduler } from '../benchmark/lib/dom-env.js'
-import { delay, disposeWith, type IStream, type ITask, just, map, merge, switchLatest } from '../src/stream/index.js'
+import {
+  delay,
+  disposeWith,
+  fromIterable,
+  type IStream,
+  type ITask,
+  just,
+  map,
+  merge,
+  switchLatest
+} from '../src/stream/index.js'
 import { state } from '../src/stream-extended/index.js'
 import {
   $element,
@@ -16,6 +26,8 @@ import {
   effectRun,
   type I$Node,
   type IStyleCSS,
+  MOTION_NO_WOBBLE,
+  MOTION_SNAP,
   motion,
   nodeEvent,
   onMounted,
@@ -270,5 +282,74 @@ describe('motion', () => {
     expect(values.length).toBeGreaterThan(5)
     expect(values.length).toBeLessThan(200)
     expect(distinct).toBeGreaterThan(5)
+  })
+})
+
+describe('motion under a throttled host', () => {
+  // A hidden tab throttles timers to a second or more. Explicit integration of
+  // a spring is only stable below `2 / damping` seconds, so a variable step
+  // taken straight from the elapsed time diverges for a stiff preset;
+  // MOTION_SNAP (damping 80) is unstable above 25ms.
+  class StepScheduler {
+    now = 0
+    queued: ITask[] = []
+    asap(task: ITask): Disposable {
+      task.run(this.now)
+      return task
+    }
+    paint(task: ITask): Disposable {
+      return this.asap(task)
+    }
+    delay(task: ITask): Disposable {
+      this.queued.push(task)
+      return task
+    }
+    time(): number {
+      return this.now
+    }
+    dayTime(): number {
+      return this.now
+    }
+    advance(ms: number): void {
+      this.now += ms
+      const due = this.queued
+      this.queued = []
+      for (const task of due) task.run(this.now)
+    }
+  }
+
+  const travel = (config: Parameters<typeof motion>[0], tickMs: number) => {
+    const scheduler = new StepScheduler()
+    const seen: number[] = []
+    motion(config, fromIterable([15, 0])).run(
+      { event: (_t, v) => seen.push(v), error() {}, end() {} },
+      scheduler as never
+    )
+    for (let i = 0; i < 400 && scheduler.queued.length > 0; i++) scheduler.advance(tickMs)
+    return { seen, settled: scheduler.queued.length === 0 }
+  }
+
+  for (const [name, config] of [
+    ['MOTION_SNAP', MOTION_SNAP],
+    ['MOTION_NO_WOBBLE', MOTION_NO_WOBBLE],
+    ['a stiff custom spring', { stiffness: 370, damping: 46, precision: 3 }]
+  ] as const) {
+    test(`${name} stays within its travel and settles at one frame per second`, () => {
+      for (const tickMs of [1000 / 60, 1000]) {
+        const { seen, settled } = travel(config, tickMs)
+        const peak = seen.reduce((m, v) => Math.max(m, Math.abs(v)), 0)
+        expect([name, tickMs, settled]).toEqual([name, tickMs, true])
+        expect([name, tickMs, peak <= 15.001]).toEqual([name, tickMs, true])
+        expect(seen[seen.length - 1]).toBe(0)
+      }
+    })
+  }
+
+  test('a throttled tick advances the spring by real elapsed time, not one step', () => {
+    const fast = travel(MOTION_NO_WOBBLE, 1000 / 60).seen.length
+    const throttled = travel(MOTION_NO_WOBBLE, 1000).seen.length
+    // one second of simulated spring per throttled tick, so a hidden tab
+    // finishes the animation instead of leaving it half-way
+    expect(throttled).toBeLessThan(fast / 4)
   })
 })
