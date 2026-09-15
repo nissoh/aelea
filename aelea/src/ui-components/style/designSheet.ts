@@ -2,7 +2,7 @@ import { o } from '../../stream/index.js'
 import { style, stylePseudo } from '../../ui/index.js'
 import { palette, text } from '../../ui-components-theme/index.js'
 
-export const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
+export const isFirefox = typeof navigator !== 'undefined' && navigator.userAgent.toLowerCase().indexOf('firefox') > -1
 
 const customScroll = isFirefox
   ? style({ scrollbarColor: `${palette.foreground} transparent` })

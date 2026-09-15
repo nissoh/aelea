@@ -8,11 +8,13 @@ import {
   switchMap,
   until
 } from '../../stream/index.js'
-import { fromCallback } from '../../stream-extended/index.js'
+import { fromCallback, stream } from '../../stream-extended/index.js'
 import { type ISlottable, onMounted } from '../../ui/index.js'
 import { fromEventTarget } from '../../ui-renderer-dom/event.js'
 
-const documentVisibilityChange = fromEventTarget(document, 'visibilitychange')
+const documentVisibilityChange: IStream<Event> = stream((sink, scheduler) =>
+  fromEventTarget(document, 'visibilitychange').run(sink, scheduler)
+)
 const documentVisible = filter(() => document.visibilityState === 'visible', documentVisibilityChange)
 const documentHidden = filter(() => document.visibilityState === 'hidden', documentVisibilityChange)
 
