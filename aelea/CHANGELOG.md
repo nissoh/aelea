@@ -1,5 +1,25 @@
 # aelea
 
+## 5.1.0
+
+### Minor Changes
+
+#### `$Popover` exposes its open state
+
+`$Popover` emits `open: IStream<boolean>` next to `dismiss`, replayed for late subscribers, so the anchor's owner can style it while the popover is up. Opt-in: existing call sites that tether only `dismiss` are unchanged.
+
+The anchor also carries the ARIA attributes of a control that opens a popup: a live `aria-expanded` that follows the popover, and `aria-haspopup="dialog"` unless the anchor already declares its own value (a `role="menu"` popover keeps `aria-haspopup="menu"`). Style an engaged anchor once with `[aria-expanded="true"]`, or read the `open` output for composite anchors.
+
+#### `$Popover` keeps tall content reachable
+
+On a short window, content taller than the room under its anchor ran off the viewport with no way to reach it: the content is `position: fixed`, so page scroll cannot reveal it. Placement now chooses the side by fit first (below if it fits, above if it fits, else the side with more room), caps the content to the room on that side so it scrolls inside itself, and clamps it inside the viewport, so the above placement never produces a negative top. The cap is measured against the content's uncapped height, so applying it cannot shift the placement, and it never drops below a scrollable minimum on a window too short for either side. The content container is `box-sizing: border-box` so the cap bounds the outer edge, and `overscroll-behavior: contain` so scrolling the popover does not scroll the page.
+
+Content inside a popover now clips at its edges. aelea's nested `$Popover`, `$Tooltip` and `$Dropdown` render in the top layer and are unaffected; a custom absolutely positioned element that is not a popover is clipped.
+
+#### `aelea/ui-components` imports without a DOM
+
+Three module-load reads of `document`, `window` and `navigator` threw outside a browser, so the package could not be imported for server rendering, the takumi image renderer, or a test that imports before installing a DOM. The visibility stream is now created on subscription, and `isDesktopScreen` and `isFirefox` fall back to desktop and not-Firefox when there is no browser. No export changed.
+
 ## 5.0.2
 
 ### Patch Changes
