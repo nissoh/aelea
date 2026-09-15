@@ -17,12 +17,15 @@ import { animationFrame, type IBehavior, multicast, state } from '../../../strea
 import {
   $node,
   attr,
+  attrBehavior,
   component,
   effectRun,
   fromEventTarget,
   type I$Node,
   type INode,
   type INodeCompose,
+  type IRecipe,
+  makeMutator,
   nodeEvent,
   style,
   styleBehavior
@@ -30,7 +33,7 @@ import {
 import { colorWeight, palette } from '../../../ui-components-theme/index.js'
 import { $column } from '../../elements/$elements.js'
 import { observer } from '../../utils/elementObservers.js'
-import { showPopover } from '../../utils/popover.js'
+import { placeFloating, showPopover } from '../../utils/popover.js'
 import { isDesktopScreen } from '../../utils/screenUtils.js'
 import { disabledOp, isDisabled, resolveDisabledState } from '../controllers/form.js'
 import type { Control } from '../controllers/types.js'
@@ -94,7 +97,7 @@ export const $Popover = ({
       const closeOnDisable = filter(d => d, isDisabledStream)
       const dismissEvent = merge(overlayClick, dismiss, closeOnDisable)
       const openContent = multicast(merge($open, constant(null, dismissEvent)))
-      const isOpen = multicast(skipRepeats(map(c => c !== null, openContent)))
+      const isOpen = state(false, skipRepeats(map(c => c !== null, openContent)))
 
       const reposition = merge(
         fromEventTarget(window, 'scroll', { capture: true }),
@@ -104,7 +107,11 @@ export const $Popover = ({
 
       const $observedAnchor = op(
         $target,
-        anchorTether(observer.intersection() as IOps<INode<HTMLElement>, IntersectionObserverEntry[]>)
+        anchorTether(observer.intersection() as IOps<INode<HTMLElement>, IntersectionObserverEntry[]>),
+        makeMutator((recipe: IRecipe) => {
+          if (recipe.attributes['aria-haspopup'] == null) recipe.attributes['aria-haspopup'] = 'dialog'
+        }),
+        attrBehavior(map(o => ({ 'aria-expanded': o ? 'true' : 'false' }), isOpen))
       )
 
       const $backdrop = switchMap(open => {
@@ -180,7 +187,9 @@ export const $Popover = ({
             border: 'none',
             margin: 0,
             color: 'inherit',
-            overflow: 'visible'
+            boxSizing: 'border-box',
+            overflowY: 'auto',
+            overscrollBehavior: 'contain'
           }),
           effectRun(showPopover),
           contentTether(observer.intersection() as IOps<INode<HTMLElement>, IntersectionObserverEntry[]>),
@@ -190,20 +199,21 @@ export const $Popover = ({
                 const aEl = aEntry[0]?.target as HTMLElement | undefined
                 const cEl = cEntry[0]?.target as HTMLElement | undefined
                 if (!aEl || !cEl) return {}
-                const aRect = aEl.getBoundingClientRect()
-                const cRect = cEl.getBoundingClientRect()
-                const spaceBelow = window.innerHeight - aRect.bottom
-                const spaceAbove = aRect.top
-                const goDown = spaceBelow >= spaceAbove
-                const centerX = aRect.left + aRect.width / 2
-                const desiredLeft = centerX - cRect.width / 2
-                const maxLeft = window.innerWidth - cRect.width - spacing
-                const left = Math.max(spacing, Math.min(desiredLeft, maxLeft))
+                const placement = placeFloating(
+                  aEl.getBoundingClientRect(),
+                  {
+                    naturalHeight: cEl.scrollHeight + cEl.offsetHeight - cEl.clientHeight,
+                    width: cEl.getBoundingClientRect().width
+                  },
+                  { width: window.innerWidth, height: window.innerHeight },
+                  spacing
+                )
                 return {
-                  top: `${goDown ? aRect.bottom + spacing : aRect.top - spacing - cRect.height}px`,
-                  left: `${left}px`,
+                  top: `${placement.top}px`,
+                  left: `${placement.left}px`,
+                  maxHeight: `${placement.maxHeight}px`,
                   transform: 'scale(1)',
-                  transformOrigin: goDown ? 'center top' : 'center bottom',
+                  transformOrigin: placement.side === 'below' ? 'center top' : 'center bottom',
                   opacity: '1',
                   visibility: 'visible'
                 }
@@ -214,6 +224,9 @@ export const $Popover = ({
         )($body)
       }, openContent)
 
-      return [$container(disabledOp(disabled))($observedAnchor, $backdrop, $content), { dismiss: dismissEvent }]
+      return [
+        $container(disabledOp(disabled))($observedAnchor, $backdrop, $content),
+        { dismiss: dismissEvent, open: isOpen }
+      ]
     }
   )
