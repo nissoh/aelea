@@ -1,5 +1,15 @@
 # aelea
 
+## 5.1.1
+
+### Patch Changes
+
+#### `$NumberTicker` renders its first value and colours every changed digit
+
+The count was shared with a bare `multicast`, which does not replay. Each digit's text subscribes one render cycle after its style, so a ticker whose value emitted once at mount lost that value in the text slots and stayed blank until the next change. The count is now a `state`, so late slots replay the current value.
+
+A digit's colour was also reset by the next change that did not reach it: a big step (1,000 to 1,323) coloured three digits for one frame, and the following small step cleared all but the last. A slot now reacts only to changes that reach it, and each colour decays on its own one-second timer. The first value never colours, and a change colours exactly the digits that differ (1,000 to 1,010 the last two, 1,000 to 999 all of them).
+
 ## 5.1.0
 
 ### Minor Changes
