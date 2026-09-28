@@ -1,5 +1,6 @@
 import {
   delay,
+  filter,
   filterNull,
   type IStream,
   just,
@@ -11,7 +12,7 @@ import {
   start,
   switchLatest
 } from '../../stream/index.js'
-import { multicast } from '../../stream-extended/index.js'
+import { state } from '../../stream-extended/index.js'
 import type { INodeCompose, IStyleCSS } from '../../ui/index.js'
 import { $node, $text, style, styleBehavior } from '../../ui/index.js'
 import { palette } from '../../ui-components-theme/index.js'
@@ -61,7 +62,7 @@ export const $NumberTicker = ({
   $container = $defaultNumberTickerContainer,
   $slot = $defaultNumberTickerSlot
 }: I$NumberTicker) => {
-  const incrementMulticast = op(
+  const count = op(
     value,
     reduce(
       (seed: CountState | null, change: number): CountState => {
@@ -80,31 +81,26 @@ export const $NumberTicker = ({
     ),
     filterNull,
     skipRepeatsWith((a, b) => a.change === b.change),
-    multicast
+    state()
   )
 
-  const resetStyle: IStream<IStyleCSS> = just({})
-  const decayStyle: IStream<IStyleCSS> = delay(1000, resetStyle)
+  const decayStyle: IStream<IStyleCSS> = delay(1000, just({}))
 
   const $slotAt = (slot: number) =>
     $slot(
       styleBehavior(
         op(
-          incrementMulticast,
-          skipRepeatsWith((a, b) => a.affectedUpTo < slot && b.affectedUpTo < slot),
-          map(state => {
-            if (state.dir === null || state.affectedUpTo < slot) return resetStyle
-            const color = state.dir === Direction.INCREMENT ? incrementColor : decrementColor
-            return start({ color }, decayStyle)
-          }),
+          count,
+          filter(tick => tick.dir !== null && tick.affectedUpTo >= slot),
+          map(tick => start({ color: tick.dir === Direction.INCREMENT ? incrementColor : decrementColor }, decayStyle)),
           switchLatest
         )
       )
     )(
       $text(
         op(
-          incrementMulticast,
-          map(state => charAt(state.changeStr, slot)),
+          count,
+          map(tick => charAt(tick.changeStr, slot)),
           skipRepeats
         )
       )
