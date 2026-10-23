@@ -1,5 +1,13 @@
 # aelea
 
+## 5.2.0
+
+### Minor Changes
+
+#### `$Tooltip` opens from its anchor's end edge
+
+`$Tooltip` takes `align: 'end'` to place its content's right edge on the anchor's right edge, so a tooltip on a right-aligned figure opens leftward and stays inside its column. The default `'center'` is unchanged, and both keep the content inside the viewport.
+
 ## 5.1.1
 
 ### Patch Changes
