@@ -35,6 +35,7 @@ export interface I$Tooltip {
   $content: I$Node
   $container?: INodeCompose
   $dropContainer?: INodeCompose
+  align?: 'center' | 'end'
 }
 
 export const $defaultTooltipDropContainer = $column(
@@ -58,7 +59,8 @@ export const $Tooltip = ({
   $anchor,
   $content,
   $container = $defaultTooltipContainer,
-  $dropContainer = $defaultTooltipDropContainer
+  $dropContainer = $defaultTooltipDropContainer,
+  align = 'center'
 }: I$Tooltip) =>
   component(
     (
@@ -108,8 +110,7 @@ export const $Tooltip = ({
                 const measured = cEl.clientWidth
                 const maxWidth = Math.max(0, screenWidth - SCREEN_PADDING * 2)
                 const width = Math.min(measured, maxWidth)
-                const centerX = target.x + target.width / 2
-                const rawLeft = centerX - width / 2
+                const rawLeft = align === 'end' ? target.right - width : target.x + target.width / 2 - width / 2
                 const left = `${Math.min(Math.max(rawLeft, SCREEN_PADDING), screenWidth - width - SCREEN_PADDING)}px`
                 const top = `${goDown ? target.bottom : target.y}px`
                 return {
