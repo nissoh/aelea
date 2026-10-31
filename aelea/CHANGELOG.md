@@ -8,6 +8,12 @@
 
 `$Tooltip` takes `align: 'end'` to place its content's right edge on the anchor's right edge, so a tooltip on a right-aligned figure opens leftward and stays inside its column. The default `'center'` is unchanged, and both keep the content inside the viewport.
 
+### Patch Changes
+
+#### `$NumberTicker` ticks only when the text it shows changes
+
+A value equal to the last one, or one that formats to the same text (1,000.002 after 1,000.001, both shown as 1,000), no longer counts as a change, and a digit's style is no longer applied again while its colour stays the same.
+
 ## 5.1.1
 
 ### Patch Changes

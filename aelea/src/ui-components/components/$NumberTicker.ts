@@ -64,6 +64,7 @@ export const $NumberTicker = ({
 }: I$NumberTicker) => {
   const count = op(
     value,
+    skipRepeats,
     reduce(
       (seed: CountState | null, change: number): CountState => {
         const changeStr = parser(change)
@@ -80,7 +81,7 @@ export const $NumberTicker = ({
       null as CountState | null
     ),
     filterNull,
-    skipRepeatsWith((a, b) => a.change === b.change),
+    skipRepeatsWith((a, b) => a.changeStr === b.changeStr),
     state()
   )
 
@@ -93,7 +94,8 @@ export const $NumberTicker = ({
           count,
           filter(tick => tick.dir !== null && tick.affectedUpTo >= slot),
           map(tick => start({ color: tick.dir === Direction.INCREMENT ? incrementColor : decrementColor }, decayStyle)),
-          switchLatest
+          switchLatest,
+          skipRepeatsWith((a, b) => a.color === b.color)
         )
       )
     )(
